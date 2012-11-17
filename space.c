@@ -5,8 +5,6 @@
 #include <SDL/SDL_opengl.h>
 #include <SDL/SDL.h>
 
-
-
 #define WIDTH  640
 #define HEIGHT 480
 
@@ -90,7 +88,7 @@ static void repaint()
     glEnd();
 
     /* increment the rotation every frame */
-    yaw = yaw + 0.05;
+    yaw += 1.0;
 
     /* finally, swap the back and front buffers */
     SDL_GL_SwapBuffers();
@@ -181,12 +179,12 @@ static void main_loop()
                     exit(0);
                                         break;
 
-                case SDLK_KP_PLUS:
+                case SDLK_PLUS:
                     level++;
-                    if (level > 5) level=5;
+                    if (level > 10) level=10;
                     break;
 
-                case SDLK_KP_MINUS:
+                case SDLK_MINUS:
                     level--;
                     if (level < 0) level=0;
                     break;
