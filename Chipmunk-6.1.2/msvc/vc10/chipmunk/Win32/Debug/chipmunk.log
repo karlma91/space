@@ -1,0 +1,77 @@
+﻿Build started 19.11.2012 20:03:09.
+     1>Project "C:\dev\space\Chipmunk-6.1.2\msvc\vc10\chipmunk\chipmunk.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Win32\Debug\chipmunk.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\..\..\include\chipmunk /ZI /nologo /W3 /WX- /Od /Oy- /D _CRT_SECURE_NO_WARNINGS /D WIN32 /D _DEBUG /D _LIB /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Win32\Debug\\" /Fd"Win32\Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\..\src\chipmunk.c ..\..\..\src\constraints\cpConstraint.c ..\..\..\src\constraints\cpDampedRotarySpring.c ..\..\..\src\constraints\cpDampedSpring.c ..\..\..\src\constraints\cpGearJoint.c ..\..\..\src\constraints\cpGrooveJoint.c ..\..\..\src\constraints\cpPinJoint.c ..\..\..\src\constraints\cpPivotJoint.c ..\..\..\src\constraints\cpRatchetJoint.c ..\..\..\src\constraints\cpRotaryLimitJoint.c ..\..\..\src\constraints\cpSimpleMotor.c ..\..\..\src\constraints\cpSlideJoint.c ..\..\..\src\cpArbiter.c ..\..\..\src\cpArray.c ..\..\..\src\cpBB.c ..\..\..\src\cpBBTree.c ..\..\..\src\cpBody.c ..\..\..\src\cpCollision.c ..\..\..\src\cpHashSet.c ..\..\..\src\cpPolyShape.c ..\..\..\src\cpShape.c ..\..\..\src\cpSpace.c ..\..\..\src\cpSpaceComponent.c ..\..\..\src\cpSpaceHash.c ..\..\..\src\cpSpaceQuery.c ..\..\..\src\cpSpaceStep.c ..\..\..\src\cpSpatialIndex.c ..\..\..\src\cpSweep1D.c ..\..\..\src\cpVect.c
+         cpVect.c
+         cpSweep1D.c
+         cpSpatialIndex.c
+         cpSpaceStep.c
+         cpSpaceQuery.c
+         cpSpaceHash.c
+         cpSpaceComponent.c
+         cpSpace.c
+         cpShape.c
+         cpPolyShape.c
+         cpHashSet.c
+         cpCollision.c
+         cpBody.c
+         cpBBTree.c
+         cpBB.c
+         cpArray.c
+         cpArbiter.c
+         cpSlideJoint.c
+         cpSimpleMotor.c
+         cpRotaryLimitJoint.c
+         Generating Code...
+         Compiling...
+         cpRatchetJoint.c
+         cpPivotJoint.c
+         cpPinJoint.c
+         cpGrooveJoint.c
+         cpGearJoint.c
+         cpDampedSpring.c
+         cpDampedRotarySpring.c
+         cpConstraint.c
+         chipmunk.c
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"Win32\Debug\chipmunk.lib" /NOLOGO Win32\Debug\chipmunk.obj
+         Win32\Debug\cpConstraint.obj
+         Win32\Debug\cpDampedRotarySpring.obj
+         Win32\Debug\cpDampedSpring.obj
+         Win32\Debug\cpGearJoint.obj
+         Win32\Debug\cpGrooveJoint.obj
+         Win32\Debug\cpPinJoint.obj
+         Win32\Debug\cpPivotJoint.obj
+         Win32\Debug\cpRatchetJoint.obj
+         Win32\Debug\cpRotaryLimitJoint.obj
+         Win32\Debug\cpSimpleMotor.obj
+         Win32\Debug\cpSlideJoint.obj
+         Win32\Debug\cpArbiter.obj
+         Win32\Debug\cpArray.obj
+         Win32\Debug\cpBB.obj
+         Win32\Debug\cpBBTree.obj
+         Win32\Debug\cpBody.obj
+         Win32\Debug\cpCollision.obj
+         Win32\Debug\cpHashSet.obj
+         Win32\Debug\cpPolyShape.obj
+         Win32\Debug\cpShape.obj
+         Win32\Debug\cpSpace.obj
+         Win32\Debug\cpSpaceComponent.obj
+         Win32\Debug\cpSpaceHash.obj
+         Win32\Debug\cpSpaceQuery.obj
+         Win32\Debug\cpSpaceStep.obj
+         Win32\Debug\cpSpatialIndex.obj
+         Win32\Debug\cpSweep1D.obj
+         Win32\Debug\cpVect.obj
+         chipmunk.vcxproj -> C:\dev\space\Chipmunk-6.1.2\msvc\vc10\chipmunk\Win32\Debug\chipmunk.lib
+       FinalizeBuildStatus:
+         Deleting file "Win32\Debug\chipmunk.unsuccessfulbuild".
+         Touching "Win32\Debug\chipmunk.lastbuildstate".
+     1>Done Building Project "C:\dev\space\Chipmunk-6.1.2\msvc\vc10\chipmunk\chipmunk.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:18.62

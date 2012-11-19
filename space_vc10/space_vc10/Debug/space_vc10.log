@@ -1,0 +1,114 @@
+﻿Build started 19.11.2012 20:55:03.
+     1>Project "c:\dev\space\space_vc10\space_vc10\space_vc10.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Touching "Debug\space_vc10.unsuccessfulbuild".
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I"..\..\Chipmunk-6.1.2\include" /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TC /analyze- /errorReport:prompt main.c
+         main.c
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(92): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(93): error C2085: 'cpfmax' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(93): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(98): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(99): error C2085: 'cpfmin' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(99): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(104): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(105): error C2085: 'cpfabs' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(105): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(110): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(111): error C2085: 'cpfclamp' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(111): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(116): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(117): error C2085: 'cpfclamp01' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(117): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(124): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(125): error C2085: 'cpflerp' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(125): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(130): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(131): error C2085: 'cpflerpconst' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\chipmunk_types.h(131): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(30): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(31): error C2085: 'cpv' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(31): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(48): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(49): error C2085: 'cpveql' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(49): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(54): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(55): error C2085: 'cpvadd' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(55): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(60): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(61): error C2085: 'cpvsub' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(61): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(66): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(67): error C2085: 'cpvneg' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(67): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(72): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(73): error C2085: 'cpvmult' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(73): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(78): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(79): error C2085: 'cpvdot' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(79): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(86): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(87): error C2085: 'cpvcross' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(87): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(92): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(93): error C2085: 'cpvperp' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(93): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(98): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(99): error C2085: 'cpvrperp' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(99): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(104): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(105): error C2085: 'cpvproject' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(105): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(110): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(111): error C2085: 'cpvforangle' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(111): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(116): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(117): error C2085: 'cpvtoangle' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(117): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(122): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(123): error C2085: 'cpvrotate' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(123): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(128): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(129): error C2085: 'cpvunrotate' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(129): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(134): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(135): error C2085: 'cpvlengthsq' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(135): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(140): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(141): error C2085: 'cpvlength' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(141): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(146): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(147): error C2085: 'cpvlerp' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(147): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(152): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(153): error C2085: 'cpvnormalize' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(153): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(158): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(159): error C2085: 'cpvnormalize_safe' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(159): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(164): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(165): error C2085: 'cpvclamp' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(165): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(170): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(171): error C2085: 'cpvlerpconst' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(171): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(176): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(177): error C2085: 'cpvdist' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(177): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(182): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(183): error C2085: 'cpvdistsq' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(183): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(188): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(189): error C2085: 'cpvnear' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(189): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(200): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(201): error C2085: 'cpMat2x2New' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(201): error C2143: syntax error : missing ';' before '{'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(207): error C2054: expected '(' to follow 'inline'
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(208): error C2085: 'cpMat2x2Transform' : not in formal parameter list
+     1>c:\dev\space\chipmunk-6.1.2\include\chipmunk\cpvect.h(208): fatal error C1003: error count exceeds 100; stopping compilation
+     1>Done Building Project "c:\dev\space\space_vc10\space_vc10\space_vc10.vcxproj" (build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:01.19
