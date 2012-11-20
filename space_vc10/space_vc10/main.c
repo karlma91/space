@@ -11,12 +11,19 @@ void drawShape(cpShape *shape, void *unused);
 cpSpace *space;
 Uint8 *keys;
 cpBody *player;
+float frames = 0;
 
 void draw(float dt)
 {
+	frames+=dt;
+	if(frames>=1){
+		printf("%.2f FPS\n",1/dt);
+		frames = 0;
+	}
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-	 glTranslatef(-200.0f, 100.0f, 0.0f);
+	glTranslatef(-player->p.x, -player->p.y, 0.0f);
 
 	//cpVect pos = cpBodyGetPos(player);
     //cpVect vel = cpBodyGetVel(ballBody);
@@ -43,16 +50,16 @@ void draw(float dt)
 
 void drawSpace(cpSpace *space)
 {
+	glBegin( GL_POINTS );
+	glColor3f( 0.95f, 0.207f, 0.031f );
 	cpSpaceEachShape(space, drawShape, NULL);
+	glEnd();
 }
 
 void drawShape(cpShape *shape, void *unused)
 {
-	glBegin( GL_POINTS );
-	glColor3f( 0.95f, 0.207f, 0.031f );
 	cpCircleShape *circle = (cpCircleShape *)shape;
 	glVertex2f(circle->tc.x, circle->tc.y);
-	glEnd();
 }
 
 void initBall(){
@@ -84,7 +91,7 @@ void initBall(){
 		  cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(player, 15, cpvzero));
 		  cpShapeSetFriction(ballShape, 0.7);
   
-  for(int i = 1; i<15; i++){
+  for(int i = 1; i<10; i++){
 	  for(int j = 1; j<15; j++){
 		  cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
 		  cpBodySetPos(ballBody, cpv(j*20, i*30));
@@ -115,7 +122,7 @@ void init(){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-	glOrtho(-200,200,-200,200,1,-1);
+	glOrtho(-(WIDTH/2),(WIDTH/2),-(HEIGHT/2),(HEIGHT/2),1,-1);
 
     //gluPerspective(60.0, aspect, 0.1, 100.0);
     /* We're done with the camera, now matrix operations
