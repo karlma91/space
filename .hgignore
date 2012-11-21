@@ -1,0 +1,3 @@
+syntax: glob
+space_msvc/src/*
+space_msvc/Debug/*
