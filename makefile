@@ -1,2 +1,2 @@
-% : %.c
-	gcc -o $@ $< `sdl-config --cflags --libs` -framework OpenGL -I Chipmunk-Mac Chipmunk-Mac/libChipmunk.a
+bin/% : src/%.c
+	gcc -o $@ $< `sdl-config --cflags --libs` -framework OpenGL -I chipmunk chipmunk/libChipmunk.a

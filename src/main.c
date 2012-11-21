@@ -13,6 +13,8 @@ Uint8 *keys;
 cpBody *player;
 float frames = 0;
 
+static int i,j;
+
 void draw(float dt) 
 {
 	frames+=dt;
@@ -91,8 +93,8 @@ void initBall(){
 		  cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(player, 15, cpvzero));
 		  cpShapeSetFriction(ballShape, 0.7);
   
-  for(int i = 1; i<10; i++){
-	  for(int j = 1; j<15; j++){
+  for(i = 1; i<10; i++){
+	  for(j = 1; j<15; j++){
 		  cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
 		  cpBodySetPos(ballBody, cpv(j*20, i*30));
 		  
@@ -193,7 +195,7 @@ int main( int argc, char* args[] )
          }
 		 
 		 //not use 100% of cpu
-		 SDL_Delay(1);
+		 SDL_Delay(16);
     }
 	
     SDL_Quit();
