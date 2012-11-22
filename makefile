@@ -8,6 +8,6 @@ bin/% : src/%.c
         -I SDL -LSDL -lSDLmain -lSDL \
         -framework cocoa -framework OpenGL \
         -I chipmunk -Lchipmunk -lChipmunk
-linuxChipLib :
-        gcc src/*.c src/constraints/*.c -Iinclude/chipmunk -o libChipmunk.a -std=c99 -lm -shared -fPIC
+
+#gcc src/*.c src/constraints/*.c -Iinclude/chipmunk -o libChipmunk.a -std=c99 -lm -shared -fPIC
 

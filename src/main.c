@@ -160,7 +160,7 @@ int main( int argc, char* args[] )
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
    
    //SDL_FULLSCREEN|
-    if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_OPENGL)))
+    if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_OPENGL | SDL_FULLSCREEN)))
     {
 		printf("ERROR");
         SDL_Quit();
