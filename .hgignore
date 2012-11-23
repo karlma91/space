@@ -1,5 +1,6 @@
 syntax: glob
 .DS_Store
+*.orig
 space_msvc/space_msvc.vcxproj.user
 space_msvc/src/*
 space_msvc/Debug/*

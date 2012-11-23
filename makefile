@@ -1,22 +1,28 @@
-windows: src/main.c
-	gcc -o bin\winodws/main.exe src/main.c \
-	-lmingw32 -lopengl32 -mwindows \
-	-ISDL/windows_mingw/include/SDL -LSDL/windows_mingw/lib -lSDLmain -lSDL  \
-	-Ichipmunk/include -Lchipmunk/windows -lChipmunk 
+SYS := $(firstword $(shell uname -s))
 
-linux : src/main.c
-	gcc -o bin/linux/main src/main.c \
-	-ISDL/linux -LSDL/linux -lSDLmain -lSDL \
-	-lX11 -lXi -lXmu -lGL -lpthread \
-	-Ichipmunk/include -Lchipmunk/linux -lChipmunk
+ifeq ($(SYS),Linux) #linux
+	suffix=
+	os_lib=-lX11 -lXi -lXmu -lpthread
+	openGL=-lGL
+	sdl=-ISDL/linux -LSDL/linux -lSDLmain -lSDL 
+	chipmunk=-Ichipmunk/include -Lchipmunk/linux -lChipmunk
+else ifneq ($(findstring MINGW32_NT, $(SYS)),) #windows
+	suffix=.exe
+	os_lib=-lmingw32 -mwindows
+	openGL=-lopengl32
+	sdl=-ISDL/windows_mingw/include/SDL -LSDL/windows_mingw/lib -lSDLmain -lSDL
+	chipmunk=-Ichipmunk/include -Lchipmunk/windows -lChipmunk
+else ifeq ($(SYS),Darwin) #mac
+	suffix=
+	os_lib=-framework cocoa
+	openGL=-framework OpenGL
+	sdl=-ISDL/mac -LSDL/mac -lSDLmain -lSDL
+	chipmunk=-Ichipmunk/include -Lchipmunk/mac -lChipmunk
+endif
 
-#mac
-bin/% : src/%.c
-	gcc -o $@ $< \
-	-ISDL/mac -LSDL/mac -lSDLmain -lSDL \
-	-framework cocoa -framework OpenGL \
-	-Ichipmunk/include -Lchipmunk/mac -lChipmunk
-
+main : src/main.c #$(addsuffix $(suffix),bin/main)
+	gcc -o bin/main$(suffix) src/main.c $(os_lib) $(openGL) $(sdl) $(chipmunk)
+	
 #mingw and linux
 #gcc src/*.c src/constraints/*.c -Iinclude/chipmunk -o libChipmunk.a -std=c99 -lm -shared -fPIC
 
