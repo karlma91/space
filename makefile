@@ -1,4 +1,6 @@
 SYS := $(firstword $(shell uname -s))
+precode=
+postcode=
 
 ifeq ($(SYS),Linux) #linux
 	suffix=
@@ -8,7 +10,8 @@ ifeq ($(SYS),Linux) #linux
 	chipmunk=-Ichipmunk/include -Lchipmunk/linux -lChipmunk
 else ifneq ($(findstring MINGW32_NT, $(SYS)),) #windows
 	suffix=.exe
-	os_lib=-lmingw32 -mwindows
+	precode = windres resources/win/space.rc -o coff -o resources/win/space.res.o #prepare resource file
+	os_lib=-lmingw32 -mwindows resources\win\space.res.o
 	openGL=-lopengl32
 	sdl=-ISDL/windows_mingw/include/SDL -LSDL/windows_mingw/lib -lSDLmain -lSDL
 	chipmunk=-Ichipmunk/include -Lchipmunk/windows -lChipmunk
@@ -20,8 +23,10 @@ else ifeq ($(SYS),Darwin) #mac
 	chipmunk=-Ichipmunk/include -Lchipmunk/mac -lChipmunk
 endif
 
-main : src/main.c #$(addsuffix $(suffix),bin/main)
+main : src/main.c
+	$(precode)
 	gcc -o bin/main$(suffix) src/main.c $(os_lib) $(openGL) $(sdl) $(chipmunk)
+	$(postcode)
 	
 #mingw and linux
 #gcc src/*.c src/constraints/*.c -Iinclude/chipmunk -o libChipmunk.a -std=c99 -lm -shared -fPIC
