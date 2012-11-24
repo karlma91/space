@@ -17,6 +17,9 @@ else ifneq ($(findstring MINGW32_NT, $(SYS)),) #windows
 	chipmunk=-Ichipmunk/include -Lchipmunk/windows -lChipmunk
 else ifeq ($(SYS),Darwin) #mac
 	suffix=
+	postcode = rm -rf bin/space.app/ && \
+		cp -R resources/mac/space.app/ bin/space.app && \
+		cp bin/main bin/space.app/Contents/MacOS/
 	os_lib=-framework cocoa
 	openGL=-framework OpenGL
 	sdl=-ISDL/mac -LSDL/mac -lSDLmain -lSDL

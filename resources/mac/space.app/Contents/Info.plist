@@ -1,0 +1,5 @@
+{
+	CFBundleIconFile = "icon.icns";
+	CFBundleName = Space;
+	CFBundleExecutable = main;
+}
