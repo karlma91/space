@@ -19,7 +19,8 @@ else ifeq ($(SYS),Darwin) #mac
 	suffix=
 	postcode = rm -rf bin/space.app/ && \
 		cp -R resources/mac/space.app/ bin/space.app && \
-		cp bin/main bin/space.app/Contents/MacOS/
+		cp bin/main bin/space.app/Contents/MacOS && \
+		install_name_tool -change /opt/local/lib/libSDL-1.2.0.dylib @executable_path/libSDL.dylib bin/space.app/Contents/MacOS/main
 	os_lib=-framework cocoa
 	openGL=-framework OpenGL
 	sdl=-ISDL/mac -LSDL/mac -lSDLmain -lSDL
