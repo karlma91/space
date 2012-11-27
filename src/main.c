@@ -157,22 +157,18 @@ void drawCircle(GLfloat *array, int len, cpVect center, cpFloat angle, cpFloat r
 
 void initBall(){
 
-  
-  for(i = 0; i<circleP_count-3; i++){
-    circleP[i] = sinf(2*M_PI*i/circleP_count);
-    circleP[i+1] = cosf(2*M_PI*i/circleP_count);
+  for(i = 0; i < circleP_count-1; i++){
+    circleP[i] = sinf( 2*M_PI*i / (circleP_count-1));
+    circleP[i+1] = cosf( 2*M_PI*i / (circleP_count-1));
     i++;
   }
-   circleP[circleP_count-2] = sinf(0);
-   circleP[circleP_count-1] = cosf(0);
 
-  for(i = 0; i<14; i++){
-    circleVAR[i] = sinf(2*M_PI*i/14);
-    circleVAR[i+1] = cosf(2*M_PI*i/14);
+  for(i = 0; i<15; i++){
+    circleVAR[i] = sin(2*M_PI*i/14);
+    circleVAR[i+1] = cos(2*M_PI*i/14);
     i++;
 	}
-	circleVAR[14] = 0.0f;
-	circleVAR[15] = 1.0f;
+	//for line
 	circleVAR[16] = 0.0f;
 	circleVAR[17] = 0.0f;
 	
