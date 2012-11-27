@@ -30,7 +30,7 @@ int stars_y[star_count];
 int planet_size = 1000;
 
 
-static GLfloat circleVAR[18];
+static GLfloat circleVAR[24];
 static const int circleVAR_count = sizeof(circleVAR)/sizeof(GLfloat)/2;
 
 #define circleP_count 1000
@@ -85,9 +85,6 @@ void draw(float dt)
   glTranslatef(-player->p.x, -player->p.y, 0.0f);
   drawStars();
   drawSpace(space);
-
-  drawCircle(circleP,circleP_count/2,planetBody->p,cpBodyGetAngle(planetBody),planet_size,0);
-
   SDL_GL_SwapBuffers();
 }
 
@@ -117,10 +114,28 @@ void drawStars()
 
 void drawShape(cpShape *shape, void *unused)
 {
-  cpCircleShape *circle = (cpCircleShape *)shape;
-  r = 10;
-  drawCircle(circleVAR, circleVAR_count, circle->tc,cpBodyGetAngle(cpShapeGetBody(shape)),r,1);
+  void (*functionPtr)(cpShape*);
+  functionPtr  = cpShapeGetUserData(shape);
+  if(functionPtr != NULL){
+	(*functionPtr)(shape);
+  }
+}
 
+void drawPlayer(cpShape *shape){
+	glColor3f( 0.95f, 0.107f, 0.05f );
+	cpCircleShape *circle = (cpCircleShape *)shape;
+	drawCircle(circleVAR, circleVAR_count, circle->tc,cpBodyGetAngle(cpShapeGetBody(shape)),15,1);
+}
+void drawBall(cpShape *shape){
+	glColor3f( 0.13f, 0.307f, 0.95f );
+	cpCircleShape *circle = (cpCircleShape *)shape;
+	drawCircle(circleVAR, circleVAR_count, circle->tc,cpBodyGetAngle(cpShapeGetBody(shape)),10,1);
+}
+
+void drawPlanet(cpShape *shape){
+    glColor3f( 0.13f, 0.607f, 0.55f );
+	cpCircleShape *circle = (cpCircleShape *)shape;
+	drawCircle(circleP,circleP_count/2, circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), planet_size, 1);
 }
 
 static void
@@ -144,7 +159,6 @@ void drawCircle(GLfloat *array, int len, cpVect center, cpFloat angle, cpFloat r
     glRotatef(angle*180.0f/M_PI - 90, 0.0f, 0.0f, 1.0f);
     glScalef(radius, radius, 1.0f);
     
-    glColor3f( 0.95f, 0.207f, 0.031f );
     glDrawArrays(GL_TRIANGLE_FAN, 0, len - 1);
     
     if (line) {
@@ -163,14 +177,14 @@ void initBall(){
     i++;
   }
 
-  for(i = 0; i<15; i++){
-    circleVAR[i] = sin(2*M_PI*i/14);
-    circleVAR[i+1] = cos(2*M_PI*i/14);
+  for(i = 0; i<21; i++){
+    circleVAR[i] = sin(2*M_PI*i/20);
+    circleVAR[i+1] = cos(2*M_PI*i/20);
     i++;
 	}
 	//for line
-	circleVAR[16] = 0.0f;
-	circleVAR[17] = 0.0f;
+	circleVAR[22] = 0.0f;
+	circleVAR[23] = 0.0f;
 	
 
   cpVect gravity = cpv(0, -0);
@@ -196,6 +210,7 @@ void initBall(){
 
   cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(player, 15, cpvzero));
   cpShapeSetFriction(ballShape, 0.7);
+  cpShapeSetUserData(ballShape, drawPlayer);
   
   for(i = 1; i<10; i++){
     for(j = 1; j<10; j++){
@@ -207,6 +222,7 @@ void initBall(){
 		  
       cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
       cpShapeSetFriction(ballShape, 0.7);
+	  cpShapeSetUserData(ballShape, drawBall);
     }
 
   }
@@ -218,6 +234,7 @@ void initBall(){
   cpShape *shape = cpSpaceAddShape(space, cpCircleShapeNew(planetBody, planet_size, cpvzero));
   cpShapeSetElasticity(shape, 1.0f);
   cpShapeSetFriction(shape, 0.0f);
+  cpShapeSetUserData(shape, drawPlanet);
 
 }
 
