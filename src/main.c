@@ -2,11 +2,13 @@
 #include "chipmunk.h"
 #include "SDL_opengl.h"
 
+void drawStars();
+void drawSpace(cpSpace *space);
+void drawShape(cpShape *shape, void *unused);
+
 int WIDTH;
 int HEIGHT;
 float accumulator;
-void drawSpace(cpSpace *space);
-void drawShape(cpShape *shape, void *unused);
 
 cpSpace *space;
 Uint8 *keys;
@@ -15,6 +17,10 @@ float frames = 0;
 cpFloat phys_step = 1/60.0f;
 
 static int i,j;
+
+#define star_count 10000
+int stars_x[star_count];
+int stars_y[star_count];
 
 void draw(float dt) 
 {
@@ -25,22 +31,29 @@ void draw(float dt)
     printf("%.2f FPS\n",1/dt);
     frames = 0;
   }
-
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity();
-  glTranslatef(-player->p.x, -player->p.y, 0.0f);
-
-  //cpVect pos = cpBodyGetPos(player);
-  //cpVect vel = cpBodyGetVel(ballBody);
+  
+  //update physics and player
+  cpVect rot = cpBodyGetRot(player);
+  rot = cpvmult(rot, 1000);
   cpBodySetForce(player, cpv(0,0));
-  if(keys[SDLK_w]){
-    cpBodySetForce(player, cpv(0,10000));
-  } else if(keys[SDLK_a]){
-    cpBodySetForce(player, cpv(-10000,0));
-  } else if(keys[SDLK_s]){
-    cpBodySetForce(player, cpv(0,-10000));
-  } else if(keys[SDLK_d]){
-    cpBodySetForce(player, cpv(10000,0));
+  cpBodySetTorque(player, 0);
+  if(keys[SDLK_w]) {
+    cpBodySetForce(player, rot);
+  }
+  if(keys[SDLK_a]){
+    cpBodySetTorque(player, 1000);
+  }
+  if(keys[SDLK_s]){
+    cpBodySetForce(player, cpvneg(rot));
+  }
+  if(keys[SDLK_d]){
+    cpBodySetTorque(player, -1000);
+  }
+  if (keys[SDLK_SPACE]) {
+    cpBodySetVelLimit(player,1000);
+    cpBodySetAngVelLimit(player,10);
+    cpBodySetVel(player, cpvzero);
+    cpBodySetAngVel(player, 0);
   }
   
   while(accumulator >= phys_step)
@@ -49,32 +62,83 @@ void draw(float dt)
       accumulator -= phys_step;
     }
   
-  //cpBodyApplyImpulse(player, cpv(0, 50), cpv(0, 0));
-  drawSpace(space);
+  //Draw
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glLoadIdentity();
+  glRotatef(-cpBodyGetAngle(player) * 180/3.14f,0,0,1);
+  glTranslatef(-player->p.x, -player->p.y, 0.0f);
 
+  drawSpace(space);
+  drawStars();
   SDL_GL_SwapBuffers();
 }
 
 void drawSpace(cpSpace *space)
 {
-  glBegin( GL_POINTS );
-  glColor3f( 0.95f, 0.207f, 0.031f );
   cpSpaceEachShape(space, drawShape, NULL);
-  glEnd();
 }
+
+#define SW (1920)
+void drawStars()
+{
+  glPointSize(2.0f);
+  glColor3f(1,1,1);
+
+  glPushMatrix();
+  glTranslatef(((int)player->p.x+SW/2) / SW * SW,((int)player->p.y+SW/2) / SW * SW,0);
+
+  glBegin(GL_POINTS);
+  for (i=0;i<star_count;i++) {
+    glVertex2f(stars_x[i],stars_y[i]);
+  }
+  glEnd();
+
+  glPopMatrix();
+}
+
+float x,y,r;
 
 void drawShape(cpShape *shape, void *unused)
 {
   cpCircleShape *circle = (cpCircleShape *)shape;
-  glVertex2f(circle->tc.x, circle->tc.y);
+  cpFloat angle = cpBodyGetAngle(cpShapeGetBody(shape)) * 180/3.14f;
+  x = circle->tc.x;
+  y = circle->tc.y;
+  r = 10;
+
+  glPushMatrix();
+  glTranslatef(x,y,0);
+  glRotatef(angle,0,0,1);
+
+  glBegin(GL_TRIANGLES);
+  {
+    glColor3f( 0.95f, 0.207f, 0.031f );
+    glVertex2f(-r,-r);
+
+    glColor3f( 0.05f, 0.207f, 1.0f );
+    glVertex2f(-r,r);
+
+    glColor3f( 0.95f, 1.0f, 0.6f );
+    glVertex2f(r*2,0);
+  }
+  glEnd();
+
+  glPopMatrix();
 }
 
 void initBall(){
-  cpVect gravity = cpv(0, -100);
+  cpVect gravity = cpv(0, -0);
   
   space = cpSpaceNew();
   cpSpaceSetGravity(space, gravity);
- 
+  //init stars
+  srand(122531);
+  for (i=0;i<star_count;i++) {
+    stars_x[i] = rand()%(WIDTH*2) - WIDTH;
+    stars_y[i] = rand()%(WIDTH*2) - WIDTH;
+  }
+
+  /*
   cpShape *ground = cpSegmentShapeNew(space->staticBody, cpv(0, -300), cpv(WIDTH, -HEIGHT+100), 0);
   cpShapeSetFriction(ground, 1);
   cpSpaceAddShape(space, ground);
@@ -86,7 +150,7 @@ void initBall(){
   ground = cpSegmentShapeNew(space->staticBody, cpv(0, -300), cpv(0, 300), 0);
   cpShapeSetFriction(ground, 1);
   cpSpaceAddShape(space, ground);
-  
+  */
   cpFloat radius = 10;
   cpFloat mass = 1;
   
