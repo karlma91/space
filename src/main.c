@@ -5,6 +5,7 @@
 void drawStars();
 void drawSpace(cpSpace *space);
 void drawShape(cpShape *shape, void *unused);
+void drawCircle(GLfloat *array,int len, cpVect center, cpFloat angle, cpFloat radius, int line);
 
 int WIDTH;
 int HEIGHT;
@@ -18,9 +19,53 @@ cpFloat phys_step = 1/60.0f;
 
 static int i,j;
 
+//planet stuff
+static cpBody *planetBody;
+static cpFloat gravityStrength = 5.0e9f;
+
 #define star_count 10000
 int stars_x[star_count];
 int stars_y[star_count];
+
+int planet_size = 10000;
+
+
+static const GLfloat circleVAR[] = {
+	 0.0000f,  1.0000f,
+	 0.2588f,  0.9659f,
+	 0.5000f,  0.8660f,
+	 0.7071f,  0.7071f,
+	 0.8660f,  0.5000f,
+	 0.9659f,  0.2588f,
+	 1.0000f,  0.0000f,
+	 0.9659f, -0.2588f,
+	 0.8660f, -0.5000f,
+	 0.7071f, -0.7071f,
+	 0.5000f, -0.8660f,
+	 0.2588f, -0.9659f,
+	 0.0000f, -1.0000f,
+	-0.2588f, -0.9659f,
+	-0.5000f, -0.8660f,
+	-0.7071f, -0.7071f,
+	-0.8660f, -0.5000f,
+	-0.9659f, -0.2588f,
+	-1.0000f, -0.0000f,
+	-0.9659f,  0.2588f,
+	-0.8660f,  0.5000f,
+	-0.7071f,  0.7071f,
+	-0.5000f,  0.8660f,
+	-0.2588f,  0.9659f,
+	 0.0000f,  1.0000f,
+	 0.0f, 0.0f, // For an extra line to see the rotation.
+};
+
+#define circleP_count 1000
+static GLfloat circleP[circleP_count];
+
+static const int circleVAR_count = sizeof(circleVAR)/sizeof(GLfloat)/2;
+
+float x,y,r;
+
 
 void draw(float dt) 
 {
@@ -34,24 +79,24 @@ void draw(float dt)
   
   //update physics and player
   cpVect rot = cpBodyGetRot(player);
-  rot = cpvmult(rot, 1000);
+  rot = cpvmult(rot, 3000);
   cpBodySetForce(player, cpv(0,0));
   cpBodySetTorque(player, 0);
   if(keys[SDLK_w]) {
     cpBodySetForce(player, rot);
   }
   if(keys[SDLK_a]){
-    cpBodySetTorque(player, 1000);
+    cpBodySetTorque(player, 2000);
   }
   if(keys[SDLK_s]){
     cpBodySetForce(player, cpvneg(rot));
   }
   if(keys[SDLK_d]){
-    cpBodySetTorque(player, -1000);
+    cpBodySetTorque(player, -2000);
   }
   if (keys[SDLK_SPACE]) {
-    cpBodySetVelLimit(player,1000);
-    cpBodySetAngVelLimit(player,10);
+    //cpBodySetVelLimit(player,1000);
+    cpBodySetAngVelLimit(player,5);
     cpBodySetVel(player, cpvzero);
     cpBodySetAngVel(player, 0);
   }
@@ -67,9 +112,11 @@ void draw(float dt)
   glLoadIdentity();
   glRotatef(-cpBodyGetAngle(player) * 180/3.14f,0,0,1);
   glTranslatef(-player->p.x, -player->p.y, 0.0f);
-
-  drawSpace(space);
   drawStars();
+  drawSpace(space);
+
+  drawCircle(circleP,circleP_count,planetBody->p,cpBodyGetAngle(planetBody),planet_size,0);
+
   SDL_GL_SwapBuffers();
 }
 
@@ -96,37 +143,58 @@ void drawStars()
   glPopMatrix();
 }
 
-float x,y,r;
 
 void drawShape(cpShape *shape, void *unused)
 {
   cpCircleShape *circle = (cpCircleShape *)shape;
-  cpFloat angle = cpBodyGetAngle(cpShapeGetBody(shape)) * 180/3.14f;
-  x = circle->tc.x;
-  y = circle->tc.y;
   r = 10;
+  drawCircle(circleVAR, circleVAR_count, circle->tc,cpBodyGetAngle(cpShapeGetBody(shape)),r,1);
 
-  glPushMatrix();
-  glTranslatef(x,y,0);
-  glRotatef(angle,0,0,1);
+}
 
-  glBegin(GL_TRIANGLES);
-  {
+static void
+planetGravityVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
+{
+	// Gravitational acceleration is proportional to the inverse square of
+	// distance, and directed toward the origin. The central planet is assumed
+	// to be massive enough that it affects the satellites but not vice versa.
+	cpVect p = cpBodyGetPos(body);
+	cpFloat sqdist = cpvlengthsq(p);
+	cpVect g = cpvmult(p, -gravityStrength / (sqdist * cpfsqrt(sqdist)));
+	
+	cpBodyUpdateVelocity(body, g, damping, dt);
+}
+
+void drawCircle(GLfloat *array,int len, cpVect center, cpFloat angle, cpFloat radius, int line)
+{
+  glVertexPointer(2, GL_FLOAT, 0, array);
+
+  glPushMatrix(); {
+    glTranslatef(center.x, center.y, 0.0f);
+    glRotatef(angle*180.0f/M_PI - 90, 0.0f, 0.0f, 1.0f);
+    glScalef(radius, radius, 1.0f);
+    
     glColor3f( 0.95f, 0.207f, 0.031f );
-    glVertex2f(-r,-r);
-
-    glColor3f( 0.05f, 0.207f, 1.0f );
-    glVertex2f(-r,r);
-
-    glColor3f( 0.95f, 1.0f, 0.6f );
-    glVertex2f(r*2,0);
-  }
-  glEnd();
-
-  glPopMatrix();
+    glDrawArrays(GL_TRIANGLE_FAN, 0, len - 1);
+    
+    if (line) {
+    glColor3f( 1.0f, 1.0f, 1.0f );
+    glDrawArrays(GL_LINE_STRIP, 0, len);
+    }
+    
+    } glPopMatrix();
 }
 
 void initBall(){
+
+  
+  for(i = 0; i<circleP_count-1; i++){
+    circleP[i] = sin(2*M_PI*i/circleP_count);
+    circleP[i+1] = cos(2*M_PI*i/circleP_count);
+    i++;
+  }
+
+
   cpVect gravity = cpv(0, -0);
   
   space = cpSpaceNew();
@@ -137,40 +205,42 @@ void initBall(){
     stars_x[i] = rand()%(WIDTH*2) - WIDTH;
     stars_y[i] = rand()%(WIDTH*2) - WIDTH;
   }
-
-  /*
-  cpShape *ground = cpSegmentShapeNew(space->staticBody, cpv(0, -300), cpv(WIDTH, -HEIGHT+100), 0);
-  cpShapeSetFriction(ground, 1);
-  cpSpaceAddShape(space, ground);
-  
-  ground = cpSegmentShapeNew(space->staticBody, cpv(400, 400), cpv(400, -400), 0);
-  cpShapeSetFriction(ground, 1);
-  cpSpaceAddShape(space, ground);
-  
-  ground = cpSegmentShapeNew(space->staticBody, cpv(0, -300), cpv(0, 300), 0);
-  cpShapeSetFriction(ground, 1);
-  cpSpaceAddShape(space, ground);
-  */
   cpFloat radius = 10;
   cpFloat mass = 1;
   
   cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
   //player
-  player = cpSpaceAddBody(space, cpBodyNew(10, cpMomentForCircle(10, 0, 15, cpvzero)));
-  cpBodySetPos(player, cpv(15*20, -1*30));
-		  
+  player = cpSpaceAddBody(space, cpBodyNew(10, cpMomentForCircle(2, 0, 15, cpvzero)));
+  cpBodySetPos(player, cpv(15*20, planet_size+10+1*30));
+
+  player->velocity_func = planetGravityVelocityFunc;  
+  // cpBodySetVel(player, cpv(600,0));
+
   cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(player, 15, cpvzero));
   cpShapeSetFriction(ballShape, 0.7);
   
   for(i = 1; i<10; i++){
-    for(j = 1; j<15; j++){
+    for(j = 1; j<10; j++){
       cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
-      cpBodySetPos(ballBody, cpv(j*20, i*30));
+      //planet gravity thing
+      ballBody->velocity_func = planetGravityVelocityFunc;
+      cpBodySetPos(ballBody, cpv(j*20, planet_size + 10+i*30));
+      // cpBodySetVel(ballBody, cpv(600,0));
 		  
       cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
       cpShapeSetFriction(ballShape, 0.7);
     }
+
   }
+  //planet stuff
+  planetBody = cpBodyNew(INFINITY, INFINITY);
+  cpBodySetAngVel(planetBody, 0.2f);
+  cpBodySetPos(planetBody, cpv(0, 0));
+
+  cpShape *shape = cpSpaceAddShape(space, cpCircleShapeNew(planetBody, planet_size, cpvzero));
+  cpShapeSetElasticity(shape, 1.0f);
+  cpShapeSetFriction(shape, 0.0f);
+
 }
 
 void init(){
@@ -179,6 +249,16 @@ void init(){
   SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
   SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
   SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+  //for antialiasing
+  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+
+
+  glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
+  glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+  
+  glEnable(GL_LINE_SMOOTH);
+  glEnable(GL_POLYGON_SMOOTH);
 
   float aspect = (float)WIDTH / (float)HEIGHT;
 
@@ -208,7 +288,9 @@ void init(){
   glPointSize(8.0f);
 
   /* We want z-buffer tests enabled*/
-  glEnable(GL_DEPTH_TEST);
+  //glEnable(GL_DEPTH_TEST);
+  //enables gldraw array
+  glEnableClientState(GL_VERTEX_ARRAY);
 
   /* Do draw back-facing polygons*/
   glDisable(GL_CULL_FACE);
