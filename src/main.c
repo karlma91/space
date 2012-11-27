@@ -21,13 +21,16 @@ static int i,j;
 
 //planet stuff
 static cpBody *planetBody;
-static cpFloat gravityStrength = 5.0e7f;
+static cpFloat gravityStrength = 5.0e9f;
+
+//camera settings
+static int cam_relative = 1;
 
 #define star_count 10000
 int stars_x[star_count];
 int stars_y[star_count];
 
-int planet_size = 1000;
+int planet_size = 5000;
 
 
 static GLfloat circleVAR[24];
@@ -72,6 +75,14 @@ void draw(float dt)
     cpBodySetAngVel(player, 0);
   }
   
+  static int F1_pushed = 0;
+  if(keys[SDLK_F1]){
+    if (!F1_pushed) {
+      F1_pushed = 1;
+      cam_relative = !cam_relative;
+    }
+  } else F1_pushed = 0;
+  
   while(accumulator >= phys_step)
     {
       cpSpaceStep(space, phys_step);
@@ -81,7 +92,7 @@ void draw(float dt)
   //Draw
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
- // glRotatef(-cpBodyGetAngle(player) * 180/3.14f,0,0,1);
+  if (cam_relative) glRotatef(-cpBodyGetAngle(player) * 180/3.14f,0,0,1);
   glTranslatef(-player->p.x, -player->p.y, 0.0f);
   drawStars();
   drawSpace(space);
