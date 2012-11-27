@@ -21,51 +21,22 @@ static int i,j;
 
 //planet stuff
 static cpBody *planetBody;
-static cpFloat gravityStrength = 5.0e9f;
+static cpFloat gravityStrength = 5.0e7f;
 
 #define star_count 10000
 int stars_x[star_count];
 int stars_y[star_count];
 
-int planet_size = 10000;
+int planet_size = 1000;
 
 
-static const GLfloat circleVAR[] = {
-	 0.0000f,  1.0000f,
-	 0.2588f,  0.9659f,
-	 0.5000f,  0.8660f,
-	 0.7071f,  0.7071f,
-	 0.8660f,  0.5000f,
-	 0.9659f,  0.2588f,
-	 1.0000f,  0.0000f,
-	 0.9659f, -0.2588f,
-	 0.8660f, -0.5000f,
-	 0.7071f, -0.7071f,
-	 0.5000f, -0.8660f,
-	 0.2588f, -0.9659f,
-	 0.0000f, -1.0000f,
-	-0.2588f, -0.9659f,
-	-0.5000f, -0.8660f,
-	-0.7071f, -0.7071f,
-	-0.8660f, -0.5000f,
-	-0.9659f, -0.2588f,
-	-1.0000f, -0.0000f,
-	-0.9659f,  0.2588f,
-	-0.8660f,  0.5000f,
-	-0.7071f,  0.7071f,
-	-0.5000f,  0.8660f,
-	-0.2588f,  0.9659f,
-	 0.0000f,  1.0000f,
-	 0.0f, 0.0f, // For an extra line to see the rotation.
-};
+static GLfloat circleVAR[18];
+static const int circleVAR_count = sizeof(circleVAR)/sizeof(GLfloat)/2;
 
 #define circleP_count 1000
 static GLfloat circleP[circleP_count];
 
-static const int circleVAR_count = sizeof(circleVAR)/sizeof(GLfloat)/2;
-
 float x,y,r;
-
 
 void draw(float dt) 
 {
@@ -95,7 +66,7 @@ void draw(float dt)
     cpBodySetTorque(player, -2000);
   }
   if (keys[SDLK_SPACE]) {
-    //cpBodySetVelLimit(player,1000);
+    cpBodySetVelLimit(player,5000);
     cpBodySetAngVelLimit(player,5);
     cpBodySetVel(player, cpvzero);
     cpBodySetAngVel(player, 0);
@@ -110,12 +81,12 @@ void draw(float dt)
   //Draw
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
-  glRotatef(-cpBodyGetAngle(player) * 180/3.14f,0,0,1);
+ // glRotatef(-cpBodyGetAngle(player) * 180/3.14f,0,0,1);
   glTranslatef(-player->p.x, -player->p.y, 0.0f);
   drawStars();
   drawSpace(space);
 
-  drawCircle(circleP,circleP_count,planetBody->p,cpBodyGetAngle(planetBody),planet_size,0);
+  drawCircle(circleP,circleP_count/2,planetBody->p,cpBodyGetAngle(planetBody),planet_size,0);
 
   SDL_GL_SwapBuffers();
 }
@@ -165,10 +136,9 @@ planetGravityVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat
 	cpBodyUpdateVelocity(body, g, damping, dt);
 }
 
-void drawCircle(GLfloat *array,int len, cpVect center, cpFloat angle, cpFloat radius, int line)
+void drawCircle(GLfloat *array, int len, cpVect center, cpFloat angle, cpFloat radius, int line)
 {
   glVertexPointer(2, GL_FLOAT, 0, array);
-
   glPushMatrix(); {
     glTranslatef(center.x, center.y, 0.0f);
     glRotatef(angle*180.0f/M_PI - 90, 0.0f, 0.0f, 1.0f);
@@ -188,12 +158,24 @@ void drawCircle(GLfloat *array,int len, cpVect center, cpFloat angle, cpFloat ra
 void initBall(){
 
   
-  for(i = 0; i<circleP_count-1; i++){
-    circleP[i] = sin(2*M_PI*i/circleP_count);
-    circleP[i+1] = cos(2*M_PI*i/circleP_count);
+  for(i = 0; i<circleP_count-3; i++){
+    circleP[i] = sinf(2*M_PI*i/circleP_count);
+    circleP[i+1] = cosf(2*M_PI*i/circleP_count);
     i++;
   }
+   circleP[circleP_count-2] = sinf(0);
+   circleP[circleP_count-1] = cosf(0);
 
+  for(i = 0; i<14; i++){
+    circleVAR[i] = sinf(2*M_PI*i/14);
+    circleVAR[i+1] = cosf(2*M_PI*i/14);
+    i++;
+	}
+	circleVAR[14] = 0.0f;
+	circleVAR[15] = 1.0f;
+	circleVAR[16] = 0.0f;
+	circleVAR[17] = 0.0f;
+	
 
   cpVect gravity = cpv(0, -0);
   
@@ -352,7 +334,7 @@ int main( int argc, char* args[] )
         }
 		 
       //not use 100% of cpu
-      SDL_Delay(1);
+      SDL_Delay(16);
     }
 	
   SDL_Quit();
