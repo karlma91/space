@@ -2,6 +2,8 @@ SYS := $(firstword $(shell uname -s))
 precode=
 postcode=
 
+gamefiles=src/main.c src/draw.c
+
 ifeq ($(SYS),Linux) #linux
 	suffix=
 	os_lib=-lX11 -lXi -lXmu -lpthread
@@ -29,7 +31,7 @@ endif
 
 main : src/main.c
 	$(precode)
-	gcc -o bin/main$(suffix) src/main.c $(os_lib) $(openGL) $(sdl) $(chipmunk)
+	gcc -o bin/main$(suffix) $(gamefiles) $(os_lib) $(openGL) $(sdl) $(chipmunk)
 	$(postcode)
 	
 #mingw and linux

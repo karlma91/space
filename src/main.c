@@ -1,11 +1,11 @@
 #include "SDL.h"
 #include "chipmunk.h"
 #include "SDL_opengl.h"
+#include "draw.h"
 
 void drawStars();
 void drawSpace(cpSpace *space);
 void drawShape(cpShape *shape, void *unused);
-void drawCircle(GLfloat *array,int len, cpVect center, cpFloat angle, cpFloat radius, int line);
 
 int WIDTH;
 int HEIGHT;
@@ -31,13 +31,6 @@ int stars_x[star_count];
 int stars_y[star_count];
 
 int planet_size = 5000;
-
-
-static GLfloat circleVAR[24];
-static const int circleVAR_count = sizeof(circleVAR)/sizeof(GLfloat)/2;
-
-#define circleP_count 1000
-static GLfloat circleP[circleP_count];
 
 float x,y,r;
 
@@ -131,22 +124,14 @@ void drawShape(cpShape *shape, void *unused)
 	(*functionPtr)(shape);
   }
 }
-
-void drawPlayer(cpShape *shape){
-	glColor3f( 0.95f, 0.107f, 0.05f );
-	cpCircleShape *circle = (cpCircleShape *)shape;
-	drawCircle(circleVAR, circleVAR_count, circle->tc,cpBodyGetAngle(cpShapeGetBody(shape)),15,1);
-}
 void drawBall(cpShape *shape){
-	glColor3f( 0.13f, 0.307f, 0.95f );
 	cpCircleShape *circle = (cpCircleShape *)shape;
-	drawCircle(circleVAR, circleVAR_count, circle->tc,cpBodyGetAngle(cpShapeGetBody(shape)),10,1);
+	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(0.0f, 1.0f, 1.0f,1.0f));
 }
 
 void drawPlanet(cpShape *shape){
-    glColor3f( 0.13f, 0.607f, 0.55f );
 	cpCircleShape *circle = (cpCircleShape *)shape;
-	drawCircle(circleP,circleP_count/2, circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), planet_size, 1);
+	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), planet_size, RGBAColor(0.95f, 0.107f, 0.05f,1.0f), RGBAColor(1.0f, 1.0f, 1.0f,0.0f));
 }
 
 static void
@@ -162,41 +147,12 @@ planetGravityVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat
 	cpBodyUpdateVelocity(body, g, damping, dt);
 }
 
-void drawCircle(GLfloat *array, int len, cpVect center, cpFloat angle, cpFloat radius, int line)
-{
-  glVertexPointer(2, GL_FLOAT, 0, array);
-  glPushMatrix(); {
-    glTranslatef(center.x, center.y, 0.0f);
-    glRotatef(angle*180.0f/M_PI - 90, 0.0f, 0.0f, 1.0f);
-    glScalef(radius, radius, 1.0f);
-    
-    glDrawArrays(GL_TRIANGLE_FAN, 0, len - 1);
-    
-    if (line) {
-    glColor3f( 1.0f, 1.0f, 1.0f );
-    glDrawArrays(GL_LINE_STRIP, 0, len);
-    }
-    
-    } glPopMatrix();
+void player_draw(cpShape *shape){
+	cpCircleShape *circle = (cpCircleShape *)shape;
+	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 15, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
 
 void initBall(){
-
-  for(i = 0; i < circleP_count-1; i++){
-    circleP[i] = sinf( 2*M_PI*i / (circleP_count-1));
-    circleP[i+1] = cosf( 2*M_PI*i / (circleP_count-1));
-    i++;
-  }
-
-  for(i = 0; i<21; i++){
-    circleVAR[i] = sin(2*M_PI*i/20);
-    circleVAR[i+1] = cos(2*M_PI*i/20);
-    i++;
-	}
-	//for line
-	circleVAR[22] = 0.0f;
-	circleVAR[23] = 0.0f;
-	
 
   cpVect gravity = cpv(0, -0);
   
@@ -221,7 +177,7 @@ void initBall(){
 
   cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(player, 15, cpvzero));
   cpShapeSetFriction(ballShape, 0.7);
-  cpShapeSetUserData(ballShape, drawPlayer);
+  cpShapeSetUserData(ballShape, player_draw);
   
   for(i = 1; i<10; i++){
     for(j = 1; j<10; j++){
@@ -329,7 +285,9 @@ int main( int argc, char* args[] )
       SDL_Quit();
       return 1;
     }
+	
   init();
+  draw_init();
   lastTime = SDL_GetTicks();
   while(!keypress) 
     {
