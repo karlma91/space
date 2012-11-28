@@ -2,6 +2,7 @@
 #include "chipmunk.h"
 #include "SDL_opengl.h"
 #include "draw.h"
+#include "SDL_ttf.h"
 
 void drawStars();
 void drawSpace(cpSpace *space);
@@ -10,6 +11,8 @@ void drawShape(cpShape *shape, void *unused);
 int WIDTH;
 int HEIGHT;
 float accumulator;
+
+TTF_Font *font;
 
 cpSpace *space;
 Uint8 *keys;
@@ -35,8 +38,56 @@ int planet_size = 5000;
 
 float x,y,r;
 
+
+
+TTF_Font* loadfont(char* file, int ptsize)
+  {
+    TTF_Font* tmpfont;
+    tmpfont = TTF_OpenFont(file, ptsize);
+    if (tmpfont == NULL){
+      printf("Unable to load font: %s %s \n", file, TTF_GetError());
+      // Handle the error here.
+    }
+    return tmpfont;
+  }
+
+
+void RenderText(TTF_Font *Font, Color color,double X, double Y, char *Text)
+{
+
+    SDL_Color c = {255,255,255,255};
+	/*Create some variables.*/
+	SDL_Surface *Message = TTF_RenderText_Blended(Font, Text, c);
+	unsigned Texture = 0;
+ 
+	/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
+	glGenTextures(1, &Texture);
+	glBindTexture(GL_TEXTURE_2D, Texture);
+ 
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+ 
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Message->w, Message->h, 0, GL_BGRA,
+	             GL_UNSIGNED_BYTE, Message->pixels);
+ 
+	/*Draw this texture on a quad with the given xyz coordinates.*/
+	glBegin(GL_QUADS);
+		glTexCoord2d(0, 0); glVertex2d(X, Y+Message->h);
+		glTexCoord2d(1, 0); glVertex2d(X+Message->w, Y+Message->h);
+		glTexCoord2d(1, 1); glVertex2d(X+Message->w, Y);
+		glTexCoord2d(0, 1); glVertex2d(X, Y);
+	glEnd();
+ 
+	/*Clean up.*/
+	glDeleteTextures(1, &Texture);
+	SDL_FreeSurface(Message);
+}
+
+
+
 void draw(float dt) 
 {
+  
   dt = dt > 0.25 ? 0.25 : dt;
   accumulator += dt;
   frames += dt;
@@ -103,6 +154,9 @@ void draw(float dt)
   glTranslatef(-player->p.x, -player->p.y, 0.0f);
   drawStars();
   drawSpace(space);
+  glLoadIdentity();
+  RenderText(font, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),-100, -100,"UBERFONT");
+  
   SDL_GL_SwapBuffers();
 }
 
@@ -229,12 +283,16 @@ void init(){
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-
+  //antialiasing
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
-  glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-  
+  glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );  
   glEnable(GL_LINE_SMOOTH);
   glEnable(GL_POLYGON_SMOOTH);
+  
+  //fra ttf opengl tutorial
+  glEnable(GL_TEXTURE_2D);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   float aspect = (float)WIDTH / (float)HEIGHT;
 
@@ -302,6 +360,10 @@ int main( int argc, char* args[] )
 	
   init();
   draw_init();
+  TTF_Init();
+  
+  font = loadfont("fonts/juraBook.ttf", 32);
+  
   lastTime = SDL_GetTicks();
   while(!keypress) 
     {
@@ -330,7 +392,7 @@ int main( int argc, char* args[] )
         }
 		 
       //not use 100% of cpu
-      SDL_Delay(16);
+      SDL_Delay(2);
     }
 	
   SDL_Quit();

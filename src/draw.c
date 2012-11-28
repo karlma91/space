@@ -45,7 +45,7 @@ init_array(int size, GLfloat *array)
 void drawCircle(cpVect center, cpFloat angle, cpFloat radius, Color fill, Color line)
 {
 	GLfloat *array;
-	if(radius < 10){
+	if(radius < 20){
 		len = CIRCLE_SMALL/2;
 		array = circle_8;
 	}else if(radius < 100){
