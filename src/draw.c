@@ -45,20 +45,29 @@ void drawCircle(cpVect center, cpFloat angle, cpFloat radius, Color fill, Color 
 		array = circle_128;
 	}
 	
+  //TMP
+  glEnableClientState(GL_COLOR_ARRAY);
+  GLfloat colors1[] = {fill.r, fill.g, fill.b};
+  
   glVertexPointer(2, GL_FLOAT, 0, array);
+  glColorPointer(3, GL_FLOAT, 0, colors1);
+  
   glPushMatrix(); {
-  glTranslatef(center.x, center.y, 0.0f);
-            glRotatef(angle*180.0f/M_PI, 0.0f, 0.0f, 1.0f);
-            glScalef(radius, radius, 1.0f);
-                
-                if(fill.a > 0){
-                        glColor_from_color(fill);
-                        glDrawArrays(GL_TRIANGLE_FAN, 0, len-1);
-                }
-                
-                if(line.a > 0){
-                        glColor_from_color(line);
-                        glDrawArrays(GL_LINE_STRIP, 0, len);
-                }
+    glTranslatef(center.x, center.y, 0.0f);
+    glRotatef(angle*180.0f/M_PI, 0.0f, 0.0f, 1.0f);
+    glScalef(radius, radius, 1.0f);
+    
+    if(fill.a > 0){
+      glColor_from_color(fill);
+      glDrawArrays(GL_TRIANGLE_FAN, 0, len-1);
+    }
+    /*          
+    if(line.a > 0){
+     glColor_from_color(line);
+     glDrawArrays(GL_LINE_STRIP, 0, len);
+    }
+    */
     } glPopMatrix();
+  
+  glDisableClientState(GL_COLOR_ARRAY);
 }

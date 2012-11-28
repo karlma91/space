@@ -25,6 +25,7 @@ static cpFloat gravityStrength = 5.0e9f;
 
 //camera settings
 static int cam_relative = 1;
+static float cam_zoom = 1;
 
 #define star_count 10000
 int stars_x[star_count];
@@ -76,6 +77,15 @@ void draw(float dt)
     }
   } else F1_pushed = 0;
   
+  if (keys[SDLK_1]){
+    cam_zoom /= 1.1;
+  }
+  if (keys[SDLK_2]){
+    cam_zoom *= 1.1;
+    if (keys[SDLK_1])
+      cam_zoom = 1;  
+  }
+  
   while(accumulator >= phys_step)
     {
       cpSpaceStep(space, phys_step);
@@ -85,6 +95,10 @@ void draw(float dt)
   //Draw
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
+  
+  //camera zoom
+  glScalef(cam_zoom,cam_zoom,cam_zoom);
+  
   if (cam_relative) glRotatef(-cpBodyGetAngle(player) * 180/3.14f,0,0,1);
   glTranslatef(-player->p.x, -player->p.y, 0.0f);
   drawStars();
