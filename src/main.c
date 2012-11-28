@@ -27,7 +27,7 @@ static cpFloat gravityStrength = 5.0e9f;
 static int cam_relative = 1;
 static float cam_zoom = 1;
 
-#define star_count 10000
+#define star_count 100
 int stars_x[star_count];
 int stars_y[star_count];
 

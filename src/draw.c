@@ -18,9 +18,11 @@ static void
 init_array(int size, GLfloat *array)
 {
   int i;
+  array[0]=0.0f;
+  array[1]=0.0f;
   for(i = 0; i < size-3; i++){
-    array[i] = sinf( 2*M_PI*i / (size-4));
-    array[i+1] = cosf( 2*M_PI*i / (size-4));
+    array[i+2] = sinf( 2*M_PI*i / (size-6));
+    array[i+3] = cosf( 2*M_PI*i / (size-6));
     i++;
   }
   array[size-2] = 0.0f;
@@ -29,13 +31,13 @@ init_array(int size, GLfloat *array)
 
 void drawCircle(cpVect center, cpFloat angle, cpFloat radius, Color fill, Color line)
 {
-	int len;
+	int len,i;
 	GLfloat *array;
 	if(radius < 10){
 		len = CIRCLE_SMALL/2;
 		array = circle_8;
 	}else if(radius < 100){
-		len = CIRCLE_MEDIUM;
+		len = CIRCLE_MEDIUM/2;
 		array = circle_16;
 	}else if(radius < 1000){
 		len = CIRCLE_BIG/2;
@@ -47,7 +49,15 @@ void drawCircle(cpVect center, cpFloat angle, cpFloat radius, Color fill, Color 
 	
   //TMP
   glEnableClientState(GL_COLOR_ARRAY);
-  GLfloat colors1[] = {fill.r, fill.g, fill.b};
+  GLfloat colors1[len*3]; //= {fill.r, fill.g, fill.b};
+  colors1[0] = 1.0f;
+  colors1[1] = 0.0f;
+  colors1[2] = 0.0f;
+  for(i=3;i<len*3;i+=3){
+	colors1[i]= 0.0f;
+	colors1[i+1]= 0.0f;
+	colors1[i+2]= 0.0f;
+  }
   
   glVertexPointer(2, GL_FLOAT, 0, array);
   glColorPointer(3, GL_FLOAT, 0, colors1);
