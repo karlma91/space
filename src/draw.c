@@ -80,6 +80,11 @@ void drawCircle(cpVect center, cpFloat angle, cpFloat radius,cpFloat scale, Colo
       glRotatef(angle*180.0f/M_PI, 0.0f, 0.0f, 1.0f);
       glScalef(radius, radius, 1.0f);
       glCallList(res);
+	  glColor_from_color(line);
+	  glBegin(GL_LINES);
+		glVertex2f(0,0);
+		glVertex2f(1,0);
+	  glEnd();
 	glPopMatrix();
 }
 

@@ -28,8 +28,8 @@ static cpBody *planetBody;
 static cpFloat gravityStrength = 5.0e11f;
 
 //camera settings
-static int cam_relative = 1;
-static float cam_zoom = 1;
+static int cam_relative = 0;
+static float cam_zoom = 1.0f;
 
 #define star_count 10
 int stars_x[star_count];
@@ -53,24 +53,18 @@ void draw(float dt)
   
   //update physics and player
   cpVect rot = cpBodyGetRot(player);
-  rot = cpvmult(rot, 3000);
+  rot = cpvmult(rot, 2500);
   cpBodySetForce(player, cpv(0,0));
   cpBodySetTorque(player, 0);
-  if(keys[SDLK_w]) {
-    cpBodySetForce(player, rot);
-  }
-  if(keys[SDLK_a]){
-    cpBodySetTorque(player, 2000);
-  }
-  if(keys[SDLK_s]){
-    cpBodySetForce(player, cpvneg(rot));
-  }
-  if(keys[SDLK_d]){
-    cpBodySetTorque(player, -2000);
-  }
+  
+  if(keys[SDLK_w]) cpBodySetForce(player, rot);
+  if(keys[SDLK_s]) cpBodySetForce(player, cpvneg(rot));
+  if(keys[SDLK_d]) cpBodySetTorque(player, -750);
+  if(keys[SDLK_a]) cpBodySetTorque(player, 750);
+  
   if (keys[SDLK_SPACE]) {
     cpBodySetVelLimit(player,5000);
-    cpBodySetAngVelLimit(player,5);
+    cpBodySetAngVelLimit(player,2);
     cpBodySetVel(player, cpvzero);
     cpBodySetAngVel(player, 0);
   }
@@ -104,8 +98,13 @@ void draw(float dt)
   
   //camera zoom
   glScalef(cam_zoom,cam_zoom,cam_zoom);
-  float r = atan2(player->p.y,player->p.x);
-  if (cam_relative) glRotatef(-r * 180/3.14f  + 90,0,0,1);
+  static float r;
+  r = atan2(player->p.y,player->p.x);
+  if (cam_relative) 
+    glRotatef(-cpBodyGetAngle(player) * 180/3.14f,0,0,1);
+  else {
+    glRotatef(-r * 180/3.14f  + 90,0,0,1);
+  }
   glTranslatef(-player->p.x, -player->p.y, 0.0f);
   drawStars();
   drawSpace(space);
@@ -149,7 +148,7 @@ void drawShape(cpShape *shape, void *unused)
 }
 void drawBall(cpShape *shape){
 	cpCircleShape *circle = (cpCircleShape *)shape;
-	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(0.0f, 1.0f, 1.0f,1.0f));
+	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
 
 void drawPlanet(cpShape *shape){
