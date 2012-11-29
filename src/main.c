@@ -22,12 +22,13 @@ float frames = 0;
 cpFloat phys_step = 1/60.0f;
 
 unsigned planet_texture;
+unsigned plane_texture;
 
 static int i,j;
 
 //planet stuff
 static cpBody *planetBody;
-static cpFloat gravityStrength = 5.0e11f;
+static cpFloat gravityStrength = 6.0e8f;
 
 //camera settings
 static int cam_relative = 0;
@@ -37,7 +38,7 @@ static float cam_zoom = 1.0f;
 int stars_x[star_count];
 int stars_y[star_count];
 
-int planet_size = 50000;
+int planet_size = 1000;
 
 float x,y,r;
 
@@ -174,7 +175,9 @@ planetGravityVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat
 
 void player_draw(cpShape *shape){
   cpCircleShape *circle = (cpCircleShape *)shape;
-  drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 15,cam_zoom, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+  //drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 15,cam_zoom, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+  drawTexture(plane_texture, circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)),30,1698,690);
+  
 }
 
 void initBall(){
@@ -321,6 +324,7 @@ int main( int argc, char* args[] )
   IMG_Init(IMG_INIT_PNG);
 
   planet_texture = loadeTexture("textures/earth.png");
+  plane_texture = loadeTexture("textures/plane.png");
   
   font = loadfont("fonts/JuraMedium.ttf", 32);
   

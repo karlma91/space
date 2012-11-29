@@ -58,26 +58,28 @@ init_array(int size, GLuint *index)
 
 void drawTexture(unsigned texture, cpVect center, cpFloat angle, cpFloat scale,int w, int h)
 {
-	//glEnable(GL_TEXTURE_2D);
+	float ratio = 1.0f*w/h;
+	ratio = ratio/2;
+	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glColor3f(1.0f,1.0f,1.0f);
-	float X = center.x-0.5f;//-1.0f;
-	float Y = center.y-0.5f;//-1.0f;
 	 glPushMatrix();
-      glTranslatef(X, Y, 0.0f);
+      glTranslatef(center.x, center.y, 0.0f);
       glRotatef(angle*180.0f/M_PI, 0.0f, 0.0f, 1.0f);
       glScalef(scale, scale, 1.0f);
       glBegin(GL_QUADS);
-		glTexCoord2d(0, 0); glVertex2d(X, Y+1.0f);
-		glTexCoord2d(1, 0); glVertex2d(X+1.0f, Y+1.0f);
-		glTexCoord2d(1, 1); glVertex2d(X+1.0f, Y);
-		glTexCoord2d(0, 1); glVertex2d(X, Y);
-	glEnd();
+		glTexCoord2d(0, 0); glVertex2d(-ratio, 0.5f);
+		glTexCoord2d(1, 0); glVertex2d(ratio, 0.5f);
+		glTexCoord2d(1, 1); glVertex2d(ratio, -0.5f);
+		glTexCoord2d(0, 1); glVertex2d(-ratio, -0.5f);
+	  glEnd();
 	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
 }
 
 void drawCircle(cpVect center, cpFloat angle, cpFloat radius,cpFloat scale, Color fill, Color line)
 {
+	
   glColor_from_color(fill);
     int res;
 	int size = radius*scale;
@@ -124,7 +126,7 @@ TTF_Font* loadfont(char* file, int ptsize)
 
 void RenderText(TTF_Font *Font, Color color,double X, double Y, char *Text)
 {
-
+	glEnable(GL_TEXTURE_2D);
     SDL_Color c = {(int)(color.r*255),(int)(color.g*255),(int)(color.b*255),255};
 	/*Create some variables.*/
 	SDL_Surface *Message = TTF_RenderText_Blended(Font, Text, c);
@@ -151,6 +153,7 @@ void RenderText(TTF_Font *Font, Color color,double X, double Y, char *Text)
 	/*Clean up.*/
 	glDeleteTextures(1, &Texture);
 	SDL_FreeSurface(Message);
+	glDisable(GL_TEXTURE_2D);
 }
 
 unsigned loadeTexture(char *file)
