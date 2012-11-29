@@ -145,36 +145,36 @@ void drawShape(cpShape *shape, void *unused)
   void (*functionPtr)(cpShape*);
   functionPtr  = cpShapeGetUserData(shape);
   if(functionPtr != NULL){
-	(*functionPtr)(shape);
+    (*functionPtr)(shape);
   }
 }
 void drawBall(cpShape *shape){
-	cpCircleShape *circle = (cpCircleShape *)shape;
-	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+  cpCircleShape *circle = (cpCircleShape *)shape;
+  drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
 
 void drawPlanet(cpShape *shape){
-	cpCircleShape *circle = (cpCircleShape *)shape;
-	//drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), planet_size,cam_zoom, RGBAColor(0.95f, 0.207f, 0.05f,1.0f), RGBAColor(1.0f, 1.0f, 1.0f,0.0f));
-	drawTexture(planet_texture, circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)),planet_size,1837,1837);
+  cpCircleShape *circle = (cpCircleShape *)shape;
+  //drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), planet_size,cam_zoom, RGBAColor(0.95f, 0.207f, 0.05f,1.0f), RGBAColor(1.0f, 1.0f, 1.0f,0.0f));
+  drawTexture(planet_texture, circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)),planet_size*2,1837,1837);
 }
 
 static void
 planetGravityVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
 {
-	// Gravitational acceleration is proportional to the inverse square of
-	// distance, and directed toward the origin. The central planet is assumed
-	// to be massive enough that it affects the satellites but not vice versa.
-	cpVect p = cpBodyGetPos(body);
-	cpFloat sqdist = cpvlengthsq(p);
-	cpVect g = cpvmult(p, -gravityStrength / (sqdist * cpfsqrt(sqdist)));
+  // Gravitational acceleration is proportional to the inverse square of
+  // distance, and directed toward the origin. The central planet is assumed
+  // to be massive enough that it affects the satellites but not vice versa.
+  cpVect p = cpBodyGetPos(body);
+  cpFloat sqdist = cpvlengthsq(p);
+  cpVect g = cpvmult(p, -gravityStrength / (sqdist * cpfsqrt(sqdist)));
 	
-	cpBodyUpdateVelocity(body, g, damping, dt);
+  cpBodyUpdateVelocity(body, g, damping, dt);
 }
 
 void player_draw(cpShape *shape){
-	cpCircleShape *circle = (cpCircleShape *)shape;
-	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 15,cam_zoom, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+  cpCircleShape *circle = (cpCircleShape *)shape;
+  drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 15,cam_zoom, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
 
 void initBall(){
@@ -214,7 +214,7 @@ void initBall(){
 		  
       cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
       cpShapeSetFriction(ballShape, 0.7);
-	  cpShapeSetUserData(ballShape, drawBall);
+      cpShapeSetUserData(ballShape, drawBall);
     }
 
   }
@@ -354,7 +354,7 @@ int main( int argc, char* args[] )
       //not use 100% of cpu
       SDL_Delay(2);
     }
-	game_destroy();
+  game_destroy();
   SDL_Quit();
   return 0;
 }
@@ -363,4 +363,5 @@ void game_destroy(){
   //cpSpaceFreeChildren(space);
   cpSpaceDestroy(space);
   draw_destroy();
+  glDeleteTextures(1, &planet_texture);
 }

@@ -62,7 +62,7 @@ void drawTexture(unsigned texture, cpVect center, cpFloat angle, cpFloat scale,i
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glColor3f(1.0f,1.0f,1.0f);
 	float X = center.x-0.5f;//-1.0f;
-	float Y = center.y;//-1.0f;
+	float Y = center.y-0.5f;//-1.0f;
 	 glPushMatrix();
       glTranslatef(X, Y, 0.0f);
       glRotatef(angle*180.0f/M_PI, 0.0f, 0.0f, 1.0f);
