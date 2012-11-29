@@ -1,6 +1,7 @@
 #include "SDL.h"
 #include "chipmunk.h"
 #include "SDL_opengl.h"
+#include "SDL_ttf.h"
 
 #define CIRCLE_SMALL 16
 #define CIRCLE_MEDIUM 32
@@ -26,4 +27,7 @@ static inline Color LAColor(float l, float a){
         return color;
 }
 void draw_init();
-void drawCircle(cpVect center, cpFloat angle, cpFloat radius, Color fill, Color line);
+void draw_destroy();
+void drawCircle(cpVect center, cpFloat angle, cpFloat radius,cpFloat scale, Color fill, Color line);
+void RenderText(TTF_Font *Font, Color color,double X, double Y, char *Text);
+TTF_Font* loadfont(char* file, int ptsize);

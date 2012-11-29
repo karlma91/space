@@ -2,11 +2,12 @@
 #include "chipmunk.h"
 #include "SDL_opengl.h"
 #include "draw.h"
-#include "SDL_ttf.h"
+
 
 void drawStars();
 void drawSpace(cpSpace *space);
 void drawShape(cpShape *shape, void *unused);
+void game_destroy();
 
 int WIDTH;
 int HEIGHT;
@@ -24,65 +25,19 @@ static int i,j;
 
 //planet stuff
 static cpBody *planetBody;
-static cpFloat gravityStrength = 5.0e9f;
+static cpFloat gravityStrength = 5.0e11f;
 
 //camera settings
 static int cam_relative = 1;
 static float cam_zoom = 1;
 
-#define star_count 100
+#define star_count 10
 int stars_x[star_count];
 int stars_y[star_count];
 
-int planet_size = 5000;
+int planet_size = 50000;
 
 float x,y,r;
-
-
-
-TTF_Font* loadfont(char* file, int ptsize)
-  {
-    TTF_Font* tmpfont;
-    tmpfont = TTF_OpenFont(file, ptsize);
-    if (tmpfont == NULL){
-      printf("Unable to load font: %s %s \n", file, TTF_GetError());
-      // Handle the error here.
-    }
-    return tmpfont;
-  }
-
-
-void RenderText(TTF_Font *Font, Color color,double X, double Y, char *Text)
-{
-
-    SDL_Color c = {255,255,255,255};
-	/*Create some variables.*/
-	SDL_Surface *Message = TTF_RenderText_Blended(Font, Text, c);
-	unsigned Texture = 0;
- 
-	/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
-	glGenTextures(1, &Texture);
-	glBindTexture(GL_TEXTURE_2D, Texture);
- 
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
- 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Message->w, Message->h, 0, GL_BGRA,
-	             GL_UNSIGNED_BYTE, Message->pixels);
- 
-	/*Draw this texture on a quad with the given xyz coordinates.*/
-	glBegin(GL_QUADS);
-		glTexCoord2d(0, 0); glVertex2d(X, Y+Message->h);
-		glTexCoord2d(1, 0); glVertex2d(X+Message->w, Y+Message->h);
-		glTexCoord2d(1, 1); glVertex2d(X+Message->w, Y);
-		glTexCoord2d(0, 1); glVertex2d(X, Y);
-	glEnd();
- 
-	/*Clean up.*/
-	glDeleteTextures(1, &Texture);
-	SDL_FreeSurface(Message);
-}
-
 
 
 void draw(float dt) 
@@ -129,10 +84,10 @@ void draw(float dt)
   } else F1_pushed = 0;
   
   if (keys[SDLK_1]){
-    cam_zoom /= 1.1;
+    cam_zoom /= dt+1.2f;
   }
   if (keys[SDLK_2]){
-    cam_zoom *= 1.1;
+    cam_zoom *= dt+1.2f;
     if (keys[SDLK_1])
       cam_zoom = 1;  
   }
@@ -149,13 +104,13 @@ void draw(float dt)
   
   //camera zoom
   glScalef(cam_zoom,cam_zoom,cam_zoom);
-  
-  if (cam_relative) glRotatef(-cpBodyGetAngle(player) * 180/3.14f,0,0,1);
+  float r = atan2(player->p.y,player->p.x);
+  if (cam_relative) glRotatef(-r * 180/3.14f  + 90,0,0,1);
   glTranslatef(-player->p.x, -player->p.y, 0.0f);
   drawStars();
   drawSpace(space);
   glLoadIdentity();
-  RenderText(font, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),-100, -100,"UBERFONT");
+  RenderText(font, RGBAColor(0.95f, 1.0f, 1.0f,1.0f),-100, 100,"UBERFONT");
   
   SDL_GL_SwapBuffers();
 }
@@ -194,12 +149,12 @@ void drawShape(cpShape *shape, void *unused)
 }
 void drawBall(cpShape *shape){
 	cpCircleShape *circle = (cpCircleShape *)shape;
-	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(0.0f, 1.0f, 1.0f,1.0f));
+	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(0.0f, 1.0f, 1.0f,1.0f));
 }
 
 void drawPlanet(cpShape *shape){
 	cpCircleShape *circle = (cpCircleShape *)shape;
-	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), planet_size, RGBAColor(0.95f, 0.107f, 0.05f,1.0f), RGBAColor(1.0f, 1.0f, 1.0f,0.0f));
+	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), planet_size,cam_zoom, RGBAColor(0.95f, 0.207f, 0.05f,1.0f), RGBAColor(1.0f, 1.0f, 1.0f,0.0f));
 }
 
 static void
@@ -217,7 +172,7 @@ planetGravityVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat
 
 void player_draw(cpShape *shape){
 	cpCircleShape *circle = (cpCircleShape *)shape;
-	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 15, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 15,cam_zoom, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
 
 void initBall(){
@@ -362,7 +317,7 @@ int main( int argc, char* args[] )
   draw_init();
   TTF_Init();
   
-  font = loadfont("fonts/juraBook.ttf", 32);
+  font = loadfont("fonts/JuraMedium.ttf", 32);
   
   lastTime = SDL_GetTicks();
   while(!keypress) 
@@ -394,7 +349,13 @@ int main( int argc, char* args[] )
       //not use 100% of cpu
       SDL_Delay(2);
     }
-	
+	game_destroy();
   SDL_Quit();
   return 0;
+}
+
+void game_destroy(){
+  //cpSpaceFreeChildren(space);
+  cpSpaceDestroy(space);
+  draw_destroy();
 }
