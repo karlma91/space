@@ -17,6 +17,7 @@ else ifneq ($(findstring MINGW32_NT, $(SYS)),) #windows
 	openGL=-lopengl32
 	sdl=-ISDL/windows_mingw/include/SDL -LSDL/windows_mingw/lib -lSDLmain -lSDL
 	sdlttf=-ISDL_ttf -LSDL_ttf/windows -lSDL_ttf
+	sdlimage=-ISDL_image/win -LSDL_image/win -lSDL_image -llibpng15-15
 	chipmunk=-Ichipmunk/include -Lchipmunk/windows -lChipmunk
 else ifeq ($(SYS),Darwin) #mac
 	suffix=
@@ -32,7 +33,7 @@ endif
 
 main : src/main.c
 	$(precode)
-	gcc -o bin/main$(suffix) $(gamefiles) $(os_lib) $(openGL) $(sdl) $(sdlttf) $(chipmunk)
+	gcc -o bin/main$(suffix) $(gamefiles) $(os_lib) $(openGL) $(sdl) $(sdlttf) $(sdlimage) $(chipmunk)
 	$(postcode)
 	
 #mingw and linux

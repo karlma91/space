@@ -2,6 +2,7 @@
 #include "chipmunk.h"
 #include "SDL_opengl.h"
 #include "SDL_ttf.h"
+#include "SDL_image.h"
 
 #define CIRCLE_SMALL 16
 #define CIRCLE_MEDIUM 32
@@ -31,3 +32,6 @@ void draw_destroy();
 void drawCircle(cpVect center, cpFloat angle, cpFloat radius,cpFloat scale, Color fill, Color line);
 void RenderText(TTF_Font *Font, Color color,double X, double Y, char *Text);
 TTF_Font* loadfont(char* file, int ptsize);
+
+unsigned loadeTexture(char *file);
+void drawTexture(unsigned texture, cpVect center, cpFloat angle, cpFloat scale,int w, int h);

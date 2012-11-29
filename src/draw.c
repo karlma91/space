@@ -55,6 +55,27 @@ init_array(int size, GLuint *index)
   //glDeleteLists(index, 1); 
 }
 
+
+void drawTexture(unsigned texture, cpVect center, cpFloat angle, cpFloat scale,int w, int h)
+{
+	//glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glColor3f(1.0f,1.0f,1.0f);
+	float X = center.x-0.5f;//-1.0f;
+	float Y = center.y;//-1.0f;
+	 glPushMatrix();
+      glTranslatef(X, Y, 0.0f);
+      glRotatef(angle*180.0f/M_PI, 0.0f, 0.0f, 1.0f);
+      glScalef(scale, scale, 1.0f);
+      glBegin(GL_QUADS);
+		glTexCoord2d(0, 0); glVertex2d(X, Y+1.0f);
+		glTexCoord2d(1, 0); glVertex2d(X+1.0f, Y+1.0f);
+		glTexCoord2d(1, 1); glVertex2d(X+1.0f, Y);
+		glTexCoord2d(0, 1); glVertex2d(X, Y);
+	glEnd();
+	glPopMatrix();
+}
+
 void drawCircle(cpVect center, cpFloat angle, cpFloat radius,cpFloat scale, Color fill, Color line)
 {
   glColor_from_color(fill);
@@ -130,4 +151,33 @@ void RenderText(TTF_Font *Font, Color color,double X, double Y, char *Text)
 	/*Clean up.*/
 	glDeleteTextures(1, &Texture);
 	SDL_FreeSurface(Message);
+}
+
+unsigned loadeTexture(char *file)
+{
+	SDL_Surface* Surf_Temp = NULL;
+    SDL_Surface* Surf_Return = NULL;
+ 
+    if((Surf_Temp = IMG_Load(file)) == NULL) {
+	printf("Unable to load texture: %s\n", file);
+        return -1;
+    }
+ 
+    Surf_Return = SDL_DisplayFormatAlpha(Surf_Temp);
+	
+	unsigned Texture = 0;
+ 
+	/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
+	glGenTextures(1, &Texture);
+	glBindTexture(GL_TEXTURE_2D, Texture);
+ 
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+ 
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Surf_Return->w, Surf_Return->h, 0, GL_BGRA,
+	             GL_UNSIGNED_BYTE, Surf_Return->pixels);
+				 
+	SDL_FreeSurface(Surf_Temp);
+	SDL_FreeSurface(Surf_Return);
+	return Texture;
 }

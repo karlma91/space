@@ -21,6 +21,8 @@ cpBody *player;
 float frames = 0;
 cpFloat phys_step = 1/60.0f;
 
+unsigned planet_texture;
+
 static int i,j;
 
 //planet stuff
@@ -153,7 +155,8 @@ void drawBall(cpShape *shape){
 
 void drawPlanet(cpShape *shape){
 	cpCircleShape *circle = (cpCircleShape *)shape;
-	drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), planet_size,cam_zoom, RGBAColor(0.95f, 0.207f, 0.05f,1.0f), RGBAColor(1.0f, 1.0f, 1.0f,0.0f));
+	//drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), planet_size,cam_zoom, RGBAColor(0.95f, 0.207f, 0.05f,1.0f), RGBAColor(1.0f, 1.0f, 1.0f,0.0f));
+	drawTexture(planet_texture, circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)),planet_size,1837,1837);
 }
 
 static void
@@ -315,6 +318,9 @@ int main( int argc, char* args[] )
   init();
   draw_init();
   TTF_Init();
+  IMG_Init(IMG_INIT_PNG);
+
+  planet_texture = loadeTexture("textures/earth.png");
   
   font = loadfont("fonts/JuraMedium.ttf", 32);
   
