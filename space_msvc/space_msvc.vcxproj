@@ -11,7 +11,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\draw.c" />
+    <ClCompile Include="src\font.c" />
     <ClCompile Include="src\main.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\constants.h" />
+    <ClInclude Include="src\draw.h" />
+    <ClInclude Include="src\font.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{09DB6E8E-AE8C-4042-92B2-04A049414C8C}</ProjectGuid>

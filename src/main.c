@@ -1,8 +1,11 @@
+#include "stdio.h"
 #include "SDL.h"
 #include "chipmunk.h"
 #include "SDL_opengl.h"
 #include "draw.h"
+#include "font.h"
 
+#define SLEEP_TIME 14
 
 void drawStars();
 void drawSpace(cpSpace *space);
@@ -12,8 +15,6 @@ void game_destroy();
 int WIDTH;
 int HEIGHT;
 float accumulator;
-
-TTF_Font *font;
 
 cpSpace *space;
 Uint8 *keys;
@@ -32,16 +33,17 @@ static cpFloat gravityStrength = 6.0e8f;
 
 //camera settings
 static int cam_relative = 0;
-static float cam_zoom = 1.0f;
+static float cam_zoom = 3.0f;
 
-#define star_count 10
+#define star_count 1000
 int stars_x[star_count];
 int stars_y[star_count];
 
 int planet_size = 1000;
 
 float x,y,r;
-
+float fps;
+char fps_buf[15];
 
 void draw(float dt) 
 {
@@ -50,7 +52,9 @@ void draw(float dt)
   accumulator += dt;
   frames += dt;
   if(frames>=1){
-    printf("%.2f FPS\n",1/dt);
+		fps = 1/dt;
+		sprintf(fps_buf,"%.2f FPS",fps);
+    printf("%s\n",fps_buf);
     frames = 0;
   }
   
@@ -65,13 +69,6 @@ void draw(float dt)
   if(keys[SDLK_d]) cpBodySetTorque(player, -750);
   if(keys[SDLK_a]) cpBodySetTorque(player, 750);
   
-  if (keys[SDLK_SPACE]) {
-    cpBodySetVelLimit(player,5000);
-    cpBodySetAngVelLimit(player,2);
-    cpBodySetVel(player, cpvzero);
-    cpBodySetAngVel(player, 0);
-  }
-  
   static int F1_pushed = 0;
   if(keys[SDLK_F1]){
     if (!F1_pushed) {
@@ -80,12 +77,12 @@ void draw(float dt)
     }
   } else F1_pushed = 0;
   
-  if (keys[SDLK_1]){
-    cam_zoom /= dt+1.2f;
+  if (keys[SDLK_q]){
+    cam_zoom /= dt+1.1f;
   }
-  if (keys[SDLK_2]){
-    cam_zoom *= dt+1.2f;
-    if (keys[SDLK_1])
+  if (keys[SDLK_e]){
+    cam_zoom *= dt+1.1f;
+    if (keys[SDLK_q])
       cam_zoom = 1;  
   }
   
@@ -104,15 +101,46 @@ void draw(float dt)
   static float r;
   r = atan2(player->p.y,player->p.x);
   if (cam_relative) 
-    glRotatef(-cpBodyGetAngle(player) * 180/3.14f,0,0,1);
+    glRotatef(-cpBodyGetAngle(player) * MATH_180PI,0,0,1);
   else {
-    glRotatef(-r * 180/3.14f  + 90,0,0,1);
+    glRotatef(-r * MATH_180PI  + 90,0,0,1);
   }
   glTranslatef(-player->p.x, -player->p.y, 0.0f);
   drawStars();
   drawSpace(space);
   glLoadIdentity();
-  RenderText(font, RGBAColor(0.95f, 1.0f, 1.0f,1.0f),-100, 100,"UBERFONT");
+	
+	
+	glLineWidth(10);
+	
+	if (keys[SDLK_SPACE]) {
+    cpBodySetVelLimit(player,5000);
+    cpBodySetAngVelLimit(player,2);
+    cpBodySetVel(player, cpvzero);
+    cpBodySetAngVel(player, 0);
+		
+		glLineWidth(1);
+  }
+	
+	//draw GUI
+  glColor3f(cos((player->p.x/50)),sin((player->p.y/100)),player->p.x/2550.0f*player->p.y/2550.0f);
+	
+  glPointSize(10);
+	setTextAngle(0);
+	setTextSize(80);
+	setTextAlign(TEXT_CENTER);
+	drawText(0,0.8f*HEIGHT/2, "SPACE");
+	
+	setTextAlign(TEXT_LEFT);
+	setTextSize(10);
+	glColor3f(1,1,1);
+	glLineWidth(2);
+  glPointSize(2);
+	
+	drawText(-WIDTH/2+15,HEIGHT/2 - 10, "WASD     MOVE\nQE       ZOOM\nSPACE    STOP\nESCAPE   QUIT");
+
+	setTextAlign(TEXT_RIGHT);
+	drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
   
   SDL_GL_SwapBuffers();
 }
@@ -125,15 +153,17 @@ void drawSpace(cpSpace *space)
 #define SW (1920)
 void drawStars()
 {
-  glPointSize(2.0f);
   glColor3f(1,1,1);
 
   glPushMatrix();
   glTranslatef(((int)player->p.x+SW/2) / SW * SW,((int)player->p.y+SW/2) / SW * SW,0);
 
-  glBegin(GL_POINTS);
+  glBegin(GL_QUADS);
   for (i=0;i<star_count;i++) {
-    glVertex2f(stars_x[i],stars_y[i]);
+    glVertex2f(stars_x[i]-1,stars_y[i]-1);
+    glVertex2f(stars_x[i]+1,stars_y[i]-1);
+    glVertex2f(stars_x[i]+1,stars_y[i]+1);
+    glVertex2f(stars_x[i]-1,stars_y[i]+1);
   }
   glEnd();
 
@@ -144,9 +174,9 @@ void drawStars()
 void drawShape(cpShape *shape, void *unused)
 {
   void (*functionPtr)(cpShape*);
-  functionPtr  = cpShapeGetUserData(shape);
+  functionPtr = (void (*)(cpShape*))cpShapeGetUserData(shape);
   if(functionPtr != NULL){
-    (*functionPtr)(shape);
+    functionPtr(shape);
   }
 }
 void drawBall(cpShape *shape){
@@ -156,8 +186,29 @@ void drawBall(cpShape *shape){
 
 void drawPlanet(cpShape *shape){
   cpCircleShape *circle = (cpCircleShape *)shape;
-  //drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), planet_size,cam_zoom, RGBAColor(0.95f, 0.207f, 0.05f,1.0f), RGBAColor(1.0f, 1.0f, 1.0f,0.0f));
-  drawTexture(planet_texture, circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)),planet_size*2,1837,1837);
+  drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), planet_size,cam_zoom, RGBAColor(0.95f, 0.207f, 0.05f,1.0f), RGBAColor(1.0f, 1.0f, 1.0f,0.0f));
+}
+
+void player_draw(cpShape *shape){
+  cpCircleShape *circle = (cpCircleShape *)shape;
+  drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 15,cam_zoom, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+  float s = 0.001;
+  float dir = cpBodyGetAngle(cpShapeGetBody(shape));
+	
+	glLineWidth(2);
+	setTextAlign(TEXT_LEFT); // \n is currently only supported by left aligned text
+	setTextSize(8);
+	setTextAngleRad(dir);
+	drawText(circle->tc.x,circle->tc.y, "-THE QUICK BROWN FOX\n+JUMPS OVER\nTHE LAZY DOG\n0123456789");
+  /*
+	//Font performance test
+	for (i = 1; i < 100; i++) {
+	setTextAngleRad(dir*i*1.618033988749895f/100.0f);
+	setTextSize(s);
+	drawText(circle->tc.x,circle->tc.y, "THE QUICK BROWN FOX\nJUMPED OVER THE LAZY DOG\n0123456789");
+	s=(10*s+s*1.618033988749895f)/11;
+  }
+  */
 }
 
 static void
@@ -173,15 +224,7 @@ planetGravityVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat
   cpBodyUpdateVelocity(body, g, damping, dt);
 }
 
-void player_draw(cpShape *shape){
-  cpCircleShape *circle = (cpCircleShape *)shape;
-  //drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 15,cam_zoom, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
-  drawTexture(plane_texture, circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)),30,1698,690);
-  
-}
-
-void initBall(){
-
+void initBall() {
   cpVect gravity = cpv(0, -0);
   
   space = cpSpaceNew();
@@ -207,6 +250,7 @@ void initBall(){
   cpShapeSetFriction(ballShape, 0.7);
   cpShapeSetUserData(ballShape, player_draw);
   
+  /*
   for(i = 1; i<10; i++){
     for(j = 1; j<10; j++){
       cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
@@ -219,8 +263,8 @@ void initBall(){
       cpShapeSetFriction(ballShape, 0.7);
       cpShapeSetUserData(ballShape, drawBall);
     }
-
   }
+  */
   //planet stuff
   planetBody = cpBodyNew(INFINITY, INFINITY);
   cpBodySetAngVel(planetBody, 0.2f);
@@ -250,7 +294,7 @@ void init(){
   glEnable(GL_POLYGON_SMOOTH);
   
   //fra ttf opengl tutorial
-  glEnable(GL_TEXTURE_2D);
+  //glEnable(GL_TEXTURE_2D);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -319,14 +363,15 @@ int main( int argc, char* args[] )
     }
 	
   init();
+	initFont();
   draw_init();
-  TTF_Init();
-  IMG_Init(IMG_INIT_PNG);
+  //TTF_Init();
+  //IMG_Init(IMG_INIT_PNG);
 
-  planet_texture = loadeTexture("textures/earth.png");
-  plane_texture = loadeTexture("textures/plane.png");
+  //planet_texture = loadeTexture("textures/earth.png");
+  //plane_texture = loadeTexture("textures/plane.png");
   
-  font = loadfont("fonts/JuraMedium.ttf", 32);
+  //font = loadfont("fonts/JuraMedium.ttf", 32);
   
   lastTime = SDL_GetTicks();
   while(!keypress) 
@@ -341,7 +386,7 @@ int main( int argc, char* args[] )
 		
       draw(deltaTime);
 		 
-      if(keys[SDLK_q]){
+      if(keys[SDLK_ESCAPE]){
         keypress = 1;
       }
 		 
@@ -356,7 +401,7 @@ int main( int argc, char* args[] )
         }
 		 
       //not use 100% of cpu
-      SDL_Delay(2);
+      SDL_Delay(SLEEP_TIME);
     }
   game_destroy();
   SDL_Quit();

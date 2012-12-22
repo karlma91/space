@@ -2,7 +2,7 @@ SYS := $(firstword $(shell uname -s))
 precode=
 postcode=
 
-gamefiles=src/main.c src/draw.c
+gamefiles=src/main.c src/draw.c src/font.c
 
 ifeq ($(SYS),Linux) #linux
 	suffix=
@@ -16,8 +16,8 @@ else ifneq ($(findstring MINGW32_NT, $(SYS)),) #windows
 	os_lib=-lmingw32 -mwindows resources\win\space.res.o
 	openGL=-lopengl32
 	sdl=-ISDL/windows_mingw/include/SDL -LSDL/windows_mingw/lib -lSDLmain -lSDL
-	sdlttf=-ISDL_ttf -LSDL_ttf/windows -lSDL_ttf
-	sdlimage=-ISDL_image/win -LSDL_image/win -lSDL_image -llibpng15-15
+	#sdlttf=-ISDL_ttf -LSDL_ttf/windows -lSDL_ttf
+	#sdlimage=-ISDL_image/win -LSDL_image/win -lSDL_image -llibpng15-15
 	chipmunk=-Ichipmunk/include -Lchipmunk/windows -lChipmunk
 else ifeq ($(SYS),Darwin) #mac
 	suffix=
@@ -33,9 +33,14 @@ endif
 
 main : src/main.c
 	$(precode)
-	gcc -o bin/main$(suffix) $(gamefiles) $(os_lib) $(openGL) $(sdl) $(sdlttf) $(sdlimage) $(chipmunk)
+	gcc -o bin/main$(suffix) $(gamefiles) $(os_lib) $(openGL) $(sdl) $(chipmunk)
 	$(postcode)
 	
 #mingw and linux
 #gcc src/*.c src/constraints/*.c -Iinclude/chipmunk -o libChipmunk.a -std=c99 -lm -shared -fPIC
 
+run :
+	cls
+	make
+	bin/main.exe
+	#sleep 0.2 && start bin/stdout.txt
