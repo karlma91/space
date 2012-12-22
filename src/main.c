@@ -38,6 +38,7 @@ static float cam_zoom = 3.0f;
 #define star_count 1000
 int stars_x[star_count];
 int stars_y[star_count];
+float stars_size[star_count];
 
 int planet_size = 1000;
 
@@ -150,7 +151,7 @@ void drawSpace(cpSpace *space)
   cpSpaceEachShape(space, drawShape, NULL);
 }
 
-#define SW (1920)
+#define SW (4000)
 void drawStars()
 {
   glColor3f(1,1,1);
@@ -160,10 +161,10 @@ void drawStars()
 
   glBegin(GL_QUADS);
   for (i=0;i<star_count;i++) {
-    glVertex2f(stars_x[i]-1,stars_y[i]-1);
-    glVertex2f(stars_x[i]+1,stars_y[i]-1);
-    glVertex2f(stars_x[i]+1,stars_y[i]+1);
-    glVertex2f(stars_x[i]-1,stars_y[i]+1);
+    glVertex2f(stars_x[i]-2,stars_y[i]-2);
+    glVertex2f(stars_x[i]+2,stars_y[i]-2);
+    glVertex2f(stars_x[i]+2,stars_y[i]+2);
+    glVertex2f(stars_x[i]-2,stars_y[i]+2);
   }
   glEnd();
 
@@ -232,8 +233,8 @@ void initBall() {
   //init stars
   srand(122531);
   for (i=0;i<star_count;i++) {
-    stars_x[i] = rand()%(WIDTH*2) - WIDTH;
-    stars_y[i] = rand()%(WIDTH*2) - WIDTH;
+    stars_x[i] = rand()%(SW*2) - SW;
+    stars_y[i] = rand()%(SW*2) - SW;
   }
   cpFloat radius = 10;
   cpFloat mass = 1;
@@ -412,5 +413,6 @@ void game_destroy(){
   //cpSpaceFreeChildren(space);
   cpSpaceDestroy(space);
   draw_destroy();
+	destroyFont();
   glDeleteTextures(1, &planet_texture);
 }

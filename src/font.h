@@ -25,3 +25,4 @@ extern float font_text_size, font_text_angle;
 // prototypes
 void drawText(float x, float y, char* text);
 void initFont();
+void destroyFont();

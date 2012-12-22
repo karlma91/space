@@ -163,3 +163,7 @@ void initFont() {
 		glEndList();
 	}	while (i++);
 }
+
+void destroyFont() {
+	glDeleteLists(firstCharList, 256); 
+}
