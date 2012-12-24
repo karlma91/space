@@ -11,11 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\bullet.c" />
     <ClCompile Include="src\draw.c" />
     <ClCompile Include="src\font.c" />
     <ClCompile Include="src\main.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\bullet.h" />
     <ClInclude Include="src\constants.h" />
     <ClInclude Include="src\draw.h" />
     <ClInclude Include="src\font.h" />

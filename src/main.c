@@ -5,12 +5,15 @@
 #include "draw.h"
 #include "font.h"
 
-#define SLEEP_TIME 14
+#define SLEEP_TIME 1
 
 void drawStars();
 void drawSpace(cpSpace *space);
 void drawShape(cpShape *shape, void *unused);
 void game_destroy();
+
+static void planetGravityVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
+void drawBall(cpShape *shape);
 
 int WIDTH;
 int HEIGHT;
@@ -46,6 +49,22 @@ float x,y,r;
 float fps;
 char fps_buf[15];
 
+void tmp_shoot() {
+	cpFloat radius = 10;
+  cpFloat mass = 1;
+  cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
+
+	cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
+	//planet gravity thing
+	//ballBody->velocity_func = planetGravityVelocityFunc;
+	cpBodySetPos(ballBody, cpv(player->p.x, player->p.y));
+	cpBodySetVel(ballBody, cpvadd(cpBodyGetVel(player),cpBodyGetVel(player)));
+		  
+	cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
+	cpShapeSetFriction(ballShape, 0.7);
+	cpShapeSetUserData(ballShape, drawBall);
+}
+
 void draw(float dt) 
 {
   
@@ -64,15 +83,27 @@ void draw(float dt)
   rot = cpvmult(rot, 2500);
   cpBodySetForce(player, cpv(0,0));
   cpBodySetTorque(player, 0);
-  
+	
+	if(keys[SDLK_w])
+		cpBodySetAngVel(player, -2);
+  else if(keys[SDLK_s])
+		cpBodySetAngVel(player, 2);
+	else
+		cpBodySetAngVel(player, 0);
+
+	if(keys[SDLK_d]) cpBodySetVel(player, rot);
+  if(keys[SDLK_a]) cpBodySetVel(player, rot);
+
+	/*
   if(keys[SDLK_w]) cpBodySetForce(player, rot);
   if(keys[SDLK_s]) cpBodySetForce(player, cpvneg(rot));
   if(keys[SDLK_d]) cpBodySetTorque(player, -750);
   if(keys[SDLK_a]) cpBodySetTorque(player, 750);
-  
+  */
+
   static int F1_pushed = 0;
   if(keys[SDLK_F1]){
-    if (!F1_pushed) {
+    if (!F1_pushed) { 
       F1_pushed = 1;
       cam_relative = !cam_relative;
     }
@@ -114,7 +145,7 @@ void draw(float dt)
 	
 	glLineWidth(10);
 	
-	if (keys[SDLK_SPACE]) {
+	if (keys[SDLK_h]) {
     cpBodySetVelLimit(player,5000);
     cpBodySetAngVelLimit(player,2);
     cpBodySetVel(player, cpvzero);
@@ -122,6 +153,10 @@ void draw(float dt)
 		
 		glLineWidth(1);
   }
+	
+	if (keys[SDLK_SPACE]) {
+		tmp_shoot();
+	}
 	
 	//draw GUI
   glColor3f(cos((player->p.x/50)),sin((player->p.y/100)),player->p.x/2550.0f*player->p.y/2550.0f);
@@ -138,7 +173,7 @@ void draw(float dt)
 	glLineWidth(2);
   glPointSize(2);
 	
-	drawText(-WIDTH/2+15,HEIGHT/2 - 10, "WASD     MOVE\nQE       ZOOM\nSPACE    STOP\nESCAPE   QUIT");
+	drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
 
 	setTextAlign(TEXT_RIGHT);
 	drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
@@ -158,19 +193,19 @@ void drawStars()
 
   glPushMatrix();
   glTranslatef(((int)player->p.x+SW/2) / SW * SW,((int)player->p.y+SW/2) / SW * SW,0);
-
+	
   glBegin(GL_QUADS);
   for (i=0;i<star_count;i++) {
-    glVertex2f(stars_x[i]-2,stars_y[i]-2);
-    glVertex2f(stars_x[i]+2,stars_y[i]-2);
-    glVertex2f(stars_x[i]+2,stars_y[i]+2);
-    glVertex2f(stars_x[i]-2,stars_y[i]+2);
+		float size = stars_size[i];
+    glVertex2f(stars_x[i]-size,stars_y[i]-size);
+    glVertex2f(stars_x[i]+size,stars_y[i]-size);
+    glVertex2f(stars_x[i]+size,stars_y[i]+size);
+    glVertex2f(stars_x[i]-size,stars_y[i]+size);
   }
   glEnd();
 
   glPopMatrix();
 }
-
 
 void drawShape(cpShape *shape, void *unused)
 {
@@ -180,9 +215,34 @@ void drawShape(cpShape *shape, void *unused)
     functionPtr(shape);
   }
 }
+
 void drawBall(cpShape *shape){
   cpCircleShape *circle = (cpCircleShape *)shape;
-  drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+
+  //drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+	
+	glLineWidth(2);
+	setTextAlign(TEXT_LEFT); // \n is currently only supported by left aligned text
+	setTextSize(40);
+	setTextAngleRad(cpBodyGetAngle(shape->body));
+	glColor3f(0,1,0);
+	drawText(circle->tc.x,circle->tc.y,"0");
+
+	/*
+	glPushMatrix();
+	glTranslatef(circle->tc.x,circle->tc.y,0);
+	glRotatef(cpBodyGetAngle(shape->body) * MATH_180PI,0,0,1);
+	glScalef(10,10,0);
+
+	glBegin(GL_QUADS);
+		glVertex2f(-1,-1);
+		glVertex2f(-1,1);
+		glVertex2f(1,1);
+		glVertex2f(1,-1);
+	glEnd();
+	
+	glPopMatrix();
+	*/
 }
 
 void drawPlanet(cpShape *shape){
@@ -235,6 +295,7 @@ void initBall() {
   for (i=0;i<star_count;i++) {
     stars_x[i] = rand()%(SW*2) - SW;
     stars_y[i] = rand()%(SW*2) - SW;
+		stars_size[i] = 2 + 4*(rand() % 1000) / 1000.0f;
   }
   cpFloat radius = 10;
   cpFloat mass = 1;
@@ -251,7 +312,7 @@ void initBall() {
   cpShapeSetFriction(ballShape, 0.7);
   cpShapeSetUserData(ballShape, player_draw);
   
-  /*
+  ///*
   for(i = 1; i<10; i++){
     for(j = 1; j<10; j++){
       cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
@@ -265,7 +326,7 @@ void initBall() {
       cpShapeSetUserData(ballShape, drawBall);
     }
   }
-  */
+  //*/
   //planet stuff
   planetBody = cpBodyNew(INFINITY, INFINITY);
   cpBodySetAngVel(planetBody, 0.2f);

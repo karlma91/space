@@ -1,9 +1,10 @@
 # SPACE
 An aerospaceplane game written in C.
 
+[Space development plan](https://docs.google.com/document/d/1Dtj3eIV7wXX-JbMaPKmj9ORMLq9SSRsVYANchJQ3Ihg/edit)
+
 ## Todo:
-* include [SDL_ttf](http://www.libsdl.org/projects/SDL_ttf/)
-* include [SDL_image](http://www.libsdl.org/projects/SDL_image/)
+* Project planning
 
 ## Libraries:
 - [SDL](http://www.libsdl.org/)
