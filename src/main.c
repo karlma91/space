@@ -18,11 +18,12 @@ void drawStars();
 void drawSpace(cpSpace *space);
 void drawShape(cpShape *shape, void *unused);
 void game_destroy();
-void draw(float dt);
-void update(float dt);
 
-void drawGround(float dt);
-void updateGround(float dt);
+void SPACE_draw(float dt);
+void SPACE_update(float dt);
+
+void GROUND_draw(float dt);
+void GROUND_update(float dt);
 
 
 static void planetGravityVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
@@ -32,14 +33,14 @@ void drawBall(cpShape *shape);
 static struct state *currentState = NULL;
 
 static struct state spaceState = {
-  draw,
-  update,
+  SPACE_draw,
+  SPACE_update,
   NULL
 };
 
 static struct state groundState = {
-  drawGround,
-  updateGround,
+  GROUND_draw,
+  GROUND_update,
   NULL
 };
 
@@ -54,17 +55,10 @@ cpBody *player;
 float frames = 0;
 cpFloat phys_step = 1/60.0f;
 
-unsigned planet_texture;
-unsigned plane_texture;
-
 static int i,j;
 
-//planet stuff
-static cpBody *planetBody;
-static cpFloat gravityStrength = 6.0e8f;
-
 //camera settings
-static int cam_relative = 0;
+static int cam_relative = 1;
 static float cam_zoom = 3.0f;
 
 #define star_count 1000
@@ -72,50 +66,52 @@ int stars_x[star_count];
 int stars_y[star_count];
 float stars_size[star_count];
 
-int planet_size = 1000;
-
 float x,y,r;
 float fps;
 char fps_buf[15];
 
 void tmp_shoot() {
-	cpFloat radius = 10;
+  cpFloat radius = 10;
   cpFloat mass = 1;
   cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
 
-	cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
-	//planet gravity thing
-	//ballBody->velocity_func = planetGravityVelocityFunc;
-	cpBodySetPos(ballBody, cpv(player->p.x, player->p.y));
-	cpBodySetVel(ballBody, cpvadd(cpBodyGetVel(player),cpBodyGetVel(player)));
+  cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
+  //planet gravity thing
+  //ballBody->velocity_func = planetGravityVelocityFunc;
+  cpBodySetPos(ballBody, cpv(player->p.x, player->p.y));
+  cpBodySetVel(ballBody, cpvadd(cpBodyGetVel(player),cpBodyGetVel(player)));
 		  
-	cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
-	cpShapeSetFriction(ballShape, 0.7);
-	cpShapeSetUserData(ballShape, drawBall);
+  cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
+  cpShapeSetFriction(ballShape, 0.7);
+  cpShapeSetUserData(ballShape, drawBall);
 }
 
-
-void drawGround(float dt)
+void GROUND_draw(float dt)
 {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity();
-
   setTextAlign(TEXT_LEFT);
   setTextSize(10);
   glColor3f(1,1,1);
   glLineWidth(2);
   glPointSize(2);
   drawText(-WIDTH/2+15,HEIGHT/2 - 10,"TESTETESTETSTE");
+  int lvlWidth = 10000;
+  glBegin(GL_QUADS);
+  glVertex2f(-lvlWidth, -(HEIGHT/2) +100);
+  glVertex2f(-lvlWidth, -(HEIGHT/2));
+    glVertex2f(lvlWidth, -(HEIGHT/2));
+    glVertex2f(lvlWidth, -(HEIGHT/2)+100);
+  glEnd();
+
 }
 
-void updateGround(float dt)
+void GROUND_update(float dt)
 {
   if(keys[SDLK_g]) currentState= &spaceState;
   keys[SDLK_g] = 0;
 }
 
-
-void update(float dt){
+void SPACE_update(float dt)
+{
   
   accumulator += dt;
   frames += dt;
@@ -128,7 +124,7 @@ void update(float dt){
   
   //update physics and player
   cpVect rot = cpBodyGetRot(player);
-  rot = cpvmult(rot, 2500);
+  rot = cpvmult(rot, 5500);
   cpBodySetForce(player, cpv(0,0));
   cpBodySetTorque(player, 0);
   /*	
@@ -145,8 +141,8 @@ void update(float dt){
 	
   if(keys[SDLK_w]) cpBodySetForce(player, rot);
   if(keys[SDLK_s]) cpBodySetForce(player, cpvneg(rot));
-  if(keys[SDLK_d]) cpBodySetTorque(player, -750);
-  if(keys[SDLK_a]) cpBodySetTorque(player, 750);
+  if(keys[SDLK_d]) cpBodySetTorque(player, -5000);
+  if(keys[SDLK_a]) cpBodySetTorque(player, 5000);
   
 
   static int F1_pushed = 0;
@@ -157,8 +153,12 @@ void update(float dt){
     }
   } else F1_pushed = 0;
 
-  if(keys[SDLK_g]) currentState = &groundState;
-  keys[SDLK_g] = 0;
+  if(keys[SDLK_g]){
+    currentState = &groundState;
+    keys[SDLK_g] = 0;
+    cpVect gravity = cpv(0, -2);
+    cpSpaceSetGravity(space, gravity);
+  }
 
   if (keys[SDLK_q]){
     cam_zoom /= dt+1.1f;
@@ -177,26 +177,22 @@ void update(float dt){
 
 }
 
-void draw(float dt) 
+void SPACE_draw(float dt) 
 {
-  //Draw
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity();
   
   //camera zoom
   glScalef(cam_zoom,cam_zoom,cam_zoom);
   static float r;
-  r = atan2(player->p.y,player->p.x);
-  if (cam_relative) 
-    glRotatef(-cpBodyGetAngle(player) * MATH_180PI,0,0,1);
-  else {
+  if (cam_relative){
+    
+  }else {
     glRotatef(-r * MATH_180PI  + 90,0,0,1);
   }
   glTranslatef(-player->p.x, -player->p.y, 0.0f);
   drawStars();
   drawSpace(space);
+
   glLoadIdentity();
-	
 	
   glLineWidth(10);
 	
@@ -269,41 +265,25 @@ void drawShape(cpShape *shape, void *unused)
   }
 }
 
-void drawBall(cpShape *shape){
+void drawBall(cpShape *shape)
+{
   cpCircleShape *circle = (cpCircleShape *)shape;
 
-  //drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
-	
-	glLineWidth(2);
-	setTextAlign(TEXT_LEFT); // \n is currently only supported by left aligned text
-	setTextSize(40);
-	setTextAngleRad(cpBodyGetAngle(shape->body));
-	glColor3f(0,1,0);
-	drawText(circle->tc.x,circle->tc.y,"0");
-
-	/*
-	glPushMatrix();
-	glTranslatef(circle->tc.x,circle->tc.y,0);
-	glRotatef(cpBodyGetAngle(shape->body) * MATH_180PI,0,0,1);
-	glScalef(10,10,0);
-
-	glBegin(GL_QUADS);
-		glVertex2f(-1,-1);
-		glVertex2f(-1,1);
-		glVertex2f(1,1);
-		glVertex2f(1,-1);
-	glEnd();
-	
-	glPopMatrix();
-	*/
+  drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+}
+void drawBox(cpShape *shape)
+{
+   cpPolyShape *poly = (cpPolyShape *)shape;
+   drawPolygon(poly->numVerts, poly->tVerts,RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+}
+void drawground(cpShape *shape)
+{
+  cpSegmentShape *seg = (cpSegmentShape *)shape;
+  drawSegment(seg->ta, seg->tb, seg->r, RGBAColor(0.80f, 0.107f, 0.05f,1.0f));
 }
 
-void drawPlanet(cpShape *shape){
-  cpCircleShape *circle = (cpCircleShape *)shape;
-  drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), planet_size,cam_zoom, RGBAColor(0.95f, 0.207f, 0.05f,1.0f), RGBAColor(1.0f, 1.0f, 1.0f,0.0f));
-}
-
-void player_draw(cpShape *shape){
+void player_draw(cpShape *shape)
+{
   cpCircleShape *circle = (cpCircleShape *)shape;
   drawCircle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 15,cam_zoom, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
   float s = 0.001;
@@ -325,21 +305,9 @@ void player_draw(cpShape *shape){
   */
 }
 
-static void
-planetGravityVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
+void initBall() 
 {
-  // Gravitational acceleration is proportional to the inverse square of
-  // distance, and directed toward the origin. The central planet is assumed
-  // to be massive enough that it affects the satellites but not vice versa.
-  cpVect p = cpBodyGetPos(body);
-  cpFloat sqdist = cpvlengthsq(p);
-  cpVect g = cpvmult(p, -gravityStrength / (sqdist * cpfsqrt(sqdist)));
-	
-  cpBodyUpdateVelocity(body, g, damping, dt);
-}
-
-void initBall() {
-  cpVect gravity = cpv(0, -0);
+  cpVect gravity = cpv(0, -200);
   
   space = cpSpaceNew();
   cpSpaceSetGravity(space, gravity);
@@ -350,49 +318,41 @@ void initBall() {
     stars_y[i] = rand()%(SW*2) - SW;
 		stars_size[i] = 2 + 4*(rand() % 1000) / 1000.0f;
   }
-  cpFloat radius = 10;
+
+  /* static ground */
+  cpBody  *staticBody = space->staticBody;
+  cpShape *shape;
+  shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-2000,-240), cpv(2000,-240), 0.0f));
+  cpShapeSetUserData(shape, drawground);
+  cpShapeSetFriction(shape, 0.8);
+  cpFloat radius = 40;
   cpFloat mass = 1;
   
   cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
   //player
   player = cpSpaceAddBody(space, cpBodyNew(10, cpMomentForCircle(2, 0, 15, cpvzero)));
-  cpBodySetPos(player, cpv(15*20, planet_size+10+1*30));
+  cpBodySetPos(player, cpv(30*20,10+1*30));
 
-  player->velocity_func = planetGravityVelocityFunc;  
-  // cpBodySetVel(player, cpv(600,0));
+  cpShape *boxShape = cpSpaceAddShape(space, cpCircleShapeNew(player, 15, cpvzero));
+  cpShapeSetFriction(boxShape, 0.7);
+  cpShapeSetUserData(boxShape, player_draw);
 
-  cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(player, 15, cpvzero));
-  cpShapeSetFriction(ballShape, 0.7);
-  cpShapeSetUserData(ballShape, player_draw);
-  
-  ///*
-  for(i = 1; i<10; i++){
+  for(i = 1; i<20; i++){
     for(j = 1; j<10; j++){
-      cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
-      //planet gravity thing
-      ballBody->velocity_func = planetGravityVelocityFunc;
-      cpBodySetPos(ballBody, cpv(j*20, planet_size + 10+i*30));
-      // cpBodySetVel(ballBody, cpv(600,0));
+      cpBody *boxBody = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(1.0f, 30.0f, 30.0f)));
+
+      cpBodySetPos(boxBody, cpv(j*42, i*42));
 		  
-      cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
-      cpShapeSetFriction(ballShape, 0.7);
-      cpShapeSetUserData(ballShape, drawBall);
+      cpShape *boxShape = cpSpaceAddShape(space, cpBoxShapeNew(boxBody, radius, radius));
+      cpShapeSetFriction(boxShape, 0.7);
+      cpShapeSetUserData(boxShape, drawBox);
     }
   }
-  //*/
-  //planet stuff
-  planetBody = cpBodyNew(INFINITY, INFINITY);
-  cpBodySetAngVel(planetBody, 0.2f);
-  cpBodySetPos(planetBody, cpv(0, 0));
-
-  cpShape *shape = cpSpaceAddShape(space, cpCircleShapeNew(planetBody, planet_size, cpvzero));
-  cpShapeSetElasticity(shape, 1.0f);
-  cpShapeSetFriction(shape, 0.0f);
-  cpShapeSetUserData(shape, drawPlanet);
 
 }
 
-void init(){
+void initGL()
+{
   SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 5 );
   SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 5 );
   SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
@@ -447,7 +407,6 @@ void init(){
 
   /* Do draw back-facing polygons*/
   glDisable(GL_CULL_FACE);
-  initBall();
 }
 
 int main( int argc, char* args[] )
@@ -475,8 +434,9 @@ int main( int argc, char* args[] )
       return 1;
     }
 	
-  init();
-	initFont();
+  initGL();
+  initBall();
+  initFont();
   draw_init();
 
   currentState = &spaceState;
@@ -493,6 +453,11 @@ int main( int argc, char* args[] )
       keys = SDL_GetKeyState(NULL);
       
       deltaTime = deltaTime > 0.25 ? 0.25 : deltaTime;
+
+      //Draw
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glLoadIdentity();
+      
       currentState->render(deltaTime);
       currentState->update(deltaTime);
       SDL_GL_SwapBuffers();
@@ -519,10 +484,10 @@ int main( int argc, char* args[] )
   return 0;
 }
 
-void game_destroy(){
+void game_destroy()
+{
   //cpSpaceFreeChildren(space);
   cpSpaceDestroy(space);
   draw_destroy();
-	destroyFont();
-  glDeleteTextures(1, &planet_texture);
+  destroyFont();
 }

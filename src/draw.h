@@ -31,6 +31,8 @@ static inline Color LAColor(float l, float a){
 void draw_init();
 void draw_destroy();
 void drawCircle(cpVect center, cpFloat angle, cpFloat radius,cpFloat scale, Color fill, Color line);
+void drawPolygon(int count, cpVect *verts, Color lineColor, Color fillColor);
+void drawSegment(cpVect a, cpVect b, cpFloat width, Color lineColor);
 //void RenderText(TTF_Font *Font, Color color,double X, double Y, char *Text);
 //TTF_Font* loadfont(char* file, int ptsize);
 

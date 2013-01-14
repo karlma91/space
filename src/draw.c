@@ -91,3 +91,32 @@ void drawCircle(cpVect center, cpFloat angle, cpFloat radius,cpFloat scale, Colo
 	*/
 	glPopMatrix();
 }
+
+void drawPolygon(int count, cpVect *verts, Color lineColor, Color fillColor)
+{
+#if CP_USE_DOUBLES
+        glVertexPointer(2, GL_DOUBLE, 0, verts);
+#else
+        glVertexPointer(2, GL_FLOAT, 0, verts);
+#endif
+        
+        if(fillColor.a > 0){
+                glColor_from_color(fillColor);
+                glDrawArrays(GL_TRIANGLE_FAN, 0, count);
+        }
+        
+        if(lineColor.a > 0){
+                glColor_from_color(lineColor);
+                glDrawArrays(GL_LINE_LOOP, 0, count);
+        }
+}
+
+void drawSegment(cpVect a, cpVect b, cpFloat width, Color lineColor)
+{
+  glColor_from_color(lineColor);
+  glLineWidth(width);
+  glBegin(GL_LINES);
+  glVertex2f( a.x, a.y);
+  glVertex2f( b.x, b.y);
+  glEnd(); 
+}
