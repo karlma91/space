@@ -7,13 +7,42 @@
 
 #define SLEEP_TIME 1
 
+/* State  struct */
+struct state {
+    void (*update)(float dt);
+    void (*render)(float dt);
+    struct state *parentState;
+};
+
 void drawStars();
 void drawSpace(cpSpace *space);
 void drawShape(cpShape *shape, void *unused);
 void game_destroy();
+void draw(float dt);
+void update(float dt);
+
+void drawGround(float dt);
+void updateGround(float dt);
+
 
 static void planetGravityVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 void drawBall(cpShape *shape);
+
+/* current state in use */
+static struct state *currentState = NULL;
+
+static struct state spaceState = {
+  draw,
+  update,
+  NULL
+};
+
+static struct state groundState = {
+  drawGround,
+  updateGround,
+  NULL
+};
+
 
 int WIDTH;
 int HEIGHT;
@@ -65,10 +94,29 @@ void tmp_shoot() {
 	cpShapeSetUserData(ballShape, drawBall);
 }
 
-void draw(float dt) 
+
+void drawGround(float dt)
 {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glLoadIdentity();
+
+  setTextAlign(TEXT_LEFT);
+  setTextSize(10);
+  glColor3f(1,1,1);
+  glLineWidth(2);
+  glPointSize(2);
+  drawText(-WIDTH/2+15,HEIGHT/2 - 10,"TESTETESTETSTE");
+}
+
+void updateGround(float dt)
+{
+  if(keys[SDLK_g]) currentState= &spaceState;
+  keys[SDLK_g] = 0;
+}
+
+
+void update(float dt){
   
-  dt = dt > 0.25 ? 0.25 : dt;
   accumulator += dt;
   frames += dt;
   if(frames>=1){
@@ -83,7 +131,7 @@ void draw(float dt)
   rot = cpvmult(rot, 2500);
   cpBodySetForce(player, cpv(0,0));
   cpBodySetTorque(player, 0);
-	
+  /*	
 	if(keys[SDLK_w])
 		cpBodySetAngVel(player, -2);
   else if(keys[SDLK_s])
@@ -93,13 +141,13 @@ void draw(float dt)
 
 	if(keys[SDLK_d]) cpBodySetVel(player, rot);
   if(keys[SDLK_a]) cpBodySetVel(player, rot);
-
-	/*
+  */
+	
   if(keys[SDLK_w]) cpBodySetForce(player, rot);
   if(keys[SDLK_s]) cpBodySetForce(player, cpvneg(rot));
   if(keys[SDLK_d]) cpBodySetTorque(player, -750);
   if(keys[SDLK_a]) cpBodySetTorque(player, 750);
-  */
+  
 
   static int F1_pushed = 0;
   if(keys[SDLK_F1]){
@@ -108,7 +156,10 @@ void draw(float dt)
       cam_relative = !cam_relative;
     }
   } else F1_pushed = 0;
-  
+
+  if(keys[SDLK_g]) currentState = &groundState;
+  keys[SDLK_g] = 0;
+
   if (keys[SDLK_q]){
     cam_zoom /= dt+1.1f;
   }
@@ -123,7 +174,11 @@ void draw(float dt)
       cpSpaceStep(space, phys_step);
       accumulator -= phys_step;
     }
-  
+
+}
+
+void draw(float dt) 
+{
   //Draw
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
@@ -143,42 +198,40 @@ void draw(float dt)
   glLoadIdentity();
 	
 	
-	glLineWidth(10);
+  glLineWidth(10);
 	
-	if (keys[SDLK_h]) {
+  if (keys[SDLK_h]) {
     cpBodySetVelLimit(player,5000);
     cpBodySetAngVelLimit(player,2);
     cpBodySetVel(player, cpvzero);
     cpBodySetAngVel(player, 0);
 		
-		glLineWidth(1);
+    glLineWidth(1);
   }
 	
-	if (keys[SDLK_SPACE]) {
-		tmp_shoot();
-	}
+  if (keys[SDLK_SPACE]) {
+    tmp_shoot();
+  }
 	
-	//draw GUI
+  //draw GUI
   glColor3f(cos((player->p.x/50)),sin((player->p.y/100)),player->p.x/2550.0f*player->p.y/2550.0f);
 	
   glPointSize(10);
-	setTextAngle(0);
-	setTextSize(80);
-	setTextAlign(TEXT_CENTER);
-	drawText(0,0.8f*HEIGHT/2, "SPACE");
+  setTextAngle(0);
+  setTextSize(80);
+  setTextAlign(TEXT_CENTER);
+  drawText(0,0.8f*HEIGHT/2, "SPACE");
 	
-	setTextAlign(TEXT_LEFT);
-	setTextSize(10);
-	glColor3f(1,1,1);
-	glLineWidth(2);
+  setTextAlign(TEXT_LEFT);
+  setTextSize(10);
+  glColor3f(1,1,1);
+  glLineWidth(2);
   glPointSize(2);
 	
-	drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
+  drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
 
-	setTextAlign(TEXT_RIGHT);
-	drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
-  
-  SDL_GL_SwapBuffers();
+  setTextAlign(TEXT_RIGHT);
+  drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
 }
 
 void drawSpace(cpSpace *space)
@@ -415,8 +468,6 @@ int main( int argc, char* args[] )
   WIDTH = myPointer->current_w;
   HEIGHT = myPointer->current_h;
 
-   
-  //SDL_FULLSCREEN|
   if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_OPENGL | SDL_FULLSCREEN)))
     {
       printf("ERROR");
@@ -427,13 +478,8 @@ int main( int argc, char* args[] )
   init();
 	initFont();
   draw_init();
-  //TTF_Init();
-  //IMG_Init(IMG_INIT_PNG);
 
-  //planet_texture = loadeTexture("textures/earth.png");
-  //plane_texture = loadeTexture("textures/plane.png");
-  
-  //font = loadfont("fonts/JuraMedium.ttf", 32);
+  currentState = &spaceState;
   
   lastTime = SDL_GetTicks();
   while(!keypress) 
@@ -445,8 +491,11 @@ int main( int argc, char* args[] )
 	
       SDL_PumpEvents();
       keys = SDL_GetKeyState(NULL);
-		
-      draw(deltaTime);
+      
+      deltaTime = deltaTime > 0.25 ? 0.25 : deltaTime;
+      currentState->render(deltaTime);
+      currentState->update(deltaTime);
+      SDL_GL_SwapBuffers();
 		 
       if(keys[SDLK_ESCAPE]){
         keypress = 1;
