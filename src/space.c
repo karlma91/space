@@ -23,7 +23,7 @@ static float accumulator = 0;
 static int i,j;
 
 // Chipmunk
-static cpFloat phys_step;
+static cpFloat phys_step = 1/60.0f;
 static cpSpace *space;
 static cpBody *player;
 static float x,y,r;

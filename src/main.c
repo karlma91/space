@@ -90,8 +90,6 @@ int main( int argc, char* args[] )
   float deltaTime = 0.0f;
   
   int keypress = 0;
-
-  float dt = 0;
   
   if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
 
@@ -125,9 +123,7 @@ int main( int argc, char* args[] )
       SDL_PumpEvents();
       keys = SDL_GetKeyState(NULL);
       
-
-      
-      frames += dt;
+      frames += deltaTime;
       fps++;
       if(frames>=1){
         sprintf(fps_buf,"%.2f FPS",fps);
@@ -137,9 +133,6 @@ int main( int argc, char* args[] )
       }
 
       deltaTime = deltaTime > 0.25 ? 0.25 : deltaTime;
-
-
-
 
       //Draw
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -178,3 +171,4 @@ static void game_destroy()
   draw_destroy();
   destroyFont();
 }
+
