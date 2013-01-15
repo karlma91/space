@@ -27,6 +27,9 @@
     <ClCompile Include="src\bullet.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\space.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\draw.h">
@@ -39,6 +42,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\bullet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\space.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

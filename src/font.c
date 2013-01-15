@@ -10,7 +10,7 @@ float font_text_angle = 0;
 // local variables
 static int i,j;
 
-GLuint firstCharList;
+static GLuint firstCharList;
 
 //inefficient 7-segment display style for digits
 //TODO: convert to redered list
@@ -18,7 +18,8 @@ const GLint digits[] = {0x3F,0x21,0x5B,0x73,0x65,0x76,0x7E,0x23,0x7F,0x67};
 const GLfloat digits_x[] = {0.5f,0.5f,-0.5f,-0.5f,-0.5f, 0.5f,0.5f,-0.5f};
 const GLfloat digits_y[] = {0,0.5, 0.5, 0,-0.5,-0.5,0, 0};
 
-void drawDigit(int d) {
+static void drawDigit(int d)
+{
 	j = 0;
 	glBegin(GL_LINES);
 	while (d && j < 7) {
@@ -32,8 +33,7 @@ void drawDigit(int d) {
 	glEnd();
 }
 
-const GLfloat letters[26][14] =
-{
+const GLfloat letters[26][14] = {
 	{0.5,-0.5,	0.5,0.5,	-0.5,0.5,	-0.5,	-0.5,	-0.5,0	,0.5,0}, //A
 	{0.4,0,	0.4,0.5,	-0.5,0.5,	-0.5,-0.5,	0.5,-0.5,	0.5,0,	-0.5,0}, //B
 	{0.5,0.5,	-0.5,0.5,	-0.5,-0.5,	0.5,-0.5}, //C
@@ -65,7 +65,8 @@ const GLfloat letters[26][14] =
 const GLint letters_points[26] = {7,7,4,5,7,6,6,6,2,3,6,3,5,4,5,5,6,6,6,5,4,3,5,5,6,4};
 
 //TODO: swap lines with quads
-void drawLetter(int d) {
+static void drawLetter(int d)
+{
   glVertexPointer(2, GL_FLOAT, 0, letters[d]);
 	glDrawArrays(GL_LINE_STRIP, 0, letters_points[d]);
 	
@@ -79,7 +80,8 @@ const GLfloat PLUS[] = {-0.5,0,	0.5,0,	0,-0.5,	0,0.5};
 const GLfloat COMMA[] = {0,0,	-0.5,-0.5};
 const GLfloat DOT[] = {-0.1,-0.5,	-0.1,-0.3,	0.1,-0.3,	0.1,-0.5, -0.1,-0.5f};
 
-void drawSymbol(char c) {
+static void drawSymbol(char c)
+{
 	switch(c) {
 		case '-':
 			glVertexPointer(2, GL_FLOAT, 0, MINUS);
@@ -103,7 +105,8 @@ void drawSymbol(char c) {
 	}
 }
 
-void drawText(GLfloat x, GLfloat y, char* text) {
+void font_drawText(GLfloat x, GLfloat y, char* text)
+{
 	glPushMatrix();
 	glTranslatef(x, y, 0.0f);
 	glRotatef(font_text_angle, 0, 0, 1);
@@ -144,7 +147,8 @@ void drawText(GLfloat x, GLfloat y, char* text) {
 	glPopMatrix();
 }
 
-void initText(char c) {
+void init_text(char c)
+{
 		if (c >= '0' && c <= '9') {
 			drawDigit(digits[c - '0']);
 		} else if (c >= 'A' && c <= 'Z') {
@@ -154,17 +158,19 @@ void initText(char c) {
 		}
 }
 
-void initFont() {
+void font_init()
+{
 	firstCharList = glGenLists(256);
 	
 	char i = 1;
 	do {
 		glNewList(firstCharList + i,GL_COMPILE);
-			initText(i);
+			init_text(i);
 		glEndList();
 	}	while (i++);
 }
 
-void destroyFont() {
+void font_destroy()
+{
 	glDeleteLists(firstCharList, 256); 
 }
