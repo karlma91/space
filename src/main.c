@@ -98,7 +98,7 @@ int main( int argc, char* args[] )
   WIDTH = myPointer->current_w;
   HEIGHT = myPointer->current_h;
 
-  if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_OPENGL)))// | SDL_FULLSCREEN)))
+  if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_OPENGL | SDL_FULLSCREEN)))
     {
       printf("ERROR");
       SDL_Quit();
@@ -106,7 +106,7 @@ int main( int argc, char* args[] )
     }
 	
   initGL();
-  initFont();
+  font_init();
   SPACE_init();
   draw_init();
 
@@ -169,6 +169,6 @@ static void game_destroy()
   //cpSpaceFreeChildren(space);
   SPACE_destroy();
   draw_destroy();
-  destroyFont();
+  font_destroy();
 }
 

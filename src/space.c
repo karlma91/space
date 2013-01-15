@@ -38,8 +38,7 @@ struct state spaceState = {
 };
 
 void SPACE_update(float dt)
-{
-  
+{ 
   accumulator += dt;
   
   //update physics and player
@@ -134,7 +133,7 @@ void SPACE_draw(float dt)
   setTextAngle(0);
   setTextSize(80);
   setTextAlign(TEXT_CENTER);
-  drawText(0,0.8f*HEIGHT/2, "SPACE");
+  font_drawText(0,0.8f*HEIGHT/2, "SPACE");
 	
   setTextAlign(TEXT_LEFT);
   setTextSize(10);
@@ -142,10 +141,10 @@ void SPACE_draw(float dt)
   glLineWidth(2);
   glPointSize(2);
 	
-  drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
+  font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
 
   setTextAlign(TEXT_RIGHT);
-  drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
+  font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
 }
 
 
@@ -160,7 +159,7 @@ static void player_draw(cpShape *shape)
 	setTextAlign(TEXT_LEFT); // \n is currently only supported by left aligned text
 	setTextSize(8);
 	setTextAngleRad(dir);
-	drawText(circle->tc.x,circle->tc.y, "-THE QUICK BROWN FOX\n+JUMPS OVER\nTHE LAZY DOG\n0123456789");
+	font_drawText(circle->tc.x,circle->tc.y, "-THE QUICK BROWN FOX\n+JUMPS OVER\nTHE LAZY DOG\n0123456789");
   /*
 	//Font performance test
 	for (i = 1; i < 100; i++) {
@@ -193,8 +192,9 @@ static void drawStars()
   glPopMatrix();
 }
 
-void SPACE_init(){
-    cpVect gravity = cpv(0, -200);
+void SPACE_init()
+{
+	cpVect gravity = cpv(0, -200);
   
   space = cpSpaceNew();
   cpSpaceSetGravity(space, gravity);
@@ -243,7 +243,8 @@ void SPACE_destroy()
 }
 
 
-static void tmp_shoot() {
+static void tmp_shoot()
+{
   cpFloat radius = 10;
   cpFloat mass = 1;
   cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
