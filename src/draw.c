@@ -44,34 +44,24 @@ void draw_init(){
 		DEBUG;
         SDL_Surface *surface;
 		DEBUG;
-        if((surface = SDL_LoadBMP("textures/dot_32bit.bmp"))==NULL){
+    if((surface = SDL_LoadBMP("textures/dot_32bit.bmp"))==NULL){
 		printf("Unable to loade texture");
 		DEBUG;
 		return;
 	}
         glGenTextures(1,&texture);
-	DEBUG;
 
         //bind texture object
         glBindTexture(GL_TEXTURE_2D,texture);
-	DEBUG;
         // set texture's stretching properties
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	DEBUG;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	DEBUG;
-	// surface->format->Amask = 0XFF000000;
-	DEBUG;
-	//surface->format->Ashift = 24;
-	DEBUG;
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, surface->w, surface->h, 0, 
-	GL_BGR, GL_UNSIGNED_BYTE, surface->pixels);
-	DEBUG;
+		surface->format->Amask = 0XFF000000;
+		surface->format->Ashift = 24;
+        glTexImage2D(GL_TEXTURE_2D, 0, 4, surface->w, surface->h, 0, 
+		GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
 
-	SDL_FreeSurface(surface);
-	DEBUG;
-        //.....
-        
+		SDL_FreeSurface(surface);
 
 }
 
