@@ -15,11 +15,13 @@ GLfloat array[CIRCLE_MAX_RES];
 
 static GLfloat colors1[CIRCLE_EXTRA/2*3];
 static int i, j, len;
+unsigned texture;
 
 GLuint c_8,c_16,c_64,c_128;
 
 float cam_zoom = 1;
 
+#define DEBUG fprintf(stderr, "line: %d", __LINE__);
 
 void draw_init(){
 	init_array(CIRCLE_SMALL, &c_8);
@@ -38,27 +40,65 @@ void draw_init(){
 	}
 
         
-        //TODO: load alpha BMP for FX
-        /*
-        GLuint texture;
+	 //TODO: load alpha BMP for FX
+		DEBUG;
         SDL_Surface *surface;
-        SDL_Surface *screen;
-        surface = SDL_LoadBMP("textures/dot_32.bmp");
+		DEBUG;
+        if((surface = SDL_LoadBMP("textures/dot_32bit.bmp"))==NULL){
+		printf("Unable to loade texture");
+		DEBUG;
+		return;
+	}
         glGenTextures(1,&texture);
+	DEBUG;
 
         //bind texture object
         glBindTexture(GL_TEXTURE_2D,texture);
+	DEBUG;
         // set texture's stretching properties
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	DEBUG;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        
+	DEBUG;
+	// surface->format->Amask = 0XFF000000;
+	DEBUG;
+	//surface->format->Ashift = 24;
+	DEBUG;
         glTexImage2D(GL_TEXTURE_2D, 0, 3, surface->w, surface->h, 0, 
-          GL_BGR, GL_UNSIGNED_BYTE, surface->pixels);
+	GL_BGR, GL_UNSIGNED_BYTE, surface->pixels);
+	DEBUG;
+
+	SDL_FreeSurface(surface);
+	DEBUG;
         //.....
-        */
+        
 
 }
-void draw_destroy(){
+
+
+
+void draw_texture(unsigned texture, cpVect a, cpVect dir, int w)
+{
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glColor3f(1.0f,1.0f,1.0f);
+         glPushMatrix();
+      glTranslatef(a.x, a.y, 0.0f);
+      // glRotatef(cpvtoangle(dir), 0.0f, 0.0f, 1.0f);
+      glScalef(100,100,1);
+      glBegin(GL_QUADS);
+                glTexCoord2d(0, 0); glVertex2d(0, 0);
+                glTexCoord2d(1, 0); glVertex2d(1, 0);
+                glTexCoord2d(1, 1); glVertex2d(1, 1);
+                glTexCoord2d(0, 1); glVertex2d(0, 1);
+          glEnd();
+        glPopMatrix();
+        glDisable(GL_TEXTURE_2D);
+}
+
+
+void draw_destroy()
+{
 	glDeleteLists(c_8, 1); 
 	glDeleteLists(c_16, 1); 
 	glDeleteLists(c_64, 1); 
@@ -68,7 +108,8 @@ void draw_destroy(){
         //...
 }
 
-static void init_array(int size, GLuint *index) {
+static void init_array(int size, GLuint *index) 
+{
   array[0]=0.0f;
   array[1]=0.0f;
   

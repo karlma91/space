@@ -9,6 +9,10 @@
 #define CIRCLE_EXTRA 256
 #define CIRCLE_MAX_RES 256
 
+// effect texture
+unsigned texture;
+
+
 //fra chipmunkDemo.h
 typedef struct Color {
         float r, g, b, a;
@@ -30,6 +34,7 @@ static inline Color LAColor(float l, float a){
 
 extern float cam_zoom;
 
+void draw_texture(unsigned texture, cpVect a, cpVect dir, int w);
 void draw_init();
 void draw_destroy();
 void draw_circle(cpVect center, cpFloat angle, 

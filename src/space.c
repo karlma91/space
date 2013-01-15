@@ -38,7 +38,8 @@ struct state spaceState = {
 };
 
 void SPACE_update(float dt)
-{ 
+{
+  
   accumulator += dt;
 
   
@@ -133,6 +134,7 @@ void SPACE_draw(float dt)
     keys[SDLK_SPACE] = 0;
   }
 	
+  draw_texture(texture, cpv(100,100), cpv(1,0),2);
   //draw GUI
   glColor3f(cos((player->p.x/50)),sin((player->p.y/100)),player->p.x/2550.0f*player->p.y/2550.0f);
 	
@@ -199,9 +201,8 @@ static void drawStars()
   glPopMatrix();
 }
 
-void SPACE_init()
-{
-	cpVect gravity = cpv(0, -200);
+void SPACE_init(){
+    cpVect gravity = cpv(0, -200);
   
   space = cpSpaceNew();
   cpSpaceSetGravity(space, gravity);
@@ -262,8 +263,7 @@ void SPACE_destroy()
 }
 
 
-static void tmp_shoot()
-{
+static void tmp_shoot() {
   cpFloat radius = 10;
   cpFloat mass = 1;
   cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
