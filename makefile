@@ -49,21 +49,13 @@ run :
 		bin/main; \
 	elif [ $(os) == 2 ]; then \
 		cls; \
+		make; \
 		bin/main.exe; \
 	elif [ $(os) == 3 ]; then \
 		clear; \
+		make; \
 		bin/space.app/Contents/MacOS/main; \
 	else \
 		clear; \
 		echo "OS not recognized"; \
-	fi
-
-
-runs :
-	make
-	if [$(os)==3]; then \
-	clear; \
-	bin/space.app/Contents/MacOS/main; \
-	else \
-	echo "OS not recognized"; \
 	fi
