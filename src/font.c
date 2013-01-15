@@ -1,3 +1,4 @@
+#include "string.h"
 #include "font.h"
 #include "SDL_opengl.h"
 

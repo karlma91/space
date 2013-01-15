@@ -2,7 +2,7 @@ SYS := $(firstword $(shell uname -s))
 precode=
 postcode=
 
-gamefiles=src/main.c src/draw.c src/font.c
+gamefiles=src/main.c src/draw.c src/font.c src/space.c
 
 ifeq ($(SYS),Linux) #linux
 	suffix=
@@ -31,11 +31,10 @@ else ifeq ($(SYS),Darwin) #mac
 	chipmunk=-Ichipmunk/include -Lchipmunk/mac -lChipmunk
 endif
 
-main : src/main.c
+main : src/main.c src/*.h
 	$(precode)
 	gcc -o bin/main$(suffix) $(gamefiles) $(os_lib) $(openGL) $(sdl) $(chipmunk)
 	$(postcode)
-	
 #mingw and linux
 #gcc src/*.c src/constraints/*.c -Iinclude/chipmunk -o libChipmunk.a -std=c99 -lm -shared -fPIC
 

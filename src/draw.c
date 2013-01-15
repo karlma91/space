@@ -1,4 +1,12 @@
+#include "stdio.h"
+#include "SDL.h"
+#include "chipmunk.h"
+#include "SDL_opengl.h"
 #include "draw.h"
+#include "font.h"
+#include "main.h"
+
+
 #include <string.h>
 
 //local function
@@ -9,6 +17,8 @@ static GLfloat colors1[CIRCLE_EXTRA/2*3];
 static int i, j, len;
 
 GLuint c_8,c_16,c_64,c_128;
+
+float cam_zoom = 1;
 
 
 void draw_init(){
@@ -26,12 +36,36 @@ void draw_init(){
 		colors1[i+1]= 0.1f;
 		colors1[i+2]= 0.1f;
 	}
+
+        
+        //TODO: load alpha BMP for FX
+        /*
+        GLuint texture;
+        SDL_Surface *surface;
+        SDL_Surface *screen;
+        surface = SDL_LoadBMP("textures/dot_32.bmp");
+        glGenTextures(1,&texture);
+
+        //bind texture object
+        glBindTexture(GL_TEXTURE_2D,texture);
+        // set texture's stretching properties
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, surface->w, surface->h, 0, 
+          GL_BGR, GL_UNSIGNED_BYTE, surface->pixels);
+        //.....
+        */
+
 }
 void draw_destroy(){
 	glDeleteLists(c_8, 1); 
 	glDeleteLists(c_16, 1); 
 	glDeleteLists(c_64, 1); 
 	glDeleteLists(c_128, 1); 
+
+        //TODO release texture resources
+        //...
 }
 
 static void init_array(int size, GLuint *index) {
@@ -57,7 +91,7 @@ static void init_array(int size, GLuint *index) {
   //glDeleteLists(index, 1); 
 }
 
-void drawCircle(cpVect center, cpFloat angle, cpFloat radius,cpFloat scale, Color fill, Color line)
+void draw_circle(cpVect center, cpFloat angle, cpFloat radius,cpFloat scale, Color fill, Color line)
 {
 	glColor_from_color(fill);
   int res;
@@ -92,7 +126,7 @@ void drawCircle(cpVect center, cpFloat angle, cpFloat radius,cpFloat scale, Colo
 	glPopMatrix();
 }
 
-void drawPolygon(int count, cpVect *verts, Color lineColor, Color fillColor)
+void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
 {
 #if CP_USE_DOUBLES
         glVertexPointer(2, GL_DOUBLE, 0, verts);
@@ -111,7 +145,7 @@ void drawPolygon(int count, cpVect *verts, Color lineColor, Color fillColor)
         }
 }
 
-void drawSegment(cpVect a, cpVect b, cpFloat width, Color lineColor)
+void draw_segment(cpVect a, cpVect b, cpFloat width, Color lineColor)
 {
   glColor_from_color(lineColor);
   glLineWidth(width);
@@ -119,4 +153,35 @@ void drawSegment(cpVect a, cpVect b, cpFloat width, Color lineColor)
   glVertex2f( a.x, a.y);
   glVertex2f( b.x, b.y);
   glEnd(); 
+}
+
+void draw_shape(cpShape *shape, void *unused)
+{
+  void (*functionPtr)(cpShape*);
+  functionPtr = (void (*)(cpShape*))cpShapeGetUserData(shape);
+  if(functionPtr != NULL){
+    functionPtr(shape);
+  }
+}
+
+void draw_ballshape(cpShape *shape)
+{
+  cpCircleShape *circle = (cpCircleShape *)shape;
+
+  draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+}
+void draw_boxshape(cpShape *shape)
+{
+   cpPolyShape *poly = (cpPolyShape *)shape;
+   draw_polygon(poly->numVerts, poly->tVerts,RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+}
+void draw_segmentshape(cpShape *shape)
+{
+  cpSegmentShape *seg = (cpSegmentShape *)shape;
+  draw_segment(seg->ta, seg->tb, seg->r, RGBAColor(0.80f, 0.107f, 0.05f,1.0f));
+}
+
+void draw_space(cpSpace *space)
+{
+  cpSpaceEachShape(space, draw_shape, NULL);
 }

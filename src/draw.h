@@ -1,8 +1,7 @@
-#include "SDL.h"
+//#ifndef SPACE_DRAW_HEADER
+//#define SPACE_DRAW_HEADER
+
 #include "chipmunk.h"
-#include "SDL_opengl.h"
-//#include "SDL_ttf.h"
-//#include "SDL_image.h"
 
 #define CIRCLE_SMALL 16
 #define CIRCLE_MEDIUM 32
@@ -28,13 +27,26 @@ static inline Color LAColor(float l, float a){
         Color color = {l, l, l, a};
         return color;
 }
+
+extern float cam_zoom;
+
 void draw_init();
 void draw_destroy();
-void drawCircle(cpVect center, cpFloat angle, cpFloat radius,cpFloat scale, Color fill, Color line);
-void drawPolygon(int count, cpVect *verts, Color lineColor, Color fillColor);
-void drawSegment(cpVect a, cpVect b, cpFloat width, Color lineColor);
+void draw_circle(cpVect center, cpFloat angle, 
+                   cpFloat radius, cpFloat scale, 
+                   Color fill, Color line);
+void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor);
+void draw_segment(cpVect a, cpVect b, cpFloat width, Color lineColor);
+void draw_space(cpSpace *space);
+void draw_segmentshape(cpShape *shape);
+void draw_boxshape(cpShape *shape);
+void draw_ballshape(cpShape *shape);
+void draw_shape(cpShape *shape, void *unused);
+
 //void RenderText(TTF_Font *Font, Color color,double X, double Y, char *Text);
 //TTF_Font* loadfont(char* file, int ptsize);
 
 //unsigned loadeTexture(char *file);
 //void drawTexture(unsigned texture, cpVect center, cpFloat angle, cpFloat scale,int w, int h);
+//#endif
+
