@@ -29,7 +29,7 @@ static cpBody *player;
 static float x,y,r;
 
 // camera settings
-static int cam_relative;
+static int cam_relative = 1;
 
 struct state spaceState = {
 	SPACE_draw,
@@ -131,10 +131,10 @@ void SPACE_draw(float dt)
 	
 	if (keys[SDLK_SPACE]) {
 		tmp_shoot();
-		keys[SDLK_SPACE] = 0;
+		//keys[SDLK_SPACE] = 0;
 	}
 	
-	draw_texture(texture, cpv(100,100), cpv(1,0),2);
+	//draw_texture(texture, cpv(100,100), cpv(1,0),2);
 	//draw GUI
 	glColor3f(cos((player->p.x/50)),sin((player->p.y/100)),player->p.x/2550.0f*player->p.y/2550.0f);
 	

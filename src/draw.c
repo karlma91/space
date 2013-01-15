@@ -44,7 +44,7 @@ void draw_init(){
 	DEBUG;
 	SDL_Surface *surface;
 	DEBUG;
-	if((surface = SDL_LoadBMP("textures/rgb.bmp"))==NULL){
+	if((surface = SDL_LoadBMP("textures/halo_1.bmp"))==NULL){
 		fprintf(stderr,"Unable to loade texture\n");
 		DEBUG;
 		return;
@@ -75,12 +75,12 @@ void draw_texture(unsigned texture, cpVect a, cpVect dir, int w)
 	glPushMatrix();
 	glTranslatef(a.x, a.y, 0.0f);
 	// glRotatef(cpvtoangle(dir), 0.0f, 0.0f, 1.0f);
-	glScalef(100,100,1);
+	glScalef(w,w,1);
 	glBegin(GL_QUADS);
-	glTexCoord2d(0, 0); glVertex2d(0, 1);
-	glTexCoord2d(0, 1); glVertex2d(0, 0);
-	glTexCoord2d(1, 1); glVertex2d(1, 0);
-	glTexCoord2d(1, 0); glVertex2d(1, 1);
+	glTexCoord2d(0, 0); glVertex2d(-0.5f, 0.5f);
+	glTexCoord2d(0, 1); glVertex2d(-0.5f, -0.5f);
+	glTexCoord2d(1, 1); glVertex2d(0.5f, -0.5f);
+	glTexCoord2d(1, 0); glVertex2d(0.5f, 0.5f);
 	glEnd();
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
@@ -199,7 +199,8 @@ void draw_ballshape(cpShape *shape)
 {
 	cpCircleShape *circle = (cpCircleShape *)shape;
 	
-	draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+	draw_texture(texture, circle->tc, cpv(1,0),128);
+	//draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
 void draw_boxshape(cpShape *shape)
 {
