@@ -67,7 +67,7 @@ const GLint letters_points[26] = {7,7,4,5,7,6,6,6,2,3,6,3,5,4,5,5,6,6,6,5,4,3,5,
 //TODO: swap lines with quads
 static void drawLetter(int d)
 {
-  glVertexPointer(2, GL_FLOAT, 0, letters[d]);
+	glVertexPointer(2, GL_FLOAT, 0, letters[d]);
 	glDrawArrays(GL_LINE_STRIP, 0, letters_points[d]);
 	
 	//drawing corners
@@ -113,15 +113,15 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 	glScalef(font_text_size, font_text_size, 1);
 	
 	switch(font_text_align) {
-	case TEXT_LEFT:
-		glTranslatef(0.5f, 0, 0);
-		glPushMatrix();
-		break;
-	case TEXT_CENTER:
-		glTranslatef(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING))/2.0f + 0.5f + CHAR_SPACING/2, 0, 0.0f);
-		break;
-	case TEXT_RIGHT:
-		glTranslatef(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING) - 0.5f  - CHAR_SPACING), 0,0);
+		case TEXT_LEFT:
+			glTranslatef(0.5f, 0, 0);
+			glPushMatrix();
+			break;
+		case TEXT_CENTER:
+			glTranslatef(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING))/2.0f + 0.5f + CHAR_SPACING/2, 0, 0.0f);
+			break;
+		case TEXT_RIGHT:
+			glTranslatef(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING) - 0.5f  - CHAR_SPACING), 0,0);
 	}
 	
 	i = 0;
@@ -149,13 +149,13 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 
 void init_text(char c)
 {
-		if (c >= '0' && c <= '9') {
-			drawDigit(digits[c - '0']);
-		} else if (c >= 'A' && c <= 'Z') {
-			drawLetter(c - 'A');
-		} else {
-			drawSymbol(c);
-		}
+	if (c >= '0' && c <= '9') {
+		drawDigit(digits[c - '0']);
+	} else if (c >= 'A' && c <= 'Z') {
+		drawLetter(c - 'A');
+	} else {
+		drawSymbol(c);
+	}
 }
 
 void font_init()
@@ -165,7 +165,7 @@ void font_init()
 	char i = 1;
 	do {
 		glNewList(firstCharList + i,GL_COMPILE);
-			init_text(i);
+		init_text(i);
 		glEndList();
 	}	while (i++);
 }

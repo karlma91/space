@@ -5,9 +5,9 @@
 
 /* State  struct */
 struct state {
-    void (*update)(float dt);
-    void (*render)(float dt);
-    struct state *parentState;
+	void (*update)(float dt);
+	void (*render)(float dt);
+	struct state *parentState;
 };
 
 extern int WIDTH;

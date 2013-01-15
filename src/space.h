@@ -6,4 +6,3 @@ void SPACE_init();
 void SPACE_destroy();
 extern struct state spaceState;
 //#endif
-
