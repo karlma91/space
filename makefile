@@ -1,16 +1,19 @@
 SYS := $(firstword $(shell uname -s))
 precode=
 postcode=
+os=0
 
 gamefiles=src/main.c src/draw.c src/font.c src/space.c
 
 ifeq ($(SYS),Linux) #linux
+	os=1
 	suffix=
 	os_lib=-lX11 -lXi -lXmu -lpthread
 	openGL=-lGL
 	sdl=-ISDL/linux -LSDL/linux -lSDLmain -lSDL 
 	chipmunk=-Ichipmunk/include -Lchipmunk/linux -lChipmunk
 else ifneq ($(findstring MINGW32_NT, $(SYS)),) #windows
+	os=2
 	suffix=.exe
 	precode = windres resources/win/space.rc -o coff -o resources/win/space.res.o #prepare resource file
 	os_lib=-lmingw32 -mwindows resources\win\space.res.o
@@ -20,6 +23,7 @@ else ifneq ($(findstring MINGW32_NT, $(SYS)),) #windows
 	#sdlimage=-ISDL_image/win -LSDL_image/win -lSDL_image -llibpng15-15
 	chipmunk=-Ichipmunk/include -Lchipmunk/windows -lChipmunk
 else ifeq ($(SYS),Darwin) #mac
+	os=3
 	suffix=
 	postcode = rm -rf bin/space.app/ && \
 		cp -R resources/mac/space.app/ bin/space.app && \
@@ -39,7 +43,27 @@ main : src/main.c src/*.h
 #gcc src/*.c src/constraints/*.c -Iinclude/chipmunk -o libChipmunk.a -std=c99 -lm -shared -fPIC
 
 run :
-	cls
+	if [ $(os) == 1 ]; then \
+		clear; \
+		make; \
+		bin/main; \
+	elif [ $(os) == 2 ]; then \
+		cls; \
+		bin/main.exe; \
+	elif [ $(os) == 3 ]; then \
+		clear; \
+		bin/space.app/Contents/MacOS/main; \
+	else \
+		clear; \
+		echo "OS not recognized"; \
+	fi
+
+
+runs :
 	make
-	bin/main.exe
-	#sleep 0.2 && start bin/stdout.txt
+	if [$(os)==3]; then \
+	clear; \
+	bin/space.app/Contents/MacOS/main; \
+	else \
+	echo "OS not recognized"; \
+	fi
