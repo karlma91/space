@@ -41,10 +41,16 @@ void SPACE_update(float dt)
 {
   
   accumulator += dt;
+
   
+  cpFloat pangvel = cpBodyGetAngVel(player);
+  cpBodySetAngVel(player, pangvel*0.9);
+  cpVect pvel =  cpBodyGetVel(player);
+  //cpBodySetVel(player,cpvmult(pvel,0.98));
+
   //update physics and player
   cpVect rot = cpBodyGetRot(player);
-  rot = cpvmult(rot, 5500);
+  rot = cpvmult(rot, 10000);
   cpBodySetForce(player, cpv(0,0));
   cpBodySetTorque(player, 0);
   /*	
@@ -125,6 +131,7 @@ void SPACE_draw(float dt)
 	
   if (keys[SDLK_SPACE]) {
     tmp_shoot();
+    keys[SDLK_SPACE] = 0;
   }
 	
   //draw GUI
@@ -198,6 +205,7 @@ void SPACE_init(){
   
   space = cpSpaceNew();
   cpSpaceSetGravity(space, gravity);
+  cpSpaceSetDamping(space, 0.999);
   //init stars
   srand(122531);
   for (i=0;i<star_count;i++) {
@@ -209,9 +217,18 @@ void SPACE_init(){
   /* static ground */
   cpBody  *staticBody = space->staticBody;
   cpShape *shape;
-  shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-2000,-240), cpv(2000,-240), 0.0f));
+  shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-2000,-2000), cpv(2000,-2000), 10.0f));
+ cpShapeSetUserData(shape, draw_segmentshape);
+ cpShapeSetElasticity(shape, 1.0f);
+  shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-2000,2000), cpv(2000,2000), 10.0f));
+ cpShapeSetUserData(shape, draw_segmentshape);
+ cpShapeSetElasticity(shape, 1.0f);
+  shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-2000,-2000), cpv(-2000,2000), 10.0f));
+ cpShapeSetUserData(shape, draw_segmentshape);
+ cpShapeSetElasticity(shape, 1.0f);
+  shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(2000,-2000), cpv(2000,2000), 10.0f));
   cpShapeSetUserData(shape, draw_segmentshape);
-  cpShapeSetFriction(shape, 0.8);
+ cpShapeSetElasticity(shape, 1.0f);
   cpFloat radius = 40;
   cpFloat mass = 1;
   
@@ -219,13 +236,15 @@ void SPACE_init(){
   //player
   player = cpSpaceAddBody(space, cpBodyNew(10, cpMomentForCircle(2, 0, 15, cpvzero)));
   cpBodySetPos(player, cpv(30*20,10+1*30));
+  cpBodySetVelLimit(player,1500);
 
-  cpShape *boxShape = cpSpaceAddShape(space, cpCircleShapeNew(player, 15, cpvzero));
-  cpShapeSetFriction(boxShape, 0.7);
-  cpShapeSetUserData(boxShape, player_draw);
+  cpShape *playerShape = cpSpaceAddShape(space, cpCircleShapeNew(player, 15, cpvzero));
+  cpShapeSetFriction(playerShape, 0.7);
+  cpShapeSetUserData(playerShape, player_draw);
+  cpShapeSetElasticity(playerShape, 1.0f);
 
-  for(i = 1; i<20; i++){
-    for(j = 1; j<10; j++){
+  for(i = 1; i<5; i++){
+    for(j = 1; j<5; j++){
       cpBody *boxBody = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(1.0f, 30.0f, 30.0f)));
 
       cpBodySetPos(boxBody, cpv(j*42, i*42));
@@ -239,7 +258,7 @@ void SPACE_init(){
 
 void SPACE_destroy()
 {
-  cpSpaceDestroy(space);
+	cpSpaceDestroy(space);
 }
 
 
@@ -247,12 +266,12 @@ static void tmp_shoot() {
   cpFloat radius = 10;
   cpFloat mass = 1;
   cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
+  cpVect prot = cpBodyGetRot(player);
 
   cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
-  //planet gravity thing
-  //ballBody->velocity_func = planetGravityVelocityFunc;
-  cpBodySetPos(ballBody, cpv(player->p.x, player->p.y));
-  cpBodySetVel(ballBody, cpvadd(cpBodyGetVel(player),cpBodyGetVel(player)));
+  cpBodySetPos(ballBody, cpvadd(cpv(player->p.x, player->p.y), cpvmult(prot,radius+radius)));
+
+  cpBodySetVel(ballBody,cpvmult(prot,1000));
 		  
   cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
   cpShapeSetFriction(ballShape, 0.7);
