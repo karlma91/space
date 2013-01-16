@@ -44,6 +44,8 @@ void initGL()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
+	glEnable(GL_COLOR_MATERIAL);
+	
 	float aspect = (float)WIDTH / (float)HEIGHT;
 	
 	/* Make the viewport cover the whole window */
@@ -93,6 +95,7 @@ int main( int argc, char* args[] )
 	
 	if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
 	
+	//random seed
 	
 	const SDL_VideoInfo* myPointer = SDL_GetVideoInfo();
 	WIDTH = myPointer->current_w;

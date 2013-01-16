@@ -24,6 +24,7 @@ float cam_zoom = 1;
 #define DEBUG fprintf(stderr, "line: %d\n", __LINE__);
 
 void draw_init(){
+	srand(time( NULL ));
 	init_array(CIRCLE_SMALL, &c_8);
 	init_array(CIRCLE_MEDIUM, &c_16);
 	init_array(CIRCLE_BIG, &c_64);
@@ -71,16 +72,22 @@ void draw_texture(unsigned texture, cpVect a, cpVect dir, int w)
 {
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glColor3f(1.0f,1.0f,1.0f);
+	//glColor3f(1.0f,1.0f,1.0f);
 	glPushMatrix();
+	
 	glTranslatef(a.x, a.y, 0.0f);
-	// glRotatef(cpvtoangle(dir), 0.0f, 0.0f, 1.0f);
-	glScalef(w,w,1);
-	glBegin(GL_QUADS);
-	glTexCoord2d(0, 0); glVertex2d(-0.5f, 0.5f);
-	glTexCoord2d(0, 1); glVertex2d(-0.5f, -0.5f);
-	glTexCoord2d(1, 1); glVertex2d(0.5f, -0.5f);
-	glTexCoord2d(1, 0); glVertex2d(0.5f, 0.5f);
+	glRotatef(cpvtoangle(dir)*(180/M_PI) + 180, 0.0f, 0.0f, 1.0f);
+	cpFloat length = cpvlength(dir)/4;
+	glScalef(1,w,1);
+	glBegin(GL_QUAD_STRIP);
+	glTexCoord2d(0, 0); glVertex2d(-8, -0.5f);
+	glTexCoord2d(0, 1); glVertex2d(-8, 0.5f);
+	glTexCoord2d(0.5f, 0); glVertex2d(0, -0.5f);
+	glTexCoord2d(0.5f, 1); glVertex2d(0, 0.5f);
+	glTexCoord2d(0.5f, 0); glVertex2d(length, -0.5f);
+	glTexCoord2d(0.5f, 1); glVertex2d(length, 0.5f);
+	glTexCoord2d(1.0f, 0); glVertex2d(length+8, -0.5f);
+	glTexCoord2d(1.0f, 1); glVertex2d(length+8, 0.5f);
 	glEnd();
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
@@ -198,8 +205,10 @@ void draw_shape(cpShape *shape, void *unused)
 void draw_ballshape(cpShape *shape)
 {
 	cpCircleShape *circle = (cpCircleShape *)shape;
-	
-	draw_texture(texture, circle->tc, cpv(1,0),128);
+
+	//printf("rand %f\n",1.0f*rand()/RAND_MAX);
+	glColor3f(sin(circle->tc.x/500),cos(circle->tc.y/500),1.0f);
+	draw_texture(texture, circle->tc, cpBodyGetVel(cpShapeGetBody(shape)),20);
 	//draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
 void draw_boxshape(cpShape *shape)
