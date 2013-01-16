@@ -101,7 +101,7 @@ void SPACE_update(float dt)
 	}
 	
 }
-
+static GLfloat testa[12] = {0.5,-0.5,	0.5,0.5,	-0.5,0.5,	-0.5,	-0.5,	-0.5,0	,0.5,0}; //A
 void SPACE_draw(float dt) 
 {
 	//camera zoom
@@ -137,23 +137,25 @@ void SPACE_draw(float dt)
 	//draw_texture(texture, cpv(100,100), cpv(1,0),2);
 	//draw GUI
 	glColor3f(cos((player->p.x/50)),sin((player->p.y/100)),player->p.x/2550.0f*player->p.y/2550.0f);
-	
+	//draw_line_strip(testa, 12, 16);
+
 	glPointSize(10);
 	setTextAngle(0);
 	setTextSize(80);
 	setTextAlign(TEXT_CENTER);
-	font_drawText(0,0.8f*HEIGHT/2, "SPACE");
+	font_drawText(0,0.8f*HEIGHT/2, "SPACE99");
 	
-	setTextAlign(TEXT_LEFT);
+	
+	/*setTextAlign(TEXT_LEFT);
 	setTextSize(10);
 	glColor3f(1,1,1);
 	glLineWidth(2);
-	glPointSize(2);
+	glPointSize(2);*/
 	
-	font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
+	//font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
 	
-	setTextAlign(TEXT_RIGHT);
-	font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
+	//setTextAlign(TEXT_RIGHT);
+	//font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
 }
 
 
@@ -163,12 +165,11 @@ static void player_draw(cpShape *shape)
 	draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 15,cam_zoom, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 	float s = 0.001;
 	float dir = cpBodyGetAngle(cpShapeGetBody(shape));
-	
 	glLineWidth(2);
 	setTextAlign(TEXT_LEFT); // \n is currently only supported by left aligned text
 	setTextSize(8);
 	setTextAngleRad(dir);
-	font_drawText(circle->tc.x,circle->tc.y, "-THE QUICK BROWN FOX\n+JUMPS OVER\nTHE LAZY DOG\n0123456789");
+	font_drawText(circle->tc.x,circle->tc.y, "-THE QUICK BROWN FOX\n+JUMPS OVER\nTHE LAZY DOG\n0123456789.");
 	/*
 	 //Font performance test
 	 for (i = 1; i < 100; i++) {

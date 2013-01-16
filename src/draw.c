@@ -45,7 +45,7 @@ void draw_init(){
 	DEBUG;
 	SDL_Surface *surface;
 	DEBUG;
-	if((surface = SDL_LoadBMP("textures/halo_1.bmp"))==NULL){
+	if((surface = SDL_LoadBMP("textures/alphatest.bmp"))==NULL){
 		fprintf(stderr,"Unable to loade texture\n");
 		DEBUG;
 		return;
@@ -68,29 +68,34 @@ void draw_init(){
 
 
 
-void draw_texture(unsigned texture, cpVect a, cpVect dir, int w)
+void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	//glColor3f(1.0f,1.0f,1.0f);
+	//glEnable(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, texture);
 	glPushMatrix();
-	
-	glTranslatef(a.x, a.y, 0.0f);
-	glRotatef(cpvtoangle(dir)*(180/M_PI) + 180, 0.0f, 0.0f, 1.0f);
-	cpFloat length = cpvlength(dir)/4;
-	glScalef(1,w,1);
-	glBegin(GL_QUAD_STRIP);
-	glTexCoord2d(0, 0); glVertex2d(-8, -0.5f);
-	glTexCoord2d(0, 1); glVertex2d(-8, 0.5f);
-	glTexCoord2d(0.5f, 0); glVertex2d(0, -0.5f);
-	glTexCoord2d(0.5f, 1); glVertex2d(0, 0.5f);
-	glTexCoord2d(0.5f, 0); glVertex2d(length, -0.5f);
-	glTexCoord2d(0.5f, 1); glVertex2d(length, 0.5f);
-	glTexCoord2d(1.0f, 0); glVertex2d(length+8, -0.5f);
-	glTexCoord2d(1.0f, 1); glVertex2d(length+8, 0.5f);
-	glEnd();
+		glTranslatef(x0, y0, 0.0f);
+		glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
+		GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
+		glScalef(1,w,1);
+		glBegin(GL_QUAD_STRIP);
+			glTexCoord2d(0, 0); glVertex2d(-w, -0.5f);
+			glTexCoord2d(0, 1); glVertex2d(-w, 0.5f);
+			glTexCoord2d(0.5f, 0); glVertex2d(0, -0.5f);
+			glTexCoord2d(0.5f, 1); glVertex2d(0, 0.5f);
+			glTexCoord2d(0.5f, 0); glVertex2d(length, -0.5f);
+			glTexCoord2d(0.5f, 1); glVertex2d(length, 0.5f);
+			glTexCoord2d(1.0f, 0); glVertex2d(length+w, -0.5f);
+			glTexCoord2d(1.0f, 1); glVertex2d(length+w, 0.5f);
+		glEnd();
 	glPopMatrix();
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
+}
+
+void draw_line_strip(const GLfloat *strip, int l, float w)
+{
+	for(i = 0; i<l-2; i+=2){
+		draw_line(strip[i],strip[i+1],strip[i+2],strip[i+3],w);
+	}
 }
 
 
@@ -208,7 +213,10 @@ void draw_ballshape(cpShape *shape)
 
 	//printf("rand %f\n",1.0f*rand()/RAND_MAX);
 	glColor3f(sin(circle->tc.x/500),cos(circle->tc.y/500),1.0f);
-	draw_texture(texture, circle->tc, cpBodyGetVel(cpShapeGetBody(shape)),20);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	draw_line(circle->tc.x, circle->tc.y, circle->tc.x + 10, circle->tc.y + 10, 16);
+	glDisable(GL_TEXTURE_2D);
 	//draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
 void draw_boxshape(cpShape *shape)

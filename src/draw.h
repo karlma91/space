@@ -38,7 +38,8 @@ static inline Color LAColor(float l, float a)
 
 extern float cam_zoom;
 
-void draw_texture(unsigned texture, cpVect a, cpVect dir, int w);
+void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
+void draw_line_strip(const GLfloat *strip, int l, float w);
 void draw_init();
 void draw_destroy();
 void draw_circle(cpVect center, cpFloat angle, 

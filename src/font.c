@@ -1,6 +1,7 @@
 #include "string.h"
 #include "font.h"
 #include "SDL_opengl.h"
+#include "draw.h"
 
 // initialize global variables
 int font_text_align = TEXT_CENTER;
@@ -21,16 +22,18 @@ const GLfloat digits_y[] = {0,0.5, 0.5, 0,-0.5,-0.5,0, 0};
 static void drawDigit(int d)
 {
 	j = 0;
-	glBegin(GL_LINES);
+	//glBegin(GL_LINES);
 	while (d && j < 7) {
 		if (d & 0x1) {
-			glVertex2f(digits_x[j],digits_y[j]);
+			draw_line(digits_x[j], digits_y[j], digits_x[j+1], digits_y[j+1], 0.5f);
+			//glVertex2f(digits_x[j],digits_y[j]);
 			j++;
-			glVertex2f(digits_x[j],digits_y[j]);
+			//glVertex2f(digits_x[j],digits_y[j]);
+			
 		} else j++;
 		d >>= 1;
 	}
-	glEnd();
+	//glEnd();
 }
 
 const GLfloat letters[26][14] = {
@@ -67,16 +70,16 @@ const GLint letters_points[26] = {7,7,4,5,7,6,6,6,2,3,6,3,5,4,5,5,6,6,6,5,4,3,5,
 //TODO: swap lines with quads
 static void drawLetter(int d)
 {
-	glVertexPointer(2, GL_FLOAT, 0, letters[d]);
-	glDrawArrays(GL_LINE_STRIP, 0, letters_points[d]);
-	
+	//glVertexPointer(2, GL_FLOAT, 0, letters[d]);
+	//glDrawArrays(GL_LINE_STRIP, 0, letters_points[d]);
+	draw_line_strip(letters[d],letters_points[d]*2, 0.5f);
 	//drawing corners
 	//glDrawArrays(GL_POINTS, 0, letters_points[d]);
 }
 
 // symbol constants
 const GLfloat MINUS[] = {-0.5,0,	0.5,0};
-const GLfloat PLUS[] = {-0.5,0,	0.5,0,	0,-0.5,	0,0.5};
+const GLfloat PLUS[] = {-0.5,0,	0.5,0,	0,0, 0,-0.5,	0,0.5};
 const GLfloat COMMA[] = {0,0,	-0.5,-0.5};
 const GLfloat DOT[] = {-0.1,-0.5,	-0.1,-0.3,	0.1,-0.3,	0.1,-0.5, -0.1,-0.5f};
 
@@ -84,20 +87,24 @@ static void drawSymbol(char c)
 {
 	switch(c) {
 		case '-':
-			glVertexPointer(2, GL_FLOAT, 0, MINUS);
-			glDrawArrays(GL_LINE_STRIP, 0, 2);
+			//glVertexPointer(2, GL_FLOAT, 0, MINUS);
+			//glDrawArrays(GL_LINE_STRIP, 0, 2);
+			draw_line_strip(MINUS,4, 0.5f);
 			break;
 		case '+':
-			glVertexPointer(2, GL_FLOAT, 0, PLUS);
-			glDrawArrays(GL_LINES, 0, 4);
+			//glVertexPointer(2, GL_FLOAT, 0, PLUS);
+			//glDrawArrays(GL_LINES, 0, 4);
+			draw_line_strip(PLUS,10, 0.5f);
 			break;
 		case ',':
-			glVertexPointer(2, GL_FLOAT, 0, COMMA);
-			glDrawArrays(GL_LINES, 0, 2);
+			//glVertexPointer(2, GL_FLOAT, 0, COMMA);
+			//glDrawArrays(GL_LINES, 0, 2);
+			draw_line_strip(COMMA,4, 0.5f);
 			break;
 		case '.':
-			glVertexPointer(2, GL_FLOAT, 0, DOT);
-			glDrawArrays(GL_LINES, 0, 5);
+			//glVertexPointer(2, GL_FLOAT, 0, DOT);
+			//glDrawArrays(GL_LINES, 0, 5);
+			draw_line_strip(DOT,10, 0.5f);
 			break;
 		default:
 			break;
@@ -107,6 +114,7 @@ static void drawSymbol(char c)
 
 void font_drawText(GLfloat x, GLfloat y, char* text)
 {
+
 	glPushMatrix();
 	glTranslatef(x, y, 0.0f);
 	glRotatef(font_text_angle, 0, 0, 1);
@@ -135,7 +143,10 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 				continue;
 			}
 		} else {
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, texture);
 			glCallList(firstCharList + text[i]);
+			glDisable(GL_TEXTURE_2D);
 		}
 		i++;
 		glTranslatef((CHAR_WIDTH + CHAR_SPACING), 0, 0);
