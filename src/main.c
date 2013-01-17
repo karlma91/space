@@ -41,10 +41,8 @@ void initGL()
   glEnable(GL_POLYGON_SMOOTH);
   
   //fra ttf opengl tutorial
-  glEnable(GL_TEXTURE_2D);
   glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-  //GL_SRC_ALPHA
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE);   
 
   float aspect = (float)WIDTH / (float)HEIGHT;
 
@@ -110,9 +108,9 @@ int main( int argc, char* args[] )
   srand(time( NULL ));
 	
   initGL();
-  font_init();
-  SPACE_init();
   draw_init();
+  SPACE_init();
+  font_init();
 
   currentState = &spaceState;
   

@@ -39,31 +39,18 @@ struct state spaceState = {
 
 void SPACE_update(float dt)
 {
-	
 	accumulator += dt;
 	
 	
 	cpFloat pangvel = cpBodyGetAngVel(player);
 	cpBodySetAngVel(player, pangvel*0.9);
 	cpVect pvel =  cpBodyGetVel(player);
-	//cpBodySetVel(player,cpvmult(pvel,0.98));
 	
 	//update physics and player
 	cpVect rot = cpBodyGetRot(player);
 	rot = cpvmult(rot, 10000);
 	cpBodySetForce(player, cpv(0,0));
 	cpBodySetTorque(player, 0);
-	/*	
-	 if(keys[SDLK_w])
-	 cpBodySetAngVel(player, -2);
-	 else if(keys[SDLK_s])
-	 cpBodySetAngVel(player, 2);
-	 else
-	 cpBodySetAngVel(player, 0);
-	 
-	 if(keys[SDLK_d]) cpBodySetVel(player, rot);
-	 if(keys[SDLK_a]) cpBodySetVel(player, rot);
-	 */
 	
 	if(keys[SDLK_w]) cpBodySetForce(player, rot);
 	if(keys[SDLK_s]) cpBodySetForce(player, cpvneg(rot));
@@ -148,7 +135,7 @@ void SPACE_draw(float dt)
 	setTextAngle(0);
 	setTextSize(80);
 	setTextAlign(TEXT_CENTER);
-	font_drawText(0,0.8f*HEIGHT/2, "SPACE99");
+	font_drawText(0,0.8f*HEIGHT/2, "SPACE");
 	
 	
 	setTextAlign(TEXT_LEFT);
@@ -166,6 +153,7 @@ static void player_draw(cpShape *shape)
 {
 	cpCircleShape *circle = (cpCircleShape *)shape;
 	draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 15,cam_zoom, RGBAColor(0.95f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+	//draw_ballshape(shape);
 	float s = 0.001;
 	float dir = cpBodyGetAngle(cpShapeGetBody(shape));
 	setTextAlign(TEXT_LEFT); // \n is currently only supported by left aligned text
@@ -265,7 +253,6 @@ void SPACE_destroy()
 	cpSpaceDestroy(space);
 }
 
-
 static void tmp_shoot() {
 	cpFloat radius = 10;
 	cpFloat mass = 1;
@@ -281,3 +268,4 @@ static void tmp_shoot() {
 	cpShapeSetFriction(ballShape, 0.7);
 	cpShapeSetUserData(ballShape, draw_ballshape);
 }
+

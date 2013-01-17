@@ -140,10 +140,7 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 				continue;
 			}
 		} else {
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, texture[0]);
 			glCallList(firstCharList + text[i]);
-			glDisable(GL_TEXTURE_2D);
 		}
 		i++;
 		glTranslatef((CHAR_WIDTH + CHAR_SPACING), 0, 0);
