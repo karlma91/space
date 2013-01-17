@@ -13,11 +13,10 @@ static int i,j;
 
 static GLuint firstCharList;
 
-//inefficient 7-segment display style for digits
-//TODO: convert to redered list
-const GLint digits[] = {0x3F,0x21,0x5B,0x73,0x65,0x76,0x7E,0x23,0x7F,0x67};
-const GLfloat digits_x[] = {0.5f,0.5f,-0.5f,-0.5f,-0.5f, 0.5f,0.5f,-0.5f};
-const GLfloat digits_y[] = {0,0.5, 0.5, 0,-0.5,-0.5,0, 0};
+// 7-segment display style for digits
+static const GLint digits[] = {0x3F,0x21,0x5B,0x73,0x65,0x76,0x7E,0x23,0x7F,0x67};
+static const GLfloat digits_x[] = {0.5f,0.5f,-0.5f,-0.5f,-0.5f, 0.5f,0.5f,-0.5f};
+static const GLfloat digits_y[] = {0,0.5, 0.5, 0,-0.5,-0.5,0, 0};
 
 static void drawDigit(int d)
 {
@@ -73,8 +72,6 @@ static void drawLetter(int d)
 	//glVertexPointer(2, GL_FLOAT, 0, letters[d]);
 	//glDrawArrays(GL_LINE_STRIP, 0, letters_points[d]);
 	draw_line_strip(letters[d],letters_points[d]*2, 0.5f);
-	//drawing corners
-	//glDrawArrays(GL_POINTS, 0, letters_points[d]);
 }
 
 // symbol constants

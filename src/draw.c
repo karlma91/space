@@ -19,7 +19,7 @@ unsigned texture;
 
 GLuint c_8,c_16,c_64,c_128;
 
-float cam_zoom = 1;
+float cam_zoom = 1; //!misplaced variable
 
 #define DEBUG fprintf(stderr, "line: %d\n", __LINE__);
 
@@ -40,12 +40,15 @@ void draw_init(){
 		colors1[i+2]= 0.1f;
 	}
 	
-	
-	//TODO: load alpha BMP for FX
-	DEBUG;
+	/* Photoshop Outer glow settings:
+	 * Opacity 50%
+	 * Spread 60%
+	 * Size 32px
+	 * Range 100%
+	 * Jitter 0%
+	 */
 	SDL_Surface *surface;
-	DEBUG;
-	if((surface = SDL_LoadBMP("textures/alphatest.bmp"))==NULL){
+	if((surface = SDL_LoadBMP("textures/glowdot.bmp"))==NULL){
 		fprintf(stderr,"Unable to loade texture\n");
 		DEBUG;
 		return;
@@ -77,6 +80,9 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 		glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
 		GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
 		glScalef(1,w,1);
+	
+		w /=2; // tmp-fix
+	
 		glBegin(GL_QUAD_STRIP);
 			glTexCoord2d(0, 0); glVertex2d(-w, -0.5f);
 			glTexCoord2d(0, 1); glVertex2d(-w, 0.5f);
@@ -106,7 +112,7 @@ void draw_destroy()
 	glDeleteLists(c_64, 1); 
 	glDeleteLists(c_128, 1); 
 	
-	//TODO release texture resources
+	//TODO! --> release texture resources
 	//...
 }
 
@@ -215,12 +221,16 @@ void draw_ballshape(cpShape *shape)
 	glColor3f(sin(circle->tc.x/500),cos(circle->tc.y/500),1.0f);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	draw_line(circle->tc.x, circle->tc.y, circle->tc.x + 10, circle->tc.y + 10, 16);
+	
+	cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
+	
+	draw_line(circle->tc.x, circle->tc.y, circle->tc.x + vel.x/16, circle->tc.y + vel.y/16, 40); //40 = 4 * radius
 	glDisable(GL_TEXTURE_2D);
 	//draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
 void draw_boxshape(cpShape *shape)
 {
+	glLineWidth(2);
 	cpPolyShape *poly = (cpPolyShape *)shape;
 	draw_polygon(poly->numVerts, poly->tVerts,RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
