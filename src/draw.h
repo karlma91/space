@@ -10,7 +10,7 @@
 #define CIRCLE_MAX_RES 256
 
 // effect texture
-unsigned texture;
+unsigned texture[10];
 
 
 //fra chipmunkDemo.h

@@ -141,7 +141,7 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 			}
 		} else {
 			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, texture);
+			glBindTexture(GL_TEXTURE_2D, texture[0]);
 			glCallList(firstCharList + text[i]);
 			glDisable(GL_TEXTURE_2D);
 		}

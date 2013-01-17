@@ -3,7 +3,7 @@ precode=
 postcode=
 os=0
 
-gamefiles=src/main.c src/draw.c src/font.c src/space.c
+gamefiles=src/*.c #src/main.c src/draw.c src/font.c src/space.c src/particles.c
 
 ifeq ($(SYS),Linux) #linux
 	os=1
@@ -45,16 +45,13 @@ main : src/main.c src/*.h
 run :
 	if [ $(os) == 1 ]; then \
 		clear; \
-		make; \
-		bin/main; \
+		make && bin/main; \
 	elif [ $(os) == 2 ]; then \
 		cls; \
-		make; \
-		bin/main.exe; \
+		make && bin/main.exe; \
 	elif [ $(os) == 3 ]; then \
 		clear; \
-		make; \
-		bin/space.app/Contents/MacOS/main; \
+		make && bin/space.app/Contents/MacOS/main; \
 	else \
 		clear; \
 		echo "OS not recognized"; \

@@ -11,11 +11,14 @@
 
 //local function
 static void init_array(int size,  GLuint *index);
+static void loadTexture(char *tex);
+
 GLfloat array[CIRCLE_MAX_RES];
 
 static GLfloat colors1[CIRCLE_EXTRA/2*3];
 static int i, j, len;
-unsigned texture;
+unsigned texture[10];
+static texC = 0;
 
 GLuint c_8,c_16,c_64,c_128;
 
@@ -47,26 +50,32 @@ void draw_init(){
 	 * Range 100%
 	 * Jitter 0%
 	 */
+	loadTexture("textures/glowdot.bmp");
+	
+}
+
+static void loadTexture(char *tex)
+{
 	SDL_Surface *surface;
-	if((surface = SDL_LoadBMP("textures/glowdot.bmp"))==NULL){
+	if((surface = SDL_LoadBMP(tex))==NULL){
 		fprintf(stderr,"Unable to loade texture\n");
 		DEBUG;
 		return;
 	}
-	glGenTextures(1,&texture);
+	glGenTextures(1,&texture[texC]);
 	
 	//bind texture object
-	glBindTexture(GL_TEXTURE_2D,texture);
+	glBindTexture(GL_TEXTURE_2D,texture[texC]);
 	// set texture's stretching properties
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	surface->format->Amask = 0XFF000000;
 	surface->format->Ashift = 24;
 	glTexImage2D(GL_TEXTURE_2D, 0, 4, surface->w, surface->h, 0,
-							 GL_BGRA, GL_UNSIGNED_BYTE, surface->pixels);
+		     GL_BGRA, GL_UNSIGNED_BYTE, surface->pixels);
 	
 	SDL_FreeSurface(surface);
-	
+	texC++;
 }
 
 
@@ -218,13 +227,17 @@ void draw_ballshape(cpShape *shape)
 	cpCircleShape *circle = (cpCircleShape *)shape;
 
 	//printf("rand %f\n",1.0f*rand()/RAND_MAX);
-	glColor3f(sin(circle->tc.x/500),cos(circle->tc.y/500),1.0f);
+	glColor3f(0.1f + sin(circle->tc.x/500)*0.8f,0.1f + cos(circle->tc.y/500)*0.8f,0.9f);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
 	
 	cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
 	
 	draw_line(circle->tc.x, circle->tc.y, circle->tc.x + vel.x/16, circle->tc.y + vel.y/16, 40); //40 = 4 * radius
+
+	glColor4f(1,1,1,0.4f);
+	draw_line(circle->tc.x, circle->tc.y, circle->tc.x + vel.x/16, circle->tc.y + vel.y/16, 40);
+
 	glDisable(GL_TEXTURE_2D);
 	//draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }

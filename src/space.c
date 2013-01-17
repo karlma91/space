@@ -5,7 +5,7 @@
 #include "draw.h"
 #include "font.h"
 #include "main.h"
-
+#include "particles.h"
 #include "space.h"
 
 #define star_count 1000
@@ -93,6 +93,26 @@ void SPACE_update(float dt)
 		if (keys[SDLK_q])
 			cam_zoom = 1;  
 	}
+
+	if (keys[SDLK_h]) {
+		cpBodySetVelLimit(player,5000);
+		cpBodySetAngVelLimit(player,2);
+		cpBodySetVel(player, cpvzero);
+		cpBodySetAngVel(player, 0);
+	}
+	
+	if (keys[SDLK_SPACE]) {
+		tmp_shoot();
+		//keys[SDLK_SPACE] = 0;
+	}
+	if (keys[SDLK_x]) {
+		paricles_add_explosion(cpBodyGetPos(player), 10);
+	paricles_add_explosion(cpBodyGetPos(player), 10);
+	paricles_add_explosion(cpBodyGetPos(player), 10);
+	paricles_add_explosion(cpBodyGetPos(player), 10);
+	paricles_add_explosion(cpBodyGetPos(player), 10);
+		//keys[SDLK_SPACE] = 0;
+	}
 	
 	while(accumulator >= phys_step)
 	{
@@ -115,20 +135,11 @@ void SPACE_draw(float dt)
 	glTranslatef(-player->p.x, -player->p.y, 0.0f);
 	drawStars();
 	draw_space(space);
+
+	paricles_draw(dt);
+
 	
 	glLoadIdentity();
-	
-	if (keys[SDLK_h]) {
-		cpBodySetVelLimit(player,5000);
-		cpBodySetAngVelLimit(player,2);
-		cpBodySetVel(player, cpvzero);
-		cpBodySetAngVel(player, 0);
-	}
-	
-	if (keys[SDLK_SPACE]) {
-		tmp_shoot();
-		//keys[SDLK_SPACE] = 0;
-	}
 	
 	//draw GUI
 	glColor3f(cos((player->p.x/50)),sin((player->p.y/100)),player->p.x/2550.0f*player->p.y/2550.0f);
