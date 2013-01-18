@@ -42,7 +42,7 @@ void initGL()
   
   //fra ttf opengl tutorial
   glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE);   
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
   float aspect = (float)WIDTH / (float)HEIGHT;
 
@@ -93,7 +93,7 @@ int main( int argc, char* args[] )
   WIDTH = myPointer->current_w;
   HEIGHT = myPointer->current_h;
 
-  if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_OPENGL | SDL_FULLSCREEN)))
+  if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_OPENGL | SDL_FULLSCREEN | SDL_DOUBLEBUF)))
     {
       printf("ERROR");
       SDL_Quit();
@@ -138,7 +138,8 @@ int main( int argc, char* args[] )
       currentState->render(deltaTime);
       currentState->update(deltaTime);
       SDL_GL_SwapBuffers();
-		 
+	
+      //input handler
       if(keys[SDLK_ESCAPE]){
         keypress = 1;
       }

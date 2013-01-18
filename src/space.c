@@ -103,11 +103,7 @@ void SPACE_update(float dt)
 	}
 	
 	if (keys[SDLK_x]) {
-		paricles_add_explosion(cpBodyGetPos(player), 10);
-		paricles_add_explosion(cpBodyGetPos(player), 10);
-		paricles_add_explosion(cpBodyGetPos(player), 10);
-		paricles_add_explosion(cpBodyGetPos(player), 10);
-		paricles_add_explosion(cpBodyGetPos(player), 10);
+		paricles_add_explosion(cpBodyGetPos(player), 40);
 	}
 	
 	while(accumulator >= phys_step)
@@ -235,6 +231,9 @@ void SPACE_init(){
 	cpShapeSetUserData(shape, draw_segmentshape);
 	cpShapeSetElasticity(shape, 0.4f);
 	cpShapeSetFriction(shape, 0.4f);
+	// sets collision type to 1
+	cpShapeSetCollisionType(shape, 1);
+
 	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,8000), cpv(8000,8000), 10.0f));
 	cpShapeSetUserData(shape, draw_segmentshape);
 	cpShapeSetElasticity(shape, 1.0f);
@@ -274,7 +273,33 @@ void SPACE_destroy()
 	cpSpaceDestroy(space);
 }
 
-static void tmp_shoot() {
+
+
+// from chipmunk docs
+// removes the object from the space
+static void
+postStepRemove(cpSpace *space, cpShape *shape, void *unused)
+{
+  cpSpaceRemoveBody(space, shape->body);
+  cpBodyFree(shape->body);
+  
+  cpSpaceRemoveShape(space, shape);
+  cpShapeFree(shape);
+}
+
+// from chipmunk docs
+static int
+begin(cpArbiter *arb, cpSpace *space, void *unused)
+{
+  cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
+  paricles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 40);
+  cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, b, NULL);
+  return 0;
+}
+
+
+static void tmp_shoot()
+{
 	cpFloat radius = 10;
 	cpFloat mass = 1;
 	cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
@@ -288,5 +313,12 @@ static void tmp_shoot() {
 	cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
 	cpShapeSetFriction(ballShape, 0.7);
 	cpShapeSetUserData(ballShape, draw_ballshape);
+	// Sets bullets collision type to 2
+	cpShapeSetCollisionType(ballShape, 2);
+	// runs callback begin when bullet (2) hits ground (1) 
+	// this will make bullet b and ground a in begin callback
+	cpSpaceAddCollisionHandler(space, 1, 2, begin, NULL, NULL, NULL, NULL);
+	
 }
+
 

@@ -58,16 +58,13 @@ static void paricles_explosion_draw(struct explosion *expl , float dt)
 		expl->particles[i].pos = cpvadd(expl->particles[i].pos,expl->particles[i].vel);
 		if(expl->particles[i].pos.y < 0){
 			expl->particles[i].vel.y = -expl->particles[i].vel.y;
+			expl->particles[i].pos.y = 0;
 		}
 		cpVect tp = expl->particles[i].pos;
 		cpVect tv = expl->particles[i].vel;
 
-
-
-		
-
 		glColor_from_color(expl->particles[i].color);
-		draw_line(tp.x, tp.y, tp.x + tv.x*3, tp.y + tv.y*3, 40);
+		draw_line(tp.x, tp.y, tp.x + tv.x*3, tp.y + tv.y*3, 30);
 	}
 	
 }
@@ -85,8 +82,7 @@ void paricles_add_explosion(cpVect v, int num)
 	for(i = 0; i < num; i++){
 		explosions[current].particles[i].pos.x = v.x;
 		explosions[current].particles[i].pos.y = v.y;
-		explosions[current].particles[i].vel.x = rand()%80 - 40;
-		explosions[current].particles[i].vel.y = rand()%80 - 40;
+		explosions[current].particles[i].vel = cpvmult(cpvforangle(RAND_FLOAT * 2 * M_PI) , rand() % 100);
 
 		explosions[current].particles[i].color = draw_rainbow_col(rand());
 	
