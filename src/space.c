@@ -34,6 +34,7 @@ static float cam_dx = 0;
 static float cam_dy = 0;
 float cam_center_x = 0;
 float cam_center_y = 0;
+float cam_zoom = 1;
 
 struct state spaceState = {
 	SPACE_draw,
@@ -54,6 +55,8 @@ void SPACE_update(float dt)
 	rot = cpvmult(rot, 10000);
 	cpBodySetForce(player, cpv(0,0));
 	cpBodySetTorque(player, 0);
+	if (player->p.x <= -7950) player->p.x += 7950*2; //tmp wraparound	
+	if (player->p.x >= 7950) player->p.x -= 7950*2;
 	
 	if(keys[SDLK_w]) cpBodySetForce(player, rot);
 	if(keys[SDLK_s]) cpBodySetForce(player, cpvneg(rot));
@@ -229,17 +232,18 @@ void SPACE_init(){
 	/* static ground */
 	cpBody  *staticBody = space->staticBody;
 	cpShape *shape;
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,0), cpv(8000,0), 10)); // ground level at 0
+	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-10000,0), cpv(10000,0), 10)); // ground level at 0
 	cpShapeSetUserData(shape, draw_segmentshape);
-	cpShapeSetElasticity(shape, 1.0f);
+	cpShapeSetElasticity(shape, 0.4f);
+	cpShapeSetFriction(shape, 0.4f);
 	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,8000), cpv(8000,8000), 10.0f));
 	cpShapeSetUserData(shape, draw_segmentshape);
 	cpShapeSetElasticity(shape, 1.0f);
 	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,0), cpv(-8000,8000), 10.0f));
-	cpShapeSetUserData(shape, draw_segmentshape);
+	cpShapeSetUserData(shape, NULL);
 	cpShapeSetElasticity(shape, 1.0f);
 	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(8000,0), cpv(8000,8000), 10.0f));
-	cpShapeSetUserData(shape, draw_segmentshape);
+	cpShapeSetUserData(shape, NULL);
 	cpShapeSetElasticity(shape, 1.0f);
 	cpFloat radius = 40;
 	cpFloat mass = 1;
@@ -258,9 +262,7 @@ void SPACE_init(){
 	for(i = 1; i<5; i++){
 		for(j = 1; j<5; j++){
 			cpBody *boxBody = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(1.0f, 30.0f, 30.0f)));
-			
 			cpBodySetPos(boxBody, cpv(j*42, i*42));
-			
 			cpShape *boxShape = cpSpaceAddShape(space, cpBoxShapeNew(boxBody, radius, radius));
 			cpShapeSetFriction(boxShape, 0.7);
 			cpShapeSetUserData(boxShape,  draw_boxshape);

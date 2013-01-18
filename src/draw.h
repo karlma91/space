@@ -36,8 +36,6 @@ static inline Color LAColor(float l, float a)
 	return color;
 }
 
-extern float cam_zoom;
-
 void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_line_strip(const GLfloat *strip, int l, float w);
 void draw_init();

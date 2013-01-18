@@ -22,8 +22,6 @@ static texC = 0;
 
 GLuint c_8,c_16,c_64,c_128;
 
-float cam_zoom = 1; //!misplaced variable
-
 #define DEBUG fprintf(stderr, "line: %d\n", __LINE__);
 
 void draw_init(){

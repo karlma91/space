@@ -56,7 +56,7 @@ static void paricles_explosion_draw(struct explosion *expl , float dt)
 
 	for(i = 0; i<expl->numParticles; i++){
 		expl->particles[i].pos = cpvadd(expl->particles[i].pos,expl->particles[i].vel);
-		if(expl->particles[i].pos.y < -2000){
+		if(expl->particles[i].pos.y < 0){
 			expl->particles[i].vel.y = -expl->particles[i].vel.y;
 		}
 		cpVect tp = expl->particles[i].pos;
