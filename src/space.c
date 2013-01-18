@@ -14,10 +14,7 @@
 static int stars_x[star_count];
 static int stars_y[star_count];
 static float stars_size[star_count];
-
-static void player_draw(cpShape *shape);
 static void drawStars();
-static void tmp_shoot();
 static float accumulator = 0;
 
 
@@ -185,6 +182,8 @@ void SPACE_init(){
 	cpShapeSetElasticity(shape, 1.0f);
 	cpFloat radius = 40;
 	cpFloat mass = 1;
+	
+	player.init(&player);
 	
 	cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
 	
