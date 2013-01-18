@@ -68,11 +68,6 @@ void initGL()
   /* set the clear color to gray */
   glClearColor(0.0, 0.0 ,0.0, 0);
 
-  //store punkter
-  glPointSize(8.0f);
-
-  /* We want z-buffer tests enabled*/
-  //glEnable(GL_DEPTH_TEST);
   //enables gldraw array
   glEnableClientState(GL_VERTEX_ARRAY);
 

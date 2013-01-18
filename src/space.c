@@ -28,8 +28,12 @@ static cpSpace *space;
 static cpBody *player;
 static float x,y,r;
 
-// camera settings
+/* camera settings */
 static int cam_relative = 1;
+static float cam_dx = 0;
+static float cam_dy = 0;
+float cam_center_x = 0;
+float cam_center_y = 0;
 
 struct state spaceState = {
 	SPACE_draw,
@@ -40,7 +44,6 @@ struct state spaceState = {
 void SPACE_update(float dt)
 {
 	accumulator += dt;
-	
 	
 	cpFloat pangvel = cpBodyGetAngVel(player);
 	cpBodySetAngVel(player, pangvel*0.9);
@@ -56,7 +59,6 @@ void SPACE_update(float dt)
 	if(keys[SDLK_s]) cpBodySetForce(player, cpvneg(rot));
 	if(keys[SDLK_d]) cpBodySetTorque(player, -5000);
 	if(keys[SDLK_a]) cpBodySetTorque(player, 5000);
-	
 	
 	static int F1_pushed = 0;
 	if(keys[SDLK_F1]){
@@ -80,6 +82,10 @@ void SPACE_update(float dt)
 		if (keys[SDLK_q])
 			cam_zoom = 1;  
 	}
+	if (keys[SDLK_r]){
+		player->p.x=0;
+		player->p.y=1000; 
+	}
 
 	if (keys[SDLK_h]) {
 		cpBodySetVelLimit(player,5000);
@@ -90,15 +96,15 @@ void SPACE_update(float dt)
 	
 	if (keys[SDLK_SPACE]) {
 		tmp_shoot();
-		//keys[SDLK_SPACE] = 0;
+		keys[SDLK_SPACE] = 0;
 	}
+	
 	if (keys[SDLK_x]) {
 		paricles_add_explosion(cpBodyGetPos(player), 10);
-	paricles_add_explosion(cpBodyGetPos(player), 10);
-	paricles_add_explosion(cpBodyGetPos(player), 10);
-	paricles_add_explosion(cpBodyGetPos(player), 10);
-	paricles_add_explosion(cpBodyGetPos(player), 10);
-		//keys[SDLK_SPACE] = 0;
+		paricles_add_explosion(cpBodyGetPos(player), 10);
+		paricles_add_explosion(cpBodyGetPos(player), 10);
+		paricles_add_explosion(cpBodyGetPos(player), 10);
+		paricles_add_explosion(cpBodyGetPos(player), 10);
 	}
 	
 	while(accumulator >= phys_step)
@@ -108,40 +114,60 @@ void SPACE_update(float dt)
 	}
 	
 }
-static GLfloat testa[12] = {0.5,-0.5,	0.5,0.5,	-0.5,0.5,	-0.5,	-0.5,	-0.5,0	,0.5,0}; //A
+
 void SPACE_draw(float dt) 
 {
-	//camera zoom
-	glScalef(cam_zoom,cam_zoom,cam_zoom);
-	static float r;
-	if (cam_relative){
-		
-	}else {
-		glRotatef(-r * MATH_180PI  + 90,0,0,1);
-	}
-	glTranslatef(-player->p.x, -player->p.y, 0.0f);
+	//TODO to make dynamic camera zoom and pos depend on velocity (e.g. higher velocity -> less delay)
+	
+	/* dynamic camera zoom */
+	static const float zoom_delay = 0.9f; // 1.0 = manual zoom, 0.0 = no delay, <0 = oscillerende zoom, >1 = undefined, default = 0.9
+	static const float zoom_slow_grow = 0.1f; // bigger = slower outer zoom growth, deafult = 0.1f
+	static const float zoom_slow_shrink = 0.5f; // bigger = slower inner zoom growth, default = 0.5f
+	cam_zoom = (1.0f * (HEIGHT / 2 + player->p.y * zoom_slow_grow) / (player->p.y+(HEIGHT * zoom_slow_shrink)) ) * (1-zoom_delay) + cam_zoom * zoom_delay;
+	
+	/* dynamic camera pos */
+	static const float pos_delay = 0.9f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
+	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
+	static const float pos_rel_y = 0.1f; // default = 0.1
+	static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
+	static const float pos_rel_offset_y = 0.2f; // default = 0.2
+	cam_dx = cam_dx * pos_delay + ((player->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
+	cam_dy = cam_dy * pos_delay + ((player->rot.y * pos_rel_y - pos_rel_offset_y) * HEIGHT) * (1 - pos_delay) / cam_zoom;
+	
+	cam_center_x = player->p.x + cam_dx;
+	cam_center_y = player->p.y + cam_dy;
+	
+	/* camera rotation */
+	if (!cam_relative) glRotatef(-cpBodyGetAngle(player) * MATH_180PI,0,0,1);
+	
+	/* draw background */
 	drawStars();
+	
+	/* translate view */
+	glScalef(cam_zoom,cam_zoom,1);
+	glTranslatef(-cam_center_x, -cam_center_y, 0.0f);
+	
+	/* draw all objects */
 	draw_space(space);
 
+	/* draw particle effects */
 	paricles_draw(dt);
-
 	
+	/* something */
 	glLoadIdentity();
 	
-	//draw GUI
+	/* draw GUI */
 	glColor3f(cos((player->p.x/50)),sin((player->p.y/100)),player->p.x/2550.0f*player->p.y/2550.0f);
-	//draw_line_strip(testa, 12, 16);
-
+	
 	setTextAngle(0);
 	setTextSize(80);
 	setTextAlign(TEXT_CENTER);
 	font_drawText(0,0.8f*HEIGHT/2, "SPACE");
 	
-	
 	setTextAlign(TEXT_LEFT);
 	setTextSize(10);
+
 	glColor3f(1,1,1);
-	
 	font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
 	
 	setTextAlign(TEXT_RIGHT);
@@ -160,32 +186,26 @@ static void player_draw(cpShape *shape)
 	setTextSize(8);
 	setTextAngleRad(dir);
 	font_drawText(circle->tc.x,circle->tc.y, "-THE QUICK BROWN FOX\n+JUMPS OVER\nTHE LAZY DOG\n0123456789.");
-	/*
-	 //Font performance test
-	 for (i = 1; i < 100; i++) {
-	 setTextAngleRad(dir*i*1.618033988749895f/100.0f);
-	 setTextSize(s);
-	 drawText(circle->tc.x,circle->tc.y, "THE QUICK BROWN FOX\nJUMPED OVER THE LAZY DOG\n0123456789");
-	 s=(10*s+s*1.618033988749895f)/11;
-	 }
-	 */
 }
 
-#define SW (4000)
+#define SW (8000)
 static void drawStars()
 {
-	glColor3f(1,1,1);
-	
 	glPushMatrix();
-	glTranslatef(((int)player->p.x+SW/2) / SW * SW,((int)player->p.y+SW/2) / SW * SW,0);
 	
+	glScalef(0.8f * cam_zoom,0.8f * cam_zoom, 1);
+	glTranslatef(-cam_center_x*0.5,-cam_center_y*0.5,0);
+	
+	glColor3f(1,1,1);
 	glBegin(GL_QUADS);
 	for (i=0;i<star_count;i++) {
 		float size = stars_size[i];
-		glVertex2f(stars_x[i]-size,stars_y[i]-size);
-		glVertex2f(stars_x[i]+size,stars_y[i]-size);
-		glVertex2f(stars_x[i]+size,stars_y[i]+size);
-		glVertex2f(stars_x[i]-size,stars_y[i]+size);
+		float star_x = (stars_x[i]);
+		float star_y = (stars_y[i]);
+		glVertex2f(star_x - size, star_y - size);
+		glVertex2f(star_x + size, star_y - size);
+		glVertex2f(star_x + size, star_y + size);
+		glVertex2f(star_x - size, star_y + size);
 	}
 	glEnd();
 	
@@ -209,16 +229,16 @@ void SPACE_init(){
 	/* static ground */
 	cpBody  *staticBody = space->staticBody;
 	cpShape *shape;
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-2000,-2000), cpv(2000,-2000), 10.0f));
+	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,0), cpv(8000,0), 10)); // ground level at 0
 	cpShapeSetUserData(shape, draw_segmentshape);
 	cpShapeSetElasticity(shape, 1.0f);
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-2000,2000), cpv(2000,2000), 10.0f));
+	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,8000), cpv(8000,8000), 10.0f));
 	cpShapeSetUserData(shape, draw_segmentshape);
 	cpShapeSetElasticity(shape, 1.0f);
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-2000,-2000), cpv(-2000,2000), 10.0f));
+	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,0), cpv(-8000,8000), 10.0f));
 	cpShapeSetUserData(shape, draw_segmentshape);
 	cpShapeSetElasticity(shape, 1.0f);
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(2000,-2000), cpv(2000,2000), 10.0f));
+	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(8000,0), cpv(8000,8000), 10.0f));
 	cpShapeSetUserData(shape, draw_segmentshape);
 	cpShapeSetElasticity(shape, 1.0f);
 	cpFloat radius = 40;
@@ -262,7 +282,7 @@ static void tmp_shoot() {
 	cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
 	cpBodySetPos(ballBody, cpvadd(cpv(player->p.x, player->p.y), cpvmult(prot,radius+radius)));
 	
-	cpBodySetVel(ballBody,cpvmult(prot,1000));
+	cpBodySetVel(ballBody,cpvmult(prot,2000));
 	
 	cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
 	cpShapeSetFriction(ballShape, 0.7);
