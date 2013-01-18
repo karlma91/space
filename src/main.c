@@ -19,7 +19,7 @@ char fps_buf[15];
 int WIDTH;
 int HEIGHT;
 Uint8 *keys;
-struct state *currentState;
+state *currentState;
 
 
 void initGL()

@@ -1,0 +1,3 @@
+
+extern object player;
+
