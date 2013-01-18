@@ -160,11 +160,10 @@ void SPACE_draw(float dt)
 	glLoadIdentity();
 	
 	/* draw GUI */
-	glColor3f(cos((player->p.x/50)),sin((player->p.y/100)),player->p.x/2550.0f*player->p.y/2550.0f);
-	
 	setTextAngle(0);
 	setTextSize(80);
 	setTextAlign(TEXT_CENTER);
+	glColor_from_color(draw_rainbow_col((int)((player->p.x+8000))));
 	font_drawText(0,0.8f*HEIGHT/2, "SPACE");
 	
 	setTextAlign(TEXT_LEFT);
@@ -250,13 +249,13 @@ void SPACE_init(){
 	
 	cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
 	//player
-	player = cpSpaceAddBody(space, cpBodyNew(10, cpMomentForCircle(2, 0, 15, cpvzero)));
+	player = cpSpaceAddBody(space, cpBodyNew(10, cpMomentForBox(1.0f, 30.0f, 30.0f)));
 	cpBodySetPos(player, cpv(30*20,10+1*30));
 	cpBodySetVelLimit(player,1500);
 	
-	cpShape *playerShape = cpSpaceAddShape(space, cpCircleShapeNew(player, 15, cpvzero));
+	cpShape *playerShape = cpSpaceAddShape(space, cpBoxShapeNew(player, radius, radius));
 	cpShapeSetFriction(playerShape, 0.7);
-	cpShapeSetUserData(playerShape, player_draw);
+	cpShapeSetUserData(playerShape, draw_boxshape);
 	cpShapeSetElasticity(playerShape, 1.0f);
 	
 	for(i = 1; i<5; i++){

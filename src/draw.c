@@ -18,7 +18,9 @@ GLfloat array[CIRCLE_MAX_RES];
 static GLfloat colors1[CIRCLE_EXTRA/2*3];
 static int i, j, len;
 unsigned texture[10];
-static texC = 0;
+static int texC = 0;
+
+Color rainbow_col[1536];
 
 GLuint c_8,c_16,c_64,c_128;
 
@@ -50,6 +52,20 @@ void draw_init(){
 	loadTexture("textures/glowdot.bmp");
 	loadTexture("textures/dot.bmp");
 	
+	/* generate rainbow colors */
+	Color *c = &rainbow_col[j];
+	for(i=0; i <= 255; i++, c++)
+		c->r = 1, c->g = i/255.0f, c->b = 0, c->a = 1;
+	for(i=0; i <= 255; i++, c++)
+		c->r = 1 - i/255.0f, c->g = 1, c->b = 0, c->a = 1;
+	for(i=0; i <= 255; i++, c++)
+		c->r = 0, c->g = 1, c->b = i/255.0f, c->a = 1;
+	for(i=0; i <= 255; i++, c++)
+		c->r = 0, c->g = 1 - i/255.0f, c->b = 1, c->a = 1;
+	for(i=0; i <= 255; i++, c++)
+		c->r = i/255.0f, c->g = 0, c->b = 1, c->a = 1;
+	for(i=0; i <= 255; i++, c++)
+		c->r = 1, c->g = 0, c->b = 1 - i/255.0f, c->a = 1;
 }
 
 static void loadTexture(char *tex)
@@ -57,7 +73,6 @@ static void loadTexture(char *tex)
 	SDL_Surface *surface;
 	if((surface = SDL_LoadBMP(tex))==NULL){
 		fprintf(stderr,"Unable to loade texture\n");
-		DEBUG;
 		return;
 	}
 	glGenTextures(1,&texture[texC]);
@@ -253,5 +268,11 @@ void draw_segmentshape(cpShape *shape)
 void draw_space(cpSpace *space)
 {
 	cpSpaceEachShape(space, draw_shape, NULL);
+}
+
+Color draw_rainbow_col(int hue)
+{
+	hue = (hue < 0 ? -hue : hue) % 1536;
+	return rainbow_col[hue];
 }
 

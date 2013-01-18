@@ -87,21 +87,8 @@ void paricles_add_explosion(cpVect v, int num)
 		explosions[current].particles[i].pos.y = v.y;
 		explosions[current].particles[i].vel.x = rand()%80 - 40;
 		explosions[current].particles[i].vel.y = rand()%80 - 40;
-		
-		int ran = rand()%(256*6);
-		Color c;
-		c.a = 1.0f;
-		if(ran < 2*256){
-			c.r = 1;
-			if(ran%(2*256) < 256) c.g = (ran%256) / 255.0f; else c.b = (ran%256) / 255.0f;
-		} else if(ran < 4*256){
-			c.g = 1;
-			if(ran%(2*256) < 256) c.r = (ran%256) / 255.0f; else c.b = (ran%256) / 255.0f;
-		} else {
-			c.b = 1;
-			if(ran%(2*256) < 256) c.r = (ran%256) / 255.0f; else c.g = (ran%256) / 255.0f;
-		}
-		explosions[current].particles[i].color = c;
+
+		explosions[current].particles[i].color = draw_rainbow_col(rand());
 	
 		/*	if(ran == 0){
 			explosions[current].particles[i].color = RGBAColor(1,
