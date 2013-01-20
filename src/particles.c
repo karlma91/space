@@ -10,6 +10,7 @@ struct particle {
 	cpVect pos;
 	cpVect vel;
 	Color color;
+	cpFloat speed;
 };
 
 struct explosion {
@@ -19,18 +20,18 @@ struct explosion {
 	float timer;
 };
 
-static int i,j;
+static int i;
 static struct explosion explosions[MAX_EXPLOSIONS];
 static int current = 0;
 static void paricles_explosion_draw(struct explosion *expl,float dt);
 
 
-int paricles_init()
+void paricles_init()
 {
 	
 }
 
-int paricles_destroy()
+void paricles_destroy()
 {
 	
 }
@@ -52,6 +53,7 @@ static void paricles_explosion_draw(struct explosion *expl , float dt)
 	if(expl->timer > MAX_EXPLOSION_TIME){
 		expl->alive = 0;
 		expl->timer = 0;
+		return;
 	}
 
 	for(i = 0; i<expl->numParticles; i++){
@@ -63,8 +65,10 @@ static void paricles_explosion_draw(struct explosion *expl , float dt)
 		cpVect tp = expl->particles[i].pos;
 		cpVect tv = expl->particles[i].vel;
 
-		glColor_from_color(expl->particles[i].color);
-		draw_line(tp.x, tp.y, tp.x + tv.x*3, tp.y + tv.y*3, 30);
+		//glColor_from_color(expl->particles[i].color);
+		Color c = expl->particles[i].color;
+		glColor4f(c.r,c.g,c.b,  (MAX_EXPLOSION_TIME - expl->timer)/MAX_EXPLOSION_TIME);
+		draw_line(tp.x, tp.y, tp.x + tv.x*3, tp.y + tv.y*3, 200 - expl->particles[i].speed*2 );
 	}
 	
 }
@@ -80,9 +84,10 @@ void paricles_add_explosion(cpVect v, int num)
 	explosions[current].numParticles = num;
 
 	for(i = 0; i < num; i++){
+		explosions[current].particles[i].speed =  rand() % 100;
 		explosions[current].particles[i].pos.x = v.x;
 		explosions[current].particles[i].pos.y = v.y;
-		explosions[current].particles[i].vel = cpvmult(cpvforangle(RAND_FLOAT * 2 * M_PI) , rand() % 100);
+		explosions[current].particles[i].vel = cpvmult(cpvforangle(RAND_FLOAT * 2 * M_PI) ,explosions[current].particles[i].speed );
 
 		explosions[current].particles[i].color = draw_rainbow_col(rand());
 	

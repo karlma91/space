@@ -8,6 +8,7 @@
 #include "particles.h"
 #include "space.h"
 #include "player.h"
+#include "mainmenu.h"
 
 
 #define star_count 1000
@@ -25,8 +26,6 @@ static int i,j;
 static cpFloat phys_step = 1/60.0f;
 cpSpace *space;
 
-static float x,y,r;
-
 /* camera settings */
 static int cam_relative = 1;
 static float cam_dx = 0;
@@ -36,8 +35,8 @@ float cam_center_y = 0;
 float cam_zoom = 1;
 
 state spaceState = {
-	SPACE_draw,
 	SPACE_update,
+	SPACE_draw,
 	NULL
 };
 
@@ -52,6 +51,12 @@ void SPACE_update(float dt)
 			cam_relative = !cam_relative;
 		}
 	} else F1_pushed = 0;
+
+	if(keys[SDLK_ESCAPE]){
+		mainMenuState.parentState = &spaceState;
+		currentState = &mainMenuState;
+		keys[SDLK_ESCAPE] = 0;
+	}
 
 	player.update(&player, dt);
 
@@ -185,7 +190,7 @@ void SPACE_init(){
 	
 	player.init(&player);
 	
-	cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
+	//cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
 	
 	for(i = 1; i<5; i++){
 		for(j = 1; j<5; j++){

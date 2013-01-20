@@ -30,7 +30,7 @@ object player = {
 static void player_init(object *obj)
 {
 	cpFloat radius = 40;
-	cpFloat mass = 1;
+	//cpFloat mass = 1;
 	/* make and add new body */
 	obj->body = cpSpaceAddBody(space, cpBodyNew(10, cpMomentForBox(1.0f, 30.0f, 30.0f)));
 	cpBodySetPos(obj->body, cpv(30*20,10+1*30));
@@ -45,7 +45,7 @@ static void player_init(object *obj)
 
 static void player_render(object *obj, float dt)
 {
-	float s = 0.001;
+	//float s = 0.001;
 	float dir = cpBodyGetAngle(obj->body);
 	setTextAlign(TEXT_LEFT); // \n is currently only supported by left aligned text
 	setTextSize(8);
@@ -57,7 +57,7 @@ static void player_update(object *obj, float dt)
 {
 	cpFloat pangvel = cpBodyGetAngVel(obj->body);
 	cpBodySetAngVel(obj->body, pangvel*0.9);
-	cpVect pvel = cpBodyGetVel(obj->body);
+	//cpVect pvel = cpBodyGetVel(obj->body);
 	
 	//update physics and player
 	cpVect rot = cpBodyGetRot(obj->body);
@@ -117,10 +117,10 @@ static void
 postStepRemove(cpSpace *space, cpShape *shape, void *unused)
 {
 	cpSpaceRemoveBody(space, shape->body);
-	cpBodyFree(shape->body);
+	//cpBodyFree(shape->body);
   
 	cpSpaceRemoveShape(space, shape);
-	cpShapeFree(shape);
+	//cpShapeFree(shape);
 }
 
 // from chipmunk docs

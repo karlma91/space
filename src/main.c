@@ -1,4 +1,5 @@
-#include "stdio.h"
+#include <stdio.h>
+#include <time.h>
 #include "SDL.h"
 #include "chipmunk.h"
 #include "SDL_opengl.h"
@@ -7,12 +8,12 @@
 #include "main.h"
 
 #include "space.h"
+#include "mainmenu.h"
 
 static void game_destroy();
 
 static float fps;
 static float frames;
-static int i,j;
 
 //external
 char fps_buf[15];
@@ -44,7 +45,7 @@ void initGL()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-  float aspect = (float)WIDTH / (float)HEIGHT;
+  //float aspect = (float)WIDTH / (float)HEIGHT;
 
   /* Make the viewport cover the whole window */
   glViewport(0, 0, WIDTH, HEIGHT);
@@ -105,11 +106,15 @@ int main( int argc, char* args[] )
   initGL();
   draw_init();
   SPACE_init();
+  mainmenu_init();
   font_init();
 
-  currentState = &spaceState;
+  currentState = &mainMenuState;
   
   lastTime = SDL_GetTicks();
+  int numstat = 0;
+  state states[5];
+  state *temps;
   while(!keypress) 
     {
 	
@@ -134,13 +139,26 @@ int main( int argc, char* args[] )
       //Draw
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glLoadIdentity();
-      
+
+      temps = currentState->parentState;
+      while(temps){
+    	  states[numstat] = *temps;
+    	  temps = temps->parentState;
+    	  numstat++;
+      }
+      int i = 0;
+      for(i = numstat-1; i>=0; i--){
+    	  states[i].render(deltaTime);
+      }
+
+      numstat = 0;
       currentState->render(deltaTime);
       currentState->update(deltaTime);
+
       SDL_GL_SwapBuffers();
 	
       //input handler
-      if(keys[SDLK_ESCAPE]){
+      if(keys[SDLK_F12]){
         keypress = 1;
       }
 		 

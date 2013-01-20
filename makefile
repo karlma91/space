@@ -16,7 +16,7 @@ else ifneq ($(findstring MINGW32_NT, $(SYS)),) #windows
 	os=2
 	suffix=.exe
 	precode = windres resources/win/space.rc -o coff -o resources/win/space.res.o #prepare resource file
-	os_lib=-lmingw32 -mwindows resources/win/space.res.o
+	os_lib=-lmingw32 -mwindows resources/win/space.res.o -g -Wall
 	openGL=-lopengl32
 	sdl=-ISDL/windows_mingw/include/SDL -LSDL/windows_mingw/lib -lSDLmain -lSDL
 	#sdlttf=-ISDL_ttf -LSDL_ttf/windows -lSDL_ttf

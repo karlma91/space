@@ -8,7 +8,7 @@ typedef struct state_ state;
 struct state_ {
 	void (*update)(float dt);
 	void (*render)(float dt);
-	struct state *parentState;
+	state *parentState;
 };
 
 /* super object struct */

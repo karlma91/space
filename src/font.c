@@ -127,6 +127,7 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 			break;
 		case TEXT_RIGHT:
 			glTranslatef(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING) - 0.5f  - CHAR_SPACING), 0,0);
+			break;
 	}
 	
 	i = 0;

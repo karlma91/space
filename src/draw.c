@@ -16,7 +16,7 @@ static void loadTexture(char *tex);
 GLfloat array[CIRCLE_MAX_RES];
 
 static GLfloat colors1[CIRCLE_EXTRA/2*3];
-static int i, j, len;
+static int i, j;
 unsigned texture[10];
 static int texC = 0;
 
@@ -198,6 +198,16 @@ void draw_circle(cpVect center, cpFloat angle, cpFloat radius,cpFloat scale, Col
 	 glEnd();
 	 */
 	glPopMatrix();
+}
+
+void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h)
+{
+	glBegin(GL_QUADS);
+		glVertex2d(x, y);
+		glVertex2d(x, y + h);
+		glVertex2d(x + w, y + h );
+		glVertex2d(x + w, y);
+	glEnd();
 }
 
 void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
