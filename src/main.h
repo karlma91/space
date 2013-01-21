@@ -32,5 +32,7 @@ extern char fps_buf[];
 /* current state in use */
 extern state *currentState;
 
+extern int main_stop();
+
 //#endif
 

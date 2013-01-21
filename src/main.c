@@ -22,6 +22,8 @@ int HEIGHT;
 Uint8 *keys;
 state *currentState;
 
+static int main_running = 1;
+
 
 void initGL()
 {
@@ -85,8 +87,6 @@ int main( int argc, char* args[] )
   Uint32 lastTime;
   float deltaTime = 0.0f;
   
-  int keypress = 0;
-  
   if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
 
 
@@ -115,8 +115,7 @@ int main( int argc, char* args[] )
   int numstat = 0;
   state states[5];
   state *temps;
-  while(!keypress) 
-    {
+  while(main_running) {
 	
       thisTime = SDL_GetTicks();
       deltaTime = (float)(thisTime - lastTime)/1000.0f;
@@ -159,7 +158,7 @@ int main( int argc, char* args[] )
 	
       //input handler
       if(keys[SDLK_F12]){
-        keypress = 1;
+        main_running = 1;
       }
 		 
       while(SDL_PollEvent(&event)) 
@@ -167,7 +166,7 @@ int main( int argc, char* args[] )
           switch (event.type) 
             {
             case SDL_QUIT:
-              keypress = 1;
+              main_running = 1;
               break;
             }
         }
@@ -178,6 +177,11 @@ int main( int argc, char* args[] )
   game_destroy();
   SDL_Quit();
   return 0;
+}
+
+int main_stop() {
+	main_running = 0;
+	return main_running;
 }
 
 static void game_destroy()
