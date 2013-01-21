@@ -12,7 +12,7 @@
 
 static void mainmenu_draw(float dt);
 static void mainmenu_update(float dt);
-static int selector = 1;
+static int select = 1;
 
 state mainMenuState = {
 	mainmenu_draw,
@@ -28,17 +28,17 @@ void mainmenu_init()
 static void mainmenu_update(float dt)
 {
 	if(keys[SDLK_w]){
-		selector--;
-		selector = selector < 1 ? 4 : selector;
+		select--;
+		select = select < 1 ? 4 : select;
 		keys[SDLK_w] = 0;
 	}
 	if(keys[SDLK_s]){
-		selector++;
-		selector = selector > 4 ? 1 : selector;
+		select++;
+		select = select > 4 ? 1 : select;
 		keys[SDLK_s] = 0;
 	}
 
-	if((keys[SDLK_SPACE] || keys[SDLK_RETURN]) && selector == 1) {
+	if((keys[SDLK_SPACE] || keys[SDLK_RETURN]) && select == 1) {
 
 		currentState = &spaceState;
 	}
@@ -50,22 +50,22 @@ static void mainmenu_draw(float dt)
 	setTextSize(40);
 
 	glColor3f(1,0,0);
-	if(selector == 1){
+	if(select == 1){
 		glColor3f(0,0,1);
 	}
 	font_drawText(0,100,"START GAME");
 	glColor3f(1,0,0);
-	if(selector == 2){
+	if(select == 2){
 			glColor3f(0,0,1);
 		}
 	font_drawText(0,50,"OPTIONS");
 	glColor3f(1,0,0);
-	if(selector == 3){
+	if(select == 3){
 			glColor3f(0,0,1);
 		}
 	font_drawText(0,0,"CREDITS");
 	glColor3f(1,0,0);
-	if(selector == 4){
+	if(select == 4){
 			glColor3f(0,0,1);
 		}
 	font_drawText(0,-50,"EXIT");
