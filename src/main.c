@@ -158,7 +158,7 @@ int main( int argc, char* args[] )
 	
       //input handler
       if(keys[SDLK_F12]){
-        main_running = 1;
+    	  main_stop();
       }
 		 
       while(SDL_PollEvent(&event)) 

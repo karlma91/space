@@ -5,6 +5,8 @@
 #include "particles.h"
 #include "draw.h"
 #include "constants.h"
+#include "main.h"
+#include "space.h"
 
 struct particle {
 	cpVect pos;
@@ -56,18 +58,29 @@ static void paricles_explosion_draw(struct explosion *expl , float dt)
 	}
 	int i;
 	for(i = 0; i < (expl->numParticles); i++){
-		expl->particles[i].pos = cpvadd(expl->particles[i].pos,expl->particles[i].vel);
+		expl->particles[i].pos = cpvadd(expl->particles[i].pos, cpvmult(expl->particles[i].vel,dt));
 		if(expl->particles[i].pos.y < 0){
 			expl->particles[i].vel.y = -expl->particles[i].vel.y;
 			expl->particles[i].pos.y = 0;
 		}
+		expl->particles[i].vel = cpvadd(expl->particles[i].vel,cpvmult(cpSpaceGetGravity(space),dt));
 		cpVect tp = expl->particles[i].pos;
+
 		cpVect tv = expl->particles[i].vel;
 
 		//glColor_from_color(expl->particles[i].color);
 		Color c = expl->particles[i].color;
-		glColor4f(c.r,c.g,c.b,  (MAX_EXPLOSION_TIME - expl->timer)/MAX_EXPLOSION_TIME);
-		draw_line(tp.x, tp.y, tp.x + tv.x*3, tp.y + tv.y*3, 200 - expl->particles[i].speed*2 );
+		float fadeStart = 0.3f;
+		if(expl->timer > MAX_EXPLOSION_TIME-fadeStart){
+			c.a = (MAX_EXPLOSION_TIME - expl->timer) / (fadeStart);
+			expl->particles[i].vel.x*=0.9f;
+					expl->particles[i].vel.y*=0.9f;
+			if(c.a < 0){
+				c.a = 0;
+			}
+		}
+		glColor4f(c.r, c.g, c.b, c.a);
+		draw_line(tp.x, tp.y, tp.x + tv.x/20, tp.y + tv.y/20, (MAX_EXPLOSION_TIME - expl->timer)*300);
 	}
 	
 }
@@ -84,7 +97,7 @@ void paricles_add_explosion(cpVect v, int num)
 	explosions[current].numParticles = num;
 	int i;
 	for(i = 0; i < num; i++){
-		explosions[current].particles[i].speed =  rand() % 100;
+		explosions[current].particles[i].speed =  rand() % 5000;
 		explosions[current].particles[i].pos.x = v.x;
 		explosions[current].particles[i].pos.y = v.y;
 		explosions[current].particles[i].vel = cpvmult(cpvforangle(RAND_FLOAT * 2 * M_PI) ,explosions[current].particles[i].speed );

@@ -1,7 +1,7 @@
 #define MAX_PARTICLES 50
 #define MIN_PARTICLES 5
 #define MAX_EXPLOSIONS 500
-#define MAX_EXPLOSION_TIME 1
+#define MAX_EXPLOSION_TIME 0.5f
 
 void paricles_init();
 void paricles_destroy();
