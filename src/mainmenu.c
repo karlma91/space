@@ -43,7 +43,7 @@ static void mainmenu_update(float dt)
 {
 	if (keys[SDLK_w] || keys[SDLK_UP]){
 		select_id--;
-		select_id = select_id < START_GAME ? EXIT : select_id;
+		select_id = (select_id < START_GAME || select_id > EXIT) ? EXIT : select_id;
 		keys[SDLK_w] = 0, keys[SDLK_UP] = 0;
 	}
 	if (keys[SDLK_s] || keys[SDLK_DOWN]){

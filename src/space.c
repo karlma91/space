@@ -60,6 +60,7 @@ void SPACE_update(float dt)
 
 	player.update(&player, dt);
 
+	static int debug;
 	while(accumulator >= phys_step)
 		{
 			cpSpaceStep(space, phys_step);

@@ -20,7 +20,6 @@ struct explosion {
 	float timer;
 };
 
-static int i;
 static struct explosion explosions[MAX_EXPLOSIONS];
 static int current = 0;
 static void paricles_explosion_draw(struct explosion *expl,float dt);
@@ -38,6 +37,7 @@ void paricles_destroy()
 
 void paricles_draw(float dt)
 {
+	int i;
 	for(i = 0; i<MAX_EXPLOSIONS; i++){
 		if(explosions[i].alive){
 			paricles_explosion_draw(&explosions[i], dt);	
@@ -47,7 +47,6 @@ void paricles_draw(float dt)
 
 static void paricles_explosion_draw(struct explosion *expl , float dt)
 {
-	int i = 0;
 	expl->timer += dt;
 
 	if(expl->timer > MAX_EXPLOSION_TIME){
@@ -55,8 +54,8 @@ static void paricles_explosion_draw(struct explosion *expl , float dt)
 		expl->timer = 0;
 		return;
 	}
-
-	for(i = 0; i<expl->numParticles; i++){
+	int i;
+	for(i = 0; i < (expl->numParticles); i++){
 		expl->particles[i].pos = cpvadd(expl->particles[i].pos,expl->particles[i].vel);
 		if(expl->particles[i].pos.y < 0){
 			expl->particles[i].vel.y = -expl->particles[i].vel.y;
@@ -75,14 +74,15 @@ static void paricles_explosion_draw(struct explosion *expl , float dt)
 
 void paricles_add_explosion(cpVect v, int num)
 {
-	
-	current = current > MAX_EXPLOSIONS ? 0 : current;
-	num = num < 0 ? 5 : num;
-	num = num > MAX_PARTICLES ? MAX_PARTICLES : num;
+	if (current >= MAX_EXPLOSIONS) {
+		current = 0;
+	}
+
+	num = num > MAX_PARTICLES ? MAX_PARTICLES : (num < 0 ? MIN_PARTICLES : num);
 
 	explosions[current].alive = 1;
 	explosions[current].numParticles = num;
-
+	int i;
 	for(i = 0; i < num; i++){
 		explosions[current].particles[i].speed =  rand() % 100;
 		explosions[current].particles[i].pos.x = v.x;
