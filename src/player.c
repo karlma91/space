@@ -66,12 +66,32 @@ static void player_update(object *obj, float dt)
 	cpBodySetTorque(obj->body, 0);
 	if (obj->body->p.x <= -7950) obj->body->p.x += 7950*2; //tmp wraparound	
 	if (obj->body->p.x >= 7950) obj->body->p.x -= 7950*2;
-	
+
+
+	/*
+	cpVect cpBodyGetVel(const cpBody *body)
+	void cpBodySetVel(cpBody *body, const cpVect value)
+	cpVect cpvforangle(const cpFloat a)  Returns the unit length vector for the given angle (in radians).
+	cpVect cpvrotate(const cpVect v1, const cpVect v2) Uses complex multiplication to rotate v1 by v2. Scaling will occur if v1 is not a unit vector.
+	*/
+
+	cpVect dirUp = cpvforangle(-0.05f);
+	cpVect dirDown = cpvforangle(0.05f);
+
 	/* Player movement */
-	if(keys[SDLK_w]) cpBodySetForce(obj->body, rot);
-	if(keys[SDLK_s]) cpBodySetForce(obj->body, cpvneg(rot));
-	if(keys[SDLK_d]) cpBodySetTorque(obj->body, -5000);
-	if(keys[SDLK_a]) cpBodySetTorque(obj->body, 5000);
+	if(keys[SDLK_w]) {
+		cpBodySetVel(obj->body, cpvrotate(cpBodyGetVel(obj->body),dirUp));
+	}
+	if(keys[SDLK_s]) {
+		cpBodySetVel(obj->body, cpvrotate(cpBodyGetVel(obj->body),dirDown));
+	}
+
+	cpBodySetAngle(obj->body, cpvtoangle(cpBodyGetVel(obj->body)));
+	cpSpaceReindexShapesForBody(space, obj->body);
+
+
+	if(keys[SDLK_d]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),5000),cpvzero);
+	if(keys[SDLK_a]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),-5000),cpvzero);
 	
 	if(keys[SDLK_g]){
 		keys[SDLK_g] = 0;
