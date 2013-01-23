@@ -116,7 +116,7 @@ void SPACE_draw(float dt)
 	setTextAngle(0);
 	setTextSize(80);
 	setTextAlign(TEXT_CENTER);
-	glColor_from_color(draw_rainbow_col((int)((player.body->p.x+8000))));
+	glColor_from_color(draw_col_rainbow((int)((player.body->p.x+8000))));
 	font_drawText(0,0.8f*HEIGHT/2, "SPACE");
 	
 	setTextAlign(TEXT_LEFT);

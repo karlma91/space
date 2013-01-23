@@ -36,7 +36,8 @@ static inline Color LAColor(float l, float a)
 	return color;
 }
 
-Color draw_rainbow_col(int hue);
+Color draw_col_rainbow(int hue);
+Color draw_col_grad(int hue);
 
 void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_line_strip(const GLfloat *strip, int l, float w);
@@ -53,10 +54,3 @@ void draw_boxshape(cpShape *shape);
 void draw_ballshape(cpShape *shape);
 void draw_shape(cpShape *shape, void *unused);
 void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h);
-
-//void RenderText(TTF_Font *Font, Color color,double X, double Y, char *Text);
-//TTF_Font* loadfont(char* file, int ptsize);
-
-//unsigned loadeTexture(char *file);
-//void drawTexture(unsigned texture, cpVect center, cpFloat angle, cpFloat scale,int w, int h);
-//#endif

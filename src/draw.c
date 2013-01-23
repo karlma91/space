@@ -53,19 +53,20 @@ void draw_init(){
 	loadTexture("textures/dot.bmp");
 	
 	/* generate rainbow colors */
+	float min_col = 0.2f;
 	Color *c = &rainbow_col[j];
 	for(i=0; i <= 255; i++, c++)
-		c->r = 1, c->g = i/255.0f, c->b = 0, c->a = 1;
+		c->r = 1, c->g = i/255.0f, c->b = min_col, c->a = 1;
 	for(i=0; i <= 255; i++, c++)
-		c->r = 1 - i/255.0f, c->g = 1, c->b = 0, c->a = 1;
+		c->r = 1 - i/255.0f, c->g = 1, c->b = min_col, c->a = 1;
 	for(i=0; i <= 255; i++, c++)
-		c->r = 0, c->g = 1, c->b = i/255.0f, c->a = 1;
+		c->r = min_col, c->g = 1, c->b = i/255.0f, c->a = 1;
 	for(i=0; i <= 255; i++, c++)
-		c->r = 0, c->g = 1 - i/255.0f, c->b = 1, c->a = 1;
+		c->r = min_col, c->g = 1 - i/255.0f, c->b = 1, c->a = 1;
 	for(i=0; i <= 255; i++, c++)
-		c->r = i/255.0f, c->g = 0, c->b = 1, c->a = 1;
+		c->r = i/255.0f, c->g = min_col, c->b = 1, c->a = 1;
 	for(i=0; i <= 255; i++, c++)
-		c->r = 1, c->g = 0, c->b = 1 - i/255.0f, c->a = 1;
+		c->r = 1, c->g = min_col, c->b = 1 - i/255.0f, c->a = 1;
 }
 
 static void loadTexture(char *tex)
@@ -280,9 +281,16 @@ void draw_space(cpSpace *space)
 	cpSpaceEachShape(space, draw_shape, NULL);
 }
 
-Color draw_rainbow_col(int hue)
+Color draw_col_rainbow(int hue)
 {
 	hue = (hue < 0 ? -hue : hue) % 1536;
+	return rainbow_col[hue];
+}
+
+Color draw_col_grad(int hue)
+{
+	static int a = 0;
+	hue = (((hue < 0 ? -hue : hue)) % (1536/8) + ++a/16) % 1536;
 	return rainbow_col[hue];
 }
 

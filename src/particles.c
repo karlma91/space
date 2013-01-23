@@ -89,7 +89,7 @@ void paricles_add_explosion(cpVect v, int num)
 		explosions[current].particles[i].pos.y = v.y;
 		explosions[current].particles[i].vel = cpvmult(cpvforangle(RAND_FLOAT * 2 * M_PI) ,explosions[current].particles[i].speed );
 
-		explosions[current].particles[i].color = draw_rainbow_col(rand());
+		explosions[current].particles[i].color = draw_col_grad(rand());
 	
 		/*	if(ran == 0){
 			explosions[current].particles[i].color = RGBAColor(1,
