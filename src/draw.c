@@ -122,11 +122,27 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
 }
+void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
+{
+	glPushMatrix();
+		glTranslatef(x0, y0, 0.0f);
+		glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
+		GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
+		glScalef(1,w,1);
+		glBegin(GL_QUAD_STRIP);
+			 glVertex2d(0, -0.5f);
+			glVertex2d(0, 0.5f);
+			glVertex2d(length, -0.5f);
+			glVertex2d(length, 0.5f);
+		glEnd();
+	glPopMatrix();
+}
 
 void draw_line_strip(const GLfloat *strip, int l, float w)
 {
 	for(i = 0; i<l-2; i+=2){
-		draw_line(strip[i],strip[i+1],strip[i+2],strip[i+3],w);
+		//draw_line(strip[i],strip[i+1],strip[i+2],strip[i+3],w);
+		draw_quad_line(strip[i],strip[i+1],strip[i+2],strip[i+3],w/4);
 	}
 }
 
@@ -230,14 +246,16 @@ void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
 	}
 }
 
-void draw_segment(cpVect a, cpVect b, cpFloat width, Color lineColor)
+void draw_segment(cpVect a, cpVect b, cpFloat w, Color lineColor)
 {
 	glColor_from_color(lineColor);
-	glLineWidth(width);
-	glBegin(GL_LINES);
-	glVertex2f( a.x, a.y);
-	glVertex2f( b.x, b.y);
-	glEnd(); 
+	glBegin(GL_QUADS);
+	glVertex2f(a.x, a.y - w);
+	glVertex2f(a.x, a.y + w);
+	glVertex2f(b.x, b.y + w);
+	glVertex2f(b.x, b.y - w);
+	glEnd();
+	//draw_line(a.x, a.y, b.x, b.y, 10);
 }
 
 void draw_shape(cpShape *shape, void *unused)
@@ -254,14 +272,12 @@ void draw_ballshape(cpShape *shape)
 	cpCircleShape *circle = (cpCircleShape *)shape;
 
 	//printf("rand %f\n",1.0f*rand()/RAND_MAX);
-	glColor3f(0.1f + sin(circle->tc.x/500)*0.8f,0.1f + cos(circle->tc.y/500)*0.8f,0.9f);
+	glColor3f(0.1f + sin(circle->tc.x/500)*0.8f,0.1f + cos(circle->tc.y/500)*0.8f,1.0f);
 	
 	cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
 	
-	draw_line(circle->tc.x, circle->tc.y, circle->tc.x + vel.x/16, circle->tc.y + vel.y/16, 40); //40 = 4 * radius
+	draw_line(circle->tc.x, circle->tc.y, circle->tc.x + vel.x/32, circle->tc.y + vel.y/32, 8); //40 = 4 * radius
 
-	glColor4f(1,1,1,0.4f);
-	draw_line(circle->tc.x, circle->tc.y, circle->tc.x + vel.x/16, circle->tc.y + vel.y/16, 40);
 	//draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
 void draw_boxshape(cpShape *shape)

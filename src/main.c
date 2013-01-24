@@ -43,9 +43,18 @@ void initGL()
   glEnable(GL_LINE_SMOOTH);
   glEnable(GL_POLYGON_SMOOTH);
   
+
+
   //fra ttf opengl tutorial
   glEnable(GL_BLEND);
+  //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+  //glBlendEquation(GL_MAX);
+  //glBlendEquationSeparate(GL_FUNC_ADD,GL_MAX);
+
+  //glBlendEquationSeparate(GL_ONE,GL_MAX);
+  //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+  //glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
   //float aspect = (float)WIDTH / (float)HEIGHT;
 
@@ -136,6 +145,7 @@ int main( int argc, char* args[] )
       deltaTime = deltaTime > 0.25 ? 0.25 : deltaTime;
 
       //Draw
+      glClearColor(0.0f,0.0f,0.0f,0.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       glLoadIdentity();
 

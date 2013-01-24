@@ -24,11 +24,10 @@ static void drawDigit(int d)
 	//glBegin(GL_LINES);
 	while (d && j < 7) {
 		if (d & 0x1) {
-			draw_line(digits_x[j], digits_y[j], digits_x[j+1], digits_y[j+1], 0.5f);
+			draw_quad_line(digits_x[j], digits_y[j], digits_x[j+1], digits_y[j+1], 0.5f);
 			//glVertex2f(digits_x[j],digits_y[j]);
 			j++;
 			//glVertex2f(digits_x[j],digits_y[j]);
-			
 		} else j++;
 		d >>= 1;
 	}
@@ -111,7 +110,8 @@ static void drawSymbol(char c)
 
 void font_drawText(GLfloat x, GLfloat y, char* text)
 {
-
+	glPushAttrib(GL_COLOR_BUFFER_BIT);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glPushMatrix();
 	glTranslatef(x, y, 0.0f);
 	glRotatef(font_text_angle, 0, 0, 1);
@@ -151,6 +151,7 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 		glPopMatrix();
 	
 	glPopMatrix();
+	glPopAttrib();
 }
 
 void init_text(char c)

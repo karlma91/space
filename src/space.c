@@ -59,7 +59,7 @@ void SPACE_update(float dt)
 	}
 
 	player.update(&player, dt);
-
+	particles_update(dt);
 	static int debug;
 	while(accumulator >= phys_step)
 		{
@@ -73,17 +73,18 @@ void SPACE_draw(float dt)
 	//TODO to make dynamic camera zoom and pos depend on velocity (e.g. higher velocity -> less delay)
 	
 	/* dynamic camera zoom */
-	static const float zoom_delay = 0.9f; // 1.0 = manual zoom, 0.0 = no delay, <0 = oscillerende zoom, >1 = undefined, default = 0.9
-	static const float zoom_slow_grow = 0.1f; // bigger = slower outer zoom growth, deafult = 0.1f
-	static const float zoom_slow_shrink = 0.5f; // bigger = slower inner zoom growth, default = 0.5f
-	cam_zoom = (1.0f * (HEIGHT / 2 + player.body->p.y * zoom_slow_grow) / (player.body->p.y+(HEIGHT * zoom_slow_shrink)) ) * (1-zoom_delay) + cam_zoom * zoom_delay;
+	static const float zoom_delay = 0.0f; // 1.0 = manual zoom, 0.0 = no delay, <0 = oscillerende zoom, >1 = undefined, default = 0.9
+	static const float zoom_slow_grow = 0.2f; // bigger = slower outer zoom growth, deafult = 0.1f
+	static const float zoom_slow_shrink = 0.12f; // bigger = slower inner zoom growth, default = 0.5f
+	static const float zoom_scale = 1.0f;
+	cam_zoom = zoom_scale*((1.0f * (HEIGHT / 2 + player.body->p.y * zoom_slow_grow) / (player.body->p.y+(HEIGHT * zoom_slow_shrink)) ) * (1-zoom_delay) + cam_zoom * zoom_delay);
 	
 	/* dynamic camera pos */
 	static const float pos_delay = 0.9f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
 	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
 	static const float pos_rel_y = 0.1f; // default = 0.1
 	static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
-	static const float pos_rel_offset_y = 0.2f; // default = 0.2
+	static const float pos_rel_offset_y = 0; // default = 0.2
 	cam_dx = cam_dx * pos_delay + ((player.body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
 	cam_dy = cam_dy * pos_delay + ((player.body->rot.y * pos_rel_y - pos_rel_offset_y) * HEIGHT) * (1 - pos_delay) / cam_zoom;
 	
@@ -158,7 +159,7 @@ void SPACE_init(){
 	
 	space = cpSpaceNew();
 	cpSpaceSetGravity(space, gravity);
-	cpSpaceSetDamping(space, 0.999);
+	//cpSpaceSetDamping(space, 0.999);
 	//init stars
 	srand(122531);
 	for (i=0;i<star_count;i++) {
@@ -167,6 +168,7 @@ void SPACE_init(){
 		stars_size[i] = 2 + 4*(rand() % 1000) / 1000.0f;
 	}
 	
+	cpFloat roofHeight = 1000;
 	/* static ground */
 	cpBody  *staticBody = space->staticBody;
 	cpShape *shape;
@@ -177,17 +179,20 @@ void SPACE_init(){
 	// sets collision type to 1
 	cpShapeSetCollisionType(shape, 1);
 
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,8000), cpv(8000,8000), 10.0f));
+	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,roofHeight), cpv(8000,roofHeight), 10.0f));
 	cpShapeSetUserData(shape, draw_segmentshape);
 	cpShapeSetElasticity(shape, 1.0f);
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,0), cpv(-8000,8000), 10.0f));
+	cpShapeSetCollisionType(shape, 1);
+
+	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,0), cpv(-8000,roofHeight), 10.0f));
 	cpShapeSetUserData(shape, NULL);
 	cpShapeSetElasticity(shape, 1.0f);
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(8000,0), cpv(8000,8000), 10.0f));
+	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(8000,0), cpv(8000,roofHeight), 10.0f));
 	cpShapeSetUserData(shape, NULL);
 	cpShapeSetElasticity(shape, 1.0f);
-	cpFloat radius = 40;
-	cpFloat mass = 1;
+
+	cpFloat boxSize = 10.0f;
+	cpFloat mass = 1.0f;
 	
 	player.init(&player);
 	
@@ -195,9 +200,9 @@ void SPACE_init(){
 	
 	for(i = 1; i<5; i++){
 		for(j = 1; j<5; j++){
-			cpBody *boxBody = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(1.0f, 30.0f, 30.0f)));
+			cpBody *boxBody = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, boxSize, boxSize)));
 			cpBodySetPos(boxBody, cpv(j*42, i*42));
-			cpShape *boxShape = cpSpaceAddShape(space, cpBoxShapeNew(boxBody, radius, radius));
+			cpShape *boxShape = cpSpaceAddShape(space, cpBoxShapeNew(boxBody, boxSize, boxSize));
 			cpShapeSetFriction(boxShape, 0.7);
 			cpShapeSetUserData(boxShape,  draw_boxshape);
 		}

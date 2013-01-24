@@ -29,12 +29,12 @@ object player = {
 
 static void player_init(object *obj)
 {
-	cpFloat radius = 40;
+	cpFloat radius = 10;
 	//cpFloat mass = 1;
 	/* make and add new body */
-	obj->body = cpSpaceAddBody(space, cpBodyNew(10, cpMomentForBox(1.0f, 30.0f, 30.0f)));
-	cpBodySetPos(obj->body, cpv(30*20,10+1*30));
-	cpBodySetVelLimit(obj->body,1500);
+	obj->body = cpSpaceAddBody(space, cpBodyNew(10, cpMomentForBox(1.0f, radius, radius)));
+	cpBodySetPos(obj->body, cpv(0,990));
+	cpBodySetVelLimit(obj->body,700);
 	/* make and connect new shape to body */
 	obj->shape = cpSpaceAddShape(space, cpBoxShapeNew(obj->body, radius, radius));
 	cpShapeSetFriction(obj->shape, 0.7);
@@ -47,10 +47,12 @@ static void player_render(object *obj, float dt)
 {
 	//float s = 0.001;
 	float dir = cpBodyGetAngle(obj->body);
-	setTextAlign(TEXT_LEFT); // \n is currently only supported by left aligned text
-	setTextSize(8);
+	setTextAlign(TEXT_LEFT);
+	setTextSize(10);
 	setTextAngleRad(dir);
-	font_drawText(obj->body->p.x,obj->body->p.y, "-THE QUICK BROWN FOX\n+JUMPS OVER\nTHE LAZY DOG\n0123456789.");
+	static char text[20];
+	sprintf(text, " SPEED: %.3f",cpvlength(cpBodyGetVel(obj->body)));
+	font_drawText(obj->body->p.x,obj->body->p.y, text);
 }
 
 static void player_update(object *obj, float dt)
@@ -75,14 +77,17 @@ static void player_update(object *obj, float dt)
 	cpVect cpvrotate(const cpVect v1, const cpVect v2) Uses complex multiplication to rotate v1 by v2. Scaling will occur if v1 is not a unit vector.
 	*/
 
-	cpVect dirUp = cpvforangle(-0.05f);
-	cpVect dirDown = cpvforangle(0.05f);
+	cpVect dirUp = cpvforangle(-0.06f);
+	cpVect dirDown = cpvforangle(0.06f);
+
+	cpFloat cspeed = cpvlength(cpBodyGetVel(obj->body));
 
 	/* Player movement */
-	if(keys[SDLK_w]) {
+	if(keys[SDLK_w] && cspeed > 100) {
 		cpBodySetVel(obj->body, cpvrotate(cpBodyGetVel(obj->body),dirUp));
 	}
-	if(keys[SDLK_s]) {
+
+	if(keys[SDLK_s] && cspeed > 100) {
 		cpBodySetVel(obj->body, cpvrotate(cpBodyGetVel(obj->body),dirDown));
 	}
 
@@ -90,8 +95,8 @@ static void player_update(object *obj, float dt)
 	cpSpaceReindexShapesForBody(space, obj->body);
 
 
-	if(keys[SDLK_d]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),5000),cpvzero);
-	if(keys[SDLK_a]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),-5000),cpvzero);
+	if(keys[SDLK_d]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),2500),cpvzero);
+	if(keys[SDLK_a]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),-2500),cpvzero);
 	
 	if(keys[SDLK_g]){
 		keys[SDLK_g] = 0;
@@ -102,6 +107,7 @@ static void player_update(object *obj, float dt)
 	if (keys[SDLK_q]){
 		cam_zoom /= dt+1.1f;
 	}
+
 	if (keys[SDLK_e]){
 		cam_zoom *= dt+1.1f;
 		if (keys[SDLK_q])
@@ -109,7 +115,7 @@ static void player_update(object *obj, float dt)
 	}
 	if (keys[SDLK_r]){
 		obj->body->p.x=0;
-		obj->body->p.y=1000; 
+		obj->body->p.y=500;
 	}
 
 	if (keys[SDLK_h]) {
@@ -156,15 +162,15 @@ begin(cpArbiter *arb, cpSpace *space, void *unused)
 
 static void tmp_shoot(object *obj)
 {
-	cpFloat radius = 10;
+	cpFloat radius = 5;
 	cpFloat mass = 1;
 	cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
 	cpVect prot = cpBodyGetRot(obj->body);
 	
 	cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
-	cpBodySetPos(ballBody, cpvadd(cpv(obj->body->p.x, obj->body->p.y), cpvmult(prot,radius+radius)));
+	cpBodySetPos(ballBody, cpvadd(cpv(obj->body->p.x, obj->body->p.y), cpvmult(prot,radius)));
 	
-	cpBodySetVel(ballBody,cpvmult(prot,2000));
+	cpBodySetVel(ballBody,cpvmult(prot,1500));
 	
 	cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
 	cpShapeSetFriction(ballShape, 0.7);

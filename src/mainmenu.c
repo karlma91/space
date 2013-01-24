@@ -11,6 +11,10 @@
 
 static void mainmenu_draw(float dt);
 static void mainmenu_update(float dt);
+static void optionmenu_func();
+static void mainmenu_func();
+static void levelmenu_func();
+
 
 state mainMenuState = {
 	mainmenu_draw,
@@ -18,16 +22,38 @@ state mainMenuState = {
 	NULL
 };
 
-enum menu {
-	START_GAME,
-	OPTIONS,
-	CREDITS,
-	EXIT
+#define MAX_MENU_ITEMS 5
+
+struct menu {
+	int num_items;
+	int escape_item;
+	void (*func)();
+	char texts[MAX_MENU_ITEMS][15];
 };
 
-static enum menu select_id = START_GAME;
-static char menu_item[4][15] = {"START GAME","OPTIONS","CREDITS","EXIT"};
+struct menu mainMenuTest = {
+		4,
+		3,
+		mainmenu_func,
+		{"START GAME","LEVELS","CREDITS","EXIT"}
+};
+struct menu ingameMenu = {
+		2,
+		0,
+		optionmenu_func,
+		{"RESUME","MAINMENU"}
+};
+struct menu levelSelect = {
+		5,
+		0,
+		levelmenu_func,
+		{"LEVEL 1","LEVEL 2","LEVEL 3","LEVEL 4","LEVEL 5"}
+};
 
+static struct menu *curMenu; //current active menu
+
+static int select_id = 0;
+static int escapePress = 0;
 static int i;
 
 static const Color col_item   = {1,0,0,1};
@@ -36,34 +62,80 @@ static const Color col_select = {0,0,1,1};
 
 void mainmenu_init()
 {
-
+	curMenu = &mainMenuTest;
 }
 
 static void mainmenu_update(float dt)
 {
 	if (keys[SDLK_w] || keys[SDLK_UP]){
 		select_id--;
-		select_id = (select_id < START_GAME || select_id > EXIT) ? EXIT : select_id;
+		select_id = (select_id < 0) ? curMenu->num_items-1 : select_id;
 		keys[SDLK_w] = 0, keys[SDLK_UP] = 0;
 	}
+
 	if (keys[SDLK_s] || keys[SDLK_DOWN]){
 		select_id++;
-		select_id = select_id > EXIT ? START_GAME : select_id;
+		select_id = select_id >= curMenu->num_items ? 0 : select_id;
 		keys[SDLK_s] = 0, keys[SDLK_DOWN] = 0;
 	}
 
 	if (keys[SDLK_SPACE] || keys[SDLK_RETURN]) {
-		switch (select_id) {
-			case START_GAME:
-				currentState = &spaceState;
-				break;
-			case EXIT:
-				main_stop();
-				break;
-			default:
-				break;
-		}
+		curMenu->func();
 		keys[SDLK_SPACE] = 0, keys[SDLK_RETURN] = 0;
+	}
+
+	if(keys[SDLK_ESCAPE]){
+		select_id = curMenu->escape_item;
+		curMenu->func();
+		keys[SDLK_ESCAPE] = 0;
+	}
+}
+
+static void mainmenu_func()
+{
+	switch (select_id) {
+	case 0:
+		currentState = &spaceState;
+		curMenu = &ingameMenu;
+		break;
+	case 1:
+		curMenu = &levelSelect;
+		break;
+	case 3:
+		main_stop();
+		break;
+	default:
+		break;
+	}
+}
+static void optionmenu_func()
+{
+	switch (select_id) {
+	case 0:
+		currentState = &spaceState;
+		break;
+	case 1:
+		mainMenuState.parentState = 0;
+		curMenu = &mainMenuTest;
+		currentState = &mainMenuState;
+		break;
+	default:
+		break;
+	}
+}
+
+static void levelmenu_func()
+{
+	switch (select_id) {
+	case 0:
+		currentState = &spaceState;
+		curMenu = &ingameMenu;
+		break;
+	case 3:
+		main_stop();
+		break;
+	default:
+		break;
 	}
 }
 
@@ -72,9 +144,9 @@ static void mainmenu_draw(float dt)
 	setTextAlign(TEXT_CENTER);
 	setTextSize(40);
 
-	for (i = START_GAME; i <= EXIT; i++) {
+	for (i = 0; i < curMenu->num_items; i++) {
 		glColor_from_color((select_id == i) ? col_select : col_item);
-		font_drawText(0,100 - 60 * i,menu_item[i]);
+		font_drawText(0,100 - 60 * i, curMenu->texts[i]);
 	}
 }
 
