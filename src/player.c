@@ -13,7 +13,7 @@ static void player_init(object *obj);
 static void player_render(object *obj, float dt);
 static void player_update(object *obj, float dt);
 static void player_destroy(object *obj);
-static void tmp_shoot(object *obj);
+static void tmp_shoot(object *obj, float dt);
 
 object player = {
 	NULL,
@@ -95,6 +95,7 @@ static void player_update(object *obj, float dt)
 	cpSpaceReindexShapesForBody(space, obj->body);
 
 
+	//TODO: gjøre svinghastighet avhengig av dt
 	if(keys[SDLK_d]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),2500),cpvzero);
 	if(keys[SDLK_a]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),-2500),cpvzero);
 	
@@ -105,11 +106,11 @@ static void player_update(object *obj, float dt)
 	}
 	
 	if (keys[SDLK_q]){
-		cam_zoom /= dt+1.1f;
+		cam_zoom /= dt+1.4f;
 	}
 
 	if (keys[SDLK_e]){
-		cam_zoom *= dt+1.1f;
+		cam_zoom *= dt+1.4f;
 		if (keys[SDLK_q])
 			cam_zoom = 1;  
 	}
@@ -126,8 +127,7 @@ static void player_update(object *obj, float dt)
 	}
 	
 	if (keys[SDLK_SPACE]) {
-		tmp_shoot(obj);
-		keys[SDLK_SPACE] = 0;
+		tmp_shoot(obj, dt);
 	}
 	
 	if (keys[SDLK_x]) {
@@ -160,10 +160,21 @@ begin(cpArbiter *arb, cpSpace *space, void *unused)
 }
 
 
-static void tmp_shoot(object *obj)
+static void tmp_shoot(object *obj, float dt) //TODO change dt to global
 {
-	cpFloat radius = 5;
-	cpFloat mass = 1;
+	//TMP shooting settings
+	static const float cooldown = 0.1f;
+	static float time = 0;
+	
+	if (time < cooldown) {
+		time += dt;
+		return;
+	}
+	
+	time = 0;
+	
+	static const cpFloat radius = 5;
+	static const cpFloat mass = 1;
 	cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
 	cpVect prot = cpBodyGetRot(obj->body);
 	

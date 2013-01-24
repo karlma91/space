@@ -20,18 +20,9 @@ static const GLfloat digits_y[] = {0,0.5, 0.5, 0,-0.5,-0.5,0, 0};
 
 static void drawDigit(int d)
 {
-	j = 0;
-	//glBegin(GL_LINES);
-	while (d && j < 7) {
-		if (d & 0x1) {
-			draw_quad_line(digits_x[j], digits_y[j], digits_x[j+1], digits_y[j+1], 0.5f);
-			//glVertex2f(digits_x[j],digits_y[j]);
-			j++;
-			//glVertex2f(digits_x[j],digits_y[j]);
-		} else j++;
-		d >>= 1;
-	}
-	//glEnd();
+	for (j = 0; d && j < 7; d >>= 1, j++)
+		if (d & 0x1)
+			draw_quad_line(digits_x[j], digits_y[j], digits_x[(j+1)], digits_y[(j+1)], 0.125f);
 }
 
 const GLfloat letters[26][14] = {
@@ -65,11 +56,8 @@ const GLfloat letters[26][14] = {
 //////////////////////////////////A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z
 const GLint letters_points[26] = {7,7,4,5,7,6,6,6,2,3,6,3,5,4,5,5,6,6,6,5,4,3,5,5,6,4};
 
-//TODO: swap lines with quads
 static void drawLetter(int d)
 {
-	//glVertexPointer(2, GL_FLOAT, 0, letters[d]);
-	//glDrawArrays(GL_LINE_STRIP, 0, letters_points[d]);
 	draw_line_strip(letters[d],letters_points[d]*2, 0.5f);
 }
 
@@ -83,23 +71,19 @@ static void drawSymbol(char c)
 {
 	switch(c) {
 		case '-':
-			//glVertexPointer(2, GL_FLOAT, 0, MINUS);
-			//glDrawArrays(GL_LINE_STRIP, 0, 2);
 			draw_line_strip(MINUS,4, 0.5f);
 			break;
 		case '+':
-			//glVertexPointer(2, GL_FLOAT, 0, PLUS);
-			//glDrawArrays(GL_LINES, 0, 4);
 			draw_line_strip(PLUS,10, 0.5f);
 			break;
 		case ',':
-			//glVertexPointer(2, GL_FLOAT, 0, COMMA);
-			//glDrawArrays(GL_LINES, 0, 2);
 			draw_line_strip(COMMA,4, 0.5f);
 			break;
+		case ':':
+			glTranslatef(0,0.8f,0);
+			draw_line_strip(DOT,10, 0.5f);
+			glTranslatef(0,-0.8f,0);
 		case '.':
-			//glVertexPointer(2, GL_FLOAT, 0, DOT);
-			//glDrawArrays(GL_LINES, 0, 5);
 			draw_line_strip(DOT,10, 0.5f);
 			break;
 		default:
