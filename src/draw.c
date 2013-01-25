@@ -129,11 +129,12 @@ void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 		glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
 		GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
 		glScalef(1,w,1);
+		w /= 2;
 		glBegin(GL_QUAD_STRIP);
-			glVertex2d(0, -0.5f);
-			glVertex2d(0, 0.5f);
-			glVertex2d(length, -0.5f);
-			glVertex2d(length, 0.5f);
+			glVertex2d(-w, -0.5f);
+			glVertex2d(-w, 0.5f);
+			glVertex2d(length + w, -0.5f);
+			glVertex2d(length + w, 0.5f);
 		glEnd();
 	glPopMatrix();
 }

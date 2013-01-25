@@ -24,40 +24,40 @@ struct explosion {
 
 static struct explosion explosions[MAX_EXPLOSIONS];
 static int current = 0;
-static void paricles_explosion_draw(struct explosion *expl,float dt);
-static void paricles_explosion_update(struct explosion *expl , float dt);
+static void paricles_explosion_draw(struct explosion *expl);
+static void paricles_explosion_update(struct explosion *expl );
 
-void paricles_init()
+void particles_init()
 {
 	
 }
 
-void paricles_destroy()
+void particles_destroy()
 {
 	
 }
 
-void paricles_draw(float dt)
+void particles_draw()
 {
 	int i;
 	for(i = 0; i<MAX_EXPLOSIONS; i++){
 		if(explosions[i].alive){
-			paricles_explosion_draw(&explosions[i], dt);	
+			paricles_explosion_draw(&explosions[i]);
 		}
 	}
 }
 
-void particles_update(float dt)
+void particles_update()
 {
 	int i;
 	for(i = 0; i<MAX_EXPLOSIONS; i++){
 		if(explosions[i].alive){
-			paricles_explosion_update(&explosions[i], dt);
+			paricles_explosion_update(&explosions[i]);
 		}
 	}
 }
 
-static void paricles_explosion_update(struct explosion *expl , float dt)
+static void paricles_explosion_update(struct explosion *expl)
 {
 	expl->timer += dt;
 
@@ -84,7 +84,7 @@ static void paricles_explosion_update(struct explosion *expl , float dt)
 		}
 }
 
-static void paricles_explosion_draw(struct explosion *expl , float dt)
+static void paricles_explosion_draw(struct explosion *expl)
 {
 
 	int i;
@@ -106,7 +106,7 @@ static void paricles_explosion_draw(struct explosion *expl , float dt)
 	}
 }
 
-void paricles_add_explosion(cpVect v, int num)
+void particles_add_explosion(cpVect v, int num)
 {
 	if (current >= MAX_EXPLOSIONS) {
 		current = 0;

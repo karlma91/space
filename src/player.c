@@ -10,10 +10,10 @@
 
 
 static void player_init(object *obj);
-static void player_render(object *obj, float dt);
-static void player_update(object *obj, float dt);
+static void player_render(object *obj);
+static void player_update(object *obj);
 static void player_destroy(object *obj);
-static void tmp_shoot(object *obj, float dt);
+static void tmp_shoot(object *obj);
 
 object player = {
 	NULL,
@@ -43,7 +43,7 @@ static void player_init(object *obj)
 	
 }
 
-static void player_render(object *obj, float dt)
+static void player_render(object *obj)
 {
 	//float s = 0.001;
 	float dir = cpBodyGetAngle(obj->body);
@@ -55,7 +55,7 @@ static void player_render(object *obj, float dt)
 	font_drawText(obj->body->p.x,obj->body->p.y, text);
 }
 
-static void player_update(object *obj, float dt)
+static void player_update(object *obj)
 {
 	cpFloat pangvel = cpBodyGetAngVel(obj->body);
 	cpBodySetAngVel(obj->body, pangvel*0.9);
@@ -127,11 +127,11 @@ static void player_update(object *obj, float dt)
 	}
 	
 	if (keys[SDLK_SPACE]) {
-		tmp_shoot(obj, dt);
+		tmp_shoot(obj);
 	}
 	
 	if (keys[SDLK_x]) {
-		paricles_add_explosion(cpBodyGetPos(obj->body), 40);
+		particles_add_explosion(cpBodyGetPos(obj->body), 40);
 	}
 }
 
@@ -154,13 +154,13 @@ static int
 begin(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
-	paricles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 40);
+	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 40);
 	cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, b, NULL);
 	return 0;
 }
 
 
-static void tmp_shoot(object *obj, float dt) //TODO change dt to global
+static void tmp_shoot(object *obj) //TODO change dt to global
 {
 	//TMP shooting settings
 	static const float cooldown = 0.1f;

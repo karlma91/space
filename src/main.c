@@ -7,18 +7,22 @@
 #include "font.h"
 #include "main.h"
 
+/* state header files */
 #include "space.h"
-#include "mainmenu.h"
+#include "menu.h"
+#include "levelselect.h"
 
 static void game_destroy();
 
 static float fps;
 static float frames;
 
+/* definition of external variables */
 //external
 char fps_buf[15];
 int WIDTH;
 int HEIGHT;
+float dt;
 Uint8 *keys;
 state *currentState;
 
@@ -114,11 +118,14 @@ int main( int argc, char* args[] )
 	
   initGL();
   draw_init();
-  SPACE_init();
-  mainmenu_init();
   font_init();
 
-  currentState = &mainMenuState;
+  /* init states */
+  state_space.init();
+  state_menu.init();
+  state_levelselect.init();
+
+  currentState = &state_menu;
   
   lastTime = SDL_GetTicks();
   int numstat = 0;
@@ -143,7 +150,7 @@ int main( int argc, char* args[] )
       }
 
       deltaTime = deltaTime > 0.25 ? 0.25 : deltaTime;
-
+      dt = deltaTime;
       //Draw
       glClearColor(0.0f,0.0f,0.0f,0.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -158,6 +165,7 @@ int main( int argc, char* args[] )
       int i = 0;
       for(i = numstat-1; i>=0; i--){
     	  states[i].render(deltaTime);
+    	  glLoadIdentity();
       }
 
       numstat = 0;
@@ -197,8 +205,12 @@ int main_stop() {
 static void game_destroy()
 {
   //cpSpaceFreeChildren(space);
-  SPACE_destroy();
-  draw_destroy();
-  font_destroy();
+	/* destroy states */
+	state_space.destroy();
+	state_menu.destroy();
+	state_levelselect.destroy();
+
+	draw_destroy();
+	font_destroy();
 }
 

@@ -8,7 +8,7 @@
 #include "particles.h"
 #include "space.h"
 #include "player.h"
-#include "mainmenu.h"
+#include "menu.h"
 
 
 #define star_count 1000
@@ -18,6 +18,11 @@ static float stars_size[star_count];
 static void drawStars();
 static float accumulator = 0;
 
+/* state functions */
+static void SPACE_init();
+static void SPACE_update();
+static void SPACE_draw();
+static void SPACE_destroy();
 
 /* helper */
 static int i,j;
@@ -34,13 +39,15 @@ float cam_center_x = 0;
 float cam_center_y = 0;
 float cam_zoom = 1;
 
-state spaceState = {
+state state_space = {
+	SPACE_init,
 	SPACE_update,
 	SPACE_draw,
+	SPACE_destroy,
 	NULL
 };
 
-void SPACE_update(float dt)
+static void SPACE_update()
 {
 	accumulator += dt;
 
@@ -53,12 +60,12 @@ void SPACE_update(float dt)
 	} else F1_pushed = 0;
 
 	if(keys[SDLK_ESCAPE]){
-		mainMenuState.parentState = &spaceState;
-		currentState = &mainMenuState;
+		state_menu.parentState = &state_space;
+		currentState = &state_menu;
 		keys[SDLK_ESCAPE] = 0;
 	}
 
-	player.update(&player, dt);
+	player.update(&player);
 	particles_update(dt);
 	static int debug;
 	while(accumulator >= phys_step)
@@ -68,12 +75,12 @@ void SPACE_update(float dt)
 		}
 }
 
-void SPACE_draw(float dt) 
+static void SPACE_draw()
 {
 	//TODO to make dynamic camera zoom and pos depend on velocity (e.g. higher velocity -> less delay)
 	
 	/* dynamic camera zoom */
-	static const float zoom_delay = 0.0f; // 1.0 = manual zoom, 0.0 = no delay, <0 = oscillerende zoom, >1 = undefined, default = 0.9
+	static const float zoom_delay = 0.9f; // 1.0 = manual zoom, 0.0 = no delay, <0 = oscillerende zoom, >1 = undefined, default = 0.9
 	static const float zoom_slow_grow = 0.2f; // bigger = slower outer zoom growth, deafult = 0.1f
 	static const float zoom_slow_shrink = 0.12f; // bigger = slower inner zoom growth, default = 0.5f
 	static const float zoom_scale = 1.0f;
@@ -102,24 +109,19 @@ void SPACE_draw(float dt)
 	glTranslatef(-cam_center_x, -cam_center_y, 0.0f);
 	
 	/* draw player */
-	player.render(&player,dt);
+	player.render(&player);
 
 	/* draw all objects */
 	draw_space(space);
 
 	/* draw particle effects */
-	paricles_draw(dt);
+	particles_draw(dt);
 	
 	/* something */
 	glLoadIdentity();
 	
 	/* draw GUI */
-	setTextAngle(0);
-	setTextSize(80);
-	setTextAlign(TEXT_CENTER);
-	glColor_from_color(draw_col_rainbow((int)((player.body->p.x+8000))));
-	font_drawText(0,0.8f*HEIGHT/2, "SPACE");
-	
+	setTextAngle(0); // TODO don't use global variables
 	setTextAlign(TEXT_LEFT);
 	setTextSize(10);
 
@@ -154,7 +156,7 @@ static void drawStars()
 	glPopMatrix();
 }
 
-void SPACE_init(){
+static void SPACE_init(){
 	cpVect gravity = cpv(0, -200);
 	
 	space = cpSpaceNew();
@@ -198,10 +200,10 @@ void SPACE_init(){
 	
 	//cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
 	
-	for(i = 1; i<5; i++){
-		for(j = 1; j<5; j++){
+	for(i = 1; i<10; i++){
+		for(j = 1; j<10; j++){
 			cpBody *boxBody = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, boxSize, boxSize)));
-			cpBodySetPos(boxBody, cpv(j*42, i*42));
+			cpBodySetPos(boxBody, cpv(j*(100), i*(boxSize)));
 			cpShape *boxShape = cpSpaceAddShape(space, cpBoxShapeNew(boxBody, boxSize, boxSize));
 			cpShapeSetFriction(boxShape, 0.7);
 			cpShapeSetUserData(boxShape,  draw_boxshape);
@@ -209,7 +211,7 @@ void SPACE_init(){
 	}
 }
 
-void SPACE_destroy()
+static void SPACE_destroy()
 {
 	cpSpaceDestroy(space);
 }
