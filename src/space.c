@@ -34,7 +34,7 @@ static cpFloat phys_step = 1/60.0f;
 cpSpace *space;
 
 /* camera settings */
-static int cam_relative = 1;
+static int cam_mode = 1;
 static float cam_dx = 0;
 static float cam_dy = 0;
 float cam_center_x = 0;
@@ -57,14 +57,17 @@ state state_space = {
 static void SPACE_update()
 {
 	accumulator += dt;
-
-	static int F1_pushed = 0;
 	if(keys[SDLK_F1]){
-		if (!F1_pushed) { 
-			F1_pushed = 1;
-			cam_relative = !cam_relative;
-		}
-	} else F1_pushed = 0;
+		cam_mode = 1;
+	}else if(keys[SDLK_F2]){
+		cam_mode = 2;
+	}else if(keys[SDLK_F3]){
+		cam_mode = 3;
+	}else if(keys[SDLK_F4]){
+		cam_mode = 4;
+	}else if(keys[SDLK_F5]){
+		cam_mode = 5;
+	}
 
 	if(keys[SDLK_ESCAPE]){
 		state_menu.parentState = &state_space;
@@ -88,26 +91,49 @@ static void SPACE_draw()
 
 	/* dynamic camera zoom */
 	float py = player.body->p.y / level_height;
+	if(cam_mode == 1){ /* fanzy zoom camera */
 
-	if (py < 0) {
-		/* undefined zoom! Reset/fix player position? */
-	} else if ( py < 0.2) {
-		cam_zoom = 2;
-		cam_center_y = 1 * level_height / (2*cam_zoom);
-	} else if (py < 0.4) {
-		cam_zoom = (3 + cos(5*M_PI * (py + 1))) / 2;
-		cam_center_y = level_height / (2*cam_zoom);
-	} else if (py < 0.6) {
-		cam_zoom = 1;
-		cam_center_y = level_height / (2*cam_zoom);
-	} else if (py < 0.8) {
-		cam_zoom = (3 - cos(5*M_PI * (py - 0.4 + 1))) / 2;
-		cam_center_y = level_height - level_height / (2*(cam_zoom));
-	} else if (py <= 1.0) {
-		cam_zoom = 2;
-		cam_center_y = 3 * level_height / (2*cam_zoom);
-	} else {
-		/* undefined zoom! Reset/fix player position? */
+		float scrlvl = 1.0f * HEIGHT/level_height;
+
+		if (py < 0) {
+			/* undefined zoom! Reset/fix player position? */
+		} else if ( py < 0.2) {
+			cam_zoom = 1+scrlvl;
+			cam_center_y = HEIGHT / (2*cam_zoom);
+		} else if (py < 0.4) {
+			cam_zoom = ((3 - (1-scrlvl)*2) + cos(5*M_PI * (py + 1))) / 2;
+			cam_center_y = HEIGHT / (2*cam_zoom);
+		} else if (py < 0.6) {
+			cam_zoom = scrlvl;
+			cam_center_y = level_height / (2);
+		} else if (py < 0.8) {
+			cam_zoom = ((3 - (1-scrlvl)*2) - cos(5*M_PI * (py - 0.4 + 1))) / 2;
+			cam_center_y = level_height - HEIGHT / (2*(cam_zoom));
+		} else if (py <= 1.0) {
+			cam_zoom = 1+scrlvl;
+			cam_center_y = level_height - HEIGHT / (2*cam_zoom);
+		} else {
+			/* undefined zoom! Reset/fix player position? */
+		}
+	}else if(cam_mode == 2 || cam_mode == 3){ /* simple zoomed camera */
+		if(cam_mode == 2){
+			cam_zoom = 2;
+		}else{
+			cam_zoom = 1.3;
+		}
+		cam_center_y = player.body->p.y;
+		if(cam_center_y > level_height - HEIGHT/(2*cam_zoom)){
+			cam_center_y = level_height - HEIGHT/(2*cam_zoom);
+		}else if(cam_center_y <  HEIGHT/(2*cam_zoom)){
+			cam_center_y = HEIGHT/(2*cam_zoom);
+		}
+
+	}else if(cam_mode == 4){
+		cam_zoom = 1.0f*HEIGHT/level_height;
+		cam_center_y = 1.0f*level_height/2;
+	}else{ /* whole map camera */
+		cam_zoom = 1.0f*HEIGHT/level_height;
+		cam_center_y = 1.0f*level_height/2;
 	}
 	
 	/* dynamic camera pos */
@@ -126,7 +152,7 @@ static void SPACE_draw()
 	if (cam_center_x > cam_right_limit) cam_center_x = cam_right_limit;
 
 	/* camera rotation */
-	if (!cam_relative) glRotatef(-cpBodyGetAngle(player.body) * MATH_180PI,0,0,1);
+	//if (!cam_relative) glRotatef(-cpBodyGetAngle(player.body) * MATH_180PI,0,0,1);
 	
 	/* draw background */
 	drawStars();
