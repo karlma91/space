@@ -9,6 +9,7 @@
 #include "space.h"
 #include "player.h"
 #include "menu.h"
+#include "math.h"
 
 
 #define star_count 1000
@@ -83,40 +84,40 @@ static void SPACE_update()
 static void SPACE_draw()
 {
 	//TODO to make dynamic camera zoom and pos depend on velocity (e.g. higher velocity -> less delay)
-	
+
 	/* dynamic camera zoom */
-	static const float zoom_delay = 0.9f; // 1.0 = manual zoom, 0.0 = no delay, <0 = oscillerende zoom, >1 = undefined, default = 0.9
-	static const float zoom_slow_grow = 0.2f; // bigger = slower outer zoom growth, deafult = 0.1f
-	static const float zoom_slow_shrink = 0.12f; // bigger = slower inner zoom growth, default = 0.5f
-	static const float zoom_scale = 1.0f;
-	cam_zoom = zoom_scale*((1.0f * (HEIGHT / 2 + player.body->p.y * zoom_slow_grow) / (player.body->p.y+(HEIGHT * zoom_slow_shrink)) ) * (1-zoom_delay) + cam_zoom * zoom_delay);
+	float py = player.body->p.y / level_height;
+
+	if (py < 0) {
+		/* undefined zoom! Reset/fix player position? */
+	} else if ( py < 0.2) {
+		cam_zoom = 2;
+		cam_center_y = 1 * level_height / (2*cam_zoom);
+	} else if (py < 0.4) {
+		cam_zoom = (3 + cos(5*M_PI * (py + 1))) / 2;
+		cam_center_y = level_height / (2*cam_zoom);
+	} else if (py < 0.6) {
+		cam_zoom = 1;
+		cam_center_y = level_height / (2*cam_zoom);
+	} else if (py < 0.8) {
+		cam_zoom = (3 - cos(5*M_PI * (py - 0.4 + 1))) / 2;
+		cam_center_y = level_height - level_height / (2*(cam_zoom));
+	} else if (py <= 1.0) {
+		cam_zoom = 2;
+		cam_center_y = 3 * level_height / (2*cam_zoom);
+	} else {
+		/* undefined zoom! Reset/fix player position? */
+	}
 	
 	/* dynamic camera pos */
 	static const float pos_delay = 0.9f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
 	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
-	static const float pos_rel_y = 0.1f; // default = 0.1
 	static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
-	static const float pos_rel_offset_y = 0; // default = 0.2
 	cam_dx = cam_dx * pos_delay + ((player.body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
-	cam_dy = cam_dy * pos_delay + ((player.body->rot.y * pos_rel_y - pos_rel_offset_y) * HEIGHT) * (1 - pos_delay) / cam_zoom;
 
 	cam_center_x = player.body->p.x + cam_dx;
-	cam_center_y = player.body->p.y + cam_dy;
 
 	/* camera constraints */
-	if (cam_zoom < HEIGHT / level_height) {
-		cam_zoom = HEIGHT / level_height; // ... > top limit - ground limit
-		//cam_center_y = level_height / 2;
-	}
-
-	static float cam_top_limit, cam_ground_limit;
-	cam_top_limit =  level_height - HEIGHT / (2 * cam_zoom);
-	cam_ground_limit = HEIGHT / (2 * cam_zoom);
-	if (cam_center_y > cam_top_limit)
-		cam_center_y = cam_top_limit;
-	if (cam_center_y < cam_ground_limit)
-		cam_center_y = cam_ground_limit;
-
 	static float cam_left_limit, cam_right_limit;
 	cam_left_limit = level_left + WIDTH / (2 * cam_zoom);
 	cam_right_limit = level_right - WIDTH / (2 * cam_zoom);

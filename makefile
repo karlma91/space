@@ -35,6 +35,10 @@ else ifeq ($(SYS),Darwin) #mac
 	chipmunk=-Ichipmunk/include -Lchipmunk/mac -lChipmunk
 endif
 
+all : build run
+
+build : main
+
 main : src/main.c src/*.h
 	$(precode)
 	gcc -o bin/main$(suffix) $(gamefiles) $(os_lib) $(openGL) $(sdl) $(chipmunk)
@@ -45,13 +49,13 @@ main : src/main.c src/*.h
 run :
 	if [ $(os) == 1 ]; then \
 		clear; \
-		make && bin/main; \
+		bin/main; \
 	elif [ $(os) == 2 ]; then \
 		cls; \
-		make && bin/main.exe; \
+		bin/main.exe; \
 	elif [ $(os) == 3 ]; then \
 		clear; \
-		make && bin/space.app/Contents/MacOS/main; \
+		bin/space.app/Contents/MacOS/main; \
 	else \
 		clear; \
 		echo "OS not recognized"; \
