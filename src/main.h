@@ -13,21 +13,6 @@ struct state_ {
 	state *parentState;
 };
 
-/* super object struct */
-typedef struct object_ object;
-struct object_ {
-	cpBody *body;
-	cpShape *shape;
-	void (*init)(object *obj);
-	void (*update)(object *obj);
-	void (*render)(object *obj);
-	void (*destroy)(object *obj);
-	void *data;
-};
-
-
-
-
 extern int WIDTH;
 extern int HEIGHT;
 /* The delta time */

@@ -8,14 +8,13 @@
 #include "space.h"
 #include "player.h"
 
+static void player_init(struct player *obj);
+static void player_render(struct player *obj);
+static void player_update(struct player *obj);
+static void player_destroy(struct player *obj);
+static void tmp_shoot(struct player *obj);
 
-static void player_init(object *obj);
-static void player_render(object *obj);
-static void player_update(object *obj);
-static void player_destroy(object *obj);
-static void tmp_shoot(object *obj);
-
-object player = {
+struct player player = {
 	NULL,
 	NULL,
 	player_init,
@@ -27,7 +26,7 @@ object player = {
 
 
 
-static void player_init(object *obj)
+static void player_init(struct player *obj)
 {
 	cpFloat radius = 10;
 	//cpFloat mass = 1;
@@ -43,7 +42,7 @@ static void player_init(object *obj)
 	
 }
 
-static void player_render(object *obj)
+static void player_render(struct player *obj)
 {
 	//float s = 0.001;
 	float dir = cpBodyGetAngle(obj->body);
@@ -55,7 +54,7 @@ static void player_render(object *obj)
 	font_drawText(obj->body->p.x,obj->body->p.y, text);
 }
 
-static void player_update(object *obj)
+static void player_update(struct player *obj)
 {
 	cpFloat pangvel = cpBodyGetAngVel(obj->body);
 	cpBodySetAngVel(obj->body, pangvel*0.9);
@@ -164,7 +163,7 @@ begin(cpArbiter *arb, cpSpace *space, void *unused)
 }
 
 
-static void tmp_shoot(object *obj) //TODO change dt to global
+static void tmp_shoot(struct player *obj) //TODO change dt to global
 {
 	//TMP shooting settings
 	static const float cooldown = 0.1f;
@@ -198,7 +197,7 @@ static void tmp_shoot(object *obj) //TODO change dt to global
 	
 }
 
-static void player_destroy(object *obj)
+static void player_destroy(struct player *obj)
 {
 
 }

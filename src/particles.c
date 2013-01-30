@@ -78,9 +78,9 @@ static void paricles_explosion_update(struct explosion *expl)
 				expl->particles[i].pos.y = 1000;
 			}
 			expl->particles[i].vel = cpvadd(expl->particles[i].vel,cpvmult(cpSpaceGetGravity(space),dt));
-			cpVect tp = expl->particles[i].pos;
+			//cpVect tp = expl->particles[i].pos;
 
-			cpVect tv = expl->particles[i].vel;
+			//cpVect tv = expl->particles[i].vel;
 		}
 }
 

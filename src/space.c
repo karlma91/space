@@ -26,6 +26,8 @@ static void SPACE_update();
 static void SPACE_draw();
 static void SPACE_destroy();
 
+static void update_objects(cpBody *body, void *unused);
+
 /* helper */
 static int i,j;
 
@@ -75,6 +77,8 @@ static void SPACE_update()
 		keys[SDLK_ESCAPE] = 0;
 	}
 
+	cpSpaceEachBody(space, update_objects, NULL);
+
 	player.update(&player);
 	particles_update(dt);
 	static int debug;
@@ -85,38 +89,47 @@ static void SPACE_update()
 		}
 }
 
+static void update_objects(cpBody *body, void *unused)
+{
+	if(body->data != NULL){
+		object *obj = ((object*)body->data);
+		obj->type->update(obj);
+	}
+}
+
 static void SPACE_draw()
 {
 	//TODO to make dynamic camera zoom and pos depend on velocity (e.g. higher velocity -> less delay)
 
 	/* dynamic camera zoom */
 	float py = player.body->p.y / level_height;
-	if(cam_mode == 1){ /* fanzy zoom camera */
+	if(cam_mode == 1 || cam_mode == 2){ /* fanzy zoom camera */
 
 		float scrlvl = 1.0f * HEIGHT/level_height;
 
+		float zoomlvl = cam_mode == 1 ? 4 : 12;
 		if (py < 0) {
 			/* undefined zoom! Reset/fix player position? */
 		} else if ( py < 0.2) {
-			cam_zoom = 1+scrlvl;
+			cam_zoom = 2 / zoomlvl + scrlvl;
 			cam_center_y = HEIGHT / (2*cam_zoom);
 		} else if (py < 0.4) {
-			cam_zoom = ((3 - (1-scrlvl)*2) + cos(5*M_PI * (py + 1))) / 2;
+			cam_zoom = (1 + cos(5*M_PI * (py + 1))) / zoomlvl + scrlvl;
 			cam_center_y = HEIGHT / (2*cam_zoom);
 		} else if (py < 0.6) {
 			cam_zoom = scrlvl;
 			cam_center_y = level_height / (2);
 		} else if (py < 0.8) {
-			cam_zoom = ((3 - (1-scrlvl)*2) - cos(5*M_PI * (py - 0.4 + 1))) / 2;
+			cam_zoom = (1 - cos(5*M_PI * (py - 0.4 + 1))) / zoomlvl + scrlvl;
 			cam_center_y = level_height - HEIGHT / (2*(cam_zoom));
 		} else if (py <= 1.0) {
-			cam_zoom = 1+scrlvl;
+			cam_zoom = 2 / zoomlvl + scrlvl;
 			cam_center_y = level_height - HEIGHT / (2*cam_zoom);
 		} else {
 			/* undefined zoom! Reset/fix player position? */
 		}
-	}else if(cam_mode == 2 || cam_mode == 3){ /* simple zoomed camera */
-		if(cam_mode == 2){
+	}else if(cam_mode == 3 || cam_mode == 4){ /* simple zoomed camera */
+		if(cam_mode == 3){
 			cam_zoom = 2;
 		}else{
 			cam_zoom = 1.3;
@@ -128,7 +141,7 @@ static void SPACE_draw()
 			cam_center_y = HEIGHT/(2*cam_zoom);
 		}
 
-	}else if(cam_mode == 4){
+	}else if(cam_mode == 5){
 		cam_zoom = 1.0f*HEIGHT/level_height;
 		cam_center_y = 1.0f*level_height/2;
 	}else{ /* whole map camera */
