@@ -39,6 +39,11 @@ float cam_center_x = 0;
 float cam_center_y = 0;
 float cam_zoom = 1;
 
+/* level data */
+static const int level_height = 1200;
+static const int level_left = -8000;
+static const int level_right = 8000;
+
 state state_space = {
 	SPACE_init,
 	SPACE_update,
@@ -94,10 +99,30 @@ static void SPACE_draw()
 	static const float pos_rel_offset_y = 0; // default = 0.2
 	cam_dx = cam_dx * pos_delay + ((player.body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
 	cam_dy = cam_dy * pos_delay + ((player.body->rot.y * pos_rel_y - pos_rel_offset_y) * HEIGHT) * (1 - pos_delay) / cam_zoom;
-	
+
 	cam_center_x = player.body->p.x + cam_dx;
 	cam_center_y = player.body->p.y + cam_dy;
-	
+
+	/* camera constraints */
+	if (cam_zoom < HEIGHT / level_height) {
+		cam_zoom = HEIGHT / level_height; // ... > top limit - ground limit
+		//cam_center_y = level_height / 2;
+	}
+
+	static float cam_top_limit, cam_ground_limit;
+	cam_top_limit =  level_height - HEIGHT / (2 * cam_zoom);
+	cam_ground_limit = HEIGHT / (2 * cam_zoom);
+	if (cam_center_y > cam_top_limit)
+		cam_center_y = cam_top_limit;
+	if (cam_center_y < cam_ground_limit)
+		cam_center_y = cam_ground_limit;
+
+	static float cam_left_limit, cam_right_limit;
+	cam_left_limit = level_left + WIDTH / (2 * cam_zoom);
+	cam_right_limit = level_right - WIDTH / (2 * cam_zoom);
+	if (cam_center_x < cam_left_limit) cam_center_x = cam_left_limit;
+	if (cam_center_x > cam_right_limit) cam_center_x = cam_right_limit;
+
 	/* camera rotation */
 	if (!cam_relative) glRotatef(-cpBodyGetAngle(player.body) * MATH_180PI,0,0,1);
 	
@@ -170,26 +195,25 @@ static void SPACE_init(){
 		stars_size[i] = 2 + 4*(rand() % 1000) / 1000.0f;
 	}
 	
-	cpFloat roofHeight = 1000;
 	/* static ground */
 	cpBody  *staticBody = space->staticBody;
 	cpShape *shape;
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-10000,0), cpv(10000,0), 10)); // ground level at 0
+	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,0), cpv(level_right,0), 10)); // ground level at 0
 	cpShapeSetUserData(shape, draw_segmentshape);
 	cpShapeSetElasticity(shape, 0.4f);
 	cpShapeSetFriction(shape, 0.4f);
 	// sets collision type to 1
 	cpShapeSetCollisionType(shape, 1);
 
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,roofHeight), cpv(8000,roofHeight), 10.0f));
+	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,level_height), cpv(level_right,level_height), 10.0f));
 	cpShapeSetUserData(shape, draw_segmentshape);
 	cpShapeSetElasticity(shape, 1.0f);
 	cpShapeSetCollisionType(shape, 1);
 
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(-8000,0), cpv(-8000,roofHeight), 10.0f));
+	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,0), cpv(level_left,level_height), 10.0f));
 	cpShapeSetUserData(shape, NULL);
 	cpShapeSetElasticity(shape, 1.0f);
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(8000,0), cpv(8000,roofHeight), 10.0f));
+	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_right,level_height), cpv(level_right,level_height), 10.0f));
 	cpShapeSetUserData(shape, NULL);
 	cpShapeSetElasticity(shape, 1.0f);
 
