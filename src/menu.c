@@ -7,6 +7,7 @@
 #include "main.h"
 #include "particles.h"
 #include "space.h"
+#include "levelselect.h"
 
 static void menu_init();
 static void menu_update();
@@ -115,6 +116,7 @@ static void mainmenu_func()
 		curMenu = &ingameMenu;
 		break;
 	case 1:
+		currentState = &state_levelselect;
 		break;
 	case 3:
 		main_stop();

@@ -25,6 +25,9 @@ struct object_ {
 	void *data;
 };
 
+
+
+
 extern int WIDTH;
 extern int HEIGHT;
 /* The delta time */
