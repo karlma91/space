@@ -47,7 +47,7 @@ static void player_render(object *obj)
 {
 	//float s = 0.001;
 	float dir = cpBodyGetAngle(obj->body);
-	setTextAlign(TEXT_LEFT);
+	setTextAlign(TEXT_CENTER);
 	setTextSize(10);
 	setTextAngleRad(dir);
 	static char text[20];

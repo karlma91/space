@@ -83,6 +83,7 @@ static void drawSymbol(char c)
 			glTranslatef(0,0.8f,0);
 			draw_line_strip(DOT,10, 0.5f);
 			glTranslatef(0,-0.8f,0);
+			/* no break */
 		case '.':
 			draw_line_strip(DOT,10, 0.5f);
 			break;

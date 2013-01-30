@@ -12,7 +12,7 @@
 #include "math.h"
 
 
-#define star_count 1000
+#define star_count 10000
 static int stars_x[star_count];
 static int stars_y[star_count];
 static float stars_size[star_count];
@@ -42,8 +42,8 @@ float cam_zoom = 1;
 
 /* level data */
 static const int level_height = 1200;
-static const int level_left = -8000;
-static const int level_right = 8000;
+static const int level_left = -2000;
+static const int level_right = 2000;
 
 state state_space = {
 	SPACE_init,
@@ -147,9 +147,14 @@ static void SPACE_draw()
 	glLoadIdentity();
 	
 	/* draw GUI */
-	setTextAngle(0); // TODO don't use global variables
+	setTextAngle(0); // TODO don't use global variables for setting font properties
 	setTextAlign(TEXT_LEFT);
 	setTextSize(10);
+
+	static float pptest = 1.0;
+	pptest -= rand()%(100) / 10000.0f;
+	if (pptest < 0) pptest = 1;
+	draw_hp(-400, 100, 80, 10, pptest);
 
 	glColor3f(1,1,1);
 	font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
