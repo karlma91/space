@@ -77,8 +77,12 @@ static void player_update(object *obj)
 	cpVect cpvrotate(const cpVect v1, const cpVect v2) Uses complex multiplication to rotate v1 by v2. Scaling will occur if v1 is not a unit vector.
 	*/
 
-	cpVect dirUp = cpvforangle(-0.06f);
-	cpVect dirDown = cpvforangle(0.06f);
+	/* units/sec */
+	cpFloat rotSpeed = 5.0;
+	cpFloat accel = 10000;
+
+	cpVect dirUp = cpvforangle(-rotSpeed*dt);
+	cpVect dirDown = cpvforangle(rotSpeed*dt);
 
 	cpFloat cspeed = cpvlength(cpBodyGetVel(obj->body));
 
@@ -96,8 +100,8 @@ static void player_update(object *obj)
 
 
 	//TODO: gjøre svinghastighet avhengig av dt
-	if(keys[SDLK_d]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),2500),cpvzero);
-	if(keys[SDLK_a]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),-2500),cpvzero);
+	if(keys[SDLK_d]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),accel*dt),cpvzero);
+	if(keys[SDLK_a]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),-accel*dt),cpvzero);
 	
 	if(keys[SDLK_g]){
 		keys[SDLK_g] = 0;
@@ -131,7 +135,7 @@ static void player_update(object *obj)
 	}
 	
 	if (keys[SDLK_x]) {
-		particles_add_explosion(cpBodyGetPos(obj->body), 40);
+		particles_add_explosion(cpBodyGetPos(obj->body),3000, 40);
 	}
 }
 
@@ -154,7 +158,7 @@ static int
 begin(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
-	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 40);
+	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 1000, 5);
 	cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, b, NULL);
 	return 0;
 }
