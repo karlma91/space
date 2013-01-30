@@ -10,6 +10,7 @@
 #include "player.h"
 #include "menu.h"
 #include "math.h"
+#include "tankfactory.h"
 
 
 #define star_count 10000
@@ -206,15 +207,15 @@ static void SPACE_init(){
 	cpShape *shape;
 	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,0), cpv(level_right,0), 10)); // ground level at 0
 	cpShapeSetUserData(shape, draw_segmentshape);
-	cpShapeSetElasticity(shape, 0.4f);
-	cpShapeSetFriction(shape, 0.4f);
+	cpShapeSetElasticity(shape, 0.2f);
+	cpShapeSetFriction(shape, 0.8f);
 	// sets collision type to 1
 	cpShapeSetCollisionType(shape, 1);
 
 	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,level_height), cpv(level_right,level_height), 10.0f));
 	cpShapeSetUserData(shape, draw_segmentshape);
-	cpShapeSetElasticity(shape, 1.0f);
-	cpShapeSetCollisionType(shape, 1);
+	cpShapeSetElasticity(shape, 0.2f);
+	cpShapeSetFriction(shape, 0.8f);
 
 	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,0), cpv(level_left,level_height), 10.0f));
 	cpShapeSetUserData(shape, NULL);
@@ -228,10 +229,13 @@ static void SPACE_init(){
 	
 	player.init(&player);
 	
+	object *tankFac = malloc(sizeof(object));
+	tankfactory_init(tankFac,500,10,100);
+
 	//cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
 	
-	for(i = 1; i<10; i++){
-		for(j = 1; j<10; j++){
+	for(i = 1; i<5; i++){
+		for(j = 1; j<5; j++){
 			cpBody *boxBody = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, boxSize, boxSize)));
 			cpBodySetPos(boxBody, cpv(j*(100), i*(boxSize)));
 			cpShape *boxShape = cpSpaceAddShape(space, cpBoxShapeNew(boxBody, boxSize, boxSize));

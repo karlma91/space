@@ -79,7 +79,7 @@ static void player_update(object *obj)
 
 	/* units/sec */
 	cpFloat rotSpeed = 5.0;
-	cpFloat accel = 10000;
+	cpFloat accel = 50000;
 
 	cpVect dirUp = cpvforangle(-rotSpeed*dt);
 	cpVect dirDown = cpvforangle(rotSpeed*dt);
