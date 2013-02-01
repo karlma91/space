@@ -315,6 +315,7 @@ void draw_hp(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p)
 {
 	float border;
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
+	p = (p < 1 ? (p > 0 ? p : 0) : 1);
 
 	/* outer edge */
 	glColor4f(1, 1, 1, 1);
@@ -331,9 +332,9 @@ void draw_hp(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p)
 	border *= 2;
 	glColor3f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1);
 	if (w > h) {
-		draw_simple_box(x + border, y + border, (w - border * 2) * (p < 1 ? p : 1), h - border * 2);
+		draw_simple_box(x + border, y + border, (w - border * 2) * p, h - border * 2);
 	} else {
-		draw_simple_box(x + border, y + border, w - border * 2, (h - border * 2) * (p < 1 ? p : 1));
+		draw_simple_box(x + border, y + border, w - border * 2, (h - border * 2) * p);
 	}
 
 	glPopAttrib();
