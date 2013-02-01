@@ -18,11 +18,11 @@ struct node_ {
 
 static node *head = NULL;
 static node **last = &head;
-//static node **previous = &head;
 
 void list_add(object* obj)
 {
-		(*last) = malloc(sizeof(node));
+		fprintf(stderr,"0x%010x\n",(*last) = malloc(sizeof(node)));
+
 		(*last)->obj = obj;
 		((*last)->remove) = 0;
 		(*last)->obj->remove = &((*last)->remove);
@@ -39,14 +39,18 @@ void list_iterate(void (*f)(object *))
 	node *n;
 	node **prev = &head;
 
-	for (n = head; n != NULL; prev = &(n->next), n = n->next) {
+	for (n = head; n != NULL;  ) {
 		if (n->remove) {
-			(*prev)->next = n->next;
+			(*prev) = n->next;
 			free(n);
+			n = (*prev);
 		} else {
 			f(n->obj);
+			prev = &(n->next);
+			n = n->next;
 		}
 	}
+	last = prev;
 }
 
 void list_iterate_type(void (*f)(object *), int type_id)
