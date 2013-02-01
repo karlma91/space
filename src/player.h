@@ -1,12 +1,14 @@
 
 struct player{
+	struct obj_type *type;
+	int instance_id;
+	int *remove;
 	cpBody *body;
 	cpShape *shape;
-	void (*init)(struct player *obj);
-	void (*update)(struct player *obj);
-	void (*render)(struct player *obj);
-	void (*destroy)(struct player *obj);
-	void *data;
+	float max_hp;
+	float hp;
 };
 
-extern struct player player;
+extern struct obj_type type_player;
+struct player player;
+object *player_init();

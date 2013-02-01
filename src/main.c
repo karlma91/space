@@ -107,7 +107,7 @@ int main( int argc, char* args[] )
   WIDTH = myPointer->current_w;
   HEIGHT = myPointer->current_h;
 
-  if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_OPENGL| SDL_DOUBLEBUF)))
+  if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_OPENGL| SDL_DOUBLEBUF| SDL_FULLSCREEN)))
     {
       printf("ERROR");
       SDL_Quit();

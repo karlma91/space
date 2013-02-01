@@ -12,6 +12,7 @@
 #include "math.h"
 #include "tankfactory.h"
 #include "tank.h"
+#include "list.h"
 
 static void init(object *fac);
 static void update(object *fac);
@@ -67,6 +68,7 @@ object *tankfactory_init( int x_pos , int max_tanks, float max_hp)
 	cpSpaceAddCollisionHandler(space, ID_TANK_FACTORY, ID_PLAYER_BULLET, collision_player_bullet, NULL, NULL, NULL, NULL);
 
 	cpBodySetUserData(fac->body, (object*)fac);
+	list_add((object*)fac);
 	return (object*)fac;
 }
 
@@ -122,4 +124,5 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 static void destroy(object *obj)
 {
 	*obj->remove = 1;
+	free(obj);
 }

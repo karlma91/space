@@ -8,66 +8,85 @@
 #include "space.h"
 #include "player.h"
 #include "tank.h"
+#include "list.h"
 
-static void player_init(struct player *obj);
-static void player_render(struct player *obj);
-static void player_update(struct player *obj);
-static void player_destroy(struct player *obj);
-static void tmp_shoot(struct player *obj);
+static void init(object *fac);
 
-struct player player = {
-	NULL,
-	NULL,
-	player_init,
+static void player_render(object *obj);
+static void player_update(object *obj);
+static void player_destroy(object *obj);
+static void tmp_shoot(object *obj);
+
+struct obj_type type_player = {
+	ID_PLAYER,
+	init,
 	player_update,
 	player_render,
-	player_destroy,
-	NULL
+	player_destroy
 };
 
+static struct player *temp;
 
-
-static void player_init(struct player *obj)
+object *player_init()
 {
 	cpFloat radius = 10;
 	//cpFloat mass = 1;
+
+	struct player *pl = malloc(sizeof(struct player));
+
+	pl->type = &type_player;
+	pl->max_hp = 200;
+	pl->hp = 200;
 	/* make and add new body */
-	obj->body = cpSpaceAddBody(space, cpBodyNew(10, cpMomentForBox(1.0f, radius, radius)));
-	cpBodySetPos(obj->body, cpv(0,990));
-	cpBodySetVelLimit(obj->body,700);
+	pl->body = cpSpaceAddBody(space, cpBodyNew(10, cpMomentForBox(1.0f, radius, radius)));
+	cpBodySetPos(pl->body, cpv(0,990));
+	cpBodySetVelLimit(pl->body,700);
 	/* make and connect new shape to body */
-	obj->shape = cpSpaceAddShape(space, cpBoxShapeNew(obj->body, radius, radius));
-	cpShapeSetFriction(obj->shape, 0.7);
-	cpShapeSetUserData(obj->shape, draw_boxshape);
-	cpShapeSetElasticity(obj->shape, 1.0f);
-	
+	pl->shape = cpSpaceAddShape(space, cpBoxShapeNew(pl->body, radius, radius));
+	cpShapeSetFriction(pl->shape, 0.7);
+	cpShapeSetUserData(pl->shape, draw_boxshape);
+	cpShapeSetElasticity(pl->shape, 1.0f);
+
+	cpBodySetUserData(pl->body, (object*)pl);
+	list_add((object*)pl);
+	return (object*)pl;
+
 }
 
-static void player_render(struct player *obj)
+static void init(object *fac)
 {
+	temp = ((struct player*)fac);
+}
+static void player_render(object *obj)
+{
+	temp = (struct player*)obj;
 	//float s = 0.001;
-	float dir = cpBodyGetAngle(obj->body);
+	float dir = cpBodyGetAngle(temp->body);
 	setTextAlign(TEXT_CENTER);
 	setTextSize(10);
 	setTextAngleRad(dir);
 	static char text[20];
-	sprintf(text, " SPEED: %.3f",cpvlength(cpBodyGetVel(obj->body)));
-	font_drawText(obj->body->p.x,obj->body->p.y, text);
+
+	sprintf(text, " SPEED: %.3f",cpvlength(cpBodyGetVel(temp->body)));
+	glColor3f(1,1,1);
+	font_drawText(temp->body->p.x,temp->body->p.y, text);
+	draw_hp(temp->body->p.x-20,temp->body->p.y+15,40,10,temp->hp/temp->max_hp);
 }
 
-static void player_update(struct player *obj)
+static void player_update(object *obj)
 {
-	cpFloat pangvel = cpBodyGetAngVel(obj->body);
-	cpBodySetAngVel(obj->body, pangvel*0.9);
+	temp = (struct player*)obj;
+	cpFloat pangvel = cpBodyGetAngVel(temp->body);
+	cpBodySetAngVel(temp->body, pangvel*0.9);
 	//cpVect pvel = cpBodyGetVel(obj->body);
 	
 	//update physics and player
-	cpVect rot = cpBodyGetRot(obj->body);
+	cpVect rot = cpBodyGetRot(temp->body);
 	rot = cpvmult(rot, 10000);
-	cpBodySetForce(obj->body, cpv(0,0));
-	cpBodySetTorque(obj->body, 0);
-	if (obj->body->p.x < level_left + 50) obj->body->p.x = level_right - 50;
-	if (obj->body->p.x > level_right - 50) obj->body->p.x = level_left + 50;
+	cpBodySetForce(temp->body, cpv(0,0));
+	cpBodySetTorque(temp->body, 0);
+	if (temp->body->p.x < level_left + 50) temp->body->p.x = level_right - 50;
+	if (temp->body->p.x > level_right - 50) temp->body->p.x = level_left + 50;
 
 
 	/*
@@ -84,24 +103,23 @@ static void player_update(struct player *obj)
 	cpVect dirUp = cpvforangle(-rotSpeed*dt);
 	cpVect dirDown = cpvforangle(rotSpeed*dt);
 
-	cpFloat cspeed = cpvlength(cpBodyGetVel(obj->body));
+	cpFloat cspeed = cpvlength(cpBodyGetVel(temp->body));
 
 	/* Player movement */
 	if(keys[SDLK_w] && cspeed > 100) {
-		cpBodySetVel(obj->body, cpvrotate(cpBodyGetVel(obj->body),dirUp));
+		cpBodySetVel(temp->body, cpvrotate(cpBodyGetVel(temp->body),dirUp));
 	}
 
 	if(keys[SDLK_s] && cspeed > 100) {
-		cpBodySetVel(obj->body, cpvrotate(cpBodyGetVel(obj->body),dirDown));
+		cpBodySetVel(temp->body, cpvrotate(cpBodyGetVel(temp->body),dirDown));
 	}
 
-	cpBodySetAngle(obj->body, cpvtoangle(cpBodyGetVel(obj->body)));
-	cpSpaceReindexShapesForBody(space, obj->body);
+	cpBodySetAngle(temp->body, cpvtoangle(cpBodyGetVel(temp->body)));
+	cpSpaceReindexShapesForBody(space, temp->body);
 
 
-	//TODO: gjøre svinghastighet avhengig av dt
-	if(keys[SDLK_d]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),accel*dt),cpvzero);
-	if(keys[SDLK_a]) cpBodyApplyForce(obj->body,cpvmult(cpBodyGetRot(obj->body),-accel*dt),cpvzero);
+	if(keys[SDLK_d]) cpBodyApplyForce(temp->body,cpvmult(cpBodyGetRot(temp->body),accel*dt),cpvzero);
+	if(keys[SDLK_a]) cpBodyApplyForce(temp->body,cpvmult(cpBodyGetRot(temp->body),-accel*dt),cpvzero);
 	
 	if(keys[SDLK_g]){
 		keys[SDLK_g] = 0;
@@ -119,15 +137,15 @@ static void player_update(struct player *obj)
 			cam_zoom = 1;  
 	}
 	if (keys[SDLK_r]){
-		obj->body->p.x=0;
-		obj->body->p.y=500;
+		temp->body->p.x=0;
+		temp->body->p.y=500;
 	}
 
 	if (keys[SDLK_h]) {
-		cpBodySetVelLimit(obj->body,5000);
-		cpBodySetAngVelLimit(obj->body,2);
-		cpBodySetVel(obj->body, cpvzero);
-		cpBodySetAngVel(obj->body, 0);
+		cpBodySetVelLimit(temp->body,5000);
+		cpBodySetAngVelLimit(temp->body,2);
+		cpBodySetVel(temp->body, cpvzero);
+		cpBodySetAngVel(temp->body, 0);
 	}
 	if(keys[SDLK_y]){
 		tank_init(200, 200.0f);
@@ -139,7 +157,7 @@ static void player_update(struct player *obj)
 	}
 	
 	if (keys[SDLK_x]) {
-		particles_add_explosion(cpBodyGetPos(obj->body),0.5f,3000, 40,200);
+		particles_add_explosion(cpBodyGetPos(temp->body),0.5f,3000, 40,200);
 	}
 }
 
@@ -168,8 +186,9 @@ begin(cpArbiter *arb, cpSpace *space, void *unused)
 }
 
 
-static void tmp_shoot(struct player *obj) //TODO change dt to global
+static void tmp_shoot(object *obj)
 {
+	temp = (struct player*)obj;
 	//TMP shooting settings
 	static const float cooldown = 0.1f;
 	static float time = 0;
@@ -184,10 +203,10 @@ static void tmp_shoot(struct player *obj) //TODO change dt to global
 	static const cpFloat radius = 5;
 	static const cpFloat mass = 1;
 	cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
-	cpVect prot = cpBodyGetRot(obj->body);
+	cpVect prot = cpBodyGetRot(temp->body);
 	
 	cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
-	cpBodySetPos(ballBody, cpvadd(cpv(obj->body->p.x, obj->body->p.y), cpvmult(prot,radius)));
+	cpBodySetPos(ballBody, cpvadd(cpv(temp->body->p.x, temp->body->p.y), cpvmult(prot,radius)));
 	
 	cpBodySetVel(ballBody,cpvmult(prot,1500));
 	
@@ -202,8 +221,9 @@ static void tmp_shoot(struct player *obj) //TODO change dt to global
 	
 }
 
-static void player_destroy(struct player *obj)
+static void player_destroy(object *obj)
 {
-
+	*obj->remove = 0;
+	free(obj);
 }
 

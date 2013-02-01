@@ -87,7 +87,6 @@ static void SPACE_update()
 			cpSpaceStep(space, phys_step);
 			accumulator -= phys_step;
 		}
-	player.update(&player);
 }
 
 static void update_objects(object *obj)
@@ -172,8 +171,6 @@ static void SPACE_draw()
 	glScalef(cam_zoom,cam_zoom,1);
 	glTranslatef(-cam_center_x, -cam_center_y, 0.0f);
 	
-	/* draw player */
-	player.render(&player);
 
 	/* draw all objects */
 	setTextAngle(0);
@@ -231,7 +228,6 @@ static void drawStars()
 	
 	glPopMatrix();
 }
-static void iterate(object *obj);
 static void SPACE_init(){
 	cpVect gravity = cpv(0, -200);
 	
@@ -262,13 +258,11 @@ static void SPACE_init(){
 	cpShapeSetFriction(shape, 0.8f);
 	cpShapeSetCollisionType(shape, ID_GROUND);
 	
-	player.init(&player);
-	
-	list_add(tankfactory_init(500,10,100));
-	list_add(tankfactory_init(100,10,100));
-	list_add(tankfactory_init(-500,10,100));
+	player = *((struct player*)player_init());
 
-
+	tankfactory_init(500,10,100);
+	tankfactory_init(100,10,100);
+	tankfactory_init(-500,10,100);
 
 }
 

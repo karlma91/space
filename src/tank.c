@@ -11,6 +11,7 @@
 #include "menu.h"
 #include "math.h"
 #include "tankfactory.h"
+#include "list.h"
 
 static void init(object *fac);
 static void update(object *fac);
@@ -29,11 +30,11 @@ struct obj_type type_tank= {
 struct tank {
 	struct obj_type *type;
 	int id;
+	int *remove;
 	cpBody *body;
 	cpShape *shape;
 	float max_hp;
 	float hp;
-	object *factory;
 };
 
 static struct tank *temp;
@@ -59,6 +60,7 @@ object *tank_init( int x_pos, float max_hp)
 	cpSpaceAddCollisionHandler(space, ID_TANK, ID_PLAYER_BULLET, collision_player_bullet, NULL, NULL, NULL, NULL);
 
 	cpBodySetUserData(tank->body, (object*)tank);
+	list_add((object*)tank);
 	return (object*)tank;
 }
 
@@ -113,5 +115,6 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 static void destroy(object *obj)
 {
+	*obj->remove = 1;
 	free(obj);
 }
