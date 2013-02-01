@@ -215,6 +215,9 @@ static void render_objects(cpBody *body, void *unused)
 	}
 }
 
+//TMP
+static void list_iterate_test(object *obj);
+
 #define SW (8000)
 static void drawStars()
 {
@@ -238,7 +241,6 @@ static void drawStars()
 	
 	glPopMatrix();
 }
-static void list_test(object* obj);
 
 static void SPACE_init(){
 	cpVect gravity = cpv(0, -200);
@@ -275,32 +277,15 @@ static void SPACE_init(){
 	
 	player.init(&player);
 	
-	object *tankFac = tankfactory_init(500,10,100);
-
-	fprintf(stderr, "add\n");
-	list_add(tankFac);
-	fprintf(stderr, "iterate\n");
-	list_iterate(list_test);
-	fprintf(stderr, "destroy\n");
+	list_add(tankfactory_init(500,10,100));
+	list_add(tankfactory_init(100,10,100));
+	list_add(tankfactory_init(-500,10,100));
+	list_iterate(list_iterate_test);
 	list_destroy();
-
-	//cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
-	
-	for(i = 1; i<5; i++){
-		for(j = 1; j<5; j++){
-			cpBody *boxBody = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, boxSize, boxSize)));
-			cpBodySetPos(boxBody, cpv(j*(100), i*(boxSize)));
-			cpShape *boxShape = cpSpaceAddShape(space, cpBoxShapeNew(boxBody, boxSize, boxSize));
-			cpShapeSetFriction(boxShape, 0.7);
-			cpShapeSetUserData(boxShape,  draw_boxshape);
-		}
-	}
-
 }
 
-static void list_test(object* obj)
-{
-	fprintf(stderr, "TYPE_ID: %d\n",obj->type->ID);
+static void list_iterate_test(object *obj) {
+	fprintf(stderr, "TYPE_ID: %d", obj->type->ID);
 }
 
 static void SPACE_destroy()

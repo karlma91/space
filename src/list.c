@@ -32,23 +32,23 @@ void list_add(object* obj)
 void list_iterate(void (*f)(object *))
 {
 	if (head == NULL) {
-		fprintf(stderr, "HEAD == NULL!\n");
 		return;
 	}
-	//TODO remove and free node
+
 	node *n;
-	for (n = head; n->next != NULL; n = n->next) {
-		fprintf(stderr, "HEAD != NULL!\n");
-		f(n->obj);
+	node **prev = &head;
+
+	for (n = head; n != NULL; prev = &(n->next), n = n->next) {
+		if (n->remove) {
+			(*prev)->next = n->next;
+			free(n);
+		} else {
+			f(n->obj);
+		}
 	}
 }
 
 void list_iterate_type(void (*f)(object *), int type_id)
-{
-
-}
-
-static void removeCurrent()
 {
 
 }
