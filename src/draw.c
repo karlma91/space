@@ -310,6 +310,7 @@ Color draw_col_grad(int hue)
 	return rainbow_col[hue];
 }
 
+//TODO: color customization
 void draw_hp(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p)
 {
 	float border;
@@ -321,14 +322,19 @@ void draw_hp(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p)
 	draw_simple_box(x, y, w, h);
 
 	/* inner edge */
-	border = 0.1 * h;
+
+	border = 0.1 * (w > h ? h : w);
 	glColor3f(0, 0, 0);
 	draw_simple_box(x + border, y + border, w - border * 2, h - border * 2);
 
 	/* hp bar */
-	border = 0.2 * h;
-	glColor3f(1-p*p, 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1);
-	draw_simple_box(x + border, y + border, (w - border * 2) * (p < 1 ? p : 1), h - border * 2);
+	border *= 2;
+	glColor3f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1);
+	if (w > h) {
+		draw_simple_box(x + border, y + border, (w - border * 2) * (p < 1 ? p : 1), h - border * 2);
+	} else {
+		draw_simple_box(x + border, y + border, w - border * 2, (h - border * 2) * (p < 1 ? p : 1));
+	}
 
 	glPopAttrib();
 }
