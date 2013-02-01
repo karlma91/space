@@ -128,13 +128,17 @@ static void player_update(struct player *obj)
 		cpBodySetVel(obj->body, cpvzero);
 		cpBodySetAngVel(obj->body, 0);
 	}
+	if(keys[SDLK_y]){
+		tank_init(200,100);
+		keys[SDLK_y] = 0;
+	}
 	
 	if (keys[SDLK_SPACE]) {
 		tmp_shoot(obj);
 	}
 	
 	if (keys[SDLK_x]) {
-		particles_add_explosion(cpBodyGetPos(obj->body),3000, 40);
+		particles_add_explosion(cpBodyGetPos(obj->body),0.5f,3000, 40,200);
 	}
 }
 
@@ -157,7 +161,7 @@ static int
 begin(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
-	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 1000, 5);
+	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 0.3f, 1200, 20,300);
 	cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, b, NULL);
 	return 0;
 }

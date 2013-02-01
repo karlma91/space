@@ -11,6 +11,7 @@
 #include "menu.h"
 #include "math.h"
 #include "tankfactory.h"
+#include "tank.h"
 
 static void init(object *fac);
 static void update(object *fac);
@@ -48,15 +49,13 @@ object *tankfactory_init( int x_pos , int max_tanks, float max_hp)
 	fac->max = max_tanks;
 	fac->max_hp = max_hp;
 
-	fac->max_hp = 1000; //TMP
+	fac->max_hp = 200; //TMP
 
 	fac->hp = fac->max_hp;
 
-	fac->x_pos = x_pos;
-
 	cpFloat size = 100;
 	/* make and add new body */
-	fac->body = cpSpaceAddBody(space, cpBodyNew(100, cpMomentForBox(10.0f, size, size)));
+	fac->body = cpSpaceAddBody(space, cpBodyNew(500, cpMomentForBox(500.0f, size, size)));
 	cpBodySetPos(fac->body, cpv(x_pos,size));
 
 	/* make and connect new shape to body */
@@ -79,8 +78,6 @@ static void init(object *fac)
 static void update(object *fac)
 {
 	temp = ((struct factory*)fac);
-	temp->timer+=dt;
-
 }
 
 static void render(object *fac)
@@ -109,10 +106,14 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	temp = ((struct factory*)(a->body->data));
 	temp->hp -= 10;
-	fprintf(stderr, "JEG BLE SKUTT HP: %.1f \t MAX_HP: %.1f\n", temp->hp, temp->max_hp);
-
-	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 1000, 5);
+	particles_add_explosion(b->body->p,0.3,1500,15,200);
 	cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, b, NULL);
+	if(temp->hp <=0 ){
+		destroy(a->body->data);
+		particles_add_explosion(a->body->p,1,2000,50,800);
+		cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
+	}
+
 	return 0;
 }
 

@@ -20,6 +20,7 @@ struct explosion {
 	int numParticles;
 	struct particle particles[MAX_PARTICLES];
 	float timer;
+	float tim_alive;
 };
 
 static struct explosion explosions[MAX_EXPLOSIONS];
@@ -72,10 +73,10 @@ static void paricles_explosion_update(struct explosion *expl)
 			expl->particles[i].pos = cpvadd(expl->particles[i].pos, cpvmult(expl->particles[i].vel,dt));
 			if(expl->particles[i].pos.y < 0){
 				expl->particles[i].vel.y = -expl->particles[i].vel.y;
-				expl->particles[i].pos.y = 0;
+				expl->particles[i].pos.y = 10;
 			}else if(expl->particles[i].pos.y > level_height){
 				expl->particles[i].vel.y = -expl->particles[i].vel.y;
-				expl->particles[i].pos.y = level_height;
+				expl->particles[i].pos.y = level_height-10;
 			}
 			expl->particles[i].vel = cpvadd(expl->particles[i].vel,cpvmult(cpSpaceGetGravity(space),dt));
 			//cpVect tp = expl->particles[i].pos;
@@ -93,7 +94,7 @@ static void paricles_explosion_draw(struct explosion *expl)
 		cpVect tv = expl->particles[i].vel;
 		Color c = expl->particles[i].color;
 		float fadeStart = 0.3f;
-		if(expl->timer > MAX_EXPLOSION_TIME-fadeStart){
+		if(expl->timer > expl->tim_alive -fadeStart){
 			c.a = (MAX_EXPLOSION_TIME - expl->timer) / (fadeStart);
 			expl->particles[i].vel.x*=0.85f;
 			expl->particles[i].vel.y*=0.85f;
@@ -102,11 +103,11 @@ static void paricles_explosion_draw(struct explosion *expl)
 			}
 		}
 		glColor4f(c.r, c.g, c.b, c.a);
-		draw_line(tp.x, tp.y, tp.x + tv.x/20, tp.y + tv.y/20, (MAX_EXPLOSION_TIME - expl->timer)*100);
+		draw_line(tp.x, tp.y, tp.x + tv.x/20, tp.y + tv.y/20, (MAX_EXPLOSION_TIME - expl->timer)*120);
 	}
 }
 
-void particles_add_explosion(cpVect v , int speed ,int num)
+void particles_add_explosion(cpVect v , float time, int speed ,int num,int col)
 {
 	if (current >= MAX_EXPLOSIONS) {
 		current = 0;
@@ -116,6 +117,7 @@ void particles_add_explosion(cpVect v , int speed ,int num)
 
 	explosions[current].alive = 1;
 	explosions[current].numParticles = num;
+	explosions[current].tim_alive = time;
 	int i;
 	for(i = 0; i < num; i++){
 		explosions[current].particles[i].speed =  rand() % speed;
@@ -123,7 +125,7 @@ void particles_add_explosion(cpVect v , int speed ,int num)
 		explosions[current].particles[i].pos.y = v.y;
 		explosions[current].particles[i].vel = cpvmult(cpvforangle(RAND_FLOAT * 2 * M_PI) ,explosions[current].particles[i].speed );
 
-		explosions[current].particles[i].color = draw_col_grad(rand());
+		explosions[current].particles[i].color = draw_col_grad(col);
 	
 		/*	if(ran == 0){
 			explosions[current].particles[i].color = RGBAColor(1,

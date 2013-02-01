@@ -273,19 +273,9 @@ static void SPACE_init(){
 	
 	player.init(&player);
 	
-	object *tankFac = tankfactory_init(500,10,100);
-
-	//cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
-	
-	for(i = 1; i<5; i++){
-		for(j = 1; j<5; j++){
-			cpBody *boxBody = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, boxSize, boxSize)));
-			cpBodySetPos(boxBody, cpv(j*(100), i*(boxSize)));
-			cpShape *boxShape = cpSpaceAddShape(space, cpBoxShapeNew(boxBody, boxSize, boxSize));
-			cpShapeSetFriction(boxShape, 0.7);
-			cpShapeSetUserData(boxShape,  draw_boxshape);
-		}
-	}
+	tankfactory_init(500,10,100);
+	tankfactory_init(100,10,100);
+	tankfactory_init(-500,10,100);
 }
 
 static void SPACE_destroy()
