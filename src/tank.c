@@ -31,8 +31,8 @@ struct tank {
 	int id;
 	cpBody *body;
 	cpShape *shape;
-	cpFloat max_hp;
-	cpFloat hp;
+	float max_hp;
+	float hp;
 	object *factory;
 };
 
@@ -102,11 +102,10 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	if(temp->hp <=0 ){
 		destroy(a->body->data);
 		a->body->data = NULL;
-		a->body->p.y = 400;
 		particles_add_explosion(a->body->p,1,2000,50,800);
 		cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
 	}
-	//cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, b, NULL);
+	cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, b, NULL);
 
 	return 0;
 }

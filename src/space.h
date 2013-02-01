@@ -27,6 +27,7 @@ struct obj_type {
 struct object_ {
 	struct obj_type *type;
 	int instance_id;
+	int *remove;
 };
 
 /* All collisoin types for objects */

@@ -11,6 +11,7 @@
 #include "menu.h"
 #include "math.h"
 #include "tankfactory.h"
+#include "list.h"
 
 
 #define star_count 10000
@@ -26,11 +27,11 @@ static void SPACE_update();
 static void SPACE_draw();
 static void SPACE_destroy();
 
-static void update_objects(cpBody *body, void *unused);
-static void render_objects(cpBody *body, void *unused);
+static void update_objects(object *obj);
+static void render_objects(object *obj);
 
 /* helper */
-static int i,j;
+int i,j;
 
 // Chipmunk
 static cpFloat phys_step = 1/60.0f;
@@ -78,24 +79,20 @@ static void SPACE_update()
 		keys[SDLK_ESCAPE] = 0;
 	}
 
-	cpSpaceEachBody(space, update_objects, NULL);
+	list_iterate(update_objects);
 
-	player.update(&player);
 	particles_update(dt);
-	static int debug;
 	while(accumulator >= phys_step)
 		{
 			cpSpaceStep(space, phys_step);
 			accumulator -= phys_step;
 		}
+	player.update(&player);
 }
 
-static void update_objects(cpBody *body, void *unused)
+static void update_objects(object *obj)
 {
-	if(body->data != NULL){
-		object *obj = ((object*)body->data);
-		obj->type->update(obj);
-	}
+	obj->type->update(obj);
 }
 
 static void SPACE_draw()
@@ -181,7 +178,7 @@ static void SPACE_draw()
 	/* draw all objects */
 	setTextAngle(0);
 	draw_space(space);
-	cpSpaceEachBody(space, render_objects, NULL);
+	list_iterate(render_objects);
 
 	/* draw particle effects */
 	particles_draw(dt);
@@ -206,12 +203,9 @@ static void SPACE_draw()
 	font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
 }
 
-static void render_objects(cpBody *body, void *unused)
+static void render_objects(object *obj)
 {
-	if(body->data != NULL){
-		object *obj = ((object*)body->data);
-		obj->type->render(obj);
-	}
+	obj->type->render(obj);
 }
 
 #define SW (8000)
@@ -237,7 +231,7 @@ static void drawStars()
 	
 	glPopMatrix();
 }
-
+static void iterate(object *obj);
 static void SPACE_init(){
 	cpVect gravity = cpv(0, -200);
 	
@@ -267,20 +261,21 @@ static void SPACE_init(){
 	cpShapeSetElasticity(shape, 0.2f);
 	cpShapeSetFriction(shape, 0.8f);
 	cpShapeSetCollisionType(shape, ID_GROUND);
-
-	cpFloat boxSize = 10.0f;
-	cpFloat mass = 1.0f;
 	
 	player.init(&player);
 	
-	tankfactory_init(500,10,100);
-	tankfactory_init(100,10,100);
-	tankfactory_init(-500,10,100);
+	list_add(tankfactory_init(500,10,100));
+	list_add(tankfactory_init(100,10,100));
+	list_add(tankfactory_init(-500,10,100));
+
+
+
 }
 
 static void SPACE_destroy()
 {
 	cpSpaceDestroy(space);
+	list_destroy();
 }
 
 

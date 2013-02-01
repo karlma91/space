@@ -7,6 +7,7 @@
 #include "particles.h"
 #include "space.h"
 #include "player.h"
+#include "tank.h"
 
 static void player_init(struct player *obj);
 static void player_render(struct player *obj);
@@ -129,7 +130,7 @@ static void player_update(struct player *obj)
 		cpBodySetAngVel(obj->body, 0);
 	}
 	if(keys[SDLK_y]){
-		tank_init(200,100);
+		tank_init(200, 200.0f);
 		keys[SDLK_y] = 0;
 	}
 	

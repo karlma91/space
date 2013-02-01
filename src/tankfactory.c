@@ -29,7 +29,8 @@ struct obj_type type_tank_factory = {
 
 struct factory {
 	struct obj_type *type;
-	int id;
+	int instance_id;
+	int *remove;
 	cpBody *body;
 	cpShape *shape;
 	int max;
@@ -120,5 +121,5 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 static void destroy(object *obj)
 {
-	free(obj);
+	*obj->remove = 1;
 }

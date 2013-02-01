@@ -24,9 +24,10 @@ void list_add(object* obj)
 {
 		(*last) = malloc(sizeof(node));
 		(*last)->obj = obj;
+		((*last)->remove) = 0;
+		(*last)->obj->remove = &((*last)->remove);
 		last = &((*last)->next);
 		(*last) = NULL;
-	//TODO set remove-pointer in object
 }
 
 void list_iterate(void (*f)(object *))
