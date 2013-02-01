@@ -27,27 +27,30 @@ struct obj_type type_tank_factory = {
 };
 
 struct factory {
+	struct obj_type *type;
 	int id;
 	cpBody *body;
 	cpShape *shape;
 	int max;
 	cpFloat timer;
 	int cur;
-	int max_hp;
-	int hp;
+	cpFloat max_hp;
+	cpFloat hp;
 	int x_pos;
 };
 
 static struct factory *temp;
 
-void tankfactory_init(object *obj, int x_pos , int max_tanks, int max_hp)
+object *tankfactory_init( int x_pos , int max_tanks, float max_hp)
 {
-	obj->type = &type_tank_factory;
-
 	struct factory *fac = malloc(sizeof(struct factory));
+	fac->type = &type_tank_factory;
 	fac->max = max_tanks;
 	fac->max_hp = max_hp;
-	fac->hp = max_hp;
+
+	fac->max_hp = 1000; //TMP
+
+	fac->hp = fac->max_hp;
 
 	fac->x_pos = x_pos;
 
@@ -55,7 +58,7 @@ void tankfactory_init(object *obj, int x_pos , int max_tanks, int max_hp)
 	/* make and add new body */
 	fac->body = cpSpaceAddBody(space, cpBodyNew(100, cpMomentForBox(10.0f, size, size)));
 	cpBodySetPos(fac->body, cpv(x_pos,size));
-	cpBodySetUserData(fac->body, obj);
+
 	/* make and connect new shape to body */
 	fac->shape = cpSpaceAddShape(space, cpBoxShapeNew(fac->body, size, size));
 	cpShapeSetFriction(fac->shape, 1);
@@ -63,30 +66,29 @@ void tankfactory_init(object *obj, int x_pos , int max_tanks, int max_hp)
 	cpShapeSetCollisionType(fac->shape, ID_TANK_FACTORY);
 	cpSpaceAddCollisionHandler(space, ID_TANK_FACTORY, ID_PLAYER_BULLET, collision, NULL, NULL, NULL, NULL);
 
-	obj->data = fac;
-
+	cpBodySetUserData(fac->body, (object*)fac);
+	return (object*)fac;
 }
 
 
 static void init(object *fac)
 {
-	temp = ((struct factory*)fac->data);
+	temp = ((struct factory*)fac);
 }
 
 static void update(object *fac)
 {
-	temp = ((struct factory*)fac->data);
+	temp = ((struct factory*)fac);
 	temp->timer+=dt;
 
 }
 
 static void render(object *fac)
 {
-	temp = ((struct factory*)fac->data);
+	temp = ((struct factory*)fac);
 
 	glColor3f(1,1,1);
-	setTextSize(20);
-	font_drawText(temp->shape->body->p.x,temp->shape->body->p.y+130,"TANK FACTORY");
+	draw_hp(temp->body->p.x-50, temp->body->p.y + 60, 100, 20, temp->hp / temp->max_hp);
 	glColor3f(1,1,0);
 	draw_boxshape(temp->shape);
 }
@@ -100,9 +102,15 @@ static void postStepRemove(cpSpace *space, cpShape *shape, void *unused)
 	//cpShapeFree(shape);
 }
 
-static int collision(cpArbiter *arb, cpSpace *space, void *unused)
+static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 {
-	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
+	cpShape *a, *b;
+	cpArbiterGetShapes(arb, &a, &b);
+
+	temp = ((struct factory*)(a->body->data));
+	temp->hp -= 10;
+	fprintf(stderr, "JEG BLE SKUTT HP: %.1f \t MAX_HP: %.1f\n", temp->hp, temp->max_hp);
+
 	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 1000, 5);
 	cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, b, NULL);
 	return 0;
@@ -111,5 +119,5 @@ static int collision(cpArbiter *arb, cpSpace *space, void *unused)
 
 static void destroy(object *obj)
 {
-	free(obj->data);
+	free(obj);
 }

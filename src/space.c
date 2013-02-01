@@ -273,8 +273,7 @@ static void SPACE_init(){
 	
 	player.init(&player);
 	
-	object *tankFac = malloc(sizeof(object));
-	tankfactory_init(tankFac,500,10,100);
+	object *tankFac = tankfactory_init(500,10,100);
 
 	//cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
 	
