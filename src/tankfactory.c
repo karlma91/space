@@ -16,7 +16,7 @@ static void init(object *fac);
 static void update(object *fac);
 static void render(object *fac);
 static void destroy(object *obj);
-static int collision(cpArbiter *arb, cpSpace *space, void *unused);
+static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 
 struct obj_type type_tank_factory = {
 	ID_TANK_FACTORY,
@@ -64,7 +64,7 @@ object *tankfactory_init( int x_pos , int max_tanks, float max_hp)
 	cpShapeSetFriction(fac->shape, 1);
 
 	cpShapeSetCollisionType(fac->shape, ID_TANK_FACTORY);
-	cpSpaceAddCollisionHandler(space, ID_TANK_FACTORY, ID_PLAYER_BULLET, collision, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, ID_TANK_FACTORY, ID_PLAYER_BULLET, collision_player_bullet, NULL, NULL, NULL, NULL);
 
 	cpBodySetUserData(fac->body, (object*)fac);
 	return (object*)fac;
