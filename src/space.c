@@ -27,6 +27,7 @@ static void SPACE_draw();
 static void SPACE_destroy();
 
 static void update_objects(cpBody *body, void *unused);
+static void render_objects(cpBody *body, void *unused);
 
 /* helper */
 static int i,j;
@@ -44,9 +45,9 @@ float cam_center_y = 0;
 float cam_zoom = 1;
 
 /* level data */
-static const int level_height = 1200;
-static const int level_left = -2000;
-static const int level_right = 2000;
+int level_height = 1200;
+int level_left = -2000;
+int level_right = 2000;
 
 state state_space = {
 	SPACE_init,
@@ -178,7 +179,9 @@ static void SPACE_draw()
 	player.render(&player);
 
 	/* draw all objects */
+	setTextAngle(0);
 	draw_space(space);
+	cpSpaceEachBody(space, render_objects, NULL);
 
 	/* draw particle effects */
 	particles_draw(dt);
@@ -201,6 +204,14 @@ static void SPACE_draw()
 	
 	setTextAlign(TEXT_RIGHT);
 	font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
+}
+
+static void render_objects(cpBody *body, void *unused)
+{
+	if(body->data != NULL){
+		object *obj = ((object*)body->data);
+		obj->type->render(obj);
+	}
 }
 
 #define SW (8000)
@@ -248,20 +259,14 @@ static void SPACE_init(){
 	cpShapeSetUserData(shape, draw_segmentshape);
 	cpShapeSetElasticity(shape, 0.2f);
 	cpShapeSetFriction(shape, 0.8f);
-	// sets collision type to 1
-	cpShapeSetCollisionType(shape, 1);
+	// sets collision type to ID_GROUND
+	cpShapeSetCollisionType(shape, ID_GROUND);
 
 	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,level_height), cpv(level_right,level_height), 10.0f));
 	cpShapeSetUserData(shape, draw_segmentshape);
 	cpShapeSetElasticity(shape, 0.2f);
 	cpShapeSetFriction(shape, 0.8f);
-
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,0), cpv(level_left,level_height), 10.0f));
-	cpShapeSetUserData(shape, NULL);
-	cpShapeSetElasticity(shape, 1.0f);
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_right,level_height), cpv(level_right,level_height), 10.0f));
-	cpShapeSetUserData(shape, NULL);
-	cpShapeSetElasticity(shape, 1.0f);
+	cpShapeSetCollisionType(shape, ID_GROUND);
 
 	cpFloat boxSize = 10.0f;
 	cpFloat mass = 1.0f;

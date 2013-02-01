@@ -65,8 +65,8 @@ static void player_update(struct player *obj)
 	rot = cpvmult(rot, 10000);
 	cpBodySetForce(obj->body, cpv(0,0));
 	cpBodySetTorque(obj->body, 0);
-	if (obj->body->p.x <= -7950) obj->body->p.x += 7950*2; //tmp wraparound	
-	if (obj->body->p.x >= 7950) obj->body->p.x -= 7950*2;
+	if (obj->body->p.x < level_left + 50) obj->body->p.x = level_right - 50;
+	if (obj->body->p.x > level_right - 50) obj->body->p.x = level_left + 50;
 
 
 	/*
@@ -190,10 +190,10 @@ static void tmp_shoot(struct player *obj) //TODO change dt to global
 	cpShapeSetFriction(ballShape, 0.7);
 	cpShapeSetUserData(ballShape, draw_ballshape);
 	// Sets bullets collision type to 2
-	cpShapeSetCollisionType(ballShape, 2);
+	cpShapeSetCollisionType(ballShape, ID_PLAYER_BULLET);
 	// runs callback begin when bullet (2) hits ground (1) 
 	// this will make bullet b and ground a in begin callback
-	cpSpaceAddCollisionHandler(space, 1, 2, begin, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, ID_GROUND, ID_PLAYER_BULLET, begin, NULL, NULL, NULL, NULL);
 	
 }
 

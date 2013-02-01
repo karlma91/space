@@ -73,9 +73,9 @@ static void paricles_explosion_update(struct explosion *expl)
 			if(expl->particles[i].pos.y < 0){
 				expl->particles[i].vel.y = -expl->particles[i].vel.y;
 				expl->particles[i].pos.y = 0;
-			}else if(expl->particles[i].pos.y > 1000){
+			}else if(expl->particles[i].pos.y > level_height){
 				expl->particles[i].vel.y = -expl->particles[i].vel.y;
-				expl->particles[i].pos.y = 1000;
+				expl->particles[i].pos.y = level_height;
 			}
 			expl->particles[i].vel = cpvadd(expl->particles[i].vel,cpvmult(cpSpaceGetGravity(space),dt));
 			//cpVect tp = expl->particles[i].pos;

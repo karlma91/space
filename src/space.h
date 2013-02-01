@@ -6,6 +6,11 @@ extern float cam_center_x;
 extern float cam_center_y;
 extern float cam_zoom;
 
+/* level data */
+extern int level_height;
+extern int level_left;
+extern int level_right;
+
 /* chipmunk physics space */
 extern cpSpace *space;
 
@@ -22,4 +27,13 @@ struct obj_type {
 struct object_ {
 	struct obj_type *type;
 	void *data;
+};
+
+/* All collisoin types for objects */
+enum OBJECT_ID {
+	ID_PLAYER,
+	ID_GROUND,
+	ID_PLAYER_BULLET,
+	ID_TANK_FACTORY,
+	ID_TANK
 };
