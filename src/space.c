@@ -249,6 +249,8 @@ static void drawStars()
 	glPopMatrix();
 }
 static void SPACE_init(){
+	list_init();
+
 	cpVect gravity = cpv(0, -200);
 	
 	space = cpSpaceNew();
