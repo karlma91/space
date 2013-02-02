@@ -87,7 +87,8 @@ static void paricles_explosion_update(struct explosion *expl)
 
 static void paricles_explosion_draw(struct explosion *expl)
 {
-
+	glPushAttrib(GL_COLOR_BUFFER_BIT);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	int i;
 	for(i = 0; i < (expl->numParticles); i++){
 		cpVect tp = expl->particles[i].pos;
@@ -105,6 +106,7 @@ static void paricles_explosion_draw(struct explosion *expl)
 		glColor4f(c.r, c.g, c.b, c.a);
 		draw_line(tp.x, tp.y, tp.x + tv.x/20, tp.y + tv.y/20, (MAX_EXPLOSION_TIME - expl->timer)*120);
 	}
+	glPopAttrib();
 }
 
 void particles_add_explosion(cpVect v , float time, int speed ,int num,int col)

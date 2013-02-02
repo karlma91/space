@@ -280,11 +280,11 @@ void draw_ballshape(cpShape *shape)
 
 	//draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
-void draw_boxshape(cpShape *shape)
+void draw_boxshape(cpShape *shape, Color a, Color b)
 {
 	glLineWidth(2);
 	cpPolyShape *poly = (cpPolyShape *)shape;
-	draw_polygon(poly->numVerts, poly->tVerts,RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
+	draw_polygon(poly->numVerts, poly->tVerts,a,b);
 }
 void draw_segmentshape(cpShape *shape)
 {

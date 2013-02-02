@@ -71,6 +71,8 @@ static void SPACE_update()
 		cam_mode = 4;
 	}else if(keys[SDLK_F5]){
 		cam_mode = 5;
+	}else if(keys[SDLK_F6]){
+		cam_mode = 6;
 	}
 
 	if(keys[SDLK_ESCAPE]){
@@ -141,7 +143,30 @@ static void SPACE_draw()
 	}else if(cam_mode == 5){
 		cam_zoom = 1.0f*HEIGHT/level_height;
 		cam_center_y = 1.0f*level_height/2;
-	}else{ /* whole map camera */
+	}else if(cam_mode == 6){
+
+		float scrlvl = 1.0f * HEIGHT/level_height;
+		/* parameters to change */
+		float zoomlvl = 4; /* amount of zoom less is more zoom */
+		float startlvl = 0.8;
+		float endlvl = 0.2;
+
+		float freq = startlvl-endlvl;
+		if (py < 0) {
+			/* undefined zoom! Reset/fix player position? */
+		} else if ( py < endlvl) {
+			cam_zoom = 2 / zoomlvl + scrlvl;
+			cam_center_y = HEIGHT / (2*cam_zoom);
+		} else if (py < startlvl) {
+			cam_zoom = (1 - cos( (1/freq)*M_PI*(py + (freq-endlvl) ))) / zoomlvl + scrlvl;
+			cam_center_y = HEIGHT / (2*cam_zoom);
+		} else if (py < 1) {
+			cam_zoom = scrlvl;
+			cam_center_y = level_height / (2);
+		}else{
+
+		}
+	}else{
 		cam_zoom = 1.0f*HEIGHT/level_height;
 		cam_center_y = 1.0f*level_height/2;
 	}
@@ -187,11 +212,6 @@ static void SPACE_draw()
 	setTextAngle(0); // TODO don't use global variables for setting font properties
 	setTextAlign(TEXT_LEFT);
 	setTextSize(10);
-
-	static float pptest = 1.0;
-	pptest -= rand()%(100) / 10000.0f;
-	if (pptest < 0) pptest = 1;
-	draw_hp(-400, 100, 80, 10, pptest);
 
 	glColor3f(1,1,1);
 	font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
@@ -260,9 +280,9 @@ static void SPACE_init(){
 	
 	player = *((struct player*)player_init());
 
-	tankfactory_init(500,10,100);
-	tankfactory_init(100,10,100);
-	tankfactory_init(-500,10,100);
+	tankfactory_init(500,3,100);
+	tankfactory_init(100,3,100);
+	tankfactory_init(-500,3,100);
 
 }
 

@@ -147,10 +147,6 @@ static void player_update(object *obj)
 		cpBodySetVel(temp->body, cpvzero);
 		cpBodySetAngVel(temp->body, 0);
 	}
-	if(keys[SDLK_y]){
-		tank_init(200, 200.0f);
-		keys[SDLK_y] = 0;
-	}
 	
 	if (keys[SDLK_SPACE]) {
 		tmp_shoot(obj);

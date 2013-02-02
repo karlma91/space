@@ -35,27 +35,30 @@ struct tank {
 	cpShape *shape;
 	float max_hp;
 	float hp;
+	struct tank_factory *factory;
 };
 
 static struct tank *temp;
 
-object *tank_init( int x_pos, float max_hp)
+object *tank_init(struct tank_factory *fac, float max_hp)
 {
 
 	struct tank *tank = malloc(sizeof(struct tank));
 	tank->type = &type_tank;
 	tank->max_hp = max_hp;
 	tank->hp = tank->max_hp;
+	tank->factory = fac;
 
 	cpFloat size = 50;
 	/* make and add new body */
 	tank->body = cpSpaceAddBody(space, cpBodyNew(20, cpMomentForBox(20.0f, size, size)));
-	cpBodySetPos(tank->body, cpv(x_pos,size+10));
-
+	cpBodySetPos(tank->body, cpv(fac->body->p.x,size+10));
+	cpBodySetVelLimit(tank->body,180);
 	/* make and connect new shape to body */
 	tank->shape = cpSpaceAddShape(space, cpBoxShapeNew(tank->body, size, size));
-	cpShapeSetFriction(tank->shape, 1);
-
+	cpShapeSetFriction(tank->shape, 0.01);
+	//cpShapeSetGroup(tank->shape, 10);
+	cpShapeSetLayers(tank->shape,4);
 	cpShapeSetCollisionType(tank->shape, ID_TANK);
 	cpSpaceAddCollisionHandler(space, ID_TANK, ID_PLAYER_BULLET, collision_player_bullet, NULL, NULL, NULL, NULL);
 
@@ -73,7 +76,24 @@ static void init(object *fac)
 static void update(object *fac)
 {
 	temp = ((struct tank*)fac);
+	cpFloat tx = temp->body->p.x;
+	cpFloat px = player.body->p.x;
 
+	cpFloat ptx = (px-tx); //direct way
+	cpFloat pltx = (tx - level_left + (level_right - px));
+	cpFloat prtx = (level_right - tx + (px - level_left));
+	if(fabs(ptx) < prtx && fabs(ptx) < pltx){
+		ptx = ptx>0? 1:-1;
+	}else if(pltx < prtx){
+		ptx = -1;
+	}else {
+		ptx = 1;
+	}
+
+	cpBodySetForce(temp->body,cpv(ptx*12000,0));
+
+	if (temp->body->p.x < level_left + 50) temp->body->p.x = level_right - 50;
+	if (temp->body->p.x > level_right - 50) temp->body->p.x = level_left + 50;
 }
 
 static void render(object *fac)
@@ -83,7 +103,7 @@ static void render(object *fac)
 	glColor3f(1,1,1);
 	draw_hp(temp->body->p.x-50, temp->body->p.y + 60, 100, 20, temp->hp / temp->max_hp);
 	glColor3f(1,1,0);
-	draw_boxshape(temp->shape);
+	draw_boxshape(temp->shape,RGBAColor(0.8,0.3,0.1,1),RGBAColor(0.8,0.6,0.3,1));
 }
 
 static void postStepRemove(cpSpace *space, cpShape *shape, void *unused)
@@ -101,6 +121,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	cpArbiterGetShapes(arb, &a, &b);
 	temp = ((struct tank*)(a->body->data));
 	temp->hp -= 10;
+	particles_add_explosion(b->body->p,0.3,1500,15,200);
 	if(temp->hp <=0 ){
 		destroy(a->body->data);
 		a->body->data = NULL;
@@ -115,6 +136,11 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 static void destroy(object *obj)
 {
+	temp = ((struct tank*)obj);
+	if(*(temp->factory->remove) < 1 ){
+		(temp->factory->cur) -= 1;
+		(temp->factory->timer) = 0;
+	}
 	*obj->remove = 1;
 	free(obj);
 }
