@@ -1,14 +1,22 @@
-#include "chipmunk.h"
-#include "SDL.h"
-#include "SDL_opengl.h"
+/* header */
+#include "player.h"
+
+/* standard c-libraries */
+#include <stdio.h>
+#include <time.h>
+
+/* Game state */
+#include "space.h"
+
+/* Drawing */
 #include "draw.h"
 #include "font.h"
-#include "main.h"
 #include "particles.h"
-#include "space.h"
-#include "player.h"
+
+/* Game components */
+#include "objects.h"
 #include "tank.h"
-#include "list.h"
+
 
 static void init(object *fac);
 
@@ -222,4 +230,3 @@ static void player_destroy(object *obj)
 	*obj->remove = 0;
 	free(obj);
 }
-

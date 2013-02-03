@@ -1,16 +1,22 @@
-#include <stdio.h>
-#include <time.h>
-#include "SDL.h"
-#include "chipmunk.h"
-#include "SDL_opengl.h"
-#include "draw.h"
-#include "font.h"
+/* header */
 #include "main.h"
 
-/* state header files */
+/* standard c-libraries */
+#include <stdio.h>
+#include <time.h>
+
+/* SDL and OpenGL */
+#include "SDL.h"
+#include "SDL_opengl.h"
+
+/* Chipmunk physics library */
+#include "chipmunk.h"
+
+/* Game states */
 #include "space.h"
 #include "menu.h"
 #include "levelselect.h"
+
 
 static void game_destroy();
 
@@ -18,12 +24,11 @@ static float fps;
 static float frames;
 
 /* definition of external variables */
-//external
 char fps_buf[15];
 int WIDTH;
 int HEIGHT;
 float dt;
-Uint8 *keys;
+unsigned char *keys;
 state *currentState;
 
 static int main_running = 1;
@@ -213,4 +218,3 @@ static void game_destroy()
 	draw_destroy();
 	font_destroy();
 }
-

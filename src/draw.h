@@ -1,6 +1,8 @@
-//#ifndef SPACE_DRAW_HEADER
-//#define SPACE_DRAW_HEADER
+#ifndef DRAW_H_
+#define DRAW_H_
 
+#include "SDL.h"
+#include "SDL_opengl.h"
 #include "chipmunk.h"
 
 #define CIRCLE_SMALL 16
@@ -56,3 +58,6 @@ void draw_shape(cpShape *shape, void *unused);
 void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h);
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_hp(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p);
+
+
+#endif /* DRAW_H_ */

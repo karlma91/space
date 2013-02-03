@@ -1,18 +1,20 @@
-#include "stdio.h"
-#include "SDL.h"
-#include "chipmunk.h"
-#include "SDL_opengl.h"
-#include "draw.h"
-#include "font.h"
-#include "main.h"
-#include "particles.h"
-#include "space.h"
-#include "player.h"
-#include "menu.h"
-#include "math.h"
+/* header */
 #include "tankfactory.h"
+
+/* standard c-libraries */
+#include <stdio.h>
+#include <math.h>
+
+/* Game state */
+#include "space.h"
+
+/* Drawing */
+#include "draw.h"
+#include "particles.h"
+
+/* Game components */
+#include "player.h"
 #include "tank.h"
-#include "list.h"
 
 static void init(object *fac);
 static void update(object *fac);

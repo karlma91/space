@@ -1,3 +1,7 @@
+#ifndef FONT_H_
+#define FONT_H_
+
+
 #include "constants.h"
 
 // text alignment constants
@@ -26,3 +30,6 @@ extern float font_text_size, font_text_angle;
 void font_drawText(float x, float y, char* text);
 void font_init();
 void font_destroy();
+
+
+#endif /* FONT_H_ */

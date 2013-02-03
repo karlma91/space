@@ -1,18 +1,22 @@
-#include "stdio.h"
-#include "SDL.h"
-#include "chipmunk.h"
-#include "SDL_opengl.h"
+/* header */
+#include "space.h"
+
+/* standard c-libraries */
+#include <stdio.h>
+
+/* Game state */
+#include "main.h"
+#include "menu.h"
+
+/* Drawing */
 #include "draw.h"
 #include "font.h"
-#include "main.h"
 #include "particles.h"
-#include "space.h"
-#include "player.h"
-#include "menu.h"
-#include "math.h"
-#include "tankfactory.h"
-#include "list.h"
 
+/* Game components */
+#include "objects.h"
+#include "player.h"
+#include "tankfactory.h"
 
 #define star_count 10000
 static int stars_x[star_count];
@@ -293,5 +297,3 @@ static void SPACE_destroy()
 	cpSpaceDestroy(space);
 	list_destroy();
 }
-
-

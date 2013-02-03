@@ -1,14 +1,21 @@
-#include "stdio.h"
-#include "SDL.h"
+/* header */
+#include "levelselect.h"
+
+/* standard c-libraries */
+#include <stdio.h>
+
+/* Chipmunk physics library */
 #include "chipmunk.h"
-#include "SDL_opengl.h"
+
+/* Game state */
+#include "main.h"
+#include "menu.h"
+
+/* Drawing */
 #include "draw.h"
 #include "font.h"
-#include "main.h"
-#include "particles.h"
-#include "space.h"
 
-
+/* static prototypes */
 static void init();
 static void update();
 static void render();

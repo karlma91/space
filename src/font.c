@@ -1,7 +1,15 @@
-#include "string.h"
+/* header */
 #include "font.h"
-#include "SDL_opengl.h"
+
+/* standard c-libraries */
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+
+/* Drawing */
 #include "draw.h"
+#include "particles.h"
+
 
 // initialize global variables
 int font_text_align = TEXT_CENTER;

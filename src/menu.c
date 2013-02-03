@@ -1,14 +1,19 @@
-#include "stdio.h"
-#include "SDL.h"
-#include "chipmunk.h"
-#include "SDL_opengl.h"
-#include "draw.h"
-#include "font.h"
+/* header */
+#include "menu.h"
+
+/* standard c-libraries */
+#include <stdio.h>
+
+/* Game state */
 #include "main.h"
-#include "particles.h"
 #include "space.h"
 #include "levelselect.h"
 
+/* Drawing */
+#include "draw.h"
+#include "font.h"
+
+/* static prototypes */
 static void menu_init();
 static void menu_update();
 static void menu_draw();
@@ -16,7 +21,6 @@ static void menu_destroy();
 
 static void optionmenu_func();
 static void mainmenu_func();
-
 
 state state_menu = {
 	menu_init,

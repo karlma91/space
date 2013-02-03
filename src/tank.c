@@ -1,18 +1,24 @@
-#include "stdio.h"
-#include "SDL.h"
-#include "chipmunk.h"
-#include "SDL_opengl.h"
-#include "draw.h"
-#include "font.h"
-#include "main.h"
-#include "particles.h"
-#include "space.h"
-#include "player.h"
-#include "menu.h"
-#include "math.h"
-#include "tankfactory.h"
-#include "list.h"
+/* header */
+#include "tank.h"
 
+/* standard c-libraries */
+#include <stdio.h>
+#include <math.h>
+
+/* Chipmunk physics library */
+#include "chipmunk.h"
+
+/* Game state */
+#include "space.h"
+
+/* Drawing */
+#include "draw.h"
+#include "particles.h"
+
+/* Game components */
+#include "player.h"
+
+/* static prototypes */
 static void init(object *fac);
 static void update(object *fac);
 static void render(object *fac);

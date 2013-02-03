@@ -1,5 +1,7 @@
-//#ifndef SPACE_MAIN_HEADER
-//#define SPACE_MAIN_HEADER
+#ifndef MAIN_H_
+#define MAIN_H_
+
+#include <stdlib.h>
 
 #define SLEEP_TIME 1
 
@@ -18,7 +20,7 @@ extern int HEIGHT;
 /* The delta time */
 extern float dt;
 
-extern Uint8 *keys;
+extern unsigned char *keys;
 
 extern char fps_buf[];
 /* current state in use */
@@ -26,5 +28,5 @@ extern state *currentState;
 
 extern int main_stop();
 
-//#endif
 
+#endif /* MAIN_H_ */

@@ -1,11 +1,7 @@
-#include "stdio.h"
-#include "SDL.h"
-#include "chipmunk.h"
-#include "SDL_opengl.h"
 #include "particles.h"
-#include "draw.h"
+
 #include "constants.h"
-#include "main.h"
+#include "draw.h"
 #include "space.h"
 
 struct particle {
@@ -150,4 +146,3 @@ void particles_add_explosion(cpVect v , float time, int speed ,int num,int col)
 	}
 	current++;
 }
-

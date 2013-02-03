@@ -1,3 +1,8 @@
+#ifndef SPACE_H_
+#define SPACE_H_
+
+#include "chipmunk.h"
+#include "main.h"
 
 extern state state_space;
 
@@ -14,29 +19,5 @@ extern int level_right;
 /* chipmunk physics space */
 extern cpSpace *space;
 
-typedef struct object_ object;
 
-struct obj_type {
-	int ID;
-	void (*init)(object *obj);
-	void (*update)(object *obj);
-	void (*render)(object *obj);
-	void (*destroy)(object *obj);
-};
-
-struct object_ {
-	struct obj_type *type;
-	int instance_id;
-	int *remove;
-};
-
-/* All collisoin types for objects */
-enum OBJECT_ID {
-	ID_PLAYER,
-	ID_GROUND,
-	ID_PLAYER_BULLET,
-	ID_TANK_FACTORY,
-	ID_TANK,
-
-	ID_COUNT
-};
+#endif /* SPACE_H_ */
