@@ -1,13 +1,7 @@
-#include "stdlib.h"
-#include "SDL.h"
-#include "chipmunk.h"
-#include "SDL_opengl.h"
-#include "draw.h"
-#include "font.h"
-#include "main.h"
-#include "particles.h"
-#include "space.h"
-#include "math.h"
+#include "objects.h"
+
+#include <stdlib.h>
+#include <stdio.h>
 
 typedef struct node_ node;
 struct node_ {
@@ -27,7 +21,6 @@ void list_init() {
 		head_all[i] = NULL;
 		last_all[i] = &(head_all[i]);
 	}
-	fprintf(stderr,"id: %d\n", ID_COUNT);
 }
 
 /* add object into its corresponding list */
