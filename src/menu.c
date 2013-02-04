@@ -47,10 +47,10 @@ static struct menu mainMenuTest = {
 };
 
 static struct menu ingameMenu = {
-		2,
+		3,
 		0,
 		optionmenu_func,
-		{"RESUME","MAINMENU"}
+		{"RESUME","RESTART","MAINMENU"}
 };
 
 static struct menu *curMenu; //current active menu
@@ -60,6 +60,18 @@ static int i;
 static const Color col_item   = {1,0,0,1};
 static const Color col_select = {0,0,1,1};
 
+
+void change_current_menu(int menu)
+{
+	switch(menu){
+	case INGAME_MENU_ID:
+		curMenu = &ingameMenu;
+		break;
+	case MAIN_MENU_ID:
+		curMenu = &mainMenuTest;
+		break;
+	}
+}
 
 static void menu_init()
 {
@@ -137,6 +149,10 @@ static void optionmenu_func()
 		currentState = &state_space;
 		break;
 	case 1:
+		currentState = &state_space;
+		space_init_level(1);
+		break;
+	case 2:
 		state_menu.parentState = 0;
 		curMenu = &mainMenuTest;
 		currentState = &state_menu;

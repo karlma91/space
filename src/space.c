@@ -252,6 +252,30 @@ static void drawStars()
 	
 	glPopMatrix();
 }
+
+void space_init_level(int lvl)
+{
+	/* static ground */
+		cpBody  *staticBody = space->staticBody;
+		cpShape *shape;
+		shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,0), cpv(level_right,0), 10)); // ground level at 0
+		cpShapeSetUserData(shape, draw_segmentshape);
+		cpShapeSetElasticity(shape, 0.2f);
+		cpShapeSetFriction(shape, 0.8f);
+		// sets collision type to ID_GROUND
+		cpShapeSetCollisionType(shape, ID_GROUND);
+
+		shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,level_height), cpv(level_right,level_height), 10.0f));
+		cpShapeSetUserData(shape, draw_segmentshape);
+		cpShapeSetElasticity(shape, 0.2f);
+		cpShapeSetFriction(shape, 0.8f);
+		cpShapeSetCollisionType(shape, ID_GROUND);
+
+		tankfactory_init(500,3,100);
+		tankfactory_init(100,3,100);
+		tankfactory_init(-500,3,100);
+}
+
 static void SPACE_init(){
 	list_init();
 
@@ -268,28 +292,8 @@ static void SPACE_init(){
 		stars_size[i] = 2 + 4*(rand() % 1000) / 1000.0f;
 	}
 	
-	/* static ground */
-	cpBody  *staticBody = space->staticBody;
-	cpShape *shape;
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,0), cpv(level_right,0), 10)); // ground level at 0
-	cpShapeSetUserData(shape, draw_segmentshape);
-	cpShapeSetElasticity(shape, 0.2f);
-	cpShapeSetFriction(shape, 0.8f);
-	// sets collision type to ID_GROUND
-	cpShapeSetCollisionType(shape, ID_GROUND);
-
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,level_height), cpv(level_right,level_height), 10.0f));
-	cpShapeSetUserData(shape, draw_segmentshape);
-	cpShapeSetElasticity(shape, 0.2f);
-	cpShapeSetFriction(shape, 0.8f);
-	cpShapeSetCollisionType(shape, ID_GROUND);
-	
 	player = *((struct player*)player_init());
-
-	tankfactory_init(500,3,100);
-	tankfactory_init(100,3,100);
-	tankfactory_init(-500,3,100);
-
+	space_init_level(1);
 }
 
 static void SPACE_destroy()

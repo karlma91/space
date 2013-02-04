@@ -19,5 +19,7 @@ extern int level_right;
 /* chipmunk physics space */
 extern cpSpace *space;
 
+/* init new level */
+void space_init_level(int lvl);
 
 #endif /* SPACE_H_ */

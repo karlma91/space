@@ -62,6 +62,7 @@ static void update()
 	}
 	if (keys[SDLK_SPACE] || keys[SDLK_RETURN]) {
 		currentState = &state_space;
+		change_current_menu(INGAME_MENU_ID);
 		keys[SDLK_SPACE] = 0, keys[SDLK_RETURN] = 0;
 	}
 	yspeed = -(ypos - sel*size - size*2 - spaceing)/20;
