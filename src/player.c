@@ -173,7 +173,7 @@ static void
 postStepRemove(cpSpace *space, cpShape *shape, void *unused)
 {
 	cpSpaceRemoveBody(space, shape->body);
-	//cpBodyFree(shape->body);
+	//cpBodyFree(   wshape->body);
   
 	cpSpaceRemoveShape(space, shape);
 	//cpShapeFree(shape);

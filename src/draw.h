@@ -45,9 +45,8 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_line_strip(const GLfloat *strip, int l, float w);
 void draw_init();
 void draw_destroy();
-void draw_circle(cpVect center, cpFloat angle, 
-								 cpFloat radius, cpFloat scale, 
-								 Color fill, Color line);
+void draw_circle(GLfloat x, GLfloat y, GLfloat radius);
+void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r);
 void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor);
 void draw_segment(cpVect a, cpVect b, cpFloat width, Color lineColor);
 void draw_space(cpSpace *space);
