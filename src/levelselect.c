@@ -31,12 +31,22 @@ state state_levelselect = {
 		NULL
 };
 
+struct level_ship{
+	float x;
+	float y;
+	int decks;
+	int radius;
+	int rotation_speed;
+	int *deck_sizes;
+};
+
 static int sel = 1;
 static int max_sel = 20;
 static float ypos = 0;
 static float yspeed = 0;
 static float size = 300;
 static float scale = 1;
+static float rotation = 0;
 static float spaceing = 10;
 static void init()
 {
@@ -68,6 +78,7 @@ static void update()
 	yspeed = -(ypos - sel*size - size*2 - spaceing)/20;
 	ypos += yspeed;
 	scale = ((1.0f * HEIGHT)/(ypos*2));
+	rotation += 0.5;
 }
 
 static void render()
@@ -75,6 +86,7 @@ static void render()
 	static char string[9];
 	glPushMatrix();
 	glScalef(scale,scale,1);
+	glRotatef(rotation,0,0,1);
 	//glTranslatef(0,ypos,0);
 
 	int i = 0;
@@ -100,6 +112,39 @@ static void render()
 	sprintf(string,"LEVEL %d",sel);
 	setTextAlign(TEXT_LEFT);
 	font_drawText(-WIDTH/2 + 10,HEIGHT/2 - 25,string);
+}
+
+static void render_ship(struct level_ship *ship)
+{
+	static char string[9];
+		glPushMatrix();
+		glScalef(scale,scale,1);
+		glRotatef(rotation,0,0,1);
+		//glTranslatef(0,ypos,0);
+
+		int i = 0;
+		glColor3f(0.1,0.1,0.1);
+		draw_circle(0,0,size);
+		for(i = 1; i < max_sel+1; i++){
+			if(sel == i){
+				glColor3f(1.0f,0,0);
+			}else{
+				glColor3f(0,0,1.0f);
+			}
+			draw_donut(0,0,i*size + spaceing,i*size + size);
+			glColor3f(1,1,1);
+			sprintf(string,"LEVEL %d",i);
+			int textpos = -i*size-size/2;
+			if(i == 0) textpos = 0;
+			setTextSize(30);
+			setTextAlign(TEXT_CENTER);
+			font_drawText(0,textpos,string);
+		}
+		glPopMatrix();
+		glLoadIdentity();
+		sprintf(string,"LEVEL %d",sel);
+		setTextAlign(TEXT_LEFT);
+		font_drawText(-WIDTH/2 + 10,HEIGHT/2 - 25,string);
 }
 
 static void destroy()

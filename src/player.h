@@ -9,6 +9,7 @@ struct player{
 	struct obj_type *type;
 	int instance_id;
 	int *remove;
+	int alive;
 	cpBody *body;
 	cpShape *shape;
 	float max_hp;

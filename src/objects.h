@@ -1,6 +1,8 @@
 #ifndef LIST_H_
 #define LIST_H_
 
+#include "chipmunk.h"
+
 typedef struct object_ object;
 
 struct obj_type {
@@ -15,15 +17,17 @@ struct object_ {
 	struct obj_type *type;
 	int instance_id;
 	int *remove;
+	int alive;
+	cpBody *body;
 };
 
 /* All collision types for objects */
 enum OBJECT_ID {
 	ID_PLAYER,
 	ID_GROUND,
-	ID_PLAYER_BULLET,
 	ID_TANK_FACTORY,
 	ID_TANK,
+	ID_BULLET,
 
 	ID_COUNT
 };

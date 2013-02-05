@@ -35,7 +35,9 @@ else ifeq ($(SYS),Darwin) #mac
 	chipmunk=-Ichipmunk/include -Lchipmunk/mac -lChipmunk
 endif
 
-all : build run
+all : 
+	build
+	run
 
 build : main
 

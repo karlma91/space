@@ -16,6 +16,7 @@
 /* Game components */
 #include "objects.h"
 #include "tank.h"
+#include "bullet.h"
 
 
 static void init(object *fac);
@@ -34,6 +35,7 @@ struct obj_type type_player = {
 };
 
 static struct player *temp;
+static float timer = 0;
 
 object *player_init()
 {
@@ -43,6 +45,7 @@ object *player_init()
 	struct player *pl = malloc(sizeof(struct player));
 
 	pl->type = &type_player;
+	pl->alive = 1;
 	pl->max_hp = 200;
 	pl->hp = 200;
 	/* make and add new body */
@@ -65,6 +68,7 @@ static void init(object *fac)
 {
 	temp = ((struct player*)fac);
 }
+
 static void player_render(object *obj)
 {
 	temp = (struct player*)obj;
@@ -83,6 +87,8 @@ static void player_render(object *obj)
 
 static void player_update(object *obj)
 {
+
+	timer += dt;
 	temp = (struct player*)obj;
 	cpFloat pangvel = cpBodyGetAngVel(temp->body);
 	cpBodySetAngVel(temp->body, pangvel*0.9);
@@ -166,67 +172,21 @@ static void player_update(object *obj)
 }
 
 
-
-// from chipmunk docs
-// removes the object from the space
-static void
-postStepRemove(cpSpace *space, cpShape *shape, void *unused)
-{
-	cpSpaceRemoveBody(space, shape->body);
-	//cpBodyFree(   wshape->body);
-  
-	cpSpaceRemoveShape(space, shape);
-	//cpShapeFree(shape);
-}
-
-// from chipmunk docs
-static int
-begin(cpArbiter *arb, cpSpace *space, void *unused)
-{
-	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
-	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 0.3f, 1200, 20,300);
-	cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, b, NULL);
-	return 0;
-}
-
-
 static void tmp_shoot(object *obj)
 {
 	temp = (struct player*)obj;
 	//TMP shooting settings
 	static const float cooldown = 0.1f;
-	static float time = 0;
 	
-	if (time < cooldown) {
-		time += dt;
+	if (timer < cooldown) {
 		return;
 	}
-	
-	time = 0;
-	
-	static const cpFloat radius = 5;
-	static const cpFloat mass = 1;
-	cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
-	cpVect prot = cpBodyGetRot(temp->body);
-	
-	cpBody *ballBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
-	cpBodySetPos(ballBody, cpvadd(cpv(temp->body->p.x, temp->body->p.y), cpvmult(prot,radius)));
-	
-	cpBodySetVel(ballBody,cpvmult(prot,1500));
-	
-	cpShape *ballShape = cpSpaceAddShape(space, cpCircleShapeNew(ballBody, radius, cpvzero));
-	cpShapeSetFriction(ballShape, 0.7);
-	cpShapeSetUserData(ballShape, draw_ballshape);
-	// Sets bullets collision type to 2
-	cpShapeSetCollisionType(ballShape, ID_PLAYER_BULLET);
-	// runs callback begin when bullet (2) hits ground (1) 
-	// this will make bullet b and ground a in begin callback
-	cpSpaceAddCollisionHandler(space, ID_GROUND, ID_PLAYER_BULLET, begin, NULL, NULL, NULL, NULL);
-	
+	timer = 0;
+	bullet_init(temp->body->p,cpBodyGetRot(temp->body),1);
 }
 
 static void player_destroy(object *obj)
 {
-	*obj->remove = 0;
-	free(obj);
+	*obj->remove = 1;
+	//free(obj);
 }

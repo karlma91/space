@@ -97,7 +97,12 @@ static void SPACE_update()
 
 static void update_objects(object *obj)
 {
-	obj->type->update(obj);
+	if(obj->alive){
+		obj->type->update(obj);
+	}else{
+		obj->type->destroy(obj);
+		*(obj->remove) = 1;
+	}
 }
 
 static void SPACE_draw()
@@ -255,6 +260,11 @@ static void drawStars()
 
 void space_init_level(int lvl)
 {
+	void func(object* obj){obj->type->destroy(obj);}
+	list_iterate(func);
+	list_destroy();
+	list_add((object*)&player);
+
 	/* static ground */
 		cpBody  *staticBody = space->staticBody;
 		cpShape *shape;

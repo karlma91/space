@@ -11,10 +11,14 @@ object* tankfactory_init(int x_pos, int max_tanks, float max_hp);
 extern struct obj_type type_tank_factory;
 
 struct tank_factory {
+	/* object */
 	struct obj_type *type;
 	int instance_id;
 	int *remove;
+	int alive;
 	cpBody *body;
+
+	/*tank factory*/
 	cpShape *shape;
 	int max;
 	cpFloat timer;
