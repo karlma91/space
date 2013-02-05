@@ -20,6 +20,7 @@ struct tank {
 	cpShape *shape;
 	float max_hp;
 	float hp;
+	float timer;
 	struct tank_factory *factory;
 };
 

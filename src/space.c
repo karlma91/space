@@ -110,7 +110,7 @@ static void SPACE_draw()
 	//TODO to make dynamic camera zoom and pos depend on velocity (e.g. higher velocity -> less delay)
 
 	/* dynamic camera zoom */
-	float py = player.body->p.y / level_height;
+	float py = player->body->p.y / level_height;
 	if(cam_mode == 1 || cam_mode == 2){ /* fanzy zoom camera */
 
 		float scrlvl = 1.0f * HEIGHT/level_height;
@@ -142,7 +142,7 @@ static void SPACE_draw()
 		}else{
 			cam_zoom = 1.3;
 		}
-		cam_center_y = player.body->p.y;
+		cam_center_y = player->body->p.y;
 		if(cam_center_y > level_height - HEIGHT/(2*cam_zoom)){
 			cam_center_y = level_height - HEIGHT/(2*cam_zoom);
 		}else if(cam_center_y <  HEIGHT/(2*cam_zoom)){
@@ -184,9 +184,9 @@ static void SPACE_draw()
 	static const float pos_delay = 0.9f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
 	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
 	static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
-	cam_dx = cam_dx * pos_delay + ((player.body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
+	cam_dx = cam_dx * pos_delay + ((player->body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
 
-	cam_center_x = player.body->p.x + cam_dx;
+	cam_center_x = player->body->p.x + cam_dx;
 
 	/* camera constraints */
 	static float cam_left_limit, cam_right_limit;
@@ -263,7 +263,7 @@ void space_init_level(int lvl)
 	void func(object* obj){obj->type->destroy(obj);}
 	list_iterate(func);
 	list_destroy();
-	list_add((object*)&player);
+	list_add((object*)player);
 
 	/* static ground */
 		cpBody  *staticBody = space->staticBody;
@@ -302,7 +302,7 @@ static void SPACE_init(){
 		stars_size[i] = 2 + 4*(rand() % 1000) / 1000.0f;
 	}
 	
-	player = *((struct player*)player_init());
+	player = ((struct player*)player_init());
 	space_init_level(1);
 }
 

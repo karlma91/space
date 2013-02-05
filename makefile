@@ -36,8 +36,8 @@ else ifeq ($(SYS),Darwin) #mac
 endif
 
 all : 
-	build
-	run
+	make build
+	make run
 
 build : main
 

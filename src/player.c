@@ -26,6 +26,8 @@ static void player_update(object *obj);
 static void player_destroy(object *obj);
 static void tmp_shoot(object *obj);
 
+static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused);
+
 struct obj_type type_player = {
 	ID_PLAYER,
 	init,
@@ -39,8 +41,8 @@ static float timer = 0;
 
 object *player_init()
 {
-	cpFloat radius = 10;
-	//cpFloat mass = 1;
+	cpFloat radius = 20;
+	cpFloat mass = 10;
 
 	struct player *pl = malloc(sizeof(struct player));
 
@@ -49,7 +51,7 @@ object *player_init()
 	pl->max_hp = 200;
 	pl->hp = 200;
 	/* make and add new body */
-	pl->body = cpSpaceAddBody(space, cpBodyNew(10, cpMomentForBox(1.0f, radius, radius)));
+	pl->body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius)));
 	cpBodySetPos(pl->body, cpv(0,990));
 	cpBodySetVelLimit(pl->body,700);
 	/* make and connect new shape to body */
@@ -57,8 +59,9 @@ object *player_init()
 	cpShapeSetFriction(pl->shape, 0.7);
 	cpShapeSetUserData(pl->shape, draw_boxshape);
 	cpShapeSetElasticity(pl->shape, 1.0f);
+	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_BULLET_ENEMY, collision_enemy_bullet, NULL, NULL, NULL, NULL);
 
-	cpBodySetUserData(pl->body, (object*)pl);
+	cpBodySetUserData(pl->body, (void*)pl);
 	list_add((object*)pl);
 	return (object*)pl;
 
@@ -78,11 +81,11 @@ static void player_render(object *obj)
 	setTextSize(10);
 	setTextAngleRad(dir);
 	static char text[20];
-
+	draw_shape(temp->shape,NULL);
 	sprintf(text, " SPEED: %.3f",cpvlength(cpBodyGetVel(temp->body)));
 	glColor3f(1,1,1);
 	font_drawText(temp->body->p.x,temp->body->p.y, text);
-	draw_hp(temp->body->p.x-20,temp->body->p.y+15,40,10,temp->hp/temp->max_hp);
+	draw_hp(temp->body->p.x-20,temp->body->p.y+15,60,20,temp->hp/temp->max_hp);
 }
 
 static void player_update(object *obj)
@@ -171,6 +174,26 @@ static void player_update(object *obj)
 	}
 }
 
+static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
+{
+	cpShape *a, *b;
+	cpArbiterGetShapes(arb, &a, &b);
+	temp = ((struct player*)(a->body->data));
+
+	struct bullet *bt = ((struct bullet*)(b->body->data));
+
+	bt->alive = 0;
+
+	//particles_add_explosion(b->body->p,0.3,1500,15,200);
+	if(temp->hp <= 0 ){
+		particles_add_explosion(a->body->p,1,2000,50,800);
+		temp->hp=200;
+	}else{
+		temp->hp -= 10;
+	}
+
+	return 0;
+}
 
 static void tmp_shoot(object *obj)
 {
@@ -182,7 +205,7 @@ static void tmp_shoot(object *obj)
 		return;
 	}
 	timer = 0;
-	bullet_init(temp->body->p,cpBodyGetRot(temp->body),1);
+	bullet_init(temp->body->p,cpBodyGetRot(temp->body),ID_BULLET_PLAYER);
 }
 
 static void player_destroy(object *obj)
@@ -190,3 +213,9 @@ static void player_destroy(object *obj)
 	*obj->remove = 1;
 	//free(obj);
 }
+/*
+ *
+rend: 0x0074dd80
+dead: 0x016642d0
+init: 0x016642d0
+ */

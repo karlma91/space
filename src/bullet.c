@@ -8,8 +8,15 @@ static void destroy(object *obj);
 
 static int callback_ground(cpArbiter *arb, cpSpace *space, void *unused);
 
-struct obj_type type_bullet= {
-	ID_BULLET,
+struct obj_type type_bullet_player= {
+	ID_BULLET_PLAYER,
+	init,
+	update,
+	render,
+	destroy
+};
+struct obj_type type_bullet_enemy= {
+	ID_BULLET_ENEMY,
 	init,
 	update,
 	render,
@@ -31,6 +38,11 @@ static void update(object *obj)
 static void render(object *obj)
 {
 	temp = (struct bullet*)obj;
+	if(temp->type->ID == ID_BULLET_PLAYER){
+		glColor3f(0.9,0.3,0.3);
+	}else{
+		glColor3f(0.3,0.3,0.9);
+	}
 	draw_ballshape(temp->shape);
 }
 
@@ -38,22 +50,26 @@ object *bullet_init(cpVect pos, cpVect dir, int type)
 {
 		temp = malloc(sizeof(struct bullet));
 		temp->alive = 1;
-		temp->type = &type_bullet;
+		if(type == ID_BULLET_PLAYER){
+			temp->type = &type_bullet_player;
+		}else{
+			temp->type = &type_bullet_enemy;
+		}
 
 		cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
 
 		temp->body = cpSpaceAddBody(space, cpBodyNew(1, moment));
-		cpBodySetPos(temp->body, cpvadd(pos, cpvmult(dir,5)));
+		cpBodySetPos(temp->body, cpvadd(pos, cpvmult(dir,15)));
 		cpBodySetUserData(temp->body, (object*)temp);
 		cpBodySetVel(temp->body,cpvmult(dir,1500));
 
 		temp->shape = cpSpaceAddShape(space, cpCircleShapeNew(temp->body, 5, cpvzero));
 		cpShapeSetFriction(temp->shape, 0.7);
 		// Sets bullets collision type
-		cpShapeSetCollisionType(temp->shape, ID_BULLET);
+		cpShapeSetCollisionType(temp->shape, type);
 		// runs callback begin when bullet (2) hits ground (1)
 		// this will make bullet b and ground a in begin callback
-		cpSpaceAddCollisionHandler(space, ID_GROUND, ID_BULLET, callback_ground, NULL, NULL, NULL, NULL);
+		cpSpaceAddCollisionHandler(space, ID_GROUND, type, callback_ground, NULL, NULL, NULL, NULL);
 
 		list_add((object*)temp);
 		return (object*)temp;

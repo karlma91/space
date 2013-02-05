@@ -46,6 +46,7 @@ object *tank_init(struct tank_factory *fac, float max_hp)
 	tank->max_hp = max_hp;
 	tank->hp = tank->max_hp;
 	tank->factory = fac;
+	tank->timer = 0;
 
 	cpFloat size = 50;
 	/* make and add new body */
@@ -58,7 +59,7 @@ object *tank_init(struct tank_factory *fac, float max_hp)
 	//cpShapeSetGroup(tank->shape, 10);
 	cpShapeSetLayers(tank->shape,4);
 	cpShapeSetCollisionType(tank->shape, ID_TANK);
-	cpSpaceAddCollisionHandler(space, ID_TANK, ID_BULLET, collision_player_bullet, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, ID_TANK, ID_BULLET_PLAYER, collision_player_bullet, NULL, NULL, NULL, NULL);
 
 	cpBodySetUserData(tank->body, (object*)tank);
 	list_add((object*)tank);
@@ -74,9 +75,14 @@ static void init(object *fac)
 static void update(object *fac)
 {
 	temp = ((struct tank*)fac);
-
+	temp->timer +=dt;
+	if(temp->timer > 0.2 + ((1.0f*rand())/RAND_MAX)){
+		cpVect t = cpvnormalize(cpvsub(player->body->p,temp->body->p));
+		bullet_init(temp->body->p,t,ID_BULLET_ENEMY);
+		temp->timer = 0;
+	}
 	cpFloat tx = temp->body->p.x;
-	cpFloat px = player.body->p.x;
+	cpFloat px = player->body->p.x;
 
 	cpFloat ptx = (px-tx); //direct way
 	cpFloat pltx = (tx - level_left + (level_right - px));

@@ -62,7 +62,7 @@ object *tankfactory_init( int x_pos , int max_tanks, float max_hp)
 	cpShapeSetLayers(fac->shape,2);
 
 	cpShapeSetCollisionType(fac->shape, ID_TANK_FACTORY);
-	cpSpaceAddCollisionHandler(space, ID_TANK_FACTORY, ID_BULLET, collision_player_bullet, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, ID_TANK_FACTORY, ID_BULLET_PLAYER, collision_player_bullet, NULL, NULL, NULL, NULL);
 
 	cpBodySetUserData(fac->body, (object*)fac);
 	list_add((object*)fac);

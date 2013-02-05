@@ -17,7 +17,7 @@ struct player{
 };
 
 extern struct obj_type type_player;
-struct player player;
+struct player *player;
 object *player_init();
 
 

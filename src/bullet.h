@@ -9,7 +9,8 @@
 
 object *bullet_init(cpVect pos, cpVect dir, int type);
 
-extern struct obj_type type_bullet;
+extern struct obj_type type_bullet_player;
+extern struct obj_type type_bullet_enemy;
 
 struct bullet{
 	/*object*/
