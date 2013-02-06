@@ -89,7 +89,7 @@ static void SPACE_update()
 		keys[SDLK_ESCAPE] = 0;
 	}
 
-	list_iterate(update_objects);
+	objects_iterate(update_objects);
 
 	particles_update(dt);
 	while(accumulator >= phys_step)
@@ -237,8 +237,7 @@ static void SPACE_draw()
 	 * TODO: make draw function for ground and roof
 	 * */
 	draw_space(space);
-
-	list_iterate(render_objects);
+	objects_iterate(render_objects);
 
 	/* draw particle effects */
 	particles_draw(dt);
@@ -295,9 +294,9 @@ static void func(object* obj)
 void space_init_level(int lvl)
 {
 
-	list_iterate(func);
-	list_destroy();
-	list_add((object*)player);
+	objects_iterate(func);
+	objects_destroy();
+	objects_add((object*)&player);
 
 	/* static ground */
 		cpBody  *staticBody = space->staticBody;
@@ -321,7 +320,7 @@ void space_init_level(int lvl)
 }
 
 static void SPACE_init(){
-	list_init();
+	objects_init();
 
 	cpVect gravity = cpv(0, -200);
 	
@@ -343,5 +342,5 @@ static void SPACE_init(){
 static void SPACE_destroy()
 {
 	cpSpaceDestroy(space);
-	list_destroy();
+	objects_destroy();
 }

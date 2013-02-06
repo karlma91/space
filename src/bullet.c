@@ -70,7 +70,7 @@ object *bullet_init(cpVect pos, cpVect dir, int type)
 			cpShapeSetLayers(temp->shape,LAYER_ENEMY_BULLET);
 		}
 
-		list_add((object*)temp);
+		objects_add((object*)temp);
 		return (object*)temp;
 }
 

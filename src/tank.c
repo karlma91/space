@@ -62,7 +62,7 @@ object *tank_init(struct tank_factory *fac, float max_hp)
 	cpSpaceAddCollisionHandler(space, ID_TANK, ID_BULLET_PLAYER, collision_player_bullet, NULL, NULL, NULL, NULL);
 
 	cpBodySetUserData(tank->body, (object*)tank);
-	list_add((object*)tank);
+	objects_add((object*)tank);
 	return (object*)tank;
 }
 

@@ -46,5 +46,10 @@ extern void list_iterate(void (*f)(object *));
 extern void list_iterate_type(void (*f)(object *), int ID);
 extern void list_destroy();
 
+extern object *objects_nearest(cpVect pos, int obj_id);
+extern object *objects_first(int obj_id);
+extern object *objects_n(int obj_id, int n);
+extern object *objects_last(int obj_id);
+extern object *objects_by_id(int obj_id, int instance_id);
 
 #endif /* LIST_H_ */

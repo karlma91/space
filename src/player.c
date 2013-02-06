@@ -63,7 +63,7 @@ object *player_init()
 	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_BULLET_ENEMY, collision_enemy_bullet, NULL, NULL, NULL, NULL);
 
 	cpBodySetUserData(pl->body, (void*)pl);
-	list_add((object*)pl);
+	objects_add((object*)pl);
 	return (object*)pl;
 
 }

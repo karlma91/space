@@ -65,7 +65,7 @@ object *tankfactory_init( int x_pos , int max_tanks, float max_hp)
 	cpSpaceAddCollisionHandler(space, ID_TANK_FACTORY, ID_BULLET_PLAYER, collision_player_bullet, NULL, NULL, NULL, NULL);
 
 	cpBodySetUserData(fac->body, (object*)fac);
-	list_add((object*)fac);
+	objects_add((object*)fac);
 	return (object*)fac;
 }
 
@@ -112,7 +112,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	if(temp->hp <=0 ){
 		particles_add_explosion(a->body->p,1,2000,50,800);
 		temp->alive = 0;
-		list_iterate_type(remove_factory_from_tank,ID_TANK);
+		objects_iterate_type(remove_factory_from_tank,ID_TANK);
 	}else{
 		temp->hp -= 10;
 	}

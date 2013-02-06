@@ -1,5 +1,6 @@
 #include "objects.h"
 
+#include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -17,21 +18,23 @@ struct node_ {
 	object *obj;
 };
 
+int instance_counter[ID_COUNT];
 static node *(head_all[ID_COUNT]);
 static node **(last_all[ID_COUNT]);
 
 static int i;
 
 /* initializes head and last values */
-void list_init() {
+void objects_init() {
 	for (i = 0; i < ID_COUNT; i++) {
 		head_all[i] = NULL;
 		last_all[i] = &(head_all[i]);
+		instance_counter[i] = 0;
 	}
 }
 
 /* add object into its corresponding list */
-void list_add(object* obj)
+void objects_add(object* obj)
 {
 	/* find right list to add object into */
 	i = obj->type->ID;
@@ -41,12 +44,14 @@ void list_add(object* obj)
 	(*(last_all[i]))->obj = obj;
 	((*(last_all[i]))->remove) = 0;
 	(*(last_all[i]))->obj->remove = &((*(last_all[i]))->remove);
+	(*(last_all[i]))->obj->instance_id = instance_counter[i];
 	last_all[i] = &((*(last_all[i]))->next);
 	*(last_all[i]) = NULL;
+	++instance_counter[i];
 }
 
 /* iterate through all lists of objects */
-void list_iterate(void (*f)(object *))
+void objects_iterate(void (*f)(object *))
 {
 	for (i = 0; i < ID_COUNT; i++) {
 		if (head_all[i] == NULL) continue;
@@ -70,21 +75,21 @@ void list_iterate(void (*f)(object *))
 }
 
 /* iterate through one type of object */
-void list_iterate_type(void (*f)(object *), int type_id)
+void objects_iterate_type(void (*f)(object *), int obj_id)
 {
-	/* error check type_id */
-	if (type_id < 0 || type_id >= ID_COUNT) {
-		fprintf(stderr,"list_iterate_type: Invalid type_id %d\n", type_id);
+	/* error check obj_id */
+	if (obj_id < 0 || obj_id >= ID_COUNT) {
+		fprintf(stderr,"list_iterate_type: Invalid obj_id %d\n", obj_id);
 		return;
 	}
 
 	/* return if list is empty */
-	if ((head_all[type_id]) == NULL) return;
+	if ((head_all[obj_id]) == NULL) return;
 
 	node *n;
-	node **prev = &(head_all[type_id]);
+	node **prev = &(head_all[obj_id]);
 
-	for (n = (head_all[type_id]); n != NULL;  ) {
+	for (n = (head_all[obj_id]); n != NULL;  ) {
 		if (n->remove) {
 			(*prev) = n->next;
 			free(n);
@@ -95,11 +100,11 @@ void list_iterate_type(void (*f)(object *), int type_id)
 			n = n->next;
 		}
 	}
-	last_all[type_id] = prev;
+	last_all[obj_id] = prev;
 }
 
 /* frees all nodes in all lists */
-void list_destroy()
+void objects_destroy()
 {
 	for (i = 0; i < ID_COUNT; i++) {
 		/* continue if list is empty */
@@ -110,5 +115,90 @@ void list_destroy()
 		for (n = head_all[i], a = n->next; n != NULL; a = n->next, free(n), n=a);
 	}
 
-	list_init();
+	objects_init();
+}
+
+object *objects_nearest(cpVect pos, int obj_id)
+{
+	cpVect v = head_all[obj_id]->obj->body->p;
+	if (head_all[obj_id] == NULL) return NULL;
+
+	node *n = head_all[obj_id];
+	node *min_node = n;
+	cpFloat min_length = INT_MAX;
+	cpFloat length;
+
+	for (n = head_all[obj_id]; n != NULL; n = n->next) {
+		v = n->obj->body->p;
+		length = (v.x-pos.x)*(v.x-pos.x) + (v.y-pos.y)*(v.y-pos.y);
+		if (length < min_length) {
+			min_length = length;
+			min_node = n;
+		}
+	}
+
+	return min_node->obj;
+}
+
+object *objects_first(int obj_id)
+{
+	return head_all[obj_id]->obj;
+}
+
+object *objects_n(int obj_id, int n)
+{
+	/* error check obj_id */
+	if (obj_id < 0 || obj_id >= ID_COUNT) {
+		fprintf(stderr,"list_iterate_type: Invalid obj_id %d\n", obj_id);
+		return NULL;
+	}
+
+	node *node;
+
+	for (node = head_all[obj_id]; node != NULL; --n, node = node->next) {
+		if (n <= 0) {
+			return node->obj;
+		}
+	}
+	return NULL;
+}
+
+object *objects_last(int obj_id)
+{
+	/* error check obj_id */
+	if (obj_id < 0 || obj_id >= ID_COUNT) {
+		fprintf(stderr,"list_iterate_type: Invalid obj_id %d\n", obj_id);
+		return NULL;
+	}
+
+	node *n = head_all[obj_id];
+
+	/* return if list is empty */
+	if ((head_all[obj_id]) == NULL) return NULL;
+
+	for (; n != NULL; n = n->next) {
+		if (n->next == NULL) {
+			return n->obj;
+		}
+	}
+	return NULL;
+}
+
+object *objects_by_id(int obj_id, int instance_id)
+{
+	/* error check obj_id */
+	if (obj_id < 0 || obj_id >= ID_COUNT) {
+		fprintf(stderr,"list_iterate_type: Invalid obj_id %d\n", obj_id);
+		return NULL;
+	}
+
+	node *node;
+
+	for (node = head_all[obj_id]; node != NULL; node = node->next) {
+		if (node->obj->instance_id == instance_id) {
+			return node->obj;
+		}
+	}
+
+	return NULL;
 }
