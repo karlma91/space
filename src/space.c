@@ -288,9 +288,13 @@ static void drawStars()
 	glPopMatrix();
 }
 
+static void func(object* obj)
+{
+	obj->type->destroy(obj);
+}
 void space_init_level(int lvl)
 {
-	void func(object* obj){obj->type->destroy(obj);}
+
 	list_iterate(func);
 	list_destroy();
 	list_add((object*)player);
