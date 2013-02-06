@@ -32,8 +32,6 @@ static void init(object *obj)
 static void update(object *obj)
 {
 	temp = (struct bullet*)obj;
-	if (temp->body->p.x < level_left + 50) temp->body->p.x = level_right - 50;
-	if (temp->body->p.x > level_right - 50) temp->body->p.x = level_left + 50;
 }
 static void render(object *obj)
 {
@@ -50,11 +48,6 @@ object *bullet_init(cpVect pos, cpVect dir, int type)
 {
 		temp = malloc(sizeof(struct bullet));
 		temp->alive = 1;
-		if(type == ID_BULLET_PLAYER){
-			temp->type = &type_bullet_player;
-		}else{
-			temp->type = &type_bullet_enemy;
-		}
 
 		cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
 
@@ -67,9 +60,15 @@ object *bullet_init(cpVect pos, cpVect dir, int type)
 		cpShapeSetFriction(temp->shape, 0.7);
 		// Sets bullets collision type
 		cpShapeSetCollisionType(temp->shape, type);
-		// runs callback begin when bullet (2) hits ground (1)
-		// this will make bullet b and ground a in begin callback
 		cpSpaceAddCollisionHandler(space, ID_GROUND, type, callback_ground, NULL, NULL, NULL, NULL);
+		cpShapeSetGroup(temp->shape,10);
+		if(type == ID_BULLET_PLAYER){
+			temp->type = &type_bullet_player;
+			cpShapeSetLayers(temp->shape,LAYER_PLAYER_BULLET);
+		}else{
+			temp->type = &type_bullet_enemy;
+			cpShapeSetLayers(temp->shape,LAYER_ENEMY_BULLET);
+		}
 
 		list_add((object*)temp);
 		return (object*)temp;

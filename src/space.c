@@ -4,6 +4,9 @@
 /* standard c-libraries */
 #include <stdio.h>
 
+/* SDL */
+#include "SDL_opengl.h"
+
 /* Game state */
 #include "main.h"
 #include "menu.h"
@@ -28,9 +31,10 @@ static float accumulator = 0;
 /* state functions */
 static void SPACE_init();
 static void SPACE_update();
-static void SPACE_draw();
+static void space_render();
 static void SPACE_destroy();
 
+static void SPACE_draw();
 static void update_objects(object *obj);
 static void render_objects(object *obj);
 
@@ -57,7 +61,7 @@ int level_right = 2000;
 state state_space = {
 	SPACE_init,
 	SPACE_update,
-	SPACE_draw,
+	space_render,
 	SPACE_destroy,
 	NULL
 };
@@ -98,6 +102,8 @@ static void SPACE_update()
 static void update_objects(object *obj)
 {
 	if(obj->alive){
+		if (obj->body->p.x < level_left ) obj->body->p.x = level_right - abs(level_left -obj->body->p.x );
+		if (obj->body->p.x > level_right) obj->body->p.x = level_left + (obj->body->p.x - level_right) ;
 		obj->type->update(obj);
 	}else{
 		obj->type->destroy(obj);
@@ -105,8 +111,9 @@ static void update_objects(object *obj)
 	}
 }
 
-static void SPACE_draw()
+static void space_render()
 {
+
 	//TODO to make dynamic camera zoom and pos depend on velocity (e.g. higher velocity -> less delay)
 
 	/* dynamic camera zoom */
@@ -192,23 +199,45 @@ static void SPACE_draw()
 	static float cam_left_limit, cam_right_limit;
 	cam_left_limit = level_left + WIDTH / (2 * cam_zoom);
 	cam_right_limit = level_right - WIDTH / (2 * cam_zoom);
-	if (cam_center_x < cam_left_limit) cam_center_x = cam_left_limit;
-	if (cam_center_x > cam_right_limit) cam_center_x = cam_right_limit;
+
+	if(cam_center_x < cam_left_limit){
+		SPACE_draw();
+		cam_center_x += level_right + abs(level_left) ;
+		SPACE_draw();
+	}else if(cam_center_x > cam_right_limit){
+		SPACE_draw();
+		cam_center_x -= level_right + abs(level_left);
+		SPACE_draw();
+	}else{
+		SPACE_draw();
+	}
+
+}
+
+static void SPACE_draw()
+{
+
 
 	/* camera rotation */
 	//if (!cam_relative) glRotatef(-cpBodyGetAngle(player.body) * MATH_180PI,0,0,1);
 	
 	/* draw background */
-	drawStars();
+	//drawStars();
 	
 	/* translate view */
+	glLoadIdentity();
 	glScalef(cam_zoom,cam_zoom,1);
 	glTranslatef(-cam_center_x, -cam_center_y, 0.0f);
 	
 
 	/* draw all objects */
 	setTextAngle(0);
+
+	/* super slow
+	 * TODO: make draw function for ground and roof
+	 * */
 	draw_space(space);
+
 	list_iterate(render_objects);
 
 	/* draw particle effects */
@@ -234,6 +263,7 @@ static void render_objects(object *obj)
 	obj->type->render(obj);
 }
 
+/*Slow*/
 #define SW (8000)
 static void drawStars()
 {

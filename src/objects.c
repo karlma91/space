@@ -3,6 +3,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+int LAYER_PLAYER          =     1<<1 | 1<<2 |                1<<5;
+int LAYER_TANK            =     1<<1 |         1<<3;
+int LAYER_TANK_FACTORY    =            1<<2  |        1<<4;
+int LAYER_PLAYER_BULLET   =                    1<<3 | 1<<4;
+int LAYER_ENEMY_BULLET    =                                 1<<5;
+
+
 typedef struct node_ node;
 struct node_ {
 	int remove;

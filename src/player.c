@@ -41,7 +41,7 @@ static float timer = 0;
 
 object *player_init()
 {
-	cpFloat radius = 20;
+	cpFloat radius = 50;
 	cpFloat mass = 10;
 
 	struct player *pl = malloc(sizeof(struct player));
@@ -59,6 +59,7 @@ object *player_init()
 	cpShapeSetFriction(pl->shape, 0.7);
 	cpShapeSetUserData(pl->shape, draw_boxshape);
 	cpShapeSetElasticity(pl->shape, 1.0f);
+	cpShapeSetLayers(pl->shape, LAYER_PLAYER);
 	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_BULLET_ENEMY, collision_enemy_bullet, NULL, NULL, NULL, NULL);
 
 	cpBodySetUserData(pl->body, (void*)pl);
@@ -80,12 +81,12 @@ static void player_render(object *obj)
 	setTextAlign(TEXT_CENTER);
 	setTextSize(10);
 	setTextAngleRad(dir);
-	static char text[20];
-	draw_shape(temp->shape,NULL);
-	sprintf(text, " SPEED: %.3f",cpvlength(cpBodyGetVel(temp->body)));
+	static char text[100];
+	sprintf(text, " SPEED: %.1f ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ",cpvlength(cpBodyGetVel(temp->body)));
 	glColor3f(1,1,1);
 	font_drawText(temp->body->p.x,temp->body->p.y, text);
-	draw_hp(temp->body->p.x-20,temp->body->p.y+15,60,20,temp->hp/temp->max_hp);
+	draw_hp(temp->body->p.x-20,temp->body->p.y+15,100,20,temp->hp/temp->max_hp);
+	draw_boxshape(temp->shape,RGBAColor(1,0,0,1),RGBAColor(0,0,1,1));
 }
 
 static void player_update(object *obj)
@@ -102,9 +103,6 @@ static void player_update(object *obj)
 	rot = cpvmult(rot, 10000);
 	cpBodySetForce(temp->body, cpv(0,0));
 	cpBodySetTorque(temp->body, 0);
-	if (temp->body->p.x < level_left + 50) temp->body->p.x = level_right - 50;
-	if (temp->body->p.x > level_right - 50) temp->body->p.x = level_left + 50;
-
 
 	/*
 	cpVect cpBodyGetVel(const cpBody *body)

@@ -59,7 +59,7 @@ object *tankfactory_init( int x_pos , int max_tanks, float max_hp)
 
 	//cpShapeSetGroup(fac->shape, 10);
 
-	cpShapeSetLayers(fac->shape,2);
+	cpShapeSetLayers(fac->shape,LAYER_TANK_FACTORY);
 
 	cpShapeSetCollisionType(fac->shape, ID_TANK_FACTORY);
 	cpSpaceAddCollisionHandler(space, ID_TANK_FACTORY, ID_BULLET_PLAYER, collision_player_bullet, NULL, NULL, NULL, NULL);
@@ -79,7 +79,7 @@ static void update(object *fac)
 {
 	temp = ((struct tank_factory*)fac);
 	temp->timer+=dt;
-	if(temp->timer > 1 && temp->cur < temp->max){
+	if(temp->timer > 5 && temp->cur < temp->max){
 		temp->timer = 0;
 		tank_init(temp, 100.0f);
 		temp->cur += 1;

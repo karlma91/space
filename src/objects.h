@@ -33,6 +33,13 @@ enum OBJECT_ID {
 	ID_COUNT
 };
 
+/* layers for objects */
+extern  int LAYER_PLAYER;
+extern  int LAYER_TANK;
+extern  int LAYER_TANK_FACTORY;
+extern  int LAYER_PLAYER_BULLET;
+extern  int LAYER_ENEMY_BULLET;
+
 extern void list_init();
 extern void list_add(object *);
 extern void list_iterate(void (*f)(object *));

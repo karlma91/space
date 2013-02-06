@@ -1,7 +1,6 @@
 #include "draw.h"
 
 //local function
-static void init_array(int size,  GLuint *index);
 static void loadTexture(char *tex);
 
 GLfloat array[CIRCLE_MAX_RES];

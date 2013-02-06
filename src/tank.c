@@ -57,7 +57,7 @@ object *tank_init(struct tank_factory *fac, float max_hp)
 	tank->shape = cpSpaceAddShape(space, cpBoxShapeNew(tank->body, size, size));
 	cpShapeSetFriction(tank->shape, 0.01);
 	//cpShapeSetGroup(tank->shape, 10);
-	cpShapeSetLayers(tank->shape,4);
+	cpShapeSetLayers(tank->shape,LAYER_TANK);
 	cpShapeSetCollisionType(tank->shape, ID_TANK);
 	cpSpaceAddCollisionHandler(space, ID_TANK, ID_BULLET_PLAYER, collision_player_bullet, NULL, NULL, NULL, NULL);
 
@@ -76,7 +76,7 @@ static void update(object *fac)
 {
 	temp = ((struct tank*)fac);
 	temp->timer +=dt;
-	if(temp->timer > 0.2 + ((1.0f*rand())/RAND_MAX)){
+	if(temp->timer > 3 + ((1.0f*rand())/RAND_MAX)){
 		cpVect t = cpvnormalize(cpvsub(player->body->p,temp->body->p));
 		bullet_init(temp->body->p,t,ID_BULLET_ENEMY);
 		temp->timer = 0;
@@ -97,8 +97,6 @@ static void update(object *fac)
 
 	cpBodySetForce(temp->body,cpv(ptx*12000,0));
 
-	if (temp->body->p.x < level_left + 50) temp->body->p.x = level_right - 50;
-	if (temp->body->p.x > level_right - 50) temp->body->p.x = level_left + 50;
 }
 
 static void render(object *fac)
@@ -121,7 +119,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	bt->alive = 0;
 
-	particles_add_explosion(b->body->p,0.3,1500,15,200);
+	particles_add_explosion(b->body->p,0.3,1500,10,200);
 
 	if(temp->hp <=0 ){
 		//a->body->data = NULL;

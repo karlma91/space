@@ -12,6 +12,10 @@
 /* Chipmunk physics library */
 #include "chipmunk.h"
 
+/* drawing code */
+#include "draw.h"
+#include "font.h"
+
 /* Game states */
 #include "space.h"
 #include "menu.h"
@@ -52,8 +56,6 @@ void initGL()
   glEnable(GL_LINE_SMOOTH);
   glEnable(GL_POLYGON_SMOOTH);
   
-
-
   //fra ttf opengl tutorial
   glEnable(GL_BLEND);
   //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
