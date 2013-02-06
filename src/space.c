@@ -293,10 +293,9 @@ static void func(object* obj)
 }
 void space_init_level(int lvl)
 {
-
 	objects_iterate(func);
 	objects_destroy();
-	objects_add((object*)&player);
+	objects_add((object*)player);
 
 	/* static ground */
 		cpBody  *staticBody = space->staticBody;
@@ -321,7 +320,6 @@ void space_init_level(int lvl)
 
 static void SPACE_init(){
 	objects_init();
-
 	cpVect gravity = cpv(0, -200);
 	
 	space = cpSpaceNew();
