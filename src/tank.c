@@ -76,11 +76,27 @@ static void update(object *fac)
 {
 	temp = ((struct tank*)fac);
 	temp->timer +=dt;
-	if(temp->timer > 3 + ((1.0f*rand())/RAND_MAX)){
-		cpVect t = cpvnormalize(cpvsub(player->body->p,temp->body->p));
+
+	if(temp->timer > 2 + ((3.0f*rand())/RAND_MAX)){
+		cpVect a = cpvsub(temp->body->p,player->body->p);
+
+		cpFloat c = cpvlength(player->body->v);
+		cpFloat b = 1500;
+		cpFloat G = acos(cpvdot(a,player->body->v)/(cpvlength(player->body->v)*cpvlength(a)));
+		cpFloat ang = asin((c*sin(G))/b);
+
+		cpFloat bc = cpvtoangle(a);
+		if(player->body->v.x < 0){
+			ang = -ang;
+		}
+		ang = M_PI + (bc  - ang);
+
+		cpVect t = cpvforangle(ang);
+
 		bullet_init(temp->body->p,t,ID_BULLET_ENEMY);
 		temp->timer = 0;
 	}
+
 	cpFloat tx = temp->body->p.x;
 	cpFloat px = player->body->p.x;
 
