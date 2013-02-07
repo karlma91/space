@@ -180,9 +180,12 @@ static void render_ship(struct level_ship *ship)
 {
 		glPushMatrix();
 
-		float gravity = (4*M_PI*M_PI * ship->radius) * (ship->rotation_speed * ship->rotation_speed);
+//		float gravity = (4*M_PI*M_PI * ship->radius) * (ship->rotation_speed * ship->rotation_speed);
+		float gravity = 300;
+		ship->rotation_speed = sqrt((gravity)/(4*M_PI*M_PI*ship->radius));
+
 		char te[30];
-		sprintf(te,"%.1f",gravity );
+		sprintf(te,"RAD: %.3f ROT: %.3f",ship->radius,ship->rotation_speed, gravity );
 		glColor3f(1,1,1);
 		setTextSize(100);
 		font_drawText(ship->x,ship->y + ship->radius + 200,te);

@@ -67,6 +67,8 @@ static void paricles_explosion_update(struct explosion *expl)
 		int i;
 		for(i = 0; i < (expl->numParticles); i++){
 			expl->particles[i].pos = cpvadd(expl->particles[i].pos, cpvmult(expl->particles[i].vel,dt));
+			expl->particles[i].vel.x*=0.85f;
+			expl->particles[i].vel.y*=0.85f;
 			if(expl->particles[i].pos.y < 0){
 				expl->particles[i].vel.y = -expl->particles[i].vel.y;
 				expl->particles[i].pos.y = 10;
@@ -93,8 +95,6 @@ static void paricles_explosion_draw(struct explosion *expl)
 		float fadeStart = 0.3f;
 		if(expl->timer > expl->tim_alive -fadeStart){
 			c.a = (MAX_EXPLOSION_TIME - expl->timer) / (fadeStart);
-			expl->particles[i].vel.x*=0.85f;
-			expl->particles[i].vel.y*=0.85f;
 			if(c.a < 0){
 				c.a = 0;
 			}

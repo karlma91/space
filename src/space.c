@@ -21,7 +21,7 @@
 #include "player.h"
 #include "tankfactory.h"
 
-#define star_count 10000
+#define star_count 1000
 static int stars_x[star_count];
 static int stars_y[star_count];
 static float stars_size[star_count];
@@ -40,6 +40,7 @@ static void render_objects(object *obj);
 
 /* helper */
 int i,j;
+static int second_draw = 0;
 
 // Chipmunk
 static cpFloat phys_step = 1/60.0f;
@@ -50,6 +51,9 @@ static int cam_mode = 6;
 float cam_center_x = 0;
 float cam_center_y = 0;
 float cam_zoom = 1;
+
+static int cam_left;
+static int cam_right;
 
 /* level data */
 int level_height = 1200;
@@ -200,32 +204,47 @@ static void space_render()
 	cam_center_x = player->body->p.x + cam_dx;
 
 	/* camera constraints */
+
+	static float camera_width;
+	camera_width = WIDTH / (2 * cam_zoom);
+
 	static float cam_left_limit, cam_right_limit;
-	cam_left_limit = level_left + WIDTH / (2 * cam_zoom);
-	cam_right_limit = level_right - WIDTH / (2 * cam_zoom);
+
+	cam_left_limit = level_left + camera_width;
+	cam_right_limit = level_right - camera_width;
+
+	cam_left = cam_center_x - camera_width;
+	cam_right = cam_center_x + camera_width;
+
+	SPACE_draw();
 
 	if(cam_center_x < cam_left_limit){
-		SPACE_draw();
+		second_draw = 1;
 		cam_center_x += level_right + abs(level_left) ;
+		cam_left = cam_center_x - camera_width;
+		cam_right = cam_center_x + camera_width;
 		SPACE_draw();
 	}else if(cam_center_x > cam_right_limit){
-		SPACE_draw();
+		second_draw = 1;
 		cam_center_x -= level_right + abs(level_left);
+		cam_left = cam_center_x - camera_width;
+		cam_right = cam_center_x + camera_width;
 		SPACE_draw();
-	}else{
-		SPACE_draw();
+
 	}
+
+	second_draw = 0;
 
 }
 
 static void SPACE_draw()
 {
-	/* camera rotation */
-	//if (!cam_relative) glRotatef(-cpBodyGetAngle(player.body) * MATH_180PI,0,0,1);
 	
 	/* draw background */
-	drawStars();
-	
+	if(!second_draw){
+		drawStars();
+	}
+
 	/* translate view */
 	glLoadIdentity();
 	glScalef(cam_zoom,cam_zoom,1);
@@ -243,28 +262,33 @@ static void SPACE_draw()
 
 	/* draw particle effects */
 	particles_draw(dt);
-	
-	/* something */
-	glLoadIdentity();
-	
-	/* draw GUI */
-	setTextAngle(0); // TODO don't use global variables for setting font properties
-	setTextAlign(TEXT_LEFT);
-	setTextSize(10);
 
-	glColor3f(1,1,1);
-	font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
+	if(!second_draw){
+		/* something */
+		glLoadIdentity();
+
+		/* draw GUI */
+		setTextAngle(0); // TODO don't use global variables for setting font properties
+		setTextAlign(TEXT_LEFT);
+		setTextSize(10);
+
+		glColor3f(1,1,1);
+		font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
+
+		setTextAlign(TEXT_RIGHT);
+		font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
+	}
 	
-	setTextAlign(TEXT_RIGHT);
-	font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
 }
 
 static void render_objects(object *obj)
 {
-	obj->type->render(obj);
+	if(obj->body->p.x > cam_left - 200 && obj->body->p.x < cam_right + 200){
+		obj->type->render(obj);
+	}
 }
 
-/*Slow*/
+
 #define SW (8000)
 static void drawStars()
 {
