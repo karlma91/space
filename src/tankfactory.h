@@ -3,7 +3,6 @@
 
 #include "chipmunk.h"
 #include "objects.h"
-#include "tank.h"
 
 
 /* the super tank_factory object */

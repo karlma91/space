@@ -15,6 +15,7 @@
 /* Drawing */
 #include "draw.h"
 #include "font.h"
+#include "level.h"
 
 /* static prototypes */
 static void init();
@@ -32,57 +33,12 @@ state state_levelselect = {
 		NULL
 };
 
-struct level_ship{
-	float x;
-	float y;
-	int decks;
-	float radius;
-	float rotation;
-	float rotation_speed;
-};
-
 static void render_ship(struct level_ship *ship);
 
 #define SHIP_COUNT 4
 
-struct level_ship ships[SHIP_COUNT] = {
-			// level 1
-			{
-					0,
-					0,
-					3,
-					1000,
-					0,
-					1
-			},
-			// level 2
-			{
-					2000,
-					200,
-					4,
-					700,
-					0,
-					2
-			},
-			// level 3
-			{
-					500,
-					4000,
-					8,
-					1500,
-					0,
-					0.5f
-			},
-			// level 4
-			{
-					6000,
-					4000,
-					2,
-					1200,
-					0,
-					1.2f
-			}
-};
+static int decs;
+struct level_ship *ships;
 
 static int overview = 1;
 static int sel = 0;
@@ -99,11 +55,21 @@ static float camera_zoom = 0;
 
 static void init()
 {
-
+	level_get_ships(&ships, &decs);
 }
 
 static void update()
 {
+
+	int i;
+	for(i = 0; i < 4; i++){
+		ships[i].rotation += 360*ships[i].rotation_speed*dt;
+	}
+
+	if (keys[SDLK_ESCAPE]){
+		currentState = &state_menu;
+		keys[SDLK_ESCAPE] = 0;
+		}
 
 	if(overview){
 		camera_zoom = 0.1;
@@ -125,7 +91,7 @@ static void update()
 			camera_x -= speed*dt;
 		}
 
-		sel = (sel < 0) ? SHIP_COUNT - 1 : (sel >= SHIP_COUNT ? 0 : sel);;
+		sel = (sel < 0) ? decs - 1 : (sel >= decs ? 0 : sel);;
 
 
 		camera_speedx = (ships[sel].x - camera_x)*5;
@@ -174,9 +140,6 @@ static void render()
 			if(i<4-1){
 				draw_line(ships[i].x,ships[i].y,ships[i+1].x,ships[i+1].y, 512);
 			}
-
-			ships[i].rotation += 360*ships[i].rotation_speed*dt;
-
 			render_ship(&ships[i]);
 		}
 		glPopMatrix();
@@ -217,17 +180,24 @@ static void render_ship(struct level_ship *ship)
 {
 		glPushMatrix();
 
+		float gravity = (4*M_PI*M_PI * ship->radius) * (ship->rotation_speed * ship->rotation_speed);
+		char te[30];
+		sprintf(te,"%.1f",gravity );
+		glColor3f(1,1,1);
+		setTextSize(100);
+		font_drawText(ship->x,ship->y + ship->radius + 200,te);
+
 		glTranslatef(ship->x,ship->y,0);
 		glRotatef(ship->rotation,0,0,1);
 
 		glColor3f(0.1,0.1,0.1);
-		draw_circle(0,0,(ship->radius - (ship->decks-1)*100));
+		draw_circle(0,0,(ship->radius - (ship->count-1)*100));
 
 		glColor3f(0.8,0.1,0.1);
-		draw_simple_box(0,-10,(ship->radius - (ship->decks-1)*100),20);
+		draw_simple_box(0,-10,(ship->radius - (ship->count-1)*100),20);
 
 		int i;
-		for(i = 1; i < ship->decks; i++){
+		for(i = 1; i < ship->count; i++){
 
 			glColor3f(1.0f,0,0);
 			draw_donut(0,0,(ship->radius - i*100) + 20,(ship->radius - i*100) + 100);
