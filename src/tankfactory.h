@@ -1,31 +1,37 @@
 #ifndef TANKFACTORY_H_
 #define TANKFACTORY_H_
 
-
 #include "chipmunk.h"
 #include "objects.h"
+#include "tank.h"
 
-object* tankfactory_init(int x_pos, int max_tanks, float max_hp);
 
 /* the super tank_factory object */
 extern struct obj_type type_tank_factory;
 
+struct tank_factory_param;
+
+object* tankfactory_init(int x_pos, struct tank_factory_param *param);
+
 struct tank_factory {
 	/* object */
-	struct obj_type *type;
-	int instance_id;
-	int *remove;
-	int alive;
-	cpBody *body;
+	object obj;
 
 	/*tank factory*/
 	cpShape *shape;
-	int max;
 	cpFloat timer;
 	int cur;
-	cpFloat max_hp;
 	cpFloat hp;
-	float x_pos;
+	struct tank_param *t_param;
+
+	/* paramerters */
+	struct tank_factory_param *param;
+};
+
+struct tank_factory_param {
+	int max_tanks;
+	cpFloat max_hp;
+	cpFloat spawn_delay;
 };
 
 

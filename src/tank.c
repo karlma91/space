@@ -37,31 +37,30 @@ struct obj_type type_tank= {
 
 static struct tank *temp;
 
-object *tank_init(struct tank_factory *fac, float max_hp)
+object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pram)
 {
-
 	struct tank *tank = malloc(sizeof(struct tank));
-	tank->type = &type_tank;
-	tank->alive = 1;
-	tank->max_hp = max_hp;
-	tank->hp = tank->max_hp;
-	tank->factory = fac;
+	((object *) tank)->type = &type_tank;
+	((object *) tank)->alive = 1;
+	tank->param = pram;
+	tank->hp = tank->param->max_hp;
 	tank->timer = 0;
+	tank->factory = factory;
 
 	cpFloat size = 50;
 	/* make and add new body */
-	tank->body = cpSpaceAddBody(space, cpBodyNew(20, cpMomentForBox(20.0f, size, size)));
-	cpBodySetPos(tank->body, cpv(fac->body->p.x,size+10));
-	cpBodySetVelLimit(tank->body,180);
+	((object *) tank)->body = cpSpaceAddBody(space, cpBodyNew(20, cpMomentForBox(20.0f, size, size)));
+	cpBodySetPos(((object *) tank)->body, cpv(xpos,size+10));
+	cpBodySetVelLimit(((object *) tank)->body,180);
 	/* make and connect new shape to body */
-	tank->shape = cpSpaceAddShape(space, cpBoxShapeNew(tank->body, size, size));
+	tank->shape = cpSpaceAddShape(space, cpBoxShapeNew(((object *) tank)->body, size, size));
 	cpShapeSetFriction(tank->shape, 0.01);
 	//cpShapeSetGroup(tank->shape, 10);
 	cpShapeSetLayers(tank->shape,LAYER_TANK);
 	cpShapeSetCollisionType(tank->shape, ID_TANK);
 	cpSpaceAddCollisionHandler(space, ID_TANK, ID_BULLET_PLAYER, collision_player_bullet, NULL, NULL, NULL, NULL);
 
-	cpBodySetUserData(tank->body, (object*)tank);
+	cpBodySetUserData(((object *) tank)->body, (object*)tank);
 	objects_add((object*)tank);
 	return (object*)tank;
 }
@@ -78,26 +77,26 @@ static void update(object *fac)
 	temp->timer +=dt;
 
 	if(temp->timer > 2 + ((3.0f*rand())/RAND_MAX)){
-		cpVect a = cpvsub(temp->body->p,player->body->p);
+		cpVect a = cpvsub(fac->body->p,player->body->p);
 
 		cpFloat c = cpvlength(player->body->v);
-		cpFloat b = 1500;
+		cpFloat b = 1000;
 		cpFloat G = acos(cpvdot(a,player->body->v)/(cpvlength(player->body->v)*cpvlength(a)));
-		cpFloat ang = asin((c*sin(G))/b);
+		temp->angle = asin((c*sin(G))/b);
 
 		cpFloat bc = cpvtoangle(a);
 		if(player->body->v.x < 0){
-			ang = -ang;
+			temp->angle  = -temp->angle;
 		}
-		ang = M_PI + (bc  - ang);
+		temp->angle  = M_PI + (bc  - temp->angle );
 
-		cpVect t = cpvforangle(ang);
+		cpVect t = cpvforangle(temp->angle );
 
-		bullet_init(temp->body->p,t,ID_BULLET_ENEMY);
+		bullet_init(fac->body->p,t,ID_BULLET_ENEMY);
 		temp->timer = 0;
 	}
 
-	cpFloat tx = temp->body->p.x;
+	cpFloat tx = fac->body->p.x;
 	cpFloat px = player->body->p.x;
 
 	cpFloat ptx = (px-tx); //direct way
@@ -111,7 +110,7 @@ static void update(object *fac)
 		ptx = 1;
 	}
 
-	cpBodySetForce(temp->body,cpv(ptx*12000,0));
+	cpBodySetForce(fac->body,cpv(ptx*12000,0));
 
 }
 
@@ -120,9 +119,13 @@ static void render(object *fac)
 	temp = ((struct tank*)fac);
 
 	glColor3f(1,1,1);
-	draw_hp(temp->body->p.x-50, temp->body->p.y + 60, 100, 20, temp->hp / temp->max_hp);
+	draw_hp(fac->body->p.x-50, fac->body->p.y + 60, 100, 20, temp->hp / temp->param->max_hp);
 	glColor3f(1,1,0);
+	cpVect r = cpvadd(fac->body->p, cpvmult(cpvforangle(temp->angle),50));
+	draw_line(fac->body->p.x,fac->body->p.y,r.x,r.y, 20);
+
 	draw_boxshape(temp->shape,RGBAColor(0.8,0.3,0.1,1),RGBAColor(0.8,0.6,0.3,1));
+
 }
 
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
@@ -141,7 +144,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 		//a->body->data = NULL;
 		particles_add_explosion(a->body->p,1,2000,50,800);
 		//cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
-		temp->alive = 0;
+		((object *) temp)->alive = 0;
 	}else{
 		temp->hp -= 10;
 	}
@@ -153,7 +156,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 static void destroy(object *obj)
 {
 	temp = ((struct tank*)obj);
-	cpSpaceRemoveBody(space, temp->body);
+	cpSpaceRemoveBody(space, obj->body);
 	cpSpaceRemoveShape(space, temp->shape);
 
 	if(temp->factory != NULL){

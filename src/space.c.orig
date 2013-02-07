@@ -1,18 +1,25 @@
-#include "stdio.h"
-#include "SDL.h"
-#include "chipmunk.h"
+/* header */
+#include "space.h"
+
+/* standard c-libraries */
+#include <stdio.h>
+
+/* SDL */
 #include "SDL_opengl.h"
+
+/* Game state */
+#include "main.h"
+#include "menu.h"
+
+/* Drawing */
 #include "draw.h"
 #include "font.h"
-#include "main.h"
 #include "particles.h"
-#include "space.h"
-#include "player.h"
-#include "menu.h"
-#include "math.h"
-#include "tankfactory.h"
-#include "list.h"
 
+/* Game components */
+#include "objects.h"
+#include "player.h"
+#include "tankfactory.h"
 
 #define star_count 10000
 static int stars_x[star_count];
@@ -24,14 +31,15 @@ static float accumulator = 0;
 /* state functions */
 static void SPACE_init();
 static void SPACE_update();
-static void SPACE_draw();
+static void space_render();
 static void SPACE_destroy();
 
-static void update_objects(cpBody *body, void *unused);
-static void render_objects(cpBody *body, void *unused);
+static void SPACE_draw();
+static void update_objects(object *obj);
+static void render_objects(object *obj);
 
 /* helper */
-static int i,j;
+int i,j;
 
 // Chipmunk
 static cpFloat phys_step = 1/60.0f;
@@ -53,7 +61,7 @@ int level_right = 2000;
 state state_space = {
 	SPACE_init,
 	SPACE_update,
-	SPACE_draw,
+	space_render,
 	SPACE_destroy,
 	NULL
 };
@@ -71,6 +79,8 @@ static void SPACE_update()
 		cam_mode = 4;
 	}else if(keys[SDLK_F5]){
 		cam_mode = 5;
+	}else if(keys[SDLK_F6]){
+		cam_mode = 6;
 	}
 
 	if(keys[SDLK_ESCAPE]){
@@ -79,11 +89,9 @@ static void SPACE_update()
 		keys[SDLK_ESCAPE] = 0;
 	}
 
-	cpSpaceEachBody(space, update_objects, NULL);
+	objects_iterate(update_objects);
 
-	player.update(&player);
 	particles_update(dt);
-	static int debug;
 	while(accumulator >= phys_step)
 		{
 			cpSpaceStep(space, phys_step);
@@ -91,20 +99,25 @@ static void SPACE_update()
 		}
 }
 
-static void update_objects(cpBody *body, void *unused)
+static void update_objects(object *obj)
 {
-	if(body->data != NULL){
-		object *obj = ((object*)body->data);
+	if(obj->alive){
+		if (obj->body->p.x < level_left ) obj->body->p.x = level_right - abs(level_left -obj->body->p.x );
+		if (obj->body->p.x > level_right) obj->body->p.x = level_left + (obj->body->p.x - level_right) ;
 		obj->type->update(obj);
+	}else{
+		obj->type->destroy(obj);
+		*(obj->remove) = 1;
 	}
 }
 
-static void SPACE_draw()
+static void space_render()
 {
+
 	//TODO to make dynamic camera zoom and pos depend on velocity (e.g. higher velocity -> less delay)
 
 	/* dynamic camera zoom */
-	float py = player.body->p.y / level_height;
+	float py = player->body->p.y / level_height;
 	if(cam_mode == 1 || cam_mode == 2){ /* fanzy zoom camera */
 
 		float scrlvl = 1.0f * HEIGHT/level_height;
@@ -136,7 +149,7 @@ static void SPACE_draw()
 		}else{
 			cam_zoom = 1.3;
 		}
-		cam_center_y = player.body->p.y;
+		cam_center_y = player->body->p.y;
 		if(cam_center_y > level_height - HEIGHT/(2*cam_zoom)){
 			cam_center_y = level_height - HEIGHT/(2*cam_zoom);
 		}else if(cam_center_y <  HEIGHT/(2*cam_zoom)){
@@ -146,7 +159,30 @@ static void SPACE_draw()
 	}else if(cam_mode == 5){
 		cam_zoom = 1.0f*HEIGHT/level_height;
 		cam_center_y = 1.0f*level_height/2;
-	}else{ /* whole map camera */
+	}else if(cam_mode == 6){
+
+		float scrlvl = 1.0f * HEIGHT/level_height;
+		/* parameters to change */
+		float zoomlvl = 4; /* amount of zoom less is more zoom */
+		float startlvl = 0.8;
+		float endlvl = 0.2;
+
+		float freq = startlvl-endlvl;
+		if (py < 0) {
+			/* undefined zoom! Reset/fix player position? */
+		} else if ( py < endlvl) {
+			cam_zoom = 2 / zoomlvl + scrlvl;
+			cam_center_y = HEIGHT / (2*cam_zoom);
+		} else if (py < startlvl) {
+			cam_zoom = (1 - cos( (1/freq)*M_PI*(py + (freq-endlvl) ))) / zoomlvl + scrlvl;
+			cam_center_y = HEIGHT / (2*cam_zoom);
+		} else if (py < 1) {
+			cam_zoom = scrlvl;
+			cam_center_y = level_height / (2);
+		}else{
+
+		}
+	}else{
 		cam_zoom = 1.0f*HEIGHT/level_height;
 		cam_center_y = 1.0f*level_height/2;
 	}
@@ -155,34 +191,53 @@ static void SPACE_draw()
 	static const float pos_delay = 0.9f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
 	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
 	static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
-	cam_dx = cam_dx * pos_delay + ((player.body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
+	cam_dx = cam_dx * pos_delay + ((player->body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
 
-	cam_center_x = player.body->p.x + cam_dx;
+	cam_center_x = player->body->p.x + cam_dx;
 
 	/* camera constraints */
 	static float cam_left_limit, cam_right_limit;
 	cam_left_limit = level_left + WIDTH / (2 * cam_zoom);
 	cam_right_limit = level_right - WIDTH / (2 * cam_zoom);
-	if (cam_center_x < cam_left_limit) cam_center_x = cam_left_limit;
-	if (cam_center_x > cam_right_limit) cam_center_x = cam_right_limit;
+
+	if(cam_center_x < cam_left_limit){
+		SPACE_draw();
+		cam_center_x += level_right + abs(level_left) ;
+		SPACE_draw();
+	}else if(cam_center_x > cam_right_limit){
+		SPACE_draw();
+		cam_center_x -= level_right + abs(level_left);
+		SPACE_draw();
+	}else{
+		SPACE_draw();
+	}
+
+}
+
+static void SPACE_draw()
+{
+
 
 	/* camera rotation */
 	//if (!cam_relative) glRotatef(-cpBodyGetAngle(player.body) * MATH_180PI,0,0,1);
 	
 	/* draw background */
-	drawStars();
+	//drawStars();
 	
 	/* translate view */
+	glLoadIdentity();
 	glScalef(cam_zoom,cam_zoom,1);
 	glTranslatef(-cam_center_x, -cam_center_y, 0.0f);
 	
-	/* draw player */
-	player.render(&player);
 
 	/* draw all objects */
 	setTextAngle(0);
+
+	/* super slow
+	 * TODO: make draw function for ground and roof
+	 * */
 	draw_space(space);
-	cpSpaceEachBody(space, render_objects, NULL);
+	objects_iterate(render_objects);
 
 	/* draw particle effects */
 	particles_draw(dt);
@@ -195,11 +250,6 @@ static void SPACE_draw()
 	setTextAlign(TEXT_LEFT);
 	setTextSize(10);
 
-	static float pptest = 1.0;
-	pptest -= rand()%(100) / 10000.0f;
-	if (pptest < 0) pptest = 1;
-	draw_hp(-400, 100, 80, 10, pptest);
-
 	glColor3f(1,1,1);
 	font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
 	
@@ -207,17 +257,12 @@ static void SPACE_draw()
 	font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
 }
 
-static void render_objects(cpBody *body, void *unused)
+static void render_objects(object *obj)
 {
-	if(body->data != NULL){
-		object *obj = ((object*)body->data);
-		obj->type->render(obj);
-	}
+	obj->type->render(obj);
 }
 
-//TMP
-static void list_iterate_test(object *obj);
-
+/*Slow*/
 #define SW (8000)
 static void drawStars()
 {
@@ -242,7 +287,44 @@ static void drawStars()
 	glPopMatrix();
 }
 
+static void func(object* obj)
+{
+	obj->type->destroy(obj);
+}
+
+
+//TODO temp
+static struct tank_factory_param t = {5,200,3};
+
+void space_init_level(int lvl)
+{
+	objects_iterate(func);
+	objects_destroy();
+	objects_add((object*)player);
+
+	/* static ground */
+		cpBody  *staticBody = space->staticBody;
+		cpShape *shape;
+		shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,0), cpv(level_right,0), 10)); // ground level at 0
+		cpShapeSetUserData(shape, draw_segmentshape);
+		cpShapeSetElasticity(shape, 0.2f);
+		cpShapeSetFriction(shape, 0.8f);
+		// sets collision type to ID_GROUND
+		cpShapeSetCollisionType(shape, ID_GROUND);
+
+		shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,level_height), cpv(level_right,level_height), 10.0f));
+		cpShapeSetUserData(shape, draw_segmentshape);
+		cpShapeSetElasticity(shape, 0.2f);
+		cpShapeSetFriction(shape, 0.8f);
+		cpShapeSetCollisionType(shape, ID_GROUND);
+
+		tankfactory_init(500,&t);
+		tankfactory_init(100,&t);
+		tankfactory_init(-500,&t);
+}
+
 static void SPACE_init(){
+	objects_init();
 	cpVect gravity = cpv(0, -200);
 	
 	space = cpSpaceNew();
@@ -256,41 +338,12 @@ static void SPACE_init(){
 		stars_size[i] = 2 + 4*(rand() % 1000) / 1000.0f;
 	}
 	
-	/* static ground */
-	cpBody  *staticBody = space->staticBody;
-	cpShape *shape;
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,0), cpv(level_right,0), 10)); // ground level at 0
-	cpShapeSetUserData(shape, draw_segmentshape);
-	cpShapeSetElasticity(shape, 0.2f);
-	cpShapeSetFriction(shape, 0.8f);
-	// sets collision type to ID_GROUND
-	cpShapeSetCollisionType(shape, ID_GROUND);
-
-	shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,level_height), cpv(level_right,level_height), 10.0f));
-	cpShapeSetUserData(shape, draw_segmentshape);
-	cpShapeSetElasticity(shape, 0.2f);
-	cpShapeSetFriction(shape, 0.8f);
-	cpShapeSetCollisionType(shape, ID_GROUND);
-
-	cpFloat boxSize = 10.0f;
-	cpFloat mass = 1.0f;
-	
-	player.init(&player);
-	
-	list_add(tankfactory_init(500,10,100));
-	list_add(tankfactory_init(100,10,100));
-	list_add(tankfactory_init(-500,10,100));
-	list_iterate(list_iterate_test);
-	list_destroy();
-}
-
-static void list_iterate_test(object *obj) {
-	fprintf(stderr, "TYPE_ID: %d", obj->type->ID);
+	player = ((struct player*)player_init());
+	space_init_level(1);
 }
 
 static void SPACE_destroy()
 {
 	cpSpaceDestroy(space);
+	objects_destroy();
 }
-
-

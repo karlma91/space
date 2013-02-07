@@ -293,6 +293,11 @@ static void func(object* obj)
 {
 	obj->type->destroy(obj);
 }
+
+
+//TODO temp
+struct tank_factory_param t = {5,200,3};
+
 void space_init_level(int lvl)
 {
 	objects_iterate(func);
@@ -315,9 +320,9 @@ void space_init_level(int lvl)
 		cpShapeSetFriction(shape, 0.8f);
 		cpShapeSetCollisionType(shape, ID_GROUND);
 
-		tankfactory_init(500,100,100);
-		tankfactory_init(100,100,100);
-		tankfactory_init(-500,100,100);
+		tankfactory_init(500,&t);
+		tankfactory_init(100,&t);
+		tankfactory_init(-500,&t);
 }
 
 static void SPACE_init(){
