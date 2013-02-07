@@ -127,6 +127,9 @@ int main( int argc, char* args[] )
   draw_init();
   font_init();
 
+  /* load levels */
+  level_init();
+
   /* init states */
   state_space.init();
   state_menu.init();
@@ -211,6 +214,8 @@ int main_stop() {
 
 static void game_destroy()
 {
+	level_destroy();
+
   //cpSpaceFreeChildren(space);
 	/* destroy states */
 	state_space.destroy();
