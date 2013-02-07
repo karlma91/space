@@ -52,7 +52,7 @@ level *level_load(int space_station, int deck)
 	return NULL;
 }
 
-extern void level_get_ships(level_ship *ship, int *count)
+extern void level_get_ships(level_ship **ship, int *count)
 {
 	*ship = worlds;
 	*count = station_count;

@@ -22,6 +22,6 @@ typedef struct level_ {
 extern void level_init();
 extern level *level_load(int space_station, int deck);
 extern void level_destroy();
-extern void level_get_ships(level_ship *,int *);
+extern void level_get_ships(level_ship **,int *);
 
 #endif /* LEVEL_H_ */
