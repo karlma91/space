@@ -46,9 +46,7 @@ static cpFloat phys_step = 1/60.0f;
 cpSpace *space;
 
 /* camera settings */
-static int cam_mode = 1;
-static float cam_dx = 0;
-static float cam_dy = 0;
+static int cam_mode = 6;
 float cam_center_x = 0;
 float cam_center_y = 0;
 float cam_zoom = 1;
@@ -113,16 +111,16 @@ static void update_objects(object *obj)
 
 static void space_render()
 {
-
-	//TODO to make dynamic camera zoom and pos depend on velocity (e.g. higher velocity -> less delay)
-
 	/* dynamic camera zoom */
 	float py = player->body->p.y / level_height;
-	if(cam_mode == 1 || cam_mode == 2){ /* fanzy zoom camera */
+	float scrlvl, zoomlvl;
+	switch (cam_mode) {
+	case 1:
+	case 2: /* fanzy zoom camera */
 
-		float scrlvl = 1.0f * HEIGHT/level_height;
+		scrlvl = 1.0f * HEIGHT/level_height;
 
-		float zoomlvl = cam_mode == 1 ? 4 : 12;
+		zoomlvl = cam_mode == 1 ? 4 : 12;
 		if (py < 0) {
 			/* undefined zoom! Reset/fix player position? */
 		} else if ( py < 0.2) {
@@ -143,7 +141,10 @@ static void space_render()
 		} else {
 			/* undefined zoom! Reset/fix player position? */
 		}
-	}else if(cam_mode == 3 || cam_mode == 4){ /* simple zoomed camera */
+		break;
+
+	case 3:
+	case 4:/* simple zoomed camera */
 		if(cam_mode == 3){
 			cam_zoom = 2;
 		}else{
@@ -155,15 +156,15 @@ static void space_render()
 		}else if(cam_center_y <  HEIGHT/(2*cam_zoom)){
 			cam_center_y = HEIGHT/(2*cam_zoom);
 		}
-
-	}else if(cam_mode == 5){
+		break;
+	case 5:
 		cam_zoom = 1.0f*HEIGHT/level_height;
 		cam_center_y = 1.0f*level_height/2;
-	}else if(cam_mode == 6){
-
-		float scrlvl = 1.0f * HEIGHT/level_height;
+		break;
+	case 6:
+		scrlvl = 1.0f * HEIGHT/level_height;
 		/* parameters to change */
-		float zoomlvl = 4; /* amount of zoom less is more zoom */
+		zoomlvl = 4; /* amount of zoom less is more zoom */
 		float startlvl = 0.8;
 		float endlvl = 0.2;
 
@@ -180,17 +181,20 @@ static void space_render()
 			cam_zoom = scrlvl;
 			cam_center_y = level_height / (2);
 		}else{
-
+			/* undefined zoom! Reset/fix player position? */
 		}
-	}else{
+		break;
+	default:
 		cam_zoom = 1.0f*HEIGHT/level_height;
 		cam_center_y = 1.0f*level_height/2;
+		break;
 	}
-	
+
 	/* dynamic camera pos */
 	static const float pos_delay = 0.9f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
 	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
 	static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
+	static float cam_dx;
 	cam_dx = cam_dx * pos_delay + ((player->body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
 
 	cam_center_x = player->body->p.x + cam_dx;
@@ -216,13 +220,11 @@ static void space_render()
 
 static void SPACE_draw()
 {
-
-
 	/* camera rotation */
 	//if (!cam_relative) glRotatef(-cpBodyGetAngle(player.body) * MATH_180PI,0,0,1);
 	
 	/* draw background */
-	//drawStars();
+	drawStars();
 	
 	/* translate view */
 	glLoadIdentity();
@@ -236,7 +238,7 @@ static void SPACE_draw()
 	/* super slow
 	 * TODO: make draw function for ground and roof
 	 * */
-	draw_space(space);
+	//draw_space(space);
 	objects_iterate(render_objects);
 
 	/* draw particle effects */
@@ -313,9 +315,9 @@ void space_init_level(int lvl)
 		cpShapeSetFriction(shape, 0.8f);
 		cpShapeSetCollisionType(shape, ID_GROUND);
 
-		tankfactory_init(500,3,100);
-		tankfactory_init(100,3,100);
-		tankfactory_init(-500,3,100);
+		tankfactory_init(500,100,100);
+		tankfactory_init(100,100,100);
+		tankfactory_init(-500,100,100);
 }
 
 static void SPACE_init(){
