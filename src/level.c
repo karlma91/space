@@ -25,14 +25,14 @@ void level_init()
 	/* read space station data */
 	file = fopen("bin/data/space","r");
 
-	//fscanf(file, "%d\n", &station_count);
-	station_count = 4;
+	fscanf(file, "%d\n", &station_count);
 	worlds = calloc(station_count,sizeof(level_ship));
 
 	for (i = 0; i < station_count; i++) {
 		int x, y, count, radius;
 		float spd;
 		fscanf(file, "%d %d %d %d %f\n", &x, &y, &count, &radius, &spd);
+		//fprintf(stderr, "%d %d %d %d %f\n", x, y, count, radius, spd);
 		worlds[i].x = x;
 		worlds[i].y = y;
 		worlds[i].count = count;
@@ -40,7 +40,7 @@ void level_init()
 		worlds[i].rotation_speed = spd;
 	}
 
-	// TMP
+
 }
 
 level *level_load(int space_station, int deck)
