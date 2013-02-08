@@ -19,8 +19,9 @@ typedef struct level_ {
 	int level_right;
 } level;
 
-extern void level_init();
+extern int level_init();
 extern level *level_load(int space_station, int deck);
+extern void level_unload(level *);
 extern void level_destroy();
 extern void level_get_ships(level_ship **,int *);
 
