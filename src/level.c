@@ -1,10 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "level.h"
 #include "objects.h"
 
 static int station_count;
 static level_ship *worlds;
+
+static char *(group_names[ID_COUNT]);
 
 static int (count[ID_COUNT]);
 static char *(names[ID_COUNT]);
@@ -14,16 +17,32 @@ static int i;
 
 static FILE * file;
 
-void level_init()
+int level_init()
 {
 	for (i = 0; i < ID_COUNT; i++) {
 		count[i] = 0;
+		group_names[i] = NULL;
 		names[i] = NULL;
 		params[i] = NULL;
 	}
 
+	/* set group names */
+	group_names[ID_PLAYER]        = "PLAYER";
+	group_names[ID_TANK]          = "TANK";
+	group_names[ID_TANK_FACTORY]  = "FACTORY";
+	group_names[ID_BULLET_PLAYER] = "BULLET_P";
+	group_names[ID_BULLET_ENEMY]  = "BULLET_E";
+
+	//TODO add new object types here /\
+
+
 	/* read space station data */
-	file = fopen("bin/data/space","r");
+	file = fopen("bin/data/objects","r");
+
+	if (file == NULL) {
+		fprintf(stderr, "could not load level data!\n");
+		return 1;
+	}
 
 	fscanf(file, "%d\n", &station_count);
 	worlds = calloc(station_count,sizeof(level_ship));
@@ -39,7 +58,33 @@ void level_init()
 		worlds[i].radius = radius;
 		worlds[i].rotation_speed = spd;
 	}
+	fclose(file);
 
+	/* read object sub groups / object sub types */
+	file = fopen("bin/data/objects","r");
+
+	if (file == NULL) {
+		fprintf(stderr, "could not load object data!\n");
+		return 2;
+	}
+
+	int ret;
+	char group[255];
+	char type[255];
+
+	for (;;) {
+		ret = fscanf(file, "%s %s ", &group[0], &type[0]);
+		if (ret == EOF) {
+			break;
+		}
+
+		//TODO parse input and store subname and create corresponding obj_struct
+		//...
+		fprintf(stderr, "%s %s \n", group, type);
+	}
+
+
+	fclose(file);
 
 }
 
@@ -60,7 +105,12 @@ level *level_load(int space_station, int deck)
 	return NULL;
 }
 
-extern void level_get_ships(level_ship **ship, int *count)
+void level_unload(level *lvl)
+{
+
+}
+
+void level_get_ships(level_ship **ship, int *count)
 {
 	*ship = worlds;
 	*count = station_count;
