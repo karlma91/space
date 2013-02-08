@@ -12,6 +12,8 @@
 #include "draw.h"
 #include "particles.h"
 
+
+#include "objects.h"
 /* Game components */
 #include "player.h"
 #include "tank.h"

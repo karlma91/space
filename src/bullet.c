@@ -1,5 +1,6 @@
 /* header */
 #include "bullet.h"
+#include "objects.h"
 
 static void init(object *obj);
 static void update(object *obj);

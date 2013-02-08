@@ -15,6 +15,8 @@
 #include "draw.h"
 #include "particles.h"
 
+#include "objects.h"
+
 /* Game components */
 #include "player.h"
 #include "bullet.h"

@@ -16,6 +16,8 @@
 #include "draw.h"
 #include "font.h"
 
+#include "level.h"
+
 /* Game states */
 #include "space.h"
 #include "menu.h"

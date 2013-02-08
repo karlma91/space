@@ -40,11 +40,11 @@ extern  int LAYER_TANK_FACTORY;
 extern  int LAYER_PLAYER_BULLET;
 extern  int LAYER_ENEMY_BULLET;
 
-extern void list_init();
-extern void list_add(object *);
-extern void list_iterate(void (*f)(object *));
-extern void list_iterate_type(void (*f)(object *), int ID);
-extern void list_destroy();
+extern void objects_init();
+extern void objects_add(object *);
+extern void objects_iterate(void (*f)(object *));
+extern void objects_iterate_type(void (*f)(object *), int ID);
+extern void objects_destroy();
 
 extern object *objects_nearest(cpVect pos, int obj_id);
 extern object *objects_first(int obj_id);

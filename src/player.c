@@ -13,6 +13,7 @@
 #include "font.h"
 #include "particles.h"
 
+#include "objects.h"
 /* Game components */
 #include "objects.h"
 #include "tank.h"
