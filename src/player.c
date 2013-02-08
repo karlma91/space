@@ -159,9 +159,6 @@ static void player_update(object *obj)
 
 	if (keys[SDLK_h]) {
 		cpBodySetVelLimit(temp->body,5000);
-		cpBodySetAngVelLimit(temp->body,2);
-		cpBodySetVel(temp->body, cpvzero);
-		cpBodySetAngVel(temp->body, 0);
 	}
 	
 	if (keys[SDLK_SPACE]) {

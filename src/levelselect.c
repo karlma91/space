@@ -37,7 +37,7 @@ static void render_ship(struct level_ship *ship, int selected);
 
 #define SHIP_COUNT 4
 
-static int decs;
+static int decks;
 struct level_ship *ships;
 
 static int overview = 1;
@@ -56,14 +56,19 @@ static float temp_y = 0;
 
 static void init()
 {
-	level_get_ships(&ships, &decs);
+	level_get_ships(&ships, &decks);
+	fprintf(stderr, "decks: %d \n", decks);
+	int i;
+	for(i=0; i<decks; i++){
+		fprintf(stderr, "x: %f y: %f radius: %f \n", ships[i].x,ships[i].y,ships[i].radius);
+	}
 }
 
 static void update()
 {
 
 	int i;
-	for(i = 0; i < 4; i++){
+	for(i = 0; i < decks; i++){
 		ships[i].rotation += 360*ships[i].rotation_speed*dt;
 	}
 
@@ -91,7 +96,7 @@ static void update()
 			camera_x -= speed*dt;
 		}
 
-		sel = (sel < 0) ? decs - 1 : (sel >= decs ? 0 : sel);;
+		sel = (sel < 0) ? decks - 1 : (sel >= decks ? 0 : sel);;
 
 		temp_y =  (camera_zoom - 0.1)*5;
 		camera_zoom -= temp_y*dt;
@@ -138,7 +143,7 @@ static void update()
 		}
 
 		camera_zoom = ((1.0f * HEIGHT)/(temp_y*2));
-		camera_speedy =  (ships[sel].radius + (ships[sel].count-level_select - 1 )*100 + spaceing - temp_y)*5;
+		camera_speedy =  (ships[sel].radius + (level_select )*100 + spaceing - temp_y)*5;
 		temp_y += camera_speedy*dt;
 	}
 }
@@ -150,8 +155,8 @@ static void render()
 		glScalef(camera_zoom,camera_zoom,1);
 		glTranslatef(-camera_x,-camera_y,0);
 		int i;
-		for(i = 0; i < 4; i++){
-			if(i<4-1){
+		for(i = 0; i < decks; i++){
+			if(i<decks-1){
 				draw_line(ships[i].x,ships[i].y,ships[i+1].x,ships[i+1].y, 512);
 			}
 			render_ship(&ships[i], sel == i);
@@ -183,12 +188,12 @@ static void render_ship(struct level_ship *ship, int selected)
 		draw_circle(0,0,(ship->radius - (ship->count-1)*100));
 
 		glColor3f(0.8,0.1,0.1);
-		draw_simple_box(0,-10,(ship->radius - (ship->count-1)*100),20);
+		draw_simple_box(-5,0,(ship->radius - (ship->count-1)*100),30);
 
 		int i;
 		for(i = 0; i < ship->count; i++){
 
-			if(selected && i == level_select){
+			if(selected && i == ship->count-level_select - 1){
 				glColor3f(0,0,1);
 			}else{
 				glColor3f(1.0f,0,0);

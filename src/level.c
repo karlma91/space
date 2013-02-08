@@ -37,7 +37,7 @@ int level_init()
 
 
 	/* read space station data */
-	file = fopen("bin/data/objects","r");
+	file = fopen("bin/data/space","r");
 
 	if (file == NULL) {
 		fprintf(stderr, "could not load level data!\n");
