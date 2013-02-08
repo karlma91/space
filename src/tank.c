@@ -102,8 +102,8 @@ static void update(object *fac)
 	cpFloat px = player->body->p.x;
 
 	cpFloat ptx = (px-tx); //direct way
-	cpFloat pltx = (tx - level_left + (level_right - px));
-	cpFloat prtx = (level_right - tx + (px - level_left));
+	cpFloat pltx = (tx - currentlvl->left + (currentlvl->right - px));
+	cpFloat prtx = (currentlvl->right - tx + (px - currentlvl->left));
 	if(fabs(ptx) < prtx && fabs(ptx) < pltx){
 		ptx = ptx>0? 1:-1;
 	}else if(pltx < prtx){

@@ -1,7 +1,7 @@
 #include "draw.h"
 
 //local function
-static void loadTexture(char *tex);
+static int loadTexture(char *tex);
 
 GLfloat array[CIRCLE_MAX_RES];
 
@@ -15,7 +15,7 @@ static GLfloat unit_circle[128];
 
 #define DEBUG fprintf(stderr, "line: %d\n", __LINE__);
 
-void draw_init(){
+int draw_init(){
 
 	for(i = 0; i < 128; i += 2) {
 		unit_circle[i] = sinf( 2*M_PI*i / (128-2));
@@ -29,8 +29,17 @@ void draw_init(){
 	 * Range 100%
 	 * Jitter 0%
 	 */
-	loadTexture("textures/glowdot.bmp");
-	loadTexture("textures/dot.bmp");
+	int error;
+	error = loadTexture("textures/glowdot.bmp");
+	if(error){
+		fprintf(stderr, "could not load glowdot.bmp");
+		return error;
+	}
+	error = loadTexture("textures/dot.bmp");
+	if(error){
+		fprintf(stderr, "could not load dot.bmp");
+		return error;
+	}
 	
 	/* generate rainbow colors */
 	float min_col = 0.2f;
@@ -47,14 +56,15 @@ void draw_init(){
 		c->r = i/255.0f, c->g = min_col, c->b = 1, c->a = 1;
 	for(i=0; i <= 255; i++, c++)
 		c->r = 1, c->g = min_col, c->b = 1 - i/255.0f, c->a = 1;
+	return 0;
 }
 
-static void loadTexture(char *tex)
+static int loadTexture(char *tex)
 {
 	SDL_Surface *surface;
 	if((surface = SDL_LoadBMP(tex))==NULL){
 		fprintf(stderr,"Unable to loade texture\n");
-		return;
+		return 1;
 	}
 	glGenTextures(1,&texture[texC]);
 	
@@ -70,6 +80,7 @@ static void loadTexture(char *tex)
 	
 	SDL_FreeSurface(surface);
 	texC++;
+	return 0;
 }
 
 

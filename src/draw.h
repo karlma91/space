@@ -43,7 +43,7 @@ Color draw_col_grad(int hue);
 
 void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_line_strip(const GLfloat *strip, int l, float w);
-void draw_init();
+int draw_init();
 void draw_destroy();
 void draw_circle(GLfloat x, GLfloat y, GLfloat radius);
 void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r);

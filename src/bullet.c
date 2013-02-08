@@ -30,10 +30,12 @@ static void init(object *obj)
 {
 
 }
+
 static void update(object *obj)
 {
 	temp = (struct bullet*)obj;
 }
+
 static void render(object *obj)
 {
 	temp = (struct bullet*)obj;

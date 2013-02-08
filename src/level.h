@@ -15,8 +15,8 @@ typedef struct level_ {
 	int station;
 	int deck;
 	int height;
-	int level_left;
-	int level_right;
+	int left;
+	int right;
 } level;
 
 extern int level_init();

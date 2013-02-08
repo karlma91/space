@@ -3,6 +3,7 @@
 
 #include "chipmunk.h"
 #include "main.h"
+#include "level.h"
 
 extern state state_space;
 
@@ -11,15 +12,13 @@ extern float cam_center_x;
 extern float cam_center_y;
 extern float cam_zoom;
 
-/* level data */
-extern int level_height;
-extern int level_left;
-extern int level_right;
 
 /* chipmunk physics space */
 extern cpSpace *space;
 
+extern level *currentlvl;
+
 /* init new level */
-void space_init_level(int lvl);
+void space_init_level(int space_station, int deck);
 
 #endif /* SPACE_H_ */

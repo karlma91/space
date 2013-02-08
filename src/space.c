@@ -20,6 +20,7 @@
 #include "objects.h"
 #include "player.h"
 #include "tankfactory.h"
+#include "level.h"
 
 #define star_count 1000
 static int stars_x[star_count];
@@ -55,10 +56,10 @@ float cam_zoom = 1;
 static int cam_left;
 static int cam_right;
 
+
+
 /* level data */
-int level_height = 1200;
-int level_left = -2000;
-int level_right = 2000;
+level *currentlvl;
 
 state state_space = {
 	SPACE_init,
@@ -104,8 +105,8 @@ static void SPACE_update()
 static void update_objects(object *obj)
 {
 	if(obj->alive){
-		if (obj->body->p.x < level_left ) obj->body->p.x = level_right - abs(level_left -obj->body->p.x );
-		if (obj->body->p.x > level_right) obj->body->p.x = level_left + (obj->body->p.x - level_right) ;
+		if (obj->body->p.x < currentlvl->left ) obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
+		if (obj->body->p.x > currentlvl->right) obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right) ;
 		obj->type->update(obj);
 	}else{
 		obj->type->destroy(obj);
@@ -116,13 +117,13 @@ static void update_objects(object *obj)
 static void space_render()
 {
 	/* dynamic camera zoom */
-	float py = player->body->p.y / level_height;
+	float py = player->body->p.y / currentlvl->height;
 	float scrlvl, zoomlvl;
 	switch (cam_mode) {
 	case 1:
 	case 2: /* fanzy zoom camera */
 
-		scrlvl = 1.0f * HEIGHT/level_height;
+		scrlvl = 1.0f * HEIGHT/currentlvl->height;
 
 		zoomlvl = cam_mode == 1 ? 4 : 12;
 		if (py < 0) {
@@ -135,13 +136,13 @@ static void space_render()
 			cam_center_y = HEIGHT / (2*cam_zoom);
 		} else if (py < 0.6) {
 			cam_zoom = scrlvl;
-			cam_center_y = level_height / (2);
+			cam_center_y = currentlvl->height / (2);
 		} else if (py < 0.8) {
 			cam_zoom = (1 - cos(5*M_PI * (py - 0.4 + 1))) / zoomlvl + scrlvl;
-			cam_center_y = level_height - HEIGHT / (2*(cam_zoom));
+			cam_center_y = currentlvl->height - HEIGHT / (2*(cam_zoom));
 		} else if (py <= 1.0) {
 			cam_zoom = 2 / zoomlvl + scrlvl;
-			cam_center_y = level_height - HEIGHT / (2*cam_zoom);
+			cam_center_y = currentlvl->height - HEIGHT / (2*cam_zoom);
 		} else {
 			/* undefined zoom! Reset/fix player position? */
 		}
@@ -155,18 +156,18 @@ static void space_render()
 			cam_zoom = 1.3;
 		}
 		cam_center_y = player->body->p.y;
-		if(cam_center_y > level_height - HEIGHT/(2*cam_zoom)){
-			cam_center_y = level_height - HEIGHT/(2*cam_zoom);
+		if(cam_center_y > currentlvl->height - HEIGHT/(2*cam_zoom)){
+			cam_center_y = currentlvl->height - HEIGHT/(2*cam_zoom);
 		}else if(cam_center_y <  HEIGHT/(2*cam_zoom)){
 			cam_center_y = HEIGHT/(2*cam_zoom);
 		}
 		break;
 	case 5:
-		cam_zoom = 1.0f*HEIGHT/level_height;
-		cam_center_y = 1.0f*level_height/2;
+		cam_zoom = 1.0f*HEIGHT/currentlvl->height;
+		cam_center_y = 1.0f*currentlvl->height/2;
 		break;
 	case 6:
-		scrlvl = 1.0f * HEIGHT/level_height;
+		scrlvl = 1.0f * HEIGHT/currentlvl->height;
 		/* parameters to change */
 		zoomlvl = 4; /* amount of zoom less is more zoom */
 		float startlvl = 0.8;
@@ -183,14 +184,14 @@ static void space_render()
 			cam_center_y = HEIGHT / (2*cam_zoom);
 		} else if (py < 1) {
 			cam_zoom = scrlvl;
-			cam_center_y = level_height / (2);
+			cam_center_y = currentlvl->height / (2);
 		}else{
 			/* undefined zoom! Reset/fix player position? */
 		}
 		break;
 	default:
-		cam_zoom = 1.0f*HEIGHT/level_height;
-		cam_center_y = 1.0f*level_height/2;
+		cam_zoom = 1.0f*HEIGHT/currentlvl->height;
+		cam_center_y = 1.0f*currentlvl->height/2;
 		break;
 	}
 
@@ -210,8 +211,8 @@ static void space_render()
 
 	static float cam_left_limit, cam_right_limit;
 
-	cam_left_limit = level_left + camera_width;
-	cam_right_limit = level_right - camera_width;
+	cam_left_limit = currentlvl->left + camera_width;
+	cam_right_limit = currentlvl->right - camera_width;
 
 	cam_left = cam_center_x - camera_width;
 	cam_right = cam_center_x + camera_width;
@@ -220,13 +221,13 @@ static void space_render()
 
 	if(cam_center_x < cam_left_limit){
 		second_draw = 1;
-		cam_center_x += level_right + abs(level_left) ;
+		cam_center_x += currentlvl->right + abs(currentlvl->left) ;
 		cam_left = cam_center_x - camera_width;
 		cam_right = cam_center_x + camera_width;
 		SPACE_draw();
 	}else if(cam_center_x > cam_right_limit){
 		second_draw = 1;
-		cam_center_x -= level_right + abs(level_left);
+		cam_center_x -= currentlvl->right + abs(currentlvl->left);
 		cam_left = cam_center_x - camera_width;
 		cam_right = cam_center_x + camera_width;
 		SPACE_draw();
@@ -321,26 +322,27 @@ static void func(object* obj)
 
 //TODO temp
 struct tank_factory_param t = {5,200,3};
+level templevel = {1,1,1200,-1000,1000};
 
-void space_init_level(int lvl)
+void space_init_level(int space_station, int deck)
 {
 	objects_iterate(func);
 	objects_destroy();
 	objects_add((object*)player);
 
-	/* static ground */
+
+
+//	currentlvl = level_load(space_station,deck);
+	currentlvl = &templevel;
+
+		/* static ground */
 		cpBody  *staticBody = space->staticBody;
 		cpShape *shape;
-		shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,0), cpv(level_right,0), 10)); // ground level at 0
-		cpShapeSetUserData(shape, draw_segmentshape);
-		cpShapeSetElasticity(shape, 0.2f);
+		shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), 10)); // ground level at 0
 		cpShapeSetFriction(shape, 0.8f);
-		// sets collision type to ID_GROUND
 		cpShapeSetCollisionType(shape, ID_GROUND);
 
-		shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(level_left,level_height), cpv(level_right,level_height), 10.0f));
-		cpShapeSetUserData(shape, draw_segmentshape);
-		cpShapeSetElasticity(shape, 0.2f);
+		shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), 10.0f));
 		cpShapeSetFriction(shape, 0.8f);
 		cpShapeSetCollisionType(shape, ID_GROUND);
 
@@ -365,7 +367,7 @@ static void SPACE_init(){
 	}
 	
 	player = ((struct player*)player_init());
-	space_init_level(1);
+	space_init_level(1,1);
 }
 
 static void SPACE_destroy()

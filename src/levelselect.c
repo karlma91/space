@@ -23,7 +23,6 @@ static void update();
 static void render();
 static void destroy();
 
-
 /* extern */
 state state_levelselect = {
 		init,
@@ -185,7 +184,7 @@ static void render_ship(struct level_ship *ship, int selected)
 		glRotatef(ship->rotation,0,0,1);
 
 		glColor3f(0.1,0.1,0.1);
-		draw_circle(0,0,(ship->radius - (ship->count-1)*100));
+		draw_circle(0,0,(ship->radius) + 120);
 
 		glColor3f(0.8,0.1,0.1);
 		draw_simple_box(-5,0,(ship->radius - (ship->count-1)*100),30);

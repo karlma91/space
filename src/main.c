@@ -125,12 +125,22 @@ int main( int argc, char* args[] )
   // random seed
   srand(time( NULL ));
 	
+  int error;
+
   initGL();
-  draw_init();
+
+  error = draw_init();
+  if(error){
+	  return error;
+  }
+
   font_init();
 
   /* load levels */
-  level_init();
+  error = level_init();
+  if(error){
+	  return error;
+  }
 
   /* init states */
   state_space.init();

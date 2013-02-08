@@ -150,7 +150,7 @@ static void optionmenu_func()
 		break;
 	case 1:
 		currentState = &state_space;
-		space_init_level(1);
+		space_init_level(1,1);
 		break;
 	case 2:
 		state_menu.parentState = 0;

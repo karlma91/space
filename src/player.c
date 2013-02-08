@@ -114,7 +114,7 @@ static void player_update(object *obj)
 
 	/* units/sec */
 	cpFloat rotSpeed = 5.0;
-	cpFloat accel = 50000;
+	cpFloat accel = 100000;
 
 	cpVect dirUp = cpvforangle(-rotSpeed*dt);
 	cpVect dirDown = cpvforangle(rotSpeed*dt);
@@ -209,9 +209,3 @@ static void player_destroy(object *obj)
 	*obj->remove = 1;
 	//free(obj);
 }
-/*
- *
-rend: 0x0074dd80
-dead: 0x016642d0
-init: 0x016642d0
- */
