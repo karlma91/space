@@ -21,6 +21,33 @@ static int i;
 
 static FILE * file;
 
+static char group[21];
+static char subtype[21];
+
+
+/** return group_name's index in group_names, or -1 if not found  */
+int get_group_index(const char* group_name) {
+	int group_id;
+	for (group_id = 0; group_id < ID_COUNT; group_id++) {
+		if (strcasecmp(group_name, group_names[group_id]) == 0) {
+			return group_id;
+		}
+	}
+	return -1;
+}
+
+/** return sub_name's index in params, or -1 if not found  */
+int get_sub_index(int group_id, const char* sub_name) {
+	int sub_id;
+	for (sub_id = 0; sub_id < count[group_id]; sub_id++) {
+		if (strcmp(names[group_id][sub_id], sub_name) == 0) {
+			/* subtype allready in list */
+			return sub_id;
+		}
+	}
+	return -1;
+}
+
 int level_init()
 {
 	int ret;
@@ -86,9 +113,6 @@ int level_init()
 		return 3;
 	}
 
-	char group[21];
-	char subtype[21];
-
 	for (;;) {
 		ret = fscanf(file, "%s %s ", &group[0], &subtype[0]);
 		if (ret == EOF) {
@@ -98,25 +122,17 @@ int level_init()
 		fprintf(stderr, "%s %s \n", group, subtype); //DEBUG
 
 		/* find object type id */
-		int group_id;
-		for (group_id = 0; group_id < ID_COUNT; group_id++) {
-			if (strcasecmp(group, group_names[group_id]) == 0) {
-				/* object name recognised */
-				break;
-			}
-		}
-		if (group_id == ID_COUNT) {
+		int group_id = get_group_index(group);
+		if (group_id == -1) {
 			fprintf(stderr, "Unrecognised object group: '%s'\n", group);
 			return 4;
 		}
 
 		/* check if subtype allready exists */
-		for (i = 0; i < count[group_id]; i++) {
-			if (strcmp(names[group_id][i], subtype) == 0) {
-				/* subtype allready in list */
-				fprintf(stderr, "Duplicate sub object definitions: %s %s\n", group, subtype);
-				return 5;
-			}
+		int sub_id = get_sub_index(group_id, subtype);
+		if (sub_id != -1) {
+			fprintf(stderr, "Duplicate sub object definitions: %s %s\n", group, subtype);
+			return 5;
 		}
 
 		/* reallocates arrays so they have room for one more object */
@@ -125,37 +141,50 @@ int level_init()
 		strcpy(names[group_id][count[group_id]-1], subtype);
 
 		/* add new sub object definition */
-		float a, b, c, d;
+		float af, bf, cf, df;
+		int ai, bi, ci, di;
 		switch (group_id) {
 		case ID_PLAYER:
-
+			/* currently unsupported */
 			break;
 		case ID_TANK:
-			fscanf(file, "%d\n", &a);
+			ret = fscanf(file, "%f\n", &af);
+			if (ret != 1) {
+				fprintf(stderr, "Wrong number of parameters: %d\n", ret);
+				return 6;
+			}
 			params[group_id] = realloc(params[group_id], sizeof(struct tank_param[count[group_id]]));
-			((struct tank_param *)params)[group_id].max_hp = a;
-			//static void *(params[ID_COUNT]);
+			((struct tank_param *)params[group_id])[count[group_id]-1].max_hp = af;
 			break;
-		case ID_TANK_FACTORY: //TMP
-			fscanf(file, "%d\n", &a);
-
+		case ID_TANK_FACTORY:
+			ret = fscanf(file, "%d %f %f\n", &ai, &af, &bf);
+			if (ret != 3) {
+				fprintf(stderr, "Wrong number of parameters: %d\n", ret);
+				return 6;
+			}
+			fprintf(stderr,"%d\n", group_id);
+			params[group_id] = realloc(params[group_id], sizeof(struct tank_factory_param[count[group_id]]));
+			((struct tank_factory_param *)params[group_id])[count[group_id]-1].max_tanks = ai;
+			((struct tank_factory_param *)params[group_id])[count[group_id]-1].max_hp = af;
+			((struct tank_factory_param *)params[group_id])[count[group_id]-1].spawn_delay = bf;
 			break;
 		case ID_BULLET_PLAYER:
-
+			/* currently unsupported */
 			break;
 		case ID_BULLET_ENEMY:
-
+			/* currently unsupported */
 			break;
 		}
 	}
-
-
 	fclose(file);
+
 	return 0;
 }
 
 level *level_load(int space_station, int deck)
 {
+	int ret;
+
 	if (space_station < 1 || space_station > station_count) {
 		fprintf(stderr, "Space station no. %d does not exist!\n", space_station);
 		return NULL;
@@ -165,15 +194,58 @@ level *level_load(int space_station, int deck)
 		fprintf(stderr, "Deck no. %d on space station no. %d does not exist!\n", deck, space_station);
 		return NULL;
 	}
+	char levelpath[200];
+	sprintf(levelpath, "bin/data/%d/%d", space_station, deck);
+	level *lvl = malloc(sizeof(*lvl));
 
+	file = fopen(levelpath,"r");
+	if (file == NULL) {
+		fprintf(stderr, "Could not find level %d.%d\n",space_station,deck);
+		return NULL;
+	}
 
+	/* read level specific data */
+	fscanf(file,"%d %d %d %d %d\n", &(lvl->station),&(lvl->deck),&(lvl->height),&(lvl->left),&(lvl->right));
 
-	return NULL;
+	int x;
+	/* add objects */
+	for (;;) {
+		ret = fscanf(file, "%s %s %d\n", group, subtype, &x);
+		if (ret == EOF) {
+			break;
+		} else if (ret != 3) {
+			fprintf(stderr, "Error while parsing level data. Wrong number of arguments\n");
+			return NULL;
+		}
+
+		int group_id = get_group_index(group);
+		int sub_id = get_sub_index(group_id, subtype);
+
+		switch (group_id) {
+		case ID_PLAYER:
+			/* currently unsupported */
+			break;
+		case ID_TANK:
+			tank_init(x,NULL,  &(((struct tank_param *)params[group_id])[sub_id])  );
+			break;
+		case ID_TANK_FACTORY:
+			tankfactory_init(x, &(((struct tank_factory_param *)params[group_id])[sub_id]));
+			break;
+		case ID_BULLET_PLAYER:
+			/* currently unsupported */
+			break;
+		case ID_BULLET_ENEMY:
+			/* currently unsupported */
+			break;
+		}
+	}
+
+	return lvl;
 }
 
 void level_unload(level *lvl)
 {
-
+	free(lvl);
 }
 
 void level_get_ships(level_ship **ship, int *count)

@@ -328,14 +328,24 @@ void space_init_level(int space_station, int deck)
 {
 	objects_iterate(func);
 	objects_destroy();
+
 	objects_add((object*)player);
 
+	if (currentlvl != NULL) {
+		level_unload(currentlvl);
+	}
 
+	currentlvl = level_load(space_station,deck);
 
-//	currentlvl = level_load(space_station,deck);
-	currentlvl = &templevel;
+	if (currentlvl == NULL) {
+		fprintf(stderr, "space_level_init failed!\n");
+		exit(-1);
+	}
+
+	//currentlvl = &templevel;
 
 		/* static ground */
+
 		cpBody  *staticBody = space->staticBody;
 		cpShape *shape;
 		shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), 10)); // ground level at 0
@@ -346,9 +356,11 @@ void space_init_level(int space_station, int deck)
 		cpShapeSetFriction(shape, 0.8f);
 		cpShapeSetCollisionType(shape, ID_GROUND);
 
+	/*
 		tankfactory_init(500,&t);
 		tankfactory_init(100,&t);
 		tankfactory_init(-500,&t);
+	*/
 }
 
 static void SPACE_init(){
