@@ -20,6 +20,7 @@ struct tank {
 	cpShape *shape;
 	float timer;
 	float angle;
+	float rot_speed;
 	float hp;
 	struct tank_factory *factory;
 	/*parameters */

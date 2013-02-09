@@ -133,6 +133,8 @@ static void update()
 		if (keys[SDLK_SPACE] || keys[SDLK_RETURN]) {
 			currentState = &state_space;
 			change_current_menu(INGAME_MENU_ID);
+			/* load correct level */
+			level_load(sel,level_select);
 			keys[SDLK_SPACE] = 0, keys[SDLK_RETURN] = 0;
 		}
 		if(keys[SDLK_BACKSPACE]){

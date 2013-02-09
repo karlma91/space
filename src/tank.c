@@ -28,6 +28,11 @@ static void render(object *fac);
 static void destroy(object *obj);
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 
+/* helper */
+static float get_angle(object *obj, object *obj2);
+static float get_best_angle(object *obj, object *obj2);
+
+
 struct obj_type type_tank= {
 	ID_TANK,
 	init,
@@ -48,6 +53,8 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 	tank->hp = tank->param->max_hp;
 	tank->timer = 0;
 	tank->factory = factory;
+
+	tank->rot_speed = 0.01;
 
 	cpFloat size = 50;
 	/* make and add new body */
@@ -78,22 +85,15 @@ static void update(object *fac)
 	temp = ((struct tank*)fac);
 	temp->timer +=dt;
 
+	float player_angle = get_best_angle(fac, ((object*)player));
+
+
+	/*TODO: stop shaking when at correct angle */
+		/* som i matlab */
+		temp->angle += ((player_angle > temp->angle)*2 - 1) * temp->rot_speed;
+
 	if(temp->timer > 2 + ((3.0f*rand())/RAND_MAX)){
-		cpVect a = cpvsub(fac->body->p,player->body->p);
-
-		cpFloat c = cpvlength(player->body->v);
-		cpFloat b = 1000;
-		cpFloat G = acos(cpvdot(a,player->body->v)/(cpvlength(player->body->v)*cpvlength(a)));
-		temp->angle = asin((c*sin(G))/b);
-
-		cpFloat bc = cpvtoangle(a);
-		if(player->body->v.x < 0){
-			temp->angle  = -temp->angle;
-		}
-		temp->angle  = M_PI + (bc  - temp->angle );
-
 		cpVect t = cpvforangle(temp->angle );
-
 		bullet_init(fac->body->p,t,ID_BULLET_ENEMY);
 		temp->timer = 0;
 	}
@@ -116,6 +116,32 @@ static void update(object *fac)
 
 }
 
+static float get_best_angle(object *obj, object *obj2)
+{
+	cpVect a = cpvsub(obj->body->p, obj2->body->p);
+
+	cpFloat c = cpvlength(obj2->body->v);
+	cpFloat b = 1000;
+	cpFloat G = acos(cpvdot(a,obj2->body->v)/(cpvlength(obj2->body->v)*cpvlength(a)));
+	float angle = asin((c*sin(G))/b);
+
+	cpFloat bc = cpvtoangle(a);
+
+	if(player->body->v.x < 0){
+		angle  = -angle;
+	}
+	angle  = M_PI + (bc  - angle );
+
+	return angle;
+}
+
+static float get_angle(object *obj, object *obj2)
+{
+	cpVect a = cpvsub(obj->body->p, obj2->body->p);
+	cpFloat bc = cpvtoangle(a);
+	return bc;
+}
+
 static void render(object *fac)
 {
 	temp = ((struct tank*)fac);
@@ -123,10 +149,10 @@ static void render(object *fac)
 	glColor3f(1,1,1);
 	draw_hp(fac->body->p.x-50, fac->body->p.y + 60, 100, 20, temp->hp / temp->param->max_hp);
 	glColor3f(1,1,0);
-	cpVect r = cpvadd(fac->body->p, cpvmult(cpvforangle(temp->angle),50));
-	draw_line(fac->body->p.x,fac->body->p.y,r.x,r.y, 20);
-
 	draw_boxshape(temp->shape,RGBAColor(0.8,0.3,0.1,1),RGBAColor(0.8,0.6,0.3,1));
+
+	cpVect r = cpvadd(fac->body->p, cpvmult(cpvforangle(temp->angle),60));
+	draw_line(fac->body->p.x,fac->body->p.y,r.x,r.y, 30);
 
 }
 

@@ -90,7 +90,7 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 	glEnable(GL_TEXTURE_2D);
 	
 	glPushMatrix();
-	glPushAttrib(GL_CURRENT_BIT);
+	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
 		glTranslatef(x0, y0, 0.0f);
 		glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
 		GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
@@ -108,6 +108,20 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 			glTexCoord2d(0.5f, 1); glVertex2d(length, 0.5f);
 			glTexCoord2d(1.0f, 0); glVertex2d(length+w, -0.5f);
 			glTexCoord2d(1.0f, 1); glVertex2d(length+w, 0.5f);
+		glEnd();
+
+		glColor3f(1,1,1);
+		glBindTexture(GL_TEXTURE_2D, texture[1]);
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+		glBegin(GL_QUAD_STRIP);
+		glTexCoord2d(0, 0); glVertex2d(-w, -0.5f);
+		glTexCoord2d(0, 1); glVertex2d(-w, 0.5f);
+		glTexCoord2d(0.5f, 0); glVertex2d(0, -0.5f);
+		glTexCoord2d(0.5f, 1); glVertex2d(0, 0.5f);
+		glTexCoord2d(0.5f, 0); glVertex2d(length, -0.5f);
+		glTexCoord2d(0.5f, 1); glVertex2d(length, 0.5f);
+		glTexCoord2d(1.0f, 0); glVertex2d(length+w, -0.5f);
+		glTexCoord2d(1.0f, 1); glVertex2d(length+w, 0.5f);
 		glEnd();
 	glPopAttrib();
 	glPopMatrix();
