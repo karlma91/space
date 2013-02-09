@@ -116,6 +116,9 @@ static void update(object *fac)
 
 }
 
+/**
+ * returns the best angle to shoot at a moving object obj2 from obj1
+ */
 static float get_best_angle(object *obj, object *obj2)
 {
 	cpVect a = cpvsub(obj->body->p, obj2->body->p);
@@ -135,6 +138,9 @@ static float get_best_angle(object *obj, object *obj2)
 	return angle;
 }
 
+/**
+ * returns the angle from a object to another
+ */
 static float get_angle(object *obj, object *obj2)
 {
 	cpVect a = cpvsub(obj->body->p, obj2->body->p);

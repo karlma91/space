@@ -77,9 +77,6 @@ static void paricles_explosion_update(struct explosion *expl)
 				expl->particles[i].pos.y = currentlvl->height - 10;
 			}
 			expl->particles[i].vel = cpvadd(expl->particles[i].vel,cpvmult(cpSpaceGetGravity(space),dt));
-			//cpVect tp = expl->particles[i].pos;
-
-			//cpVect tv = expl->particles[i].vel;
 		}
 }
 
@@ -124,25 +121,6 @@ void particles_add_explosion(cpVect v , float time, int speed ,int num,int col)
 		explosions[current].particles[i].vel = cpvmult(cpvforangle(RAND_FLOAT * 2 * M_PI) ,explosions[current].particles[i].speed );
 
 		explosions[current].particles[i].color = draw_col_grad(col);
-	
-		/*	if(ran == 0){
-			explosions[current].particles[i].color = RGBAColor(1,
-								   RAND_FLOAT,
-								   RAND_FLOAT,
-								   1.0f);
-		}else if(ran == 1){
-			explosions[current].particles[i].color = RGBAColor(RAND_FLOAT,
-								   1,
-								   RAND_FLOAT,
-								   1.0f);	
-		}else{
-			explosions[current].particles[i].color = RGBAColor(RAND_FLOAT,
-								   RAND_FLOAT,
-								   1,
-								   1.0f);	
-								   }*/
-		
-		
 	}
 	current++;
 }

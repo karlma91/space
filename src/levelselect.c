@@ -42,7 +42,6 @@ struct level_ship *ships;
 static int overview = 1;
 static int sel = 0;
 static int level_select = 0;
-static float spaceing = 10;
 
 static float camera_x = 0;
 static float camera_y = 0;
@@ -51,7 +50,8 @@ static float camera_speedy = 0;
 
 static float camera_zoom = 0.1; // start zoom
 
-static float temp_y = 0;
+static float zoomed_temp_y = 0;
+static float zoomed_cam_y = 0;
 
 static void init()
 {
@@ -97,23 +97,15 @@ static void update()
 
 		sel = (sel < 0) ? decks - 1 : (sel >= decks ? 0 : sel);;
 
-		temp_y =  (camera_zoom - 0.1)*5;
-		camera_zoom -= temp_y*dt;
-
-		camera_speedx = (ships[sel].x - camera_x)*5;
-		camera_speedy = (ships[sel].y - camera_y)*5;
-
-		camera_x += camera_speedx*dt;
-		camera_y += camera_speedy*dt;
+		float temp_z =  (camera_zoom - 0.1)*5;
+		camera_zoom -= temp_z*dt;
 
 		if (keys[SDLK_RETURN]){
 			overview = 0;
-			temp_y = ((1.0f * HEIGHT)/(camera_zoom*2));
+			zoomed_temp_y = ((1.0f * HEIGHT)/(camera_zoom*2));
 			keys[SDLK_RETURN] = 0;
 		}
 
-//		camera_x = ships[sel].x;
-//		camera_y = ships[sel].y;
 	}else{
 		if (keys[SDLK_w] || keys[SDLK_UP]){
 			level_select--;
@@ -134,7 +126,7 @@ static void update()
 			currentState = &state_space;
 			change_current_menu(INGAME_MENU_ID);
 			/* load correct level */
-			level_load(sel,level_select);
+			space_init_level(sel+1,level_select+1);
 			keys[SDLK_SPACE] = 0, keys[SDLK_RETURN] = 0;
 		}
 		if(keys[SDLK_BACKSPACE]){
@@ -143,10 +135,17 @@ static void update()
 			keys[SDLK_BACKSPACE]=0;
 		}
 
-		camera_zoom = ((1.0f * HEIGHT)/(temp_y*2));
-		camera_speedy =  (ships[sel].radius + (level_select )*100 + spaceing - temp_y)*5;
-		temp_y += camera_speedy*dt;
+		camera_zoom = ((1.0f * HEIGHT)/(zoomed_temp_y*2));
+		zoomed_cam_y =  (ships[sel].radius + (level_select )*100 + 200 - zoomed_temp_y)*5;
+		zoomed_temp_y += zoomed_cam_y*dt;
 	}
+
+	camera_speedx = (ships[sel].x - camera_x)*5;
+	camera_speedy = (ships[sel].y - camera_y)*5;
+
+	camera_x += camera_speedx*dt;
+	camera_y += camera_speedy*dt;
+
 }
 
 static void render()
