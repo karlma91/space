@@ -20,6 +20,7 @@
 #include "objects.h"
 #include "player.h"
 #include "tankfactory.h"
+#include "robotarm.h";
 #include "level.h"
 
 #define star_count 1000
@@ -323,6 +324,7 @@ static void func(object* obj)
 //TODO temp
 struct tank_factory_param t = {5,200,3};
 level templevel = {1,1,1200,-1000,1000};
+struct robotarm_param robot_temp = {200};
 
 void space_init_level(int space_station, int deck)
 {
@@ -341,6 +343,8 @@ void space_init_level(int space_station, int deck)
 		fprintf(stderr, "space_level_init failed!\n");
 		exit(-1);
 	}
+
+	objects_add(robotarm_init(200,&robot_temp));
 
 	//currentlvl = &templevel;
 
