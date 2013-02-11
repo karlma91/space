@@ -148,7 +148,6 @@ int main( int argc, char* args[] )
   state_levelselect.init();
 
   currentState = &state_menu;
-  
   lastTime = SDL_GetTicks();
   int numstat = 0;
   state states[5];

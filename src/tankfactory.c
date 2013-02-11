@@ -49,9 +49,6 @@ object *tankfactory_init( int x_pos , struct tank_factory_param *param)
 	((object*)fac)->type = &type_tank_factory;
 	fac->param = param;
 
-	fac->t_param = &ttt;
-
-
 
 	fac->cur = 0;
 
@@ -91,7 +88,7 @@ static void update(object *fac)
 	temp->timer+=dt;
 	if(temp->timer > temp->param->spawn_delay && temp->cur < temp->param->max_tanks){
 		temp->timer = 0;
-		tank_init(fac->body->p.x, temp, temp->t_param);
+		tank_init(fac->body->p.x, temp, temp->param->t_param );
 		temp->cur += 1;
 	}
 }
@@ -121,6 +118,9 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	if(temp->hp <=0 ){
 		particles_add_explosion(a->body->p,1,2000,50,800);
+		if(((object *) temp)->alive){
+			((struct player *)objects_first(ID_PLAYER))->highscore += temp->param->score;
+		}
 		((object*)temp)->alive = 0;
 		objects_iterate_type(remove_factory_from_tank,ID_TANK);
 	}else{

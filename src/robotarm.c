@@ -90,7 +90,7 @@ object *robotarm_init(float xpos,struct robotarm_param *pram)
 
 static void init(object *fac)
 {
-	temp = ((struct tank*)fac);
+	temp = ((struct robotarm*)fac);
 }
 
 static void update(object *obj)

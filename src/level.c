@@ -21,6 +21,7 @@ static int i;
 
 static FILE * file;
 
+static char buf[21];
 static char group[21];
 static char subtype[21];
 
@@ -140,6 +141,8 @@ int level_init()
 		names[group_id] = realloc(names[group_id], sizeof(char[count[group_id]][21]));
 		strcpy(names[group_id][count[group_id]-1], subtype);
 
+
+		int obj_index = count[group_id] - 1;
 		/* add new sub object definition */
 		float af, bf, cf, df;
 		int ai, bi, ci, di;
@@ -148,25 +151,38 @@ int level_init()
 			/* currently unsupported */
 			break;
 		case ID_TANK:
-			ret = fscanf(file, "%f\n", &af);
-			if (ret != 1) {
+			ret = fscanf(file, "%f %d\n", &af, &ai);
+			if (ret != 2) {
 				fprintf(stderr, "Wrong number of parameters: %d\n", ret);
 				return 6;
 			}
 			params[group_id] = realloc(params[group_id], sizeof(struct tank_param[count[group_id]]));
-			((struct tank_param *)params[group_id])[count[group_id]-1].max_hp = af;
+			((struct tank_param *)params[group_id])[obj_index].max_hp = af;
+			((struct tank_param *)params[group_id])[obj_index].score = ai;
 			break;
 		case ID_TANK_FACTORY:
-			ret = fscanf(file, "%d %f %f\n", &ai, &af, &bf);
-			if (ret != 3) {
+			ret = fscanf(file, "%d %f %f %d %s\n", &ai, &af, &bf, &bi, buf);
+			if (ret != 5) {
 				fprintf(stderr, "Wrong number of parameters: %d\n", ret);
 				return 6;
 			}
 			fprintf(stderr,"%d\n", group_id);
 			params[group_id] = realloc(params[group_id], sizeof(struct tank_factory_param[count[group_id]]));
-			((struct tank_factory_param *)params[group_id])[count[group_id]-1].max_tanks = ai;
-			((struct tank_factory_param *)params[group_id])[count[group_id]-1].max_hp = af;
-			((struct tank_factory_param *)params[group_id])[count[group_id]-1].spawn_delay = bf;
+			struct tank_factory_param * factory = &(((struct tank_factory_param *)params[group_id])[obj_index]);
+			factory->max_tanks = ai;
+			factory->max_hp = af;
+			factory->spawn_delay = bf;
+			factory->score = bi;
+			int sub_id = get_sub_index(ID_TANK,buf);
+			if (sub_id == -1 || sub_id >= count[ID_TANK]) {
+				fprintf(stderr, "ERROR while reading tank factory data\n");
+				return 7;
+			} else {
+				fprintf(stderr, "tank factory with tank id: %d\n",sub_id);
+			}
+			struct tank_param *tnk = &(((struct tank_param *)params[ID_TANK])[sub_id]);
+			fprintf(stderr,"max_hp: %f score: %d\n",tnk->max_hp,tnk->score);
+			factory->t_param = tnk;
 			break;
 		case ID_BULLET_PLAYER:
 			/* currently unsupported */

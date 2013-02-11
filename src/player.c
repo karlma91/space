@@ -201,7 +201,10 @@ static void tmp_shoot(object *obj)
 		return;
 	}
 	timer = 0;
-	bullet_init(temp->body->p,cpBodyGetRot(temp->body),ID_BULLET_PLAYER);
+	int i;
+	for(i=0; i<3;i++){
+		bullet_init(temp->body->p,cpvforangle(cpBodyGetAngle(temp->body) + (M_PI/70)*(2 -i)),ID_BULLET_PLAYER);
+	}
 }
 
 static void player_destroy(object *obj)

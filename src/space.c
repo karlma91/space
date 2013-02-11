@@ -20,7 +20,7 @@
 #include "objects.h"
 #include "player.h"
 #include "tankfactory.h"
-#include "robotarm.h";
+#include "robotarm.h"
 #include "level.h"
 
 #define star_count 1000
@@ -275,7 +275,11 @@ static void SPACE_draw()
 		setTextSize(10);
 
 		glColor3f(1,1,1);
-		font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
+		//font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
+		char score_temp[20];
+		sprintf(score_temp,"SCORE: %d",player->highscore);
+
+		font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,score_temp);
 
 		setTextAlign(TEXT_RIGHT);
 		font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
@@ -323,7 +327,6 @@ static void func(object* obj)
 
 //TODO temp
 struct tank_factory_param t = {5,200,3};
-level templevel = {1,1,1200,-1000,1000};
 struct robotarm_param robot_temp = {200};
 
 void space_init_level(int space_station, int deck)
@@ -346,25 +349,24 @@ void space_init_level(int space_station, int deck)
 
 	objects_add(robotarm_init(200,&robot_temp));
 
-	//currentlvl = &templevel;
-
 		/* static ground */
-
 		cpBody  *staticBody = space->staticBody;
-		cpShape *shape;
-		shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), 10)); // ground level at 0
-		cpShapeSetFriction(shape, 0.8f);
-		cpShapeSetCollisionType(shape, ID_GROUND);
+		static cpShape *floor;
+		static cpShape *ceiling;
+		/* remove floor and ceiling */
+		if(floor != NULL && ceiling != NULL){
+			cpSpaceRemoveStaticShape(space,floor);
+			cpSpaceRemoveStaticShape(space,ceiling);
+		}
 
-		shape = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), 10.0f));
-		cpShapeSetFriction(shape, 0.8f);
-		cpShapeSetCollisionType(shape, ID_GROUND);
+		floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), 10)); // ground level at 0
+		cpShapeSetFriction(floor, 0.8f);
+		cpShapeSetCollisionType(floor, ID_GROUND);
 
-	/*
-		tankfactory_init(500,&t);
-		tankfactory_init(100,&t);
-		tankfactory_init(-500,&t);
-	*/
+		ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), 10.0f));
+		cpShapeSetFriction(ceiling, 0.8f);
+		cpShapeSetCollisionType(ceiling, ID_GROUND);
+
 }
 
 static void SPACE_init(){

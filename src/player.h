@@ -14,6 +14,7 @@ struct player{
 	cpShape *shape;
 	float max_hp;
 	float hp;
+	int highscore;
 };
 
 extern struct obj_type type_player;

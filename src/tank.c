@@ -50,6 +50,7 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 	((object *) tank)->type = &type_tank;
 	((object *) tank)->alive = 1;
 	tank->param = pram;
+
 	tank->hp = tank->param->max_hp;
 	tank->timer = 0;
 	tank->factory = factory;
@@ -177,6 +178,9 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	if(temp->hp <=0 ){
 		//a->body->data = NULL;
 		particles_add_explosion(a->body->p,1,2000,50,800);
+		if(((object *) temp)->alive){
+			((struct player *)objects_first(ID_PLAYER))->highscore += temp->param->score;
+		}
 		//cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
 		((object *) temp)->alive = 0;
 	}else{
