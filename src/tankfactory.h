@@ -29,8 +29,8 @@ struct tank_factory {
 
 struct tank_factory_param {
 	int max_tanks;
-	cpFloat max_hp;
-	cpFloat spawn_delay;
+	float max_hp;
+	float spawn_delay;
 	int score;
 	struct tank_param *t_param;
 };
