@@ -98,6 +98,8 @@ static void update(object *obj)
 	temp = ((struct robotarm*)obj);
 	temp->timer +=dt;
 
+	struct player *player = ((struct player*)objects_first(ID_PLAYER));
+
 	float targetx = player->body->p.x;
 	float targety = player->body->p.y;
 

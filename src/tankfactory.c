@@ -35,11 +35,6 @@ struct obj_type type_tank_factory = {
 	destroy
 };
 
-// TODO remove
-static struct tank_param ttt = {
-		20
-};
-
 static struct tank_factory *temp;
 
 object *tankfactory_init( int x_pos , struct tank_factory_param *param)

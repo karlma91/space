@@ -52,4 +52,6 @@ extern object *objects_n(int obj_id, int n);
 extern object *objects_last(int obj_id);
 extern object *objects_by_id(int obj_id, int instance_id);
 
+extern int objects_isempty(int obj_id);
+
 #endif /* LIST_H_ */

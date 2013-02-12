@@ -86,6 +86,9 @@ static void update(object *fac)
 	temp = ((struct tank*)fac);
 	temp->timer +=dt;
 
+	/* gets the player from the list */
+	struct player *player = ((struct player*)objects_first(ID_PLAYER));
+
 	float player_angle = get_best_angle(fac, ((object*)player));
 
 
@@ -131,7 +134,7 @@ static float get_best_angle(object *obj, object *obj2)
 
 	cpFloat bc = cpvtoangle(a);
 
-	if(player->body->v.x < 0){
+	if(obj2->body->v.x < 0){
 		angle  = -angle;
 	}
 	angle  = M_PI + (bc  - angle );
@@ -177,7 +180,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	if(temp->hp <=0 ){
 		//a->body->data = NULL;
-		particles_add_explosion(a->body->p,1,2000,50,800);
+		particles_add_explosion(a->body->p,1,2000,20,800);
 		if(((object *) temp)->alive){
 			((struct player *)objects_first(ID_PLAYER))->highscore += temp->param->score;
 		}

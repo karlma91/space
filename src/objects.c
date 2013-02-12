@@ -202,3 +202,14 @@ object *objects_by_id(int obj_id, int instance_id)
 
 	return NULL;
 }
+
+
+int objects_isempty(int obj_id)
+{
+	if(head_all[obj_id] == NULL){
+		return 1;
+	}
+	return 0;
+}
+
+

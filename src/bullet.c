@@ -83,7 +83,7 @@ static int callback_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
 	temp = (struct bullet*)b->body->data;
-	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 0.3f, 1200, 20,300);
+	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 0.3f, 1200, 10,300);
 	temp->alive = 0;
 	return 0;
 }

@@ -39,9 +39,9 @@ static void SPACE_destroy();
 static void SPACE_draw();
 static void update_objects(object *obj);
 static void render_objects(object *obj);
+static void update_camera_zoom(int cam_mode);
+static void update_camera_position();
 
-/* helper */
-int i,j;
 static int second_draw = 0;
 
 // Chipmunk
@@ -49,13 +49,16 @@ static cpFloat phys_step = 1/60.0f;
 cpSpace *space;
 
 /* camera settings */
-static int cam_mode = 6;
 float cam_center_x = 0;
 float cam_center_y = 0;
 float cam_zoom = 1;
 
 static int cam_left;
 static int cam_right;
+
+static float camera_width;
+static float cam_left_limit;
+static float cam_right_limit;
 
 
 
@@ -72,6 +75,9 @@ state state_space = {
 
 static void SPACE_update()
 {
+
+	static int cam_mode = 6;
+
 	accumulator += dt;
 	if(keys[SDLK_F1]){
 		cam_mode = 1;
@@ -96,11 +102,23 @@ static void SPACE_update()
 	objects_iterate(update_objects);
 
 	particles_update(dt);
+
+	/*
+	 * update all chipmunk objects
+	 */
 	while(accumulator >= phys_step)
-		{
-			cpSpaceStep(space, phys_step);
-			accumulator -= phys_step;
-		}
+	{
+		cpSpaceStep(space, phys_step);
+		accumulator -= phys_step;
+	}
+
+	/* Updating camera zoom an position */
+	update_camera_zoom(cam_mode);
+	update_camera_position();
+
+	if(objects_isempty(ID_TANK_FACTORY)){
+		space_init_level(1,1);
+	}
 }
 
 static void update_objects(object *obj)
@@ -117,6 +135,34 @@ static void update_objects(object *obj)
 
 static void space_render()
 {
+
+	/*
+	 * draws everything twice to make infinite loop world
+	 */
+	SPACE_draw();
+	if(cam_center_x < cam_left_limit){
+		second_draw = 1;
+		cam_center_x += currentlvl->right + abs(currentlvl->left) ;
+		cam_left = cam_center_x - camera_width;
+		cam_right = cam_center_x + camera_width;
+		SPACE_draw();
+	}else if(cam_center_x > cam_right_limit){
+		second_draw = 1;
+		cam_center_x -= currentlvl->right + abs(currentlvl->left);
+		cam_left = cam_center_x - camera_width;
+		cam_right = cam_center_x + camera_width;
+		SPACE_draw();
+
+	}
+
+	second_draw = 0;
+
+}
+
+static void update_camera_zoom(int cam_mode)
+{
+	struct player *player = ((struct player*)objects_first(ID_PLAYER));
+
 	/* dynamic camera zoom */
 	float py = player->body->p.y / currentlvl->height;
 	float scrlvl, zoomlvl;
@@ -195,7 +241,12 @@ static void space_render()
 		cam_center_y = 1.0f*currentlvl->height/2;
 		break;
 	}
+}
 
+static void update_camera_position()
+{
+
+	struct player *player = ((struct player*)objects_first(ID_PLAYER));
 	/* dynamic camera pos */
 	static const float pos_delay = 0.9f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
 	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
@@ -207,36 +258,14 @@ static void space_render()
 
 	/* camera constraints */
 
-	static float camera_width;
 	camera_width = WIDTH / (2 * cam_zoom);
 
-	static float cam_left_limit, cam_right_limit;
 
 	cam_left_limit = currentlvl->left + camera_width;
 	cam_right_limit = currentlvl->right - camera_width;
 
 	cam_left = cam_center_x - camera_width;
 	cam_right = cam_center_x + camera_width;
-
-	SPACE_draw();
-
-	if(cam_center_x < cam_left_limit){
-		second_draw = 1;
-		cam_center_x += currentlvl->right + abs(currentlvl->left) ;
-		cam_left = cam_center_x - camera_width;
-		cam_right = cam_center_x + camera_width;
-		SPACE_draw();
-	}else if(cam_center_x > cam_right_limit){
-		second_draw = 1;
-		cam_center_x -= currentlvl->right + abs(currentlvl->left);
-		cam_left = cam_center_x - camera_width;
-		cam_right = cam_center_x + camera_width;
-		SPACE_draw();
-
-	}
-
-	second_draw = 0;
-
 }
 
 static void SPACE_draw()
@@ -276,6 +305,8 @@ static void SPACE_draw()
 
 		glColor3f(1,1,1);
 		//font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
+
+		struct player *player = ((struct player*)objects_first(ID_PLAYER));
 		char score_temp[20];
 		sprintf(score_temp,"SCORE: %d",player->highscore);
 
@@ -305,6 +336,7 @@ static void drawStars()
 	
 	glColor3f(1,1,1);
 	glBegin(GL_QUADS);
+	int i;
 	for (i=0;i<star_count;i++) {
 		float size = stars_size[i];
 		float star_x = (stars_x[i]);
@@ -331,8 +363,15 @@ struct robotarm_param robot_temp = {200};
 
 void space_init_level(int space_station, int deck)
 {
+
+	static struct player *player;
+
 	objects_iterate(func);
 	objects_destroy();
+
+	if(player==NULL){
+		player = (struct player*)player_init();
+	}
 
 	objects_add((object*)player);
 
@@ -346,6 +385,10 @@ void space_init_level(int space_station, int deck)
 		fprintf(stderr, "space_level_init failed!\n");
 		exit(-1);
 	}
+
+	player->body->p.x = currentlvl->left + 50;
+	player->body->p.y = currentlvl->height - 50;
+	player->hp = player->max_hp;
 
 	objects_add(robotarm_init(200,&robot_temp));
 
@@ -369,22 +412,24 @@ void space_init_level(int space_station, int deck)
 
 }
 
-static void SPACE_init(){
+static void SPACE_init()
+{
 	objects_init();
+
 	cpVect gravity = cpv(0, -200);
-	
 	space = cpSpaceNew();
 	cpSpaceSetGravity(space, gravity);
 	//cpSpaceSetDamping(space, 0.999);
+
 	//init stars
 	srand(122531);
-	for (i=0;i<star_count;i++) {
+	int i;
+	for (i=0; i<star_count; i++) {
 		stars_x[i] = rand()%(SW*2) - SW;
 		stars_y[i] = rand()%(SW*2) - SW;
 		stars_size[i] = 2 + 4*(rand() % 1000) / 1000.0f;
 	}
 	
-	player = ((struct player*)player_init());
 	space_init_level(1,1);
 }
 
