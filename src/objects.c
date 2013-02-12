@@ -18,7 +18,8 @@ struct node_ {
 	object *obj;
 };
 
-int instance_counter[ID_COUNT];
+static int object_count[ID_COUNT];
+static int instance_counter[ID_COUNT];
 static node *(head_all[ID_COUNT]);
 static node **(last_all[ID_COUNT]);
 
@@ -30,6 +31,7 @@ void objects_init() {
 		head_all[i] = NULL;
 		last_all[i] = &(head_all[i]);
 		instance_counter[i] = 0;
+		object_count[i] = 0;
 	}
 }
 
@@ -48,6 +50,7 @@ void objects_add(object* obj)
 	last_all[i] = &((*(last_all[i]))->next);
 	*(last_all[i]) = NULL;
 	++instance_counter[i];
+	++object_count[i];
 }
 
 /* iterate through all lists of objects */
@@ -64,6 +67,7 @@ void objects_iterate(void (*f)(object *))
 				(*prev) = n->next;
 				free(n);
 				n = (*prev);
+				--object_count[i];
 			} else {
 				f(n->obj);
 				prev = &(n->next);
@@ -94,6 +98,7 @@ void objects_iterate_type(void (*f)(object *), int obj_id)
 			(*prev) = n->next;
 			free(n);
 			n = (*prev);
+			--object_count[i];
 		} else {
 			f(n->obj);
 			prev = &(n->next);
@@ -113,6 +118,8 @@ void objects_destroy()
 		/* frees all nodes in current list */
 		node *n, *a;
 		for (n = head_all[i], a = n->next; n != NULL; a = n->next, free(n), n=a);
+
+		object_count[i] = 0;
 	}
 
 	objects_init();
@@ -203,13 +210,9 @@ object *objects_by_id(int obj_id, int instance_id)
 	return NULL;
 }
 
-
-int objects_isempty(int obj_id)
+int objects_count(int obj_id)
 {
-	if(head_all[obj_id] == NULL){
-		return 1;
-	}
-	return 0;
+	return object_count[obj_id];
 }
 
 

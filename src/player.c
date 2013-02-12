@@ -52,11 +52,11 @@ object *player_init()
 	pl->max_hp = 200;
 	pl->hp = 200;
 	/* make and add new body */
-	pl->body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius)));
+	pl->body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius/2)));
 	cpBodySetPos(pl->body, cpv(0,990));
 	cpBodySetVelLimit(pl->body,700);
 	/* make and connect new shape to body */
-	pl->shape = cpSpaceAddShape(space, cpBoxShapeNew(pl->body, radius, radius));
+	pl->shape = cpSpaceAddShape(space, cpBoxShapeNew(pl->body, radius, radius/2));
 	cpShapeSetFriction(pl->shape, 0.7);
 	cpShapeSetUserData(pl->shape, draw_boxshape);
 	cpShapeSetElasticity(pl->shape, 1.0f);
@@ -82,17 +82,12 @@ static void player_render(object *obj)
 	setTextAlign(TEXT_CENTER);
 	setTextSize(10);
 	setTextAngleRad(dir);
-	static char text[100];
-	sprintf(text, " SPEED: %.1f ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ",cpvlength(cpBodyGetVel(temp->body)));
-	glColor3f(1,1,1);
-	font_drawText(temp->body->p.x,temp->body->p.y, text);
-	draw_hp(temp->body->p.x-20,temp->body->p.y+15,100,20,temp->hp/temp->max_hp);
 	draw_boxshape(temp->shape,RGBAColor(1,0,0,1),RGBAColor(0,0,1,1));
+	draw_hp(temp->body->p.x-25,temp->body->p.y+20,50,12,temp->hp/temp->max_hp);
 }
 
 static void player_update(object *obj)
 {
-
 	timer += dt;
 	temp = (struct player*)obj;
 	cpFloat pangvel = cpBodyGetAngVel(temp->body);

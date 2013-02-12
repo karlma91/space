@@ -57,13 +57,14 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 
 	tank->rot_speed = 0.01;
 
-	cpFloat size = 50;
+	cpFloat width = 50;
+	cpFloat height = 30;
 	/* make and add new body */
-	((object *) tank)->body = cpSpaceAddBody(space, cpBodyNew(20, cpMomentForBox(20.0f, size, size)));
-	cpBodySetPos(((object *) tank)->body, cpv(xpos,size+10));
+	((object *) tank)->body = cpSpaceAddBody(space, cpBodyNew(20, cpMomentForBox(20.0f, width, height)));
+	cpBodySetPos(((object *) tank)->body, cpv(xpos,height+10));
 	cpBodySetVelLimit(((object *) tank)->body,180);
 	/* make and connect new shape to body */
-	tank->shape = cpSpaceAddShape(space, cpBoxShapeNew(((object *) tank)->body, size, size));
+	tank->shape = cpSpaceAddShape(space, cpBoxShapeNew(((object *) tank)->body, width, height));
 	cpShapeSetFriction(tank->shape, 0.01);
 	//cpShapeSetGroup(tank->shape, 10);
 	cpShapeSetLayers(tank->shape,LAYER_TANK);
@@ -156,14 +157,12 @@ static void render(object *fac)
 {
 	temp = ((struct tank*)fac);
 
-	glColor3f(1,1,1);
-	draw_hp(fac->body->p.x-50, fac->body->p.y + 60, 100, 20, temp->hp / temp->param->max_hp);
-	glColor3f(1,1,0);
 	draw_boxshape(temp->shape,RGBAColor(0.8,0.3,0.1,1),RGBAColor(0.8,0.6,0.3,1));
 
 	cpVect r = cpvadd(fac->body->p, cpvmult(cpvforangle(temp->angle),60));
 	draw_line(fac->body->p.x,fac->body->p.y,r.x,r.y, 30);
 
+	draw_hp(fac->body->p.x-15, fac->body->p.y + 25, 30, 8, temp->hp / temp->param->max_hp);
 }
 
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)

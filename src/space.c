@@ -116,7 +116,7 @@ static void SPACE_update()
 	update_camera_zoom(cam_mode);
 	update_camera_position();
 
-	if(objects_isempty(ID_TANK_FACTORY)){
+	if(objects_count(ID_TANK_FACTORY) == 0){
 		space_init_level(1,1);
 	}
 }
@@ -366,12 +366,12 @@ void space_init_level(int space_station, int deck)
 
 	static struct player *player;
 
-	objects_iterate(func);
-	objects_destroy();
-
 	if(player==NULL){
 		player = (struct player*)player_init();
 	}
+
+	objects_iterate(func);
+	objects_destroy();
 
 	objects_add((object*)player);
 
