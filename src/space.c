@@ -46,6 +46,7 @@ static int second_draw = 0;
 
 // Chipmunk
 static cpFloat phys_step = 1/60.0f;
+/* extern */
 cpSpace *space;
 
 /* camera settings */
@@ -61,10 +62,29 @@ static float cam_left_limit;
 static float cam_right_limit;
 
 
+/*
+ * The ingame states for level transition and delays
+ */
+enum game_state{
+	LEVEL_START,
+	LEVEL_RUNNING,
+	LEVEL_WON,
+	LEVEL_GAMEOVER,
+	LEVEL_TRANSITION
+};
+
+/*
+ * the current state of the game
+ */
+enum game_state gamestate = LEVEL_START;
+
 
 /* level data */
 level *currentlvl;
 
+/**
+ * The global space state
+ */
 state state_space = {
 	SPACE_init,
 	SPACE_update,
@@ -73,12 +93,18 @@ state state_space = {
 	NULL
 };
 
+/**
+ * Main space update function
+ */
 static void SPACE_update()
 {
-
-	static int cam_mode = 6;
-
+	/* chipmunk timestep counter */
 	accumulator += dt;
+
+	/*
+	 * Camera modes
+	 */
+	static int cam_mode = 6;
 	if(keys[SDLK_F1]){
 		cam_mode = 1;
 	}else if(keys[SDLK_F2]){
@@ -93,18 +119,29 @@ static void SPACE_update()
 		cam_mode = 6;
 	}
 
+	/*
+	 * Opens the pause menu
+	 */
 	if(keys[SDLK_ESCAPE]){
 		state_menu.parentState = &state_space;
 		currentState = &state_menu;
 		keys[SDLK_ESCAPE] = 0;
 	}
 
-	objects_iterate(update_objects);
-
-	particles_update(dt);
 
 	/*
-	 * update all chipmunk objects
+	 * Calls update_opbject for all objects in objects
+	 */
+	objects_iterate(update_objects);
+
+	/*
+	 * update the particle engine
+	 */
+	particles_update(dt);
+
+
+	/*
+	 * update all chipmunk objects 60 times per second
 	 */
 	while(accumulator >= phys_step)
 	{
@@ -116,6 +153,9 @@ static void SPACE_update()
 	update_camera_zoom(cam_mode);
 	update_camera_position();
 
+	/*
+	 * check if there is more tank_factories alive
+	 */
 	if(objects_count(ID_TANK_FACTORY) == 0){
 		space_init_level(1,1);
 	}
@@ -152,7 +192,6 @@ static void space_render()
 		cam_left = cam_center_x - camera_width;
 		cam_right = cam_center_x + camera_width;
 		SPACE_draw();
-
 	}
 
 	second_draw = 0;

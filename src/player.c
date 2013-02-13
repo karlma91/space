@@ -7,6 +7,7 @@
 
 /* Game state */
 #include "space.h"
+#include "levelselect.h"
 
 /* Drawing */
 #include "draw.h"
@@ -51,6 +52,10 @@ object *player_init()
 	pl->alive = 1;
 	pl->max_hp = 200;
 	pl->hp = 200;
+
+	pl->lives = 3;
+	pl->state = PLAYER_STATE_NORMAL;
+
 	/* make and add new body */
 	pl->body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius/2)));
 	cpBodySetPos(pl->body, cpv(0,990));
@@ -82,7 +87,39 @@ static void player_render(object *obj)
 	setTextAlign(TEXT_CENTER);
 	setTextSize(10);
 	setTextAngleRad(dir);
-	draw_boxshape(temp->shape,RGBAColor(1,0,0,1),RGBAColor(0,0,1,1));
+	Color c = RGBAColor(1,0,0,1);
+	switch(temp->state){
+	case PLAYER_STATE_GAMEOVER:
+		currentState = &state_levelselect;
+		temp->state = PLAYER_STATE_NORMAL;
+		break;
+	case PLAYER_STATE_LOST_LIFE:
+		if(temp->lost_life_timer<1){
+			particles_add_explosion(temp->body->p,1,2000,40,456);
+		}else if(temp->lost_life_timer > 1 && temp->lost_life_timer < 4){
+			temp->body->p.x = currentlvl->left+50;
+			temp->body->p.y = currentlvl->height-50;
+			temp->hp = temp->max_hp;
+		}else{
+			temp->lost_life_timer =0;
+			if(temp->lives == 0){
+				temp->state = PLAYER_STATE_GAMEOVER;
+			}else{
+				temp->state = PLAYER_STATE_NORMAL;
+			}
+		}
+		static float counter = 0.5;
+		temp->lost_life_timer += dt;
+		if(temp->lost_life_timer < counter){
+			c = RGBAColor(0,0,1,1);
+		}else if(temp->lost_life_timer>counter+0.5){
+			counter+=1;
+		}
+		break;
+	case PLAYER_STATE_NORMAL:
+		break;
+	}
+	draw_boxshape(temp->shape,RGBAColor(1,1,1,1),c);
 	draw_hp(temp->body->p.x-25,temp->body->p.y+20,50,12,temp->hp/temp->max_hp);
 }
 
@@ -116,22 +153,24 @@ static void player_update(object *obj)
 
 	cpFloat cspeed = cpvlength(cpBodyGetVel(temp->body));
 
-	/* Player movement */
-	if(keys[SDLK_w] && cspeed > 100) {
-		cpBodySetVel(temp->body, cpvrotate(cpBodyGetVel(temp->body),dirUp));
+	if(temp->state==PLAYER_STATE_NORMAL){
+		/* Player movement */
+		if(keys[SDLK_w] && cspeed > 100) {
+			cpBodySetVel(temp->body, cpvrotate(cpBodyGetVel(temp->body),dirUp));
+		}
+
+		if(keys[SDLK_s] && cspeed > 100) {
+			cpBodySetVel(temp->body, cpvrotate(cpBodyGetVel(temp->body),dirDown));
+		}
+
+		cpBodySetAngle(temp->body, cpvtoangle(cpBodyGetVel(temp->body)));
+		cpSpaceReindexShapesForBody(space, temp->body);
+
+
+		if(keys[SDLK_d]) cpBodyApplyForce(temp->body,cpvmult(cpBodyGetRot(temp->body),accel*dt),cpvzero);
+		if(keys[SDLK_a]) cpBodyApplyForce(temp->body,cpvmult(cpBodyGetRot(temp->body),-accel*dt),cpvzero);
 	}
 
-	if(keys[SDLK_s] && cspeed > 100) {
-		cpBodySetVel(temp->body, cpvrotate(cpBodyGetVel(temp->body),dirDown));
-	}
-
-	cpBodySetAngle(temp->body, cpvtoangle(cpBodyGetVel(temp->body)));
-	cpSpaceReindexShapesForBody(space, temp->body);
-
-
-	if(keys[SDLK_d]) cpBodyApplyForce(temp->body,cpvmult(cpBodyGetRot(temp->body),accel*dt),cpvzero);
-	if(keys[SDLK_a]) cpBodyApplyForce(temp->body,cpvmult(cpBodyGetRot(temp->body),-accel*dt),cpvzero);
-	
 	if(keys[SDLK_g]){
 		keys[SDLK_g] = 0;
 		cpVect gravity = cpv(0, -2);
@@ -178,9 +217,16 @@ static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	//particles_add_explosion(b->body->p,0.3,1500,15,200);
 	if(temp->hp <= 0 ){
 		particles_add_explosion(a->body->p,1,2000,50,800);
-		temp->hp=200;
+		if(temp->state == PLAYER_STATE_NORMAL){
+			temp->lives--;
+		}
+		temp->state = PLAYER_STATE_LOST_LIFE;
 	}else{
-		temp->hp -= 10;
+		switch(temp->state){
+		case PLAYER_STATE_NORMAL:
+			temp->hp -= 10;
+			break;
+		}
 	}
 
 	return 0;
