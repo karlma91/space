@@ -161,7 +161,7 @@ static void player_update(object *obj)
 	}
 	
 	if (keys[SDLK_x]) {
-		particles_add_explosion(cpBodyGetPos(temp->body),0.5f,3000, 40,200);
+		particles_add_explosion(cpBodyGetPos(temp->body),0.5f,4000, 1000,200);
 	}
 }
 

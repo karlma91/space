@@ -4,17 +4,18 @@
 #include "draw.h"
 #include "space.h"
 
-struct particle {
-	cpVect pos;
-	cpVect vel;
-	Color color;
-	cpFloat speed;
-};
+#define MAX_PARTICLES 1000
+#define MIN_PARTICLES 5
+#define MAX_EXPLOSIONS 200
+#define MAX_EXPLOSION_TIME 0.4f
 
 struct explosion {
 	int alive;
 	int numParticles;
-	struct particle particles[MAX_PARTICLES];
+
+	GLfloat particle_pos[MAX_PARTICLES*2];
+	GLfloat particle_vel[MAX_PARTICLES*2];
+	Color color;
 	float timer;
 	float tim_alive;
 };
@@ -65,40 +66,52 @@ static void paricles_explosion_update(struct explosion *expl)
 		}
 
 		int i;
-		for(i = 0; i < (expl->numParticles); i++){
-			expl->particles[i].pos = cpvadd(expl->particles[i].pos, cpvmult(expl->particles[i].vel,dt));
-			expl->particles[i].vel.x*=0.85f;
-			expl->particles[i].vel.y*=0.85f;
-			if(expl->particles[i].pos.y < 0){
-				expl->particles[i].vel.y = -expl->particles[i].vel.y;
-				expl->particles[i].pos.y = 10;
-			}else if(expl->particles[i].pos.y > currentlvl->height){
-				expl->particles[i].vel.y = -expl->particles[i].vel.y;
-				expl->particles[i].pos.y = currentlvl->height - 10;
-			}
-			expl->particles[i].vel = cpvadd(expl->particles[i].vel,cpvmult(cpSpaceGetGravity(space),dt));
+		for(i = 0; i < (expl->numParticles)*2-1; i += 2){
+			expl->particle_pos[i] =  expl->particle_pos[i]  + (expl->particle_vel[i]*dt);
+			expl->particle_pos[i+1] =  expl->particle_pos[i+1]  + (expl->particle_vel[i+1]*dt);
+			expl->particle_vel[i]*=0.8f;
+			expl->particle_vel[i+1]*=0.8f;
 		}
 }
 
 static void paricles_explosion_draw(struct explosion *expl)
 {
 	glPushAttrib(GL_COLOR_BUFFER_BIT);
+
+	glEnable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	int i;
-	for(i = 0; i < (expl->numParticles); i++){
-		cpVect tp = expl->particles[i].pos;
-		cpVect tv = expl->particles[i].vel;
-		Color c = expl->particles[i].color;
-		float fadeStart = 0.3f;
-		if(expl->timer > expl->tim_alive -fadeStart){
-			c.a = (MAX_EXPLOSION_TIME - expl->timer) / (fadeStart);
-			if(c.a < 0){
-				c.a = 0;
-			}
+
+	glEnable( GL_TEXTURE_2D );
+
+	glEnable(GL_POINT_SPRITE);
+
+	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+	glPointSize(30);
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
+
+	//glActiveTexture(GL_TEXTURE0);
+	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	glVertexPointer(2, GL_FLOAT, sizeof(GLfloat), expl->particle_pos);
+
+
+	Color c = expl->color;
+	float fadeStart = 0.3f;
+	if(expl->timer > expl->tim_alive -fadeStart){
+		c.a = (MAX_EXPLOSION_TIME - expl->timer) / (fadeStart);
+		if(c.a < 0){
+			c.a = 0;
 		}
-		glColor4f(c.r, c.g, c.b, c.a);
-		draw_line(tp.x, tp.y, tp.x + tv.x/20, tp.y + tv.y/20, (MAX_EXPLOSION_TIME - expl->timer)*120);
 	}
+
+	glColor4f(c.r, c.g, c.b, c.a);
+
+	glDrawArrays(GL_POINTS, 0, expl->numParticles);
+
+	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_FALSE);
+	glDisable(GL_POINT_SPRITE);
+	glDisable(GL_TEXTURE_2D);
 	glPopAttrib();
 }
 
@@ -113,14 +126,15 @@ void particles_add_explosion(cpVect v , float time, int speed ,int num,int col)
 	explosions[current].alive = 1;
 	explosions[current].numParticles = num;
 	explosions[current].tim_alive = time;
+	explosions[current].color = draw_col_grad(col);
 	int i;
-	for(i = 0; i < num; i++){
-		explosions[current].particles[i].speed =  rand() % speed;
-		explosions[current].particles[i].pos.x = v.x;
-		explosions[current].particles[i].pos.y = v.y;
-		explosions[current].particles[i].vel = cpvmult(cpvforangle(RAND_FLOAT * 2 * M_PI) ,explosions[current].particles[i].speed );
-
-		explosions[current].particles[i].color = draw_col_grad(col);
+	for(i = 0; i < num*2 - 1; i+=2){
+		float sp = rand() % speed;
+		float angle = RAND_FLOAT * 2 * M_PI;
+		explosions[current].particle_pos[i] = v.x;
+		explosions[current].particle_pos[i+1] = v.y;
+		explosions[current].particle_vel[i] = cos(angle)*sp;
+		explosions[current].particle_vel[i+1] = sin(angle)*sp;
 	}
 	current++;
 }

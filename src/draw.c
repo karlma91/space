@@ -88,9 +88,11 @@ static int loadTexture(char *tex)
 void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
 	glEnable(GL_TEXTURE_2D);
-	
+
 	glPushMatrix();
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	  glBlendEquationSeparate(GL_SRC_ALPHA, GL_ONE,GL_MAX,GL_MAX);
 		glTranslatef(x0, y0, 0.0f);
 		glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
 		GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
@@ -240,7 +242,7 @@ void draw_ballshape(cpShape *shape)
 	
 	cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
 	
-	draw_line(circle->tc.x, circle->tc.y, circle->tc.x + vel.x/32, circle->tc.y + vel.y/32, 32); //40 = 4 * radius
+	draw_line(circle->tc.x, circle->tc.y, circle->tc.x - vel.x/32, circle->tc.y - vel.y/32, 32); //40 = 4 * radius
 
 	//draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }

@@ -60,10 +60,13 @@ void initGL()
   
   //fra ttf opengl tutorial
   glEnable(GL_BLEND);
+
+
+
   //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
   //glBlendEquation(GL_MAX);
-  //glBlendEquationSeparate(GL_FUNC_ADD,GL_MAX);
+
 
   //glBlendEquationSeparate(GL_ONE,GL_MAX);
   //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
