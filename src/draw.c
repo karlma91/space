@@ -92,7 +92,6 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 	glPushMatrix();
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	  glBlendEquationSeparate(GL_SRC_ALPHA, GL_ONE,GL_MAX,GL_MAX);
 		glTranslatef(x0, y0, 0.0f);
 		glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
 		GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));

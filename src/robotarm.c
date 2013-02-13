@@ -56,8 +56,8 @@ object *robotarm_init(float xpos,struct robotarm_param *pram)
 	ra->hp = ra->param->max_hp;
 	ra->timer = 0;
 
-	ra->segments = 10;
-	ra->seg_length = 60;
+	ra->segments = 3;
+	ra->seg_length = 140;
 
 	ra->x = malloc(sizeof(int)*ra->segments);
 	ra->y = malloc(sizeof(int)*ra->segments);
