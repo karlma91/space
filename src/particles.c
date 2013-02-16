@@ -5,9 +5,11 @@
 #include "space.h"
 
 #define MAX_PARTICLES 1000
-#define MIN_PARTICLES 5
+#define MIN_PARTICLES 1
 #define MAX_EXPLOSIONS 200
 #define MAX_EXPLOSION_TIME 0.4f
+
+const float PARTICLE_SIZE = sizeof(GLfloat[2]);
 
 struct explosion {
 	int alive;
@@ -66,11 +68,12 @@ static void paricles_explosion_update(struct explosion *expl)
 		}
 
 		int i;
-		for(i = 0; i < (expl->numParticles)*2-1; i += 2){
-			expl->particle_pos[i] =  expl->particle_pos[i]  + (expl->particle_vel[i]*dt);
-			expl->particle_pos[i+1] =  expl->particle_pos[i+1]  + (expl->particle_vel[i+1]*dt);
+		for(i = 0; i < (expl->numParticles)*2-1; i++){
+			expl->particle_pos[i] += (expl->particle_vel[i]*dt);
 			expl->particle_vel[i]*=0.8f;
-			expl->particle_vel[i+1]*=0.8f;
+			++i;
+			expl->particle_pos[i] += (expl->particle_vel[i]*dt);
+			expl->particle_vel[i]*=0.8f;
 		}
 }
 
@@ -93,7 +96,7 @@ static void paricles_explosion_draw(struct explosion *expl)
 	//glActiveTexture(GL_TEXTURE0);
 	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-	glVertexPointer(2, GL_FLOAT, sizeof(GLfloat), expl->particle_pos);
+	glVertexPointer(2, GL_FLOAT, PARTICLE_SIZE, expl->particle_pos);
 
 
 	Color c = expl->color;
@@ -107,8 +110,8 @@ static void paricles_explosion_draw(struct explosion *expl)
 
 	glColor4f(c.r, c.g, c.b, c.a);
 
-	glDrawArrays(GL_POINTS, 0, expl->numParticles);
-
+	int num = expl->numParticles;
+	glDrawArrays(GL_POINTS, 0, num);
 	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_FALSE);
 	glDisable(GL_POINT_SPRITE);
 	glDisable(GL_TEXTURE_2D);
@@ -128,13 +131,14 @@ void particles_add_explosion(cpVect v , float time, int speed ,int num,int col)
 	explosions[current].tim_alive = time;
 	explosions[current].color = draw_col_grad(col);
 	int i;
-	for(i = 0; i < num*2 - 1; i+=2){
+	for(i = 0; i < num*2 - 1; i++){
 		float sp = rand() % speed;
 		float angle = RAND_FLOAT * 2 * M_PI;
 		explosions[current].particle_pos[i] = v.x;
-		explosions[current].particle_pos[i+1] = v.y;
 		explosions[current].particle_vel[i] = cos(angle)*sp;
-		explosions[current].particle_vel[i+1] = sin(angle)*sp;
+		++i;
+		explosions[current].particle_pos[i] = v.y;
+		explosions[current].particle_vel[i] = sin(angle)*sp;
 	}
 	current++;
 }

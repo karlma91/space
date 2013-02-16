@@ -347,9 +347,12 @@ static void SPACE_draw()
 
 		struct player *player = ((struct player*)objects_first(ID_PLAYER));
 		char score_temp[20];
+		char pos_temp[20];
 		sprintf(score_temp,"SCORE: %d",player->highscore);
+		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->body->p.x,player->body->p.y);
 
 		font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,score_temp);
+		font_drawText(-WIDTH/2+15,HEIGHT/2 - 30,pos_temp);
 
 		setTextAlign(TEXT_RIGHT);
 		font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
