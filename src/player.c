@@ -30,6 +30,8 @@ static void tmp_shoot(object *obj);
 
 static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 
+static void player_controls(object *obj);
+
 struct obj_type type_player = {
 	ID_PLAYER,
 	init,
@@ -54,7 +56,6 @@ object *player_init()
 	pl->hp = 200;
 
 	pl->lives = 3;
-	pl->state = PLAYER_STATE_NORMAL;
 
 	/* make and add new body */
 	pl->body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius/2)));
@@ -88,37 +89,6 @@ static void player_render(object *obj)
 	setTextSize(10);
 	setTextAngleRad(dir);
 	Color c = RGBAColor(1,0,0,1);
-	switch(temp->state){
-	case PLAYER_STATE_GAMEOVER:
-		currentState = &state_levelselect;
-		temp->state = PLAYER_STATE_NORMAL;
-		break;
-	case PLAYER_STATE_LOST_LIFE:
-		if(temp->lost_life_timer<1){
-			particles_add_explosion(temp->body->p,1,2000,40,456);
-		}else if(temp->lost_life_timer > 1 && temp->lost_life_timer < 4){
-			temp->body->p.x = currentlvl->left+50;
-			temp->body->p.y = currentlvl->height-50;
-			temp->hp = temp->max_hp;
-		}else{
-			temp->lost_life_timer =0;
-			if(temp->lives == 0){
-				temp->state = PLAYER_STATE_GAMEOVER;
-			}else{
-				temp->state = PLAYER_STATE_NORMAL;
-			}
-		}
-		static float counter = 0.5;
-		temp->lost_life_timer += dt;
-		if(temp->lost_life_timer < counter){
-			c = RGBAColor(0,0,1,1);
-		}else if(temp->lost_life_timer>counter+0.5){
-			counter+=1;
-		}
-		break;
-	case PLAYER_STATE_NORMAL:
-		break;
-	}
 	draw_boxshape(temp->shape,RGBAColor(1,1,1,1),c);
 	draw_hp(temp->body->p.x-25,temp->body->p.y+20,50,12,temp->hp/temp->max_hp);
 }
@@ -137,23 +107,23 @@ static void player_update(object *obj)
 	cpBodySetForce(temp->body, cpv(0,0));
 	cpBodySetTorque(temp->body, 0);
 
-	/*
-	cpVect cpBodyGetVel(const cpBody *body)
-	void cpBodySetVel(cpBody *body, const cpVect value)
-	cpVect cpvforangle(const cpFloat a)  Returns the unit length vector for the given angle (in radians).
-	cpVect cpvrotate(const cpVect v1, const cpVect v2) Uses complex multiplication to rotate v1 by v2. Scaling will occur if v1 is not a unit vector.
-	*/
+	if(temp->disable == 0){
+		player_controls(obj);
+	}
 
+}
+
+static void player_controls(object *obj)
+{
 	/* units/sec */
-	cpFloat rotSpeed = 5.0;
-	cpFloat accel = 100000;
+		cpFloat rotSpeed = 5.0;
+		cpFloat accel = 100000;
 
-	cpVect dirUp = cpvforangle(-rotSpeed*dt);
-	cpVect dirDown = cpvforangle(rotSpeed*dt);
+		cpVect dirUp = cpvforangle(-rotSpeed*dt);
+		cpVect dirDown = cpvforangle(rotSpeed*dt);
 
-	cpFloat cspeed = cpvlength(cpBodyGetVel(temp->body));
+		cpFloat cspeed = cpvlength(cpBodyGetVel(temp->body));
 
-	if(temp->state==PLAYER_STATE_NORMAL){
 		/* Player movement */
 		if(keys[SDLK_w] && cspeed > 100) {
 			cpBodySetVel(temp->body, cpvrotate(cpBodyGetVel(temp->body),dirUp));
@@ -169,39 +139,38 @@ static void player_update(object *obj)
 
 		if(keys[SDLK_d]) cpBodyApplyForce(temp->body,cpvmult(cpBodyGetRot(temp->body),accel*dt),cpvzero);
 		if(keys[SDLK_a]) cpBodyApplyForce(temp->body,cpvmult(cpBodyGetRot(temp->body),-accel*dt),cpvzero);
-	}
 
-	if(keys[SDLK_g]){
-		keys[SDLK_g] = 0;
-		cpVect gravity = cpv(0, -2);
-		cpSpaceSetGravity(space, gravity);
-	}
-	
-	if (keys[SDLK_q]){
-		cam_zoom /= dt+1.4f;
-	}
+		if(keys[SDLK_g]){
+			keys[SDLK_g] = 0;
+			cpVect gravity = cpv(0, -2);
+			cpSpaceSetGravity(space, gravity);
+		}
 
-	if (keys[SDLK_e]){
-		cam_zoom *= dt+1.4f;
-		if (keys[SDLK_q])
-			cam_zoom = 1;  
-	}
-	if (keys[SDLK_r]){
-		temp->body->p.x=0;
-		temp->body->p.y=500;
-	}
+		if (keys[SDLK_q]){
+			cam_zoom /= dt+1.4f;
+		}
 
-	if (keys[SDLK_h]) {
-		cpBodySetVelLimit(temp->body,5000);
-	}
-	
-	if (keys[SDLK_SPACE]) {
-		tmp_shoot(obj);
-	}
-	
-	if (keys[SDLK_x]) {
-		particles_add_explosion(cpBodyGetPos(temp->body),0.5f,4000, 1000,200);
-	}
+		if (keys[SDLK_e]){
+			cam_zoom *= dt+1.4f;
+			if (keys[SDLK_q])
+				cam_zoom = 1;
+		}
+		if (keys[SDLK_r]){
+			temp->body->p.x=0;
+			temp->body->p.y=500;
+		}
+
+		if (keys[SDLK_h]) {
+			cpBodySetVelLimit(temp->body,5000);
+		}
+
+		if (keys[SDLK_SPACE]) {
+			tmp_shoot(obj);
+		}
+
+		if (keys[SDLK_x]) {
+			particles_add_explosion(cpBodyGetPos(temp->body),0.5f,4000, 1000,200);
+		}
 }
 
 static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
@@ -217,16 +186,9 @@ static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	//particles_add_explosion(b->body->p,0.3,1500,15,200);
 	if(temp->hp <= 0 ){
 		particles_add_explosion(a->body->p,1,2000,50,800);
-		if(temp->state == PLAYER_STATE_NORMAL){
 			temp->lives--;
-		}
-		temp->state = PLAYER_STATE_LOST_LIFE;
 	}else{
-		switch(temp->state){
-		case PLAYER_STATE_NORMAL:
-			temp->hp -= 10;
-			break;
-		}
+		temp->hp -= 10;
 	}
 
 	return 0;
