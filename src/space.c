@@ -182,8 +182,12 @@ static void level_cleared()
 }
 static void level_transition()
 {
+
 	if(state_timer > 1){
+		particles_removeall();
 		space_init_level(1,1);
+		/* update objects to move shapes to same position as body */
+		update_all();
 		change_state(LEVEL_START);
 	}
 }
@@ -596,32 +600,37 @@ void space_init_level(int space_station, int deck)
 	player->body->p.x = currentlvl->left + 50;
 	player->body->p.y = currentlvl->height - 50;
 	player->hp = player->max_hp;
+	player->body->v.x = 0;
+	player->body->v.y = -10;
 
 	objects_add(robotarm_init(200,&robot_temp));
 
-		/* static ground */
-		cpBody  *staticBody = space->staticBody;
-		static cpShape *floor;
-		static cpShape *ceiling;
-		/* remove floor and ceiling */
-		if(floor != NULL && ceiling != NULL){
-			cpSpaceRemoveStaticShape(space,floor);
-			cpSpaceRemoveStaticShape(space,ceiling);
-		}
+	/* static ground */
+	cpBody  *staticBody = space->staticBody;
+	static cpShape *floor;
+	static cpShape *ceiling;
+	/* remove floor and ceiling */
+	if(floor != NULL && ceiling != NULL){
+		cpSpaceRemoveStaticShape(space,floor);
+		cpSpaceRemoveStaticShape(space,ceiling);
+	}
 
-		floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), 10)); // ground level at 0
-		cpShapeSetFriction(floor, 0.8f);
-		cpShapeSetCollisionType(floor, ID_GROUND);
+	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), 10)); // ground level at 0
+	cpShapeSetFriction(floor, 0.8f);
+	cpShapeSetCollisionType(floor, ID_GROUND);
 
-		ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), 10.0f));
-		cpShapeSetFriction(ceiling, 0.8f);
-		cpShapeSetCollisionType(ceiling, ID_GROUND);
+	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), 10.0f));
+	cpShapeSetFriction(ceiling, 0.8f);
+	cpShapeSetCollisionType(ceiling, ID_GROUND);
 
 }
 
 static void SPACE_init()
 {
 	objects_init();
+
+	state_timer = 10;
+	gamestate = LEVEL_TRANSITION;
 
 	cpVect gravity = cpv(0, -200);
 	space = cpSpaceNew();
@@ -636,8 +645,6 @@ static void SPACE_init()
 		stars_y[i] = rand()%(SW*2) - SW;
 		stars_size[i] = 2 + 4*(rand() % 1000) / 1000.0f;
 	}
-	
-	space_init_level(1,1);
 }
 
 static void SPACE_destroy()

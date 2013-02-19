@@ -46,6 +46,14 @@ void particles_draw()
 		}
 	}
 }
+void particles_removeall()
+{
+	int i;
+	for(i = 0; i<MAX_EXPLOSIONS; i++){
+		explosions[i].alive = 0;
+	}
+	current = 0;
+}
 
 void particles_update()
 {
