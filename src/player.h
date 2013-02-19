@@ -5,12 +5,6 @@
 #include "objects.h"  /* Game components */
 
 
-enum player_state{
-	PLAYER_STATE_GAMEOVER,
-	PLAYER_STATE_LOST_LIFE,
-	PLAYER_STATE_NORMAL
-};
-
 struct player{
 	struct obj_type *type;
 	int instance_id;
@@ -22,8 +16,8 @@ struct player{
 	float hp;
 	int highscore;
 	int lives;
-	enum player_state state;
 	float lost_life_timer;
+	int disable;
 };
 
 extern struct obj_type type_player;

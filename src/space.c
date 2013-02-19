@@ -35,6 +35,16 @@ static void SPACE_init();
 static void SPACE_update();
 static void space_render();
 static void SPACE_destroy();
+/**
+ * The global space state
+ */
+state state_space = {
+	SPACE_init,
+	SPACE_update,
+	space_render,
+	SPACE_destroy,
+	NULL
+};
 
 static void SPACE_draw();
 static void update_objects(object *obj);
@@ -62,15 +72,20 @@ static float cam_left_limit;
 static float cam_right_limit;
 
 
+/* level data */
+level *currentlvl;
+
 /*
  * The ingame states for level transition and delays
  */
 enum game_state{
 	LEVEL_START,
 	LEVEL_RUNNING,
-	LEVEL_WON,
-	LEVEL_GAMEOVER,
-	LEVEL_TRANSITION
+	LEVEL_TIMESUP,
+	LEVEL_PLAYER_DEAD,
+	LEVEL_CLEARED,
+	LEVEL_TRANSITION,
+	LEVEL_STATE_COUNT
 };
 
 /*
@@ -78,20 +93,81 @@ enum game_state{
  */
 enum game_state gamestate = LEVEL_START;
 
+static void level_start();
+static void level_running();
+static void level_timesup();
+static void level_player_dead();
+static void level_cleared();
+static void level_transition();
+static void change_state(int state);
+static void update_all();
 
-/* level data */
-level *currentlvl;
+void (*state_functions[])(void) = {
+		level_start,
+		level_running,
+		level_timesup,
+		level_player_dead,
+		level_cleared,
+		level_transition
+};
+
+
+/* The state timer */
+static float state_timer = 0;
+/**
+ * Inner state functions
+ */
+
+static void level_start()
+{
+	if(state_timer > 1.5){
+		change_state(LEVEL_RUNNING);
+	}
+}
+static void level_running()
+{
+	update_all();
+	struct player *player = (struct player*)objects_first(ID_PLAYER);
+	if(player->hp < 50){
+		player->disable = 1;
+		change_state(LEVEL_PLAYER_DEAD);
+	}
+	if(objects_count(ID_TANK_FACTORY) == 0){
+		change_state(LEVEL_CLEARED);
+	}
+}
+static void level_timesup()
+{
+
+}
+static void level_player_dead()
+{
+	update_all();
+	if(state_timer > 3){
+		struct player *player = (struct player*)objects_first(ID_PLAYER);
+		player->hp = player->max_hp;
+		player->disable = 0;
+		change_state(LEVEL_TRANSITION);
+	}
+}
+static void level_cleared()
+{
+	change_state(LEVEL_TRANSITION);
+}
+static void level_transition()
+{
+	space_init_level(1,1);
+	change_state(LEVEL_START);
+}
 
 /**
- * The global space state
+ * Resets timer and changes state
  */
-state state_space = {
-	SPACE_init,
-	SPACE_update,
-	space_render,
-	SPACE_destroy,
-	NULL
-};
+static void change_state(int state)
+{
+	state_timer = 0;
+	gamestate = state;
+}
 
 /**
  * Main space update function
@@ -128,6 +204,20 @@ static void SPACE_update()
 		keys[SDLK_ESCAPE] = 0;
 	}
 
+	/* runs the current state */
+	state_timer+=dt; /* updates the timer */
+	state_functions[gamestate]();
+
+	/* Updating camera zoom an position */
+	update_camera_zoom(cam_mode);
+	update_camera_position();
+}
+
+/**
+ * Updates all the objects in objects and in chipmunk
+ */
+static void update_all()
+{
 
 	/*
 	 * Calls update_opbject for all objects in objects
@@ -149,18 +239,12 @@ static void SPACE_update()
 		accumulator -= phys_step;
 	}
 
-	/* Updating camera zoom an position */
-	update_camera_zoom(cam_mode);
-	update_camera_position();
-
-	/*
-	 * check if there is more tank_factories alive
-	 */
-	if(objects_count(ID_TANK_FACTORY) == 0){
-		space_init_level(1,1);
-	}
 }
 
+
+/**
+ * Used by object_iterate to update all objects
+ */
 static void update_objects(object *obj)
 {
 	if(obj->alive){
@@ -173,12 +257,11 @@ static void update_objects(object *obj)
 	}
 }
 
+/**
+ * draws everything twice to make infinite loop world
+ */
 static void space_render()
 {
-
-	/*
-	 * draws everything twice to make infinite loop world
-	 */
 	SPACE_draw();
 	if(cam_center_x < cam_left_limit){
 		second_draw = 1;
