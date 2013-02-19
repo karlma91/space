@@ -87,7 +87,17 @@ enum game_state{
 	LEVEL_PLAYER_DEAD,
 	LEVEL_CLEARED,
 	LEVEL_TRANSITION,
+
 	LEVEL_STATE_COUNT
+};
+
+char *game_state_names[] = {
+	"LEVEL_START",
+	"LEVEL_RUNNING",
+	"LEVEL_TIMESUP",
+	"LEVEL_PLAYER_DEAD",
+	"LEVEL_CLEARED",
+	"LEVEL_TRANSITION"
 };
 
 /*
@@ -122,12 +132,16 @@ static float state_timer = 0;
 
 static void level_start()
 {
+	game_time = 0;
 	if(state_timer > 1.5){
 		change_state(LEVEL_RUNNING);
 	}
 }
 static void level_running()
 {
+	/* update game time */
+	game_time += dt;
+
 	update_all();
 	struct player *player = (struct player*)objects_first(ID_PLAYER);
 	if(player->hp < 50){
@@ -137,10 +151,20 @@ static void level_running()
 	if(objects_count(ID_TANK_FACTORY) == 0){
 		change_state(LEVEL_CLEARED);
 	}
+
+	if (game_time >= currentlvl->timelimit) {
+		change_state(LEVEL_TIMESUP);
+	}
 }
 static void level_timesup()
 {
-
+	update_all();
+	struct player *player = (struct player*)objects_first(ID_PLAYER);
+	player->hp = 0;
+	player->disable = 1;
+	if (state_timer > 3) {
+		change_state(LEVEL_PLAYER_DEAD);
+	}
 }
 static void level_player_dead()
 {
@@ -154,12 +178,17 @@ static void level_player_dead()
 }
 static void level_cleared()
 {
-	change_state(LEVEL_TRANSITION);
+	update_all();
+	if(state_timer > 3){
+		change_state(LEVEL_TRANSITION);
+	}
 }
 static void level_transition()
 {
-	space_init_level(1,1);
-	change_state(LEVEL_START);
+	if(state_timer > 1){
+		space_init_level(1,1);
+		change_state(LEVEL_START);
+	}
 }
 
 /**
@@ -169,6 +198,7 @@ static void change_state(int state)
 {
 	state_timer = 0;
 	gamestate = state;
+	fprintf(stderr,"DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
 }
 
 /**
@@ -176,8 +206,6 @@ static void change_state(int state)
  */
 static void SPACE_update()
 {
-	game_time += dt;
-
 	/* chipmunk timestep counter */
 	accumulator += dt;
 
@@ -443,27 +471,58 @@ static void SPACE_draw()
 		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->body->p.x,player->body->p.y);
 		font_drawText(-WIDTH/2+15,-HEIGHT/2+8,pos_temp);
 
+		font_drawText(WIDTH/2-250,-HEIGHT/2+8,game_state_names[gamestate]);
+
 		setTextAlign(TEXT_RIGHT);
 		font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
 
-		char time_temp[20];
-		int time_remaining, min, sec;
-		time_remaining = (currentlvl->timelimit - game_time);
-		if (time_remaining < 0) time_remaining = 0;
-		min = time_remaining / 60;
-		sec = time_remaining % 60;
-		sprintf(time_temp,"%01d:%02d",min,sec);
-		setTextAlign(TEXT_CENTER);
-		int extra_size = (time_remaining < 10 ? 10 - time_remaining : 0) * 30;
-		if (time_remaining < 10) {
-			if (time_remaining % 2 == 0) {
-				glColor3f(1,0,0);
-			} else {
-				glColor3f(1,1,1);
+		switch(gamestate) {
+		case LEVEL_START:
+			setTextSize(60);
+			glColor3f(1,1,1);
+			setTextAlign(TEXT_CENTER);
+			font_drawText(0, 0, "GET READY!");
+			break;
+		case LEVEL_RUNNING: case LEVEL_TIMESUP:
+			glColor3f(1,1,1);
+			char time_temp[20];
+			int time_remaining, min, sec;
+			time_remaining = (currentlvl->timelimit - game_time + 0.5f);
+			if (time_remaining < 0) time_remaining = 0;
+			min = time_remaining / 60;
+			sec = time_remaining % 60;
+			sprintf(time_temp,"%01d:%02d",min,sec);
+			int extra_size = (time_remaining < 10 ? 10 - time_remaining : 0) * 30;
+			if (time_remaining < 10) {
+				if (time_remaining % 2 == 0) {
+					glColor3f(1,0,0);
+				} else {
+					glColor3f(1,1,1);
+				}
 			}
+			setTextAlign(TEXT_CENTER);
+			setTextSize(40 + extra_size);
+			font_drawText(0, HEIGHT/2 - 45 - extra_size*1.5, time_temp);
+			break;
+		case LEVEL_CLEARED:
+			setTextSize(60);
+			glColor3f(1,1,1);
+			setTextAlign(TEXT_CENTER);
+			font_drawText(0, 0, "LEVEL CLEARED!");
+			break;
+		case LEVEL_TRANSITION:
+			setTextSize(60);
+			glColor3f(0.8f,0.8f,0.8f);
+			setTextAlign(TEXT_CENTER);
+			font_drawText(0, 0, "LOADING LEVEL...");
+			break;
+		case LEVEL_PLAYER_DEAD:
+			setTextSize(60);
+			glColor3f(1,0,0);
+			setTextAlign(TEXT_CENTER);
+			font_drawText(0, 0, "GAME OVER!");
+			break;
 		}
-		setTextSize(40 + extra_size);
-		font_drawText(0, HEIGHT/2 - 45 - extra_size*1.5, time_temp);
 	}
 }
 
