@@ -144,7 +144,7 @@ static void level_running()
 
 	update_all();
 	struct player *player = (struct player*)objects_first(ID_PLAYER);
-	if(player->hp < 50){
+	if(player->hp <= 0){
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
@@ -170,9 +170,6 @@ static void level_player_dead()
 {
 	update_all();
 	if(state_timer > 3){
-		struct player *player = (struct player*)objects_first(ID_PLAYER);
-		player->hp = player->max_hp;
-		player->disable = 0;
 		change_state(LEVEL_TRANSITION);
 	}
 }
@@ -206,9 +203,6 @@ static void change_state(int state)
  */
 static void SPACE_update()
 {
-	/* chipmunk timestep counter */
-	accumulator += dt;
-
 	/*
 	 * Camera modes
 	 */
@@ -250,6 +244,8 @@ static void SPACE_update()
  */
 static void update_all()
 {
+	/* chipmunk timestep counter */
+	accumulator += dt;
 
 	/*
 	 * Calls update_opbject for all objects in objects
@@ -488,7 +484,7 @@ static void SPACE_draw()
 			char time_temp[20];
 			int time_remaining, min, sec;
 			time_remaining = (currentlvl->timelimit - game_time + 0.5f);
-			if (time_remaining < 0) time_remaining = 0;
+			//if (time_remaining < 0) time_remaining = 0;
 			min = time_remaining / 60;
 			sec = time_remaining % 60;
 			sprintf(time_temp,"%01d:%02d",min,sec);
@@ -576,6 +572,9 @@ void space_init_level(int space_station, int deck)
 
 	if(player==NULL){
 		player = (struct player*)player_init();
+	} else {
+		player->hp = player->max_hp;
+		player->disable = 0;
 	}
 
 	objects_iterate(func);
