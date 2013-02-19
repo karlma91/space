@@ -56,6 +56,8 @@ object *player_init()
 	pl->hp = 200;
 
 	pl->lives = 3;
+	pl->highscore = 0;
+	pl->disable = 0;
 
 	/* make and add new body */
 	pl->body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius/2)));
