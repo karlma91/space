@@ -44,6 +44,8 @@ static void update_camera_position();
 
 static int second_draw = 0;
 
+static float game_time;
+
 // Chipmunk
 static cpFloat phys_step = 1/60.0f;
 /* extern */
@@ -98,6 +100,8 @@ state state_space = {
  */
 static void SPACE_update()
 {
+	game_time += dt;
+
 	/* chipmunk timestep counter */
 	accumulator += dt;
 
@@ -340,24 +344,44 @@ static void SPACE_draw()
 		/* draw GUI */
 		setTextAngle(0); // TODO don't use global variables for setting font properties
 		setTextAlign(TEXT_LEFT);
-		setTextSize(10);
+		setTextSize(40);
 
 		glColor3f(1,1,1);
 		//font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
 
 		struct player *player = ((struct player*)objects_first(ID_PLAYER));
-		char score_temp[20];
-		char pos_temp[20];
-		sprintf(score_temp,"SCORE: %d",player->highscore);
-		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->body->p.x,player->body->p.y);
 
-		font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,score_temp);
-		font_drawText(-WIDTH/2+15,HEIGHT/2 - 30,pos_temp);
+		char score_temp[20];
+		sprintf(score_temp,"%d",player->highscore);
+		font_drawText(-WIDTH/2+20,HEIGHT/2 - 45,score_temp);
+
+		setTextSize(10);
+		char pos_temp[20];
+		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->body->p.x,player->body->p.y);
+		font_drawText(-WIDTH/2+15,-HEIGHT/2+8,pos_temp);
 
 		setTextAlign(TEXT_RIGHT);
 		font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
+
+		char time_temp[20];
+		int time_remaining, min, sec;
+		time_remaining = (currentlvl->timelimit - game_time);
+		if (time_remaining < 0) time_remaining = 0;
+		min = time_remaining / 60;
+		sec = time_remaining % 60;
+		sprintf(time_temp,"%01d:%02d",min,sec);
+		setTextAlign(TEXT_CENTER);
+		int extra_size = (time_remaining < 10 ? 10 - time_remaining : 0) * 30;
+		if (time_remaining < 10) {
+			if (time_remaining % 2 == 0) {
+				glColor3f(1,0,0);
+			} else {
+				glColor3f(1,1,1);
+			}
+		}
+		setTextSize(40 + extra_size);
+		font_drawText(0, HEIGHT/2 - 45 - extra_size*1.5, time_temp);
 	}
-	
 }
 
 static void render_objects(object *obj)
@@ -479,4 +503,8 @@ static void SPACE_destroy()
 {
 	cpSpaceDestroy(space);
 	objects_destroy();
+}
+
+float getGameTime() {
+	return game_time;
 }

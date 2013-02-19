@@ -21,4 +21,6 @@ extern level *currentlvl;
 /* init new level */
 void space_init_level(int space_station, int deck);
 
+float extern getGameTime();
+
 #endif /* SPACE_H_ */

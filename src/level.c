@@ -230,7 +230,12 @@ level *level_load(int space_station, int deck)
 	}
 
 	/* read level specific data */
-	fscanf(file,"%d %d %d %d %d\n", &(lvl->station),&(lvl->deck),&(lvl->height),&(lvl->left),&(lvl->right));
+	ret = fscanf(file,"%d %d %d %d %d %d\n", &(lvl->station),&(lvl->deck),&(lvl->height),&(lvl->left),&(lvl->right), &(lvl->timelimit));
+	int retExp = 6;
+	if (ret != retExp) {
+		fprintf(stderr, "Error while parsing level header. Wrong number of arguemnts. Got %d, expected %d.\n", ret, retExp);
+		return NULL;
+	}
 
 	int x;
 	/* add objects */

@@ -17,6 +17,7 @@ typedef struct level_ {
 	int height;
 	int left;
 	int right;
+	int timelimit;
 } level;
 
 extern int level_init();
