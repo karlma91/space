@@ -12,6 +12,7 @@
 /* Drawing */
 #include "draw.h"
 #include "font.h"
+#include "highscorelist.h"
 
 /* static prototypes */
 static void menu_init();
@@ -76,6 +77,13 @@ void change_current_menu(int menu)
 static void menu_init()
 {
 	curMenu = &mainMenuTest;
+
+	scorelist * list = malloc(sizeof(scorelist));
+	highscorelist_create(list);
+	highscorelist_readfile(list,"bin/data/highscores");
+	highscorelist_addscore(list,"RAND",rand());
+	highscorelist_writefile(list,"bin/data/highscores");
+
 }
 
 static void menu_update()

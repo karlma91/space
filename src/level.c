@@ -67,7 +67,7 @@ int level_init()
 	//group_names[ID_BULLET_PLAYER] = "BULLET_P";
 	//group_names[ID_BULLET_ENEMY]  = "BULLET_E";
 
-	//TODO add new object types here /\
+	//TODO add new object types here
 
 
 	/* read space station data */
