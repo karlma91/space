@@ -97,7 +97,7 @@ static void update(object *fac)
 		/* som i matlab */
 		temp->angle += ((player_angle > temp->angle)*2 - 1) * temp->rot_speed;
 
-	if(temp->timer > 2 + ((3.0f*rand())/RAND_MAX)){
+	if(temp->timer > 1 + ((3.0f*rand())/RAND_MAX)){
 		cpVect t = cpvforangle(temp->angle );
 		bullet_init(fac->body->p,t,ID_BULLET_ENEMY);
 		temp->timer = 0;

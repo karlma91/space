@@ -187,7 +187,6 @@ static void level_transition()
 		particles_removeall();
 		space_init_level(1,1);
 		/* update objects to move shapes to same position as body */
-		update_all();
 		change_state(LEVEL_START);
 	}
 }
@@ -228,7 +227,7 @@ static void SPACE_update()
 	/*
 	 * Opens the pause menu
 	 */
-	if(keys[SDLK_ESCAPE]){
+	if(keys[SDLK_ESCAPE] && gamestate == LEVEL_RUNNING){
 		state_menu.parentState = &state_space;
 		currentState = &state_menu;
 		keys[SDLK_ESCAPE] = 0;
@@ -597,6 +596,10 @@ void space_init_level(int space_station, int deck)
 		exit(-1);
 	}
 
+
+	/* SETS the gamestate */
+	change_state(LEVEL_START);
+
 	player->body->p.x = currentlvl->left + 50;
 	player->body->p.y = currentlvl->height - 50;
 	player->hp = player->max_hp;
@@ -622,6 +625,11 @@ void space_init_level(int space_station, int deck)
 	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), 10.0f));
 	cpShapeSetFriction(ceiling, 0.8f);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
+
+	/*
+	 * puts all shapes in correct position
+	 */
+	update_all();
 
 }
 
