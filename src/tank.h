@@ -25,6 +25,8 @@ struct tank {
 	struct tank_factory *factory;
 	/*parameters */
 	struct tank_param *param;
+	cpBody *wheel1;
+	cpBody *wheel2;
 };
 
 struct tank_param {

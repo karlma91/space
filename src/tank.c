@@ -27,6 +27,9 @@ static void update(object *fac);
 static void render(object *fac);
 static void destroy(object *obj);
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
+static cpShape *tempShape;
+static cpBody *addChassis(cpSpace *space, cpVect pos, cpVect boxOffset);
+static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset);
 
 /* helper */
 static float get_angle(object *obj, object *obj2);
@@ -59,17 +62,42 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 
 	cpFloat width = 50;
 	cpFloat height = 30;
+
+
 	/* make and add new body */
-	((object *) tank)->body = cpSpaceAddBody(space, cpBodyNew(20, cpMomentForBox(20.0f, width, height)));
-	cpBodySetPos(((object *) tank)->body, cpv(xpos,height+10));
-	cpBodySetVelLimit(((object *) tank)->body,180);
+	// Make a car with some nice soft suspension
+	cpVect boxOffset;
+	cpVect posA = cpv(xpos-20, 120);
+	cpVect posB = cpv(xpos+20, 120);
+	boxOffset = cpv(0, 0);
+
+	((object *) tank)->body = addChassis(space, cpv(xpos, height+10),boxOffset);
+	tank->shape = tempShape;
+	tempShape = NULL;
+	//((object *) tank)->body = cpSpaceAddBody(space, cpBodyNew(20, cpMomentForBox(20.0f, width, height)));
+	//cpBodySetPos(((object *) tank)->body, cpv(xpos,height+10));
+	//cpBodySetVelLimit(((object *) tank)->body,180);
 	/* make and connect new shape to body */
-	tank->shape = cpSpaceAddShape(space, cpBoxShapeNew(((object *) tank)->body, width, height));
-	cpShapeSetFriction(tank->shape, 0.01);
+	//tank->shape = cpSpaceAddShape(space, cpBoxShapeNew(((object *) tank)->body, width, height));
+	//cpShapeSetFriction(tank->shape, 0.01);
 	//cpShapeSetGroup(tank->shape, 10);
-	cpShapeSetLayers(tank->shape,LAYER_TANK);
+	//cpShapeSetLayers(tank->shape,LAYER_TANK);
 	cpShapeSetCollisionType(tank->shape, ID_TANK);
 	cpSpaceAddCollisionHandler(space, ID_TANK, ID_BULLET_PLAYER, collision_player_bullet, NULL, NULL, NULL, NULL);
+
+
+
+
+	tank->wheel1 = addWheel(space, posA, boxOffset);
+	tank->wheel2 = addWheel(space, posB, boxOffset);
+
+
+	cpSpaceAddConstraint(space, cpGrooveJointNew(((object *) tank)->body, tank->wheel1 , cpv(-30, -10), cpv(-30, -40), cpvzero));
+	cpSpaceAddConstraint(space, cpGrooveJointNew(((object *) tank)->body, tank->wheel2, cpv( 30, -10), cpv( 30, -40), cpvzero));
+
+	cpSpaceAddConstraint(space, cpDampedSpringNew(((object *) tank)->body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 20.0f, 10.0f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(((object *) tank)->body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 20.0f, 10.0f));
+
 
 	cpBodySetUserData(((object *) tank)->body, (object*)tank);
 	objects_add((object*)tank);
@@ -117,7 +145,7 @@ static void update(object *fac)
 		ptx = 1;
 	}
 
-	cpBodySetForce(fac->body,cpv(ptx*12000,0));
+	//cpBodySetForce(fac->body,cpv(ptx*12000,0));
 
 }
 
@@ -152,12 +180,55 @@ static float get_angle(object *obj, object *obj2)
 	cpFloat bc = cpvtoangle(a);
 	return bc;
 }
+/*
+ * make a wheel
+ */
+static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset)
+{
+	cpFloat radius = 15.0f;
+	cpFloat mass = 1.0f;
+	cpBody *body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
+	cpBodySetPos(body, cpvadd(pos, boxOffset));
+
+
+	cpShape *shape = cpSpaceAddShape(space, cpCircleShapeNew(body, radius, cpvzero));
+	cpShapeSetElasticity(shape, 0.0f);
+	cpShapeSetFriction(shape, 0.7f);
+	cpShapeSetGroup(shape, 1); // use a group to keep the car parts from colliding
+	cpShapeSetLayers(shape,LAYER_TANK);
+
+	return body;
+}
+
+/**
+ * make a chassies
+ */
+static cpBody *
+addChassis(cpSpace *space, cpVect pos, cpVect boxOffset)
+{
+	cpFloat mass = 5.0f;
+	cpFloat width = 80;
+	cpFloat height = 30;
+
+	cpBody *body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, width, height)));
+	cpBodySetPos(body, cpvadd(pos, boxOffset));
+
+	tempShape = cpSpaceAddShape(space, cpBoxShapeNew(body, width, height));
+	cpShapeSetElasticity(tempShape, 0.0f);
+	cpShapeSetFriction(tempShape, 0.7f);
+	cpShapeSetGroup(tempShape, 1); // use a group to keep the car parts from colliding
+	cpShapeSetLayers(tempShape,LAYER_TANK);
+
+	return body;
+}
 
 static void render(object *fac)
 {
 	temp = ((struct tank*)fac);
 
 	draw_boxshape(temp->shape,RGBAColor(0.8,0.3,0.1,1),RGBAColor(0.8,0.6,0.3,1));
+	draw_simple_circle(temp->wheel1->p.x,temp->wheel1->p.y,15);
+	draw_simple_circle(temp->wheel2->p.x,temp->wheel2->p.y,15);
 
 	cpVect r = cpvadd(fac->body->p, cpvmult(cpvforangle(temp->angle),60));
 	draw_line(fac->body->p.x,fac->body->p.y,r.x,r.y, 30);
