@@ -166,10 +166,12 @@ static void level_timesup()
 		change_state(LEVEL_PLAYER_DEAD);
 	}
 }
+int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead()
 {
 	update_all();
 	if(state_timer > 3){
+		lvl_cleared=0;
 		change_state(LEVEL_TRANSITION);
 	}
 }
@@ -177,6 +179,7 @@ static void level_cleared()
 {
 	update_all();
 	if(state_timer > 3){
+		lvl_cleared=1;
 		change_state(LEVEL_TRANSITION);
 	}
 }
@@ -184,8 +187,12 @@ static void level_transition()
 {
 
 	if(state_timer > 1){
-		particles_removeall();
-		space_init_level(1,1);
+		//space_init_level(1,1);
+		if (lvl_cleared==1) {
+			space_init_level(1,(currentlvl->deck-1+1)%3+1); //TODO TMP
+		} else {
+			space_init_level(1,1); //TODO TMP
+		}
 		/* update objects to move shapes to same position as body */
 		change_state(LEVEL_START);
 	}
@@ -472,6 +479,12 @@ static void SPACE_draw()
 
 		font_drawText(WIDTH/2-250,-HEIGHT/2+8,game_state_names[gamestate]);
 
+		char level_temp[20];
+		setTextAlign(TEXT_CENTER);
+		sprintf(level_temp,"STATION: %d DECK: %d",currentlvl->station, currentlvl->deck);
+		font_drawText(0, -HEIGHT/2+8, level_temp);
+
+
 		setTextAlign(TEXT_RIGHT);
 		font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
 
@@ -570,6 +583,7 @@ struct robotarm_param robot_temp = {200};
 
 void space_init_level(int space_station, int deck)
 {
+	particles_removeall();
 
 	static struct player *player;
 

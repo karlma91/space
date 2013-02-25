@@ -215,7 +215,7 @@ level *level_load(int space_station, int deck)
 		return NULL;
 	}
 
-	if (deck < 1 || deck > worlds[space_station].count) {
+	if (deck < 1 || deck > worlds[space_station - 1].count) {
 		fprintf(stderr, "Deck no. %d on space station no. %d does not exist!\n", deck, space_station);
 		return NULL;
 	}
