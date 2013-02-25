@@ -192,17 +192,20 @@ void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h)
 	glEnd();
 }
 
-void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius)
+void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot)
 {
 	int i;
 	glPushMatrix();
 	glTranslatef(x,y,0);
+	glRotatef(rot,0,0,1);
 	glBegin(GL_TRIANGLE_FAN);
 	glVertex2f(0,0);
 	for(i = 0;i<128; i+=2){
 		glVertex2f(unit_circle[i]*radius, unit_circle[i+1]*radius);
 	}
 	glEnd();
+	glColor3f(1,1,1);
+	draw_simple_box(0, 0, radius, 5);
 	glPopMatrix();
 }
 

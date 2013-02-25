@@ -95,8 +95,8 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 	cpSpaceAddConstraint(space, cpGrooveJointNew(((object *) tank)->body, tank->wheel1 , cpv(-30, -10), cpv(-30, -40), cpvzero));
 	cpSpaceAddConstraint(space, cpGrooveJointNew(((object *) tank)->body, tank->wheel2, cpv( 30, -10), cpv( 30, -40), cpvzero));
 
-	cpSpaceAddConstraint(space, cpDampedSpringNew(((object *) tank)->body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 20.0f, 10.0f));
-	cpSpaceAddConstraint(space, cpDampedSpringNew(((object *) tank)->body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 20.0f, 10.0f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(((object *) tank)->body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 20.0f, 5.0f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(((object *) tank)->body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 20.0f, 5.0f));
 
 
 	cpBodySetUserData(((object *) tank)->body, (object*)tank);
@@ -146,6 +146,13 @@ static void update(object *fac)
 	}
 
 	//cpBodySetForce(fac->body,cpv(ptx*12000,0));
+	if(ptx<0){
+		cpBodySetTorque(temp->wheel1,2000);
+		cpBodySetTorque(temp->wheel2,2000);
+	}else{
+		cpBodySetTorque(temp->wheel1,-2000);
+		cpBodySetTorque(temp->wheel2,-2000);
+	}
 
 }
 
@@ -189,7 +196,7 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset)
 	cpFloat mass = 1.0f;
 	cpBody *body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(body, cpvadd(pos, boxOffset));
-
+	cpBodySetAngVelLimit(body,20);
 
 	cpShape *shape = cpSpaceAddShape(space, cpCircleShapeNew(body, radius, cpvzero));
 	cpShapeSetElasticity(shape, 0.0f);
@@ -227,8 +234,11 @@ static void render(object *fac)
 	temp = ((struct tank*)fac);
 
 	draw_boxshape(temp->shape,RGBAColor(0.8,0.3,0.1,1),RGBAColor(0.8,0.6,0.3,1));
-	draw_simple_circle(temp->wheel1->p.x,temp->wheel1->p.y,15);
-	draw_simple_circle(temp->wheel2->p.x,temp->wheel2->p.y,15);
+	GLfloat rot = cpBodyGetAngle(temp->wheel1)*(180/M_PI);
+	glColor3f(1,0,0);
+	draw_simple_circle(temp->wheel1->p.x,temp->wheel1->p.y,15,rot);
+	glColor3f(1,0,0);
+	draw_simple_circle(temp->wheel2->p.x,temp->wheel2->p.y,15,rot);
 
 	cpVect r = cpvadd(fac->body->p, cpvmult(cpvforangle(temp->angle),60));
 	draw_line(fac->body->p.x,fac->body->p.y,r.x,r.y, 30);
