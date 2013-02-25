@@ -192,6 +192,20 @@ void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h)
 	glEnd();
 }
 
+void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius)
+{
+	int i;
+	glPushMatrix();
+	glTranslatef(x,y,0);
+	glBegin(GL_TRIANGLE_FAN);
+	glVertex2f(0,0);
+	for(i = 0;i<128; i+=2){
+		glVertex2f(unit_circle[i]*radius, unit_circle[i+1]*radius);
+	}
+	glEnd();
+	glPopMatrix();
+}
+
 void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
 {
 #if CP_USE_DOUBLES
