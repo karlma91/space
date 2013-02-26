@@ -70,7 +70,8 @@ static void drawLetter(int d)
 }
 
 // symbol constants
-const GLfloat MINUS[] = {-0.5,0,	0.5,0};
+const GLfloat MINUS[] = {-0.4,0,	0.4,0};
+const GLfloat UNDERSCORE[] = {-0.5,-0.5,	0.5,-0.5};
 const GLfloat PLUS[] = {-0.5,0,	0.5,0,	0,0, 0,-0.5,	0,0.5};
 const GLfloat COMMA[] = {0,0,	-0.5,-0.5};
 const GLfloat DOT[] = {-0.1,-0.5,	-0.1,-0.3,	0.1,-0.3,	0.1,-0.5, -0.1,-0.5f};
@@ -78,6 +79,9 @@ const GLfloat DOT[] = {-0.1,-0.5,	-0.1,-0.3,	0.1,-0.3,	0.1,-0.5, -0.1,-0.5f};
 static void drawSymbol(char c)
 {
 	switch(c) {
+		case '_':
+		draw_line_strip(UNDERSCORE,4, 0.5f);
+		break;
 		case '-':
 			draw_line_strip(MINUS,4, 0.5f);
 			break;

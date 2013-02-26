@@ -10,6 +10,7 @@
 /* Game state */
 #include "main.h"
 #include "menu.h"
+#include "gameover.h"
 
 /* Drawing */
 #include "draw.h"
@@ -173,7 +174,8 @@ static void level_player_dead()
 	update_all();
 	if(state_timer > 3){
 		lvl_cleared=0;
-		change_state(LEVEL_TRANSITION);
+		currentState = &state_gameover;
+		//change_state(LEVEL_TRANSITION);
 	}
 }
 static void level_cleared()
@@ -192,7 +194,7 @@ static void level_transition()
 		if (lvl_cleared==1) {
 			space_init_level(1,(currentlvl->deck-1+1)%3+1); //TODO TMP
 		} else {
-			space_init_level(1,1); //TODO TMP
+			//space_init_level(1,1); //TODO TMP
 		}
 		/* update objects to move shapes to same position as body */
 		change_state(LEVEL_START);
@@ -230,6 +232,9 @@ static void SPACE_update()
 		cam_mode = 5;
 	}else if(keys[SDLK_F6]){
 		cam_mode = 6;
+	}else if(keys[SDLK_F11]){
+		game_time = currentlvl->timelimit;
+		return;
 	}
 
 	/*
@@ -672,7 +677,7 @@ static void SPACE_init()
 	objects_init();
 
 	state_timer = 10;
-	gamestate = LEVEL_TRANSITION;
+	change_state(LEVEL_START);
 
 	cpVect gravity = cpv(0, -980);
 	space = cpSpaceNew();

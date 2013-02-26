@@ -19,8 +19,9 @@
 #include "level.h"
 
 /* Game states */
-#include "space.h"
 #include "menu.h"
+#include "space.h"
+#include "gameover.h"
 #include "levelselect.h"
 
 
@@ -149,6 +150,7 @@ int main( int argc, char* args[] )
   state_space.init();
   state_menu.init();
   state_levelselect.init();
+  state_gameover.init();
 
   currentState = &state_menu;
   lastTime = SDL_GetTicks();
