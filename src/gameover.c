@@ -43,7 +43,7 @@ static const int char_count = 37; /* valid_char length*/
 
 static void gameover_init()
 {
-	scorelist * list = malloc(sizeof(scorelist));
+	static scorelist * list = malloc(sizeof(scorelist));
 	highscorelist_create(list);
 	highscorelist_readfile(list,"bin/data/highscores");
 	highscorelist_writefile(list,"bin/data/highscores");
@@ -104,7 +104,14 @@ static void gameover_update()
 		input[i] = valid_char[valid_index[i]];
 		break;
 	case confirm_name:
-
+		if (keys[SDLK_LEFT]) {
+			gameover_state = enter_name;
+			keys[SDLK_LEFT] = 0;
+		} else if (keys[SDLK_RIGHT]) {
+			/* add score */
+			gameover_state = show_highscore;
+			highscorelist_addscore(list,&input[0],getPlayerScore());
+		}
 		break;
 	case show_highscore:
 
@@ -131,7 +138,7 @@ static void gameover_draw()
 		break;
 	case confirm_name:
 		font_drawText(0,0, &input[0]);
-		if (timer<1) font_drawText(0,-80,"OK?"); else if(timer>=2) timer=0;
+		if (timer<1) font_drawText(0,-100,"PRESS RIGHT TO CONFIRM"); else if(timer>=2) timer=0;
 		break;
 	case show_highscore:
 

@@ -700,6 +700,13 @@ static void SPACE_destroy()
 	objects_destroy();
 }
 
-float getGameTime() {
+float getGameTime()
+{
 	return game_time;
+}
+
+int getPlayerScore()
+{
+	struct player *player = ((struct player*)objects_first(ID_PLAYER));
+	return player->highscore;
 }
