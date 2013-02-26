@@ -95,8 +95,8 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 	cpSpaceAddConstraint(space, cpGrooveJointNew(((object *) tank)->body, tank->wheel1 , cpv(-30, -10), cpv(-30, -40), cpvzero));
 	cpSpaceAddConstraint(space, cpGrooveJointNew(((object *) tank)->body, tank->wheel2, cpv( 30, -10), cpv( 30, -40), cpvzero));
 
-	cpSpaceAddConstraint(space, cpDampedSpringNew(((object *) tank)->body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 20.0f, 5.0f));
-	cpSpaceAddConstraint(space, cpDampedSpringNew(((object *) tank)->body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 20.0f, 5.0f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(((object *) tank)->body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(((object *) tank)->body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
 
 
 	cpBodySetUserData(((object *) tank)->body, (object*)tank);
@@ -145,13 +145,12 @@ static void update(object *fac)
 		ptx = 1;
 	}
 
-	//cpBodySetForce(fac->body,cpv(ptx*12000,0));
 	if(ptx<0){
-		cpBodySetTorque(temp->wheel1,2000);
-		cpBodySetTorque(temp->wheel2,2000);
+		cpBodySetTorque(temp->wheel1,20000);
+		cpBodySetTorque(temp->wheel2,20000);
 	}else{
-		cpBodySetTorque(temp->wheel1,-2000);
-		cpBodySetTorque(temp->wheel2,-2000);
+		cpBodySetTorque(temp->wheel1,-20000);
+		cpBodySetTorque(temp->wheel2,-20000);
 	}
 
 }
@@ -164,7 +163,7 @@ static float get_best_angle(object *obj, object *obj2)
 	cpVect a = cpvsub(obj->body->p, obj2->body->p);
 
 	cpFloat c = cpvlength(obj2->body->v);
-	cpFloat b = 1000;
+	cpFloat b = 1500;
 	cpFloat G = acos(cpvdot(a,obj2->body->v)/(cpvlength(obj2->body->v)*cpvlength(a)));
 	float angle = asin((c*sin(G))/b);
 
@@ -213,7 +212,7 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset)
 static cpBody *
 addChassis(cpSpace *space, cpVect pos, cpVect boxOffset)
 {
-	cpFloat mass = 5.0f;
+	cpFloat mass = 2.0f;
 	cpFloat width = 80;
 	cpFloat height = 30;
 
@@ -258,6 +257,8 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	particles_add_explosion(b->body->p,0.3,1500,10,200);
 
+	temp->hp -= 10;
+
 	if(temp->hp <=0 ){
 		//a->body->data = NULL;
 		particles_add_explosion(a->body->p,1,2000,20,800);
@@ -266,8 +267,6 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 		}
 		//cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
 		((object *) temp)->alive = 0;
-	}else{
-		temp->hp -= 10;
 	}
 
 	return 0;
@@ -279,6 +278,9 @@ static void destroy(object *obj)
 	temp = ((struct tank*)obj);
 	cpSpaceRemoveBody(space, obj->body);
 	cpSpaceRemoveShape(space, temp->shape);
+
+	cpSpaceRemoveBody(space, temp->wheel1);
+	cpSpaceRemoveBody(space, temp->wheel2);
 
 	if(temp->factory != NULL){
 		temp->factory->cur--;

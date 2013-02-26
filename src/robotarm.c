@@ -78,7 +78,7 @@ object *robotarm_init(float xpos,struct robotarm_param *pram)
 	/* make and connect new shape to body */
 	ra->shape = cpSpaceAddShape(space, cpBoxShapeNew(((object *) ra)->body, size, size));
 	cpShapeSetFriction(ra->shape, 0.01);
-	cpShapeSetLayers(ra->shape,LAYER_TANK);
+	cpShapeSetLayers(ra->shape,1<<20);
 	cpShapeSetCollisionType(ra->shape, ID_ROBOTARM);
 	cpSpaceAddCollisionHandler(space, ID_ROBOTARM, ID_BULLET_PLAYER, collision_player_bullet, NULL, NULL, NULL, NULL);
 

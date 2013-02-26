@@ -8,6 +8,7 @@ static void render(object *obj);
 static void destroy(object *obj);
 
 static int callback_ground(cpArbiter *arb, cpSpace *space, void *unused);
+static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 
 struct obj_type type_bullet_player= {
 	ID_BULLET_PLAYER,
@@ -44,7 +45,8 @@ static void render(object *obj)
 	}else{
 		glColor3f(0.3,0.3,0.9);
 	}
-	draw_ballshape(temp->shape);
+	glColor3f(1,0,0);
+	draw_velocity_line(temp->shape);
 }
 
 object *bullet_init(cpVect pos, cpVect dir, int type)
@@ -57,7 +59,8 @@ object *bullet_init(cpVect pos, cpVect dir, int type)
 		temp->body = cpSpaceAddBody(space, cpBodyNew(1, moment));
 		cpBodySetPos(temp->body, cpvadd(pos, cpvmult(dir,15)));
 		cpBodySetUserData(temp->body, (object*)temp);
-		cpBodySetVel(temp->body,cpvmult(dir,1000));
+		cpBodySetVel(temp->body,cpvmult(dir,1500));
+		temp->body->velocity_func = bulletVelocityFunc;
 
 		temp->shape = cpSpaceAddShape(space, cpCircleShapeNew(temp->body, 5, cpvzero));
 		cpShapeSetFriction(temp->shape, 0.7);
@@ -77,13 +80,22 @@ object *bullet_init(cpVect pos, cpVect dir, int type)
 		return (object*)temp;
 }
 
+/**
+ * Velocity function to remove gravity
+ */
+static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
+{
+	cpVect g = cpv(0,-50);
+
+	cpBodyUpdateVelocity(body, g, damping, dt);
+}
 
 // from chipmunk docs
 static int callback_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
 	temp = (struct bullet*)b->body->data;
-	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 0.5f, 1500, 100,300);
+	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 0.5f, 1500, 50,300);
 	temp->alive = 0;
 	return 0;
 }

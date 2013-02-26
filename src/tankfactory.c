@@ -111,6 +111,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	particles_add_explosion(b->body->p,0.3,1500,15,200);
 
+	temp->hp -= 10;
 	if(temp->hp <=0 ){
 		particles_add_explosion(a->body->p,1,2000,50,800);
 		if(((object *) temp)->alive){
@@ -118,8 +119,6 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 		}
 		((object*)temp)->alive = 0;
 		objects_iterate_type(remove_factory_from_tank,ID_TANK);
-	}else{
-		temp->hp -= 10;
 	}
 
 	return 0;

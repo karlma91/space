@@ -22,6 +22,7 @@
 #include "tankfactory.h"
 #include "robotarm.h"
 #include "level.h"
+#include "tank.h"
 
 #define star_count 1000
 static int stars_x[star_count];
@@ -283,11 +284,30 @@ static void update_all()
 /**
  * Used by object_iterate to update all objects
  */
+static struct tank *temptank = NULL;
 static void update_objects(object *obj)
 {
 	if(obj->alive){
-		if (obj->body->p.x < currentlvl->left ) obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
-		if (obj->body->p.x > currentlvl->right) obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right) ;
+
+		//TODO: fix this shit
+		if(obj->type->ID == ID_TANK){
+			temptank = ((struct tank*)obj);
+			if (obj->body->p.x < currentlvl->left ){
+				obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
+				temptank->wheel1->p.x = currentlvl->right - abs(currentlvl->left - temptank->wheel1->p.x );
+				temptank->wheel2->p.x = currentlvl->right - abs(currentlvl->left - temptank->wheel2->p.x );
+
+			}
+			if (obj->body->p.x > currentlvl->right){
+				obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
+				temptank->wheel1->p.x = currentlvl->left + (temptank->wheel1->p.x - currentlvl->right);
+				temptank->wheel2->p.x = currentlvl->left + (temptank->wheel2->p.x - currentlvl->right);
+			}
+		}else{
+			if (obj->body->p.x < currentlvl->left ) obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
+			if (obj->body->p.x > currentlvl->right) obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
+		}
+
 		obj->type->update(obj);
 	}else{
 		obj->type->destroy(obj);
@@ -633,11 +653,11 @@ void space_init_level(int space_station, int deck)
 	}
 
 	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), 10)); // ground level at 0
-	cpShapeSetFriction(floor, 0.8f);
+	cpShapeSetFriction(floor, 1.0f);
 	cpShapeSetCollisionType(floor, ID_GROUND);
 
 	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), 10.0f));
-	cpShapeSetFriction(ceiling, 0.8f);
+	cpShapeSetFriction(ceiling, 1.0f);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
 
 	/*
@@ -654,7 +674,7 @@ static void SPACE_init()
 	state_timer = 10;
 	gamestate = LEVEL_TRANSITION;
 
-	cpVect gravity = cpv(0, -200);
+	cpVect gravity = cpv(0, -980);
 	space = cpSpaceNew();
 	cpSpaceSetGravity(space, gravity);
 	//cpSpaceSetDamping(space, 0.999);

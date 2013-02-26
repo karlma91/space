@@ -240,27 +240,18 @@ void draw_segment(cpVect a, cpVect b, cpFloat w, Color lineColor)
 	//draw_line(a.x, a.y, b.x, b.y, 10);
 }
 
-void draw_shape(cpShape *shape, void *unused)
-{
-	void (*functionPtr)(cpShape*);
-	functionPtr = (void (*)(cpShape*))cpShapeGetUserData(shape);
-	if(functionPtr != NULL){
-		functionPtr(shape);
-	}
-}
-
 void draw_ballshape(cpShape *shape)
 {
 	cpCircleShape *circle = (cpCircleShape *)shape;
-
-	//printf("rand %f\n",1.0f*rand()/RAND_MAX);
-	//glColor3f(0.1f + sin(circle->tc.x/500)*0.8f,0.1f + cos(circle->tc.y/500)*0.8f,1.0f);
-	
+	cpBody *body = shape->body;
 	cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
-	
+	draw_simple_circle(circle->tc.x, circle->tc.y, circle->r, cpBodyGetAngle(body)*(180/M_PI)); //40 = 4 * radius
+}
+void draw_velocity_line(cpShape *shape)
+{
+	cpCircleShape *circle = (cpCircleShape *)shape;
+	cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
 	draw_line(circle->tc.x, circle->tc.y, circle->tc.x - vel.x/32, circle->tc.y - vel.y/32, 32); //40 = 4 * radius
-
-	//draw_circle(circle->tc, cpBodyGetAngle(cpShapeGetBody(shape)), 10,cam_zoom, RGBAColor(0.80f, 0.107f, 0.05f,1.0f),RGBAColor(1.0f, 1.0f, 1.0f,1.0f));
 }
 void draw_boxshape(cpShape *shape, Color a, Color b)
 {
@@ -272,11 +263,6 @@ void draw_segmentshape(cpShape *shape)
 {
 	cpSegmentShape *seg = (cpSegmentShape *)shape;
 	draw_segment(seg->ta, seg->tb, seg->r, RGBAColor(0.80f, 0.107f, 0.05f,1.0f));
-}
-
-void draw_space(cpSpace *space)
-{
-	cpSpaceEachShape(space, draw_shape, NULL);
 }
 
 Color draw_col_rainbow(int hue)

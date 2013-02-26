@@ -31,6 +31,8 @@ static void tmp_shoot(object *obj);
 static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 
 static void player_controls(object *obj);
+static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
+
 
 struct obj_type type_player = {
 	ID_PLAYER,
@@ -63,9 +65,10 @@ object *player_init()
 	pl->body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius/2)));
 	cpBodySetPos(pl->body, cpv(0,990));
 	cpBodySetVelLimit(pl->body,700);
+	pl->body->velocity_func = playerVelocityFunc;
 	/* make and connect new shape to body */
 	pl->shape = cpSpaceAddShape(space, cpBoxShapeNew(pl->body, radius, radius/2));
-	cpShapeSetFriction(pl->shape, 0.7);
+	cpShapeSetFriction(pl->shape, 0.8);
 	cpShapeSetUserData(pl->shape, draw_boxshape);
 	cpShapeSetElasticity(pl->shape, 1.0f);
 	cpShapeSetLayers(pl->shape, LAYER_PLAYER);
@@ -99,8 +102,8 @@ static void player_update(object *obj)
 {
 	timer += dt;
 	temp = (struct player*)obj;
-	cpFloat pangvel = cpBodyGetAngVel(temp->body);
-	cpBodySetAngVel(temp->body, pangvel*0.9);
+	//cpFloat pangvel = cpBodyGetAngVel(temp->body);
+	//cpBodySetAngVel(temp->body, pangvel*0.9);
 	//cpVect pvel = cpBodyGetVel(obj->body);
 	
 	//update physics and player
@@ -174,6 +177,18 @@ static void player_controls(object *obj)
 			particles_add_explosion(cpBodyGetPos(temp->body),0.5f,4000, 1000,200);
 		}
 }
+
+/**
+ * Velocity function to remove gravity
+ */
+static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
+{
+	cpVect p = cpBodyGetPos(body);
+	cpVect g = cpv(0,0);
+
+	cpBodyUpdateVelocity(body, g, damping, dt);
+}
+
 
 static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 {

@@ -52,7 +52,7 @@ void draw_segment(cpVect a, cpVect b, cpFloat width, Color lineColor);
 void draw_space(cpSpace *space);
 void draw_segmentshape(cpShape *shape);
 void draw_boxshape(cpShape *shape, Color a, Color b);
-void draw_ballshape(cpShape *shape);
+void draw_velocity_line(cpShape *shape);
 void draw_shape(cpShape *shape, void *unused);
 void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h);
 void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot);
