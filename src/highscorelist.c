@@ -17,17 +17,18 @@ void highscorelist_create(scorelist *list)
 
 /**
  * adds a score to the list
+ * returns position, or -1 if error
  */
 int highscorelist_addscore(scorelist *list, char *name, int score)
 {
 
 	if(strlen(name)>4 || strlen(name)<3){
-		fprintf(stderr,"%s to long or short name",name);
-		return 1;
+		//fprintf(stderr,"%s to long or short name",name);
+		return -1;
 	}
 	if(score < 0){
-		fprintf(stderr,"negative score %d\n",score);
-		return 1;
+		//fprintf(stderr,"negative score %d\n",score);
+		return -1;
 	}
 
 	scoreelement **cur = &(list->head);
@@ -36,20 +37,21 @@ int highscorelist_addscore(scorelist *list, char *name, int score)
 	strcpy(element->name, name);
 	element->score = score;
 	element->next = NULL;
-
+	int position = 1;
 	while(*cur != NULL){
+		position++;
 		if((*cur)->score <= element->score){
 			element->next = *cur;
 			*cur = element;
 			list->elements++;
-			return 0;
+			return position;
 		}
 		cur = &((*cur)->next);
 	}
 
 	(*cur) = element;
 	list->elements++;
-	return 0;
+	return position;
 }
 
 /**
@@ -68,8 +70,8 @@ int highscorelist_getscore(scorelist *list, int position, char *name, int *score
 		cur = cur->next;
 		counter++;
 	}
-	fprintf(stderr,"position not inside list %d",position);
-	return 1;
+	//fprintf(stderr,"position not inside list %d",position);
+	return -1;
 }
 
 /**

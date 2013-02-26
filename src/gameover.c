@@ -40,13 +40,13 @@ static char input[MAX_NAME_LENGTH+1] = "    ";
 static int valid_index[MAX_NAME_LENGTH];
 static const char valid_char[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
 static const int char_count = 37; /* valid_char length*/
+static scorelist * list;
 
 static void gameover_init()
 {
-	static scorelist * list = malloc(sizeof(scorelist));
+	list = malloc(sizeof(scorelist));
 	highscorelist_create(list);
 	highscorelist_readfile(list,"bin/data/highscores");
-	highscorelist_writefile(list,"bin/data/highscores");
 }
 
 enum gameover_state_ {
@@ -138,19 +138,36 @@ static void gameover_draw()
 		break;
 	case confirm_name:
 		font_drawText(0,0, &input[0]);
+		setTextSize(30);
 		if (timer<1) font_drawText(0,-100,"PRESS RIGHT TO CONFIRM"); else if(timer>=2) timer=0;
 		break;
 	case show_highscore:
-
+		draw_highscore();
 		break;
 	}
 }
 
 static void gameover_destroy()
 {
-
+	highscorelist_writefile(list,"bin/data/highscores");
+	highscorelist_destroy(list);
+	free(list);
 }
 
-static void draw_highscore() {
+static void draw_highscore()
+{
+	char name[5];
+	char temp[50];
+	int score;
+	int i;
+	setTextAlign(TEXT_LEFT);
+	setTextSize(40);
+	for(i=0;i<10;i++){
+		if(highscorelist_getscore(list,i+1,name,&score) == 0){
+			sprintf(temp,"%-9s %10d",name, score);
+			font_drawText(-10*40*1.5f, 300 - i*50, temp);
+		}else{
 
+		}
+	}
 }
