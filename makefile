@@ -33,7 +33,7 @@ else ifeq ($(SYS),Darwin) #mac
 	os_lib=-framework cocoa
 	openGL=-framework OpenGL
 	sdl=-ISDL/mac -LSDL/mac -lSDLmain -lSDL
-	sdlimage=-lSDL -framework SDL_image
+	sdlimage=-framework SDL_image -Ilib/SDL_image
 	chipmunk=-Ichipmunk/include -Lchipmunk/mac -lChipmunk
 endif
 
