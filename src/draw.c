@@ -7,6 +7,9 @@ GLfloat array[CIRCLE_MAX_RES];
 
 static int i, j;
 unsigned texture[10];
+
+extern unsigned int *textures; //TMP
+
 static int texC = 0;
 
 Color rainbow_col[1536];
@@ -14,6 +17,9 @@ Color rainbow_col[1536];
 static GLfloat unit_circle[128];
 
 #define DEBUG fprintf(stderr, "line: %d\n", __LINE__);
+
+//TODO TMP remove:
+unsigned int loadePNGTexture(char *file);
 
 int draw_init(){
 
@@ -29,6 +35,7 @@ int draw_init(){
 	 * Range 100%
 	 * Jitter 0%
 	 */
+	/*
 	int error;
 	error = loadTexture("textures/glowdot.bmp");
 	if(error){
@@ -40,7 +47,10 @@ int draw_init(){
 		fprintf(stderr, "could not load dot.bmp");
 		return error;
 	}
-	
+	*/
+	//TODO remove TMP
+	 loadePNGTexture("textures/glowdot.png"); loadePNGTexture("textures/glow.png"); texture[0] = textures[0]; texture[1] = textures[1];
+
 	/* generate rainbow colors */
 	float min_col = 0.2f;
 	Color *c = &rainbow_col[j];
