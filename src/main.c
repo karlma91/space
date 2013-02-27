@@ -3,6 +3,8 @@
 
 /* standard c-libraries */
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 /* SDL and OpenGL */
@@ -11,6 +13,9 @@
 
 /* Chipmunk physics library */
 #include "chipmunk.h"
+
+/* ini loader lib */
+#include "ini.h"
 
 /* drawing code */
 #include "draw.h"
@@ -23,9 +28,6 @@
 #include "space.h"
 #include "gameover.h"
 #include "levelselect.h"
-
-
-static void game_destroy();
 
 static float fps;
 static float frames;
@@ -40,8 +42,41 @@ state *currentState;
 
 static int main_running = 1;
 
+configuration config;
 
-void initGL()
+static int handler(void* config, const char* section, const char* name, const char* value)
+{
+  configuration* pconfig = (configuration*)config;
+
+#define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
+  if (MATCH("video", "fullscreen")) {
+  	pconfig->fullscreen = atoi(value);
+  } else if (MATCH("keyboard", "key_left")) {
+  	pconfig->key_left = atoi(value);
+  } else if (MATCH("keyboard", "key_up")) {
+  	pconfig->key_up = atoi(value);
+  } else if (MATCH("keyboard", "key_right")) {
+  	pconfig->key_right = atoi(value);
+  } else if (MATCH("keyboard", "key_down")) {
+  	pconfig->key_down = atoi(value);
+  } else {
+      return 0;  /* unknown section/name, error */
+  }
+  return 1;
+}
+
+static int init_config()
+{
+	if (ini_parse("bin/config.ini", handler, &config) < 0) {
+		printf("Could not load 'bin/config.ini'\n");
+		return 1;
+	}
+	fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d",
+			config.fullscreen);
+	return 0;
+}
+
+static void initGL()
 {
 	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
 	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
@@ -61,19 +96,7 @@ void initGL()
 
 	//fra ttf opengl tutorial
 	glEnable(GL_BLEND);
-
-
-
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendEquation(GL_MAX);
-
-
-	//glBlendEquationSeparate(GL_ONE,GL_MAX);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	//glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
-	//float aspect = (float)WIDTH / (float)HEIGHT;
 
 	/* Make the viewport cover the whole window */
 	glViewport(0, 0, WIDTH, HEIGHT);
@@ -104,8 +127,10 @@ void initGL()
 	glDisable(GL_CULL_FACE);
 }
 
-int main_init()
+static int main_init()
 {
+	init_config();
+
 	SDL_Surface *screen;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
@@ -114,7 +139,7 @@ int main_init()
 	WIDTH = myPointer->current_w;
 	HEIGHT = myPointer->current_h;
 
-	if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, SDL_OPENGL| SDL_DOUBLEBUF| SDL_FULLSCREEN)))
+	if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, (SDL_OPENGL| SDL_DOUBLEBUF) | (SDL_FULLSCREEN * config.fullscreen))))
 	{
 		printf("ERROR");
 		SDL_Quit();
@@ -149,7 +174,7 @@ int main_init()
 	return 0;
 }
 
-int main_run()
+static int main_run()
 {
   SDL_Event event;
 	Uint32 thisTime = 0;
@@ -225,7 +250,7 @@ int main_run()
 	return 0;
 }
 
-int main_destroy()
+static int main_destroy()
 {
 	level_destroy();
 	//cpSpaceFreeChildren(space);

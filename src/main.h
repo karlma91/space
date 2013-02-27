@@ -5,6 +5,19 @@
 
 #define SLEEP_TIME 1
 
+/* config struct */
+typedef struct
+{
+    int fullscreen;
+    char key_left;
+    char key_up;
+    char key_right;
+    char key_down;
+    char key_space;
+} configuration;
+
+extern configuration config;
+
 /* State  struct */
 typedef struct state_ state;
 struct state_ {
