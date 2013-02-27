@@ -6,6 +6,8 @@
 
 static FILE * file;
 
+static int load_file = 0;
+
 /**
  * inits a list struct
  */
@@ -40,7 +42,7 @@ int highscorelist_addscore(scorelist *list, char *name, int score)
 	int position = 1;
 	while(*cur != NULL){
 		position++;
-		if((*cur)->score <= element->score){
+		if((*cur)->score <= element->score - load_file){
 			element->next = *cur;
 			*cur = element;
 			list->elements++;
@@ -103,6 +105,7 @@ int highscorelist_readfile(scorelist *list, char *filename)
 		return 1;
 	}
 
+	load_file = 1;
 	char name[5];
 	int score = 0;
 	int ret = 0;
@@ -115,6 +118,7 @@ int highscorelist_readfile(scorelist *list, char *filename)
 		}
 	}
 	fclose(file);
+	load_file = 0;
 	return 0;
 }
 

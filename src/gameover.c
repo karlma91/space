@@ -163,11 +163,12 @@ static void draw_highscore()
 	setTextAlign(TEXT_LEFT);
 	setTextSize(40);
 	for(i=0;i<10;i++){
-		if(highscorelist_getscore(list,i+1,name,&score) == 0){
-			sprintf(temp,"%-9s %10d",name, score);
-			font_drawText(-10*40*1.5f, 300 - i*50, temp);
-		}else{
-
+		//TODO put name and score inside its own struct
+		if(highscorelist_getscore(list,i+1,name,&score) != 0) {
+			name[0] = '\0';
+			score = 0;
 		}
+		sprintf(temp,"%2d %-9s %10d", (i+1), name, score);
+		font_drawText(-10*40*1.5f, 300 - i*50*1.5f, temp);
 	}
 }

@@ -237,6 +237,7 @@ static void game_destroy()
 	state_space.destroy();
 	state_menu.destroy();
 	state_levelselect.destroy();
+	state_gameover.destroy();
 
 	draw_destroy();
 	font_destroy();
