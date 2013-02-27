@@ -4,6 +4,7 @@
 /* standard c-libraries */
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 /* Game state */
 #include "main.h"
@@ -154,21 +155,39 @@ static void gameover_destroy()
 	free(list);
 }
 
+char * covertToUpper(char *str)
+    {
+        int i = 0;
+        int len = 0;
+
+        len = strlen(str);
+
+        for(i = 0; str[i]; i++)
+        {
+           str[i] = toupper(str[i]);
+        }
+        //terminate string
+        str[i]= '\0';
+        return str;
+
+    }
+
 static void draw_highscore()
 {
-	char name[5];
-	char temp[50];
-	int score;
+	scoreelement score = {"LAME",0,0,0};
+	char temp[100];
 	int i;
 	setTextAlign(TEXT_LEFT);
-	setTextSize(40);
+	setTextSize(20);
 	for(i=0;i<10;i++){
 		//TODO put name and score inside its own struct
-		if(highscorelist_getscore(list,i+1,name,&score) != 0) {
-			name[0] = '\0';
-			score = 0;
+		if(highscorelist_getscore(list,i+1,&score) != 0) {
+
 		}
-		sprintf(temp,"%2d %-9s %10d", (i+1), name, score);
+		time_t tim = (time_t)(score.time);
+		 struct tm *tmm = gmtime(&tim);
+
+		sprintf(temp,"%2d %-5s %10d         %02d-%02d-%02d", (i+1), score.name, score.score,tmm->tm_mday,tmm->tm_mon+1,tmm->tm_year%100);
 		font_drawText(-10*40*1.5f, 300 - i*50*1.5f, temp);
 	}
 }

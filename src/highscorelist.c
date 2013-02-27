@@ -4,10 +4,14 @@
 
 #include "highscorelist.h"
 
+#define DEBUG fprintf(stderr,"Line: %d\n",__LINE__);
+
 static FILE * file;
 
 static int load_file = 0;
 
+static scoreelement score_def = {"DEFU",0,0,0};
+static int read_addscore(scorelist *list, char *name, int score,long time,int from_file);
 /**
  * inits a list struct
  */
@@ -23,56 +27,68 @@ void highscorelist_create(scorelist *list)
  */
 int highscorelist_addscore(scorelist *list, char *name, int score)
 {
+	long tim = 555;
+	time(&tim);
+	return read_addscore(list, name,score,tim,0);
+}
 
+static int read_addscore(scorelist *list, char *name, int score,long time,int from_file)
+{
+	//fprintf(stderr, "%s %d %d %d\n",name,score,time,from_file);
 	if(strlen(name)>4 || strlen(name)<3){
-		//fprintf(stderr,"%s to long or short name",name);
-		return -1;
-	}
-	if(score < 0){
-		//fprintf(stderr,"negative score %d\n",score);
-		return -1;
-	}
-
-	scoreelement **cur = &(list->head);
-
-	scoreelement *element = malloc(sizeof(scoreelement));
-	strcpy(element->name, name);
-	element->score = score;
-	element->next = NULL;
-	int position = 1;
-	while(*cur != NULL){
-		position++;
-		if((*cur)->score <= element->score - load_file){
-			element->next = *cur;
-			*cur = element;
-			list->elements++;
-			return position;
+			//fprintf(stderr,"%s to long or short name",name);
+			return -1;
 		}
-		cur = &((*cur)->next);
-	}
+		if(score < 0){
+			//fprintf(stderr,"negative score %d\n",score);
+			return -1;
+		}
+		DEBUG
 
-	(*cur) = element;
-	list->elements++;
-	return position;
+		scoreelement **cur = &(list->head);
+
+		scoreelement *element = malloc(sizeof(scoreelement));
+		strcpy(element->name, name);
+		element->score = score;
+		element->time = time;
+		element->next = NULL;
+		int position = 1;
+		while(*cur != NULL){
+			position++;
+			if((*cur)->score <= element->score - from_file){
+				element->next = *cur;
+				*cur = element;
+				list->elements++;
+				return position;
+			}
+			cur = &((*cur)->next);
+		}
+
+		(*cur) = element;
+		list->elements++;
+		return position;
 }
 
 /**
  * gets score at a position
  */
-int highscorelist_getscore(scorelist *list, int position, char *name, int *score)
+int highscorelist_getscore(scorelist *list, int position, scoreelement *score)
 {
 	int counter = 1;
 	scoreelement *cur = list->head;
 	while(counter < list->elements+1){
 		if(counter == position){
-			strcpy(name,cur->name);
-			*score = cur->score;
+			strcpy(score->name, cur->name);
+			score->score = cur->score;
+			score->time = cur->time;
 			return 0;
 		}
 		cur = cur->next;
 		counter++;
 	}
-	//fprintf(stderr,"position not inside list %d",position);
+	strcpy(score->name, score_def.name);
+	score->score = score_def.score;
+	score->time = score_def.time;
 	return -1;
 }
 
@@ -105,20 +121,20 @@ int highscorelist_readfile(scorelist *list, char *filename)
 		return 1;
 	}
 
-	load_file = 1;
 	char name[5];
 	int score = 0;
+	int time = 0;
 	int ret = 0;
 	while(1==1){
-		ret = fscanf(file,"%s %d",name,&score);
-		if(ret != EOF && ret == 2){
-			highscorelist_addscore(list,name,score);
+		ret = fscanf(file,"%s %d %d\n",name,&score,&time);
+		if(ret != EOF && ret == 3){
+			read_addscore(list,name,score,time,1);
 		}else{
+			fprintf(stderr,"error reading highscore file\n");
 			break;
 		}
 	}
 	fclose(file);
-	load_file = 0;
 	return 0;
 }
 
@@ -132,13 +148,13 @@ int highscorelist_writefile(scorelist *list, char *filename)
 		fprintf(stderr, "Could not load %s\n",filename);
 		return 1;
 	}
-	char name[5];
-	int score = 0;
+
+	scoreelement temp = {"LAME",0,0,0};
 
 	int i;
 	for(i=0; i<list->elements; i++){
-		highscorelist_getscore(list,i+1,name,&score);
-		fprintf(file,"%s %d\n",name,score);
+		highscorelist_getscore(list,i+1,&temp);
+		fprintf(file,"%s %d %d\n",temp.name,temp.score,temp.time);
 	}
 	fclose(file);
 	return 0;

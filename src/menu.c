@@ -7,6 +7,7 @@
 /* Game state */
 #include "main.h"
 #include "space.h"
+#include "gameover.h"
 #include "levelselect.h"
 
 /* Drawing */
@@ -40,10 +41,10 @@ struct menu {
 };
 
 static struct menu mainMenuTest = {
+		5,
 		4,
-		3,
 		mainmenu_func,
-		{"START GAME","LEVELS","CREDITS","EXIT"}
+		{"START GAME","LEVELS","HIGHSCORES","CREDITS","EXIT"}
 };
 
 static struct menu ingameMenu = {
@@ -134,6 +135,9 @@ static void mainmenu_func()
 		break;
 	case 1:
 		currentState = &state_levelselect;
+		break;
+	case 2:
+		currentState = &state_gameover;
 		break;
 	case 3:
 		main_stop();
