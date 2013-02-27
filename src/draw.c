@@ -244,7 +244,7 @@ void draw_ballshape(cpShape *shape)
 {
 	cpCircleShape *circle = (cpCircleShape *)shape;
 	cpBody *body = shape->body;
-	cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
+	//cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
 	draw_simple_circle(circle->tc.x, circle->tc.y, circle->r, cpBodyGetAngle(body)*(180/M_PI)); //40 = 4 * radius
 }
 void draw_velocity_line(cpShape *shape)

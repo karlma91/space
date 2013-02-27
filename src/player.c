@@ -183,7 +183,7 @@ static void player_controls(object *obj)
  */
 static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
 {
-	cpVect p = cpBodyGetPos(body);
+	//cpVect p = cpBodyGetPos(body);
 	cpVect g = cpv(0,0);
 
 	cpBodyUpdateVelocity(body, g, damping, dt);

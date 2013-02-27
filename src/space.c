@@ -559,6 +559,9 @@ static void SPACE_draw()
 			setTextAlign(TEXT_CENTER);
 			font_drawText(0, 0, "GAME OVER!");
 			break;
+		case LEVEL_STATE_COUNT:
+			/* invalid value */
+			break;
 		}
 	}
 }

@@ -62,7 +62,7 @@ static int i = 0;
 static void gameover_update()
 {
 	if (keys[SDLK_RETURN]) {
-		gameover_state = (++gameover_state)%3;
+		gameover_state = (1+gameover_state)%3;
 		keys[SDLK_RETURN] = 0;
 		return;
 	}

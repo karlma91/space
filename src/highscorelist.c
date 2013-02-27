@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "highscorelist.h"
 
@@ -8,9 +9,7 @@
 
 static FILE * file;
 
-static int load_file = 0;
-
-static scoreelement score_def = {"DEFU",0,0,0};
+static scoreelement score_def = {"    ",0,0,0};
 static int read_addscore(scorelist *list, char *name, int score,long time,int from_file);
 /**
  * inits a list struct
@@ -27,9 +26,9 @@ void highscorelist_create(scorelist *list)
  */
 int highscorelist_addscore(scorelist *list, char *name, int score)
 {
-	long tim = 555;
-	time(&tim);
-	return read_addscore(list, name,score,tim,0);
+	long t = 0;
+	time(&t);
+	return read_addscore(list, name,score,t,0);
 }
 
 static int read_addscore(scorelist *list, char *name, int score,long time,int from_file)
@@ -43,8 +42,6 @@ static int read_addscore(scorelist *list, char *name, int score,long time,int fr
 			//fprintf(stderr,"negative score %d\n",score);
 			return -1;
 		}
-		DEBUG
-
 		scoreelement **cur = &(list->head);
 
 		scoreelement *element = malloc(sizeof(scoreelement));

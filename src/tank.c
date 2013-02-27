@@ -32,7 +32,7 @@ static cpBody *addChassis(cpSpace *space, cpVect pos, cpVect boxOffset);
 static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset);
 
 /* helper */
-static float get_angle(object *obj, object *obj2);
+//static float get_angle(object *obj, object *obj2);
 static float get_best_angle(object *obj, object *obj2);
 
 
@@ -60,7 +60,7 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 
 	tank->rot_speed = 0.01;
 
-	cpFloat width = 50;
+//	cpFloat width = 50;
 	cpFloat height = 30;
 
 
@@ -177,15 +177,18 @@ static float get_best_angle(object *obj, object *obj2)
 	return angle;
 }
 
+//TODO: misplaced method: remove or move this method to objects?
 /**
  * returns the angle from a object to another
  */
-static float get_angle(object *obj, object *obj2)
+/*static float get_angle(object *obj, object *obj2)
 {
 	cpVect a = cpvsub(obj->body->p, obj2->body->p);
 	cpFloat bc = cpvtoangle(a);
 	return bc;
 }
+*/
+
 /*
  * make a wheel
  */
