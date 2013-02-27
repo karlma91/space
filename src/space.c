@@ -708,5 +708,8 @@ float getGameTime()
 int getPlayerScore()
 {
 	struct player *player = ((struct player*)objects_first(ID_PLAYER));
-	return player->highscore;
+	if (player != NULL)
+		return player->highscore;
+	else
+		return -1;
 }

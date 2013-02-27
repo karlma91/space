@@ -149,7 +149,10 @@ object *objects_nearest(cpVect pos, int obj_id)
 
 object *objects_first(int obj_id)
 {
-	return head_all[obj_id]->obj;
+	if (object_count[obj_id])
+		return head_all[obj_id]->obj;
+	else
+		return NULL;
 }
 
 object *objects_n(int obj_id, int n)

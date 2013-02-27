@@ -12,6 +12,7 @@ ifeq ($(SYS),Linux) #linux
 	openGL=-lGL
 	sdl=-ISDL/linux -LSDL/linux -lSDLmain -lSDL 
 	chipmunk=-Ichipmunk/include -Lchipmunk/linux -lChipmunk
+	sdlimage=-ISDL_image/linux -LSDL_image/linux -lSDL_image
 else ifneq ($(findstring MINGW32_NT, $(SYS)),) #windows
 	os=2
 	suffix=.exe
@@ -43,7 +44,7 @@ build : main
 
 main : src/main.c src/*.h
 	$(precode)
-	gcc -o bin/main$(suffix) $(gamefiles) $(os_lib) $(openGL) $(sdl) $(chipmunk)
+	gcc -o bin/main$(suffix) $(gamefiles) $(os_lib) $(openGL) $(sdl) $(sdlimage) $(chipmunk) -Wall -g
 	$(postcode)
 #mingw and linux
 #gcc src/*.c src/constraints/*.c -Iinclude/chipmunk -o libChipmunk.a -std=c99 -lm -shared -fPIC
