@@ -31,7 +31,7 @@ int draw_init(){
 	//TODO remove TMP
 	 loadePNGTexture("textures/glow.png");
 	 loadePNGTexture("textures/glowdot.png");
-	 loadePNGTexture("textures/player.png");
+	// loadePNGTexture("textures/player.png");
 
 	/* generate rainbow colors */
 	float min_col = 0.2f;
