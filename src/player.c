@@ -96,6 +96,21 @@ static void player_render(object *obj)
 	Color c = RGBAColor(1,0,0,1);
 	draw_boxshape(temp->shape,RGBAColor(1,1,1,1),c);
 	draw_hp(temp->body->p.x-25,temp->body->p.y+20,50,12,temp->hp/temp->max_hp);
+	//TODO: fix player draw texture
+	/*glEnable(GL_TEXTURE_2D);
+	glPushMatrix();
+	glTranslatef(temp->body->p.x,temp->body->p.y, 0.0f);
+	glScalef(100,100,1);
+	glBindTexture(GL_TEXTURE_2D, textures[2]);
+	glBegin(GL_QUAD_STRIP);
+	glTexCoord2d(0, 0); glVertex2d(0, 0);
+	glTexCoord2d(0, 1); glVertex2d(0, 1);
+	glTexCoord2d(1.0f, 0); glVertex2d(1, 0);
+	glTexCoord2d(1.0f, 1); glVertex2d(1, 1);
+	glEnd();
+	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
+*/
 }
 
 static void player_update(object *obj)

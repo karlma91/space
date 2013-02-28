@@ -1,16 +1,8 @@
 #include "draw.h"
+#include "imgloader.h"
 
-//local function
-static int loadTexture(char *tex);
 
 GLfloat array[CIRCLE_MAX_RES];
-
-static int i, j;
-unsigned texture[10];
-
-extern unsigned int *textures; //TMP
-
-static int texC = 0;
 
 Color rainbow_col[1536];
 
@@ -18,11 +10,9 @@ static GLfloat unit_circle[128];
 
 #define DEBUG fprintf(stderr, "line: %d\n", __LINE__);
 
-//TODO TMP remove:
-unsigned int loadePNGTexture(char *file);
-
 int draw_init(){
 
+	int i=0,j=0;
 	for(i = 0; i < 128; i += 2) {
 		unit_circle[i] = sinf( 2*M_PI*i / (128-2));
 		unit_circle[i+1] = cosf( 2*M_PI*i / (128-2));
@@ -36,20 +26,12 @@ int draw_init(){
 	 * Jitter 0%
 	 */
 	/*
-	int error;
-	error = loadTexture("textures/glowdot.bmp");
-	if(error){
-		fprintf(stderr, "could not load glowdot.bmp");
-		return error;
-	}
-	error = loadTexture("textures/dot.bmp");
-	if(error){
-		fprintf(stderr, "could not load dot.bmp");
-		return error;
-	}
-	*/
+	 *
+	 */
 	//TODO remove TMP
-	 loadePNGTexture("textures/glowdot.png"); loadePNGTexture("textures/glow.png"); texture[0] = textures[0]; texture[1] = textures[1];
+	 loadePNGTexture("textures/glow.png");
+	 loadePNGTexture("textures/glowdot.png");
+	 loadePNGTexture("textures/player.png");
 
 	/* generate rainbow colors */
 	float min_col = 0.2f;
@@ -69,32 +51,6 @@ int draw_init(){
 	return 0;
 }
 
-static int loadTexture(char *tex)
-{
-	SDL_Surface *surface;
-	if((surface = SDL_LoadBMP(tex))==NULL){
-		fprintf(stderr,"Unable to loade texture\n");
-		return 1;
-	}
-	glGenTextures(1,&texture[texC]);
-	
-	//bind texture object
-	glBindTexture(GL_TEXTURE_2D,texture[texC]);
-	// set texture's stretching properties
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	surface->format->Amask = 0XFF000000;
-	surface->format->Ashift = 24;
-	glTexImage2D(GL_TEXTURE_2D, 0, 4, surface->w, surface->h, 0,
-		     GL_BGRA, GL_UNSIGNED_BYTE, surface->pixels);
-	
-	SDL_FreeSurface(surface);
-	texC++;
-	return 0;
-}
-
-
-
 void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
 	glEnable(GL_TEXTURE_2D);
@@ -109,7 +65,7 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 	
 		w /=2; // tmp-fix
 	
-		glBindTexture(GL_TEXTURE_2D, texture[0]);
+		glBindTexture(GL_TEXTURE_2D, textures[0]);
 		glBegin(GL_QUAD_STRIP);
 			glTexCoord2d(0, 0); glVertex2d(-w, -0.5f);
 			glTexCoord2d(0, 1); glVertex2d(-w, 0.5f);
@@ -122,7 +78,7 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 		glEnd();
 
 		glColor3f(1,1,1);
-		glBindTexture(GL_TEXTURE_2D, texture[1]);
+		glBindTexture(GL_TEXTURE_2D, textures[1]);
 		glBegin(GL_QUAD_STRIP);
 			glTexCoord2d(0, 0); glVertex2d(-w, -0.5f);
 			glTexCoord2d(0, 1); glVertex2d(-w, 0.5f);
@@ -157,6 +113,7 @@ void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 
 void draw_line_strip(const GLfloat *strip, int l, float w)
 {
+	int i;
 	for(i = 0; i<l-2; i+=2) {
 		draw_quad_line(strip[i],strip[i+1],strip[i+2],strip[i+3],w/4);
 	}

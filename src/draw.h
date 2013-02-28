@@ -4,16 +4,13 @@
 #include "SDL.h"
 #include "SDL_opengl.h"
 #include "chipmunk.h"
+#include "imgloader.h"
 
 #define CIRCLE_SMALL 16
 #define CIRCLE_MEDIUM 32
 #define CIRCLE_BIG 128
 #define CIRCLE_EXTRA 256
 #define CIRCLE_MAX_RES 256
-
-// effect texture
-unsigned texture[10];
-
 
 //fra chipmunkDemo.h
 typedef struct Color {

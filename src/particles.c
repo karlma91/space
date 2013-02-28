@@ -99,7 +99,7 @@ static void paricles_explosion_draw(struct explosion *expl)
 
 	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 	glPointSize(30);
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
 
 	//glActiveTexture(GL_TEXTURE0);
 	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);

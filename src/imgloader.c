@@ -44,11 +44,11 @@ unsigned int loadePNGTexture(char *file)
 
 	Surf_Return = SDL_DisplayFormatAlpha(Surf_Temp);
 
-	unsigned int Texture = 0;
+	unsigned int Tex = 0;
 
 	/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
-	glGenTextures(1, &Texture);
-	glBindTexture(GL_TEXTURE_2D, Texture);
+	glGenTextures(1, &Tex);
+	glBindTexture(GL_TEXTURE_2D, Tex);
 
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -56,7 +56,7 @@ unsigned int loadePNGTexture(char *file)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Surf_Return->w, Surf_Return->h, 0, GL_BGRA,
 			GL_UNSIGNED_BYTE, Surf_Return->pixels);
 
-	textures[tex_counter] = Texture;
+	textures[tex_counter] = Tex;
 
 	SDL_FreeSurface(Surf_Temp);
 	SDL_FreeSurface(Surf_Return);
