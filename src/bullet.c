@@ -84,7 +84,7 @@ object *bullet_init(cpVect pos, cpVect dir, int type)
  */
 static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
 {
-	cpVect g = cpv(0,-50);
+	cpVect g = cpv(0,-100);
 
 	cpBodyUpdateVelocity(body, g, damping, dt);
 }

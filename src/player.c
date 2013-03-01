@@ -56,7 +56,7 @@ object *player_init()
 	pl->alive = 1;
 	pl->max_hp = 200;
 	pl->hp = 200;
-
+	pl->gun_level = 1;
 	pl->lives = 3;
 	pl->highscore = 0;
 	pl->disable = 0;
@@ -210,10 +210,9 @@ static void player_controls(object *obj)
  */
 static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
 {
-	//cpVect p = cpBodyGetPos(body);
 	cpVect g = cpv(0,0);
-
-	cpBodyUpdateVelocity(body, gravity, damping, dt);
+	g = cpvproject(gravity,body->v);
+	cpBodyUpdateVelocity(body, g, damping, dt);
 }
 
 
@@ -248,9 +247,10 @@ static void tmp_shoot(object *obj)
 		return;
 	}
 	timer = 0;
+	//bullet_init(temp->body->p,cpvforangle(cpBodyGetAngle(temp->body)),ID_BULLET_PLAYER);
 	int i;
-	for(i=1; i<2;i++){
-		bullet_init(temp->body->p,cpvforangle(cpBodyGetAngle(temp->body) + (M_PI/70)*(2 -i)),ID_BULLET_PLAYER);
+	for(i=0; i < temp->gun_level;i++){
+		bullet_init(temp->body->p,cpvforangle(cpBodyGetAngle(temp->body) + (M_PI/70)*((i+1) - (temp->gun_level-i))),ID_BULLET_PLAYER);
 	}
 }
 

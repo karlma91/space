@@ -18,6 +18,7 @@ struct player{
 	int lives;
 	float lost_life_timer;
 	int disable;
+	int gun_level;
 };
 
 extern struct obj_type type_player;

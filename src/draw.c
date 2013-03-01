@@ -32,6 +32,8 @@ int draw_init(){
 	 texture_load("textures/glow.png");
 	 texture_load("textures/dot.png");
 	 texture_load("textures/player.png");
+	 texture_load("textures/player.png");
+	 texture_load("textures/player.png");
 	 texture_load("textures/wheel.png");
 	 texture_load("textures/rectangle.png");
 	 texture_load("textures/square.png");

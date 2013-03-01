@@ -26,6 +26,7 @@ unsigned int texture_load(char *file)
 {
 	int have_texture = texture_from_name(file);
 	if(have_texture >=0){
+		fprintf(stderr,"have texture: %s\n", file);
 		return have_texture;
 	}
 
@@ -33,12 +34,13 @@ unsigned int texture_load(char *file)
 	SDL_Surface* Surf_Return = NULL;
 
 	if((Surf_Temp = IMG_Load(file)) == NULL) {
-		printf("Unable to load texture: %s\n", file);
+		fprintf(stderr,"Unable to load texture: %s\n", file);
 		return -1;
 	}
 
 	tex_counter++;
 	names = realloc(names,(sizeof(char[tex_counter+1][20])));
+	strcpy(names[tex_counter],file);
 	textures = realloc(textures,sizeof(int[(tex_counter + 1)]));
 
 
@@ -67,7 +69,7 @@ unsigned int texture_load(char *file)
 static int texture_from_name(char *file)
 {
 	int i;
-	for(i=0;i<tex_counter; i++){
+	for(i=0;i<=tex_counter; i++){
 		if(strcmp(names[i],file) == 0){
 			return i;
 		}
