@@ -5,10 +5,10 @@
  *      Author: karlmka
  */
 
-#ifndef IMGLOADER_H_
-#define IMGLOADER_H_
+#ifndef TEXTURE_H_
+#define TEXTURE_H_
 
 extern unsigned int *textures;
-unsigned int loadePNGTexture(char *file);
+extern unsigned int texture_load(char *file);
 
-#endif /* IMGLOADER_H_ */
+#endif /* TEXTURE_H_ */

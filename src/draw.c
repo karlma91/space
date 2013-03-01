@@ -1,5 +1,5 @@
 #include "draw.h"
-#include "imgloader.h"
+#include "texture.h"
 
 
 GLfloat array[CIRCLE_MAX_RES];
@@ -29,9 +29,12 @@ int draw_init(){
 	 *
 	 */
 	//TODO remove TMP
-	 loadePNGTexture("textures/glow.png");
-	 loadePNGTexture("textures/glowdot.png");
-	// loadePNGTexture("textures/player.png");
+	 texture_load("textures/glow.png");
+	 texture_load("textures/dot.png");
+	 texture_load("textures/player.png");
+	 texture_load("textures/wheel.png");
+	 texture_load("textures/rectangle.png");
+	 texture_load("textures/square.png");
 
 	/* generate rainbow colors */
 	float min_col = 0.2f;

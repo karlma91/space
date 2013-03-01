@@ -22,7 +22,7 @@ static int tex_counter = -1;
 
 static int texture_from_name(char *file);
 
-unsigned int loadePNGTexture(char *file)
+unsigned int texture_load(char *file)
 {
 	int have_texture = texture_from_name(file);
 	if(have_texture >=0){

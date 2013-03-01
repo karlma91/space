@@ -90,27 +90,39 @@ static void player_render(object *obj)
 	temp = (struct player*)obj;
 	//float s = 0.001;
 	float dir = cpBodyGetAngle(temp->body);
-	setTextAlign(TEXT_CENTER);
-	setTextSize(10);
-	setTextAngleRad(dir);
-	Color c = RGBAColor(1,0,0,1);
-	draw_boxshape(temp->shape,RGBAColor(1,1,1,1),c);
-	draw_hp(temp->body->p.x-25,temp->body->p.y+20,50,12,temp->hp/temp->max_hp);
+	//Color c = RGBAColor(1,0,0,1);
+	//draw_boxshape(temp->shape,RGBAColor(1,1,1,1),c);
+
+	static float hp_timer = 0;
+	static float hp_last = 1;
+	float hp = temp->hp/temp->max_hp;
+
+	if (hp_last != hp) {
+		hp_timer = 2;
+		hp_last = hp;
+	}
+	if (hp_timer > 0 || hp < 0.5) {
+		hp_timer -= dt;
+		draw_hp(temp->body->p.x-25,temp->body->p.y+30,50,8,hp);
+	}
+
 	//TODO: fix player draw texture
-	/*glEnable(GL_TEXTURE_2D);
+	///*
+	glEnable(GL_TEXTURE_2D);
 	glPushMatrix();
 	glTranslatef(temp->body->p.x,temp->body->p.y, 0.0f);
+	glRotatef(dir*180/M_PI,0,0,1);
 	glScalef(100,100,1);
 	glBindTexture(GL_TEXTURE_2D, textures[2]);
 	glBegin(GL_QUAD_STRIP);
-	glTexCoord2d(0, 0); glVertex2d(0, 0);
-	glTexCoord2d(0, 1); glVertex2d(0, 1);
-	glTexCoord2d(1.0f, 0); glVertex2d(1, 0);
-	glTexCoord2d(1.0f, 1); glVertex2d(1, 1);
+	glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
+	glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
+	glTexCoord2d(1.0f, 0); glVertex2d(0.5, -0.5);
+	glTexCoord2d(1.0f, 1); glVertex2d(0.5, 0.5);
 	glEnd();
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
-*/
+	// */
 }
 
 static void player_update(object *obj)
@@ -145,11 +157,11 @@ static void player_controls(object *obj)
 		cpFloat cspeed = cpvlength(cpBodyGetVel(temp->body));
 
 		/* Player movement */
-		if(keys[SDLK_w] && cspeed > 100) {
+		if(keys[SDLK_w] && cspeed > 50) {
 			cpBodySetVel(temp->body, cpvrotate(cpBodyGetVel(temp->body),dirUp));
 		}
 
-		if(keys[SDLK_s] && cspeed > 100) {
+		if(keys[SDLK_s] && cspeed > 50) {
 			cpBodySetVel(temp->body, cpvrotate(cpBodyGetVel(temp->body),dirDown));
 		}
 
@@ -201,7 +213,7 @@ static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cp
 	//cpVect p = cpBodyGetPos(body);
 	cpVect g = cpv(0,0);
 
-	cpBodyUpdateVelocity(body, g, damping, dt);
+	cpBodyUpdateVelocity(body, gravity, damping, dt);
 }
 
 
@@ -230,14 +242,14 @@ static void tmp_shoot(object *obj)
 {
 	temp = (struct player*)obj;
 	//TMP shooting settings
-	static const float cooldown = 0.1f;
+	static const float cooldown = 0.04f;
 	
 	if (timer < cooldown) {
 		return;
 	}
 	timer = 0;
 	int i;
-	for(i=0; i<3;i++){
+	for(i=1; i<2;i++){
 		bullet_init(temp->body->p,cpvforangle(cpBodyGetAngle(temp->body) + (M_PI/70)*(2 -i)),ID_BULLET_PLAYER);
 	}
 }

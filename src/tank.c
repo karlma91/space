@@ -235,17 +235,64 @@ static void render(object *fac)
 {
 	temp = ((struct tank*)fac);
 
-	draw_boxshape(temp->shape,RGBAColor(0.8,0.3,0.1,1),RGBAColor(0.8,0.6,0.3,1));
+	if (temp->param->max_hp < 100)
+		glColor3f(1,1,1);
+	else
+		glColor3f(1.0,0.4,0.4);
+
+	//draw_boxshape(temp->shape,RGBAColor(0.8,0.3,0.1,1),RGBAColor(0.8,0.6,0.3,1));
+	GLfloat dir = cpBodyGetAngle(fac->body)*(180/M_PI);
 	GLfloat rot = cpBodyGetAngle(temp->wheel1)*(180/M_PI);
-	glColor3f(1,0,0);
-	draw_simple_circle(temp->wheel1->p.x,temp->wheel1->p.y,15,rot);
-	glColor3f(1,0,0);
-	draw_simple_circle(temp->wheel2->p.x,temp->wheel2->p.y,15,rot);
+	//glColor3f(1,0,0);
+	//draw_simple_circle(temp->wheel1->p.x,temp->wheel1->p.y,15,rot);
+	//glColor3f(1,0,0);
+	//draw_simple_circle(temp->wheel2->p.x,temp->wheel2->p.y,15,rot);
 
 	cpVect r = cpvadd(fac->body->p, cpvmult(cpvforangle(temp->angle),60));
 	draw_line(fac->body->p.x,fac->body->p.y,r.x,r.y, 30);
 
-	draw_hp(fac->body->p.x-15, fac->body->p.y + 25, 30, 8, temp->hp / temp->param->max_hp);
+	draw_hp(fac->body->p.x-15, fac->body->p.y + 35, 50, 8, temp->hp / temp->param->max_hp);
+
+
+	//TODO lage en generell texture tegne metode
+	glEnable(GL_TEXTURE_2D);
+	glPushMatrix();
+	glTranslatef(temp->wheel1->p.x,temp->wheel1->p.y, 0.0f);
+	glRotatef(rot,0,0,1);
+	glScalef(100,100,1);
+	glBindTexture(GL_TEXTURE_2D, textures[3]);
+	glBegin(GL_QUAD_STRIP);
+	glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
+	glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
+	glTexCoord2d(1.0f, 0); glVertex2d(0.5, -0.5);
+	glTexCoord2d(1.0f, 1); glVertex2d(0.5, 0.5);
+	glEnd();
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(temp->wheel2->p.x,temp->wheel2->p.y, 0.0f);
+	glRotatef(rot,0,0,1);
+	glScalef(100,100,1);
+	glBindTexture(GL_TEXTURE_2D, textures[3]);
+	glBegin(GL_QUAD_STRIP);
+	glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
+	glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
+	glTexCoord2d(1.0f, 0); glVertex2d(0.5, -0.5);
+	glTexCoord2d(1.0f, 1); glVertex2d(0.5, 0.5);
+	glEnd();
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(fac->body->p.x,fac->body->p.y, 0.0f);
+	glRotatef(dir,0,0,1);
+	glScalef(200,100,1);
+	glBindTexture(GL_TEXTURE_2D, textures[4]);
+	glBegin(GL_QUAD_STRIP);
+	glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
+	glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
+	glTexCoord2d(1.0f, 0); glVertex2d(0.5, -0.5);
+	glTexCoord2d(1.0f, 1); glVertex2d(0.5, 0.5);
+	glEnd();
+	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
 }
 
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)

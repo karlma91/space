@@ -22,6 +22,8 @@ struct tank_factory {
 	int cur;
 	cpFloat hp;
 
+	/* animation */
+	float rot;
 
 	/* paramerters */
 	struct tank_factory_param *param;

@@ -115,7 +115,10 @@ static void gameover_update()
 		}
 		break;
 	case show_highscore:
-
+		if (keys[SDLK_ESCAPE]) {
+			currentState = &state_menu;
+			keys[SDLK_ESCAPE] = 0;
+		}
 		break;
 	}
 }

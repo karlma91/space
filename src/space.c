@@ -433,7 +433,7 @@ static void update_camera_position()
 
 	struct player *player = ((struct player*)objects_first(ID_PLAYER));
 	/* dynamic camera pos */
-	static const float pos_delay = 0.9f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
+	static const float pos_delay = 0.99f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
 	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
 	static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
 	static float cam_dx;
@@ -682,7 +682,7 @@ static void SPACE_init()
 	state_timer = 10;
 	change_state(LEVEL_START);
 
-	cpVect gravity = cpv(0, -980);
+	cpVect gravity = cpv(0, -200);
 	space = cpSpaceNew();
 	cpSpaceSetGravity(space, gravity);
 	//cpSpaceSetDamping(space, 0.999);

@@ -4,7 +4,7 @@
 #include "SDL.h"
 #include "SDL_opengl.h"
 #include "chipmunk.h"
-#include "imgloader.h"
+#include "texture.h"
 
 #define CIRCLE_SMALL 16
 #define CIRCLE_MEDIUM 32

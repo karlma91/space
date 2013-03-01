@@ -45,7 +45,6 @@ static void render(object *obj)
 	}else{
 		glColor3f(0.3,0.3,0.9);
 	}
-	glColor3f(1,0,0);
 	draw_velocity_line(temp->shape);
 }
 
@@ -57,13 +56,13 @@ object *bullet_init(cpVect pos, cpVect dir, int type)
 		cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
 
 		temp->body = cpSpaceAddBody(space, cpBodyNew(1, moment));
-		cpBodySetPos(temp->body, cpvadd(pos, cpvmult(dir,15)));
+		cpBodySetPos(temp->body, cpvadd(pos, cpvmult(dir,60)));
 		cpBodySetUserData(temp->body, (object*)temp);
 		cpBodySetVel(temp->body,cpvmult(dir,1500));
 		temp->body->velocity_func = bulletVelocityFunc;
 
 		temp->shape = cpSpaceAddShape(space, cpCircleShapeNew(temp->body, 5, cpvzero));
-		cpShapeSetFriction(temp->shape, 0.7);
+		cpShapeSetFriction(temp->shape, 1.0);
 		// Sets bullets collision type
 		cpShapeSetCollisionType(temp->shape, type);
 		cpSpaceAddCollisionHandler(space, ID_GROUND, type, callback_ground, NULL, NULL, NULL, NULL);
