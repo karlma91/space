@@ -175,6 +175,7 @@ static void level_player_dead()
 	if(state_timer > 3){
 		lvl_cleared=0;
 		currentState = &state_gameover;
+		struct player *player = (struct player*)objects_first(ID_PLAYER);
 		//change_state(LEVEL_TRANSITION);
 	}
 }
@@ -557,7 +558,8 @@ static void SPACE_draw()
 			setTextSize(60);
 			glColor3f(1,0,0);
 			setTextAlign(TEXT_CENTER);
-			font_drawText(0, 0, "GAME OVER!");
+			font_drawText(0, 0, "GAME OVER");
+			setTextSize(120);font_drawText(0,-180,"\x49\x4e\x46\x33\x34\x38\x30");
 			break;
 		case LEVEL_STATE_COUNT:
 			/* invalid value */

@@ -20,6 +20,8 @@
 #include "tank.h"
 #include "bullet.h"
 
+#include "chipmunk.h"
+
 
 static void init(object *fac);
 
@@ -117,12 +119,12 @@ static void player_render(object *obj)
 	}
 	if (hp_timer > 0 || hp < 0.5) {
 		hp_timer -= dt;
-		draw_hp(temp->obj.body->p.x-25,temp->obj.body->p.y+30,50,8,hp);
+		draw_hp((obj->body->p).x-25,(obj->body->p).y+30,50,8,hp);
 	}
 
 	//TODO: fix player draw texture
 	///*
-	draw_texture(temp->param->tex_id, &(temp->obj.body->p), &(tex_map), 100, 100, dir*180/M_PI);
+	draw_texture(temp->param->tex_id, &(obj->body->p), &(tex_map), 100, 100, dir*180/M_PI);
 	// */
 }
 

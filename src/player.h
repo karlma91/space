@@ -24,8 +24,8 @@ struct player{
 };
 
 struct player_param {
-	int tex_id;
 	float max_hp;
+	int tex_id;
 };
 
 extern struct obj_type type_player;
