@@ -3,7 +3,7 @@
 
 #include "chipmunk.h"
 
-typedef struct object_ object;
+typedef struct object object;
 
 struct obj_type {
 	int ID;
@@ -13,7 +13,7 @@ struct obj_type {
 	void (*destroy)(object *obj);
 };
 
-struct object_ {
+struct object {
 	struct obj_type *type;
 	int instance_id;
 	int *remove;

@@ -11,7 +11,7 @@ typedef struct level_ship {
 	float rotation_speed;
 } level_ship;
 
-typedef struct level_ {
+typedef struct level {
 	int station;
 	int deck;
 	int height;

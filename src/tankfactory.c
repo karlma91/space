@@ -151,7 +151,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	if(temp->hp <=0 ){
 		particles_add_explosion(a->body->p,1,2000,50,800);
 		if(((object *) temp)->alive){
-			((struct player *)objects_first(ID_PLAYER))->highscore += temp->param->score;
+			((struct player *)objects_first(ID_PLAYER))->score += temp->param->score;
 		}
 		((object*)temp)->alive = 0;
 		objects_iterate_type(remove_factory_from_tank,ID_TANK);

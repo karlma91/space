@@ -279,3 +279,23 @@ void draw_hp(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p)
 
 	glPopAttrib();
 }
+
+void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
+{
+	glEnable(GL_TEXTURE_2D);
+	glPushMatrix();
+	glTranslatef(pos->x, pos->y, 0.0f);
+	glRotatef(angle,0,0,1);
+	glScalef(width,height,1);
+	glBindTexture(GL_TEXTURE_2D, textures[tex_id]);
+
+	glBegin(GL_QUAD_STRIP);
+		glTexCoord2d(tex_map->ax, tex_map->ay); glVertex2d(-0.5, -0.5);
+		glTexCoord2d(tex_map->ax, tex_map->by); glVertex2d(-0.5, 0.5);
+		glTexCoord2d(tex_map->bx, tex_map->ay); glVertex2d(0.5, -0.5);
+		glTexCoord2d(tex_map->bx, tex_map->by); glVertex2d(0.5, 0.5);
+	glEnd();
+
+	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
+}

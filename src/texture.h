@@ -1,12 +1,12 @@
-/*
- * imgloader.h
- *
- *  Created on: Feb 28, 2013
- *      Author: karlmka
- */
-
 #ifndef TEXTURE_H_
 #define TEXTURE_H_
+
+typedef struct texture_map {
+	float ax;
+	float ay;
+	float bx;
+	float by;
+} texture_map;
 
 extern unsigned int *textures;
 extern unsigned int texture_load(char *file);

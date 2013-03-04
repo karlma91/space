@@ -4,21 +4,28 @@
 #include "chipmunk.h" /* Chipmunk physics library */
 #include "objects.h"  /* Game components */
 
+struct player_param;
 
 struct player{
-	struct obj_type *type;
-	int instance_id;
-	int *remove;
-	int alive;
-	cpBody *body;
+	/* standard */
+	object obj;
+
+	/* player's instance variables */
 	cpShape *shape;
-	float max_hp;
 	float hp;
-	int highscore;
 	int lives;
 	float lost_life_timer;
 	int disable;
 	int gun_level;
+	int score;
+
+	/* parameters */
+	struct player_param *param;
+};
+
+struct player_param {
+	int tex_id;
+	float max_hp;
 };
 
 extern struct obj_type type_player;

@@ -13,20 +13,21 @@ struct tank_param;
 extern object *tank_init(float xpos, struct tank_factory *factory, struct tank_param *param);
 
 struct tank {
-	/*standard*/
+	/* standard */
 	object obj;
 
-	/*tank*/
+	/* tank */
 	cpShape *shape;
 	float timer;
 	float angle;
 	float rot_speed;
 	float hp;
 	struct tank_factory *factory;
-	/*parameters */
-	struct tank_param *param;
 	cpBody *wheel1;
 	cpBody *wheel2;
+
+	/*parameters */
+	struct tank_param *param;
 };
 
 struct tank_param {

@@ -100,8 +100,8 @@ static void update(object *obj)
 
 	struct player *player = ((struct player*)objects_first(ID_PLAYER));
 
-	float targetx = player->body->p.x;
-	float targety = player->body->p.y;
+	float targetx = player->obj.body->p.x;
+	float targety = player->obj.body->p.y;
 
 
 	int i;

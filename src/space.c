@@ -349,7 +349,7 @@ static void update_camera_zoom(int cam_mode)
 	struct player *player = ((struct player*)objects_first(ID_PLAYER));
 
 	/* dynamic camera zoom */
-	float py = player->body->p.y / currentlvl->height;
+	float py = player->obj.body->p.y / currentlvl->height;
 	float scrlvl, zoomlvl;
 	switch (cam_mode) {
 	case 1:
@@ -387,7 +387,7 @@ static void update_camera_zoom(int cam_mode)
 		}else{
 			cam_zoom = 1.3;
 		}
-		cam_center_y = player->body->p.y;
+		cam_center_y = player->obj.body->p.y;
 		if(cam_center_y > currentlvl->height - HEIGHT/(2*cam_zoom)){
 			cam_center_y = currentlvl->height - HEIGHT/(2*cam_zoom);
 		}else if(cam_center_y <  HEIGHT/(2*cam_zoom)){
@@ -437,9 +437,9 @@ static void update_camera_position()
 	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
 	static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
 	static float cam_dx;
-	cam_dx = cam_dx * pos_delay + ((player->body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
+	cam_dx = cam_dx * pos_delay + ((player->obj.body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
 
-	cam_center_x = player->body->p.x + cam_dx;
+	cam_center_x = player->obj.body->p.x + cam_dx;
 
 	/* camera constraints */
 
@@ -494,12 +494,12 @@ static void SPACE_draw()
 		struct player *player = ((struct player*)objects_first(ID_PLAYER));
 
 		char score_temp[20];
-		sprintf(score_temp,"%d",player->highscore);
+		sprintf(score_temp,"%d",player->score);
 		font_drawText(-WIDTH/2+20,HEIGHT/2 - 45,score_temp);
 
 		setTextSize(10);
 		char pos_temp[20];
-		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->body->p.x,player->body->p.y);
+		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->obj.body->p.x,player->obj.body->p.y);
 		font_drawText(-WIDTH/2+15,-HEIGHT/2+8,pos_temp);
 
 		font_drawText(WIDTH/2-250,-HEIGHT/2+8,game_state_names[gamestate]);
@@ -618,7 +618,7 @@ void space_init_level(int space_station, int deck)
 	if(player==NULL){
 		player = (struct player*)player_init();
 	} else {
-		player->hp = player->max_hp;
+		player->hp = player->param->max_hp;
 		player->disable = 0;
 	}
 
@@ -642,13 +642,13 @@ void space_init_level(int space_station, int deck)
 	/* SETS the gamestate */
 	change_state(LEVEL_START);
 
-	player->body->p.x = currentlvl->left + 50;
-	player->body->p.y = currentlvl->height - 50;
-	player->hp = player->max_hp;
-	player->body->v.x = 0;
-	player->body->v.y = -10;
+	player->obj.body->p.x = currentlvl->left + 50;
+	player->obj.body->p.y = currentlvl->height - 50;
+	player->hp = player->param->max_hp;
+	player->obj.body->v.x = 0;
+	player->obj.body->v.y = -10;
 
-	objects_add(robotarm_init(200,&robot_temp));
+	//objects_add(robotarm_init(200,&robot_temp));
 
 	/* static ground */
 	cpBody  *staticBody = space->staticBody;
@@ -712,7 +712,7 @@ int getPlayerScore()
 {
 	struct player *player = ((struct player*)objects_first(ID_PLAYER));
 	if (player != NULL)
-		return player->highscore;
+		return player->score;
 	else
 		return -1;
 }

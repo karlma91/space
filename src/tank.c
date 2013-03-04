@@ -71,7 +71,8 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 	cpVect posB = cpv(xpos+20, 120);
 	boxOffset = cpv(0, 0);
 
-	((object *) tank)->body = addChassis(space, cpv(xpos, height+10),boxOffset);
+	tank->obj.body = addChassis(space, cpv(xpos, height+10),boxOffset);
+
 	tank->shape = tempShape;
 	tempShape = NULL;
 	//((object *) tank)->body = cpSpaceAddBody(space, cpBodyNew(20, cpMomentForBox(20.0f, width, height)));
@@ -132,7 +133,7 @@ static void update(object *fac)
 	}
 
 	cpFloat tx = fac->body->p.x;
-	cpFloat px = player->body->p.x;
+	cpFloat px = player->obj.body->p.x;
 
 	cpFloat ptx = (px-tx); //direct way
 	cpFloat pltx = (tx - currentlvl->left + (currentlvl->right - px));
@@ -313,7 +314,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 		//a->body->data = NULL;
 		particles_add_explosion(a->body->p,1,2000,20,800);
 		if(((object *) temp)->alive){
-			((struct player *)objects_first(ID_PLAYER))->highscore += temp->param->score;
+			((struct player *)objects_first(ID_PLAYER))->score += temp->param->score;
 		}
 		//cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
 		((object *) temp)->alive = 0;
