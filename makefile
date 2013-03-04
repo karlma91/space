@@ -23,6 +23,7 @@ else ifneq ($(findstring MINGW32_NT, $(SYS)),) #windows
 	#sdlttf=-ISDL_ttf -LSDL_ttf/windows -lSDL_ttf
 	sdlimage=-ISDL_image/win -LSDL_image/win -lSDL_image -llibpng15-15
 	chipmunk=-Ichipmunk/include -Lchipmunk/windows -lChipmunk
+	mxml=-Imxml/include -Lmxml/lib -lmxml
 else ifeq ($(SYS),Darwin) #mac
 	os=3
 	suffix=
@@ -45,7 +46,7 @@ build : main
 
 main : src/main.c src/*.h
 	$(precode)
-	gcc -o bin/main$(suffix) $(gamefiles) $(os_lib) $(openGL) $(sdl) $(sdlimage) $(chipmunk) -Wall -g
+	gcc -o bin/main$(suffix) $(gamefiles) $(os_lib) $(openGL) $(sdl) $(sdlimage) $(chipmunk) $(mxml) -Wall -g
 	$(postcode)
 #mingw and linux
 #gcc src/*.c src/constraints/*.c -Iinclude/chipmunk -o libChipmunk.a -std=c99 -lm -shared -fPIC

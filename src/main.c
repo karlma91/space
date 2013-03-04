@@ -20,6 +20,7 @@
 /* drawing code */
 #include "draw.h"
 #include "font.h"
+#include "particles.h"
 
 #include "level.h"
 
@@ -158,6 +159,7 @@ static int main_init()
 	}
 
 	font_init();
+	particles_init();
 
 	/* load levels */
 	error = level_init();
@@ -239,7 +241,7 @@ static int main_run()
 			switch (event.type)
 			{
 			case SDL_QUIT:
-				main_running = 1;
+			    main_stop();
 				break;
 			}
 		}

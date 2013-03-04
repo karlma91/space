@@ -684,7 +684,7 @@ static void SPACE_init()
 	state_timer = 10;
 	change_state(LEVEL_START);
 
-	cpVect gravity = cpv(0, -200);
+	cpVect gravity = cpv(0, -600);
 	space = cpSpaceNew();
 	cpSpaceSetGravity(space, gravity);
 	//cpSpaceSetDamping(space, 0.999);

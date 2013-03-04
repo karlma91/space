@@ -4,6 +4,9 @@
 #include "draw.h"
 #include "space.h"
 
+/** mini xml reader compatible with anci c */
+#include <mxml.h>
+
 #define MAX_PARTICLES 1000
 #define MIN_PARTICLES 1
 #define MAX_EXPLOSIONS 200
@@ -27,10 +30,79 @@ static int current = 0;
 static void paricles_explosion_draw(struct explosion *expl);
 static void paricles_explosion_update(struct explosion *expl );
 
+
+int test () {
+
+         FILE *fp  = NULL;
+
+         int k = 0;
+
+         mxml_node_t * tree = NULL;
+         mxml_node_t * node  = NULL;
+
+         fp = fopen ("particles/flame.xml", "r");
+         if (fp ){
+             tree = mxmlLoadFile (NULL , fp , MXML_OPAQUE_CALLBACK);
+         }else {
+             fprintf(stderr,"Could Not Open the File Provided");
+             return 1;
+         }
+         if (tree){
+                 for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
+                         node != NULL;
+                         node=mxmlWalkNext (node, NULL, MXML_DESCEND)
+                         //node = mxmlFindElement(node, tree, NULL,NULL,NULL,MXML_DESCEND)
+                 ){
+                         if (node->type  == MXML_ELEMENT) {
+                             fprintf(stderr,"MXML_ELEMENT Node <%s>:%d \n", node->value.element.name, node->value.element.num_attrs);
+                             for (k = 0; k < node->value.element.num_attrs; k++){
+                                 if (node->value.element.attrs ){
+                                     fprintf (stderr,"Attribute Name :: %s \n", node->value.element.attrs[k].name);
+                                     fprintf (stderr,"Attribute Value:: %s \n", node->value.element.attrs[k].value);
+                                 }
+                                 //if (!strncmp(node->value.element.name , "display-name", 12 )){
+                                 //    printf(" String %s \n", (char*) node->child->value.text.string);
+                                 //}
+                             }
+                         }
+                         else if (node->type == MXML_REAL){
+                             fprintf(stderr,"MXML_REAL Node is %s \n", node->value.element.name);
+                         }
+                         else if(node->type == MXML_OPAQUE){
+                             fprintf(stderr,"MXML_OPAQUE Node is %s \n", node->value.element.name);
+                         }
+                         else if(node->type == MXML_INTEGER){
+                             fprintf(stderr,"MXML_INTEGER Node is %s \n", node->value.element.name);
+                         }
+                         else if(node->type == MXML_TEXT){
+                             fprintf(stderr,"MXML_TEXT Node is %s \n", node->value.element.name);
+                         }
+                         else if(node->type == MXML_IGNORE){
+                             fprintf(stderr,"MXML_IGNORE Node is %s \n", node->value.element.name);
+                         }
+                         else if(node->type == MXML_CUSTOM){
+                             fprintf(stderr,"MXML_IGNORE Node is %s \n", node->value.element.name);
+                         }
+                         else {
+                             fprintf(stderr,"Type Default Node is %s \n", node->value.element.name);
+                         }
+                 }
+         }
+         if (tree){
+            mxmlDelete(tree);
+         }
+         if (fp){
+            fclose(fp);
+         }
+         return 0;
+}
+
 void particles_init()
 {
-	
+  test();
 }
+
+
 
 void particles_destroy()
 {
