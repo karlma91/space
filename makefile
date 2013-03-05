@@ -36,6 +36,7 @@ else ifeq ($(SYS),Darwin) #mac
 	sdl=-ISDL/mac -LSDL/mac -lSDLmain -lSDL
 	sdlimage=-framework SDL_image -Ilib/SDL_image
 	chipmunk=-Ichipmunk/include -Lchipmunk/mac -lChipmunk
+	mxml=-Ilib/mxml/mac -Llib/mxml/mac -lmxml
 endif
 
 all : 
