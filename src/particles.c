@@ -25,81 +25,25 @@ struct explosion {
 	float tim_alive;
 };
 
+
 static struct explosion explosions[MAX_EXPLOSIONS];
 static int current = 0;
 static void paricles_explosion_draw(struct explosion *expl);
 static void paricles_explosion_update(struct explosion *expl );
 
+/**
+ * parse functions
+ */
+static int parse_color_step(mxml_node_t *node, emitter *e);
+static int parse_range(mxml_node_t *node, range *r);
+static int parse_value(mxml_node_t *node, float *v);
 
-int test () {
-
-         FILE *fp  = NULL;
-
-         int k = 0;
-
-         mxml_node_t * tree = NULL;
-         mxml_node_t * node  = NULL;
-
-         fp = fopen ("particles/flame.xml", "r");
-         if (fp ){
-             tree = mxmlLoadFile (NULL , fp , MXML_OPAQUE_CALLBACK);
-         }else {
-             fprintf(stderr,"Could Not Open the File Provided");
-             return 1;
-         }
-         if (tree){
-                 for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
-                         node != NULL;
-                         node=mxmlWalkNext (node, NULL, MXML_DESCEND)
-                         //node = mxmlFindElement(node, tree, NULL,NULL,NULL,MXML_DESCEND)
-                 ){
-                         if (node->type  == MXML_ELEMENT) {
-                             fprintf(stderr,"MXML_ELEMENT Node <%s>:%d \n", node->value.element.name, node->value.element.num_attrs);
-                             for (k = 0; k < node->value.element.num_attrs; k++){
-                                 if (node->value.element.attrs ){
-                                     fprintf (stderr,"Attribute Name :: %s \n", node->value.element.attrs[k].name);
-                                     fprintf (stderr,"Attribute Value:: %s \n", node->value.element.attrs[k].value);
-                                 }
-                                 //if (!strncmp(node->value.element.name , "display-name", 12 )){
-                                 //    printf(" String %s \n", (char*) node->child->value.text.string);
-                                 //}
-                             }
-                         }
-                         else if (node->type == MXML_REAL){
-                             fprintf(stderr,"MXML_REAL Node is %s \n", node->value.element.name);
-                         }
-                         else if(node->type == MXML_OPAQUE){
-                             fprintf(stderr,"MXML_OPAQUE Node is %s \n", node->value.element.name);
-                         }
-                         else if(node->type == MXML_INTEGER){
-                             fprintf(stderr,"MXML_INTEGER Node is %s \n", node->value.element.name);
-                         }
-                         else if(node->type == MXML_TEXT){
-                             fprintf(stderr,"MXML_TEXT Node is %s \n", node->value.element.name);
-                         }
-                         else if(node->type == MXML_IGNORE){
-                             fprintf(stderr,"MXML_IGNORE Node is %s \n", node->value.element.name);
-                         }
-                         else if(node->type == MXML_CUSTOM){
-                             fprintf(stderr,"MXML_IGNORE Node is %s \n", node->value.element.name);
-                         }
-                         else {
-                             fprintf(stderr,"Type Default Node is %s \n", node->value.element.name);
-                         }
-                 }
-         }
-         if (tree){
-            mxmlDelete(tree);
-         }
-         if (fp){
-            fclose(fp);
-         }
-         return 0;
-}
 
 void particles_init()
 {
-  test();
+    emitter em;
+    em.color_counter = 0;
+    read_emitter_from_file (&em);
 }
 
 
@@ -222,3 +166,166 @@ void particles_add_explosion(cpVect v , float time, int speed ,int num,int col)
 	}
 	current++;
 }
+
+#define TESTNAME(s) strcmp(node->value.element.name, s) == 0
+/**
+ * reads from a xml file made with pedegree slick2d particle editor
+ */
+int read_emitter_from_file (emitter *emi)
+{
+
+         FILE *fp  = NULL;
+
+         mxml_node_t * tree = NULL;
+         mxml_node_t * node  = NULL;
+
+         fp = fopen ("particles/flame.xml", "r");
+         if (fp ){
+             tree = mxmlLoadFile (NULL , fp , MXML_OPAQUE_CALLBACK);
+         }else {
+             fprintf(stderr,"Could Not Open the File Provided");
+             return 1;
+         }
+         if(tree == NULL){
+        	 fprintf(stderr,"particles.c file is empty \n");
+        	 return 1;
+         }
+
+         for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
+        		 node != NULL;
+        		 node=mxmlWalkNext (node, NULL, MXML_DESCEND)
+         ){
+        	 if (node->type  == MXML_ELEMENT) {
+        		 if(TESTNAME("emitter")){
+
+        		 }else if(TESTNAME("spawnInterval")){
+        		     parse_range(node,&(emi->spawn_interval));
+        		 }else if(TESTNAME("spawnCount")){
+        		     parse_range(node,&(emi->spawn_count));
+        		 }else if(TESTNAME("initialLife")){
+        		     parse_range(node,&(emi->init_life));
+        		 }else if(TESTNAME("initialSize")){
+        		     parse_range(node,&(emi->init_life));
+        		 }else if(TESTNAME("xOffset")){
+        		     parse_range(node,&(emi->xoffset));
+        		 }else if(TESTNAME("yOffset")){
+        		     parse_range(node,&(emi->yoffset));
+        		 }else if(TESTNAME("initialDistance")){
+        		     parse_range(node,&(emi->init_distance));
+        		 }else if(TESTNAME("speed")){
+        		     parse_range(node,&(emi->speed));
+        		 }else if(TESTNAME("emitCount")){
+        		     parse_range(node,&(emi->emitCount));
+        		 }else if(TESTNAME("spread")){
+        		     parse_value(node,&(emi->spread));
+        		 }else if(TESTNAME("angularOffset")){
+        		     parse_value(node,&(emi->angular_offset));
+        		 }else if(TESTNAME("growthFactor")){
+        		     parse_value(node,&(emi->growthfactor));
+        		 }else if(TESTNAME("gravityFactor")){
+        		     parse_value(node,&(emi->gravityfactor));
+        		 }else if(TESTNAME("windFactor")){
+        		     parse_value(node,&(emi->windfactor));
+        		 }else if(TESTNAME("startAlpha")){
+        		     parse_value(node,&(emi->startalpha));
+        		 }else if(TESTNAME("endAlpha")){
+        		     parse_value(node,&(emi->endalpha));
+        		 }else if(TESTNAME("color")){
+
+        		 }else if(TESTNAME("step")){
+        		     parse_color_step(node,emi);
+        		 }else{
+        		    // fprintf (stderr,"unused element %s \n", node->value.element.name);
+        		 }
+
+        	 }else {
+        		// fprintf(stderr,"Type Default Node is %s \n", node->value.element.name);
+        	 }
+         }
+
+         mxmlDelete(tree);
+         fclose(fp);
+         return 0;
+}
+
+/**
+ * Parses the atributes of a node to a range r
+ * return 0 on ok, else -1
+ */
+static int parse_range(mxml_node_t *node, range *r)
+{
+    int ok = 0;
+    int k;
+    for (k = 0; k < node->value.element.num_attrs; k++){
+	if(strcmp(node->value.element.attrs[k].name, "min") == 0){
+	    r->min = strtod(node->value.element.attrs[k].value,NULL);
+	    ok++;
+	}else if(strcmp(node->value.element.attrs[k].name, "max") == 0){
+	    r->max = strtod(node->value.element.attrs[k].value,NULL);
+	    ok++;
+	}
+    }
+    if(ok == 2){
+	return 0;
+    }else{
+	 fprintf(stderr,"Error parsing range in node %s  ok: %d \n", node->value.element.name,ok);
+	 return -1;
+    }
+}
+
+/**
+ * Parses the atributes of a node to a value v
+ * return 0 on ok, else -1
+ */
+static int parse_value(mxml_node_t *node, float *v)
+{
+    int ok = 0;
+    int k;
+    for (k = 0; k < node->value.element.num_attrs; k++){
+	if(strcmp(node->value.element.attrs[k].name, "value") == 0){
+	    *v = strtod(node->value.element.attrs[k].value,NULL);
+	    ok++;
+	}
+    }
+    if(ok == 1){
+	return 0;
+    }else{
+	 fprintf(stderr,"Error parsing value in node %s \n", node->value.element.name);
+	 return -1;
+    }
+}
+/**
+ * Parses the atributes of a node to a value v
+ * return 0 on ok, else -1
+ */
+static int parse_color_step(mxml_node_t *node, emitter *e)
+{
+    int index = e->color_counter;
+    int ok = 0;
+    int k;
+    for (k = 0; k < node->value.element.num_attrs; k++){
+	if(strcmp(node->value.element.attrs[k].name, "r") == 0){
+	    e->colors[index].r = strtod(node->value.element.attrs[k].value,NULL);
+	    ok++;
+	}else if(strcmp(node->value.element.attrs[k].name, "g") == 0){
+	    e->colors[index].g = strtod(node->value.element.attrs[k].value,NULL);
+	    ok++;
+	}else if(strcmp(node->value.element.attrs[k].name, "b") == 0){
+	    e->colors[index].b = strtod(node->value.element.attrs[k].value,NULL);
+	    ok++;
+	}else if(strcmp(node->value.element.attrs[k].name, "offset") == 0){
+	    e->colors[index].offset = strtod(node->value.element.attrs[k].value,NULL);
+	    ok++;
+	}
+    }
+    e->color_counter++;
+
+    if(ok == 4){
+	return 0;
+    }else{
+	 fprintf(stderr,"Error parsing color step %s \n", node->value.element.name);
+	 return -1;
+    }
+}
+
+
