@@ -58,11 +58,10 @@ void particles_init()
     	emitters[EMITTER_FLAME][i] = emitters[EMITTER_FLAME][i-1];
     }
     /* sets all particles available */
-    for(i=0; i<MAX_PARTICLES; i++){
-    	(main_pool[i].next = NULL);
-    	available_stack[i] = &(main_pool[i]);
+    available_counter = 0;
+    for(i=0; i<MAX_PARTICLES-1; i++){
+    	set_particle_available(&(main_pool[i]));
     }
-    available_counter = MAX_PARTICLES-1;
     //fprintf(stderr,"sizeis correct: %f  %f test %f \n",emitters[EMITTER_FLAME][0].init_life.min,emitters[EMITTER_FLAME][0].init_life.max, range_get_random(emitters[EMITTER_FLAME][0].init_life));
 }
 
@@ -121,28 +120,26 @@ static void emitter_update(emitter *em)
  */
 static void emitter_update_particles(emitter *em)
 {
-	particle *prev = NULL;
+	particle **prev = &(em->head);
 	particle *p = em->head;
 	while(p){
 		if(p->time_alive >= p->max_time)
 		{
 			p->alive = 0;
-			if(prev == NULL){
-				em->head = p->next;
-			}else{
-				prev->next = p->next;
-			}
+			*prev = p->next;
+
 			p->next = NULL;
 			set_particle_available(p);
+			p = *prev;
 		}else{
-
 			p->vely -= em->gravityfactor * 0.0005f * mdt;
 			p->velx += em->windfactor * 0.0005f * mdt;
 
 			particle_update(p);
+
+			prev = &(p->next);
+			p = p->next;
 		}
-		prev = p;
-		p = p->next;
 	}
 }
 /**
@@ -153,6 +150,23 @@ static void set_particle_available(particle *p)
 	++available_counter;
 	available_stack[available_counter] = p;
 }
+
+/**
+ * get a particle from the available pool and put it in the in_use list
+ * if the pool is empty, then it returns available_pool[0]
+ */
+static particle * get_particle()
+{
+	if(available_counter == 0){
+		return NULL;
+	}else{
+		particle *p = available_stack[available_counter];
+		available_stack[available_counter] = NULL;
+		--available_counter;
+		return p;
+	}
+}
+
 /**
  * update time and position on a single particle
  */
@@ -205,20 +219,6 @@ static void add_particle(emitter *em)
 	p->time_alive = 0;
 }
 
-/**
- * get a particle from the available pool and put it in the in_use list
- * if the pool is empty, then it returns available_pool[0]
- */
-static particle * get_particle()
-{
-	if(available_counter == 0){
-		return NULL;
-	}else{
-		particle *p = available_stack[available_counter];
-		--available_counter;
-		return p;
-	}
-}
 
 /**
  * returns a random number inside a range

@@ -276,7 +276,7 @@ static int main_destroy()
 	return 0;
 }
 
-int main( int argc, char* args[] )
+int main( int argc, char *args[] )
 {
 	main_init();
 	main_run();
