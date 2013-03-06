@@ -13,6 +13,7 @@ ifeq ($(SYS),Linux) #linux
 	sdl=-ISDL/linux -LSDL/linux -lSDLmain -lSDL 
 	chipmunk=-Ichipmunk/include -Lchipmunk/linux -lChipmunk
 	sdlimage=-ISDL_image/linux -LSDL_image/linux -lSDL_image
+	mxml=-Ilib/mxml/linux -Llib/mxml/linux -lmxml
 else ifneq ($(findstring MINGW32_NT, $(SYS)),) #windows
 	os=2
 	suffix=.exe

@@ -38,6 +38,7 @@ char fps_buf[15];
 int WIDTH;
 int HEIGHT;
 float dt;
+float mdt;
 unsigned char *keys;
 state *currentState;
 
@@ -208,6 +209,7 @@ static int main_run()
 
 		deltaTime = deltaTime > 0.25 ? 0.25 : deltaTime;
 		dt = deltaTime;
+		mdt = dt*0.001;
 		//Draw
 		glClearColor(0.0f,0.0f,0.0f,0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

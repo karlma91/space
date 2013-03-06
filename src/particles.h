@@ -4,6 +4,14 @@
 #include "chipmunk.h"
 
 
+/**
+ * all the types of emitters
+ */
+enum emitter_types{
+		EMITTER_FLAME,
+		EMITTER_EXPLOTION,
+		EMITTER_COUNT
+};
 
 
 
@@ -16,36 +24,40 @@ typedef struct range {
 	float min,max;
 } range;
 
-typedef struct particle {
+typedef struct particle particle;
+struct particle {
+
+	int alive;
 
 	float x;
 	float y;
 	float velx;
 	float vely;
 
-	float angle;
-
 	float size;
 
 	float time_alive;
 	float max_time;
 
-} particle;
+	particle *next;
+
+};
 
 typedef struct emitter {
 
-	particle particles[500];
+	particle **head;
 
 	/** texture id */
 	int texture_id;
 
 	/** boolean values */
-	int enabled;
+	int alive;
 	int additive;
 	int rotation;
 	int infinite; /* = 1 if it spawns particles continuously */
 	int emitCount_enabled;/* only spawns emitcount amount of particles and then disables */
 
+	float time_allive;
 	float next_spawn; /* time to next spawn */
 
 	float x,y;
@@ -80,7 +92,7 @@ typedef struct emitter {
 } emitter;
 
 
-int read_emitter_from_file (emitter *emi);
+
 void particles_init();
 void particles_destroy();
 void particles_add_explosion(cpVect v, float time, int speed, int numPar, int color);

@@ -32,6 +32,7 @@ extern int WIDTH;
 extern int HEIGHT;
 /* The delta time */
 extern float dt;
+extern float mdt;
 
 extern unsigned char *keys;
 

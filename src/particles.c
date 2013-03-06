@@ -8,170 +8,262 @@
 #include <mxml.h>
 
 #define MAX_PARTICLES 1000
-#define MIN_PARTICLES 1
-#define MAX_EXPLOSIONS 200
-#define MAX_EXPLOSION_TIME 0.4f
-
-const float PARTICLE_SIZE = sizeof(GLfloat[2]);
-
-struct explosion {
-	int alive;
-	int numParticles;
-
-	GLfloat particle_pos[MAX_PARTICLES*2];
-	GLfloat particle_vel[MAX_PARTICLES*2];
-	Color color;
-	float timer;
-	float tim_alive;
-};
-
-
-static struct explosion explosions[MAX_EXPLOSIONS];
-static int current = 0;
-static void paricles_explosion_draw(struct explosion *expl);
-static void paricles_explosion_update(struct explosion *expl );
 
 /**
  * parse functions
  */
+static int read_emitter_from_file (emitter *emi,char *filename);
 static int parse_color_step(mxml_node_t *node, emitter *e);
 static int parse_range(mxml_node_t *node, range *r);
 static int parse_value(mxml_node_t *node, float *v);
 
+/**
+ * emitter functions
+ */
+static float range_get_random(range r);
+static void emitter_interval(emitter *em);
+static void emitter_update_particles(emitter *em);
+static void emitter_update(emitter *em);
+static void particle_update(particle *p);
+/**
+ * stack operators
+ */
+static void add_particle(emitter *em);
+static particle * get_particle();
+static void set_particle_available(particle *p);
+
+static emitter emitters[EMITTER_COUNT][10];
+static int max_emitters = 10;
+static int flame_count;
+static int explotion_count;
+static particle main_pool[MAX_PARTICLES];
+static int available_counter;
+static particle *(available_stack[MAX_PARTICLES]);
+
 
 void particles_init()
 {
-    emitter em;
-    em.color_counter = 0;
-    read_emitter_from_file (&em);
+    emitters[EMITTER_FLAME][0].color_counter = 0;
+    read_emitter_from_file (&(emitters[EMITTER_FLAME][0]),"particles/flame.xml");
+    emitters[EMITTER_FLAME][0].alive = 1;
+    emitters[EMITTER_FLAME][0].texture_id = 1;
+    int i;
+    for(i=1; i<10; i++){
+    	emitters[EMITTER_FLAME][i] = emitters[EMITTER_FLAME][i-1];
+    }
+    /* sets all particles available */
+    for(i=0; i<MAX_PARTICLES; i++){
+    	available_stack[i] = &(main_pool[i]);
+    }
+    available_counter = MAX_PARTICLES;
 }
-
-
 
 void particles_destroy()
 {
 	
 }
 
-void particles_draw()
+emitter * particles_get_emitter(int type)
 {
+	switch (type) {
+	case EMITTER_FLAME:
+		if(flame_count>max_emitters){
+			flame_count = 0;
+		}
+		return &(emitters[EMITTER_FLAME][flame_count++]);
+		break;
+	case EMITTER_EXPLOTION:
+		if(explotion_count>max_emitters){
+			explotion_count = 0;
+		}
+		return &(emitters[EMITTER_EXPLOTION][explotion_count++]);
+		break;
+	default:
+		break;
+	}
+	return NULL;
+}
+
+static void emitter_interval(emitter *em)
+{
+	float spaw_count = range_get_random(em->spawn_count);
+	em->next_spawn = range_get_random(em->spawn_interval);
+	em->time_allive = 0;
+	em->alive = 1;
+
 	int i;
-	for(i = 0; i<MAX_EXPLOSIONS; i++){
-		if(explosions[i].alive){
-			paricles_explosion_draw(&explosions[i]);
+	for(i=0; i<spaw_count; i++){
+		add_particle(em);
+	}
+}
+
+static void emitter_update(emitter *em)
+{
+	if(em->time_allive >= em->next_spawn){
+		emitter_interval(em);
+	}
+	em->time_allive+=dt;
+	emitter_update_particles(em);
+}
+
+/**
+ * update all particles used by a emitter
+ */
+static void emitter_update_particles(emitter *em)
+{
+	particle **prev = em->head;
+	particle *p = *(em->head);
+	while(p){
+		if(p->time_alive >= p->max_time)
+		{
+			p->alive = 0;
+			(*prev) = p->next;
+			p->next = NULL;
+			p = (*prev);
+			set_particle_available(p);
+		}else{
+			particle_update(p);
 		}
 	}
 }
+/**
+ * adds a particle back to the stack
+ */
+static void set_particle_available(particle *p)
+{
+	available_stack[++available_counter] = p;
+}
+/**
+ * update time and position on a single particle
+ */
+static void particle_update(particle *p)
+{
+	p->x += p->velx * mdt;
+	p->y += p->vely * mdt;
+	p->time_alive += mdt;
+}
+
+
+/**
+ * adds a particle to en emitter and sets correct parameters for the particle
+ */
+static void add_particle(emitter *em)
+{
+	particle *p = get_particle();
+	p->next = *(em->head);
+	*(em->head) = p;
+
+	p->alive = 1;
+
+	/* speed */
+	float angle = ((RAND_FLOAT - 0.5)*((em->spread)) + (em->angular_offset+90))*(M_PI/180);
+	float speed = range_get_random(em->speed);
+	p->velx = cos(angle)*speed;
+	p->vely = sin(angle)*speed;
+
+	/* position */
+	p->x = em->x;
+	p->y = em->y;
+
+	/* initial size */
+	p->size = range_get_random(em->init_size);
+
+	/* set time to live */
+	p->max_time = range_get_random(em->init_life);
+	p->time_alive = 0;
+}
+
+/**
+ * get a particle from the available pool and put it in the in_use list
+ * if the pool is empty, then it returns available_pool[0]
+ */
+static particle * get_particle()
+{
+	particle *p = available_stack[available_counter--];
+	available_counter = available_counter < 0 ? 0 : available_counter;
+	return p;
+}
+
+/**
+ * returns a random number inside a range
+ */
+static float range_get_random(range r)
+{
+	return r.min + ((float)rand()/RAND_MAX)*(r.max-r.min);
+}
+
+
+static void draw_particle(particle p, color c){
+
+}
+
+static void draw_emitter(emitter *em)
+{
+	particle *p = *(em->head);
+	while(p){
+
+		float offset = em->time_allive / em->next_spawn;
+		float inv = 1-offset;
+
+
+
+	}
+}
+void particles_draw()
+{
+	/*
+	int i,j;
+	for(i=0; i<EMITTER_COUNT; i++){
+		for (j = 0; j < max_emitters; ++j) {
+			if(emitters[j][i].alive){
+				emitter_update(&(emitters[j][i]));
+			}
+		}
+	}*/
+}
+
 void particles_removeall()
 {
-	int i;
-	for(i = 0; i<MAX_EXPLOSIONS; i++){
-		explosions[i].alive = 0;
-	}
-	current = 0;
+	//TODO:
 }
 
 void particles_update()
 {
-	int i;
-	for(i = 0; i<MAX_EXPLOSIONS; i++){
-		if(explosions[i].alive){
-			paricles_explosion_update(&explosions[i]);
+	/*
+	int i,j;
+	for(i=0; i<EMITTER_COUNT; i++){
+		for (j = 0; j < max_emitters; ++j) {
+			if(emitters[j][i].alive){
+				emitter_update(&(emitters[j][i]));
+			}
 		}
 	}
+	*/
 }
 
 static void paricles_explosion_update(struct explosion *expl)
 {
-	expl->timer += dt;
 
-		if(expl->timer > MAX_EXPLOSION_TIME){
-			expl->alive = 0;
-			expl->timer = 0;
-			return;
-		}
-
-		int i;
-		for(i = 0; i < (expl->numParticles)*2-1; i++){
-			expl->particle_pos[i] += (expl->particle_vel[i]*dt);
-			expl->particle_vel[i]*=0.8f;
-			++i;
-			expl->particle_pos[i] += (expl->particle_vel[i]*dt);
-			expl->particle_vel[i]*=0.8f;
-		}
 }
 
-static void paricles_explosion_draw(struct explosion *expl)
-{
-	glPushAttrib(GL_COLOR_BUFFER_BIT);
+void particles_add_explosion(cpVect v, float time, int speed, int numPar, int color){
 
-	glEnable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-	glEnable( GL_TEXTURE_2D );
-
-	glEnable(GL_POINT_SPRITE);
-
-	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-	glPointSize(30);
-	glBindTexture(GL_TEXTURE_2D, textures[0]);
-
-	//glActiveTexture(GL_TEXTURE0);
-	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-	glVertexPointer(2, GL_FLOAT, PARTICLE_SIZE, expl->particle_pos);
-
-
-	Color c = expl->color;
-	float fadeStart = 0.3f;
-	if(expl->timer > expl->tim_alive -fadeStart){
-		c.a = (MAX_EXPLOSION_TIME - expl->timer) / (fadeStart);
-		if(c.a < 0){
-			c.a = 0;
-		}
-	}
-
-	glColor4f(c.r, c.g, c.b, c.a);
-
-	int num = expl->numParticles;
-	glDrawArrays(GL_POINTS, 0, num);
-	glTexEnvf(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_FALSE);
-	glDisable(GL_POINT_SPRITE);
-	glDisable(GL_TEXTURE_2D);
-	glPopAttrib();
 }
 
-void particles_add_explosion(cpVect v , float time, int speed ,int num,int col)
-{
-	if (current >= MAX_EXPLOSIONS) {
-		current = 0;
-	}
 
-	num = num > MAX_PARTICLES ? MAX_PARTICLES : (num < 0 ? MIN_PARTICLES : num);
-
-	explosions[current].alive = 1;
-	explosions[current].numParticles = num;
-	explosions[current].tim_alive = time;
-	explosions[current].color = draw_col_grad(col);
-	int i;
-	for(i = 0; i < num*2 - 1; i++){
-		float sp = rand() % speed;
-		float angle = RAND_FLOAT * 2 * M_PI;
-		explosions[current].particle_pos[i] = v.x;
-		explosions[current].particle_vel[i] = cos(angle)*sp;
-		++i;
-		explosions[current].particle_pos[i] = v.y;
-		explosions[current].particle_vel[i] = sin(angle)*sp;
-	}
-	current++;
-}
-
+/****
+ *
+ *
+ * PARSER STUFF
+ *
+ *
+ */
 #define TESTNAME(s) strcmp(node->value.element.name, s) == 0
+
 /**
  * reads from a xml file made with pedegree slick2d particle editor
  */
-int read_emitter_from_file (emitter *emi)
+static int read_emitter_from_file (emitter *emi,char *filename)
 {
 
          FILE *fp  = NULL;
@@ -179,7 +271,7 @@ int read_emitter_from_file (emitter *emi)
          mxml_node_t * tree = NULL;
          mxml_node_t * node  = NULL;
 
-         fp = fopen ("particles/flame.xml", "r");
+         fp = fopen (filename, "r");
          if (fp ){
              tree = mxmlLoadFile (NULL , fp , MXML_OPAQUE_CALLBACK);
          }else {
@@ -190,7 +282,7 @@ int read_emitter_from_file (emitter *emi)
         	 fprintf(stderr,"particles.c file is empty \n");
         	 return 1;
          }
-
+         fprintf(stderr,"particles.c parsing %s \n",filename);
          for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
         		 node != NULL;
         		 node=mxmlWalkNext (node, NULL, MXML_DESCEND)
@@ -327,5 +419,3 @@ static int parse_color_step(mxml_node_t *node, emitter *e)
 	 return -1;
     }
 }
-
-
