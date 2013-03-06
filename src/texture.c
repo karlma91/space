@@ -1,6 +1,6 @@
-
 #include <stdio.h>
 #include <string.h>
+#include "texture.h"
 #include "SDL.h"
 #include "SDL_opengl.h"
 #include "SDL_image.h"
@@ -10,10 +10,13 @@
  */
 unsigned int *textures;
 
+static const texture_map TEX_MAP_FULL_ = {0,0,1,1};
+const texture_map *TEX_MAP_FULL = &TEX_MAP_FULL_;
+
 /**
  * Texture names
  */
-static char (*names)[20];
+static char (*names)[51];
 
 /**
  * number of textures
@@ -39,7 +42,7 @@ unsigned int texture_load(char *file)
 	}
 
 	tex_counter++;
-	names = realloc(names,(sizeof(char[tex_counter+1][20])));
+	names = realloc(names,(sizeof(char[tex_counter+1][51])));
 	strcpy(names[tex_counter],file);
 	textures = realloc(textures,sizeof(int[(tex_counter + 1)]));
 
@@ -63,16 +66,31 @@ unsigned int texture_load(char *file)
 	SDL_FreeSurface(Surf_Temp);
 	SDL_FreeSurface(Surf_Return);
 
+	fprintf(stderr,"loaded texture: %s\n", file);
 	return tex_counter;
 }
 
 static int texture_from_name(char *file)
 {
+	fprintf(stderr,"line: %d\n", __LINE__);
 	int i;
 	for(i=0;i<=tex_counter; i++){
 		if(strcmp(names[i],file) == 0){
 			return i;
 		}
 	}
+	fprintf(stderr,"line: %d\n", __LINE__);
 	return -1;
+}
+
+/* NEED TO BE CALLED BEFORE ANY texture_load() CALLS! */
+extern int texture_init()
+{
+	TEX_WHEEL   = texture_load("textures/wheel.png");
+	TEX_DOT     = texture_load("textures/dot.png");
+	TEX_GLOW    = texture_load("textures/glow.png");
+	TEX_GLOWDOT = texture_load("textures/glowdot.png");
+	TEX_CLOUD = texture_load("textures/cloud.png");
+
+	return 0;
 }

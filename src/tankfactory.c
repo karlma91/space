@@ -21,7 +21,7 @@
 
 static void init(object *fac);
 static void update(object *fac);
-static void render(object *fac);
+static void render(object *factory);
 static void destroy(object *obj);
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 static void remove_factory_from_tank(object *obj);
@@ -88,12 +88,12 @@ static void update(object *fac)
 	}
 }
 
-static void render(object *fac)
+static void render(object *factory)
 {
-	temp = ((struct tank_factory*)fac);
+	temp = ((struct tank_factory*)factory);
 
 	//glColor3f(1,1,1);
-	draw_hp(fac->body->p.x-50, fac->body->p.y + 90, 100, 16, temp->hp / temp->param->max_hp);
+	draw_hp(factory->body->p.x-50, factory->body->p.y + 90, 100, 16, temp->hp / temp->param->max_hp);
 
 
 	if (temp->param->max_hp < 300)
@@ -104,34 +104,8 @@ static void render(object *fac)
 	//draw_boxshape(temp->shape,RGBAColor(0.2,0.9,0.1,1),RGBAColor(0.6,0.9,0.4,1));
 	temp->rot += 381*dt;
 
-	glEnable(GL_TEXTURE_2D);
-	glPushMatrix();
-	glTranslatef(fac->body->p.x,fac->body->p.y, 0.0f);
-	glRotatef(temp->rot,0,0,1);
-	glScalef(150,150,1);
-	glBindTexture(GL_TEXTURE_2D, textures[3]);
-	glBegin(GL_QUAD_STRIP);
-	glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
-	glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
-	glTexCoord2d(1.0f, 0); glVertex2d(0.5, -0.5);
-	glTexCoord2d(1.0f, 1); glVertex2d(0.5, 0.5);
-	glEnd();
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(fac->body->p.x,fac->body->p.y, 0.0f);
-	glScalef(200,200,1);
-	glBindTexture(GL_TEXTURE_2D, textures[5]);
-	glBegin(GL_QUAD_STRIP);
-	glTexCoord2d(0, 1); glVertex2d(-0.5, -0.5);
-	glTexCoord2d(0, 0); glVertex2d(-0.5, 0.5);
-	glTexCoord2d(1.0f, 1); glVertex2d(0.5, -0.5);
-	glTexCoord2d(1.0f, 0); glVertex2d(0.5, 0.5);
-	glEnd();
-	glPopMatrix();
-	glDisable(GL_TEXTURE_2D);
-
-
+	draw_texture(TEX_WHEEL, &factory->body->p, TEX_MAP_FULL,150, 150, temp->rot);
+	draw_texture(temp->param->tex_id, &(factory->body->p), TEX_MAP_FULL,200, 200, 0);
 }
 
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)

@@ -28,15 +28,6 @@ int draw_init(){
 	/*
 	 *
 	 */
-	//TODO remove TMP
-	 texture_load("textures/glow.png");
-	 texture_load("textures/dot.png");
-	 texture_load("textures/player.png");
-	 texture_load("textures/player.png");
-	 texture_load("textures/player.png");
-	 texture_load("textures/wheel.png");
-	 texture_load("textures/rectangle.png");
-	 texture_load("textures/square.png");
 
 	/* generate rainbow colors */
 	float min_col = 0.2f;
@@ -70,7 +61,7 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 	
 		w /=2; // tmp-fix
 	
-		glBindTexture(GL_TEXTURE_2D, textures[0]);
+		glBindTexture(GL_TEXTURE_2D, textures[TEX_GLOW]);
 		glBegin(GL_QUAD_STRIP);
 			glTexCoord2d(0, 0); glVertex2d(-w, -0.5f);
 			glTexCoord2d(0, 1); glVertex2d(-w, 0.5f);
@@ -83,7 +74,7 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 		glEnd();
 
 		glColor3f(1,1,1);
-		glBindTexture(GL_TEXTURE_2D, textures[1]);
+		glBindTexture(GL_TEXTURE_2D, textures[TEX_DOT]);
 		glBegin(GL_QUAD_STRIP);
 			glTexCoord2d(0, 0); glVertex2d(-w, -0.5f);
 			glTexCoord2d(0, 1); glVertex2d(-w, 0.5f);
@@ -290,10 +281,10 @@ void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float wid
 	glBindTexture(GL_TEXTURE_2D, textures[tex_id]);
 
 	glBegin(GL_QUAD_STRIP);
-		glTexCoord2d(tex_map->ax, tex_map->ay); glVertex2d(-0.5, -0.5);
-		glTexCoord2d(tex_map->ax, tex_map->by); glVertex2d(-0.5, 0.5);
-		glTexCoord2d(tex_map->bx, tex_map->ay); glVertex2d(0.5, -0.5);
-		glTexCoord2d(tex_map->bx, tex_map->by); glVertex2d(0.5, 0.5);
+		glTexCoord2d(tex_map->ax, tex_map->ay); glVertex2d(-0.5, 0.5);
+		glTexCoord2d(tex_map->ax, tex_map->by); glVertex2d(-0.5, -0.5);
+		glTexCoord2d(tex_map->bx, tex_map->ay); glVertex2d(0.5, 0.5);
+		glTexCoord2d(tex_map->bx, tex_map->by); glVertex2d(0.5, -0.5);
 	glEnd();
 
 	glPopMatrix();

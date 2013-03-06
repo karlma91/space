@@ -24,6 +24,7 @@ static FILE * file;
 static char buf[21];
 static char group[21];
 static char subtype[21];
+static char fname[51];
 
 
 /** return group_name's index in group_names, or -1 if not found  */
@@ -154,14 +155,15 @@ int level_init()
 			/* currently unsupported */
 			break;
 		case ID_TANK:
-			expected = 2;
+			expected = 3;
 			paramsize = sizeof(struct tank_param);
-			ret = fscanf(file, "%f %d\n", &tank.max_hp, &tank.score);
+			ret = fscanf(file, "%f %d %s\n", &tank.max_hp, &tank.score, &fname[0]);
+			tank.tex_id = texture_load(fname);
 			break;
 		case ID_TANK_FACTORY:
-			expected = 5;
+			expected = 6;
 			paramsize = sizeof(struct tank_factory_param);
-			ret = fscanf(file, "%d %f %f %d %s\n", &factory.max_tanks, &factory.max_hp, &factory.spawn_delay, &factory.score, buf);
+			ret = fscanf(file, "%d %f %f %d %s %s\n", &factory.max_tanks, &factory.max_hp, &factory.spawn_delay, &factory.score, buf, &fname[0]);
 
 			/* find tank subtype */
 			int sub_id = get_sub_index(ID_TANK,buf);
@@ -170,6 +172,7 @@ int level_init()
 				return 7;
 			}
 			factory.t_param = &(((struct tank_param *)params[ID_TANK])[sub_id]);
+			factory.tex_id = texture_load(fname);
 			break;
 		case ID_BULLET_PLAYER:
 			/* currently unsupported */

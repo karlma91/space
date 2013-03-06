@@ -45,6 +45,10 @@ struct obj_type type_tank= {
 };
 
 
+static const texture_map tex_map[2] = {
+		{0,0,1,0.5}, {0,0.5,0.5,1}
+};
+
 static struct tank *temp;
 
 object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pram)
@@ -254,46 +258,9 @@ static void render(object *fac)
 
 	draw_hp(fac->body->p.x-15, fac->body->p.y + 35, 50, 8, temp->hp / temp->param->max_hp);
 
-
-	//TODO lage en generell texture tegne metode
-	glEnable(GL_TEXTURE_2D);
-	glPushMatrix();
-	glTranslatef(temp->wheel1->p.x,temp->wheel1->p.y, 0.0f);
-	glRotatef(rot,0,0,1);
-	glScalef(100,100,1);
-	glBindTexture(GL_TEXTURE_2D, textures[3]);
-	glBegin(GL_QUAD_STRIP);
-	glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
-	glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
-	glTexCoord2d(1.0f, 0); glVertex2d(0.5, -0.5);
-	glTexCoord2d(1.0f, 1); glVertex2d(0.5, 0.5);
-	glEnd();
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(temp->wheel2->p.x,temp->wheel2->p.y, 0.0f);
-	glRotatef(rot,0,0,1);
-	glScalef(100,100,1);
-	glBindTexture(GL_TEXTURE_2D, textures[3]);
-	glBegin(GL_QUAD_STRIP);
-	glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
-	glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
-	glTexCoord2d(1.0f, 0); glVertex2d(0.5, -0.5);
-	glTexCoord2d(1.0f, 1); glVertex2d(0.5, 0.5);
-	glEnd();
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(fac->body->p.x,fac->body->p.y, 0.0f);
-	glRotatef(dir,0,0,1);
-	glScalef(200,100,1);
-	glBindTexture(GL_TEXTURE_2D, textures[4]);
-	glBegin(GL_QUAD_STRIP);
-	glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
-	glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
-	glTexCoord2d(1.0f, 0); glVertex2d(0.5, -0.5);
-	glTexCoord2d(1.0f, 1); glVertex2d(0.5, 0.5);
-	glEnd();
-	glPopMatrix();
-	glDisable(GL_TEXTURE_2D);
+	draw_texture(temp->param->tex_id, &(fac->body->p), &tex_map[0],200, 100, dir);
+	draw_texture(temp->param->tex_id, &temp->wheel1->p, &tex_map[1],100, 100, rot);
+	draw_texture(temp->param->tex_id, &temp->wheel2->p, &tex_map[1],100, 100, rot);
 }
 
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)

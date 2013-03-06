@@ -35,6 +35,7 @@ struct tank_factory_param {
 	float spawn_delay;
 	int score;
 	struct tank_param *t_param;
+	int tex_id;
 };
 
 

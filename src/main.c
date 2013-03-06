@@ -154,6 +154,9 @@ static int main_init()
 
 	initGL();
 
+	/* preload textures */
+	texture_init();
+
 	error = draw_init();
 	if(error){
 		return error;

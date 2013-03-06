@@ -33,6 +33,7 @@ struct tank {
 struct tank_param {
 	float max_hp;
 	int score;
+	int tex_id;
 };
 
 #endif /* TANK_H_ */
