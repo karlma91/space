@@ -46,6 +46,7 @@ object *tankfactory_init( int x_pos , struct tank_factory_param *param)
 
 
 	fac->cur = 0;
+	fac->rot = 0;
 
 	fac->timer = (fac->param->spawn_delay)*0.7;
 	fac->hp = fac->param->max_hp;
@@ -103,9 +104,10 @@ static void render(object *factory)
 
 	//draw_boxshape(temp->shape,RGBAColor(0.2,0.9,0.1,1),RGBAColor(0.6,0.9,0.4,1));
 	temp->rot += 381*dt;
+	float rot = temp->rot;
 
-	draw_texture(TEX_WHEEL, &factory->body->p, TEX_MAP_FULL,150, 150, temp->rot);
 	draw_texture(temp->param->tex_id, &(factory->body->p), TEX_MAP_FULL,200, 200, 0);
+	draw_texture(TEX_WHEEL, &(factory->body->p), TEX_MAP_FULL,150, 150, rot);
 }
 
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
