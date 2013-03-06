@@ -86,11 +86,11 @@ static int texture_from_name(char *file)
 /* NEED TO BE CALLED BEFORE ANY texture_load() CALLS! */
 extern int texture_init()
 {
+	TEX_CLOUD = texture_load("textures/cloud.png");
 	TEX_WHEEL   = texture_load("textures/wheel.png");
 	TEX_DOT     = texture_load("textures/dot.png");
 	TEX_GLOW    = texture_load("textures/glow.png");
 	TEX_GLOWDOT = texture_load("textures/glowdot.png");
-	TEX_CLOUD = texture_load("textures/cloud.png");
 
 	return 0;
 }

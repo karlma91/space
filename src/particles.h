@@ -100,5 +100,7 @@ void particles_draw();
 void particles_update();
 void particles_removeall();
 
+extern unsigned int particles_active;
+extern int available_counter; //TMP
 
 #endif /* PARTICLES_H_ */

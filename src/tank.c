@@ -253,7 +253,7 @@ static void render(object *fac)
 	//glColor3f(1,0,0);
 	//draw_simple_circle(temp->wheel2->p.x,temp->wheel2->p.y,15,rot);
 
-	cpVect r = cpvadd(fac->body->p, cpvmult(cpvforangle(temp->angle),60));
+	cpVect r = cpvadd(fac->body->p, cpvmult(cpvforangle(temp->angle),80));
 	draw_line(fac->body->p.x,fac->body->p.y,r.x,r.y, 30);
 
 	draw_hp(fac->body->p.x-15, fac->body->p.y + 35, 50, 8, temp->hp / temp->param->max_hp);

@@ -1,5 +1,5 @@
-#ifndef LIST_H_
-#define LIST_H_
+#ifndef OBJECTS_H_
+#define OBJECTS_H_
 
 #include "chipmunk.h"
 
@@ -54,4 +54,4 @@ extern object *objects_by_id(int obj_id, int instance_id);
 
 extern int objects_count(int obj_id);
 
-#endif /* LIST_H_ */
+#endif /* OBJECTS_H_ */

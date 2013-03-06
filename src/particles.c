@@ -7,7 +7,7 @@
 /** mini xml reader compatible with anci c */
 #include <mxml.h>
 
-#define MAX_PARTICLES 1000
+#define MAX_PARTICLES 10000
 
 /**
  * parse functions
@@ -38,19 +38,20 @@ static int max_emitters = 10;
 static int flame_count;
 static int explotion_count;
 static particle main_pool[MAX_PARTICLES];
-static int available_counter;
+int available_counter;
 static particle *(available_stack[MAX_PARTICLES]);
 
 
 void particles_init()
 {
     emitters[EMITTER_FLAME][0].color_counter = 0;
-    read_emitter_from_file (&(emitters[EMITTER_FLAME][0]),"particles/flame.xml");
+    read_emitter_from_file (&(emitters[EMITTER_FLAME][0]),"particles/flame_3.xml");
     emitters[EMITTER_FLAME][0].alive = 1;
     emitters[EMITTER_FLAME][0].texture_id = 1;
     emitters[EMITTER_FLAME][0].next_spawn = 0;
 
     emitters[EMITTER_FLAME][0].head = NULL;
+
 
     int i;
     for(i=1; i<10; i++){
@@ -149,7 +150,8 @@ static void emitter_update_particles(emitter *em)
  */
 static void set_particle_available(particle *p)
 {
-	available_stack[++available_counter] = p;
+	++available_counter;
+	available_stack[available_counter] = p;
 }
 /**
  * update time and position on a single particle
@@ -163,14 +165,20 @@ static void particle_update(particle *p)
 	p->time_alive += mdt;
 }
 
-
+#include "objects.h"
 /**
  * adds a particle to en emitter and sets correct parameters for the particle
  */
 static void add_particle(emitter *em)
 {
-	em->x = 0;
-	em->y = 400;
+	//em->x = 0;
+	//em->y = 400;
+
+	object *pl = objects_first(ID_PLAYER);
+
+	em->x = pl->body->p.x;
+	em->y = pl->body->p.y;
+
 	particle *p = get_particle();
 	if(p == NULL){
 		return;
@@ -225,11 +233,15 @@ static void draw_particle(particle p, color c){
 
 }
 
+unsigned int particles_active = 0;
+
 static void draw_emitter(emitter *em)
 {
+	particles_active = 0;
 	particle *p = em->head;
 	while(p){
 		if(p->time_alive < p->max_time){
+			++particles_active;
 			float offset = p->time_alive / p->max_time;
 			float inv = 1-offset;
 
@@ -367,7 +379,7 @@ static int read_emitter_from_file (emitter *emi,char *filename)
         		 if(TESTNAME("system")){
         			 parse_bool(node,"additive",&(emi->additive));
         		 }else if(TESTNAME("emitter")){
-        			 parse_bool(node,"additive",&(emi->additive));
+        			 parse_bool(node,"useAdditive",&(emi->additive));
         		 }else if(TESTNAME("spawnInterval")){
         		     parse_range(node,&(emi->spawn_interval));
         		 }else if(TESTNAME("spawnCount")){

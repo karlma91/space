@@ -499,6 +499,16 @@ static void SPACE_draw()
 		font_drawText(-WIDTH/2+20,HEIGHT/2 - 45,score_temp);
 
 		setTextSize(10);
+		char particles_temp[20];
+		char particles2_temp[20];
+		char particles3_temp[20];
+		sprintf(particles_temp,"%d",particles_active);
+		sprintf(particles2_temp,"%d",available_counter);
+		sprintf(particles3_temp,"%d",(available_counter + particles_active));
+		font_drawText(-WIDTH/2+20,HEIGHT/2 - 80,particles_temp);
+		font_drawText(-WIDTH/2+20,HEIGHT/2 - 110,particles2_temp);
+		font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles3_temp);
+
 		char pos_temp[20];
 		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->obj.body->p.x,player->obj.body->p.y);
 		font_drawText(-WIDTH/2+15,-HEIGHT/2+8,pos_temp);
