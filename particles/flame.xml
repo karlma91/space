@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<emitter imageName="glow.png" name="Default" renderType="inherit" useAdditive="false" useOriented="false">
+<system additive="false" points="false">
+<emitter imageName="" name="Default" renderType="inherit" useAdditive="false" useOriented="false">
 <spawnInterval enabled="true" max="100.0" min="10.0"/>
-<spawnCount enabled="true" max="40.0" min="10.0"/>
+<spawnCount enabled="true" max="80.0" min="10.0"/>
 <initialLife enabled="false" max="1000.0" min="1000.0"/>
-<initialSize enabled="true" max="40.0" min="20.0"/>
+<initialSize enabled="true" max="100.0" min="20.0"/>
 <xOffset enabled="false" max="0.0" min="0.0"/>
 <yOffset enabled="false" max="0.0" min="0.0"/>
 <initialDistance enabled="false" max="0.0" min="0.0"/>
-<speed enabled="true" max="70.0" min="40.0"/>
+<speed enabled="true" max="150.0" min="40.0"/>
 <length enabled="false" max="1000.0" min="1000.0"/>
 <emitCount enabled="false" max="1000.0" min="1000.0"/>
 <spread type="random" value="312.0"/>
 <angularOffset type="simple" value="0.0"/>
-<growthFactor type="simple" value="-24.0"/>
+<growthFactor type="simple" value="-2.0"/>
 <gravityFactor type="simple" value="-2.0"/>
 <windFactor type="simple" value="0.0"/>
 <startAlpha type="simple" value="255.0"/>
@@ -43,3 +44,4 @@
 <step b="0.8" g="0.8" offset="1.0" r="0.8"/>
 </color>
 </emitter>
+</system>

@@ -16,6 +16,7 @@ static int read_emitter_from_file (emitter *emi,char *filename);
 static int parse_color_step(mxml_node_t *node, emitter *e);
 static int parse_range(mxml_node_t *node, range *r);
 static int parse_value(mxml_node_t *node, float *v);
+static int parse_bool(mxml_node_t *node,char *name, int *v);
 
 /**
  * emitter functions
@@ -47,15 +48,21 @@ void particles_init()
     read_emitter_from_file (&(emitters[EMITTER_FLAME][0]),"particles/flame.xml");
     emitters[EMITTER_FLAME][0].alive = 1;
     emitters[EMITTER_FLAME][0].texture_id = 1;
+    emitters[EMITTER_FLAME][0].next_spawn = 0;
+
+    emitters[EMITTER_FLAME][0].head = NULL;
+
     int i;
     for(i=1; i<10; i++){
     	emitters[EMITTER_FLAME][i] = emitters[EMITTER_FLAME][i-1];
     }
     /* sets all particles available */
     for(i=0; i<MAX_PARTICLES; i++){
+    	(main_pool[i].next = NULL);
     	available_stack[i] = &(main_pool[i]);
     }
-    available_counter = MAX_PARTICLES;
+    available_counter = MAX_PARTICLES-1;
+    //fprintf(stderr,"sizeis correct: %f  %f test %f \n",emitters[EMITTER_FLAME][0].init_life.min,emitters[EMITTER_FLAME][0].init_life.max, range_get_random(emitters[EMITTER_FLAME][0].init_life));
 }
 
 void particles_destroy()
@@ -99,10 +106,12 @@ static void emitter_interval(emitter *em)
 
 static void emitter_update(emitter *em)
 {
+	//fprintf(stderr,"update %f %f \n",em->time_allive, em->next_spawn);
 	if(em->time_allive >= em->next_spawn){
 		emitter_interval(em);
+		em->time_allive = 0;
 	}
-	em->time_allive+=dt;
+	em->time_allive += mdt;
 	emitter_update_particles(em);
 }
 
@@ -111,19 +120,28 @@ static void emitter_update(emitter *em)
  */
 static void emitter_update_particles(emitter *em)
 {
-	particle **prev = em->head;
-	particle *p = *(em->head);
+	particle *prev = NULL;
+	particle *p = em->head;
 	while(p){
 		if(p->time_alive >= p->max_time)
 		{
 			p->alive = 0;
-			(*prev) = p->next;
+			if(prev == NULL){
+				em->head = p->next;
+			}else{
+				prev->next = p->next;
+			}
 			p->next = NULL;
-			p = (*prev);
 			set_particle_available(p);
 		}else{
+
+			p->vely -= em->gravityfactor * 0.0005f * mdt;
+			p->velx += em->windfactor * 0.0005f * mdt;
+
 			particle_update(p);
 		}
+		prev = p;
+		p = p->next;
 	}
 }
 /**
@@ -138,7 +156,9 @@ static void set_particle_available(particle *p)
  */
 static void particle_update(particle *p)
 {
+
 	p->x += p->velx * mdt;
+	//fprintf(stderr,"particle: %f -- %f\n",p->x, p->velx);
 	p->y += p->vely * mdt;
 	p->time_alive += mdt;
 }
@@ -149,15 +169,20 @@ static void particle_update(particle *p)
  */
 static void add_particle(emitter *em)
 {
+	em->x = 0;
+	em->y = 400;
 	particle *p = get_particle();
-	p->next = *(em->head);
-	*(em->head) = p;
+	if(p == NULL){
+		return;
+	}
+	p->next = em->head;
+	em->head = p;
 
 	p->alive = 1;
 
 	/* speed */
 	float angle = ((RAND_FLOAT - 0.5)*((em->spread)) + (em->angular_offset+90))*(M_PI/180);
-	float speed = range_get_random(em->speed);
+	float speed = range_get_random(em->speed) * 0.001f;
 	p->velx = cos(angle)*speed;
 	p->vely = sin(angle)*speed;
 
@@ -167,7 +192,6 @@ static void add_particle(emitter *em)
 
 	/* initial size */
 	p->size = range_get_random(em->init_size);
-
 	/* set time to live */
 	p->max_time = range_get_random(em->init_life);
 	p->time_alive = 0;
@@ -179,9 +203,13 @@ static void add_particle(emitter *em)
  */
 static particle * get_particle()
 {
-	particle *p = available_stack[available_counter--];
-	available_counter = available_counter < 0 ? 0 : available_counter;
-	return p;
+	if(available_counter == 0){
+		return NULL;
+	}else{
+		particle *p = available_stack[available_counter];
+		--available_counter;
+		return p;
+	}
 }
 
 /**
@@ -189,7 +217,7 @@ static particle * get_particle()
  */
 static float range_get_random(range r)
 {
-	return r.min + ((float)rand()/RAND_MAX)*(r.max-r.min);
+	return r.min + ((float)rand()/(float)RAND_MAX)*(r.max-r.min);
 }
 
 
@@ -199,27 +227,74 @@ static void draw_particle(particle p, color c){
 
 static void draw_emitter(emitter *em)
 {
-	particle *p = *(em->head);
+	particle *p = em->head;
 	while(p){
+		if(p->time_alive < p->max_time){
+			float offset = p->time_alive / p->max_time;
+			float inv = 1-offset;
 
-		float offset = em->time_allive / em->next_spawn;
-		float inv = 1-offset;
+			color a,b,c;
+			float coloffset;
+			float colinv;
+			int i;
+			float alpha = (em->startalpha/255.0f)*inv + (em->endalpha/255.0f)*offset;
+			for(i = 0; i<em->color_counter-1; i++){
+				a = em->colors[i];
+				b = em->colors[i+1];
+				if(offset >= a.offset && offset <= b.offset){
 
+					float step = b.offset - a.offset;
 
+					coloffset = offset - a.offset;
+					coloffset = coloffset / step;
+					coloffset = 1 - coloffset;
+					colinv = 1 - coloffset;
 
+					c.r = (a.r * coloffset) + (b.r * colinv);
+					c.g = (a.g * coloffset) + (b.g * colinv);
+					c.b = (a.b * coloffset) + (b.b * colinv);
+				}
+			}
+
+			glColor4f(c.r,c.g,c.b,alpha);
+			glEnable(GL_TEXTURE_2D);
+			glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
+			if(em->additive){
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+			}
+			glPushMatrix();
+			glTranslatef(p->x, p->y, 0.0f);
+			glRotatef(0,0,0,1);
+
+			glScalef(p->size,p->size,1);
+			glBindTexture(GL_TEXTURE_2D, textures[0]);
+
+			glBegin(GL_QUAD_STRIP);
+			glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
+			glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
+			glTexCoord2d(1, 0); glVertex2d(0.5, -0.5);
+			glTexCoord2d(1, 1); glVertex2d(0.5, 0.5);
+			glEnd();
+
+			glPopMatrix();
+			glPopAttrib();
+			glDisable(GL_TEXTURE_2D);
+		}
+
+		p = p->next;
 	}
 }
 void particles_draw()
 {
-	/*
 	int i,j;
 	for(i=0; i<EMITTER_COUNT; i++){
 		for (j = 0; j < max_emitters; ++j) {
-			if(emitters[j][i].alive){
-				emitter_update(&(emitters[j][i]));
+			if(emitters[i][j].alive){
+				//draw_emitter(&(emitters[i][j]));
 			}
 		}
-	}*/
+	}
+	draw_emitter(&(emitters[EMITTER_FLAME][0]));
 }
 
 void particles_removeall()
@@ -229,16 +304,17 @@ void particles_removeall()
 
 void particles_update()
 {
-	/*
+
 	int i,j;
 	for(i=0; i<EMITTER_COUNT; i++){
 		for (j = 0; j < max_emitters; ++j) {
-			if(emitters[j][i].alive){
-				emitter_update(&(emitters[j][i]));
+			if(emitters[i][j].alive){
+			//	emitter_update(&(emitters[i][j]));
 			}
 		}
 	}
-	*/
+	emitter_update(&(emitters[EMITTER_FLAME][0]));
+
 }
 
 static void paricles_explosion_update(struct explosion *expl)
@@ -288,8 +364,10 @@ static int read_emitter_from_file (emitter *emi,char *filename)
         		 node=mxmlWalkNext (node, NULL, MXML_DESCEND)
          ){
         	 if (node->type  == MXML_ELEMENT) {
-        		 if(TESTNAME("emitter")){
-
+        		 if(TESTNAME("system")){
+        			 parse_bool(node,"additive",&(emi->additive));
+        		 }else if(TESTNAME("emitter")){
+        			 parse_bool(node,"additive",&(emi->additive));
         		 }else if(TESTNAME("spawnInterval")){
         		     parse_range(node,&(emi->spawn_interval));
         		 }else if(TESTNAME("spawnCount")){
@@ -297,7 +375,7 @@ static int read_emitter_from_file (emitter *emi,char *filename)
         		 }else if(TESTNAME("initialLife")){
         		     parse_range(node,&(emi->init_life));
         		 }else if(TESTNAME("initialSize")){
-        		     parse_range(node,&(emi->init_life));
+        		     parse_range(node,&(emi->init_size));
         		 }else if(TESTNAME("xOffset")){
         		     parse_range(node,&(emi->xoffset));
         		 }else if(TESTNAME("yOffset")){
@@ -356,6 +434,7 @@ static int parse_range(mxml_node_t *node, range *r)
 	    r->max = strtod(node->value.element.attrs[k].value,NULL);
 	    ok++;
 	}
+
     }
     if(ok == 2){
 	return 0;
@@ -384,6 +463,31 @@ static int parse_value(mxml_node_t *node, float *v)
     }else{
 	 fprintf(stderr,"Error parsing value in node %s \n", node->value.element.name);
 	 return -1;
+    }
+}
+/**
+ * Parses the atributes of a node to a value v
+ * return 0 on ok, else -1
+ */
+static int parse_bool(mxml_node_t *node, char *name, int *v)
+{
+    int ok = 0;
+    int k;
+    for (k = 0; k < node->value.element.num_attrs; k++){
+    	if(strcmp(node->value.element.attrs[k].name, name) == 0){
+    		if(strcmp(node->value.element.attrs[k].value,"true")){
+    			*v = 0;
+    		}else{
+    			*v = 1;
+    		}
+    		ok++;
+    	}
+    }
+    if(ok == 1){
+    	return 0;
+    }else{
+    	fprintf(stderr,"Error parsing boolean in node %s \n", node->value.element.name);
+    	return -1;
     }
 }
 /**

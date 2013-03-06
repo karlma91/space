@@ -45,7 +45,7 @@ struct particle {
 
 typedef struct emitter {
 
-	particle **head;
+	particle *head;
 
 	/** texture id */
 	int texture_id;
