@@ -95,7 +95,7 @@ static int callback_ground(cpArbiter *arb, cpSpace *space, void *unused)
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
 	temp = (struct bullet*)b->body->data;
 	particles_add_explosion(cpBodyGetPos(cpShapeGetBody(b)), 0.5f, 1500, 50,300);
-	temp->alive = 0;
+	temp->alive = 0; // TODO FIXME BUG: segmentation fault?
 	return 0;
 }
 
