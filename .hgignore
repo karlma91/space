@@ -8,3 +8,6 @@ bin/*
 *~
 src/*~
 resources/win/space.res.o
+
+syntax: regexp
+^Debug$
