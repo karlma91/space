@@ -1,0 +1,33 @@
+How to auto-compile this project in eclipse 
+
+TODO: legge inn argumenter for windows og linux
+
+
+Set linking and compile arguments for GCC in Project properties/ C/C++ Build / Settings.
+Paste the corresponding linking text line for your OS into linker flags in Linker / Miscellaneous,
+and paste the compile text line into other flags in Compiler / Miscellaneous.
+
+NB! you need to run make in lib/inih to create a static library for inih.
+
+TODO: plassere alle eksterne biblioteker i lib mappen, på formen:
+lib/foo/include
+lib/foo/(OS) (folder containing static/dynamic library)
+lib/foo/src
+lib/foo/make (build static library/libraries from lib/foo/src and place it in lib/foo/(os))
+der (OS) er enten linux/win/mac
+
+
+linking (linux):
+
+compile (linux):
+
+
+linking (windows):
+
+compile (windows):
+
+
+linking (mac):
+-framework cocoa -framework OpenGL -L../lib/SDL/mac -framework SDL -lSDLmain -SDL -framework SDL_image -L../lib/chipmunk/mac -lChipmunk -L../lib/mxml/mac -lmxml -L../lib/inih/mac -linih
+compile (mac):
+-I../lib/SDL/mac -I../lib/SDL_image -I../lib/chipmunk/include -I../lib/mxml/mac -I../lib/inih/include
