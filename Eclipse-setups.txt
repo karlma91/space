@@ -22,9 +22,30 @@ linking (linux):
 compile (linux):
 
 
-linking (windows):
+linking (windows): (-l)
+mingw32
+SDL_image
+SDLmain
+SDL
+opengl32
+libpng15-15
+Chipmunk
+mxml
 
-compile (windows):
+(-L)
+"${workspace_loc:/${ProjName}/lib}"
+"${workspace_loc:/${ProjName}/SDL/windows_mingw/lib}"
+"${workspace_loc:/${ProjName}/chipmunk/windows}"
+"${workspace_loc:/${ProjName}/mxml/lib}"
+"${workspace_loc:/${ProjName}/SDL_image/win}"
+
+compile (windows): (-I)
+"${workspace_loc:/${ProjName}/chipmunk/include}"
+"${workspace_loc:/${ProjName}/SDL_image/win}"
+"${workspace_loc:/${ProjName}/lib/inih}"
+"${workspace_loc:/${ProjName}/mxml/include}"
+"${workspace_loc:/${ProjName}/SDL/windows_mingw/include}"
+"${workspace_loc:/${ProjName}/SDL/windows_mingw/include/SDL}"
 
 
 linking (mac):
