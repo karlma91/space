@@ -14,6 +14,8 @@ typedef struct
     char key_right;
     char key_down;
     char key_space;
+    unsigned int width;
+    unsigned int height;
 } configuration;
 
 extern configuration config;

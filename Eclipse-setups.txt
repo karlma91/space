@@ -22,30 +22,14 @@ linking (linux):
 compile (linux):
 
 
-linking (windows): (-l)
-mingw32
-SDL_image
-SDLmain
-SDL
-opengl32
-libpng15-15
-Chipmunk
-mxml
+linking (windows):
+-lmingw32 -L../SDL_image/win -lSDL_image -L../SDL/windows_mingw/lib -lSDLmain -lSDL -lopengl32 -lpng15-15 -L../chipmunk/windows -lChipmunk -L../mxml/lib -lmxml -L../lib/inih/win -linih
 
-(-L)
-"${workspace_loc:/${ProjName}/lib}"
-"${workspace_loc:/${ProjName}/SDL/windows_mingw/lib}"
-"${workspace_loc:/${ProjName}/chipmunk/windows}"
-"${workspace_loc:/${ProjName}/mxml/lib}"
-"${workspace_loc:/${ProjName}/SDL_image/win}"
 
-compile (windows): (-I)
-"${workspace_loc:/${ProjName}/chipmunk/include}"
-"${workspace_loc:/${ProjName}/SDL_image/win}"
-"${workspace_loc:/${ProjName}/lib/inih}"
-"${workspace_loc:/${ProjName}/mxml/include}"
-"${workspace_loc:/${ProjName}/SDL/windows_mingw/include}"
-"${workspace_loc:/${ProjName}/SDL/windows_mingw/include/SDL}"
+compile (windows):
+-I../chipmunk/include -I../SDL_image/win -I../lib/inih/include -I../mxml/include -I../SDL/windows_mingw/include -I../SDL/windows_mingw/include/SDL
+In command-line settings, make sure that ${FLAGS} is placed after ${INPUTS}:
+${COMMAND} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS} ${FLAGS} 
 
 
 linking (mac):

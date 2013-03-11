@@ -8,7 +8,7 @@
 /**
  * texture values (GLOBAL)
  */
-unsigned int *textures;
+int *textures;
 
 static const texture_map TEX_MAP_FULL_ = {0,0,1,1};
 const texture_map *TEX_MAP_FULL = &TEX_MAP_FULL_;
@@ -25,7 +25,7 @@ static int tex_counter = -1;
 
 static int texture_from_name(char *file);
 
-unsigned int texture_load(char *file)
+int texture_load(char *file)
 {
 
 	int have_texture = texture_from_name(file);
@@ -98,4 +98,12 @@ extern int texture_init()
 	TEX_PLAYER = texture_load("glowdot.png");
 
 	return 0;
+}
+
+int texture_bind(int tex_id) {
+	if (tex_id >= 0) {
+		glBindTexture(GL_TEXTURE_2D, textures[tex_id]);
+		return 0;
+	}
+	return 1;
 }

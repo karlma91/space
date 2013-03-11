@@ -279,7 +279,8 @@ static void draw_emitter(emitter *em)
 			glRotatef(0,0,0,1);
 
 			glScalef(p->size,p->size,1);
-			glBindTexture(GL_TEXTURE_2D, textures[0]);
+
+			texture_bind(TEX_CLOUD);
 
 			glBegin(GL_QUAD_STRIP);
 			glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);

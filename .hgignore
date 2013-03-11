@@ -5,6 +5,10 @@ space_msvc/space_msvc.vcxproj.user
 space_msvc/src/*
 space_msvc/Debug/*
 bin/*
+Debug/*
+.project
+.cproject
+.settings
 *~
 src/*~
 resources/win/space.res.o

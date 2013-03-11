@@ -11,6 +11,8 @@ os=mac
 suffix=.a
 endif
 
+all: static-lib
+
 static-lib: $(os)
 	gcc -c src/ini.c -Iinclude -o ini.o
 	ar rcs $(os)/libinih$(suffix) ini.o

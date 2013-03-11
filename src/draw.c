@@ -61,7 +61,7 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 	
 		w /=2; // tmp-fix
 	
-		glBindTexture(GL_TEXTURE_2D, textures[TEX_GLOW]);
+		texture_bind(TEX_GLOW);
 		glBegin(GL_QUAD_STRIP);
 			glTexCoord2d(0, 0); glVertex2d(-w, -0.5f);
 			glTexCoord2d(0, 1); glVertex2d(-w, 0.5f);
@@ -74,7 +74,7 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 		glEnd();
 
 		glColor3f(1,1,1);
-		glBindTexture(GL_TEXTURE_2D, textures[TEX_DOT]);
+		texture_bind(TEX_DOT);
 		glBegin(GL_QUAD_STRIP);
 			glTexCoord2d(0, 0); glVertex2d(-w, -0.5f);
 			glTexCoord2d(0, 1); glVertex2d(-w, 0.5f);
@@ -278,13 +278,14 @@ void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float wid
 	glTranslatef(pos->x, pos->y, 0.0f);
 	glRotatef(angle,0,0,1);
 	glScalef(width,height,1);
-	glBindTexture(GL_TEXTURE_2D, textures[tex_id]);
+
+	texture_bind(tex_id);
 
 	glBegin(GL_QUAD_STRIP);
-		glTexCoord2d(tex_map->ax, tex_map->ay); glVertex2d(-0.5, 0.5);
-		glTexCoord2d(tex_map->ax, tex_map->by); glVertex2d(-0.5, -0.5);
-		glTexCoord2d(tex_map->bx, tex_map->ay); glVertex2d(0.5, 0.5);
-		glTexCoord2d(tex_map->bx, tex_map->by); glVertex2d(0.5, -0.5);
+	glTexCoord2d(tex_map->ax, tex_map->ay); glVertex2d(-0.5, 0.5);
+	glTexCoord2d(tex_map->ax, tex_map->by); glVertex2d(-0.5, -0.5);
+	glTexCoord2d(tex_map->bx, tex_map->ay); glVertex2d(0.5, 0.5);
+	glTexCoord2d(tex_map->bx, tex_map->by); glVertex2d(0.5, -0.5);
 	glEnd();
 
 	glPopMatrix();

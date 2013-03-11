@@ -52,9 +52,13 @@ static int handler(void* config, const char* section, const char* name, const ch
 
 #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
   if (MATCH("video", "fullscreen")) {
-  	pconfig->fullscreen = atoi(value);
+	  pconfig->fullscreen = atoi(value);
+  } else if (MATCH("video", "width")) {
+	  pconfig->width = atoi(value);
+  } else if (MATCH("video", "height")) {
+	  pconfig->height= atoi(value);
   } else if (MATCH("keyboard", "key_left")) {
-  	pconfig->key_left = atoi(value);
+	  pconfig->key_left = atoi(value);
   } else if (MATCH("keyboard", "key_up")) {
   	pconfig->key_up = atoi(value);
   } else if (MATCH("keyboard", "key_right")) {
@@ -137,9 +141,14 @@ static int main_init()
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
 
-	const SDL_VideoInfo* myPointer = SDL_GetVideoInfo();
-	WIDTH = myPointer->current_w;
-	HEIGHT = myPointer->current_h;
+	if (config.fullscreen) {
+		const SDL_VideoInfo* myPointer = SDL_GetVideoInfo();
+		WIDTH = myPointer->current_w;
+		HEIGHT = myPointer->current_h;
+	} else {
+		WIDTH = config.width;
+		HEIGHT = config.height;
+	}
 
 	if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, (SDL_OPENGL| SDL_DOUBLEBUF) | (SDL_FULLSCREEN * config.fullscreen))))
 	{
