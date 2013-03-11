@@ -18,6 +18,7 @@ struct player{
 	int disable;
 	int gun_level;
 	int score;
+	float rotation_speed;
 
 	/* parameters */
 	struct player_param *param;

@@ -1,4 +1,4 @@
-TANK LIGHT 10 10 textures/tank_01.png
-TANK HEAVY 100 35 textures/tank_02.png
-FACTORY SMALL 3 150 8 400 LIGHT textures/square.png
-FACTORY BIG 1 500 10 1000 HEAVY textures/square.png
+TANK LIGHT 10 10 tank_01.png
+TANK HEAVY 100 35 tank_02.png
+FACTORY SMALL 3 150 8 400 LIGHT square.png
+FACTORY BIG 1 500 10 1000 HEAVY square.png

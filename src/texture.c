@@ -27,17 +27,21 @@ static int texture_from_name(char *file);
 
 unsigned int texture_load(char *file)
 {
+
 	int have_texture = texture_from_name(file);
 	if(have_texture >=0){
 		fprintf(stderr,"have texture: %s\n", file);
 		return have_texture;
 	}
 
+	char filepath[100];
+	sprintf(filepath,"textures/%s",file);
+
 	SDL_Surface* Surf_Temp = NULL;
 	SDL_Surface* Surf_Return = NULL;
 
-	if((Surf_Temp = IMG_Load(file)) == NULL) {
-		fprintf(stderr,"Unable to load texture: %s\n", file);
+	if((Surf_Temp = IMG_Load(filepath)) == NULL) {
+		fprintf(stderr,"Unable to load texture: %s\n", filepath);
 		return -1;
 	}
 
@@ -86,11 +90,12 @@ static int texture_from_name(char *file)
 /* NEED TO BE CALLED BEFORE ANY texture_load() CALLS! */
 extern int texture_init()
 {
-	TEX_CLOUD = texture_load("textures/cloud.png");
-	TEX_WHEEL   = texture_load("textures/wheel.png");
-	TEX_DOT     = texture_load("textures/dot.png");
-	TEX_GLOW    = texture_load("textures/glow.png");
-	TEX_GLOWDOT = texture_load("textures/glowdot.png");
+	TEX_CLOUD = texture_load("cloud.png");
+	TEX_WHEEL   = texture_load("wheel.png");
+	TEX_DOT     = texture_load("dot.png");
+	TEX_GLOW    = texture_load("glow.png");
+	TEX_GLOWDOT = texture_load("glowdot.png");
+	TEX_PLAYER = texture_load("glowdot.png");
 
 	return 0;
 }

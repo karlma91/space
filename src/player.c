@@ -35,7 +35,7 @@ static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 static void player_controls(object *obj);
 static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 
-static int controll_mode = 1;
+static int controll_mode = 2;
 
 static void normal_control(); //1
 static void arcade_control(); //2

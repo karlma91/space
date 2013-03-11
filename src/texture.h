@@ -21,6 +21,7 @@ unsigned int
 	TEX_GLOW,
 	TEX_GLOW,
 	TEX_GLOWDOT,
+	TEX_PLAYER,
 	TEX_CLOUD;
 
 #endif /* TEXTURE_H_ */
