@@ -35,6 +35,15 @@ static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 static void player_controls(object *obj);
 static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 
+static int controll_mode = 1;
+
+static void normal_control(); //1
+static void arcade_control(); //2
+static void tmp_shoot_dir(cpVect pos, cpVect v);
+
+static void pitch_up(cpBody *body, float rotSpeed);
+static void pitch_down(cpBody *body, float rotSpeed);
+
 
 struct obj_type type_player = {
 	ID_PLAYER,
@@ -69,13 +78,14 @@ object *player_init()
 	pl->obj.alive = 1;
 
 	pl->param = &default_player;
-	pl->param->tex_id = texture_load("textures/player.png"); //TMP
+	pl->param->tex_id = TEX_PLAYER;
 
 	pl->hp = 200;
 	pl->gun_level = 1;
 	pl->lives = 3;
 	pl->score = 0;
 	pl->disable = 0;
+	pl->rotation_speed = 8;
 
 	/* make and add new body */
 	pl->obj.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius/2)));
@@ -150,30 +160,16 @@ static void player_update(object *obj)
 
 static void player_controls(object *obj)
 {
-	/* units/sec */
-		cpFloat rotSpeed = 5.0;
-		cpFloat accel = 100000;
 
-		cpVect dirUp = cpvforangle(-rotSpeed*dt);
-		cpVect dirDown = cpvforangle(rotSpeed*dt);
 
-		cpFloat cspeed = cpvlength(cpBodyGetVel(temp->obj.body));
-
-		/* Player movement */
-		if(keys[SDLK_w] && cspeed > 50) {
-			cpBodySetVel(temp->obj.body, cpvrotate(cpBodyGetVel(temp->obj.body),dirUp));
+		switch(controll_mode){
+			case 1:
+				normal_control();
+				break;
+			case 2:
+				arcade_control();
+				break;
 		}
-
-		if(keys[SDLK_s] && cspeed > 50) {
-			cpBodySetVel(temp->obj.body, cpvrotate(cpBodyGetVel(temp->obj.body),dirDown));
-		}
-
-		cpBodySetAngle(temp->obj.body, cpvtoangle(cpBodyGetVel(temp->obj.body)));
-		cpSpaceReindexShapesForBody(space, temp->obj.body);
-
-
-		if(keys[SDLK_d]) cpBodyApplyForce(temp->obj.body,cpvmult(cpBodyGetRot(temp->obj.body),accel*dt),cpvzero);
-		if(keys[SDLK_a]) cpBodyApplyForce(temp->obj.body,cpvmult(cpBodyGetRot(temp->obj.body),-accel*dt),cpvzero);
 
 		if(keys[SDLK_g]){
 			keys[SDLK_g] = 0;
@@ -206,6 +202,83 @@ static void player_controls(object *obj)
 		if (keys[SDLK_x]) {
 			particles_add_explosion(cpBodyGetPos(temp->obj.body),0.5f,4000, 1000,200);
 		}
+}
+
+static void normal_control()
+{
+	/* units/sec */
+	cpFloat accel = 100000;
+
+	cpFloat cspeed = cpvlength(cpBodyGetVel(temp->obj.body));
+	/* Player movement */
+	if(keys[SDLK_w] && cspeed > 50) {
+		pitch_up((temp->obj.body),temp->rotation_speed);
+	}
+	if(keys[SDLK_s] && cspeed > 50) {
+		pitch_down((temp->obj.body),temp->rotation_speed);
+	}
+	cpBodySetAngle(temp->obj.body, cpvtoangle(cpBodyGetVel(temp->obj.body)));
+	cpSpaceReindexShapesForBody(space, temp->obj.body);
+
+	if(keys[SDLK_d]) cpBodyApplyForce(temp->obj.body,cpvmult(cpBodyGetRot(temp->obj.body),accel*dt),cpvzero);
+	if(keys[SDLK_a]) cpBodyApplyForce(temp->obj.body,cpvmult(cpBodyGetRot(temp->obj.body),-accel*dt),cpvzero);
+}
+
+static void arcade_control()
+{
+
+	cpFloat speed = 700;
+
+	cpVect vel = cpv(0,0.01);
+	int pressed = 0;
+	if(keys[SDLK_w]) {
+		vel = cpvadd(vel, cpvmult(cpv(0,1), speed));
+		pressed=1;
+	}else if(keys[SDLK_s]) {
+		vel = cpvadd(vel,cpvmult(cpv(0,-1), speed));
+		pressed=1;
+	}
+	if(keys[SDLK_a]) {
+		vel = cpvadd(vel, cpvmult(cpv(-1,0), speed));
+		pressed=1;
+	}else if(keys[SDLK_d]) {
+		vel = cpvadd(vel, cpvmult(cpv(1,0), speed));
+		pressed=1;
+	}
+	if(pressed){
+		cpBodySetVel(temp->obj.body, vel);
+	}
+
+	cpBodySetAngle(temp->obj.body, cpvtoangle(cpBodyGetVel(temp->obj.body)));
+	cpSpaceReindexShapesForBody(space, temp->obj.body);
+
+	cpVect shoot_dir = cpv(0,0);
+	if(keys[SDLK_UP]) {
+		shoot_dir = cpvadd(shoot_dir, cpv(0,1));
+	}else if(keys[SDLK_DOWN]) {
+		shoot_dir = cpvadd(shoot_dir, cpv(0,-1));
+	}
+	if(keys[SDLK_LEFT]) {
+		shoot_dir = cpvadd(shoot_dir, cpv(-1,0));
+	}else if(keys[SDLK_RIGHT]) {
+		shoot_dir = cpvadd(shoot_dir, cpv(1,0));
+	}
+
+	if(shoot_dir.x != 0 || shoot_dir.y != 0){
+		tmp_shoot_dir(temp->obj.body->p,cpvrotate(cpBodyGetVel(temp->obj.body),shoot_dir));
+	}
+}
+
+static void pitch_up(cpBody *body, float rotSpeed)
+{
+	cpVect dirUp = cpvforangle(-rotSpeed*dt);
+	cpBodySetVel(body, cpvrotate(cpBodyGetVel(body),dirUp));
+}
+
+static void pitch_down(cpBody *body, float rotSpeed)
+{
+	cpVect dirDown = cpvforangle(rotSpeed*dt);
+	cpBodySetVel(body, cpvrotate(cpBodyGetVel(body),dirDown));
 }
 
 /**
@@ -244,7 +317,7 @@ static void tmp_shoot(object *obj)
 {
 	temp = (struct player*)obj;
 	//TMP shooting settings
-	static const float cooldown = 0.04f;
+	static const float cooldown = 0.15f;
 	
 	if (timer < cooldown) {
 		return;
@@ -256,6 +329,22 @@ static void tmp_shoot(object *obj)
 		bullet_init(temp->obj.body->p,cpvforangle(cpBodyGetAngle(temp->obj.body) + (M_PI/70)*((i+1) - (temp->gun_level-i))),ID_BULLET_PLAYER);
 	}
 }
+static void tmp_shoot_dir(cpVect pos, cpVect v)
+{
+	//TMP shooting settings
+	static const float cooldown = 0.1f;
+
+	if (timer < cooldown) {
+		return;
+	}
+	timer = 0;
+	//bullet_init(temp->body->p,cpvforangle(cpBodyGetAngle(temp->body)),ID_BULLET_PLAYER);
+	int i;
+	for(i=0; i < temp->gun_level;i++){
+		bullet_init(pos,cpvforangle(cpvtoangle(v) + (M_PI/70)*((i+1) - (temp->gun_level-i))),ID_BULLET_PLAYER);
+	}
+}
+
 
 static void player_destroy(object *obj)
 {
