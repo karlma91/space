@@ -18,7 +18,7 @@ static int parse_color_step(mxml_node_t *node, emitter *e);
 static int parse_range(mxml_node_t *node, range *r);
 static int parse_value(mxml_node_t *node, float *v);
 static int parse_bool(mxml_node_t *node,char *name, int *v);
-static int parse_string(mxml_node_t *node, char *name, char *c);
+static int parse_string(mxml_node_t *node, char *name, char **c);
 
 /**
  * emitter functions
@@ -422,9 +422,11 @@ static int read_emitter_from_file (emitter *emi,char *filename)
         		 if(TESTNAME("system")){
         			 parse_bool(node,"additive",&(emi->additive));
         		 }else if(TESTNAME("emitter")){
-        			 char *c;
-        			 parse_string(node,"imgName",c);
-        			 emi->texture_id = texture_load(c);
+        			 char *(spint[1]);
+        			 parse_string(node,"imageName",spint);
+        			 if(*spint != NULL){
+        				 emi->texture_id = texture_load(*spint);
+        			 }
         			 parse_bool(node,"useAdditive",&(emi->additive));
         		 }else if(TESTNAME("spawnInterval")){
         			 parse_range(node,&(emi->spawn_interval));
@@ -557,12 +559,12 @@ static int parse_bool(mxml_node_t *node, char *name, int *v)
  * Parses the atributes of a node to a value v
  * return 0 on ok, else -1
  */
-static int parse_string(mxml_node_t *node, char *name, char *c)
+static int parse_string(mxml_node_t *node, char *name, char **c)
 {
     int k;
     for (k = 0; k < node->value.element.num_attrs; k++){
     	if(strcmp(node->value.element.attrs[k].name, name) == 0){
-    		c = node->value.element.attrs[k].value;
+    		*c = (node->value.element.attrs[k].value);
     	}
     }
     return 0;
