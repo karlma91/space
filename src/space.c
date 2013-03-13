@@ -236,6 +236,8 @@ static void SPACE_update()
 	}else if(keys[SDLK_F11]){
 		game_time = currentlvl->timelimit;
 		return;
+	}else if(keys[SDLK_F8]){
+		particles_init();
 	}
 
 	/*
@@ -494,9 +496,20 @@ static void SPACE_draw()
 
 		struct player *player = ((struct player*)objects_first(ID_PLAYER));
 
+		/* simple score animation */
 		char score_temp[20];
-		sprintf(score_temp,"%d",player->score);
+		static int score_anim = 0;
+		static int score_adder = 1;
+		if (score_anim + score_adder < player->score) {
+			score_anim += score_adder;
+			++score_adder;
+		} else {
+			score_anim = player->score;
+			score_adder = 1;
+		}
+		sprintf(score_temp,"%d",score_anim);
 		font_drawText(-WIDTH/2+20,HEIGHT/2 - 45,score_temp);
+
 
 		setTextSize(10);
 		char particles_temp[20];

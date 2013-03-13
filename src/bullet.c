@@ -58,7 +58,7 @@ object *bullet_init(cpVect pos, cpVect dir, int type)
 		temp->body = cpSpaceAddBody(space, cpBodyNew(1, moment));
 		cpBodySetPos(temp->body, cpvadd(pos, cpvmult(dir,60)));
 		cpBodySetUserData(temp->body, (object*)temp);
-		cpBodySetVel(temp->body,cpvmult(dir,1500));
+		cpBodySetVel(temp->body,cpvmult(dir,3000));
 		temp->body->velocity_func = bulletVelocityFunc;
 
 		temp->shape = cpSpaceAddShape(space, cpCircleShapeNew(temp->body, 5, cpvzero));

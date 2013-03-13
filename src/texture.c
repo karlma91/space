@@ -91,11 +91,14 @@ static int texture_from_name(char *file)
 extern int texture_init()
 {
 	TEX_CLOUD = texture_load("cloud.png");
+	TEX_CLOUD_ULQ = texture_load("cloud_ultralow.png");
+	TEX_CLOUD_LQ = texture_load("cloud_low.png");
+	TEX_CLOUD = texture_load("cloud.png");
 	TEX_WHEEL   = texture_load("wheel.png");
 	TEX_DOT     = texture_load("dot.png");
 	TEX_GLOW    = texture_load("glow.png");
 	TEX_GLOWDOT = texture_load("glowdot.png");
-	TEX_PLAYER = texture_load("glowdot.png");
+	TEX_PLAYER = texture_load("player.png");
 
 	return 0;
 }

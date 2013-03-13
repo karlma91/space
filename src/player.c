@@ -39,7 +39,7 @@ static int controll_mode = 2;
 
 static void normal_control(); //1
 static void arcade_control(); //2
-static void tmp_shoot_dir(cpVect pos, cpVect v);
+static void tmp_shoot_dir(object *obj, float v);
 
 static void pitch_up(cpBody *body, float rotSpeed);
 static void pitch_down(cpBody *body, float rotSpeed);
@@ -236,48 +236,103 @@ static void normal_control()
 	if(keys[SDLK_a]) cpBodyApplyForce(temp->obj.body,cpvmult(cpBodyGetRot(temp->obj.body),-accel*dt),cpvzero);
 }
 
+//TODO move this method to objects.c?
+static float turn_toangle(float from_angle, float to_angle, float step_size)
+{
+	from_angle += from_angle >= (2*M_PI) ? -(2*M_PI) : from_angle < 0 ? (2*M_PI) : 0;
+
+	if (to_angle < from_angle - step_size)
+		from_angle += (from_angle - to_angle) < M_PI ? -step_size : +step_size;
+	else if (to_angle > from_angle + step_size)
+		from_angle += (to_angle - from_angle) < M_PI ? +step_size : -step_size;
+	else
+		from_angle = to_angle;
+
+	return from_angle;
+}
+
+//TODO CLEANUP!
+#define DIR_E 0
+#define DIR_NE 1
+#define DIR_N 2
+#define DIR_NW 3
+#define DIR_W 4
+#define DIR_SW 5
+#define DIR_S 6
+#define DIR_SE 7
+
+static const float dir8[8] = {
+		M_PI_4*0,
+		M_PI_4*1,
+		M_PI_4*2,
+		M_PI_4*3,
+		M_PI_4*4,
+		M_PI_4*5,
+		M_PI_4*6,
+		M_PI_4*7,
+};
+
+
 static void arcade_control()
 {
 
+	float player_angle = cpBodyGetAngle(temp->obj.body);
+	float player_angle_target;
+	int angle_index = -1;
+
+	if (keys[SDLK_w])
+			if (keys[SDLK_a])
+				angle_index = DIR_NW;
+			else if (keys[SDLK_d])
+				angle_index = DIR_NE;
+			else
+				angle_index = DIR_N;
+	else if (keys[SDLK_s])
+		if (keys[SDLK_a])
+			angle_index = DIR_SW;
+		else if (keys[SDLK_d])
+			angle_index = DIR_SE;
+		else
+			angle_index = DIR_S;
+	else if (keys[SDLK_a])
+		angle_index = DIR_W;
+	else if (keys[SDLK_d])
+		angle_index = DIR_E;
+	else
+		angle_index = -1;
+
 	cpFloat speed = 700;
 
-	cpVect vel = cpv(0,0.01);
-	int pressed = 0;
-	if(keys[SDLK_w]) {
-		vel = cpvadd(vel, cpvmult(cpv(0,1), speed));
-		pressed=1;
-	}else if(keys[SDLK_s]) {
-		vel = cpvadd(vel,cpvmult(cpv(0,-1), speed));
-		pressed=1;
-	}
-	if(keys[SDLK_a]) {
-		vel = cpvadd(vel, cpvmult(cpv(-1,0), speed));
-		pressed=1;
-	}else if(keys[SDLK_d]) {
-		vel = cpvadd(vel, cpvmult(cpv(1,0), speed));
-		pressed=1;
-	}
-	if(pressed){
-		cpBodySetVel(temp->obj.body, vel);
+	if (angle_index != -1) {
+		player_angle_target = dir8[angle_index];
+		float dir_step = (1 * 2*M_PI) * dt; // 1 rps
+		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
+
+		cpBodySetVel(temp->obj.body, cpvmult(cpvforangle(player_angle),speed));
 	}
 
 	cpBodySetAngle(temp->obj.body, cpvtoangle(cpBodyGetVel(temp->obj.body)));
 	cpSpaceReindexShapesForBody(space, temp->obj.body);
 
-	cpVect shoot_dir = cpv(0,0);
-	if(keys[SDLK_UP]) {
-		shoot_dir = cpvadd(shoot_dir, cpv(0,1));
-	}else if(keys[SDLK_DOWN]) {
-		shoot_dir = cpvadd(shoot_dir, cpv(0,-1));
-	}
-	if(keys[SDLK_LEFT]) {
-		shoot_dir = cpvadd(shoot_dir, cpv(-1,0));
-	}else if(keys[SDLK_RIGHT]) {
-		shoot_dir = cpvadd(shoot_dir, cpv(1,0));
-	}
 
-	if(shoot_dir.x != 0 || shoot_dir.y != 0){
-		tmp_shoot_dir(temp->obj.body->p,cpvrotate(cpBodyGetVel(temp->obj.body),shoot_dir));
+	static float aim_angle = 0;
+	float aim_angle_target = 0;
+
+
+#define KEY_EAST (keys[SDLK_RIGHT])
+#define KEY_NORTH (keys[SDLK_UP])
+#define KEY_WEST  (keys[SDLK_LEFT])
+#define KEY_SOUTH (keys[SDLK_DOWN])
+
+	angle_index = KEY_NORTH ? (KEY_EAST ? DIR_NE : (KEY_WEST ? DIR_NW : DIR_N)) : KEY_SOUTH ? (KEY_EAST ? DIR_SE : (KEY_WEST ? DIR_SW : DIR_S)) : (KEY_EAST ? DIR_E : (KEY_WEST ? DIR_W : -1));
+
+	if (angle_index != -1) {
+		aim_angle_target = dir8[angle_index];
+		float dir_step = (0.5f * 2*M_PI) * dt; // 2 rps
+
+		aim_angle = turn_toangle(aim_angle,aim_angle_target,dir_step);
+
+		tmp_shoot_dir((object *)temp, aim_angle);
 	}
 }
 
@@ -341,10 +396,10 @@ static void tmp_shoot(object *obj)
 		bullet_init(temp->obj.body->p,cpvforangle(cpBodyGetAngle(temp->obj.body) + (M_PI/70)*((i+1) - (temp->gun_level-i))),ID_BULLET_PLAYER);
 	}
 }
-static void tmp_shoot_dir(cpVect pos, cpVect v)
+static void tmp_shoot_dir(object *obj, float v)
 {
 	//TMP shooting settings
-	static const float cooldown = 0.1f;
+	static const float cooldown = 0.05f;
 
 	if (timer < cooldown) {
 		return;
@@ -353,7 +408,7 @@ static void tmp_shoot_dir(cpVect pos, cpVect v)
 	//bullet_init(temp->body->p,cpvforangle(cpBodyGetAngle(temp->body)),ID_BULLET_PLAYER);
 	int i;
 	for(i=0; i < temp->gun_level;i++){
-		bullet_init(pos,cpvforangle(cpvtoangle(v) + (M_PI/70)*((i+1) - (temp->gun_level-i))),ID_BULLET_PLAYER);
+		bullet_init(obj->body->p,cpvforangle(v + (M_PI/70)*((i+1) - (temp->gun_level-i))),ID_BULLET_PLAYER);
 	}
 }
 
