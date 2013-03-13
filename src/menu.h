@@ -6,7 +6,7 @@
 extern state state_menu;
 void change_current_menu(int menu);
 
-enum MENU_ID{
+enum MENU_ID{ //TODO: standardise names
 	MAIN_MENU_ID,
 	INGAME_MENU_ID
 };

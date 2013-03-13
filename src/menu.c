@@ -128,18 +128,21 @@ static void menu_draw()
 static void mainmenu_func()
 {
 	switch (select_id) {
-	case 0:
+	case 0: //START GAME
 		space_init_level(1,1);
 		currentState = &state_space;
 		curMenu = &ingameMenu;
 		break;
-	case 1:
+	case 1: //LEVEL SELECT
 		currentState = &state_levelselect;
 		break;
-	case 2:
+	case 2: //HIGHSCORE
 		currentState = &state_gameover;
+		gameover_setstate(show_highscore);
 		break;
-	case 3:
+	case 3: //CREDITS
+		break;
+	case 4: //EXIT
 		main_stop();
 		break;
 	default:
@@ -150,10 +153,10 @@ static void mainmenu_func()
 static void optionmenu_func()
 {
 	switch (select_id) {
-	case 0:
+	case 0: //RESUME GAME
 		currentState = &state_space;
 		break;
-	case 1:
+	case 1: //RESTART GAME
 		currentState = &state_space;
 		space_init_level(1,1);
 		break;

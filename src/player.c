@@ -41,8 +41,8 @@ static void normal_control(); //1
 static void arcade_control(); //2
 static void tmp_shoot_dir(object *obj, float v);
 
-static void pitch_up(cpBody *body, float rotSpeed);
-static void pitch_down(cpBody *body, float rotSpeed);
+//static void pitch_up(cpBody *body, float rotSpeed);
+//static void pitch_down(cpBody *body, float rotSpeed);
 
 
 struct obj_type type_player = {
@@ -146,7 +146,7 @@ static void player_update(object *obj)
 	//cpFloat pangvel = cpBodyGetAngVel(temp->body);
 	//cpBodySetAngVel(temp->body, pangvel*0.9);
 	//cpVect pvel = cpBodyGetVel(obj->body);
-	
+
 	//update physics and player
 	cpVect rot = cpBodyGetRot(temp->obj.body);
 	rot = cpvmult(rot, 10000);
@@ -164,8 +164,6 @@ static void player_update(object *obj)
 
 static void player_controls(object *obj)
 {
-
-
 		switch(controll_mode){
 			case 1:
 				normal_control();
@@ -199,10 +197,6 @@ static void player_controls(object *obj)
 			cpBodySetVelLimit(temp->obj.body,5000);
 		}
 
-		if (keys[SDLK_SPACE]) {
-			tmp_shoot(obj);
-		}
-
 		if (keys[SDLK_x]) {
 			particles_add_explosion(cpBodyGetPos(temp->obj.body),0.5f,4000, 1000,200);
 		}
@@ -224,21 +218,27 @@ static void normal_control()
 	cpFloat cspeed = cpvlength(cpBodyGetVel(temp->obj.body));
 	/* Player movement */
 	if(keys[SDLK_w] && cspeed > 50) {
-		pitch_up((temp->obj.body),temp->rotation_speed);
+		//pitch_up((temp->obj.body),temp->rotation_speed);
 	}
 	if(keys[SDLK_s] && cspeed > 50) {
-		pitch_down((temp->obj.body),temp->rotation_speed);
+		//pitch_down((temp->obj.body),temp->rotation_speed);
 	}
 	cpBodySetAngle(temp->obj.body, cpvtoangle(cpBodyGetVel(temp->obj.body)));
 	cpSpaceReindexShapesForBody(space, temp->obj.body);
 
 	if(keys[SDLK_d]) cpBodyApplyForce(temp->obj.body,cpvmult(cpBodyGetRot(temp->obj.body),accel*dt),cpvzero);
 	if(keys[SDLK_a]) cpBodyApplyForce(temp->obj.body,cpvmult(cpBodyGetRot(temp->obj.body),-accel*dt),cpvzero);
+
+	if (keys[SDLK_SPACE]) {
+		tmp_shoot(temp);
+	}
 }
 
 //TODO move this method to objects.c?
 static float turn_toangle(float from_angle, float to_angle, float step_size)
 {
+	//TODO fix oscillation when to_angle is around 0
+	//TODO possible fix?: consider including step_size in some way in the ternary tests
 	from_angle += from_angle >= (2*M_PI) ? -(2*M_PI) : from_angle < 0 ? (2*M_PI) : 0;
 
 	if (to_angle < from_angle - step_size)
@@ -250,60 +250,39 @@ static float turn_toangle(float from_angle, float to_angle, float step_size)
 
 	return from_angle;
 }
-
-//TODO CLEANUP!
-#define DIR_E 0
-#define DIR_NE 1
-#define DIR_N 2
-#define DIR_NW 3
-#define DIR_W 4
-#define DIR_SW 5
-#define DIR_S 6
-#define DIR_SE 7
+typedef enum {
+	DIR_E, DIR_NE, DIR_N, DIR_NW, DIR_W, DIR_SW, DIR_S, DIR_SE, DIR_NONE = -1
+} Direction;
 
 static const float dir8[8] = {
-		M_PI_4*0,
-		M_PI_4*1,
-		M_PI_4*2,
-		M_PI_4*3,
-		M_PI_4*4,
-		M_PI_4*5,
-		M_PI_4*6,
-		M_PI_4*7,
+		M_PI/4*0,
+		M_PI/4*1,
+		M_PI/4*2,
+		M_PI/4*3,
+		M_PI/4*4,
+		M_PI/4*5,
+		M_PI/4*6,
+		M_PI/4*7,
 };
 
+static inline Direction angle_index_fromkeys(SDLKey key_left, SDLKey key_up, SDLKey key_right, SDLKey key_down)
+{
+	return keys[key_up] ? (keys[key_right] ? DIR_NE : (keys[key_left] ? DIR_NW : DIR_N)) :
+		 keys[key_down] ? (keys[key_right] ? DIR_SE : (keys[key_left] ? DIR_SW : DIR_S)) :
+		(keys[key_right] ? DIR_E : (keys[key_left] ? DIR_W : DIR_NONE));
+}
 
 static void arcade_control()
 {
-
 	float player_angle = cpBodyGetAngle(temp->obj.body);
 	float player_angle_target;
-	int angle_index = -1;
+	Direction angle_index = -1;
 
-	if (keys[SDLK_w])
-			if (keys[SDLK_a])
-				angle_index = DIR_NW;
-			else if (keys[SDLK_d])
-				angle_index = DIR_NE;
-			else
-				angle_index = DIR_N;
-	else if (keys[SDLK_s])
-		if (keys[SDLK_a])
-			angle_index = DIR_SW;
-		else if (keys[SDLK_d])
-			angle_index = DIR_SE;
-		else
-			angle_index = DIR_S;
-	else if (keys[SDLK_a])
-		angle_index = DIR_W;
-	else if (keys[SDLK_d])
-		angle_index = DIR_E;
-	else
-		angle_index = -1;
+	angle_index = angle_index_fromkeys(SDLK_a, SDLK_w, SDLK_d, SDLK_s);
 
 	cpFloat speed = 700;
 
-	if (angle_index != -1) {
+	if (angle_index != DIR_NONE) {
 		player_angle_target = dir8[angle_index];
 		float dir_step = (1 * 2*M_PI) * dt; // 1 rps
 		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
@@ -314,24 +293,15 @@ static void arcade_control()
 	cpBodySetAngle(temp->obj.body, cpvtoangle(cpBodyGetVel(temp->obj.body)));
 	cpSpaceReindexShapesForBody(space, temp->obj.body);
 
-
 	static float aim_angle = 0;
 	float aim_angle_target = 0;
 
+	angle_index = angle_index_fromkeys(SDLK_LEFT, SDLK_UP, SDLK_RIGHT, SDLK_DOWN);
 
-#define KEY_EAST (keys[SDLK_RIGHT])
-#define KEY_NORTH (keys[SDLK_UP])
-#define KEY_WEST  (keys[SDLK_LEFT])
-#define KEY_SOUTH (keys[SDLK_DOWN])
-
-	angle_index = KEY_NORTH ? (KEY_EAST ? DIR_NE : (KEY_WEST ? DIR_NW : DIR_N)) : KEY_SOUTH ? (KEY_EAST ? DIR_SE : (KEY_WEST ? DIR_SW : DIR_S)) : (KEY_EAST ? DIR_E : (KEY_WEST ? DIR_W : -1));
-
-	if (angle_index != -1) {
+	if (angle_index != DIR_NONE) {
 		aim_angle_target = dir8[angle_index];
-		float dir_step = (0.5f * 2*M_PI) * dt; // 2 rps
-
+		float dir_step = (0.5f * 2*M_PI) * dt; // 0.5 rps
 		aim_angle = turn_toangle(aim_angle,aim_angle_target,dir_step);
-
 		tmp_shoot_dir((object *)temp, aim_angle);
 	}
 }
@@ -385,7 +355,7 @@ static void tmp_shoot(object *obj)
 	temp = (struct player*)obj;
 	//TMP shooting settings
 	static const float cooldown = 0.15f;
-	
+
 	if (timer < cooldown) {
 		return;
 	}

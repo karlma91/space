@@ -175,13 +175,23 @@ static void level_player_dead()
 	if(state_timer > 3){
 		lvl_cleared=0;
 		currentState = &state_gameover;
-		struct player *player = (struct player*)objects_first(ID_PLAYER);
+		gameover_setstate(enter_name);
 		//change_state(LEVEL_TRANSITION);
 	}
 }
 static void level_cleared()
 {
+	//TODO: add a 3 seconds animation of remaining time being added to score
+	int time_remaining = (currentlvl->timelimit - game_time + 0.5f);
+
+	if (time_remaining > 0) {
+		struct player *player = (struct player *)objects_first(ID_PLAYER);
+		player->score += time_remaining * 150; //Time bonus (150 * sec)
+		game_time = currentlvl->timelimit;
+	}
+
 	update_all();
+
 	if(state_timer > 3){
 		lvl_cleared=1;
 		change_state(LEVEL_TRANSITION);
@@ -189,11 +199,18 @@ static void level_cleared()
 }
 static void level_transition()
 {
-
 	if(state_timer > 1){
 		//space_init_level(1,1);
 		if (lvl_cleared==1) {
-			space_init_level(1,(currentlvl->deck-1+1)%3+1); //TODO TMP
+			//TODO remove tmp next level
+			int next_lvl = currentlvl->deck + 1;
+			//TODO WARNING: final level index hard-coded!
+			if (next_lvl > 3) {
+				currentState = &state_gameover;
+				gameover_setstate(GAMEOVER_WIN);
+			} else {
+				space_init_level(1,next_lvl); //TODO TMP
+			}
 		} else {
 			//space_init_level(1,1); //TODO TMP
 		}
@@ -458,7 +475,7 @@ static void update_camera_position()
 
 static void SPACE_draw()
 {
-	
+
 	/* draw background */
 	if(!second_draw){
 		drawStars();
@@ -468,7 +485,7 @@ static void SPACE_draw()
 	glLoadIdentity();
 	glScalef(cam_zoom,cam_zoom,1);
 	glTranslatef(-cam_center_x, -cam_center_y, 0.0f);
-	
+
 
 	/* draw all objects */
 	setTextAngle(0);
@@ -502,7 +519,7 @@ static void SPACE_draw()
 		static int score_adder = 1;
 		if (score_anim + score_adder < player->score) {
 			score_anim += score_adder;
-			++score_adder;
+			score_adder += 11;
 		} else {
 			score_anim = player->score;
 			score_adder = 1;
@@ -603,10 +620,10 @@ static void render_objects(object *obj)
 static void drawStars()
 {
 	glPushMatrix();
-	
+
 	glScalef(0.8f * cam_zoom,0.8f * cam_zoom, 1);
 	glTranslatef(-cam_center_x*0.5,-cam_center_y*0.5,0);
-	
+
 	glColor3f(1,1,1);
 	glBegin(GL_QUADS);
 	int i;
@@ -620,7 +637,7 @@ static void drawStars()
 		glVertex2f(star_x - size, star_y + size);
 	}
 	glEnd();
-	
+
 	glPopMatrix();
 }
 
@@ -640,11 +657,15 @@ void space_init_level(int space_station, int deck)
 
 	static struct player *player;
 
+
 	if(player==NULL){
 		player = (struct player*)player_init();
 	} else {
 		player->hp = player->param->max_hp;
 		player->disable = 0;
+		if (space_station == 1 && deck == 1) { // reset player score if level 1 is initializing
+			player->score = 0;
+		}
 	}
 
 	objects_iterate(func);

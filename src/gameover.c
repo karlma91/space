@@ -50,30 +50,28 @@ static void gameover_init()
 	highscorelist_readfile(list,"bin/data/highscores");
 }
 
-enum gameover_state_ {
-	enter_name,
-	confirm_name,
-	show_highscore
-};
-
-static int gameover_state = enter_name;
+static enum gameover_state gameover_state = enter_name;
 
 static int i = 0;
-static void gameover_update()
-{
+static int win = 0; //TMP solution for win screens
+
+static void gameover_update() {
+/*{ //DEBUG CODE
 	if (keys[SDLK_RETURN]) {
 		gameover_state = (1+gameover_state)%3;
 		keys[SDLK_RETURN] = 0;
 		return;
 	}
-
+*/
 	static float key_dt = 0;
 	static float key_ddt = 0.25;
 	static const float key_ddt_min = 0.12f;
 
 	switch(gameover_state) {
+	case GAMEOVER_WIN:
+		win = 1;
+		/* no break */
 	case enter_name:
-
 		if (keys[SDLK_UP]) {
 			if (key_dt<=0) {
 				key_dt = key_ddt;
@@ -95,10 +93,14 @@ static void gameover_update()
 		key_dt -= dt;
 
 		if (keys[SDLK_RIGHT]) {
-			if (++i >= MAX_NAME_LENGTH) i -= MAX_NAME_LENGTH;
+			if (++i >= MAX_NAME_LENGTH) {
+				i = 0;
+				gameover_state = confirm_name;
+				win = 0;
+			}
 			keys[SDLK_RIGHT] = 0;
 		} else if (keys[SDLK_LEFT]) {
-			if (--i < 0) i += MAX_NAME_LENGTH;
+			if (i > 0) --i;
 			keys[SDLK_LEFT] = 0;
 		}
 
@@ -117,6 +119,7 @@ static void gameover_update()
 	case show_highscore:
 		if (keys[SDLK_ESCAPE]) {
 			currentState = &state_menu;
+			change_current_menu(MAIN_MENU_ID);
 			keys[SDLK_ESCAPE] = 0;
 		}
 		break;
@@ -132,21 +135,35 @@ static void gameover_draw()
 	setTextSize(80);
 	setTextAlign(TEXT_CENTER);
 	glColor_from_color(draw_col_rainbow((int)(timer*1000)));
-	font_drawText(0,0.4f*HEIGHT, "GAME OVER");
+
+	if (gameover_state != show_highscore) {
+		if (win)
+			font_drawText(0,0.4f*HEIGHT, "YOU WON");
+		else
+			font_drawText(0,0.4f*HEIGHT, "GAME OVER");
+	}
 	setTextSize(60);
 
 	switch(gameover_state) {
+	case GAMEOVER_WIN:
+		/*no break*/
 	case enter_name:
 		font_drawText(0,0, &input[0]);
 		font_drawText(1.5f*60*(i-2+0.5f),-60/4, "_");
 		break;
 	case confirm_name:
 		font_drawText(0,0, &input[0]);
-		setTextSize(30);
-		if (timer<1) font_drawText(0,-100,"PRESS RIGHT TO CONFIRM"); else if(timer>=2) timer=0;
+		setTextSize(25);
+		if (timer<1) {
+			font_drawText(200,-100,"RIGHT TO CONFIRM");
+			font_drawText(-200,-150,"LEFT TO RENAME");
+		} else if(timer>=2) timer=0;
 		break;
 	case show_highscore:
 		draw_highscore();
+		setTextSize(80);
+		setTextAlign(TEXT_CENTER);
+		font_drawText(0,0.4f*HEIGHT, "HIGHSCORES");
 		break;
 	}
 }
@@ -193,4 +210,10 @@ static void draw_highscore()
 		sprintf(temp,"%2d %-5s %10d         %02d-%02d-%02d", (i+1), score.name, score.score,tmm->tm_mday,tmm->tm_mon+1,tmm->tm_year%100);
 		font_drawText(-10*40*1.5f, 300 - i*50*1.5f, temp);
 	}
+}
+
+int gameover_setstate(enum gameover_state state)
+{
+	gameover_state = state;
+	return 0;
 }
