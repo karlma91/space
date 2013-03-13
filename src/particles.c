@@ -280,7 +280,7 @@ static void draw_emitter(emitter *em)
 
 			glScalef(p->size,p->size,1);
 
-			texture_bind(TEX_CLOUD);
+			texture_bind(TEX_CLOUD_LQ);
 
 			glBegin(GL_QUAD_STRIP);
 			glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);

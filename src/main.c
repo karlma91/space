@@ -124,7 +124,7 @@ static void initGL()
 	glMatrixMode(GL_MODELVIEW);
 
 	/* set the clear color to gray */
-	glClearColor(0.0, 0.0 ,0.0, 0);
+	glClearColor(0,0.08,0.15, 1);
 
 	//enables gldraw array
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -223,7 +223,7 @@ static int main_run()
 		dt = deltaTime;
 		mdt = dt*1000;
 		//Draw
-		glClearColor(0.0f,0.0f,0.0f,0.0f);
+		//glClearColor(0.0f,0.0f,0.0f,0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
 
