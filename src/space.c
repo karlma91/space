@@ -503,8 +503,8 @@ static void SPACE_draw()
 		char particles2_temp[20];
 		char particles3_temp[20];
 		sprintf(particles_temp,"%d",particles_active);
-		sprintf(particles2_temp,"%d",available_counter);
-		sprintf(particles3_temp,"%d",(available_counter + particles_active));
+		sprintf(particles2_temp,"%d",available_particle_counter);
+		sprintf(particles3_temp,"%d",(available_particle_counter + particles_active));
 		font_drawText(-WIDTH/2+20,HEIGHT/2 - 80,particles_temp);
 		font_drawText(-WIDTH/2+20,HEIGHT/2 - 110,particles2_temp);
 		font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles3_temp);

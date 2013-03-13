@@ -86,6 +86,7 @@ object *player_init()
 	pl->score = 0;
 	pl->disable = 0;
 	pl->rotation_speed = 8;
+	pl->e = particles_get_emitter(EMITTER_FLAME);
 
 	/* make and add new body */
 	pl->obj.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius/2)));
@@ -149,8 +150,11 @@ static void player_update(object *obj)
 	//update physics and player
 	cpVect rot = cpBodyGetRot(temp->obj.body);
 	rot = cpvmult(rot, 10000);
-	cpBodySetForce(temp->obj.body, cpv(0,0));
-	cpBodySetTorque(temp->obj.body, 0);
+	cpBodySetForce(obj->body, cpv(0,0));
+	cpBodySetTorque(obj->body, 0);
+
+	temp->e->x = obj->body->p.x;
+	temp->e->y = obj->body->p.y;
 
 	if(temp->disable == 0){
 		player_controls(obj);
@@ -201,6 +205,14 @@ static void player_controls(object *obj)
 
 		if (keys[SDLK_x]) {
 			particles_add_explosion(cpBodyGetPos(temp->obj.body),0.5f,4000, 1000,200);
+		}
+		if (keys[SDLK_b]) {
+			emitter *t = particles_get_emitter(EMITTER_EXPLOTION);
+			if(t != NULL){
+				t->x = obj->body->p.x;
+				t->y = obj->body->p.y;
+			}
+			keys[SDLK_b] = 0;
 		}
 }
 

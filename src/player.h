@@ -3,6 +3,7 @@
 
 #include "chipmunk.h" /* Chipmunk physics library */
 #include "objects.h"  /* Game components */
+#include "particles.h"
 
 struct player_param;
 
@@ -19,6 +20,7 @@ struct player{
 	int gun_level;
 	int score;
 	float rotation_speed;
+	emitter *e;
 
 	/* parameters */
 	struct player_param *param;
