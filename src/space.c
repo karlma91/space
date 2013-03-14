@@ -654,7 +654,7 @@ struct robotarm_param robot_temp = {200};
 
 void space_init_level(int space_station, int deck)
 {
-	particles_removeall();
+	particles_clear();
 
 	static struct player *player;
 

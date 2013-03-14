@@ -384,11 +384,6 @@ void particles_draw()
 	draw_all_particles();
 }
 
-void particles_removeall()
-{
-	//TODO:
-}
-
 void particles_update()
 {
 	update_all_particles();

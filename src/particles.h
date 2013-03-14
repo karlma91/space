@@ -104,7 +104,6 @@ void particles_destroy();
 void particles_add_explosion(cpVect v, float time, int speed, int numPar, int color);
 void particles_draw();
 void particles_update();
-void particles_removeall();
 void particles_release_emitter(emitter* e);
 void particles_clear();
 emitter *particles_get_emitter(int type);

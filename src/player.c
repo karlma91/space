@@ -241,13 +241,31 @@ static float turn_toangle(float from_angle, float to_angle, float step_size)
 	//TODO possible fix?: consider including step_size in some way in the ternary tests
 	from_angle += from_angle >= (2*M_PI) ? -(2*M_PI) : from_angle < 0 ? (2*M_PI) : 0;
 
-	if (to_angle < from_angle - step_size)
-		from_angle += (from_angle - to_angle) < M_PI ? -step_size : +step_size;
-	else if (to_angle > from_angle + step_size)
-		from_angle += (to_angle - from_angle) < M_PI ? +step_size : -step_size;
-	else
+	if (to_angle < from_angle - step_size) {
+		if ((from_angle - to_angle) < M_PI) {
+			from_angle -= step_size;
+		} else {
+			if (2*M_PI - (from_angle - to_angle) < step_size) {
+				from_angle = to_angle;
+			} else {
+				from_angle += step_size;
+			}
+		}
+	} else if (to_angle > from_angle + step_size) {
+		if ((to_angle - from_angle) < M_PI) {
+			from_angle += step_size;
+		} else {
+			if (2*M_PI - (to_angle - from_angle) < step_size) {
+				from_angle = to_angle;
+			} else {
+				from_angle -= step_size;
+			}
+		}
+	} else {
 		from_angle = to_angle;
+	}
 
+	fprintf(stderr,"angle: %0.4f\n",from_angle*180/M_PI);
 	return from_angle;
 }
 typedef enum {
