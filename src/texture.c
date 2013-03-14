@@ -93,7 +93,6 @@ extern int texture_init()
 	TEX_CLOUD = texture_load("cloud.png");
 	TEX_CLOUD_ULQ = texture_load("cloud_ultralow.png");
 	TEX_CLOUD_LQ = texture_load("cloud_low.png");
-	TEX_CLOUD = texture_load("cloud.png");
 	TEX_WHEEL   = texture_load("wheel.png");
 	TEX_DOT     = texture_load("dot.png");
 	TEX_GLOW    = texture_load("glow.png");

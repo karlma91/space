@@ -53,27 +53,56 @@ int available_particle_counter;
 static particle *particles_in_use;
 static particle *(available_particle_stack[MAX_PARTICLES]);
 
-
+/**
+ * Resets everything and load files to templates.
+ */
 void particles_init()
 {
-    read_emitter_from_file(&(emitter_templates[EMITTER_FLAME]),"particles/flame_3.xml");
-    read_emitter_from_file(&(emitter_templates[EMITTER_EXPLOTION]),"particles/flame.xml");
-    /* sets all particles available */
-    available_particle_counter = -1;
     int i;
+    read_emitter_from_file(&(emitter_templates[EMITTER_FLAME]),"particles/flame_3.xml");
+    read_emitter_from_file(&(emitter_templates[EMITTER_EXPLOTION]),"particles/explosion_ground.xml");
+
+    /* sets in use list empty */
+    emitters_in_use_list = NULL;
+    particles_in_use = NULL;
+
+    available_particle_counter = -1;
+    /* sets all particles available */
     for(i=0; i<MAX_PARTICLES; i++){
+    	main_partice_pool[i].next = NULL;
     	set_particle_available(&(main_partice_pool[i]));
     }
     available_emitter_counter = -1;
+    /* sets all emitters available */
     for(i=0; i<MAX_EMITTERS; i++){
+    	available_emitter_stack[i] = NULL;
+    	main_emitter_pool[i].next = NULL;
     	set_emitter_available(&(main_emitter_pool[i]));
     }
 }
 
 void particles_destroy()
 {
-	//TODO
+	//TODO: no need
 }
+
+void particles_clear()
+{
+    particle *p = particles_in_use;
+    while(p){
+    	set_particle_available(p);
+    	p = p->next;
+    }
+    particles_in_use = NULL;
+
+    emitter *e = emitters_in_use_list;
+    while(e){
+    	set_emitter_available(e);
+    	e = e->next;
+    }
+    emitters_in_use_list = NULL;
+}
+
 
 emitter *particles_get_emitter(int type)
 {
@@ -108,6 +137,7 @@ void particles_release_emitter(emitter* e)
 static void set_emitter_available(emitter *e)
 {
 	e->alive = 0;
+	e->next = NULL;
 	++available_emitter_counter;
 	available_emitter_stack[available_emitter_counter] = e;
 }
@@ -151,7 +181,6 @@ void update_all_emitters(){
 		if(e->alive == 0)
 		{
 			*prev = e->next;
-			e->next = NULL;
 			set_emitter_available(e);
 			e = *prev;
 		}else{
@@ -175,7 +204,6 @@ static void update_all_particles()
 		{
 			p->alive = 0;
 			*prev = p->next;
-			p->next = NULL;
 			set_particle_available(p);
 			p = *prev;
 		}else{
@@ -333,7 +361,7 @@ static void draw_all_particles()
 
 		glScalef(p->size,p->size,1);
 
-		texture_bind(TEX_CLOUD);
+		texture_bind(em->texture_id);
 
 		glBegin(GL_QUAD_STRIP);
 		glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
@@ -368,7 +396,11 @@ void particles_update()
 }
 
 void particles_add_explosion(cpVect v, float time, int speed, int numPar, int color){
-
+	emitter *e = particles_get_emitter(EMITTER_EXPLOTION);
+	if(e){
+		e->x = v.x;
+		e->y = v.y;
+	}
 }
 
 
@@ -424,6 +456,7 @@ static int read_emitter_from_file (emitter *emi,char *filename)
         		 }else if(TESTNAME("emitter")){
         			 char *(spint[1]);
         			 parse_string(node,"imageName",spint);
+        			 fprintf(stderr, "HELLO TEXTURE: %s\n", *spint);
         			 if(*spint != NULL){
         				 emi->texture_id = texture_load(*spint);
         			 }

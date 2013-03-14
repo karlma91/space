@@ -106,6 +106,7 @@ void particles_draw();
 void particles_update();
 void particles_removeall();
 void particles_release_emitter(emitter* e);
+void particles_clear();
 emitter *particles_get_emitter(int type);
 
 extern unsigned int particles_active;

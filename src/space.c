@@ -255,6 +255,7 @@ static void SPACE_update()
 		return;
 	}else if(keys[SDLK_F8]){
 		particles_init();
+		keys[SDLK_F8] = 0;
 	}
 
 	/*
