@@ -214,7 +214,7 @@ void draw_velocity_line(cpShape *shape)
 {
 	cpCircleShape *circle = (cpCircleShape *)shape;
 	cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
-	draw_line(circle->tc.x, circle->tc.y, circle->tc.x - vel.x/32, circle->tc.y - vel.y/32, 32); //40 = 4 * radius
+	draw_line(circle->tc.x, circle->tc.y, circle->tc.x - vel.x/64, circle->tc.y - vel.y/64, 32); //40 = 4 * radius
 }
 void draw_boxshape(cpShape *shape, Color a, Color b)
 {

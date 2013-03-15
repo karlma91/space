@@ -10,6 +10,8 @@
 enum emitter_types{
 		EMITTER_FLAME,
 		EMITTER_EXPLOTION,
+		EMITTER_SPARKS,
+		EMITTER_SMOKE,
 		EMITTER_COUNT
 };
 
@@ -34,7 +36,6 @@ struct particle {
 	float y;
 	float velx;
 	float vely;
-
 	float size;
 
 	float time_alive;

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <emitter imageName="particle.png" name="Default" renderType="inherit"
 	useAdditive="true" useOriented="false">
-	<spawnInterval enabled="true" max="20.0" min="20.0" ></spawnInterval>
-	<spawnCount enabled="true" max="10.0" min="10.0" />
-	<initialLife enabled="false" max="1000" min="1000" />
-	<initialSize enabled="true" max="50.0" min="15.0" />
+	<spawnInterval enabled="true" max="70" min="50" ></spawnInterval>
+	<spawnCount enabled="true" max="1.0" min="3.0" />
+	<initialLife enabled="false" max="700" min="400" />
+	<initialSize enabled="true" max="100.0" min="50.0" />
 	<xOffset enabled="false" max="0.0" min="0.0" />
 	<yOffset enabled="false" max="0.0" min="0.0" />
 	<initialDistance enabled="false" max="0.0" min="0.0" />

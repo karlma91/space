@@ -47,7 +47,7 @@ object *tankfactory_init( int x_pos , struct tank_factory_param *param)
 
 	fac->cur = 0;
 	fac->rot = 0;
-
+	fac->smoke = particles_get_emitter(EMITTER_SMOKE);
 	fac->timer = (fac->param->spawn_delay)*0.7;
 	fac->hp = fac->param->max_hp;
 
@@ -87,6 +87,8 @@ static void update(object *fac)
 		tank_init(fac->body->p.x, temp, temp->param->t_param );
 		temp->cur += 1;
 	}
+	temp->smoke->x = fac->body->p.x;
+	temp->smoke->y = fac->body->p.y + 100;
 }
 
 static void render(object *factory)
@@ -149,6 +151,7 @@ static void destroy(object *obj)
 {
 	temp = ((struct tank_factory*)obj);
 	*obj->remove = 1;
+	particles_release_emitter(temp->smoke);
 
 	cpSpaceRemoveBody(space, obj->body);
 	cpSpaceRemoveShape(space, temp->shape);

@@ -265,9 +265,10 @@ static float turn_toangle(float from_angle, float to_angle, float step_size)
 		from_angle = to_angle;
 	}
 
-	fprintf(stderr,"angle: %0.4f\n",from_angle*180/M_PI);
+	//fprintf(stderr,"angle: %0.4f\n",from_angle*180/M_PI);
 	return from_angle;
 }
+
 typedef enum {
 	DIR_E, DIR_NE, DIR_N, DIR_NW, DIR_W, DIR_SW, DIR_S, DIR_SE, DIR_NONE = -1
 } Direction;

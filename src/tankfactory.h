@@ -3,6 +3,7 @@
 
 #include "chipmunk.h"
 #include "objects.h"
+#include "particles.h"
 
 
 /* the super tank_factory object */
@@ -24,6 +25,7 @@ struct tank_factory {
 
 	/* animation */
 	float rot;
+	emitter *smoke;
 
 	/* paramerters */
 	struct tank_factory_param *param;

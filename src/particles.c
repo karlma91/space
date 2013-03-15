@@ -61,6 +61,8 @@ void particles_init()
     int i;
     read_emitter_from_file(&(emitter_templates[EMITTER_FLAME]),"particles/flame_3.xml");
     read_emitter_from_file(&(emitter_templates[EMITTER_EXPLOTION]),"particles/explosion_ground.xml");
+    read_emitter_from_file(&(emitter_templates[EMITTER_SPARKS]),"particles/sparks.xml");
+    read_emitter_from_file(&(emitter_templates[EMITTER_SMOKE]),"particles/smoke.xml");
 
     /* sets in use list empty */
     emitters_in_use_list = NULL;
@@ -81,11 +83,25 @@ void particles_init()
     }
 }
 
+/**
+ * resets all emitters and particles
+ */
 void particles_destroy()
 {
-	//TODO: no need
+	particles_clear();
+
+	/* clears emitter list */
+	emitter *e = emitters_in_use_list;
+	while(e){
+		set_emitter_available(e);
+		e = e->next;
+	}
+	emitters_in_use_list = NULL;
 }
 
+/**
+ * resets all the active particles
+ */
 void particles_clear()
 {
     particle *p = particles_in_use;
@@ -94,13 +110,6 @@ void particles_clear()
     	p = p->next;
     }
     particles_in_use = NULL;
-
-    emitter *e = emitters_in_use_list;
-    while(e){
-    	set_emitter_available(e);
-    	e = e->next;
-    }
-    emitters_in_use_list = NULL;
 }
 
 
@@ -127,7 +136,7 @@ emitter *particles_get_emitter(int type)
 void particles_release_emitter(emitter* e)
 {
 	if(e != NULL){
-		set_emitter_available(e);
+		e->alive = 0;
 	}
 }
 
@@ -207,8 +216,8 @@ static void update_all_particles()
 			set_particle_available(p);
 			p = *prev;
 		}else{
-			p->vely -= em->gravityfactor * 0.0005f * mdt;
-			p->velx += em->windfactor * 0.0005f * mdt;
+			p->vely -= em->gravityfactor * 0.0001f * mdt;
+			p->velx += em->windfactor * 0.0001f * mdt;
 
 			particle_update_pos(p);
 
@@ -355,25 +364,29 @@ static void draw_all_particles()
 		if(em->additive){
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		}
-		glPushMatrix();
-		glTranslatef(p->x, p->y, 0.0f);
-		glRotatef(0,0,0,1);
 
-		glScalef(p->size,p->size,1);
+		if(em->rotation){
+			//float angle = (atan2(p->vely,p->velx) + M_PI)*(180/M_PI);
+			//glRotatef(angle,0,0,1);
+			draw_line(p->x,p->y,p->x + p->velx*p->size,p->y+ p->vely*p->size, p->size);
+		}else{
+			glPushMatrix();
+			glTranslatef(p->x, p->y, 0.0f);
+			glScalef(p->size,p->size,1);
 
-		texture_bind(em->texture_id);
+			texture_bind(em->texture_id);
 
-		glBegin(GL_QUAD_STRIP);
-		glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
-		glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
-		glTexCoord2d(1, 0); glVertex2d(0.5, -0.5);
-		glTexCoord2d(1, 1); glVertex2d(0.5, 0.5);
-		glEnd();
+			glBegin(GL_QUAD_STRIP);
+			glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
+			glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
+			glTexCoord2d(1, 0); glVertex2d(0.5, -0.5);
+			glTexCoord2d(1, 1); glVertex2d(0.5, 0.5);
+			glEnd();
 
-		glPopMatrix();
-		glPopAttrib();
-		glDisable(GL_TEXTURE_2D);
-
+			glPopMatrix();
+		}
+			glPopAttrib();
+			glDisable(GL_TEXTURE_2D);
 
 		p = p->next;
 	}
@@ -391,7 +404,7 @@ void particles_update()
 }
 
 void particles_add_explosion(cpVect v, float time, int speed, int numPar, int color){
-	emitter *e = particles_get_emitter(EMITTER_EXPLOTION);
+	emitter *e = particles_get_emitter(EMITTER_SPARKS);
 	if(e){
 		e->x = v.x;
 		e->y = v.y;
@@ -456,6 +469,7 @@ static int read_emitter_from_file (emitter *emi,char *filename)
         				 emi->texture_id = texture_load(*spint);
         			 }
         			 parse_bool(node,"useAdditive",&(emi->additive));
+        			 parse_bool(node,"useOriented",&(emi->rotation));
         		 }else if(TESTNAME("spawnInterval")){
         			 parse_range(node,&(emi->spawn_interval));
         		 }else if(TESTNAME("spawnCount")){
