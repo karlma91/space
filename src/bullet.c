@@ -102,8 +102,10 @@ static int callback_ground(cpArbiter *arb, cpSpace *space, void *unused)
 static void destroy(object *bullet)
 {
 	temp = (struct bullet*)bullet;
-	cpSpaceRemoveBody(space, temp->body);
 	cpSpaceRemoveShape(space, temp->shape);
+	cpSpaceRemoveBody(space, temp->body);
+	cpShapeFree(temp->shape);
+	cpBodyFree(temp->body);
 	*temp->remove = 1;
 	free(temp);
 	temp = NULL;

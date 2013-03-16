@@ -707,11 +707,11 @@ void space_init_level(int space_station, int deck)
 		cpSpaceRemoveStaticShape(space,ceiling);
 	}
 
-	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), 10)); // ground level at 0
+	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), 15.0f)); // ground level at 0
 	cpShapeSetFriction(floor, 1.0f);
 	cpShapeSetCollisionType(floor, ID_GROUND);
 
-	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), 10.0f));
+	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), 15.0f));
 	cpShapeSetFriction(ceiling, 1.0f);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
 

@@ -291,14 +291,33 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 }
 
 
+static void shape_from_space(cpBody *body, cpShape *shape, void *data)
+{
+    cpSpaceRemoveShape(space, shape);
+    cpShapeFree(shape);
+}
+static void constrain_from_space(cpBody *body, cpConstraint *constraint, void *data)
+{
+    cpSpaceRemoveConstraint(space, constraint);
+    cpConstraintFree(constraint);
+}
+
 static void destroy(object *obj)
 {
 	temp = ((struct tank*)obj);
-	cpSpaceRemoveBody(space, obj->body);
-	cpSpaceRemoveShape(space, temp->shape);
 
+	cpBodyEachShape(obj->body,shape_from_space,NULL);
+	cpBodyEachConstraint(obj->body,constrain_from_space,NULL);
+
+	cpSpaceRemoveBody(space, obj->body);
+	cpBodyFree(obj->body);
+
+	cpBodyEachShape(temp->wheel1,shape_from_space,NULL);
+	cpBodyEachShape(temp->wheel2,shape_from_space,NULL);
 	cpSpaceRemoveBody(space, temp->wheel1);
 	cpSpaceRemoveBody(space, temp->wheel2);
+	cpBodyFree(temp->wheel1);
+	cpBodyFree(temp->wheel2);
 
 	if(temp->factory != NULL){
 		temp->factory->cur--;

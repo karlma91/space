@@ -153,7 +153,9 @@ static void destroy(object *obj)
 	*obj->remove = 1;
 	particles_release_emitter(temp->smoke);
 
-	cpSpaceRemoveBody(space, obj->body);
 	cpSpaceRemoveShape(space, temp->shape);
+	cpSpaceRemoveBody(space, obj->body);
+	cpShapeFree(temp->shape);
+	cpBodyFree(obj->body);
 	free(obj);
 }
