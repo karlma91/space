@@ -6,6 +6,8 @@
 
 /** mini xml reader compatible with anci c */
 #include <mxml.h>
+/** helper functions for mxml **/
+#include "xmlh.h"
 
 #define MAX_PARTICLES 10000
 #define MAX_EMITTERS 10
@@ -14,12 +16,8 @@
  * parse functions
  */
 static int read_emitter_from_file (emitter *emi,char *filename);
-static int parse_color_step(mxml_node_t *node, emitter *e);
 static int parse_range(mxml_node_t *node, range *r);
-static int parse_value(mxml_node_t *node, float *v);
-static int parse_bool(mxml_node_t *node,char *name, int *v);
-static int parse_string(mxml_node_t *node, char *name, char **c);
-
+static int parse_color_step(mxml_node_t *node, emitter *e);
 /**
  * emitter functions
  */
@@ -423,7 +421,7 @@ void particles_add_explosion(cpVect v, float time, int speed, int numPar, int co
  *
  *
  */
-#define TESTNAME(s) strcmp(node->value.element.name, s) == 0
+
 
 /**
  * reads from a xml file made with pedegree slick2d particle editor
@@ -493,19 +491,19 @@ static int read_emitter_from_file (emitter *emi,char *filename)
         		     parse_range(node,&(emi->length));
         		     parse_bool(node,"enabled",&(emi->length_enabled));
         		 }else if(TESTNAME("spread")){
-        		     parse_value(node,&(emi->spread));
+        		     parse_float(node,"value", &(emi->spread));
         		 }else if(TESTNAME("angularOffset")){
-        		     parse_value(node,&(emi->angular_offset));
+        		     parse_float(node,"value",&(emi->angular_offset));
         		 }else if(TESTNAME("growthFactor")){
-        		     parse_value(node,&(emi->growthfactor));
+        		     parse_float(node,"value",&(emi->growthfactor));
         		 }else if(TESTNAME("gravityFactor")){
-        		     parse_value(node,&(emi->gravityfactor));
+        		     parse_float(node,"value",&(emi->gravityfactor));
         		 }else if(TESTNAME("windFactor")){
-        		     parse_value(node,&(emi->windfactor));
+        		     parse_float(node,"value",&(emi->windfactor));
         		 }else if(TESTNAME("startAlpha")){
-        		     parse_value(node,&(emi->startalpha));
+        		     parse_float(node,"value",&(emi->startalpha));
         		 }else if(TESTNAME("endAlpha")){
-        		     parse_value(node,&(emi->endalpha));
+        		     parse_float(node,"value",&(emi->endalpha));
         		 }else if(TESTNAME("color")){
 
         		 }else if(TESTNAME("step")){
@@ -524,92 +522,17 @@ static int read_emitter_from_file (emitter *emi,char *filename)
          return 0;
 }
 
+
+
 /**
  * Parses the atributes of a node to a range r
  * return 0 on ok, else -1
  */
 static int parse_range(mxml_node_t *node, range *r)
 {
-    int ok = 0;
-    int k;
-    for (k = 0; k < node->value.element.num_attrs; k++){
-	if(strcmp(node->value.element.attrs[k].name, "min") == 0){
-	    r->min = strtod(node->value.element.attrs[k].value,NULL);
-	    ok++;
-	}else if(strcmp(node->value.element.attrs[k].name, "max") == 0){
-	    r->max = strtod(node->value.element.attrs[k].value,NULL);
-	    ok++;
-	}
-
-    }
-    if(ok == 2){
+	parse_float(node,"min",&(r->min));
+	parse_float(node,"max",&(r->max));
 	return 0;
-    }else{
-	 fprintf(stderr,"Error parsing range in node %s  ok: %d \n", node->value.element.name,ok);
-	 return -1;
-    }
-}
-
-/**
- * Parses the atributes of a node to a value v
- * return 0 on ok, else -1
- */
-static int parse_value(mxml_node_t *node, float *v)
-{
-    int ok = 0;
-    int k;
-    for (k = 0; k < node->value.element.num_attrs; k++){
-	if(strcmp(node->value.element.attrs[k].name, "value") == 0){
-	    *v = strtod(node->value.element.attrs[k].value,NULL);
-	    ok++;
-	}
-    }
-    if(ok == 1){
-	return 0;
-    }else{
-	 fprintf(stderr,"Error parsing value in node %s \n", node->value.element.name);
-	 return -1;
-    }
-}
-/**
- * Parses the atributes of a node to a value v
- * return 0 on ok, else -1
- */
-static int parse_bool(mxml_node_t *node, char *name, int *v)
-{
-    int ok = 0;
-    int k;
-    for (k = 0; k < node->value.element.num_attrs; k++){
-    	if(strcmp(node->value.element.attrs[k].name, name) == 0){
-    		if(strcmp(node->value.element.attrs[k].value,"true")){
-    			*v = 0;
-    		}else{
-    			*v = 1;
-    		}
-    		ok++;
-    	}
-    }
-    if(ok == 1){
-    	return 0;
-    }else{
-    	fprintf(stderr,"Error parsing boolean in node %s \n", node->value.element.name);
-    	return -1;
-    }
-}
-
-/**
- * Parses the atributes of a node to a value v
- * return 0 on ok, else -1
- */
-static int parse_string(mxml_node_t *node, char *name, char **c)
-{
-    int k;
-    for (k = 0; k < node->value.element.num_attrs; k++){
-    	if(strcmp(node->value.element.attrs[k].name, name) == 0){
-    		*c = (node->value.element.attrs[k].value);
-    	}
-    }
-    return 0;
 }
 
 
@@ -620,29 +543,11 @@ static int parse_string(mxml_node_t *node, char *name, char **c)
 static int parse_color_step(mxml_node_t *node, emitter *e)
 {
     int index = e->color_counter;
-    int ok = 0;
-    int k;
-    for (k = 0; k < node->value.element.num_attrs; k++){
-	if(strcmp(node->value.element.attrs[k].name, "r") == 0){
-	    e->colors[index].r = strtod(node->value.element.attrs[k].value,NULL);
-	    ok++;
-	}else if(strcmp(node->value.element.attrs[k].name, "g") == 0){
-	    e->colors[index].g = strtod(node->value.element.attrs[k].value,NULL);
-	    ok++;
-	}else if(strcmp(node->value.element.attrs[k].name, "b") == 0){
-	    e->colors[index].b = strtod(node->value.element.attrs[k].value,NULL);
-	    ok++;
-	}else if(strcmp(node->value.element.attrs[k].name, "offset") == 0){
-	    e->colors[index].offset = strtod(node->value.element.attrs[k].value,NULL);
-	    ok++;
-	}
-    }
-    e->color_counter++;
+    (e->color_counter)++;
+    parse_float(node,"r",&(e->colors[index].r));
+    parse_float(node,"g",&(e->colors[index].g));
+    parse_float(node,"b",&(e->colors[index].b));
+    parse_float(node,"offset",&(e->colors[index].offset));
 
-    if(ok == 4){
-	return 0;
-    }else{
-	 fprintf(stderr,"Error parsing color step %s \n", node->value.element.name);
-	 return -1;
-    }
+    return 0;
 }

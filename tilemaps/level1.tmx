@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="60" height="10" tilewidth="128" tileheight="128">
  <tileset firstgid="1" name="tiles" tilewidth="128" tileheight="128">
-  <image source="../textures/tiles.png" width="1280" height="1280"/>
+  <image source="tiles.png" width="1280" height="1280"/>
  </tileset>
  <layer name="Tile Layer 1" width="60" height="10">
   <data encoding="csv">1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -16,3 +16,5 @@
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2</data>
  </layer>
 </map>
+
+

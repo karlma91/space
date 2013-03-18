@@ -16,6 +16,7 @@
 #include "draw.h"
 #include "font.h"
 #include "particles.h"
+#include "tilemap.h"
 
 /* Game components */
 #include "objects.h"
@@ -75,6 +76,11 @@ static float camera_width;
 static float cam_left_limit;
 static float cam_right_limit;
 
+
+/*
+ * TODO: put this in level
+ */
+tilemap tmpmap;
 
 /* level data */
 level *currentlvl;
@@ -336,8 +342,8 @@ static void update_objects(object *obj)
 
 		obj->type->update(obj);
 	}else{
-		obj->type->destroy(obj);
 		*(obj->remove) = 1;
+		obj->type->destroy(obj);
 	}
 }
 
@@ -490,7 +496,8 @@ static void SPACE_draw()
 
 	/* draw all objects */
 	setTextAngle(0);
-
+	/* draw tilemap */
+	tilemap_render(&(tmpmap));
 	/* super slow
 	 * TODO: make draw function for ground and roof
 	 * */
@@ -499,6 +506,7 @@ static void SPACE_draw()
 
 	/* draw particle effects */
 	particles_draw(dt);
+
 
 	if(!second_draw){
 		/* something */
@@ -733,6 +741,9 @@ static void SPACE_init()
 	space = cpSpaceNew();
 	cpSpaceSetGravity(space, gravity);
 	//cpSpaceSetDamping(space, 0.999);
+
+	//TODO: put in level.c
+	tilemap_create(&(tmpmap),"tilemaps/level1.tmx");
 
 	//init stars
 	srand(122531);

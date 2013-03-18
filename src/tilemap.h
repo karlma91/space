@@ -25,8 +25,11 @@ typedef struct tilemap {
 
     int *data; /* tilmap data array */
 
-
 }tilemap;
+
+
+void tilemap_render(tilemap *map);
+int tilemap_create (tilemap *map, char *filename);
 
 
 #endif /* TILEMAP_H_ */
