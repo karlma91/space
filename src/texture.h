@@ -1,6 +1,8 @@
 #ifndef TEXTURE_H_
 #define TEXTURE_H_
 
+#include "SDL_opengl.h"
+
 typedef struct texture_map {
 	float ax;
 	float ay;
@@ -11,7 +13,7 @@ typedef struct texture_map {
 extern int *textures;
 extern int texture_load(char *file);
 
-extern int texture_init();
+extern int texture_init(GLenum type);
 
 extern const texture_map *TEX_MAP_FULL;
 

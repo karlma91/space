@@ -133,11 +133,12 @@ static void initGL()
 	glDisable(GL_CULL_FACE);
 }
 
+SDL_Surface *screen;
+
 static int main_init()
 {
 	init_config();
 
-	SDL_Surface *screen;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
 
@@ -164,7 +165,8 @@ static int main_init()
 	initGL();
 
 	/* preload textures */
-	texture_init();
+	int color_type = screen->format->Bshift ? GL_UNSIGNED_INT_8_8_8_8 : GL_UNSIGNED_INT_8_8_8_8_REV;
+	texture_init(color_type);
 
 	error = draw_init();
 	if(error){

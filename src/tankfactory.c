@@ -87,7 +87,7 @@ static void update(object *fac)
 		tank_init(fac->body->p.x, temp, temp->param->t_param );
 		temp->cur += 1;
 	}
-	temp->smoke->x = fac->body->p.x;
+	temp->smoke->x = fac->body->p.x; //TODO fix: Caused crash on mac os x (after completing level 2, exiting to main menu, then re-enter level 2 from level select)
 	temp->smoke->y = fac->body->p.y + 100;
 }
 

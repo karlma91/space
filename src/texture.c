@@ -24,6 +24,7 @@ static char (*names)[51];
 static int tex_counter = -1;
 
 static int texture_from_name(char *file);
+static GLenum GL_ENUM_TYPE;
 
 int texture_load(char *file)
 {
@@ -61,9 +62,12 @@ int texture_load(char *file)
 
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+/*
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Surf_Return->w, Surf_Return->h, 0, GL_BGRA,
 			GL_UNSIGNED_BYTE, Surf_Return->pixels);
+*/
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Surf_Return->w, Surf_Return->h, 0, GL_BGRA,
+			GL_ENUM_TYPE, Surf_Return->pixels);
 
 	textures[tex_counter] = Tex;
 
@@ -88,8 +92,10 @@ static int texture_from_name(char *file)
 }
 
 /* NEED TO BE CALLED BEFORE ANY texture_load() CALLS! */
-extern int texture_init()
+extern int texture_init(GLenum type)
 {
+	GL_ENUM_TYPE = type;
+
 	TEX_CLOUD = texture_load("cloud.png");
 	TEX_CLOUD_ULQ = texture_load("cloud_ultralow.png");
 	TEX_CLOUD_LQ = texture_load("cloud_low.png");

@@ -44,5 +44,7 @@ extern state *currentState;
 
 extern int main_stop();
 
+#include "SDL.h"
+extern SDL_Surface *screen; //TODO TMP
 
 #endif /* MAIN_H_ */
