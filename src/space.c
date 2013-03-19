@@ -69,8 +69,8 @@ float cam_center_x = 0;
 float cam_center_y = 0;
 float cam_zoom = 1;
 
-static int cam_left;
-static int cam_right;
+int cam_left;
+int cam_right;
 
 static float camera_width;
 static float cam_left_limit;
