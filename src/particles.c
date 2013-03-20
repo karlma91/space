@@ -10,7 +10,7 @@
 #include "xmlh.h"
 
 #define MAX_PARTICLES 10000
-#define MAX_EMITTERS 10
+#define MAX_EMITTERS 20
 
 /**
  * parse functions

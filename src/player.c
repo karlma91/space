@@ -382,7 +382,7 @@ static void tmp_shoot(object *obj)
 	//bullet_init(temp->body->p,cpvforangle(cpBodyGetAngle(temp->body)),ID_BULLET_PLAYER);
 	int i;
 	for(i=0; i < temp->gun_level;i++){
-		bullet_init(temp->obj.body->p,cpvforangle(cpBodyGetAngle(temp->obj.body) + (M_PI/70)*((i+1) - (temp->gun_level-i))),ID_BULLET_PLAYER);
+		bullet_init(temp->obj.body->p,cpvforangle(cpBodyGetAngle(temp->obj.body) + (M_PI/70)*((i+1) - (temp->gun_level-i))),obj->body->v, ID_BULLET_PLAYER);
 	}
 }
 static void tmp_shoot_dir(object *obj, float v)
@@ -397,7 +397,7 @@ static void tmp_shoot_dir(object *obj, float v)
 	//bullet_init(temp->body->p,cpvforangle(cpBodyGetAngle(temp->body)),ID_BULLET_PLAYER);
 	int i;
 	for(i=0; i < temp->gun_level;i++){
-		bullet_init(obj->body->p,cpvforangle(v + (M_PI/70)*((i+1) - (temp->gun_level-i))),ID_BULLET_PLAYER);
+		bullet_init(obj->body->p, cpvforangle(v + (M_PI/70)*((i+1) - (temp->gun_level-i))), obj->body->v, ID_BULLET_PLAYER);
 	}
 }
 

@@ -48,7 +48,7 @@ static void render(object *obj)
 	draw_velocity_line(temp->shape);
 }
 
-object *bullet_init(cpVect pos, cpVect dir, int type)
+object *bullet_init(cpVect pos, cpVect dir, cpVect intit_vel, int type)
 {
 		temp = malloc(sizeof(struct bullet));
 		temp->alive = 1;
@@ -58,7 +58,7 @@ object *bullet_init(cpVect pos, cpVect dir, int type)
 		temp->body = cpSpaceAddBody(space, cpBodyNew(1, moment));
 		cpBodySetPos(temp->body, cpvadd(pos, cpvmult(dir,60)));
 		cpBodySetUserData(temp->body, (object*)temp);
-		cpBodySetVel(temp->body,cpvmult(dir,3000));
+		cpBodySetVel(temp->body,cpvadd(cpvmult(dir,3000),intit_vel));
 		temp->body->velocity_func = bulletVelocityFunc;
 
 		temp->shape = cpSpaceAddShape(space, cpCircleShapeNew(temp->body, 5, cpvzero));

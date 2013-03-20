@@ -7,7 +7,7 @@
 #include "particles.h"
 #include "space.h"
 
-object *bullet_init(cpVect pos, cpVect dir, int type);
+object *bullet_init(cpVect pos, cpVect dir, cpVect intit_vel, int type);
 
 extern struct obj_type type_bullet_player;
 extern struct obj_type type_bullet_enemy;

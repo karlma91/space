@@ -132,7 +132,7 @@ static void update(object *fac)
 
 	if(temp->timer > 1 + ((3.0f*rand())/RAND_MAX)){
 		cpVect t = cpvforangle(temp->angle );
-		bullet_init(fac->body->p,t,ID_BULLET_ENEMY);
+		bullet_init(fac->body->p,t,fac->body->v,ID_BULLET_ENEMY);
 		temp->timer = 0;
 	}
 
