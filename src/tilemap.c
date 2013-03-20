@@ -150,6 +150,11 @@ int tilemap_create (tilemap *map, char *filename)
 	return 0;
 }
 
+void tilemap_destroy(tilemap *map)
+{
+	free(map->data);
+}
+
 static int parse_data(tilemap *map, char *string)
 {
 	char temp[5000];

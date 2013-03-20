@@ -231,10 +231,22 @@ level *level_load(int space_station, int deck)
 		fprintf(stderr, "Could not find level %d.%d\n",space_station,deck);
 		return NULL;
 	}
+	char tilemap_name[100];
+	ret = fscanf(file,"%s\n",tilemap_name);
+	int retExp = 0;
+	lvl->tiles = malloc(sizeof(tilemap));
+	ret = tilemap_create(lvl->tiles,tilemap_name);
+	if (ret != retExp) {
+		fprintf(stderr, "Error while parsing level header. Could not load tilemap %s.\n", tilemap_name);
+		return NULL;
+	}
+	lvl->height = lvl->tiles->height*lvl->tiles->tile_height;
+	lvl->left = -(lvl->tiles->width*lvl->tiles->tile_width)/2;
+	lvl->right = (lvl->tiles->width*lvl->tiles->tile_width)/2;
 
 	/* read level specific data */
-	ret = fscanf(file,"%d %d %d %d %d %d\n", &(lvl->station),&(lvl->deck),&(lvl->height),&(lvl->left),&(lvl->right), &(lvl->timelimit));
-	int retExp = 6;
+	ret = fscanf(file,"%d %d %d\n", &(lvl->station),&(lvl->deck), &(lvl->timelimit));
+	retExp = 3;
 	if (ret != retExp) {
 		fprintf(stderr, "Error while parsing level header. Wrong number of arguemnts. Got %d, expected %d.\n", ret, retExp);
 		return NULL;
@@ -278,6 +290,8 @@ level *level_load(int space_station, int deck)
 
 void level_unload(level *lvl)
 {
+	tilemap_destroy(lvl->tiles);
+	free(lvl->tiles);
 	free(lvl);
 }
 
