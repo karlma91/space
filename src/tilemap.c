@@ -126,7 +126,10 @@ int tilemap_create (tilemap *map, char *filename)
 				parse_int(node,"height",&(map->height));
 				parse_int(node,"tilewidth",&(map->tile_width));
 				parse_int(node,"tileheight",&(map->tile_height));
-				map->data = (int*) malloc(sizeof(int)*(map->width)*(map->height));
+				fprintf(stderr,"HELLO %d  \n", map->width);
+				map->data = (int*) calloc(sizeof(int)*(map->width)*(map->height),sizeof(int));
+				if(map->data == NULL)
+				fprintf(stderr,"HELLO %d  \n", map->height);
 			}else if(TESTNAME("image")){
 				char *(temp[1]);
 				char name[40];
@@ -155,11 +158,11 @@ void tilemap_destroy(tilemap *map)
 	free(map->data);
 }
 
-static int parse_data(tilemap *map, char *string)
+static int parse_data(tilemap *map, char *data)
 {
-	char temp[5000];
-	strcpy(temp,string);
-	char *data = temp;
+	//char temp[5000];
+	//strcpy(temp,string);
+	//char *data = temp;
 //	fprintf(stderr,"data: %s\n", data);
 	int x,y;
 	for(x = 0; x < map->height; x++){
