@@ -15,7 +15,7 @@
 
 static int parse_data(tilemap *map, char *data);
 
-static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h);
+static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height);
 
 
 
@@ -23,10 +23,10 @@ void tilemap_render(tilemap *map)
 {
 	glPushMatrix();
 	glEnable(GL_TEXTURE_2D);
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glColor3f(1,1,1);
 	texture_bind(map->texture_id);
 
@@ -42,38 +42,47 @@ void tilemap_render(tilemap *map)
 	j_end = (cam_right + map->tile_width) / map->tile_width + map->width / 2; //OLD: map->width
 
 	//TODO: fix special case, when supposed to render two sides, add another loop
-	if (j_start < 0) j_start = 0; //special case
-	if (j_end > map->width) j_end = map->width; //special case
+	//if (j_start < 0) j_start = 0; //special case
+	//if (j_end > map->width) j_end = map->width; //special case
 
-	for(i = 0; i < map->height; i++){
+	for(i = map->height-1; i >= 0; i--){
 		int lvl_y = i*map->tile_height;
 		for(j=j_start; j < j_end; j++){
-			x = map->data[j + (map->height - i - 1)*map->width]%(map->image_width/map->tile_width) - 1;
-			y = map->data[j + (map->height - i - 1)*map->width]/(map->image_height/map->tile_width);
 
+			/** Circular indexing **/
+			int k = 0;
+			if(j < 0){
+				/* + because (j % map->width) is negative */
+				k = map->width + (j % map->width);
+			}else if(j >= map->width){
+				k = j % map->width;
+			}else{
+				 k = j;
+			}
 
-			//fprintf(stderr,"DRAW: %d %d \n", x, y);
-			if(map->data[j + i*map->width]>0){
+			x = map->data[k + (i)*map->width]%(map->image_width/map->tile_width) - 1;
+			y = map->data[k + (i)*map->width]/(map->image_height/map->tile_width);
+
+			if(map->data[k + i*map->width]>0){
 				int lvl_x = j*map->tile_width - (map->width*map->tile_width)/2;
-				draw_subimage(lvl_x,lvl_y, (x*w), (y*h), w, h);
+				draw_subimage(lvl_x,lvl_y, (x*w), (y*h), w, h, map->tile_width, map->tile_height);
 			}
 		}
 	}
-	//fprintf(stderr,"END");
 	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
 
 }
-static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h)
+static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height)
 {
 	//fprintf(stderr,"DRAW: %.2f %.2f %.2f %.2f %.2f %.2f \n",x,y,tx,ty,w,h);
 	glPushMatrix();
 	glTranslatef(x,y,0);
 	glBegin(GL_QUADS);
-	glTexCoord2d(tx, ty+h); glVertex2d(0, 0);
-	glTexCoord2d(tx, (ty)); glVertex2d(0, 128);
-	glTexCoord2d(tx+w, ty); glVertex2d(128, 128);
-	glTexCoord2d(tx+w, (ty+h)); glVertex2d(128, 0);
+	glTexCoord2d(tx, ty); glVertex2d(0, 0);
+	glTexCoord2d(tx, (ty+h)); glVertex2d(0, tile_height);
+	glTexCoord2d(tx+w, ty+h); glVertex2d(tile_width, tile_height);
+	glTexCoord2d(tx+w, (ty)); glVertex2d(tile_width, 0);
 	glEnd();
 	glPopMatrix();
 }

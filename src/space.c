@@ -366,8 +366,8 @@ static void space_render()
 		cam_right = cam_center_x + camera_width;
 		SPACE_draw();
 	}
-
 	second_draw = 0;
+
 
 }
 
@@ -493,23 +493,21 @@ static void SPACE_draw()
 	glScalef(cam_zoom,cam_zoom,1);
 	glTranslatef(-cam_center_x, -cam_center_y, 0.0f);
 
-
-	/* draw all objects */
-	setTextAngle(0);
 	/* draw tilemap */
-	tilemap_render(&(tmpmap));
-	/* super slow
-	 * TODO: make draw function for ground and roof
-	 * */
-	//draw_space(space);
+	if(!second_draw){
+		tilemap_render(&(tmpmap));
+	}
+
+	setTextAngle(0);
+	/* draw all objects */
 	objects_iterate(render_objects);
 
 	/* draw particle effects */
 	particles_draw(dt);
 
-
 	if(!second_draw){
-		/* something */
+
+		/* reset transform matrix */
 		glLoadIdentity();
 
 		/* draw GUI */
