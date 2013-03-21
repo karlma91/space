@@ -33,10 +33,8 @@ struct particle {
 
 	int alive;
 
-	float x;
-	float y;
-	float velx;
-	float vely;
+	cpVect p;
+	cpVect v;
 	float size;
 
 	float time_alive;
@@ -73,7 +71,7 @@ struct emitter {
 	float total_time_allive;
 	float next_spawn; /* time to next spawn */
 
-	float x,y;
+	cpVect p;
 
 	int particle_count; /* number of particles this emitter have emitted*/
 
@@ -118,10 +116,10 @@ void particles_add_explosion(cpVect v, float time, int speed, int numPar, int co
 void particles_draw();
 void particles_update();
 void particles_release_emitter(emitter* e);
-emitter *particles_add_score_popup(float x, float y,int score);
+emitter *particles_add_score_popup(cpVect p, int score);
 void particles_clear();
 emitter *particles_get_emitter(int type);
-emitter *particles_get_emitter_at(int type,float x, float y);
+emitter *particles_get_emitter_at(int type,cpVect p);
 
 void particles_reload_particles();
 

@@ -145,8 +145,7 @@ static void player_update(object *obj)
 	cpBodySetForce(obj->body, cpv(0,0));
 	cpBodySetTorque(obj->body, 0);
 
-	temp->e->x = obj->body->p.x;
-	temp->e->y = obj->body->p.y;
+	temp->e->p = obj->body->p;
 	temp->e->angular_offset = cpvtoangle(obj->body->v) * (180/M_PI)+90;
 
 	if(temp->disable == 0){
@@ -194,10 +193,9 @@ static void player_controls(object *obj)
 			particles_add_explosion(cpBodyGetPos(temp->obj.body),0.5f,4000, 1000,200);
 		}
 		if (keys[SDLK_b]) {
-			emitter *t = particles_get_emitter(EMITTER_EXPLOTION);
-			if(t != NULL){
-				t->x = obj->body->p.x;
-				t->y = obj->body->p.y;
+			emitter *em = particles_get_emitter(EMITTER_EXPLOTION);
+			if(em != NULL){
+				em->p = obj->body->p;
 			}
 			keys[SDLK_b] = 0;
 		}

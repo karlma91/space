@@ -1,16 +1,13 @@
-#include "particles.h"
 
+#include "particles.h"
 #include "constants.h"
 #include "draw.h"
 #include "space.h"
 #include "font.h"
-/** mini xml reader compatible with anci c */
 #include <mxml.h>
-/** helper functions for mxml **/
 #include "xmlh.h"
 
 #define MAX_PARTICLES 10000
-#define MAX_EMITTERS 20
 
 /**
  * parse functions
@@ -18,20 +15,21 @@
 static int read_emitter_from_file (int type, char *filename);
 static int parse_range(mxml_node_t *node, range *r);
 static int parse_color_step(mxml_node_t *node, emitter *e);
+
 /**
  * emitter functions
  */
 static float range_get_random(range r);
 static void emitter_interval(emitter *em);
-static void update_all_particles(emitter *em);
 static void emitter_update(emitter *em);
-static void particle_update_pos(particle *p);
 
-static void draw_all_emitters();
+static void update_all_particles(emitter *em);
 static void draw_all_particles(emitter *em);
 
 static void default_particle_draw(emitter *em, particle *p);
+static void draw_particle_as_score(emitter *em, particle *p);
 
+static void particle_update_pos(particle *p);
 
 static emitter * get_emitter();
 static void set_emitter_available(emitter *e);
@@ -43,6 +41,9 @@ static void add_particle(emitter *em);
 static particle * get_particle();
 static void set_particle_available(particle *p);
 
+/*
+ * variables
+ */
 static int max_emitters;
 
 static emitter *main_emitter_pool;
@@ -57,6 +58,11 @@ static particle main_partice_pool[MAX_PARTICLES];
 int available_particle_counter;
 static particle *particles_in_use;
 static particle *(available_particle_stack[MAX_PARTICLES]);
+
+
+/**
+ * GLOABL FUNCTIONS
+ */
 
 /**
  * Resets everything and load files to templates.
@@ -94,6 +100,36 @@ void particles_init()
 	}
 }
 
+void particles_update()
+{
+    emitter **prev = &(emitters_in_use_list);
+    emitter *e = emitters_in_use_list;
+    while(e){
+	if(e->alive == 0)
+	    {
+	    *prev = e->next;
+	    set_emitter_available(e);
+	    e = *prev;
+	    }else{
+		emitter_update(e);
+		prev = &(e->next);
+		e = e->next;
+	    }
+    }
+}
+
+void particles_draw()
+{
+	particles_active = 0;
+	emitter **prev = &(emitters_in_use_list);
+	emitter *e = emitters_in_use_list;
+	while(e){
+		draw_all_particles(e);
+		prev = &(e->next);
+		e = e->next;
+	}
+}
+
 void particles_reload_particles()
 {
 	read_emitter_from_file(EMITTER_FLAME,"particles/flame_3.xml");
@@ -114,6 +150,55 @@ void particles_reload_particles()
 		e->waiting_to_die = rdy;
 		prev = &(e->next);
 		e = e->next;
+	}
+}
+
+emitter *particles_add_score_popup(cpVect p,int score)
+{
+	emitter *e = particles_get_emitter_at(EMITTER_SCORE, p);
+	if(e){
+		e->data = (void*)score;
+		e->draw_particle = draw_particle_as_score;
+		return e;
+	}else{
+		return NULL;
+	}
+}
+
+emitter *particles_get_emitter_at(int type, cpVect p){
+	emitter *e = particles_get_emitter(type);
+	if(e){
+		e->p = p;
+		return e;
+	}else{
+		return NULL;
+	}
+}
+
+emitter *particles_get_emitter(int type)
+{
+	emitter *e = get_emitter();
+	if(e != NULL){
+		emitter *next = e->next;
+		*e = (emitter_templates[type]);
+		if(e->emit_count_enabled){
+			e->emit_count_set = range_get_random(e->emit_count);
+		}
+		if(e->length_enabled){
+			e->length_set = range_get_random(e->length);
+		}
+		e->next = next;
+		return e;
+	}else{
+		return NULL;
+	}
+}
+
+/* do not call on emitters that has length or count enabled outside particles.c */
+void particles_release_emitter(emitter* e)
+{
+	if(e != NULL){
+		e->waiting_to_die = 1;
 	}
 }
 
@@ -150,65 +235,27 @@ void particles_clear()
 }
 
 
-static void draw_particle_as_score(emitter *em, particle *p){
-	glDisable(GL_TEXTURE_2D);
-		char temp[10];
-		int score = ((int*)em->data);
-		sprintf(temp,"%d",score);
-		setTextAlign(TEXT_CENTER);
-		setTextSize(p->size);
-		font_drawText(p->x,p->y,temp);
-}
 
-emitter *particles_add_score_popup(float x, float y,int score)
-{
-	emitter *e = particles_get_emitter_at(EMITTER_SCORE,x,y);
-	if(e){
-		e->data = (void*)score;
-		e->draw_particle = draw_particle_as_score;
-		return e;
-	}else{
-		return NULL;
-	}
-}
+/**
+ * ***********************
+ *
+ *
+ * PRIVAT FUNCTIONS
+ *
+ *
+ * ***********************
+ */
 
-emitter *particles_get_emitter_at(int type,float x, float y){
-	emitter *e = particles_get_emitter(type);
-	if(e){
-		e->x = x;
-		e->y =y;
-		return e;
-	}else{
-		return NULL;
-	}
-}
-
-emitter *particles_get_emitter(int type)
-{
-	emitter *e = get_emitter();
-	if(e != NULL){
-		emitter *next = e->next;
-		*e = (emitter_templates[type]);
-		if(e->emit_count_enabled){
-			e->emit_count_set = range_get_random(e->emit_count);
-		}
-		if(e->length_enabled){
-			e->length_set = range_get_random(e->length);
-		}
-		e->next = next;
-		return e;
-	}else{
-		return NULL;
-	}
-}
-
-/* do not call on emitters that has length or count enabled outside particles.c */
-void particles_release_emitter(emitter* e)
-{
-	if(e != NULL){
-		e->waiting_to_die = 1;
-	}
-}
+static void draw_particle_as_score(emitter *em, particle *p)
+    {
+    glDisable(GL_TEXTURE_2D);
+    char temp[10];
+    int score = ((int)em->data);
+    sprintf(temp,"%d",score);
+    setTextAlign(TEXT_CENTER);
+    setTextSize(p->size);
+    font_drawText(p->p.x,p->p.y,temp);
+    }
 
 /**
  * adds a emitter back to the stack
@@ -258,24 +305,6 @@ static void emitter_update(emitter *em)
 	em->total_time_allive += mdt;
 }
 
-
-void update_all_emitters(){
-	emitter **prev = &(emitters_in_use_list);
-	emitter *e = emitters_in_use_list;
-	while(e){
-		if(e->alive == 0)
-		{
-			*prev = e->next;
-			set_emitter_available(e);
-			e = *prev;
-		}else{
-			emitter_update(e);
-			prev = &(e->next);
-			e = e->next;
-		}
-	}
-}
-
 /**
  * update all particles used by a emitter
  */
@@ -292,8 +321,8 @@ static void update_all_particles(emitter *em)
 			em->list_length--;
 			p = *prev;
 		}else{
-			p->vely -= em->gravityfactor * 0.0001f * mdt;
-			p->velx += em->windfactor * 0.0001f * mdt;
+			p->v.y -= em->gravityfactor * 0.0001f * mdt;
+			p->v.x += em->windfactor * 0.0001f * mdt;
 
 			particle_update_pos(p);
 
@@ -356,8 +385,7 @@ static particle * get_particle()
  */
 static void particle_update_pos(particle *p)
 {
-	p->x += p->velx * mdt;
-	p->y += p->vely * mdt;
+	p->p = cpvadd(p->p, cpvmult(p->v, mdt));
 	p->time_alive += mdt;
 }
 
@@ -379,12 +407,10 @@ static void add_particle(emitter *em)
 	/* speed */
 	float angle = ((RAND_FLOAT - 0.5)*((em->spread)) + (em->angular_offset+90))*(M_PI/180);
 	float speed = range_get_random(em->speed) * 0.001f;
-	p->velx = cos(angle)*speed;
-	p->vely = sin(angle)*speed;
+	p->v = cpvmult(cpvforangle(angle),speed);
 
 	/* position */
-	p->x = em->x;
-	p->y = em->y;
+	p->p = em->p;
 
 	/* initial size */
 	p->size = range_get_random(em->init_size);
@@ -402,23 +428,16 @@ static float range_get_random(range r)
 	return r.min + ((float)rand()/(float)RAND_MAX)*(r.max-r.min);
 }
 
-static void draw_all_emitters()
-{
-	emitter **prev = &(emitters_in_use_list);
-	emitter *e = emitters_in_use_list;
-	while(e){
-		draw_all_particles(e);
-		prev = &(e->next);
-		e = e->next;
-	}
-}
-
 static void draw_all_particles(emitter *em)
 {
-	particle *p = em->head;
 	glEnable(GL_TEXTURE_2D);
+	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
 	texture_bind(em->texture_id);
+	if(em->additive){
+	    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	}
 
+	particle *p = em->head;
 	while(p){
 		++particles_active;
 		float offset = p->time_alive / p->max_time;
@@ -437,10 +456,9 @@ static void draw_all_particles(emitter *em)
 
 				float step = b.offset - a.offset;
 
-				coloffset = offset - a.offset;
-				coloffset = coloffset / step;
+				coloffset = (offset - a.offset) / step;
+				colinv = coloffset;
 				coloffset = 1 - coloffset;
-				colinv = 1 - coloffset;
 
 				c.r = (a.r * coloffset) + (b.r * colinv);
 				c.g = (a.g * coloffset) + (b.g * colinv);
@@ -449,17 +467,14 @@ static void draw_all_particles(emitter *em)
 		}
 
 		glColor4f(c.r,c.g,c.b,alpha);
-		glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
-		if(em->additive){
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		}
-		/** call the draw function **/
 
+		/** call the draw function **/
 		em->draw_particle(em,p);
-		glPopAttrib();
+
 
 		p = p->next;
 	}
+		glPopAttrib();
 	glDisable(GL_TEXTURE_2D);
 }
 
@@ -468,10 +483,10 @@ static void default_particle_draw(emitter *em, particle *p)
 	if(em->rotation){
 		//float angle = (atan2(p->vely,p->velx) + M_PI)*(180/M_PI);
 		//glRotatef(angle,0,0,1);
-		draw_line(p->x,p->y,p->x + p->velx*p->size,p->y+ p->vely*p->size, p->size);
+		draw_line(p->p.x,p->p.y,p->p.x + p->v.x*p->size,p->p.y+ p->v.y*p->size, p->size);
 	}else{
 		glPushMatrix();
-		glTranslatef(p->x, p->y, 0.0f);
+		glTranslatef(p->p.x, p->p.y, 0.0f);
 		glScalef(p->size,p->size,1);
 
 		glBegin(GL_QUAD_STRIP);
@@ -485,34 +500,23 @@ static void default_particle_draw(emitter *em, particle *p)
 	}
 }
 
-void particles_draw()
-{
-	particles_active = 0;
-	draw_all_emitters();
-}
-
-void particles_update()
-{
-	update_all_emitters();
-}
 
 void particles_add_explosion(cpVect v, float time, int speed, int numPar, int color){
-	particles_get_emitter_at(EMITTER_EXPLOTION,v.x,v.y);
+	particles_get_emitter_at(EMITTER_EXPLOTION,v);
 }
 
 
-/****
+/***************************************
  *
  *
  *
  *
- * PARSER STUFF
+ * PRIVATE PARSER STUFF
  *
  *
  *
  *
- */
-
+ **************************************/
 
 /**
  * reads from a xml file made with pedegree slick2d particle editor
@@ -626,8 +630,8 @@ static int read_emitter_from_file (int type,char *filename)
  */
 static int parse_range(mxml_node_t *node, range *r)
 {
-	parse_float(node,"min",&(r->min));
-	parse_float(node,"max",&(r->max));
+	parse_float(node,"min", &(r->min));
+	parse_float(node,"max", &(r->max));
 	return 0;
 }
 
@@ -640,10 +644,9 @@ static int parse_color_step(mxml_node_t *node, emitter *e)
 {
 	int index = e->color_counter;
 	(e->color_counter)++;
-	parse_float(node,"r",&(e->colors[index].r));
-	parse_float(node,"g",&(e->colors[index].g));
-	parse_float(node,"b",&(e->colors[index].b));
-	parse_float(node,"offset",&(e->colors[index].offset));
-
+	parse_float(node,"r", &(e->colors[index].r));
+	parse_float(node,"g", &(e->colors[index].g));
+	parse_float(node,"b", &(e->colors[index].b));
+	parse_float(node,"offset", &(e->colors[index].offset));
 	return 0;
 }

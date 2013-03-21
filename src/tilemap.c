@@ -14,68 +14,65 @@
 #include "space.h"
 
 static int parse_data(tilemap *map, char *data);
-
 static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height);
-
-
 
 void tilemap_render(tilemap *map)
 {
-	glPushMatrix();
-	glEnable(GL_TEXTURE_2D);
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glPushMatrix();
+    glEnable(GL_TEXTURE_2D);
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	glColor3f(1,1,1);
-	texture_bind(map->texture_id);
+    glColor3f(1,1,1);
+    texture_bind(map->texture_id);
 
-	GLfloat w = ((GLfloat)map->tile_width)/map->image_width;
-	GLfloat h = ((GLfloat)map->tile_height)/map->image_height;
+    GLfloat w = ((GLfloat)map->tile_width)/map->image_width;
+    GLfloat h = ((GLfloat)map->tile_height)/map->image_height;
 
-	int i,j;
-	int x,y;
+    int i,j;
+    int x,y;
 
-	//TODO: check if cam_left and cam_right is correct
-	int j_start, j_end;
-	j_start = (cam_left - map->tile_width) / map->tile_width + map->width / 2; //OLD: 0
-	j_end = (cam_right + map->tile_width) / map->tile_width + map->width / 2; //OLD: map->width
+    //TODO: check if cam_left and cam_right is correct
+    int j_start, j_end;
+    j_start = (cam_left - map->tile_width) / map->tile_width + map->width / 2; //OLD: 0
+    j_end = (cam_right + map->tile_width) / map->tile_width + map->width / 2; //OLD: map->width
 
-	//TODO: fix special case, when supposed to render two sides, add another loop
-	//if (j_start < 0) j_start = 0; //special case
-	//if (j_end > map->width) j_end = map->width; //special case
+    //TODO: fix special case, when supposed to render two sides, add another loop
+    //if (j_start < 0) j_start = 0; //special case
+    //if (j_end > map->width) j_end = map->width; //special case
 
-	/** draws from top and down **/
-	for(i = 0; i < map->height; i++){
-		int lvl_y = i*map->tile_height;
-		lvl_y = map->tile_height * (map->height-1) - lvl_y;
-		for(j = j_start; j < j_end; j++){
+    /** draws from top and down **/
+    for(i = 0; i < map->height; i++){
+	int lvl_y = i*map->tile_height;
+	lvl_y = map->tile_height * (map->height-1) - lvl_y;
+	for(j = j_start; j < j_end; j++){
 
-			/** Circular indexing **/
-			int k = 0;
-			if(j < 0){
-				/* + because (j % map->width) is negative */
-				k = map->width + (j % map->width);
-			}else if(j >= map->width){
-				k = j % map->width;
-			}else{
-				 k = j;
-			}
+	    /** Circular indexing **/
+	    int k = 0;
+	    if(j < 0){
+		/* + because (j % map->width) is negative */
+		k = map->width + (j % map->width);
+	    }else if(j >= map->width){
+		k = j % map->width;
+	    }else{
+		k = j;
+	    }
 
-			x = map->data[k + i * map->width] % (map->image_width / map->tile_width) - 1;
-			y = map->data[k + i * map->width] / (map->image_height / map->tile_width);
+	    x = map->data[k + i * map->width] % (map->image_width / map->tile_width) - 1;
+	    y = map->data[k + i * map->width] / (map->image_height / map->tile_height);
 
-			if(map->data[k + i*map->width] > 0){
-				int lvl_x = j*map->tile_width - (map->width*map->tile_width)/2;
-				draw_subimage(lvl_x, lvl_y, (x*w), (y*h), w, h, map->tile_width, map->tile_height);
-			}
-		}
+	    if(map->data[k + i*map->width] > 0){
+		int lvl_x = j*map->tile_width - (map->width*map->tile_width)/2;
+		draw_subimage(lvl_x, lvl_y, (x*w), (y*h), w, h, map->tile_width, map->tile_height);
+	    }
 	}
-	glDisable(GL_TEXTURE_2D);
-	glPopMatrix();
-
+    }
+    glDisable(GL_TEXTURE_2D);
+    glPopMatrix();
 }
+
 static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height)
 {
 	glPushMatrix();
@@ -126,10 +123,7 @@ int tilemap_create (tilemap *map, char *filename)
 				parse_int(node,"height",&(map->height));
 				parse_int(node,"tilewidth",&(map->tile_width));
 				parse_int(node,"tileheight",&(map->tile_height));
-				fprintf(stderr,"HELLO %d  \n", map->width);
 				map->data = (int*) calloc(sizeof(int)*(map->width)*(map->height),sizeof(int));
-				if(map->data == NULL)
-				fprintf(stderr,"HELLO %d  \n", map->height);
 			}else if(TESTNAME("image")){
 				char *(temp[1]);
 				char name[40];
@@ -149,7 +143,6 @@ int tilemap_create (tilemap *map, char *filename)
 	}
 	mxmlDelete(tree);
 	fclose(fp);
-	fprintf(stderr,"HELLO %d TEXTUREMAP.c \n",__LINE__);
 	return 0;
 }
 
@@ -160,23 +153,13 @@ void tilemap_destroy(tilemap *map)
 
 static int parse_data(tilemap *map, char *data)
 {
-	//char temp[5000];
-	//strcpy(temp,string);
-	//char *data = temp;
-//	fprintf(stderr,"data: %s\n", data);
 	int x,y;
 	for(x = 0; x < map->height; x++){
 		for(y=0;y < map->width; y++){
-			//fprintf(stderr,"char: A %c A\n",*data);
 			map->data[y+x*map->width] = (int) strtol(data, &(data), 10);
 			data++;
-			//fprintf(stderr,"char: %c == %d E\n",*data,map->data[x+y*map->width]);
 		}
 	}
 	fprintf(stderr,"HELLO %d TEXTUREMAP.c \n",__LINE__);
 	return 0;
 }
-
-
-
-

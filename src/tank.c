@@ -273,14 +273,15 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	bt->alive = 0;
 
 
-	particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p.x, b->body->p.y);
+	particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
 
 	temp->hp_bar.value -= 10;
 
 	if(temp->hp_bar.value <=0 ){
 		//a->body->data = NULL;
-		particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p.x, b->body->p.y);
-		particles_add_score_popup(b->body->p.x, b->body->p.y+100,temp->param->score);
+		particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
+		particles_add_score_popup(b->body->p, temp->param->score);
+
 		if(((object *) temp)->alive){
 			((struct player *)objects_first(ID_PLAYER))->score += temp->param->score;
 		}

@@ -91,8 +91,8 @@ static void update(object *fac)
 		temp->cur += 1;
 	}
 	if(temp->smoke){
-		temp->smoke->x = fac->body->p.x; //TODO fix: Caused crash on mac os x (after completing level 2, exiting to main menu, then re-enter level 2 from level select)
-		temp->smoke->y = fac->body->p.y + 100;
+		temp->smoke->p.x = fac->body->p.x; //TODO fix: Caused crash on mac os x (after completing level 2, exiting to main menu, then re-enter level 2 from level select)
+		temp->smoke->p.y = fac->body->p.y + 100;
 	}
 }
 
@@ -132,7 +132,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	temp->hp_bar.value -= 10;
 	if(temp->hp_bar.value <=0 ){
 		particles_add_explosion(a->body->p,1,2000,50,800);
-		particles_add_score_popup(a->body->p.x, a->body->p.y,temp->param->score);
+		particles_add_score_popup(a->body->p, temp->param->score);
 		if(((object *) temp)->alive){
 			((struct player *)objects_first(ID_PLAYER))->score += temp->param->score;
 		}

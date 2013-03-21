@@ -1,13 +1,6 @@
-/*
- * xmlh.c
- *
- *  Created on: 18. mars 2013
- *      Author: Karl
- */
 
 #include "stdio.h"
 #include "xmlh.h"
-
 
 /**
  * Parses the atributes of a node to a value v
