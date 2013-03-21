@@ -4,6 +4,7 @@
 #include "chipmunk.h" /* Chipmunk physics library */
 #include "objects.h"  /* Game components */
 #include "particles.h"
+#include "hpbar.h"
 
 struct player_param;
 
@@ -13,7 +14,7 @@ struct player{
 
 	/* player's instance variables */
 	cpShape *shape;
-	float hp;
+	hpbar hp_bar;
 	int lives;
 	float lost_life_timer;
 	int disable;

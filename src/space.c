@@ -152,7 +152,7 @@ static void level_running()
 
 	update_all();
 	struct player *player = (struct player*)objects_first(ID_PLAYER);
-	if(player->hp <= 0){
+	if(player->hp_bar.value <= 0){
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
@@ -168,7 +168,7 @@ static void level_timesup()
 {
 	update_all();
 	struct player *player = (struct player*)objects_first(ID_PLAYER);
-	player->hp = 0;
+	player->hp_bar.value = 0;
 	player->disable = 1;
 	if (state_timer > 3) {
 		change_state(LEVEL_PLAYER_DEAD);
@@ -668,7 +668,7 @@ void space_init_level(int space_station, int deck)
 	if(player==NULL){
 		player = (struct player*)player_init();
 	} else {
-		player->hp = player->param->max_hp;
+		player->hp_bar.value = player->param->max_hp;
 		player->disable = 0;
 		if (space_station == 1 && deck == 1) { // reset player score if level 1 is initializing
 			player->score = 0;
@@ -697,7 +697,7 @@ void space_init_level(int space_station, int deck)
 
 	player->obj.body->p.x = currentlvl->left + 50;
 	player->obj.body->p.y = currentlvl->height - 50;
-	player->hp = player->param->max_hp;
+	player->hp_bar.value = player->param->max_hp;
 	player->obj.body->v.x = 0;
 	player->obj.body->v.y = -10;
 

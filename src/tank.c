@@ -58,7 +58,6 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 	((object *) tank)->alive = 1;
 	tank->param = pram;
 
-	tank->hp = tank->param->max_hp;
 	tank->timer = 0;
 	tank->factory = factory;
 
@@ -66,7 +65,6 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 
 //	cpFloat width = 50;
 	cpFloat height = 30;
-
 
 	/* make and add new body */
 	// Make a car with some nice soft suspension
@@ -91,8 +89,6 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 	cpSpaceAddCollisionHandler(space, ID_TANK, ID_BULLET_PLAYER, collision_player_bullet, NULL, NULL, NULL, NULL);
 
 
-
-
 	tank->wheel1 = addWheel(space, posA, boxOffset);
 	tank->wheel2 = addWheel(space, posB, boxOffset);
 
@@ -106,6 +102,9 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 
 	cpBodySetUserData(((object *) tank)->body, (object*)tank);
 	objects_add((object*)tank);
+
+	hpbar_init(&tank->hp_bar,pram->max_hp,80,16,-40,60,&(tank->obj.body->p));
+
 	return (object*)tank;
 }
 
@@ -256,7 +255,7 @@ static void render(object *fac)
 	cpVect r = cpvadd(fac->body->p, cpvmult(cpvforangle(temp->angle),80));
 	draw_line(fac->body->p.x,fac->body->p.y,r.x,r.y, 30);
 
-	draw_hp(fac->body->p.x-15, fac->body->p.y + 35, 50, 8, temp->hp / temp->param->max_hp);
+	hpbar_draw(&temp->hp_bar);
 
 	draw_texture(temp->param->tex_id, &(fac->body->p), &tex_map[0],200, 100, dir);
 	draw_texture(temp->param->tex_id, &temp->wheel1->p, &tex_map[1],100, 100, rot);
@@ -275,9 +274,9 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	particles_add_explosion(b->body->p,0.3,1500,10,200);
 
-	temp->hp -= 10;
+	temp->hp_bar.value -= 10;
 
-	if(temp->hp <=0 ){
+	if(temp->hp_bar.value <=0 ){
 		//a->body->data = NULL;
 		particles_add_explosion(a->body->p,1,2000,20,800);
 		if(((object *) temp)->alive){

@@ -44,12 +44,12 @@ object *tankfactory_init( int x_pos , struct tank_factory_param *param)
 	((object*)fac)->type = &type_tank_factory;
 	fac->param = param;
 
-
 	fac->cur = 0;
 	fac->rot = 0;
 	fac->smoke = particles_get_emitter(EMITTER_SMOKE);
 	fac->timer = (fac->param->spawn_delay)*0.7;
-	fac->hp = fac->param->max_hp;
+	//fac->hp = fac->param->max_hp; //TODO FIXME
+
 
 	cpFloat size = 100;
 	/* make and add new body */
@@ -69,6 +69,9 @@ object *tankfactory_init( int x_pos , struct tank_factory_param *param)
 
 	cpBodySetUserData(((object*)fac)->body, (object*)fac);
 	objects_add((object*)fac);
+
+	hpbar_init(&fac->hp_bar, param->max_hp, 100, 16, -50, 90, &(fac->obj.body->p));
+
 	return (object*)fac;
 }
 
@@ -98,8 +101,8 @@ static void render(object *factory)
 	temp = ((struct tank_factory*)factory);
 
 	//glColor3f(1,1,1);
-	draw_hp(factory->body->p.x-50, factory->body->p.y + 90, 100, 16, temp->hp / temp->param->max_hp);
 
+	hpbar_draw(&temp->hp_bar);
 
 	if (temp->param->max_hp < 300)
 		glColor3f(0.5,0.8,0.9);
@@ -126,9 +129,8 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	bt->alive = 0;
 
 	particles_add_explosion(b->body->p,0.3,1500,15,200);
-
-	temp->hp -= 10;
-	if(temp->hp <=0 ){
+	temp->hp_bar.value -= 10;
+	if(temp->hp_bar.value <=0 ){
 		particles_add_explosion(a->body->p,1,2000,50,800);
 		if(((object *) temp)->alive){
 			((struct player *)objects_first(ID_PLAYER))->score += temp->param->score;
@@ -136,7 +138,6 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 		((object*)temp)->alive = 0;
 		objects_iterate_type(remove_factory_from_tank,ID_TANK);
 	}
-
 	return 0;
 }
 

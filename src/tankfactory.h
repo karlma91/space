@@ -4,7 +4,7 @@
 #include "chipmunk.h"
 #include "objects.h"
 #include "particles.h"
-
+#include "hpbar.h"
 
 /* the super tank_factory object */
 extern struct obj_type type_tank_factory;
@@ -21,7 +21,7 @@ struct tank_factory {
 	cpShape *shape;
 	cpFloat timer;
 	int cur;
-	cpFloat hp;
+	hpbar hp_bar;
 
 	/* animation */
 	float rot;

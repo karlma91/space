@@ -3,6 +3,7 @@
 
 #include "objects.h"
 #include "tankfactory.h"
+#include "hpbar.h"
 
 
 extern struct obj_type type_tank;
@@ -21,7 +22,7 @@ struct tank {
 	float timer;
 	float angle;
 	float rot_speed;
-	float hp;
+	hpbar hp_bar;
 	struct tank_factory *factory;
 	cpBody *wheel1;
 	cpBody *wheel2;

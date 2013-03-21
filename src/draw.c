@@ -242,7 +242,7 @@ Color draw_col_grad(int hue)
 }
 
 //TODO: color customization
-void draw_hp(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p)
+void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p)
 {
 	float border;
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);

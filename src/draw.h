@@ -54,7 +54,7 @@ void draw_shape(cpShape *shape, void *unused);
 void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h);
 void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot);
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
-void draw_hp(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p);
+void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p);
 extern void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle);
 
 

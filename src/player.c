@@ -4,6 +4,7 @@
 /* standard c-libraries */
 #include <stdio.h>
 #include <time.h>
+#include <assert.h>
 
 /* Game state */
 #include "space.h"
@@ -80,7 +81,7 @@ object *player_init()
 	pl->param = &default_player;
 	pl->param->tex_id = TEX_PLAYER;
 
-	pl->hp = 200;
+	//pl->hp = 200; //TODO FIXME
 	pl->gun_level = 1;
 	pl->lives = 3;
 	pl->score = 0;
@@ -103,8 +104,9 @@ object *player_init()
 
 	cpBodySetUserData(pl->obj.body, (void*)pl);
 	objects_add((object*)pl);
-	return (object*)pl;
 
+	hpbar_init(&(pl->hp_bar), pl->param->max_hp, 80, 16, -40, 30, &(pl->obj.body->p));
+	return (object*)pl;
 }
 
 static void init(object *fac)
@@ -120,18 +122,8 @@ static void player_render(object *obj)
 	//Color c = RGBAColor(1,0,0,1);
 	//draw_boxshape(temp->shape,RGBAColor(1,1,1,1),c);
 
-	static float hp_timer = 0;
-	static float hp_last = 1;
-	float hp = temp->hp/temp->param->max_hp;
-
-	if (hp_last != hp) {
-		hp_timer = 2;
-		hp_last = hp;
-	}
-	if (hp_timer > 0 || hp < 0.5) {
-		hp_timer -= dt;
-		draw_hp((obj->body->p).x-25,(obj->body->p).y+30,50,8,hp);
-	}
+	hpbar_draw(&temp->hp_bar);
+	assert(*(temp->hp_bar.x) == (temp->obj.body->p.x));
 
 	//TODO: fix player draw texture
 	///*
@@ -325,18 +317,6 @@ static void arcade_control()
 	}
 }
 
-static void pitch_up(cpBody *body, float rotSpeed)
-{
-	cpVect dirUp = cpvforangle(-rotSpeed*dt);
-	cpBodySetVel(body, cpvrotate(cpBodyGetVel(body),dirUp));
-}
-
-static void pitch_down(cpBody *body, float rotSpeed)
-{
-	cpVect dirDown = cpvforangle(rotSpeed*dt);
-	cpBodySetVel(body, cpvrotate(cpBodyGetVel(body),dirDown));
-}
-
 /**
  * Velocity function to remove gravity
  */
@@ -359,13 +339,12 @@ static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	bt->alive = 0;
 
 	//particles_add_explosion(b->body->p,0.3,1500,15,200);
-	if(temp->hp <= 0 ){
+	if(temp->hp_bar.value <= 0 ){
 		particles_add_explosion(a->body->p,1,2000,50,800);
 			temp->lives--;
 	}else{
-		temp->hp -= 10;
+		temp->hp_bar.value -= 10;
 	}
-
 	return 0;
 }
 
