@@ -132,6 +132,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	temp->hp_bar.value -= 10;
 	if(temp->hp_bar.value <=0 ){
 		particles_add_explosion(a->body->p,1,2000,50,800);
+		particles_add_score_popup(a->body->p.x, a->body->p.y,temp->param->score);
 		if(((object *) temp)->alive){
 			((struct player *)objects_first(ID_PLAYER))->score += temp->param->score;
 		}

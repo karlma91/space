@@ -44,7 +44,6 @@ struct obj_type type_tank= {
 	destroy
 };
 
-
 static const texture_map tex_map[2] = {
 		{0,0,1,0.5}, {0,0.5,0.5,1}
 };
@@ -62,6 +61,7 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 	tank->factory = factory;
 
 	tank->rot_speed = 0.01;
+	tank->angle = 0;
 
 //	cpFloat width = 50;
 	cpFloat height = 30;
@@ -272,13 +272,15 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	bt->alive = 0;
 
-	particles_add_explosion(b->body->p,0.3,1500,10,200);
+
+	particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p.x, b->body->p.y);
 
 	temp->hp_bar.value -= 10;
 
 	if(temp->hp_bar.value <=0 ){
 		//a->body->data = NULL;
-		particles_add_explosion(a->body->p,1,2000,20,800);
+		particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p.x, b->body->p.y);
+		particles_add_score_popup(b->body->p.x, b->body->p.y+100,temp->param->score);
 		if(((object *) temp)->alive){
 			((struct player *)objects_first(ID_PLAYER))->score += temp->param->score;
 		}

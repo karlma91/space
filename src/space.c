@@ -77,11 +77,6 @@ static float cam_left_limit;
 static float cam_right_limit;
 
 
-/*
- * TODO: put this in level
- */
-tilemap tmpmap;
-
 /* level data */
 level *currentlvl;
 
@@ -495,7 +490,7 @@ static void SPACE_draw()
 
 	/* draw tilemap */
 	if(!second_draw){
-		tilemap_render(&(tmpmap));
+		tilemap_render(currentlvl->tiles);
 	}
 
 	setTextAngle(0);
@@ -654,9 +649,6 @@ static void func(object* obj)
 }
 
 
-//TODO temp
-struct tank_factory_param t = {5,200,3};
-struct robotarm_param robot_temp = {200};
 
 void space_init_level(int space_station, int deck)
 {
@@ -739,9 +731,6 @@ static void SPACE_init()
 	space = cpSpaceNew();
 	cpSpaceSetGravity(space, gravity);
 	//cpSpaceSetDamping(space, 0.999);
-
-	//TODO: put in level.c
-	tilemap_create(&(tmpmap),"tilemaps/level1.tmx");
 
 	//init stars
 	srand(122531);

@@ -30,6 +30,7 @@ typedef struct tilemap {
 
 void tilemap_render(tilemap *map);
 int tilemap_create (tilemap *map, char *filename);
+void tilemap_destroy(tilemap *map);
 
 
 #endif /* TILEMAP_H_ */

@@ -12,6 +12,7 @@ enum emitter_types{
 		EMITTER_EXPLOTION,
 		EMITTER_SPARKS,
 		EMITTER_SMOKE,
+		EMITTER_SCORE,
 		EMITTER_COUNT
 };
 
@@ -41,10 +42,7 @@ struct particle {
 	float time_alive;
 	float max_time;
 
-	emitter *e;
-
 	particle *next;
-
 };
 
 struct emitter {
@@ -52,8 +50,17 @@ struct emitter {
 	/** texture id */
 	int texture_id;
 
+	/** particle draw functions **/
+	void (*draw_particle)(emitter *em, particle *p);
+
+	/** particle list **/
+	int list_length;
+	particle *head;
+
 	/** boolean values */
 	int alive;
+	int waiting_to_die;
+
 	int additive;
 	int rotation;
 	int infinite; /* = 1 if it spawns particles continuously */
@@ -95,6 +102,9 @@ struct emitter {
 	color colors[10]; /* a list of colors that the particles get the color from */
 	int color_counter;
 
+	/** data to use in a custom draw function */
+	void *data;
+
 	emitter *next;
 };
 
@@ -106,8 +116,10 @@ void particles_add_explosion(cpVect v, float time, int speed, int numPar, int co
 void particles_draw();
 void particles_update();
 void particles_release_emitter(emitter* e);
+emitter *particles_add_score_popup(float x, float y,int score);
 void particles_clear();
 emitter *particles_get_emitter(int type);
+emitter *particles_get_emitter_at(int type,float x, float y);
 
 extern unsigned int particles_active;
 extern int available_particle_counter; //TMP

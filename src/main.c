@@ -37,6 +37,9 @@ static float frames;
 char fps_buf[15];
 int WIDTH;
 int HEIGHT;
+
+int W,H;
+
 float dt;
 float mdt;
 unsigned char *keys;
@@ -105,7 +108,7 @@ static void initGL()
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	/* Make the viewport cover the whole window */
-	glViewport(0, 0, WIDTH, HEIGHT);
+	glViewport(0, 0, W, H);
 
 	/* Set the camera projection matrix:
 	 * field of view: 90 degrees
@@ -139,19 +142,22 @@ static int main_init()
 {
 	init_config();
 
-
 	if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
 
 	if (config.fullscreen) {
 		const SDL_VideoInfo* myPointer = SDL_GetVideoInfo();
-		WIDTH = myPointer->current_w;
-		HEIGHT = myPointer->current_h;
+		W = myPointer->current_w;
+		H = myPointer->current_h;
 	} else {
-		WIDTH = config.width;
-		HEIGHT = config.height;
+		W = config.width;
+		H = config.height;
 	}
 
-	if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, 32, (SDL_OPENGL| SDL_DOUBLEBUF) | (SDL_FULLSCREEN * config.fullscreen))))
+	WIDTH = 1920;
+	float temph = H;
+	HEIGHT = (temph/W) * WIDTH;
+
+	if (!(screen = SDL_SetVideoMode(W, H, 32, (SDL_OPENGL| SDL_DOUBLEBUF) | (SDL_FULLSCREEN * config.fullscreen))))
 	{
 		printf("ERROR");
 		SDL_Quit();

@@ -1,6 +1,7 @@
 #ifndef LEVEL_H_
 #define LEVEL_H_
 
+#include "tilemap.h"
 
 typedef struct level_ship {
 	float x;
@@ -18,6 +19,7 @@ typedef struct level {
 	int left;
 	int right;
 	int timelimit;
+	tilemap *tiles;
 } level;
 
 extern int level_init();
