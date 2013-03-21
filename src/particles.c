@@ -15,7 +15,7 @@
 /**
  * parse functions
  */
-static int read_emitter_from_file (emitter *emi,char *filename);
+static int read_emitter_from_file (int type, char *filename);
 static int parse_range(mxml_node_t *node, range *r);
 static int parse_color_step(mxml_node_t *node, emitter *e);
 /**
@@ -64,11 +64,11 @@ static particle *(available_particle_stack[MAX_PARTICLES]);
 void particles_init()
 {
 	int i;
-	read_emitter_from_file(&(emitter_templates[EMITTER_FLAME]),"particles/flame_3.xml");
-	read_emitter_from_file(&(emitter_templates[EMITTER_EXPLOTION]),"particles/explosion_ground.xml");
-	read_emitter_from_file(&(emitter_templates[EMITTER_SPARKS]),"particles/sparks.xml");
-	read_emitter_from_file(&(emitter_templates[EMITTER_SMOKE]),"particles/smoke.xml");
-	read_emitter_from_file(&(emitter_templates[EMITTER_SCORE]),"particles/score.xml");
+	read_emitter_from_file(EMITTER_FLAME,"particles/flame_3.xml");
+	read_emitter_from_file(EMITTER_EXPLOTION,"particles/explosion_ground.xml");
+	read_emitter_from_file(EMITTER_SPARKS,"particles/sparks.xml");
+	read_emitter_from_file(EMITTER_SMOKE,"particles/smoke.xml");
+	read_emitter_from_file(EMITTER_SCORE,"particles/score.xml");
 
 	/* sets in use list empty */
 	emitters_in_use_list = NULL;
@@ -91,6 +91,29 @@ void particles_init()
 		available_emitter_stack[i] = NULL;
 		main_emitter_pool[i].next = NULL;
 		set_emitter_available(&(main_emitter_pool[i]));
+	}
+}
+
+void particles_reload_particles()
+{
+	read_emitter_from_file(EMITTER_FLAME,"particles/flame_3.xml");
+	read_emitter_from_file(EMITTER_EXPLOTION,"particles/explosion_ground.xml");
+	read_emitter_from_file(EMITTER_SPARKS,"particles/sparks.xml");
+	read_emitter_from_file(EMITTER_SMOKE,"particles/smoke.xml");
+	read_emitter_from_file(EMITTER_SCORE,"particles/score.xml");
+
+	emitter **prev = &(emitters_in_use_list);
+	emitter *e = emitters_in_use_list;
+	while(e){
+		particle *head = e->head;
+		emitter *next = e->next;
+		int rdy = e->waiting_to_die;
+		*e = (emitter_templates[e->type]);
+		e->head = head;
+		e->next = next;
+		e->waiting_to_die = rdy;
+		prev = &(e->next);
+		e = e->next;
 	}
 }
 
@@ -474,11 +497,7 @@ void particles_update()
 }
 
 void particles_add_explosion(cpVect v, float time, int speed, int numPar, int color){
-	emitter *e = particles_get_emitter(EMITTER_SPARKS);
-	if(e){
-		e->x = v.x;
-		e->y = v.y;
-	}
+	particles_get_emitter_at(EMITTER_EXPLOTION,v.x,v.y);
 }
 
 
@@ -498,9 +517,10 @@ void particles_add_explosion(cpVect v, float time, int speed, int numPar, int co
 /**
  * reads from a xml file made with pedegree slick2d particle editor
  */
-static int read_emitter_from_file (emitter *emi,char *filename)
+static int read_emitter_from_file (int type,char *filename)
 {
-
+	emitter *emi = &(emitter_templates[type]);
+	emi->type = type;
 	emi->color_counter = 0;
 	emi->alive = 1;
 	emi->next_spawn = 0;

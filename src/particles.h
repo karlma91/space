@@ -47,6 +47,8 @@ struct particle {
 
 struct emitter {
 
+	int type;
+
 	/** texture id */
 	int texture_id;
 
@@ -120,6 +122,8 @@ emitter *particles_add_score_popup(float x, float y,int score);
 void particles_clear();
 emitter *particles_get_emitter(int type);
 emitter *particles_get_emitter_at(int type,float x, float y);
+
+void particles_reload_particles();
 
 extern unsigned int particles_active;
 extern int available_particle_counter; //TMP

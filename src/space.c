@@ -255,7 +255,7 @@ static void SPACE_update()
 		game_time = currentlvl->timelimit;
 		return;
 	}else if(keys[SDLK_F8]){
-		particles_init();
+		particles_reload_particles();
 		keys[SDLK_F8] = 0;
 	}
 

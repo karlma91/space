@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <system additive="true" points="false">
 <emitter imageName="particle.png" name="Default" renderType="inherit" useAdditive="true" useOriented="false">
-<spawnInterval enabled="true" max="100.0" min="10.0"/>
-<spawnCount enabled="true" max="8.0" min="1.0"/>
+<spawnInterval enabled="true" max="10.0" min="1.0"/>
+<spawnCount enabled="true" max="20.0" min="10.0"/>
 <initialLife enabled="false" max="1000.0" min="100.0"/>
 <initialSize enabled="true" max="100.0" min="20.0"/>
 <xOffset enabled="false" max="0.0" min="0.0"/>

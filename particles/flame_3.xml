@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <emitter imageName="particle.png" name="Default" renderType="inherit"
 	useAdditive="true" useOriented="false">
-	<spawnInterval enabled="true" max="70" min="50" ></spawnInterval>
-	<spawnCount enabled="true" max="1.0" min="3.0" />
-	<initialLife enabled="false" max="700" min="400" />
-	<initialSize enabled="true" max="100.0" min="50.0" />
+	<spawnInterval enabled="true" max="70" min="1" ></spawnInterval>
+	<spawnCount enabled="true" max="10.0" min="1" />
+	<initialLife enabled="false" max="2000" min="1000" />
+	<initialSize enabled="true" max="70" min="10" />
 	<xOffset enabled="false" max="0.0" min="0.0" />
 	<yOffset enabled="false" max="0.0" min="0.0" />
 	<initialDistance enabled="false" max="0.0" min="0.0" />
-	<speed enabled="true" max="180.0" min="0.0" />
+	<speed enabled="true" max="200" min="100.0" />
 	<length enabled="false" max="1000.0" min="1000.0" />
 	<emitCount enabled="false" max="1000.0" min="1000.0" />
-	<spread type="random" value="360" />
-	<angularOffset type="simple" value="0.0" />
+	<spread type="random" value="50" />
+	<angularOffset type="simple" value="90.0" />
 	<growthFactor type="simple" value="100.0" />
 	<gravityFactor type="simple" value="0" />
 	<windFactor type="simple" value="0" />
@@ -36,8 +36,8 @@
 	</scaleY>
 	<color>
 		<step b="0" g="0" offset="0.0" r="0" />
-		<step b="1.0" g="0.6" offset="0.1" r="0.4" />
-		<step b="1.0" g="0.4" offset="0.8" r="0.2" />
+		<step b="0.5" g="0.3" offset="0.1" r="0.2" />
+		<step b="0.5" g="0.2" offset="0.8" r="0.1" />
 		<step b="0" g="0" offset="1.0" r="0" />
 	</color>
 </emitter>

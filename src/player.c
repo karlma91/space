@@ -147,6 +147,7 @@ static void player_update(object *obj)
 
 	temp->e->x = obj->body->p.x;
 	temp->e->y = obj->body->p.y;
+	temp->e->angular_offset = cpvtoangle(obj->body->v) * (180/M_PI)+90;
 
 	if(temp->disable == 0){
 		player_controls(obj);
