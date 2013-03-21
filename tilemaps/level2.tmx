@@ -17,4 +17,12 @@
 81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81,81
 </data>
  </layer>
+ <objectgroup name="Object Layer 1" width="80" height="10">
+  <object name="coll" type="collision" x="3592" y="368" width="1024" height="768">
+   <properties>
+    <property name="friction" value="10"/>
+    <property name="segment" value="false"/>
+   </properties>
+  </object>
+ </objectgroup>
 </map>

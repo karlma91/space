@@ -80,14 +80,14 @@ int texture_load(char *file)
 
 static int texture_from_name(char *file)
 {
-	fprintf(stderr,"line: %d\n", __LINE__);
+	//fprintf(stderr,"line: %d\n", __LINE__);
 	int i;
 	for(i=0;i<=tex_counter; i++){
 		if(strcmp(names[i],file) == 0){
 			return i;
 		}
 	}
-	fprintf(stderr,"line: %d\n", __LINE__);
+	//fprintf(stderr,"line: %d\n", __LINE__);
 	return -1;
 }
 
