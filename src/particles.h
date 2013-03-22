@@ -35,6 +35,8 @@ struct particle {
 
 	cpVect p;
 	cpVect v;
+	float angle;
+	float rot_speed;
 	float size;
 
 	float time_alive;
@@ -82,6 +84,8 @@ struct emitter {
 	range spawn_count;    /* number of particles to spawn this interval */
 	range init_life;      /* lifetime for a particle */
 	range init_size;      /* start size of particle */
+	range init_rotation;
+	range speed_rotation;
 	range xoffset;        /* spawn particles inside x+-offset */
 	range yoffset;
 	range init_distance;       /* distancs from x,y to spawn */
@@ -112,11 +116,13 @@ struct emitter {
 
 void particles_init();
 void particles_destroy();
-void particles_add_explosion(cpVect v, float time, int speed, int numPar, int color);
 void particles_draw();
 void particles_update();
 void particles_release_emitter(emitter* e);
+
 emitter *particles_add_score_popup(cpVect p, int score);
+emitter *particles_add_sparks(cpVect p);
+
 void particles_clear();
 emitter *particles_get_emitter(int type);
 emitter *particles_get_emitter_at(int type,cpVect p);

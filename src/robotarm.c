@@ -141,11 +141,11 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	bt->alive = 0;
 
-	particles_add_explosion(b->body->p,0.3,1500,10,200);
+	particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
 
 	if(temp->hp <=0 ){
 		//a->body->data = NULL;
-		particles_add_explosion(a->body->p,1,2000,50,800);
+		particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
 		//cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
 		//((object *) temp)->alive = 0;
 	}else{

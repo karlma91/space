@@ -26,8 +26,12 @@ static void emitter_update(emitter *em);
 static void update_all_particles(emitter *em);
 static void draw_all_particles(emitter *em);
 
+/**
+ * Particle draw functions
+ */
 static void default_particle_draw(emitter *em, particle *p);
 static void draw_particle_as_score(emitter *em, particle *p);
+static void draw_particle_as_spark(emitter *em, particle *p);
 
 static void particle_update_pos(particle *p);
 
@@ -165,6 +169,17 @@ emitter *particles_add_score_popup(cpVect p,int score)
 	}
 }
 
+emitter *particles_add_sparks(cpVect p)
+{
+	emitter *e = particles_get_emitter_at(EMITTER_SPARKS, p);
+	if(e){
+		e->draw_particle = draw_particle_as_spark;
+		return e;
+	}else{
+		return NULL;
+	}
+}
+
 emitter *particles_get_emitter_at(int type, cpVect p){
 	emitter *e = particles_get_emitter(type);
 	if(e){
@@ -174,6 +189,7 @@ emitter *particles_get_emitter_at(int type, cpVect p){
 		return NULL;
 	}
 }
+
 
 emitter *particles_get_emitter(int type)
 {
@@ -247,15 +263,21 @@ void particles_clear()
  */
 
 static void draw_particle_as_score(emitter *em, particle *p)
-    {
-    glDisable(GL_TEXTURE_2D);
-    char temp[10];
-    int score = ((int)em->data);
-    sprintf(temp,"%d",score);
-    setTextAlign(TEXT_CENTER);
-    setTextSize(p->size);
-    font_drawText(p->p.x,p->p.y,temp);
-    }
+{
+	glDisable(GL_TEXTURE_2D);
+	char temp[10];
+	int score = ((int)em->data);
+	sprintf(temp,"%d",score);
+	setTextAlign(TEXT_CENTER);
+	setTextSize(p->size);
+	font_drawText(p->p.x,p->p.y,temp);
+}
+
+
+static void draw_particle_as_spark(emitter *em, particle *p)
+{
+	draw_line(p->p.x,p->p.y,p->p.x + p->v.x*p->size,p->p.y+ p->v.y*p->size, p->size);
+}
 
 /**
  * adds a emitter back to the stack
@@ -407,13 +429,16 @@ static void add_particle(emitter *em)
 	/* speed */
 	float angle = ((RAND_FLOAT - 0.5)*((em->spread)) + (em->angular_offset+90))*(M_PI/180);
 	float speed = range_get_random(em->speed) * 0.001f;
-	p->v = cpvmult(cpvforangle(angle),speed);
+	cpVect t = cpvforangle(angle);
+	p->v = cpvmult(t,speed);
 
 	/* position */
-	p->p = em->p;
+	p->p = cpvadd(em->p,cpvmult(t,range_get_random(em->init_distance)));
 
 	/* initial size */
 	p->size = range_get_random(em->init_size);
+	p->angle = range_get_random(em->init_rotation);
+	p->rot_speed = range_get_random(em->speed_rotation);
 	/* set time to live */
 	p->max_time = range_get_random(em->init_life);
 	p->time_alive = 0;
@@ -481,9 +506,9 @@ static void draw_all_particles(emitter *em)
 static void default_particle_draw(emitter *em, particle *p)
 {
 	if(em->rotation){
-		//float angle = (atan2(p->vely,p->velx) + M_PI)*(180/M_PI);
-		//glRotatef(angle,0,0,1);
-		draw_line(p->p.x,p->p.y,p->p.x + p->v.x*p->size,p->p.y+ p->v.y*p->size, p->size);
+		//float angle = (atan2(p->v.y,p->v.x) + M_PI)*(180/M_PI);
+		glRotatef(p->angle*(180/M_PI), 0, 0, 1);
+		p->angle += p->rot_speed;
 	}else{
 		glPushMatrix();
 		glTranslatef(p->p.x, p->p.y, 0.0f);
@@ -498,11 +523,6 @@ static void default_particle_draw(emitter *em, particle *p)
 
 		glPopMatrix();
 	}
-}
-
-
-void particles_add_explosion(cpVect v, float time, int speed, int numPar, int color){
-	particles_get_emitter_at(EMITTER_EXPLOTION,v);
 }
 
 
@@ -576,6 +596,10 @@ static int read_emitter_from_file (int type,char *filename)
 				parse_range(node,&(emi->init_life));
 			}else if(TESTNAME("initialSize")){
 				parse_range(node,&(emi->init_size));
+			}else if(TESTNAME("initialRotation")){
+				parse_range(node,&(emi->init_rotation));
+			}else if(TESTNAME("rotationSpeed")){
+				parse_range(node,&(emi->speed_rotation));
 			}else if(TESTNAME("xOffset")){
 				parse_range(node,&(emi->xoffset));
 			}else if(TESTNAME("yOffset")){

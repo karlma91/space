@@ -190,13 +190,10 @@ static void player_controls(object *obj)
 		}
 
 		if (keys[SDLK_x]) {
-			particles_add_explosion(cpBodyGetPos(temp->obj.body),0.5f,4000, 1000,200);
+			emitter *em = particles_get_emitter_at(EMITTER_EXPLOTION, temp->obj.body->p);
 		}
 		if (keys[SDLK_b]) {
-			emitter *em = particles_get_emitter(EMITTER_EXPLOTION);
-			if(em != NULL){
-				em->p = obj->body->p;
-			}
+			emitter *em = particles_get_emitter_at(EMITTER_EXPLOTION, temp->obj.body->p);
 			keys[SDLK_b] = 0;
 		}
 }
@@ -339,8 +336,8 @@ static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	//particles_add_explosion(b->body->p,0.3,1500,15,200);
 	if(temp->hp_bar.value <= 0 ){
-		particles_add_explosion(a->body->p,1,2000,50,800);
-			temp->lives--;
+		particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
+		temp->lives--;
 	}else{
 		temp->hp_bar.value -= 10;
 	}
