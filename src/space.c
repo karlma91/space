@@ -658,7 +658,7 @@ void space_init_level(int space_station, int deck)
 
 
 	if(player==NULL){
-		player = (object_group_player*)player_init();
+		player = (object_group_player*)object_create_player();
 	} else {
 		player->hp_bar.value = player->param->max_hp;
 		player->disable = 0;

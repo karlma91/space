@@ -9,6 +9,7 @@
 struct _object_param_player {
 	float max_hp;
 	int tex_id;
+	float cooldown;
 };
 
 typedef struct {
@@ -20,10 +21,12 @@ typedef struct {
 	hpbar hp_bar;
 	int lives;
 	float lost_life_timer;
-	int disable;
+	int disable; //todo move this out to object_data?
 	int gun_level;
 	int score;
 	float rotation_speed;
+	float timer;
+	float aim_angle;
 	emitter *e;
 
 	/* parameters */
@@ -32,6 +35,6 @@ typedef struct {
 
 extern object_group_preset object_type_player;
 
-extern object_data *player_init();
+extern object_group_player *object_create_player();
 
 #endif /* PLAYER_H_ */
