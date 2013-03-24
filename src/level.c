@@ -147,8 +147,8 @@ int level_init()
 		int obj_index = count[group_id] - 1;
 
 		/* add new sub object definition */ //TODO add new param structs here
-		struct tank_param tank;
-		struct tank_factory_param factory;
+		object_param_tank tank;
+		object_param_tankfactory factory;
 
 		switch (group_id) {
 		case ID_PLAYER:
@@ -156,13 +156,13 @@ int level_init()
 			break;
 		case ID_TANK:
 			expected = 3;
-			paramsize = sizeof(struct tank_param);
+			paramsize = sizeof(object_param_tank);
 			ret = fscanf(file, "%f %d %s\n", &tank.max_hp, &tank.score, &fname[0]);
 			tank.tex_id = texture_load(fname);
 			break;
 		case ID_TANK_FACTORY:
 			expected = 6;
-			paramsize = sizeof(struct tank_factory_param);
+			paramsize = sizeof(object_param_tankfactory);
 			ret = fscanf(file, "%d %f %f %d %s %s\n", &factory.max_tanks, &factory.max_hp, &factory.spawn_delay, &factory.score, buf, &fname[0]);
 
 			/* find tank subtype */
@@ -171,7 +171,7 @@ int level_init()
 				fprintf(stderr, "ERROR while reading tank factory data, TANK %s not defined before\n", buf);
 				return 7;
 			}
-			factory.t_param = &(((struct tank_param *)params[ID_TANK])[sub_id]);
+			factory.t_param = &(((object_param_tank *)params[ID_TANK])[sub_id]);
 			factory.tex_id = texture_load(fname);
 			break;
 		case ID_BULLET_PLAYER:
@@ -196,9 +196,9 @@ int level_init()
 		case ID_PLAYER:
 			/* currently unsupported */ break;
 		case ID_TANK:
-			((struct tank_param *)params[group_id])[obj_index] = tank; break;
+			((object_param_tank *)params[group_id])[obj_index] = tank; break;
 		case ID_TANK_FACTORY:
-			((struct tank_factory_param *)params[group_id])[obj_index] = factory; break;
+			((object_param_tankfactory *)params[group_id])[obj_index] = factory; break;
 		case ID_BULLET_PLAYER:
 			/* currently unsupported */ break;
 		case ID_BULLET_ENEMY:
@@ -271,10 +271,10 @@ level *level_load(int space_station, int deck)
 			/* currently unsupported */
 			break;
 		case ID_TANK:
-			tank_init(x,NULL,  &(((struct tank_param *)params[group_id])[sub_id])  );
+			tank_init(x,NULL,  &(((object_param_tank *)params[group_id])[sub_id])  );
 			break;
 		case ID_TANK_FACTORY:
-			tankfactory_init(x, &(((struct tank_factory_param *)params[group_id])[sub_id]));
+			tankfactory_init(x, &(((object_param_tankfactory *)params[group_id])[sub_id]));
 			break;
 		case ID_BULLET_PLAYER:
 			/* currently unsupported */

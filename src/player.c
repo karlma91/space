@@ -24,29 +24,24 @@
 #include "chipmunk.h"
 
 
-static void init(object *fac);
+static void init(object_data *);
 
-static void player_render(object *obj);
-static void player_update(object *obj);
-static void player_destroy(object *obj);
-static void tmp_shoot(object *obj);
+static void player_render(object_data *);
+static void player_update(object_data *);
+static void player_destroy(object_data *);
+static void tmp_shoot(object_data *);
 
 static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 
-static void player_controls(object *obj);
+static void player_controls(object_data *obj);
 static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 
 static int controll_mode = 2;
 
-static void normal_control(); //1
 static void arcade_control(); //2
-static void tmp_shoot_dir(object *obj, float v);
+static void tmp_shoot_dir(object_data *obj, float v);
 
-//static void pitch_up(cpBody *body, float rotSpeed);
-//static void pitch_down(cpBody *body, float rotSpeed);
-
-
-struct obj_type type_player = {
+object_group_preset object_type_player = {
 	ID_PLAYER,
 	init,
 	player_update,
@@ -54,29 +49,29 @@ struct obj_type type_player = {
 	player_destroy
 };
 
-static struct player *temp;
+static object_group_player *temp; //TODO remove this, and move all instance variables into object_group_player
 static float timer = 0;
 
 static const texture_map tex_map = {
 		0,0,1,1
 };
 
-struct player_param default_player = {
+object_param_player default_player = {
 		200,
 		-1
 };
 
-object *player_init()
+object_data *player_init()
 {
 	cpFloat radius = 50;
 	cpFloat mass = 10;
 
-	struct player *pl = malloc(sizeof(struct player));
+	object_group_player *pl = malloc(sizeof(object_group_player));
 
 	//(object* pl)
 
-	pl->obj.type = &type_player;
-	pl->obj.alive = 1;
+	pl->data.preset = &object_type_player;
+	pl->data.alive = 1;
 
 	pl->param = &default_player;
 	pl->param->tex_id = TEX_PLAYER;
@@ -90,57 +85,55 @@ object *player_init()
 	pl->e = particles_get_emitter(EMITTER_FLAME);
 
 	/* make and add new body */
-	pl->obj.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius/2)));
-	cpBodySetPos(pl->obj.body, cpv(0,990));
-	cpBodySetVelLimit(pl->obj.body,700);
-	pl->obj.body->velocity_func = playerVelocityFunc;
+	pl->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius/2)));
+	cpBodySetPos(pl->data.body, cpv(0,990));
+	cpBodySetVelLimit(pl->data.body,700);
+	pl->data.body->velocity_func = playerVelocityFunc;
 	/* make and connect new shape to body */
-	pl->shape = cpSpaceAddShape(space, cpBoxShapeNew(pl->obj.body, radius, radius/2));
+	pl->shape = cpSpaceAddShape(space, cpBoxShapeNew(pl->data.body, radius, radius/2));
 	cpShapeSetFriction(pl->shape, 0.8);
 	cpShapeSetUserData(pl->shape, draw_boxshape);
 	cpShapeSetElasticity(pl->shape, 1.0f);
 	cpShapeSetLayers(pl->shape, LAYER_PLAYER);
 	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_BULLET_ENEMY, collision_enemy_bullet, NULL, NULL, NULL, NULL);
 
-	cpBodySetUserData(pl->obj.body, (void*)pl);
-	objects_add((object*)pl);
+	cpBodySetUserData(pl->data.body, (void*)pl);
+	objects_add((object_data*)pl);
 
-	hpbar_init(&(pl->hp_bar), pl->param->max_hp, 80, 16, -40, 30, &(pl->obj.body->p));
-	return (object*)pl;
+	hpbar_init(&(pl->hp_bar), pl->param->max_hp, 80, 16, -40, 30, &(pl->data.body->p));
+	return (object_data*)pl;
 }
 
-static void init(object *fac)
+static void init(object_data *fac)
 {
-	temp = ((struct player*)fac);
+	temp = ((object_group_player*)fac);
 }
 
-static void player_render(object *obj)
+static void player_render(object_data *obj)
 {
-	temp = (struct player*)obj;
+	object_group_player *player = (object_group_player *)obj;
+
 	//float s = 0.001;
-	float dir = cpBodyGetAngle(temp->obj.body);
+	float dir = cpBodyGetAngle(player->data.body);
 	//Color c = RGBAColor(1,0,0,1);
-	//draw_boxshape(temp->shape,RGBAColor(1,1,1,1),c);
+	//draw_boxshape(player->shape,RGBAColor(1,1,1,1),c);
 
-	hpbar_draw(&temp->hp_bar);
-	assert(*(temp->hp_bar.x) == (temp->obj.body->p.x));
+	hpbar_draw(&player->hp_bar);
 
 	//TODO: fix player draw texture
-	///*
-	draw_texture(temp->param->tex_id, &(obj->body->p), &(tex_map), 100, 100, dir*180/M_PI);
-	// */
+	draw_texture(player->param->tex_id, &(player->data.body->p), &(tex_map), 100, 100, dir*180/M_PI);
 }
 
-static void player_update(object *obj)
+static void player_update(object_data *obj)
 {
 	timer += dt;
-	temp = (struct player*)obj;
+	temp = (object_group_player*)obj;
 	//cpFloat pangvel = cpBodyGetAngVel(temp->body);
 	//cpBodySetAngVel(temp->body, pangvel*0.9);
 	//cpVect pvel = cpBodyGetVel(obj->body);
 
 	//update physics and player
-	cpVect rot = cpBodyGetRot(temp->obj.body);
+	cpVect rot = cpBodyGetRot(temp->data.body);
 	rot = cpvmult(rot, 10000);
 	cpBodySetForce(obj->body, cpv(0,0));
 	cpBodySetTorque(obj->body, 0);
@@ -151,15 +144,11 @@ static void player_update(object *obj)
 	if(temp->disable == 0){
 		player_controls(obj);
 	}
-
 }
 
-static void player_controls(object *obj)
+static void player_controls(object_data *obj)
 {
 		switch(controll_mode){
-			case 1:
-				normal_control();
-				break;
 			case 2:
 				arcade_control();
 				break;
@@ -181,45 +170,21 @@ static void player_controls(object *obj)
 				cam_zoom = 1;
 		}
 		if (keys[SDLK_r]){
-			temp->obj.body->p.x=0;
-			temp->obj.body->p.y=500;
+			temp->data.body->p.x=0;
+			temp->data.body->p.y=500;
 		}
 
 		if (keys[SDLK_h]) {
-			cpBodySetVelLimit(temp->obj.body,5000);
+			cpBodySetVelLimit(temp->data.body,5000);
 		}
 
 		if (keys[SDLK_x]) {
-			emitter *em = particles_get_emitter_at(EMITTER_EXPLOTION, temp->obj.body->p);
+			emitter *em = particles_get_emitter_at(EMITTER_EXPLOTION, temp->data.body->p);
 		}
 		if (keys[SDLK_b]) {
-			emitter *em = particles_get_emitter_at(EMITTER_EXPLOTION, temp->obj.body->p);
+			emitter *em = particles_get_emitter_at(EMITTER_EXPLOTION, temp->data.body->p);
 			keys[SDLK_b] = 0;
 		}
-}
-
-static void normal_control()
-{
-	/* units/sec */
-	cpFloat accel = 100000;
-
-	cpFloat cspeed = cpvlength(cpBodyGetVel(temp->obj.body));
-	/* Player movement */
-	if(keys[SDLK_w] && cspeed > 50) {
-		//pitch_up((temp->obj.body),temp->rotation_speed);
-	}
-	if(keys[SDLK_s] && cspeed > 50) {
-		//pitch_down((temp->obj.body),temp->rotation_speed);
-	}
-	cpBodySetAngle(temp->obj.body, cpvtoangle(cpBodyGetVel(temp->obj.body)));
-	cpSpaceReindexShapesForBody(space, temp->obj.body);
-
-	if(keys[SDLK_d]) cpBodyApplyForce(temp->obj.body,cpvmult(cpBodyGetRot(temp->obj.body),accel*dt),cpvzero);
-	if(keys[SDLK_a]) cpBodyApplyForce(temp->obj.body,cpvmult(cpBodyGetRot(temp->obj.body),-accel*dt),cpvzero);
-
-	if (keys[SDLK_SPACE]) {
-		tmp_shoot(temp);
-	}
 }
 
 //TODO move this method to objects.c?
@@ -281,7 +246,7 @@ static inline Direction angle_index_fromkeys(SDLKey key_left, SDLKey key_up, SDL
 
 static void arcade_control()
 {
-	float player_angle = cpBodyGetAngle(temp->obj.body);
+	float player_angle = cpBodyGetAngle(temp->data.body);
 	float player_angle_target;
 	Direction angle_index = -1;
 
@@ -294,11 +259,11 @@ static void arcade_control()
 		float dir_step = (1 * 2*M_PI) * dt; // 1 rps
 		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
 
-		cpBodySetVel(temp->obj.body, cpvmult(cpvforangle(player_angle),speed));
+		cpBodySetVel(temp->data.body, cpvmult(cpvforangle(player_angle),speed));
 	}
 
-	cpBodySetAngle(temp->obj.body, cpvtoangle(cpBodyGetVel(temp->obj.body)));
-	cpSpaceReindexShapesForBody(space, temp->obj.body);
+	cpBodySetAngle(temp->data.body, cpvtoangle(cpBodyGetVel(temp->data.body)));
+	cpSpaceReindexShapesForBody(space, temp->data.body);
 
 	static float aim_angle = 0;
 	float aim_angle_target = 0;
@@ -309,7 +274,7 @@ static void arcade_control()
 		aim_angle_target = dir8[angle_index];
 		float dir_step = (0.5f * 2*M_PI) * dt; // 0.5 rps
 		aim_angle = turn_toangle(aim_angle,aim_angle_target,dir_step);
-		tmp_shoot_dir((object *)temp, aim_angle);
+		tmp_shoot_dir((object_data *)temp, aim_angle);
 	}
 }
 
@@ -328,7 +293,7 @@ static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
-	temp = ((struct player*)(a->body->data));
+	temp = ((object_group_player*)(a->body->data));
 
 	struct bullet *bt = ((struct bullet*)(b->body->data));
 
@@ -344,9 +309,9 @@ static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	return 0;
 }
 
-static void tmp_shoot(object *obj)
+static void tmp_shoot(object_data *obj)
 {
-	temp = (struct player*)obj;
+	temp = (object_group_player*)obj;
 	//TMP shooting settings
 	static const float cooldown = 0.15f;
 
@@ -357,10 +322,10 @@ static void tmp_shoot(object *obj)
 	//bullet_init(temp->body->p,cpvforangle(cpBodyGetAngle(temp->body)),ID_BULLET_PLAYER);
 	int i;
 	for(i=0; i < temp->gun_level;i++){
-		bullet_init(temp->obj.body->p,cpvforangle(cpBodyGetAngle(temp->obj.body) + (M_PI/70)*((i+1) - (temp->gun_level-i))),obj->body->v, ID_BULLET_PLAYER);
+		bullet_init(temp->data.body->p,cpvforangle(cpBodyGetAngle(temp->data.body) + (M_PI/70)*((i+1) - (temp->gun_level-i))),obj->body->v, ID_BULLET_PLAYER);
 	}
 }
-static void tmp_shoot_dir(object *obj, float v)
+static void tmp_shoot_dir(object_data *obj, float v)
 {
 	//TMP shooting settings
 	static const float cooldown = 0.05f;
@@ -377,7 +342,7 @@ static void tmp_shoot_dir(object *obj, float v)
 }
 
 
-static void player_destroy(object *obj)
+static void player_destroy(object_data *obj)
 {
 	*obj->remove = 1;
 	//free(obj);

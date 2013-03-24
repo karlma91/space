@@ -3,16 +3,16 @@
 
 #include "objects.h"
 
-extern struct obj_type type_robotarm;
+extern object_group_preset type_robotarm;
 
 struct robotarm;
 struct robotarm_param;
 
-extern object *robotarm_init(float xpos, struct robotarm_param *param);
+extern object_data *robotarm_init(float xpos, struct robotarm_param *param);
 
 struct robotarm {
 	/*standard*/
-	object obj;
+	object_data obj;
 
 	/*tank*/
 	cpShape *shape;

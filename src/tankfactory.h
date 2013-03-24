@@ -7,15 +7,20 @@
 #include "hpbar.h"
 
 /* the super tank_factory object */
-extern struct obj_type type_tank_factory;
+extern object_group_preset type_tank_factory;
 
-struct tank_factory_param;
+struct _object_param_tankfactory {
+	int max_tanks;
+	float max_hp;
+	float spawn_delay;
+	int score;
+	object_param_tank *t_param;
+	int tex_id;
+};
 
-object* tankfactory_init(int x_pos, struct tank_factory_param *param);
-
-struct tank_factory {
+typedef struct {
 	/* object */
-	object obj;
+	object_data obj;
 
 	/*tank factory*/
 	cpShape *shape;
@@ -28,17 +33,9 @@ struct tank_factory {
 	emitter *smoke;
 
 	/* paramerters */
-	struct tank_factory_param *param;
-};
+	object_param_tankfactory *param;
+} object_group_tankfactory;
 
-struct tank_factory_param {
-	int max_tanks;
-	float max_hp;
-	float spawn_delay;
-	int score;
-	struct tank_param *t_param;
-	int tex_id;
-};
-
+object_data* tankfactory_init(int x_pos, object_param_tankfactory *param);
 
 #endif /* TANKFACTORY_H_ */

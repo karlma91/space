@@ -7,14 +7,14 @@
 #include "particles.h"
 #include "space.h"
 
-object *bullet_init(cpVect pos, cpVect dir, cpVect intit_vel, int type);
+object_data *bullet_init(cpVect pos, cpVect dir, cpVect intit_vel, int type);
 
-extern struct obj_type type_bullet_player;
-extern struct obj_type type_bullet_enemy;
+extern object_group_preset type_bullet_player;
+extern object_group_preset type_bullet_enemy;
 
 struct bullet{
 	/*object*/
-	struct obj_type *type;
+	object_group_preset *type;
 	int instance_id;
 	int *remove;
 	int alive;

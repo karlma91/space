@@ -22,10 +22,10 @@
 #include "bullet.h"
 
 /* static prototypes */
-static void init(object *fac);
-static void update(object *fac);
-static void render(object *fac);
-static void destroy(object *obj);
+static void init(object_data *fac);
+static void update(object_data *fac);
+static void render(object_data *fac);
+static void destroy(object_data *obj);
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 static cpShape *tempShape;
 static cpBody *addChassis(cpSpace *space, cpVect pos, cpVect boxOffset);
@@ -33,10 +33,10 @@ static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset);
 
 /* helper */
 //static float get_angle(object *obj, object *obj2);
-static float get_best_angle(object *obj, object *obj2);
+static float get_best_angle(object_data *obj, object_data *obj2);
 
 
-struct obj_type type_tank= {
+object_group_preset type_tank= {
 	ID_TANK,
 	init,
 	update,
@@ -48,13 +48,13 @@ static const texture_map tex_map[2] = {
 		{0,0,1,0.5}, {0,0.5,0.5,1}
 };
 
-static struct tank *temp;
+static object_group_tank *temp;
 
-object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pram)
+object_data *tank_init(float xpos,object_group_tankfactory *factory, object_param_tank *pram)
 {
-	struct tank *tank = malloc(sizeof(struct tank));
-	((object *) tank)->type = &type_tank;
-	((object *) tank)->alive = 1;
+	object_group_tank *tank = malloc(sizeof(object_group_tank));
+	((object_data *) tank)->preset = &type_tank;
+	((object_data *) tank)->alive = 1;
 	tank->param = pram;
 
 	tank->timer = 0;
@@ -93,36 +93,36 @@ object *tank_init(float xpos,struct tank_factory *factory, struct tank_param *pr
 	tank->wheel2 = addWheel(space, posB, boxOffset);
 
 
-	cpSpaceAddConstraint(space, cpGrooveJointNew(((object *) tank)->body, tank->wheel1 , cpv(-30, -10), cpv(-30, -40), cpvzero));
-	cpSpaceAddConstraint(space, cpGrooveJointNew(((object *) tank)->body, tank->wheel2, cpv( 30, -10), cpv( 30, -40), cpvzero));
+	cpSpaceAddConstraint(space, cpGrooveJointNew(((object_data *) tank)->body, tank->wheel1 , cpv(-30, -10), cpv(-30, -40), cpvzero));
+	cpSpaceAddConstraint(space, cpGrooveJointNew(((object_data *) tank)->body, tank->wheel2, cpv( 30, -10), cpv( 30, -40), cpvzero));
 
-	cpSpaceAddConstraint(space, cpDampedSpringNew(((object *) tank)->body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
-	cpSpaceAddConstraint(space, cpDampedSpringNew(((object *) tank)->body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(((object_data *) tank)->body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(((object_data *) tank)->body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
 
 
-	cpBodySetUserData(((object *) tank)->body, (object*)tank);
-	objects_add((object*)tank);
+	cpBodySetUserData(((object_data *) tank)->body, (object_data*)tank);
+	objects_add((object_data*)tank);
 
 	hpbar_init(&tank->hp_bar,pram->max_hp,80,16,-40,60,&(tank->obj.body->p));
 
-	return (object*)tank;
+	return (object_data*)tank;
 }
 
 
-static void init(object *fac)
+static void init(object_data *fac)
 {
-	temp = ((struct tank*)fac);
+	temp = ((object_group_tank*)fac);
 }
 
-static void update(object *fac)
+static void update(object_data *fac)
 {
-	temp = ((struct tank*)fac);
+	temp = ((object_group_tank*)fac);
 	temp->timer +=dt;
 
 	/* gets the player from the list */
-	struct player *player = ((struct player*)objects_first(ID_PLAYER));
+	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 
-	float player_angle = get_best_angle(fac, ((object*)player));
+	float player_angle = get_best_angle(fac, ((object_data*)player));
 
 
 	/*TODO: stop shaking when at correct angle */
@@ -136,7 +136,7 @@ static void update(object *fac)
 	}
 
 	cpFloat tx = fac->body->p.x;
-	cpFloat px = player->obj.body->p.x;
+	cpFloat px = player->data.body->p.x;
 
 	cpFloat ptx = (px-tx); //direct way
 	cpFloat pltx = (tx - currentlvl->left + (currentlvl->right - px));
@@ -162,7 +162,7 @@ static void update(object *fac)
 /**
  * returns the best angle to shoot at a moving object obj2 from obj1
  */
-static float get_best_angle(object *obj, object *obj2)
+static float get_best_angle(object_data *obj, object_data *obj2)
 {
 	cpVect a = cpvsub(obj->body->p, obj2->body->p);
 
@@ -235,9 +235,9 @@ addChassis(cpSpace *space, cpVect pos, cpVect boxOffset)
 	return body;
 }
 
-static void render(object *fac)
+static void render(object_data *fac)
 {
-	temp = ((struct tank*)fac);
+	temp = ((object_group_tank*)fac);
 
 	if (temp->param->max_hp < 100)
 		glColor3f(1,1,1);
@@ -266,7 +266,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
-	temp = ((struct tank*)(a->body->data));
+	temp = ((object_group_tank*)(a->body->data));
 
 	struct bullet *bt = ((struct bullet*)(b->body->data));
 
@@ -282,11 +282,11 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 		particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
 		particles_add_score_popup(b->body->p, temp->param->score);
 
-		if(((object *) temp)->alive){
-			((struct player *)objects_first(ID_PLAYER))->score += temp->param->score;
+		if(((object_data *) temp)->alive){
+			((object_group_player *)objects_first(ID_PLAYER))->score += temp->param->score;
 		}
 		//cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
-		((object *) temp)->alive = 0;
+		((object_data *) temp)->alive = 0;
 	}
 
 	return 0;
@@ -304,9 +304,9 @@ static void constrain_from_space(cpBody *body, cpConstraint *constraint, void *d
     cpConstraintFree(constraint);
 }
 
-static void destroy(object *obj)
+static void destroy(object_data *obj)
 {
-	temp = ((struct tank*)obj);
+	temp = ((object_group_tank*)obj);
 
 	cpBodyEachShape(obj->body,shape_from_space,NULL);
 	cpBodyEachConstraint(obj->body,constrain_from_space,NULL);

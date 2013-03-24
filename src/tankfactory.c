@@ -18,22 +18,22 @@
 #include "tank.h"
 #include "bullet.h"
 
-static void init(object *fac);
-static void update(object *fac);
-static void render(object *factory);
-static void destroy(object *obj);
+static void init(object_data *fac);
+static void update(object_data *fac);
+static void render(object_data *factory);
+static void destroy(object_data *obj);
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
-static void remove_factory_from_tank(object *obj);
+static void remove_factory_from_tank(object_data *obj);
 
-struct obj_type type_tank_factory = { ID_TANK_FACTORY, init, update, render,
+object_group_preset type_tank_factory = { ID_TANK_FACTORY, init, update, render,
 		destroy };
 
-static struct tank_factory *temp; //TODO fjerne denne!?
+static object_group_tankfactory *temp; //TODO fjerne denne!?
 
-object *tankfactory_init(int x_pos, struct tank_factory_param *param) {
-	struct tank_factory *fac = malloc(sizeof(struct tank_factory));
-	((object*) fac)->alive = 1;
-	((object*) fac)->type = &type_tank_factory;
+object_data *tankfactory_init(int x_pos, object_param_tankfactory *param) {
+	object_group_tankfactory *fac = malloc(sizeof(object_group_tankfactory));
+	((object_data*) fac)->alive = 1;
+	((object_data*) fac)->preset = &type_tank_factory;
 	fac->param = param;
 
 	fac->cur = 0;
@@ -44,13 +44,13 @@ object *tankfactory_init(int x_pos, struct tank_factory_param *param) {
 
 	cpFloat size = 100;
 	/* make and add new body */
-	((object*) fac)->body = cpSpaceAddBody(space,
+	((object_data*) fac)->body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(500.0f, size, size)));
-	cpBodySetPos(((object*) fac)->body, cpv(x_pos, size));
+	cpBodySetPos(((object_data*) fac)->body, cpv(x_pos, size));
 
 	/* make and connect new shape to body */
 	fac->shape = cpSpaceAddShape(space,
-			cpBoxShapeNew(((object*) fac)->body, size, size));
+			cpBoxShapeNew(((object_data*) fac)->body, size, size));
 	cpShapeSetFriction(fac->shape, 1);
 
 	//cpShapeSetGroup(fac->shape, 10);
@@ -61,21 +61,21 @@ object *tankfactory_init(int x_pos, struct tank_factory_param *param) {
 	cpSpaceAddCollisionHandler(space, ID_TANK_FACTORY, ID_BULLET_PLAYER,
 			collision_player_bullet, NULL, NULL, NULL, NULL );
 
-	cpBodySetUserData(((object*) fac)->body, (object*) fac);
-	objects_add((object*) fac);
+	cpBodySetUserData(((object_data*) fac)->body, (object_data*) fac);
+	objects_add((object_data*) fac);
 
 	hpbar_init(&fac->hp_bar, param->max_hp, 100, 16, -50, 90,
 			&(fac->obj.body->p));
 
-	return (object*) fac;
+	return (object_data*) fac;
 }
 
-static void init(object *fac) {
-	temp = ((struct tank_factory*) fac);
+static void init(object_data *fac) {
+	temp = ((object_group_tankfactory*) fac);
 }
 
-static void update(object *fac) {
-	temp = ((struct tank_factory*) fac);
+static void update(object_data *fac) {
+	temp = ((object_group_tankfactory*) fac);
 	temp->timer += dt;
 	if (temp->timer > temp->param->spawn_delay
 			&& temp->cur < temp->param->max_tanks) {
@@ -89,8 +89,8 @@ static void update(object *fac) {
 	}
 }
 
-static void render(object *factory) {
-	temp = ((struct tank_factory*) factory);
+static void render(object_data *factory) {
+	temp = ((object_group_tankfactory*) factory);
 
 	//glColor3f(1,1,1);
 
@@ -114,7 +114,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
 
-	temp = ((struct tank_factory*) (a->body->data));
+	temp = ((object_group_tankfactory*) (a->body->data));
 
 	struct bullet *bt = ((struct bullet*) (b->body->data));
 
@@ -126,25 +126,25 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 		particles_get_emitter_at(EMITTER_EXPLOTION, a->body->p);
 
 		particles_add_score_popup(a->body->p, temp->param->score);
-		if (((object *) temp)->alive) {
-			((struct player *) objects_first(ID_PLAYER))->score +=
+		if (((object_data *) temp)->alive) {
+			((object_group_player *) objects_first(ID_PLAYER))->score +=
 					temp->param->score;
 		}
-		((object*) temp)->alive = 0;
+		((object_data*) temp)->alive = 0;
 		objects_iterate_type(remove_factory_from_tank, ID_TANK);
 	}
 	return 0;
 }
 
-static void remove_factory_from_tank(object *obj) {
-	struct tank *t = (struct tank *) obj;
+static void remove_factory_from_tank(object_data *obj) {
+	object_group_tank *t = (object_group_tank *) obj;
 	if (t->factory == temp) {
 		t->factory = NULL;
 	}
 }
 
-static void destroy(object *obj) {
-	temp = ((struct tank_factory*) obj);
+static void destroy(object_data *obj) {
+	temp = ((object_group_tankfactory*) obj);
 	*obj->remove = 1;
 	particles_release_emitter(temp->smoke);
 

@@ -11,13 +11,14 @@ int LAYER_PLAYER_BULLET   =                    1<<3 | 1<<4;
 int LAYER_ENEMY_BULLET    =                                 1<<5;
 
 
-typedef struct node_ node;
-struct node_ {
+typedef struct _node node;
+struct _node {
 	int remove;
 	node *next;
-	object *obj;
+	object_data *obj;
 };
 
+//TODO put these static variables into a structure, for easier simultaneous parallel level storage
 static int object_count[ID_COUNT];
 static int instance_counter[ID_COUNT];
 static node *(head_all[ID_COUNT]);
@@ -36,10 +37,10 @@ void objects_init() {
 }
 
 /* add object into its corresponding list */
-void objects_add(object* obj)
+void objects_add(object_data* obj)
 {
 	/* find right list to add object into */
-	i = obj->type->ID;
+	i = obj->preset->ID;
 
 	/* add object at end of list */
 	(*(last_all[i])) = malloc(sizeof(node));
@@ -54,7 +55,7 @@ void objects_add(object* obj)
 }
 
 /* iterate through all lists of objects */
-void objects_iterate(void (*f)(object *))
+void objects_iterate(void (*f)(object_data *))
 {
 	for (i = 0; i < ID_COUNT; i++) {
 		if (head_all[i] == NULL) continue;
@@ -79,7 +80,7 @@ void objects_iterate(void (*f)(object *))
 }
 
 /* iterate through one type of object */
-void objects_iterate_type(void (*f)(object *), int obj_id)
+void objects_iterate_type(void (*f)(object_data *), int obj_id)
 {
 	/* error check obj_id */
 	if (obj_id < 0 || obj_id >= ID_COUNT) {
@@ -125,7 +126,7 @@ void objects_destroy()
 	objects_init();
 }
 
-object *objects_nearest(cpVect pos, int obj_id)
+object_data *objects_nearest(cpVect pos, int obj_id)
 {
 	cpVect v = head_all[obj_id]->obj->body->p;
 	if (head_all[obj_id] == NULL) return NULL;
@@ -147,7 +148,7 @@ object *objects_nearest(cpVect pos, int obj_id)
 	return min_node->obj;
 }
 
-object *objects_first(int obj_id)
+object_data *objects_first(int obj_id)
 {
 	if (object_count[obj_id])
 		return head_all[obj_id]->obj;
@@ -155,7 +156,7 @@ object *objects_first(int obj_id)
 		return NULL;
 }
 
-object *objects_n(int obj_id, int n)
+object_data *objects_n(int obj_id, int n)
 {
 	/* error check obj_id */
 	if (obj_id < 0 || obj_id >= ID_COUNT) {
@@ -173,7 +174,7 @@ object *objects_n(int obj_id, int n)
 	return NULL;
 }
 
-object *objects_last(int obj_id)
+object_data *objects_last(int obj_id)
 {
 	/* error check obj_id */
 	if (obj_id < 0 || obj_id >= ID_COUNT) {
@@ -194,7 +195,7 @@ object *objects_last(int obj_id)
 	return NULL;
 }
 
-object *objects_by_id(int obj_id, int instance_id)
+object_data *objects_by_id(int obj_id, int instance_id)
 {
 	/* error check obj_id */
 	if (obj_id < 0 || obj_id >= ID_COUNT) {
@@ -219,3 +220,4 @@ int objects_count(int obj_id)
 }
 
 
+//TODO add help methods here?

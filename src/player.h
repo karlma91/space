@@ -6,11 +6,14 @@
 #include "particles.h"
 #include "hpbar.h"
 
-struct player_param;
+struct _object_param_player {
+	float max_hp;
+	int tex_id;
+};
 
-struct player{
+typedef struct {
 	/* standard */
-	object obj;
+	object_data data;
 
 	/* player's instance variables */
 	cpShape *shape;
@@ -24,16 +27,11 @@ struct player{
 	emitter *e;
 
 	/* parameters */
-	struct player_param *param;
-};
+	object_param_player *param;
+} object_group_player;
 
-struct player_param {
-	float max_hp;
-	int tex_id;
-};
+extern object_group_preset object_type_player;
 
-extern struct obj_type type_player;
-
-object *player_init();
+extern object_data *player_init();
 
 #endif /* PLAYER_H_ */

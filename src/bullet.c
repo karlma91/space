@@ -2,22 +2,22 @@
 #include "bullet.h"
 #include "objects.h"
 
-static void init(object *obj);
-static void update(object *obj);
-static void render(object *obj);
-static void destroy(object *obj);
+static void init(object_data *obj);
+static void update(object_data *obj);
+static void render(object_data *obj);
+static void destroy(object_data *obj);
 
 static int callback_ground(cpArbiter *arb, cpSpace *space, void *unused);
 static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 
-struct obj_type type_bullet_player= {
+object_group_preset type_bullet_player= {
 	ID_BULLET_PLAYER,
 	init,
 	update,
 	render,
 	destroy
 };
-struct obj_type type_bullet_enemy= {
+object_group_preset type_bullet_enemy= {
 	ID_BULLET_ENEMY,
 	init,
 	update,
@@ -25,19 +25,19 @@ struct obj_type type_bullet_enemy= {
 	destroy
 };
 
-struct bullet *temp;
+static struct bullet *temp;
 
-static void init(object *obj)
+static void init(object_data *obj)
 {
 
 }
 
-static void update(object *obj)
+static void update(object_data *obj)
 {
 	temp = (struct bullet*)obj;
 }
 
-static void render(object *obj)
+static void render(object_data *obj)
 {
 	temp = (struct bullet*)obj;
 	if(temp->type->ID == ID_BULLET_PLAYER){
@@ -48,7 +48,7 @@ static void render(object *obj)
 	draw_velocity_line(temp->shape);
 }
 
-object *bullet_init(cpVect pos, cpVect dir, cpVect intit_vel, int type)
+object_data *bullet_init(cpVect pos, cpVect dir, cpVect intit_vel, int type)
 {
 		temp = malloc(sizeof(struct bullet));
 		temp->alive = 1;
@@ -57,7 +57,7 @@ object *bullet_init(cpVect pos, cpVect dir, cpVect intit_vel, int type)
 
 		temp->body = cpSpaceAddBody(space, cpBodyNew(1, moment));
 		cpBodySetPos(temp->body, cpvadd(pos, cpvmult(dir,60)));
-		cpBodySetUserData(temp->body, (object*)temp);
+		cpBodySetUserData(temp->body, (object_data*)temp);
 		cpBodySetVel(temp->body,cpvadd(cpvmult(dir,3000),intit_vel));
 		temp->body->velocity_func = bulletVelocityFunc;
 
@@ -75,8 +75,8 @@ object *bullet_init(cpVect pos, cpVect dir, cpVect intit_vel, int type)
 			cpShapeSetLayers(temp->shape,LAYER_ENEMY_BULLET);
 		}
 
-		objects_add((object*)temp);
-		return (object*)temp;
+		objects_add((object_data*)temp);
+		return (object_data*)temp;
 }
 
 /**
@@ -99,7 +99,7 @@ static int callback_ground(cpArbiter *arb, cpSpace *space, void *unused)
 	return 0;
 }
 
-static void destroy(object *bullet)
+static void destroy(object_data *bullet)
 {
 	temp = (struct bullet*)bullet;
 	cpSpaceRemoveShape(space, temp->shape);

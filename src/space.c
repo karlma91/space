@@ -50,8 +50,8 @@ state state_space = {
 };
 
 static void SPACE_draw();
-static void update_objects(object *obj);
-static void render_objects(object *obj);
+static void update_objects(object_data *obj);
+static void render_objects(object_data *obj);
 static void update_camera_zoom(int cam_mode);
 static void update_camera_position();
 
@@ -146,7 +146,7 @@ static void level_running()
 	game_time += dt;
 
 	update_all();
-	struct player *player = (struct player*)objects_first(ID_PLAYER);
+	object_group_player *player = (object_group_player*)objects_first(ID_PLAYER);
 	if(player->hp_bar.value <= 0){
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
@@ -162,7 +162,7 @@ static void level_running()
 static void level_timesup()
 {
 	update_all();
-	struct player *player = (struct player*)objects_first(ID_PLAYER);
+	object_group_player *player = (object_group_player*)objects_first(ID_PLAYER);
 	player->hp_bar.value = 0;
 	player->disable = 1;
 	if (state_timer > 3) {
@@ -186,7 +186,7 @@ static void level_cleared()
 	int time_remaining = (currentlvl->timelimit - game_time + 0.5f);
 
 	if (time_remaining > 0) {
-		struct player *player = (struct player *)objects_first(ID_PLAYER);
+		object_group_player *player = (object_group_player *)objects_first(ID_PLAYER);
 		player->score += time_remaining * 150; //Time bonus (150 * sec)
 		game_time = currentlvl->timelimit;
 	}
@@ -311,14 +311,14 @@ static void update_all()
 /**
  * Used by object_iterate to update all objects
  */
-static struct tank *temptank = NULL;
-static void update_objects(object *obj)
+static object_group_tank *temptank = NULL;
+static void update_objects(object_data *obj)
 {
 	if(obj->alive){
 
 		//TODO: fix this shit
-		if(obj->type->ID == ID_TANK){
-			temptank = ((struct tank*)obj);
+		if(obj->preset->ID == ID_TANK){
+			temptank = ((object_group_tank*)obj);
 			if (obj->body->p.x < currentlvl->left ){
 				obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
 				temptank->wheel1->p.x = currentlvl->right - abs(currentlvl->left - temptank->wheel1->p.x );
@@ -335,10 +335,10 @@ static void update_objects(object *obj)
 			if (obj->body->p.x > currentlvl->right) obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
 		}
 
-		obj->type->update(obj);
+		obj->preset->update(obj);
 	}else{
 		*(obj->remove) = 1;
-		obj->type->destroy(obj);
+		obj->preset->destroy(obj);
 	}
 }
 
@@ -368,10 +368,10 @@ static void space_render()
 
 static void update_camera_zoom(int cam_mode)
 {
-	struct player *player = ((struct player*)objects_first(ID_PLAYER));
+	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 
 	/* dynamic camera zoom */
-	float py = player->obj.body->p.y / currentlvl->height;
+	float py = player->data.body->p.y / currentlvl->height;
 	float scrlvl, zoomlvl;
 	switch (cam_mode) {
 	case 1:
@@ -409,7 +409,7 @@ static void update_camera_zoom(int cam_mode)
 		}else{
 			cam_zoom = 1.3;
 		}
-		cam_center_y = player->obj.body->p.y;
+		cam_center_y = player->data.body->p.y;
 		if(cam_center_y > currentlvl->height - HEIGHT/(2*cam_zoom)){
 			cam_center_y = currentlvl->height - HEIGHT/(2*cam_zoom);
 		}else if(cam_center_y <  HEIGHT/(2*cam_zoom)){
@@ -453,15 +453,15 @@ static void update_camera_zoom(int cam_mode)
 static void update_camera_position()
 {
 
-	struct player *player = ((struct player*)objects_first(ID_PLAYER));
+	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 	/* dynamic camera pos */
 	static const float pos_delay = 0.99f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
 	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
 	static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
 	static float cam_dx;
-	cam_dx = cam_dx * pos_delay + ((player->obj.body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
+	cam_dx = cam_dx * pos_delay + ((player->data.body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
 
-	cam_center_x = player->obj.body->p.x + cam_dx;
+	cam_center_x = player->data.body->p.x + cam_dx;
 
 	/* camera constraints */
 
@@ -513,7 +513,7 @@ static void SPACE_draw()
 		glColor3f(1,1,1);
 		//font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
 
-		struct player *player = ((struct player*)objects_first(ID_PLAYER));
+		object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 
 		/* simple score animation */
 		char score_temp[20];
@@ -542,7 +542,7 @@ static void SPACE_draw()
 		font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles3_temp);
 
 		char pos_temp[20];
-		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->obj.body->p.x,player->obj.body->p.y);
+		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->data.body->p.x,player->data.body->p.y);
 		font_drawText(-WIDTH/2+15,-HEIGHT/2+8,pos_temp);
 
 		font_drawText(WIDTH/2-250,-HEIGHT/2+8,game_state_names[gamestate]);
@@ -610,10 +610,10 @@ static void SPACE_draw()
 	}
 }
 
-static void render_objects(object *obj)
+static void render_objects(object_data *obj)
 {
 	if(obj->body->p.x > cam_left - 200 && obj->body->p.x < cam_right + 200){
-		obj->type->render(obj);
+		obj->preset->render(obj);
 	}
 }
 
@@ -643,9 +643,9 @@ static void drawStars()
 	glPopMatrix();
 }
 
-static void func(object* obj)
+static void func(object_data* obj)
 {
-	obj->type->destroy(obj);
+	obj->preset->destroy(obj);
 }
 
 
@@ -654,11 +654,11 @@ void space_init_level(int space_station, int deck)
 {
 	particles_clear();
 
-	static struct player *player;
+	static object_group_player *player;
 
 
 	if(player==NULL){
-		player = (struct player*)player_init();
+		player = (object_group_player*)player_init();
 	} else {
 		player->hp_bar.value = player->param->max_hp;
 		player->disable = 0;
@@ -670,7 +670,7 @@ void space_init_level(int space_station, int deck)
 	objects_iterate(func);
 	objects_destroy();
 
-	objects_add((object*)player);
+	objects_add((object_data*)player);
 
 	if (currentlvl != NULL) {
 		level_unload(currentlvl);
@@ -687,11 +687,11 @@ void space_init_level(int space_station, int deck)
 	/* SETS the gamestate */
 	change_state(LEVEL_START);
 
-	player->obj.body->p.x = currentlvl->left + 50;
-	player->obj.body->p.y = currentlvl->height - 50;
+	player->data.body->p.x = currentlvl->left + 50;
+	player->data.body->p.y = currentlvl->height - 50;
 	player->hp_bar.value = player->param->max_hp;
-	player->obj.body->v.x = 0;
-	player->obj.body->v.y = -10;
+	player->data.body->v.x = 0;
+	player->data.body->v.y = -10;
 
 	//objects_add(robotarm_init(200,&robot_temp));
 
@@ -755,7 +755,7 @@ float getGameTime()
 
 int getPlayerScore()
 {
-	struct player *player = ((struct player*)objects_first(ID_PLAYER));
+	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 	if (player != NULL)
 		return player->score;
 	else
