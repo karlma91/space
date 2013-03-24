@@ -530,23 +530,25 @@ static void SPACE_draw()
 		font_drawText(-WIDTH/2+20,HEIGHT/2 - 45,score_temp);
 
 
-		setTextSize(10);
+		setTextSize(20);
 		char particles_temp[20];
 		char particles2_temp[20];
 		char particles3_temp[20];
 		sprintf(particles_temp,"%d",particles_active);
 		sprintf(particles2_temp,"%d",available_particle_counter);
 		sprintf(particles3_temp,"%d",(available_particle_counter + particles_active));
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 80,particles_temp);
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 110,particles2_temp);
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles3_temp);
+		font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,particles_temp);
+		font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles2_temp);
+		font_drawText(-WIDTH/2+20,HEIGHT/2 - 180,particles3_temp);
 
 		char pos_temp[20];
 		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->data.body->p.x,player->data.body->p.y);
-		font_drawText(-WIDTH/2+15,-HEIGHT/2+8,pos_temp);
+		font_drawText(-WIDTH/2+15,-HEIGHT/2+12,pos_temp);
 
-		font_drawText(WIDTH/2-250,-HEIGHT/2+8,game_state_names[gamestate]);
+		setTextAlign(TEXT_RIGHT);
+		font_drawText(WIDTH/2-25,-HEIGHT/2+15,game_state_names[gamestate]);
 
+		setTextSize(15);
 		char level_temp[20];
 		setTextAlign(TEXT_CENTER);
 		sprintf(level_temp,"STATION: %d DECK: %d",currentlvl->station, currentlvl->deck);
@@ -554,7 +556,7 @@ static void SPACE_draw()
 
 
 		setTextAlign(TEXT_RIGHT);
-		font_drawText(WIDTH/2 - 15, HEIGHT/2 - 10, fps_buf);
+		font_drawText(WIDTH/2 - 15, HEIGHT/2 - 20, fps_buf);
 
 		switch(gamestate) {
 		case LEVEL_START:

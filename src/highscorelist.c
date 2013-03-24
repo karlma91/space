@@ -124,10 +124,14 @@ int highscorelist_readfile(scorelist *list, char *filename)
 	int ret = 0;
 	while(1==1){
 		ret = fscanf(file,"%s %d %d\n",name,&score,&time);
-		if (ret != EOF && ret == 3) {
-			read_addscore(list,name,score,time,1);
-		} else if(ret != 3) {
-			fprintf(stderr,"error reading highscore file\n");
+		if (ret != EOF) {
+			if (ret == 3) {
+				read_addscore(list,name,score,time,1);
+			} else {
+				fprintf(stderr,"error reading highscore file\n");
+				break;
+			}
+		} else {
 			break;
 		}
 	}
