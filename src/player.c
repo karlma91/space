@@ -23,23 +23,19 @@
 
 #include "chipmunk.h"
 
-
 static void init(object_data *);
 
-static void player_render(object_data *);
+static void player_render(object_group_player *);
 static void player_update(object_group_player *);
-static void player_destroy(object_data *);
-static void tmp_shoot(object_data *);
+static void player_destroy(object_group_player *);
 
 static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 
 static void player_controls(object_group_player *);
 static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 
-//static int controll_mode = 2;
-
 static void arcade_control(object_group_player *); //2
-static void tmp_shoot_dir(object_group_player *, float v);
+static void action_shoot(object_group_player *);
 
 object_group_preset object_type_player = {
 	ID_PLAYER,
@@ -56,8 +52,9 @@ static const texture_map tex_map = {
 };
 
 object_param_player default_player = {
-		200,
-		-1
+		.max_hp = 200,
+		.tex_id = -1,
+		.gun_cooldown = 0.05f
 };
 
 object_group_player *object_create_player()
@@ -75,7 +72,6 @@ object_group_player *object_create_player()
 	player->param = &default_player;
 	player->param->tex_id = TEX_PLAYER;
 
-	//pl->hp = 200; //TODO FIXME
 	player->gun_level = 1;
 	player->lives = 3;
 	player->score = 0;
@@ -107,10 +103,8 @@ static void init(object_data *fac)
 {
 }
 
-static void player_render(object_data *data)
+static void player_render(object_group_player *player)
 {
-	object_group_player *player = (object_group_player *)data;
-
 	//float s = 0.001;
 	float dir = cpBodyGetAngle(player->data.body);
 	//Color c = RGBAColor(1,0,0,1);
@@ -118,16 +112,12 @@ static void player_render(object_data *data)
 
 	hpbar_draw(&player->hp_bar);
 
-	//TODO: fix player draw texture
 	draw_texture(player->param->tex_id, &(player->data.body->p), &(tex_map), 100, 100, dir*180/M_PI);
 }
 
 static void player_update(object_group_player *player)
 {
-	player->timer += dt;//FIXME
-	//cpFloat pangvel = cpBodyGetAngVel(temp->body);
-	//cpBodySetAngVel(temp->body, pangvel*0.9);
-	//cpVect pvel = cpBodyGetVel(obj->body);
+	player->gun_timer += dt;
 
 	//update physics and player
 	cpVect rot = cpBodyGetRot(player->data.body);
@@ -145,11 +135,7 @@ static void player_update(object_group_player *player)
 
 static void player_controls(object_group_player *player)
 {
-	//switch(controll_mode){
-	//	case 2:
 	arcade_control(player);
-	//		break;
-	//}
 
 	if(keys[SDLK_g]){
 		keys[SDLK_g] = 0;
@@ -176,19 +162,18 @@ static void player_controls(object_group_player *player)
 	}
 
 	if (keys[SDLK_x]) {
-		emitter *em = particles_get_emitter_at(EMITTER_EXPLOTION, player->data.body->p);
+		particles_get_emitter_at(EMITTER_EXPLOTION, player->data.body->p);
 	}
 	if (keys[SDLK_b]) {
-		emitter *em = particles_get_emitter_at(EMITTER_EXPLOTION, player->data.body->p);
+		particles_get_emitter_at(EMITTER_EXPLOTION, player->data.body->p);
 		keys[SDLK_b] = 0;
 	}
 }
 
+//TODO add preferred angle to handle situations with two possible solutions
 //TODO move this method to objects.c?
 static float turn_toangle(float from_angle, float to_angle, float step_size)
 {
-	//TODO fix oscillation when to_angle is around 0
-	//TODO possible fix?: consider including step_size in some way in the ternary tests
 	from_angle += from_angle >= (2*M_PI) ? -(2*M_PI) : from_angle < 0 ? (2*M_PI) : 0;
 
 	if (to_angle < from_angle - step_size) {
@@ -271,7 +256,7 @@ static void arcade_control(object_group_player *player)
 		aim_angle_target = dir8[angle_index];
 		float dir_step = (0.5f * 2*M_PI) * dt; // 0.5 rps
 		player->aim_angle = turn_toangle(player->aim_angle,aim_angle_target,dir_step);
-		tmp_shoot_dir(player);
+		action_shoot(player);
 	}
 }
 
@@ -289,59 +274,40 @@ static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cp
 static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b;
+
 	cpArbiterGetShapes(arb, &a, &b);
-	temp = ((object_group_player*)(a->body->data));
+	object_group_player *player  = ((object_group_player *)(a->body->data));
 
 	struct bullet *bt = ((struct bullet*)(b->body->data));
 
 	bt->alive = 0;
 
 	//particles_add_explosion(b->body->p,0.3,1500,15,200);
-	if(temp->hp_bar.value <= 0 ){
+	if(player->hp_bar.value <= 0 ){
 		particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
-		temp->lives--;
+		player->lives--;
 	}else{
-		temp->hp_bar.value -= 10;
+		player->hp_bar.value -= 10;
 	}
 	return 0;
 }
 
-static void tmp_shoot(object_data *obj)
+static void action_shoot(object_group_player *player)
 {
-	temp = (object_group_player*)obj;
-	//TMP shooting settings
-	//static const float cooldown = 0.15f;
+	if (player->gun_timer >= player->param->gun_cooldown) {
+		int i;
 
-	if (timer < cooldown) {
-		return;
-	}
-	timer = 0;
-	//bullet_init(temp->body->p,cpvforangle(cpBodyGetAngle(temp->body)),ID_BULLET_PLAYER);
-	int i;
-	for(i=0; i < temp->gun_level;i++){
-		bullet_init(temp->data.body->p,cpvforangle(cpBodyGetAngle(temp->data.body) + (M_PI/70)*((i+1) - (temp->gun_level-i))),obj->body->v, ID_BULLET_PLAYER);
-	}
-}
-static void tmp_shoot_dir(object_group_player *player)
-{
+		for(i=0; i < player->gun_level;i++){
+			bullet_init(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
+		}
 
-	//TMP shooting settings
-	//static const float cooldown = 0.05f;
-
-	if (player->timer < player->cooldown) {
-		return;
-	}
-	player->timer = 0;
-	//bullet_init(temp->body->p,cpvforangle(cpBodyGetAngle(temp->body)),ID_BULLET_PLAYER);
-	int i;
-	for(i=0; i < player->gun_level;i++){
-		bullet_init(player->body->p, cpvforangle(v + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
+		player->gun_timer = 0;
 	}
 }
 
 
-static void player_destroy(object_data *obj)
+static void player_destroy(object_group_player *player)
 {
-	*obj->remove = 1;
-	//free(obj);
+	objects_remove(player);
+	//free(player); // does not work since player is currently static inside space.c
 }

@@ -22,19 +22,18 @@
 #include "bullet.h"
 
 /* static prototypes */
-static void init(object_data *fac);
-static void update(object_data *fac);
-static void render(object_data *fac);
-static void destroy(object_data *obj);
+static void init(object_group_tank *);
+static void update(object_group_tank *);
+static void render(object_group_tank *);
+static void destroy(object_group_tank *);
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
-static cpShape *tempShape;
+static cpShape *tempShape; //todo remove this?
 static cpBody *addChassis(cpSpace *space, cpVect pos, cpVect boxOffset);
 static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset);
 
 /* helper */
 //static float get_angle(object *obj, object *obj2);
 static float get_best_angle(object_data *obj, object_data *obj2);
-
 
 object_group_preset type_tank= {
 	ID_TANK,
@@ -48,17 +47,16 @@ static const texture_map tex_map[2] = {
 		{0,0,1,0.5}, {0,0.5,0.5,1}
 };
 
-static object_group_tank *temp;
-
-object_data *tank_init(float xpos,object_group_tankfactory *factory, object_param_tank *pram)
+object_group_tank *object_create_tank(float xpos,object_group_tankfactory *factory, object_param_tank *param)
 {
-	object_group_tank *tank = malloc(sizeof(object_group_tank));
-	((object_data *) tank)->preset = &type_tank;
-	((object_data *) tank)->alive = 1;
-	tank->param = pram;
+	object_group_tank *tank = malloc(sizeof(*tank));
+	tank->data.preset = &type_tank;
+	tank->data.alive = 1;
+	tank->param = param;
 
 	tank->timer = 0;
 	tank->factory = factory;
+	tank->factory_id = factory->data.instance_id;
 
 	tank->rot_speed = 0.01;
 	tank->angle = 0;
@@ -73,7 +71,7 @@ object_data *tank_init(float xpos,object_group_tankfactory *factory, object_para
 	cpVect posB = cpv(xpos+20, 120);
 	boxOffset = cpv(0, 0);
 
-	tank->obj.body = addChassis(space, cpv(xpos, height+10),boxOffset);
+	tank->data.body = addChassis(space, cpv(xpos, height+10),boxOffset);
 
 	tank->shape = tempShape;
 	tempShape = NULL;
@@ -93,49 +91,49 @@ object_data *tank_init(float xpos,object_group_tankfactory *factory, object_para
 	tank->wheel2 = addWheel(space, posB, boxOffset);
 
 
-	cpSpaceAddConstraint(space, cpGrooveJointNew(((object_data *) tank)->body, tank->wheel1 , cpv(-30, -10), cpv(-30, -40), cpvzero));
-	cpSpaceAddConstraint(space, cpGrooveJointNew(((object_data *) tank)->body, tank->wheel2, cpv( 30, -10), cpv( 30, -40), cpvzero));
+	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel1 , cpv(-30, -10), cpv(-30, -40), cpvzero));
+	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel2, cpv( 30, -10), cpv( 30, -40), cpvzero));
 
-	cpSpaceAddConstraint(space, cpDampedSpringNew(((object_data *) tank)->body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
-	cpSpaceAddConstraint(space, cpDampedSpringNew(((object_data *) tank)->body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
 
+	cpBodySetUserData(tank->data.body, tank);
+	objects_add((object_data *)tank);
 
-	cpBodySetUserData(((object_data *) tank)->body, (object_data*)tank);
-	objects_add((object_data*)tank);
+	hpbar_init(&tank->hp_bar,param->max_hp,80,16,-40,60,&(tank->data.body->p));
 
-	hpbar_init(&tank->hp_bar,pram->max_hp,80,16,-40,60,&(tank->obj.body->p));
-
-	return (object_data*)tank;
+	return tank;
 }
 
 
-static void init(object_data *fac)
+static void init(object_group_tank *tank)
 {
-	temp = ((object_group_tank*)fac);
 }
 
-static void update(object_data *fac)
+static void update(object_group_tank *tank)
 {
-	temp = ((object_group_tank*)fac);
-	temp->timer +=dt;
+	tank->timer +=dt;
 
 	/* gets the player from the list */
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 
-	float player_angle = get_best_angle(fac, ((object_data*)player));
+	//TODO fix best_angle
+	float player_angle = get_best_angle((object_data *)tank, (object_data *)player);
 
+	//TODO bruke generell vinkel metode som u player.c!
+	//TODO implement tank collision avoidance
 
 	/*TODO: stop shaking when at correct angle */
 		/* som i matlab */
-		temp->angle += ((player_angle > temp->angle)*2 - 1) * temp->rot_speed;
+		tank->angle += ((player_angle > tank->angle)*2 - 1) * tank->rot_speed;
 
-	if(temp->timer > 1 + ((3.0f*rand())/RAND_MAX)){
-		cpVect t = cpvforangle(temp->angle );
-		bullet_init(fac->body->p,t,fac->body->v,ID_BULLET_ENEMY);
-		temp->timer = 0;
+	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX)){
+		cpVect t = cpvforangle(tank->angle );
+		bullet_init(tank->data.body->p,t,tank->data.body->v,ID_BULLET_ENEMY);
+		tank->timer = 0;
 	}
 
-	cpFloat tx = fac->body->p.x;
+	cpFloat tx = tank->data.body->p.x;
 	cpFloat px = player->data.body->p.x;
 
 	cpFloat ptx = (px-tx); //direct way
@@ -150,11 +148,11 @@ static void update(object_data *fac)
 	}
 
 	if(ptx<0){
-		cpBodySetTorque(temp->wheel1,20000);
-		cpBodySetTorque(temp->wheel2,20000);
+		cpBodySetTorque(tank->wheel1,20000);
+		cpBodySetTorque(tank->wheel2,20000);
 	}else{
-		cpBodySetTorque(temp->wheel1,-20000);
-		cpBodySetTorque(temp->wheel2,-20000);
+		cpBodySetTorque(tank->wheel1,-20000);
+		cpBodySetTorque(tank->wheel2,-20000);
 	}
 
 }
@@ -235,38 +233,36 @@ addChassis(cpSpace *space, cpVect pos, cpVect boxOffset)
 	return body;
 }
 
-static void render(object_data *fac)
+static void render(object_group_tank *tank)
 {
-	temp = ((object_group_tank*)fac);
-
-	if (temp->param->max_hp < 100)
+	if (tank->param->max_hp < 100)
 		glColor3f(1,1,1);
 	else
 		glColor3f(1.0,0.4,0.4);
 
 	//draw_boxshape(temp->shape,RGBAColor(0.8,0.3,0.1,1),RGBAColor(0.8,0.6,0.3,1));
-	GLfloat dir = cpBodyGetAngle(fac->body)*(180/M_PI);
-	GLfloat rot = cpBodyGetAngle(temp->wheel1)*(180/M_PI);
+	GLfloat dir = cpBodyGetAngle(tank->data.body)*(180/M_PI);
+	GLfloat rot = cpBodyGetAngle(tank->wheel1)*(180/M_PI);
 	//glColor3f(1,0,0);
 	//draw_simple_circle(temp->wheel1->p.x,temp->wheel1->p.y,15,rot);
 	//glColor3f(1,0,0);
 	//draw_simple_circle(temp->wheel2->p.x,temp->wheel2->p.y,15,rot);
 
-	cpVect r = cpvadd(fac->body->p, cpvmult(cpvforangle(temp->angle),80));
-	draw_line(fac->body->p.x,fac->body->p.y,r.x,r.y, 30);
+	cpVect r = cpvadd(tank->data.body->p, cpvmult(cpvforangle(tank->angle),80));
+	draw_line(tank->data.body->p.x,tank->data.body->p.y,r.x,r.y, 30);
 
-	hpbar_draw(&temp->hp_bar);
+	hpbar_draw(&tank->hp_bar);
 
-	draw_texture(temp->param->tex_id, &(fac->body->p), &tex_map[0],200, 100, dir);
-	draw_texture(temp->param->tex_id, &temp->wheel1->p, &tex_map[1],100, 100, rot);
-	draw_texture(temp->param->tex_id, &temp->wheel2->p, &tex_map[1],100, 100, rot);
+	draw_texture(tank->param->tex_id, &(tank->data.body->p), &tex_map[0],200, 100, dir);
+	draw_texture(tank->param->tex_id, &tank->wheel1->p, &tex_map[1],100, 100, rot);
+	draw_texture(tank->param->tex_id, &tank->wheel2->p, &tex_map[1],100, 100, rot);
 }
 
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
-	temp = ((object_group_tank*)(a->body->data));
+	object_group_tank *tank = ((object_group_tank *)(a->body->data));
 
 	struct bullet *bt = ((struct bullet*)(b->body->data));
 
@@ -275,18 +271,21 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
 
-	temp->hp_bar.value -= 10;
+	//TODO create a function for damaging other objects
+	tank->hp_bar.value -= 10;
 
-	if(temp->hp_bar.value <=0 ){
+	if (tank->hp_bar.value <= 0) {
 		//a->body->data = NULL;
-		particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
-		particles_add_score_popup(b->body->p, temp->param->score);
+		if (tank->data.alive) {
+			particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
+			particles_add_score_popup(b->body->p, tank->param->score);
 
-		if(((object_data *) temp)->alive){
-			((object_group_player *)objects_first(ID_PLAYER))->score += temp->param->score;
+			//TODO create a function for both adding score and creating score pop-up emitters
+			((object_group_player *) objects_first(ID_PLAYER))->score +=
+					tank->param->score;
 		}
 		//cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
-		((object_data *) temp)->alive = 0;
+		tank->data.alive = 0;
 	}
 
 	return 0;
@@ -304,27 +303,25 @@ static void constrain_from_space(cpBody *body, cpConstraint *constraint, void *d
     cpConstraintFree(constraint);
 }
 
-static void destroy(object_data *obj)
+static void destroy(object_group_tank *tank)
 {
-	temp = ((object_group_tank*)obj);
+	cpBodyEachShape(tank->data.body,shape_from_space,NULL);
+	cpBodyEachConstraint(tank->data.body,constrain_from_space,NULL);
 
-	cpBodyEachShape(obj->body,shape_from_space,NULL);
-	cpBodyEachConstraint(obj->body,constrain_from_space,NULL);
+	cpSpaceRemoveBody(space, tank->data.body);
+	cpBodyFree(tank->data.body);
 
-	cpSpaceRemoveBody(space, obj->body);
-	cpBodyFree(obj->body);
+	cpBodyEachShape(tank->wheel1,shape_from_space,NULL);
+	cpBodyEachShape(tank->wheel2,shape_from_space,NULL);
+	cpSpaceRemoveBody(space, tank->wheel1);
+	cpSpaceRemoveBody(space, tank->wheel2);
+	cpBodyFree(tank->wheel1);
+	cpBodyFree(tank->wheel2);
 
-	cpBodyEachShape(temp->wheel1,shape_from_space,NULL);
-	cpBodyEachShape(temp->wheel2,shape_from_space,NULL);
-	cpSpaceRemoveBody(space, temp->wheel1);
-	cpSpaceRemoveBody(space, temp->wheel2);
-	cpBodyFree(temp->wheel1);
-	cpBodyFree(temp->wheel2);
-
-	if(temp->factory != NULL){
-		temp->factory->cur--;
+	if(tank->factory != NULL){
+		tank->factory->cur--;
 	}
 
-	*obj->remove = 1;
-	free(obj);
+	objects_remove((object_data *)tank);
+	free(tank);
 }

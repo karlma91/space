@@ -20,7 +20,7 @@ struct _object_param_tankfactory {
 
 typedef struct {
 	/* object */
-	object_data obj;
+	object_data data;
 
 	/*tank factory*/
 	cpShape *shape;
@@ -36,6 +36,6 @@ typedef struct {
 	object_param_tankfactory *param;
 } object_group_tankfactory;
 
-object_data* tankfactory_init(int x_pos, object_param_tankfactory *param);
+object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tankfactory *param);
 
 #endif /* TANKFACTORY_H_ */

@@ -271,10 +271,10 @@ level *level_load(int space_station, int deck)
 			/* currently unsupported */
 			break;
 		case ID_TANK:
-			tank_init(x,NULL,  &(((object_param_tank *)params[group_id])[sub_id])  );
+			object_create_tank(x,NULL,  &(((object_param_tank *)params[group_id])[sub_id])  );
 			break;
 		case ID_TANK_FACTORY:
-			tankfactory_init(x, &(((object_param_tankfactory *)params[group_id])[sub_id]));
+			object_create_tankfactory(x, &(((object_param_tankfactory *)params[group_id])[sub_id]));
 			break;
 		case ID_BULLET_PLAYER:
 			/* currently unsupported */

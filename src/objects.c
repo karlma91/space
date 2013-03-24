@@ -219,5 +219,9 @@ int objects_count(int obj_id)
 	return object_count[obj_id];
 }
 
+inline void objects_remove(object_data *obj)
+{
+	*obj->remove = 1;
+}
 
 //TODO add help methods here?

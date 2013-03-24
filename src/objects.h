@@ -3,7 +3,7 @@
 
 #include "chipmunk.h"
 
-/* All collision types for objects */
+/* ID number of each object group*/
 enum OBJECT_ID {
 	ID_PLAYER,
 	ID_GROUND,
@@ -53,6 +53,7 @@ extern void objects_add(object_data *);
 extern void objects_iterate(void (*f)(object_data *));
 extern void objects_iterate_type(void (*f)(object_data *), int ID);
 extern void objects_destroy();
+extern inline void objects_remove(object_data *);
 
 extern object_data *objects_nearest(cpVect pos, int obj_id);
 extern object_data *objects_first(int obj_id);

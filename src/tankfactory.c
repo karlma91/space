@@ -18,139 +18,132 @@
 #include "tank.h"
 #include "bullet.h"
 
-static void init(object_data *fac);
-static void update(object_data *fac);
-static void render(object_data *factory);
-static void destroy(object_data *obj);
+static void init(object_group_tankfactory *);
+static void update(object_group_tankfactory *);
+static void render(object_group_tankfactory *);
+static void destroy(object_group_tankfactory *);
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
-static void remove_factory_from_tank(object_data *obj);
+static void remove_factory_from_tank(object_group_tank *);
 
 object_group_preset type_tank_factory = { ID_TANK_FACTORY, init, update, render,
 		destroy };
 
-static object_group_tankfactory *temp; //TODO fjerne denne!?
+object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tankfactory *param) {
+	object_group_tankfactory *factory = malloc(sizeof(*factory));
+	factory->data.alive = 1;
+	factory->data.preset = &type_tank_factory;
+	factory->param = param;
 
-object_data *tankfactory_init(int x_pos, object_param_tankfactory *param) {
-	object_group_tankfactory *fac = malloc(sizeof(object_group_tankfactory));
-	((object_data*) fac)->alive = 1;
-	((object_data*) fac)->preset = &type_tank_factory;
-	fac->param = param;
-
-	fac->cur = 0;
-	fac->rot = 0;
-	fac->smoke = particles_get_emitter(EMITTER_SMOKE);
-	fac->timer = (fac->param->spawn_delay) * 0.7;
+	factory->cur = 0;
+	factory->rot = 0;
+	factory->smoke = particles_get_emitter(EMITTER_SMOKE);
+	factory->timer = (factory->param->spawn_delay) * 0.7;
 	//fac->hp = fac->param->max_hp; //TODO FIXME
 
 	cpFloat size = 100;
 	/* make and add new body */
-	((object_data*) fac)->body = cpSpaceAddBody(space,
+	factory->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(500.0f, size, size)));
-	cpBodySetPos(((object_data*) fac)->body, cpv(x_pos, size));
+	cpBodySetPos(factory->data.body, cpv(x_pos, size));
 
 	/* make and connect new shape to body */
-	fac->shape = cpSpaceAddShape(space,
-			cpBoxShapeNew(((object_data*) fac)->body, size, size));
-	cpShapeSetFriction(fac->shape, 1);
+	factory->shape = cpSpaceAddShape(space,cpBoxShapeNew(factory->data.body, size, size));
+	cpShapeSetFriction(factory->shape, 1);
 
 	//cpShapeSetGroup(fac->shape, 10);
 
-	cpShapeSetLayers(fac->shape, LAYER_TANK_FACTORY);
+	cpShapeSetLayers(factory->shape, LAYER_TANK_FACTORY);
 
-	cpShapeSetCollisionType(fac->shape, ID_TANK_FACTORY);
+	cpShapeSetCollisionType(factory->shape, ID_TANK_FACTORY);
 	cpSpaceAddCollisionHandler(space, ID_TANK_FACTORY, ID_BULLET_PLAYER,
 			collision_player_bullet, NULL, NULL, NULL, NULL );
 
-	cpBodySetUserData(((object_data*) fac)->body, (object_data*) fac);
-	objects_add((object_data*) fac);
+	cpBodySetUserData(factory->data.body, factory);
+	objects_add((object_data *) factory);
 
-	hpbar_init(&fac->hp_bar, param->max_hp, 100, 16, -50, 90,
-			&(fac->obj.body->p));
+	hpbar_init(&factory->hp_bar, param->max_hp, 100, 16, -50, 90,
+			&(factory->data.body->p));
 
-	return (object_data*) fac;
+	return (object_group_tankfactory*) factory;
 }
 
-static void init(object_data *fac) {
-	temp = ((object_group_tankfactory*) fac);
+static void init(object_group_tankfactory *factory) {
+
 }
 
-static void update(object_data *fac) {
-	temp = ((object_group_tankfactory*) fac);
-	temp->timer += dt;
-	if (temp->timer > temp->param->spawn_delay
-			&& temp->cur < temp->param->max_tanks) {
-		temp->timer = 0;
-		tank_init(fac->body->p.x, temp, temp->param->t_param);
-		temp->cur += 1;
+static void update(object_group_tankfactory *factory) {
+	factory->timer += dt;
+	if (factory->timer > factory->param->spawn_delay
+			&& factory->cur < factory->param->max_tanks) {
+		factory->timer = 0;
+		object_create_tank(factory->data.body->p.x, factory, factory->param->t_param);
+		factory->cur += 1;
 	}
-	if (temp->smoke) {
-		temp->smoke->p.x = fac->body->p.x; //TODO fix: Caused crash on mac os x (after completing level 2, exiting to main menu, then re-enter level 2 from level select)
-		temp->smoke->p.y = fac->body->p.y + 100;
+	if (factory->smoke) {
+		factory->smoke->p.x = factory->data.body->p.x;
+		factory->smoke->p.y = factory->data.body->p.y + 100;
 	}
 }
 
-static void render(object_data *factory) {
-	temp = ((object_group_tankfactory*) factory);
-
+static void render(object_group_tankfactory *factory) {
 	//glColor3f(1,1,1);
 
-	hpbar_draw(&temp->hp_bar);
+	hpbar_draw(&factory->hp_bar);
 
-	if (temp->param->max_hp < 300)
+	if (factory->param->max_hp < 300)
 		glColor3f(0.5, 0.8, 0.9);
 	else
 		glColor3f(0.9, 0.5, 0.5);
 
-	//draw_boxshape(temp->shape,RGBAColor(0.2,0.9,0.1,1),RGBAColor(0.6,0.9,0.4,1));
-	temp->rot += 381 * dt;
-	float rot = temp->rot;
+	//draw_boxshape(factory->shape,RGBAColor(0.2,0.9,0.1,1),RGBAColor(0.6,0.9,0.4,1));
+	factory->rot += 381 * dt;
+	float rot = factory->rot;
 
-	draw_texture(temp->param->tex_id, &(factory->body->p), TEX_MAP_FULL, 200,
+	draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200,
 			200, 0);
-	draw_texture(TEX_WHEEL, &(factory->body->p), TEX_MAP_FULL, 150, 150, rot);
+	draw_texture(TEX_WHEEL, &(factory->data.body->p), TEX_MAP_FULL, 150, 150, rot);
 }
 
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused) {
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
 
-	temp = ((object_group_tankfactory*) (a->body->data));
+	object_group_tankfactory *factory = (object_group_tankfactory *) a->body->data;
 
 	struct bullet *bt = ((struct bullet*) (b->body->data));
 
 	bt->alive = 0;
 
 	particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
-	temp->hp_bar.value -= 10;
-	if (temp->hp_bar.value <= 0) {
+	factory->hp_bar.value -= 10;
+	if (factory->hp_bar.value <= 0) {
 		particles_get_emitter_at(EMITTER_EXPLOTION, a->body->p);
 
-		particles_add_score_popup(a->body->p, temp->param->score);
-		if (((object_data *) temp)->alive) {
+		particles_add_score_popup(a->body->p, factory->param->score);
+		if (factory->data.alive) {
 			((object_group_player *) objects_first(ID_PLAYER))->score +=
-					temp->param->score;
+					factory->param->score;
 		}
-		((object_data*) temp)->alive = 0;
+		factory->data.alive = 0;
 		objects_iterate_type(remove_factory_from_tank, ID_TANK);
 	}
 	return 0;
 }
 
-static void remove_factory_from_tank(object_data *obj) {
-	object_group_tank *t = (object_group_tank *) obj;
-	if (t->factory == temp) {
-		t->factory = NULL;
+//FIXME Somewhat slow temporary fix, as objects_iterate_type does not support extra arguments!
+static void remove_factory_from_tank(object_group_tank *tank) {
+	if (tank->factory) {
+		tank->factory = objects_by_id(ID_TANK_FACTORY,tank->factory_id);
 	}
 }
 
-static void destroy(object_data *obj) {
-	temp = ((object_group_tankfactory*) obj);
-	*obj->remove = 1;
-	particles_release_emitter(temp->smoke);
+static void destroy(object_group_tankfactory *factory) {
+	objects_remove(factory);
+	particles_release_emitter(factory->smoke);
 
-	cpSpaceRemoveShape(space, temp->shape);
-	cpSpaceRemoveBody(space, obj->body);
-	cpShapeFree(temp->shape);
-	cpBodyFree(obj->body);
-	free(obj);
+	cpSpaceRemoveShape(space, factory->shape);
+	cpSpaceRemoveBody(space, factory->data.body);
+	cpShapeFree(factory->shape);
+	cpBodyFree(factory->data.body);
+	free(factory);
 }

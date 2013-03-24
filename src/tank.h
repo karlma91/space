@@ -15,7 +15,7 @@ struct _object_param_tank {
 
 typedef struct {
 	/* standard */
-	object_data obj;
+	object_data data;
 
 	/* tank */
 	cpShape *shape;
@@ -24,6 +24,7 @@ typedef struct {
 	float rot_speed;
 	hpbar hp_bar;
 	object_group_tankfactory *factory;
+	int factory_id;
 	cpBody *wheel1;
 	cpBody *wheel2;
 
@@ -31,6 +32,6 @@ typedef struct {
 	object_param_tank *param;
 } object_group_tank;
 
-extern object_data *tank_init(float xpos, object_group_tankfactory *factory, object_param_tank *param);
+extern object_group_tank *object_create_tank(float xpos, object_group_tankfactory *factory, object_param_tank *param);
 
 #endif /* TANK_H_ */

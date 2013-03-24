@@ -337,7 +337,7 @@ static void update_objects(object_data *obj)
 
 		obj->preset->update(obj);
 	}else{
-		*(obj->remove) = 1;
+		objects_remove(obj);
 		obj->preset->destroy(obj);
 	}
 }

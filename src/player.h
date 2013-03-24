@@ -9,7 +9,7 @@
 struct _object_param_player {
 	float max_hp;
 	int tex_id;
-	float cooldown;
+	float gun_cooldown;
 };
 
 typedef struct {
@@ -25,7 +25,7 @@ typedef struct {
 	int gun_level;
 	int score;
 	float rotation_speed;
-	float timer;
+	float gun_timer;
 	float aim_angle;
 	emitter *e;
 
