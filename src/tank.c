@@ -56,7 +56,9 @@ object_group_tank *object_create_tank(float xpos,object_group_tankfactory *facto
 
 	tank->timer = 0;
 	tank->factory = factory;
-	tank->factory_id = factory->data.instance_id;
+
+	if (factory)
+		tank->factory_id = factory->data.instance_id;
 
 	tank->rot_speed = 0.01;
 	tank->angle = 0;
