@@ -80,7 +80,7 @@ static int init_config()
 		printf("Could not load 'bin/config.ini'\n");
 		return 1;
 	}
-	fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d",
+	fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d\n",
 			config.fullscreen);
 	return 0;
 }

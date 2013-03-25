@@ -80,8 +80,8 @@ static void update(object_group_tankfactory *factory) {
 		factory->cur += 1;
 	}
 	if (factory->smoke) {
-		factory->smoke->p.x = factory->data.body->p.x;
-		factory->smoke->p.y = factory->data.body->p.y + 100;
+		factory->smoke->p.x = factory->data.body->p.x - 20;
+		factory->smoke->p.y = factory->data.body->p.y + 80;
 	}
 }
 
@@ -91,17 +91,16 @@ static void render(object_group_tankfactory *factory) {
 	hpbar_draw(&factory->hp_bar);
 
 	if (factory->param->max_hp < 300)
-		glColor3f(0.5, 0.8, 0.9);
+		glColor3f(0.3, 0.6, 0.8);
 	else
-		glColor3f(0.9, 0.5, 0.5);
+		glColor3f(0.8, 0.4, 0.4);
 
 	//draw_boxshape(factory->shape,RGBAColor(0.2,0.9,0.1,1),RGBAColor(0.6,0.9,0.4,1));
 	factory->rot += 381 * dt;
 	float rot = factory->rot;
 
-	draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200,
-			200, 0);
 	draw_texture(TEX_WHEEL, &(factory->data.body->p), TEX_MAP_FULL, 150, 150, rot);
+	draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200, 200, 0);
 }
 
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused) {

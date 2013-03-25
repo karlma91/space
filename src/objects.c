@@ -224,4 +224,49 @@ inline void objects_remove(object_data *obj)
 	*obj->remove = 1;
 }
 
+//TODO compute the shortest distance considering wrap-around
+void objects_nearest_x_two(object_data *object, int obj_id, object_data **left, object_data **right, cpFloat *left_distance, cpFloat *right_distance)
+{
+	cpVect v = head_all[obj_id]->obj->body->p;
+	if (head_all[obj_id] == NULL) return;
+
+	node *n = head_all[obj_id];
+	cpFloat min_length_left = INT_MIN;
+	cpFloat min_length_right = INT_MAX;
+	cpFloat length;
+
+	int check_id = (obj_id == object->preset->ID);
+
+	for (n = head_all[obj_id]; n != NULL; n = n->next) {
+		if (check_id && object->instance_id == n->obj->instance_id)
+			continue; //skip self
+
+		v = n->obj->body->p;
+		length = v.x - object->body->p.x;
+		if (length < 0) { //left side
+			if (length > min_length_left) {
+				min_length_left = length;
+				*left = n->obj;
+			}
+		} else { //right side
+			if (length < min_length_right) {
+				min_length_right = length;
+				*right = n->obj;
+			}
+		}
+	}
+	if (min_length_left == INT_MIN) {
+		*left = NULL;
+		*left_distance =  INT_MAX;
+	} else {
+		*left_distance =  -min_length_left;
+	}
+	if (min_length_right == INT_MAX) {
+		*right = NULL;
+		*right_distance = INT_MAX;
+	} else {
+		*right_distance = min_length_right;
+	}
+}
+
 //TODO add help methods here?

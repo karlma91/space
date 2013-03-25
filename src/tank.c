@@ -14,6 +14,7 @@
 /* Drawing */
 #include "draw.h"
 #include "particles.h"
+#include "font.h"
 
 #include "objects.h"
 
@@ -75,6 +76,9 @@ object_group_tank *object_create_tank(float xpos,object_group_tankfactory *facto
 
 	tank->data.body = addChassis(space, cpv(xpos, height+10),boxOffset);
 
+	tank->debug_left_dist = -1;
+	tank->debug_right_dist = -1;
+
 	tank->shape = tempShape;
 	tempShape = NULL;
 	//((object *) tank)->body = cpSpaceAddBody(space, cpBodyNew(20, cpMomentForBox(20.0f, width, height)));
@@ -110,6 +114,12 @@ object_group_tank *object_create_tank(float xpos,object_group_tankfactory *facto
 
 static void init(object_group_tank *tank)
 {
+}
+
+static void set_wheel_velocity(object_group_tank *tank, float velocity)
+{
+	cpBodySetAngVel(tank->wheel1,velocity);
+	cpBodySetTorque(tank->wheel2,velocity);
 }
 
 static void update(object_group_tank *tank)
@@ -149,14 +159,43 @@ static void update(object_group_tank *tank)
 		ptx = 1;
 	}
 
-	if(ptx<0){
-		cpBodySetTorque(tank->wheel1,20000);
-		cpBodySetTorque(tank->wheel2,20000);
-	}else{
-		cpBodySetTorque(tank->wheel1,-20000);
-		cpBodySetTorque(tank->wheel2,-20000);
-	}
+	object_data *left, *right;
+	cpFloat left_dist, right_dist;
+	objects_nearest_x_two((object_data *)tank, ID_TANK, &left, &right, &left_dist, &right_dist);
 
+	int left_clear = (left_dist > 250);
+	int right_clear = (right_dist > 250);
+
+	tank->debug_left_dist = left ? left_dist : -1;
+	tank->debug_right_dist = right ? right_dist : -1;
+
+	//TMP DEBUG OVERSTYRING AV TANK
+	if (keys[SDLK_LCTRL]) {
+		if (keys[SDLK_k])
+			set_wheel_velocity(tank, 100);
+		else if (keys[SDLK_l])
+			set_wheel_velocity(tank, -100);
+		else
+			set_wheel_velocity(tank, 0);
+	} else {
+		if (ptx < 0) {
+			if (left_clear)
+				set_wheel_velocity(tank, left_dist > 400 ? 50 : 20);
+			else if (right_clear)
+				set_wheel_velocity(tank, right_dist > 400 ? -50 : -20);
+			else
+				set_wheel_velocity(tank, 0);
+		} else if (ptx > 0) {
+			if (right_clear)
+				set_wheel_velocity(tank, right_dist > 400 ? -50 : -20);
+			else if (left_clear)
+				set_wheel_velocity(tank, left_dist > 400 ? 50 : 20);
+			else
+				set_wheel_velocity(tank, 0);
+		} else {
+			set_wheel_velocity(tank, 0);
+		}
+	}
 }
 
 /**
@@ -255,9 +294,23 @@ static void render(object_group_tank *tank)
 
 	hpbar_draw(&tank->hp_bar);
 
-	draw_texture(tank->param->tex_id, &(tank->data.body->p), &tex_map[0],200, 100, dir);
-	draw_texture(tank->param->tex_id, &tank->wheel1->p, &tex_map[1],100, 100, rot);
-	draw_texture(tank->param->tex_id, &tank->wheel2->p, &tex_map[1],100, 100, rot);
+	int texture = tank->param->tex_id;
+
+	draw_texture(texture, &(tank->data.body->p), &tex_map[0],200, 100, dir);
+	draw_texture(texture, &tank->wheel1->p, &tex_map[1],100, 100, rot);
+	draw_texture(texture, &tank->wheel2->p, &tex_map[1],100, 100, rot);
+
+	// debug draw
+	/*
+	char debug_buf_left[30];
+	char debug_buf_right[30];
+	sprintf(debug_buf_left, "% 3.1f", tank->debug_left_dist);
+	sprintf(debug_buf_right, "% 3.1f", tank->debug_right_dist);
+	setTextSize(10);
+	setTextAlign(TEXT_CENTER);
+	font_drawText(tank->data.body->p.x - 80,tank->data.body->p.y+60,debug_buf_left);
+	font_drawText(tank->data.body->p.x + 80,tank->data.body->p.y+60,debug_buf_right);
+	*/
 }
 
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
@@ -274,7 +327,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
 
 	//TODO create a function for damaging other objects
-	tank->hp_bar.value -= 10;
+	tank->hp_bar.value -= bt->damage;
 
 	if (tank->hp_bar.value <= 0) {
 		//a->body->data = NULL;

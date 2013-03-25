@@ -28,6 +28,11 @@ typedef struct {
 	cpBody *wheel1;
 	cpBody *wheel2;
 
+	/* tmp debug variables */
+	cpFloat debug_left_dist;
+	cpFloat debug_right_dist;
+	/* end of tmp debug variables*/
+
 	/*parameters */
 	object_param_tank *param;
 } object_group_tank;

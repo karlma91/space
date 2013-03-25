@@ -54,7 +54,7 @@ static const texture_map tex_map = {
 object_param_player default_player = {
 		.max_hp = 200,
 		.tex_id = -1,
-		.gun_cooldown = 0.05f
+		.gun_cooldown = 0.125f
 };
 
 object_group_player *object_create_player()
@@ -308,6 +308,6 @@ static void action_shoot(object_group_player *player)
 
 static void player_destroy(object_group_player *player)
 {
-	objects_remove(player);
+	objects_remove((object_data *) player);
 	//free(player); // does not work since player is currently static inside space.c
 }

@@ -45,9 +45,17 @@ static void render(object_data *obj)
 	}else{
 		glColor3f(0.3,0.3,0.9);
 	}
-	draw_velocity_line(temp->shape);
+
+	{
+		cpShape *shape = temp->shape;
+
+		cpCircleShape *circle = (cpCircleShape *)shape;
+		cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
+		draw_line(circle->tc.x, circle->tc.y, circle->tc.x - vel.x/128, circle->tc.y - vel.y/128, 64); //40 = 4 * radius
+	}
 }
 
+//TODO standardize bullet
 object_data *bullet_init(cpVect pos, cpVect dir, cpVect intit_vel, int type)
 {
 		temp = malloc(sizeof(struct bullet));
@@ -61,7 +69,7 @@ object_data *bullet_init(cpVect pos, cpVect dir, cpVect intit_vel, int type)
 		cpBodySetVel(temp->body,cpvadd(cpvmult(dir,3000),intit_vel));
 		temp->body->velocity_func = bulletVelocityFunc;
 
-		temp->shape = cpSpaceAddShape(space, cpCircleShapeNew(temp->body, 5, cpvzero));
+		temp->shape = cpSpaceAddShape(space, cpCircleShapeNew(temp->body, 15, cpvzero));
 		cpShapeSetFriction(temp->shape, 1.0);
 		// Sets bullets collision type
 		cpShapeSetCollisionType(temp->shape, type);
@@ -70,9 +78,11 @@ object_data *bullet_init(cpVect pos, cpVect dir, cpVect intit_vel, int type)
 		if(type == ID_BULLET_PLAYER){
 			temp->type = &type_bullet_player;
 			cpShapeSetLayers(temp->shape,LAYER_PLAYER_BULLET);
+			temp->damage = 20;
 		}else{
 			temp->type = &type_bullet_enemy;
 			cpShapeSetLayers(temp->shape,LAYER_ENEMY_BULLET);
+			temp->damage = 10;
 		}
 
 		objects_add((object_data*)temp);
