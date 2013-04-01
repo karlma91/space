@@ -109,7 +109,9 @@ extern int texture_init(GLenum type)
 }
 
 int texture_bind(int tex_id) {
-	if (tex_id >= 0) {
+	static int last_tex_id = -1;
+	if (tex_id != last_tex_id && tex_id >= 0) {
+		last_tex_id = tex_id;
 		glBindTexture(GL_TEXTURE_2D, textures[tex_id]);
 		return 0;
 	}

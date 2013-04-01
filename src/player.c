@@ -47,8 +47,8 @@ object_group_preset object_type_player = {
 
 //static float timer = 0;
 
-static const texture_map tex_map = {
-		0,0,1,1
+static const texture_map tex_map[2] = {
+		{0,0,0.5,1}, {0.5,0,1,1}
 };
 
 object_param_player default_player = {
@@ -110,9 +110,10 @@ static void player_render(object_group_player *player)
 	//Color c = RGBAColor(1,0,0,1);
 	//draw_boxshape(player->shape,RGBAColor(1,1,1,1),c);
 
-	hpbar_draw(&player->hp_bar);
+	draw_texture(player->param->tex_id, &(player->data.body->p), &(tex_map[0]), 100, 100, player->aim_angle*180/M_PI);
+	draw_texture(player->param->tex_id, &(player->data.body->p), &(tex_map[1]), 100, 100, dir*180/M_PI);
 
-	draw_texture(player->param->tex_id, &(player->data.body->p), &(tex_map), 100, 100, dir*180/M_PI);
+	hpbar_draw(&player->hp_bar);
 }
 
 static void player_update(object_group_player *player)
@@ -230,6 +231,7 @@ static void arcade_control(object_group_player *player)
 {
 	float player_angle = cpBodyGetAngle(player->data.body);
 	float player_angle_target;
+	float dir_step;
 	Direction angle_index = -1;
 
 	angle_index = angle_index_fromkeys(SDLK_a, SDLK_w, SDLK_d, SDLK_s);
@@ -238,7 +240,7 @@ static void arcade_control(object_group_player *player)
 
 	if (angle_index != DIR_NONE) {
 		player_angle_target = dir8[angle_index];
-		float dir_step = (1 * 2*M_PI) * dt; // 1 rps
+		dir_step = (1 * 2*M_PI) * dt; // 1 rps
 		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
 
 		cpBodySetVel(player->data.body, cpvmult(cpvforangle(player_angle),speed));
@@ -254,7 +256,7 @@ static void arcade_control(object_group_player *player)
 
 	if (angle_index != DIR_NONE) {
 		aim_angle_target = dir8[angle_index];
-		float dir_step = (0.5f * 2*M_PI) * dt; // 0.5 rps
+		dir_step = (0.5f * 2*M_PI) * dt; // 0.5 rps
 		player->aim_angle = turn_toangle(player->aim_angle,aim_angle_target,dir_step);
 		action_shoot(player);
 	}

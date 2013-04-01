@@ -92,16 +92,18 @@ static void gameover_update() {
 		}
 		key_dt -= dt;
 
-		if (keys[SDLK_RIGHT]) {
+		if (keys[SDLK_RIGHT] || keys[SDLK_RETURN]) {
 			if (++i >= MAX_NAME_LENGTH) {
 				i = 0;
 				gameover_state = confirm_name;
 				win = 0;
 			}
 			keys[SDLK_RIGHT] = 0;
-		} else if (keys[SDLK_LEFT]) {
+			keys[SDLK_RETURN] = 0;
+		} else if (keys[SDLK_LEFT] || keys[SDLK_ESCAPE]) {
 			if (i > 0) --i;
 			keys[SDLK_LEFT] = 0;
+			keys[SDLK_ESCAPE] = 0;
 		}
 
 		input[i] = valid_char[valid_index[i]];
