@@ -9,34 +9,41 @@
 #define STATESYSTEM_H_
 
 enum STATESYSTEM_STATES {
-		STATESYSTEM_MAIN,
-		STATESYSTEM_OPTION,
-		STATESYSTEM_SPACE,
-		STATESYSTEM_INGAME_MENU,
-		STATESYSTEM_GAMEOVER
+    STATESYSTEM_MENU,
+    STATESYSTEM_LEVELSELECT,
+    STATESYSTEM_SPACE,
+    STATESYSTEM_INGAME_MENU,
+    STATESYSTEM_GAMEOVER,
+    STATESYSTEM_COUNT
 };
 
 /**
  * standar functions
  */
-void statesyste_init();
-void statesyste_update();
-void statesyste_draw();
-void statesyste_destroy();
+void statesystem_init();
+void statesystem_update();
+void statesystem_draw();
+void statesystem_destroy();
 
 /**
  * statesystem functions
  */
 
-int statesystem_init_state(int state, int inner_states, void (*on_enter)(), void (*update)(), void (*draw)(), void (*on_leave)());
+void statesystem_init_state(int state, int inner_states,
+        void (*on_enter)(),
+        void (*pre_update)(),
+        void (*post_update)(),
+        void (*draw)(),
+        void (*on_leave)(),
+        void (*destroy)());
 
-int statesystem_add_inner_state(int state, int inner_state, void (*update)(), void (*draw)());
+void statesystem_add_inner_state(int state, int inner_state, void (*update)(), void (*draw)());
 
-int statesystem_set_inner_state(int state, int inner_state);
+void statesystem_set_inner_state(int state, int inner_state);
 
-int statesystem_push_state(int state);
-int statesystem_pop_state(int state);
-int statesystem_set_state(int state);
+void statesystem_push_state(int state);
+void statesystem_pop_state(int state);
+void statesystem_set_state(int state);
 
 
 #endif /* STATESYSTEM_H_ */

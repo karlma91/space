@@ -11,6 +11,7 @@
 #include "main.h"
 #include "menu.h"
 #include "gameover.h"
+#include "statesystem.h"
 
 /* Drawing */
 #include "draw.h"
@@ -34,20 +35,13 @@ static void drawStars();
 static float accumulator = 0;
 
 /* state functions */
-static void SPACE_init();
-static void SPACE_update();
-static void space_render();
-static void SPACE_destroy();
+static void pre_update();
+static void post_update();
+static void render();
+static void destroy();
 /**
  * The global space state
  */
-state state_space = {
-	SPACE_init,
-	SPACE_update,
-	space_render,
-	SPACE_destroy,
-	NULL
-};
 
 static void SPACE_draw();
 static void update_objects(object_data *obj);
@@ -117,15 +111,6 @@ static void level_transition();
 static void change_state(int state);
 static void update_all();
 
-void (*state_functions[])(void) = {
-		level_start,
-		level_running,
-		level_timesup,
-		level_player_dead,
-		level_cleared,
-		level_transition
-};
-
 
 /* The state timer */
 static float state_timer = 0;
@@ -175,7 +160,7 @@ static void level_player_dead()
 	update_all();
 	if(state_timer > 3){
 		lvl_cleared=0;
-		currentState = &state_gameover;
+		statesystem_set_state(STATESYSTEM_GAMEOVER);
 		gameover_setstate(enter_name);
 		//change_state(LEVEL_TRANSITION);
 	}
@@ -209,8 +194,8 @@ static void level_transition()
 			int next_lvl = currentlvl->deck + 1;
 			//TODO WARNING: final level index hard-coded!
 			if (next_lvl > 3) {
-				currentState = &state_gameover;
 				gameover_setstate(GAMEOVER_WIN);
+			    statesystem_set_state(STATESYSTEM_GAMEOVER);
 			} else {
 				space_init_level(1,next_lvl); //TODO TMP
 			}
@@ -228,19 +213,20 @@ static void level_transition()
 static void change_state(int state)
 {
 	state_timer = 0;
+	statesystem_set_inner_state(STATESYSTEM_SPACE,state);
 	gamestate = state;
 	fprintf(stderr,"DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
 }
 
+	static int cam_mode = 6;
 /**
  * Main space update function
  */
-static void SPACE_update()
+static void pre_update()
 {
 	/*
 	 * Camera modes
 	 */
-	static int cam_mode = 6;
 	if(keys[SDLK_F1]){
 		cam_mode = 1;
 	}else if(keys[SDLK_F2]){
@@ -265,18 +251,23 @@ static void SPACE_update()
 	 * Opens the pause menu
 	 */
 	if(keys[SDLK_ESCAPE] && gamestate == LEVEL_RUNNING){
-		state_menu.parentState = &state_space;
-		currentState = &state_menu;
+	    menu_change_current_menu(MENU_INGAME);
+		statesystem_push_state(STATESYSTEM_MENU);
 		keys[SDLK_ESCAPE] = 0;
 	}
 
 	/* runs the current state */
 	state_timer+=dt; /* updates the timer */
-	state_functions[gamestate]();
+	//state_functions[gamestate]();
 
-	/* Updating camera zoom an position */
-	update_camera_zoom(cam_mode);
-	update_camera_position();
+
+}
+
+static void post_update()
+{
+    /* Updating camera zoom an position */
+        update_camera_zoom(cam_mode);
+        update_camera_position();
 }
 
 static void empty(){
@@ -351,7 +342,7 @@ static void update_objects(object_data *obj)
 /**
  * draws everything twice to make infinite loop world
  */
-static void space_render()
+static void render()
 {
 	SPACE_draw();
 	if(cam_center_x < cam_left_limit){
@@ -728,8 +719,32 @@ void space_init_level(int space_station, int deck)
 
 }
 
-static void SPACE_init()
+static void on_enter()
 {
+
+}
+
+static void on_leave()
+{
+
+}
+
+static void SPACE_destroy()
+{
+    cpSpaceDestroy(space);
+    objects_destroy();
+}
+
+void space_init()
+{
+    statesystem_init_state(STATESYSTEM_SPACE,LEVEL_STATE_COUNT,on_enter,pre_update,post_update,render,on_leave,SPACE_destroy);
+    statesystem_add_inner_state(STATESYSTEM_SPACE,LEVEL_START,level_start,NULL);
+    statesystem_add_inner_state(STATESYSTEM_SPACE,LEVEL_RUNNING,level_running,NULL);
+    statesystem_add_inner_state(STATESYSTEM_SPACE,LEVEL_TIMESUP,level_timesup,NULL);
+    statesystem_add_inner_state(STATESYSTEM_SPACE,LEVEL_PLAYER_DEAD,level_player_dead,NULL);
+    statesystem_add_inner_state(STATESYSTEM_SPACE,LEVEL_CLEARED,level_cleared,NULL);
+    statesystem_add_inner_state(STATESYSTEM_SPACE,LEVEL_TRANSITION,level_transition,NULL);
+
 	objects_init();
 
 	state_timer = 10;
@@ -750,11 +765,7 @@ static void SPACE_init()
 	}
 }
 
-static void SPACE_destroy()
-{
-	cpSpaceDestroy(space);
-	objects_destroy();
-}
+
 
 float getGameTime()
 {

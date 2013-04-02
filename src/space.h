@@ -5,7 +5,7 @@
 #include "main.h"
 #include "level.h"
 
-extern state state_space;
+void space_init();
 
 /* camera */
 extern float cam_center_x;

@@ -17,6 +17,8 @@
 /* ini loader lib */
 #include "ini.h"
 
+#include "statesystem.h"
+
 /* drawing code */
 #include "draw.h"
 #include "font.h"
@@ -189,10 +191,8 @@ static int main_init()
 	}
 
 	/* init states */
-	state_space.init();
-	state_menu.init();
-	state_levelselect.init();
-	state_gameover.init();
+	statesystem_init();
+	statesystem_set_state(STATESYSTEM_MENU);
 
 	return 0;
 }
@@ -204,11 +204,10 @@ static int main_run()
 	Uint32 lastTime;
 	float deltaTime = 0.0f;
 
-	currentState = &state_menu;
+	statesystem_set_state(STATESYSTEM_MENU);
+
 	lastTime = SDL_GetTicks();
-	int numstat = 0;
-	state states[5];
-	state *temps;
+
 	while(main_running) {
 
 		thisTime = SDL_GetTicks();
@@ -235,21 +234,8 @@ static int main_run()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
 
-		temps = currentState->parentState;
-		while(temps){
-			states[numstat] = *temps;
-			temps = temps->parentState;
-			numstat++;
-		}
-		int i = 0;
-		for(i = numstat-1; i>=0; i--){
-			states[i].render(deltaTime);
-			glLoadIdentity();
-		}
-
-		numstat = 0;
-		currentState->render(deltaTime);
-		currentState->update(deltaTime);
+		statesystem_update();
+		statesystem_draw();
 
 		SDL_GL_SwapBuffers();
 
@@ -280,10 +266,7 @@ static int main_destroy()
 	//cpSpaceFreeChildren(space);
 
 	/* destroy states */
-	state_space.destroy();
-	state_menu.destroy();
-	state_levelselect.destroy();
-	state_gameover.destroy();
+	statesystem_destroy();
 
 	draw_destroy();
 	font_destroy();

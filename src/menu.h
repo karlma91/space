@@ -3,12 +3,12 @@
 
 #include "main.h"
 
-extern state state_menu;
-void change_current_menu(int menu);
-
-enum MENU_ID{ //TODO: standardise names
-	MAIN_MENU_ID,
-	INGAME_MENU_ID
+enum MINU_INNER_STATES {
+	MENU_MAIN,
+	MENU_INGAME
 };
+
+void menu_init();
+void menu_change_current_menu(int);
 
 #endif /* MAINMENU_H_ */

@@ -3,7 +3,6 @@
 
 #include "main.h"
 
-extern state state_levelselect;
-
+void levelselevt_init();
 
 #endif /* LEVELSELECT_H_ */

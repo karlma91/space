@@ -11,6 +11,7 @@
 #include "main.h"
 #include "menu.h"
 #include "space.h"
+#include "statesystem.h"
 
 /* Drawing */
 #include "draw.h"
@@ -18,19 +19,11 @@
 #include "level.h"
 
 /* static prototypes */
-static void init();
 static void update();
 static void render();
 static void destroy();
-
-/* extern */
-state state_levelselect = {
-		init,
-		update,
-		render,
-		destroy,
-		NULL
-};
+static void on_enter();
+static void on_leave();
 
 static void render_ship(struct level_ship *ship, int selected);
 
@@ -53,8 +46,10 @@ static float camera_zoom = 0.1; // start zoom
 static float zoomed_temp_y = 0;
 static float zoomed_cam_y = 0;
 
-static void init()
+void levelselevt_init()
 {
+    statesystem_init_state(STATESYSTEM_LEVELSELECT, 0, on_enter, update, NULL, render, on_leave, destroy);
+
 	level_get_ships(&ships, &decks);
 	fprintf(stderr, "decks: %d \n", decks);
 	int i;
@@ -62,6 +57,16 @@ static void init()
 		fprintf(stderr, "x: %f y: %f radius: %f \n", ships[i].x,ships[i].y,ships[i].radius);
 	}
 }
+
+static void on_enter()
+{
+
+}
+static void on_leave()
+{
+
+}
+
 
 static void update()
 {
@@ -72,7 +77,7 @@ static void update()
 	}
 
 	if (keys[SDLK_ESCAPE]){
-		currentState = &state_menu;
+	    statesystem_set_state(STATESYSTEM_MENU);
 		keys[SDLK_ESCAPE] = 0;
 		}
 
@@ -118,13 +123,8 @@ static void update()
 
 		level_select = (level_select < 0) ? ships[sel].count - 1 : (level_select >= ships[sel].count ? 0 : level_select);;
 
-		if(keys[SDLK_ESCAPE]){
-			currentState = &state_menu;
-			keys[SDLK_ESCAPE]=0;
-		}
 		if (keys[SDLK_SPACE] || keys[SDLK_RETURN]) {
-			currentState = &state_space;
-			change_current_menu(INGAME_MENU_ID);
+		    statesystem_set_state(STATESYSTEM_SPACE);
 			/* load correct level */
 			space_init_level(sel+1,level_select+1);
 			keys[SDLK_SPACE] = 0, keys[SDLK_RETURN] = 0;

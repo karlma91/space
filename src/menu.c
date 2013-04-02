@@ -9,27 +9,22 @@
 #include "space.h"
 #include "gameover.h"
 #include "levelselect.h"
+#include "statesystem.h"
+
 
 /* Drawing */
 #include "draw.h"
 #include "font.h"
 
 /* static prototypes */
-static void menu_init();
-static void menu_update();
-static void menu_draw();
-static void menu_destroy();
+static void on_enter();
+static void update();
+static void draw();
+static void on_leave();
+static void destroy();
 
-static void optionmenu_func();
-static void mainmenu_func();
-
-state state_menu = {
-	menu_init,
-	menu_draw,
-	menu_update,
-	menu_destroy,
-	NULL
-};
+static void inner_ingame();
+static void inner_main();
 
 #define MAX_MENU_ITEMS 5
 
@@ -43,14 +38,14 @@ struct menu {
 static struct menu mainMenuTest = {
 		5,
 		4,
-		mainmenu_func,
+		inner_main,
 		{"START GAME","LEVELS","HIGHSCORES","CREDITS","EXIT"}
 };
 
 static struct menu ingameMenu = {
 		3,
 		0,
-		optionmenu_func,
+		inner_ingame,
 		{"RESUME","RESTART","MAINMENU"}
 };
 
@@ -62,24 +57,42 @@ static const Color col_item   = {1,0,0,1};
 static const Color col_select = {0,0,1,1};
 
 
-void change_current_menu(int menu)
+void menu_init()
+{
+    curMenu = &mainMenuTest;
+
+    statesystem_init_state(STATESYSTEM_MENU, 0,
+            on_enter,
+            update,
+            NULL,
+            draw,
+            on_leave,
+            destroy);
+
+}
+
+static void on_enter()
+{
+
+}
+static void on_leave()
+{
+
+}
+
+void menu_change_current_menu(int menu)
 {
 	switch(menu){
-	case INGAME_MENU_ID:
+	case MENU_INGAME:
 		curMenu = &ingameMenu;
 		break;
-	case MAIN_MENU_ID:
+	case MENU_MAIN:
 		curMenu = &mainMenuTest;
 		break;
 	}
 }
 
-static void menu_init()
-{
-	curMenu = &mainMenuTest;
-}
-
-static void menu_update()
+static void update()
 {
 	if (keys[SDLK_w] || keys[SDLK_UP]){
 		select_id--;
@@ -105,7 +118,7 @@ static void menu_update()
 	}
 }
 
-static void menu_draw()
+static void draw()
 {
 	static float timer;
 	timer +=dt;
@@ -125,20 +138,20 @@ static void menu_draw()
 	}
 }
 
-static void mainmenu_func()
+static void inner_main()
 {
 	switch (select_id) {
 	case 0: //START GAME
 		space_init_level(1,1);
-		currentState = &state_space;
+		statesystem_set_state(STATESYSTEM_SPACE);
 		curMenu = &ingameMenu;
 		break;
 	case 1: //LEVEL SELECT
-		currentState = &state_levelselect;
+	    statesystem_set_state(STATESYSTEM_LEVELSELECT);
 		break;
 	case 2: //HIGHSCORE
-		currentState = &state_gameover;
 		gameover_setstate(show_highscore);
+		statesystem_set_state(STATESYSTEM_GAMEOVER);
 		break;
 	case 3: //CREDITS
 		break;
@@ -150,27 +163,27 @@ static void mainmenu_func()
 	}
 }
 
-static void optionmenu_func()
+static void inner_ingame()
 {
 	switch (select_id) {
 	case 0: //RESUME GAME
-		currentState = &state_space;
+		statesystem_set_state(STATESYSTEM_SPACE);
 		break;
 	case 1: //RESTART GAME
-		currentState = &state_space;
+	    statesystem_set_state(STATESYSTEM_SPACE);
+	    menu_change_current_menu(MENU_INGAME);
 		space_init_level(1,1);
 		break;
 	case 2:
-		state_menu.parentState = 0;
 		curMenu = &mainMenuTest;
-		currentState = &state_menu;
+		statesystem_set_state(STATESYSTEM_MENU);
 		break;
 	default:
 		break;
 	}
 }
 
-static void menu_destroy()
+static void destroy()
 {
 
 }

@@ -11,7 +11,7 @@ enum gameover_state {
 	show_highscore
 };
 
-extern state state_gameover;
 extern int gameover_setstate(enum gameover_state state);
+void gameover_init();
 
 #endif /* GAMEOVER_H_ */
