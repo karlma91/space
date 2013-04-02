@@ -149,8 +149,8 @@ void statesystem_destroy()
     for(i=0; i<STATESYSTEM_COUNT; i++){
         states[i].destroy();
         if(states[i].inner_states > 0){
-            free(states[i].inner_update);
-            free(states[i].inner_draw);
+           // free(states[i].inner_update);
+          //  free(states[i].inner_draw);
         }
     }
 }
