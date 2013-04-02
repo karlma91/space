@@ -279,6 +279,10 @@ static void SPACE_update()
 	update_camera_position();
 }
 
+static void empty(){
+
+}
+
 /**
  * Updates all the objects in objects and in chipmunk
  */
@@ -291,6 +295,7 @@ static void update_all()
 	 * Calls update_opbject for all objects in objects
 	 */
 	objects_iterate(update_objects);
+	objects_iterate(empty);
 
 	/*
 	 * update the particle engine
@@ -306,7 +311,6 @@ static void update_all()
 		cpSpaceStep(space, phys_step);
 		accumulator -= phys_step;
 	}
-
 }
 
 

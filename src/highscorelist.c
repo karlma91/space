@@ -9,7 +9,7 @@
 
 static FILE * file;
 
-static scoreelement score_def = {"    ",0,0,0};
+static scoreelement score_def = {"----",0,1352918808,NULL};
 static int read_addscore(scorelist *list, char *name, int score,long time,int from_file);
 /**
  * inits a list struct
@@ -150,7 +150,7 @@ int highscorelist_writefile(scorelist *list, char *filename)
 		return 1;
 	}
 
-	scoreelement temp = {"LAME",0,0,0};
+	scoreelement temp = {"    ",0,0,0};
 
 	int i;
 	for(i=0; i<list->elements; i++){

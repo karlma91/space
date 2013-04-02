@@ -108,6 +108,11 @@ extern int texture_init(GLenum type)
 	return 0;
 }
 
+extern int texture_destroy()
+{
+
+}
+
 int texture_bind(int tex_id) {
 	static int last_tex_id = -1;
 	if (tex_id != last_tex_id && tex_id >= 0) {

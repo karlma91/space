@@ -78,6 +78,8 @@ object_group_player *object_create_player()
 	player->disable = 0;
 	player->rotation_speed = 8;
 	player->e = particles_get_emitter(EMITTER_FLAME);
+	player->aim_angle = 0;
+	player->gun_timer = 0;
 
 	/* make and add new body */
 	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius/2)));

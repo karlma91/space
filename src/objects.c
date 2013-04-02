@@ -71,8 +71,17 @@ void objects_iterate(void (*f)(object_data *))
 				--object_count[i];
 			} else {
 				f(n->obj);
-				prev = &(n->next);
-				n = n->next;
+
+				// TODO FIXME
+				if (n->remove) {
+					(*prev) = n->next;
+					free(n);
+					n = (*prev);
+					--object_count[i];
+				} else {
+					prev = &(n->next);
+					n = n->next;
+				}
 			}
 		}
 		last_all[i] = prev;
@@ -102,8 +111,17 @@ void objects_iterate_type(void (*f)(object_data *), int obj_id)
 			--object_count[i];
 		} else {
 			f(n->obj);
-			prev = &(n->next);
-			n = n->next;
+
+			if (n->remove) {
+				(*prev) = n->next;
+				free(n);
+				n = (*prev);
+				--object_count[i];
+			} else {
+				prev = &(n->next);
+				n = n->next;
+			}
+
 		}
 	}
 	last_all[obj_id] = prev;
@@ -207,7 +225,7 @@ object_data *objects_by_id(int obj_id, int instance_id)
 
 	for (node = head_all[obj_id]; node != NULL; node = node->next) {
 		if (node->obj->instance_id == instance_id) {
-			return node->obj;
+			return node->remove ? NULL : node->obj;
 		}
 	}
 
@@ -227,9 +245,9 @@ inline void objects_remove(object_data *obj)
 //TODO compute the shortest distance considering wrap-around
 void objects_nearest_x_two(object_data *object, int obj_id, object_data **left, object_data **right, cpFloat *left_distance, cpFloat *right_distance)
 {
-	cpVect v = head_all[obj_id]->obj->body->p;
 	if (head_all[obj_id] == NULL) return;
 
+	cpVect v = head_all[obj_id]->obj->body->p;
 	node *n = head_all[obj_id];
 	cpFloat min_length_left = INT_MIN;
 	cpFloat min_length_right = INT_MAX;

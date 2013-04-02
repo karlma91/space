@@ -39,7 +39,7 @@ state state_gameover = {
 /* static variables */
 static char input[MAX_NAME_LENGTH+1] = "    ";
 static int valid_index[MAX_NAME_LENGTH];
-static const char valid_char[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
+static const char valid_char[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
 static const int char_count = 37; /* valid_char length*/
 static scorelist * list;
 
@@ -119,10 +119,11 @@ static void gameover_update() {
 		}
 		break;
 	case show_highscore:
-		if (keys[SDLK_ESCAPE]) {
+		if (keys[SDLK_ESCAPE] || keys[SDLK_RETURN]) {
 			currentState = &state_menu;
 			change_current_menu(MAIN_MENU_ID);
 			keys[SDLK_ESCAPE] = 0;
+			keys[SDLK_RETURN] = 0;
 		}
 		break;
 	}
@@ -196,13 +197,12 @@ char * covertToUpper(char *str)
 
 static void draw_highscore()
 {
-	scoreelement score = {"LAME",0,0,0};
+	scoreelement score = {"----",0,0,0};
 	char temp[100];
 	int i;
 	setTextAlign(TEXT_LEFT);
 	setTextSize(20);
 	for(i=0;i<10;i++){
-		//TODO put name and score inside its own struct
 		if(highscorelist_getscore(list,i+1,&score) != 0) {
 
 		}

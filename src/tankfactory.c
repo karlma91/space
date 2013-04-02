@@ -116,15 +116,14 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
 	factory->hp_bar.value -= 10;
 	if (factory->hp_bar.value <= 0) {
-		particles_get_emitter_at(EMITTER_EXPLOTION, a->body->p);
 
-		particles_add_score_popup(a->body->p, factory->param->score);
 		if (factory->data.alive) {
+			particles_get_emitter_at(EMITTER_EXPLOTION, a->body->p);
+			particles_add_score_popup(a->body->p, factory->param->score);
 			((object_group_player *) objects_first(ID_PLAYER))->score +=
 					factory->param->score;
 		}
 		factory->data.alive = 0;
-		objects_iterate_type(remove_factory_from_tank, ID_TANK);
 	}
 	return 0;
 }
@@ -144,5 +143,6 @@ static void destroy(object_group_tankfactory *factory) {
 	cpSpaceRemoveBody(space, factory->data.body);
 	cpShapeFree(factory->shape);
 	cpBodyFree(factory->data.body);
+	objects_iterate_type(remove_factory_from_tank, ID_TANK);
 	free(factory);
 }
