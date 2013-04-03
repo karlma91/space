@@ -304,7 +304,7 @@ static void emitter_interval(emitter *em)
 static void emitter_update(emitter *em)
 {
 	if(!em->waiting_to_die){
-		if(em->time_allive >= em->next_spawn){
+		if(em->time_allive >= em->next_spawn && !em->disable){
 			emitter_interval(em);
 			em->time_allive = 0;
 		}
@@ -547,6 +547,7 @@ static int read_emitter_from_file (int type,char *filename)
 	emi->type = type;
 	emi->color_counter = 0;
 	emi->alive = 1;
+	emi->disable = 0;
 	emi->next_spawn = 0;
 	emi->particle_count = 0;
 	emi->list_length = 0;

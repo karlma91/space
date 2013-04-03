@@ -62,6 +62,7 @@ struct emitter {
 	/** boolean values */
 	int alive;
 	int waiting_to_die;
+	int disable;
 
 	int additive;
 	int rotation;

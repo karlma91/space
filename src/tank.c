@@ -133,7 +133,6 @@ static void update(object_group_tank *tank)
 	float player_angle = get_best_angle((object_data *)tank, (object_data *)player);
 
 	//TODO bruke generell vinkel metode som u player.c!
-	//TODO implement tank collision avoidance
 
 	/*TODO: stop shaking when at correct angle */
 		/* som i matlab */
@@ -172,9 +171,9 @@ static void update(object_group_tank *tank)
 	//TMP DEBUG OVERSTYRING AV TANK
 	if (keys[SDLK_LCTRL]) {
 		if (keys[SDLK_k])
-			set_wheel_velocity(tank, 100);
+			set_wheel_velocity(tank, 500);
 		else if (keys[SDLK_l])
-			set_wheel_velocity(tank, -100);
+			set_wheel_velocity(tank, -500);
 		else
 			set_wheel_velocity(tank, 0);
 	} else {
@@ -206,7 +205,7 @@ static float get_best_angle(object_data *obj, object_data *obj2)
 	cpVect a = cpvsub(obj->body->p, obj2->body->p);
 
 	cpFloat c = cpvlength(obj2->body->v);
-	cpFloat b = 1500;
+	cpFloat b = 3000;
 	cpFloat G = acos(cpvdot(a,obj2->body->v)/(cpvlength(obj2->body->v)*cpvlength(a)));
 	float angle = asin((c*sin(G))/b);
 

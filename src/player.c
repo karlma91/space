@@ -59,7 +59,7 @@ object_param_player default_player = {
 
 object_group_player *object_create_player()
 {
-	cpFloat radius = 50;
+	cpFloat radius = 25;
 	cpFloat mass = 10;
 
 	object_group_player *player = malloc(sizeof(object_group_player));
@@ -77,7 +77,7 @@ object_group_player *object_create_player()
 	player->score = 0;
 	player->disable = 0;
 	player->rotation_speed = 8;
-	player->e = particles_get_emitter(EMITTER_FLAME);
+	player->flame = particles_get_emitter(EMITTER_FLAME);
 	player->aim_angle = 0;
 	player->gun_timer = 0;
 
@@ -85,9 +85,9 @@ object_group_player *object_create_player()
 	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius/2)));
 	cpBodySetPos(player->data.body, cpv(0,990));
 	cpBodySetVelLimit(player->data.body,700);
-	player->data.body->velocity_func = playerVelocityFunc;
+	//player->data.body->velocity_func = playerVelocityFunc;
 	/* make and connect new shape to body */
-	player->shape = cpSpaceAddShape(space, cpBoxShapeNew(player->data.body, radius, radius/2));
+	player->shape = cpSpaceAddShape(space, cpCircleShapeNew(player->data.body, radius, cpvzero));
 	cpShapeSetFriction(player->shape, 0.8);
 	cpShapeSetUserData(player->shape, draw_boxshape);
 	cpShapeSetElasticity(player->shape, 1.0f);
@@ -98,6 +98,21 @@ object_group_player *object_create_player()
 	objects_add((object_data*)player);
 
 	hpbar_init(&(player->hp_bar), player->param->max_hp, 80, 16, -40, 30, &(player->data.body->p));
+	cpShapeSetGroup(player->shape, 341); // use a group to keep the car parts from colliding
+
+
+	//FIXME cleanup
+	player->gunwheel = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
+	cpBodySetPos(player->gunwheel, player->data.body->p);
+
+	cpShape *shape = cpSpaceAddShape(space, cpCircleShapeNew(player->gunwheel, radius, cpvzero));
+	cpShapeSetElasticity(shape, 0.0f);
+	cpShapeSetFriction(shape, 0.7f);
+	cpShapeSetGroup(shape, 341); // use a group to keep the car parts from colliding
+	cpShapeSetLayers(shape,LAYER_PLAYER_BULLET);
+
+
+
 	return player;
 }
 
@@ -112,7 +127,7 @@ static void player_render(object_group_player *player)
 	//Color c = RGBAColor(1,0,0,1);
 	//draw_boxshape(player->shape,RGBAColor(1,1,1,1),c);
 
-	draw_texture(player->param->tex_id, &(player->data.body->p), &(tex_map[0]), 100, 100, player->aim_angle*180/M_PI);
+	draw_texture(player->param->tex_id, &(player->gunwheel->p), &(tex_map[0]), 100, 100, player->aim_angle*180/M_PI);
 	draw_texture(player->param->tex_id, &(player->data.body->p), &(tex_map[1]), 100, 100, dir*180/M_PI);
 
 	hpbar_draw(&player->hp_bar);
@@ -123,17 +138,26 @@ static void player_update(object_group_player *player)
 	player->gun_timer += dt;
 
 	//update physics and player
-	cpVect rot = cpBodyGetRot(player->data.body);
-	rot = cpvmult(rot, 10000);
-	cpBodySetForce(player->data.body, cpv(0,0));
-	cpBodySetTorque(player->data.body, 0);
+	if (player->hp_bar.value > 0) { //alive
+		cpBodySetForce(player->data.body, cpv(0,0));
+		cpBodySetTorque(player->data.body, 0);
+		cpBodySetAngVel(player->data.body, 0);
 
-	player->e->p = player->data.body->p;
-	player->e->angular_offset = cpvtoangle(player->data.body->v) * (180/M_PI)+90;
+		player->flame->p = player->data.body->p;
+		player->flame->angular_offset = cpvtoangle(player->data.body->v) * (180/M_PI)+90;
 
-	if(player->disable == 0){
-		player_controls(player);
+		player->gunwheel->p = player->data.body->p;
+		player->gunwheel->rot = cpvforangle(player->aim_angle);
+		player->gunwheel->v = player->data.body->v;
+
+		if(player->disable == 0){
+			player_controls(player);
+		}
+	} else {
+		player->aim_angle = cpvtoangle(player->gunwheel->rot);
+		player->flame->disable = 1;
 	}
+
 }
 
 static void player_controls(object_group_player *player)
@@ -246,6 +270,11 @@ static void arcade_control(object_group_player *player)
 		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
 
 		cpBodySetVel(player->data.body, cpvmult(cpvforangle(player_angle),speed));
+
+
+		player->flame->disable = 0;
+	} else {
+		player->flame->disable = 1;
 	}
 
 	cpBodySetAngle(player->data.body, cpvtoangle(cpBodyGetVel(player->data.body)));
