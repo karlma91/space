@@ -30,6 +30,8 @@ static void player_update(object_group_player *);
 static void player_destroy(object_group_player *);
 
 static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused);
+static int collision_ground(cpArbiter *arb, cpSpace *space, void *unused);
+static int collision_factory(cpArbiter *arb, cpSpace *space, void *unused);
 
 static void player_controls(object_group_player *);
 static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
@@ -60,7 +62,7 @@ object_param_player default_player = {
 object_group_player *object_create_player()
 {
 	cpFloat radius = 25;
-	cpFloat mass = 10;
+	cpFloat mass = 2;
 
 	object_group_player *player = malloc(sizeof(object_group_player));
 
@@ -94,6 +96,10 @@ object_group_player *object_create_player()
 	cpShapeSetLayers(player->shape, LAYER_PLAYER);
 	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_BULLET_ENEMY, collision_enemy_bullet, NULL, NULL, NULL, NULL);
 
+	//TODO create a better solution for hurting the player when he hits other objects and ground
+	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_GROUND, collision_ground, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_TANK_FACTORY, collision_factory, NULL, NULL, NULL, NULL);
+
 	cpBodySetUserData(player->data.body, (void*)player);
 	objects_add((object_data*)player);
 
@@ -110,8 +116,6 @@ object_group_player *object_create_player()
 	cpShapeSetFriction(shape, 0.7f);
 	cpShapeSetGroup(shape, 341); // use a group to keep the car parts from colliding
 	cpShapeSetLayers(shape,LAYER_PLAYER_BULLET);
-
-
 
 	return player;
 }
@@ -189,10 +193,10 @@ static void player_controls(object_group_player *player)
 	}
 
 	if (keys[SDLK_x]) {
-		particles_get_emitter_at(EMITTER_EXPLOTION, player->data.body->p);
+		particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
 	}
 	if (keys[SDLK_b]) {
-		particles_get_emitter_at(EMITTER_EXPLOTION, player->data.body->p);
+		particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
 		keys[SDLK_b] = 0;
 	}
 }
@@ -266,11 +270,11 @@ static void arcade_control(object_group_player *player)
 
 	if (angle_index != DIR_NONE) {
 		player_angle_target = dir8[angle_index];
-		dir_step = (1 * 2*M_PI) * dt; // 1 rps
+		dir_step = (5 * 2*M_PI) * dt; // 2.5 rps
 		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
 
-		cpBodySetVel(player->data.body, cpvmult(cpvforangle(player_angle),speed));
-
+		//TODO use impulses instead?
+		cpBodySetForce(player->data.body, cpvmult(cpvforangle(player_angle),speed*1000));
 
 		player->flame->disable = 0;
 	} else {
@@ -304,6 +308,38 @@ static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cp
 }
 
 
+static int collision_ground(cpArbiter *arb, cpSpace *space, void *unused)
+{
+	cpShape *a, *b;
+	cpArbiterGetShapes(arb, &a, &b);
+	object_group_player *player  = ((object_group_player *)(a->body->data));
+	if (player)  {
+		if (player->data.preset->ID == ID_PLAYER) {
+			player->hp_bar.value -= 50;
+			particles_get_emitter_at(EMITTER_SPARKS, player->data.body->p);
+		} else {
+			fprintf(stderr, "Expected object type ID %d, but got %d!\n", ID_PLAYER, player->data.preset->ID);
+		}
+	} else {
+		fprintf(stderr, "Expected object from collision between player and ground, but got NULL\n");
+	}
+
+	return 1;
+}
+
+static int collision_factory(cpArbiter *arb, cpSpace *space, void *unused)
+{
+	cpShape *a, *b;
+	cpArbiterGetShapes(arb, &a, &b);
+	object_group_player *player  = ((object_group_player *)(a->body->data));
+	if (player) {
+		player->hp_bar.value -= 50;
+		particles_get_emitter_at(EMITTER_SPARKS, player->data.body->p);
+	}
+
+	return 1;
+}
+
 static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b;
@@ -317,7 +353,7 @@ static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	//particles_add_explosion(b->body->p,0.3,1500,15,200);
 	if(player->hp_bar.value <= 0 ){
-		particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
+		particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 		player->lives--;
 	}else{
 		player->hp_bar.value -= 10;

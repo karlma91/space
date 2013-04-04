@@ -323,7 +323,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	bt->alive = 0;
 
 
-	particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
+	particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 
 	//TODO create a function for damaging other objects
 	tank->hp_bar.value -= bt->damage;
@@ -331,7 +331,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	if (tank->hp_bar.value <= 0) {
 		//a->body->data = NULL;
 		if (tank->data.alive) {
-			particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
+			particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 			particles_add_score_popup(b->body->p, tank->param->score);
 
 			//TODO create a function for both adding score and creating score pop-up emitters

@@ -75,7 +75,7 @@ void particles_init()
 {
 	int i;
 	read_emitter_from_file(EMITTER_FLAME,"particles/flame_3.xml");
-	read_emitter_from_file(EMITTER_EXPLOTION,"particles/explosion_ground.xml");
+	read_emitter_from_file(EMITTER_EXPLOSION,"particles/explosion_ground.xml");
 	read_emitter_from_file(EMITTER_SPARKS,"particles/sparks.xml");
 	read_emitter_from_file(EMITTER_SMOKE,"particles/smoke.xml");
 	read_emitter_from_file(EMITTER_SCORE,"particles/score.xml");
@@ -137,7 +137,7 @@ void particles_draw()
 void particles_reload_particles()
 {
 	read_emitter_from_file(EMITTER_FLAME,"particles/flame_3.xml");
-	read_emitter_from_file(EMITTER_EXPLOTION,"particles/explosion_ground.xml");
+	read_emitter_from_file(EMITTER_EXPLOSION,"particles/explosion_ground.xml");
 	read_emitter_from_file(EMITTER_SPARKS,"particles/sparks.xml");
 	read_emitter_from_file(EMITTER_SMOKE,"particles/smoke.xml");
 	read_emitter_from_file(EMITTER_SCORE,"particles/score.xml");

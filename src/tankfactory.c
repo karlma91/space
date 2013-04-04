@@ -43,7 +43,7 @@ object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tank
 	cpFloat size = 100;
 	/* make and add new body */
 	factory->data.body = cpSpaceAddBody(space,
-			cpBodyNew(500, cpMomentForBox(500.0f, size, size)));
+			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
 	cpBodySetPos(factory->data.body, cpv(x_pos, size));
 
 	/* make and connect new shape to body */
@@ -113,12 +113,12 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	bt->alive = 0;
 
-	particles_get_emitter_at(EMITTER_EXPLOTION, b->body->p);
+	particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 	factory->hp_bar.value -= 10;
 	if (factory->hp_bar.value <= 0) {
 
 		if (factory->data.alive) {
-			particles_get_emitter_at(EMITTER_EXPLOTION, a->body->p);
+			particles_get_emitter_at(EMITTER_EXPLOSION, a->body->p);
 			particles_add_score_popup(a->body->p, factory->param->score);
 			((object_group_player *) objects_first(ID_PLAYER))->score +=
 					factory->param->score;
