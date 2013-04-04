@@ -30,8 +30,8 @@ static void player_update(object_group_player *);
 static void player_destroy(object_group_player *);
 
 static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused);
-static int collision_ground(cpArbiter *arb, cpSpace *space, void *unused);
-static int collision_factory(cpArbiter *arb, cpSpace *space, void *unused);
+static void collision_ground(cpArbiter *arb, cpSpace *space, void *unused);
+static void collision_factory(cpArbiter *arb, cpSpace *space, void *unused);
 
 static void player_controls(object_group_player *);
 static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
@@ -66,8 +66,6 @@ object_group_player *object_create_player()
 
 	object_group_player *player = malloc(sizeof(object_group_player));
 
-	//(object* pl)
-
 	player->data.preset = &object_type_player;
 	player->data.alive = 1;
 
@@ -91,14 +89,13 @@ object_group_player *object_create_player()
 	/* make and connect new shape to body */
 	player->shape = cpSpaceAddShape(space, cpCircleShapeNew(player->data.body, radius, cpvzero));
 	cpShapeSetFriction(player->shape, 0.8);
-	cpShapeSetUserData(player->shape, draw_boxshape);
 	cpShapeSetElasticity(player->shape, 1.0f);
 	cpShapeSetLayers(player->shape, LAYER_PLAYER);
 	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_BULLET_ENEMY, collision_enemy_bullet, NULL, NULL, NULL, NULL);
 
 	//TODO create a better solution for hurting the player when he hits other objects and ground
-	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_GROUND, collision_ground, NULL, NULL, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_TANK_FACTORY, collision_factory, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_GROUND, NULL, NULL, collision_ground, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_TANK_FACTORY, NULL, NULL, collision_factory, NULL, NULL);
 
 	cpBodySetUserData(player->data.body, (void*)player);
 	objects_add((object_data*)player);
@@ -144,9 +141,8 @@ static void player_update(object_group_player *player)
 	//update physics and player
 	if (player->hp_bar.value > 0) { //alive
 		cpBodySetForce(player->data.body, cpv(0,0));
-		cpBodySetTorque(player->data.body, 0);
-		cpBodySetAngVel(player->data.body, 0);
-
+		//cpBodySetAngVel(player->data.body,cpBodyGetAngVel(player->data.body)*0.8);
+		cpBodySetAngVel(player->data.body,0);
 		player->flame->p = player->data.body->p;
 		player->flame->angular_offset = cpvtoangle(player->data.body->v) * (180/M_PI)+90;
 
@@ -282,6 +278,7 @@ static void arcade_control(object_group_player *player)
 	}
 
 	cpBodySetAngle(player->data.body, cpvtoangle(cpBodyGetVel(player->data.body)));
+
 	cpSpaceReindexShapesForBody(space, player->data.body);
 
 	//static float aim_angle = 0;
@@ -308,14 +305,14 @@ static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cp
 }
 
 
-static int collision_ground(cpArbiter *arb, cpSpace *space, void *unused)
+static void collision_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
 	object_group_player *player  = ((object_group_player *)(a->body->data));
 	if (player)  {
 		if (player->data.preset->ID == ID_PLAYER) {
-			player->hp_bar.value -= 50;
+			player->hp_bar.value -= 1;
 			particles_get_emitter_at(EMITTER_SPARKS, player->data.body->p);
 		} else {
 			fprintf(stderr, "Expected object type ID %d, but got %d!\n", ID_PLAYER, player->data.preset->ID);
@@ -324,20 +321,20 @@ static int collision_ground(cpArbiter *arb, cpSpace *space, void *unused)
 		fprintf(stderr, "Expected object from collision between player and ground, but got NULL\n");
 	}
 
-	return 1;
+	//return 1;
 }
 
-static int collision_factory(cpArbiter *arb, cpSpace *space, void *unused)
+static void collision_factory(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
 	object_group_player *player  = ((object_group_player *)(a->body->data));
 	if (player) {
-		player->hp_bar.value -= 50;
+		player->hp_bar.value -= 1;
 		particles_get_emitter_at(EMITTER_SPARKS, player->data.body->p);
 	}
 
-	return 1;
+	//return 1;
 }
 
 static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
