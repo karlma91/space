@@ -278,7 +278,7 @@ static int main_destroy()
 
 int main( int argc, char *args[] )
 {
-	main_init();
+    main_init();
 	main_run();
 	main_destroy();
 

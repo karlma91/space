@@ -17,6 +17,7 @@
 #include "player.h"
 #include "tank.h"
 #include "bullet.h"
+#include "spaceengine.h"
 
 static void init(object_group_tankfactory *);
 static void update(object_group_tankfactory *);
@@ -25,8 +26,13 @@ static void destroy(object_group_tankfactory *);
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 static void remove_factory_from_tank(object_group_tank *);
 
-object_group_preset type_tank_factory = { ID_TANK_FACTORY, init, update, render,
-		destroy };
+object_group_preset type_tank_factory =
+	{ ID_TANK_FACTORY,
+			init,
+			update,
+			render,
+			destroy
+	};
 
 object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tankfactory *param) {
 	object_group_tankfactory *factory = malloc(sizeof(*factory));
@@ -113,15 +119,14 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	bt->alive = 0;
 
-	particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
-	factory->hp_bar.value -= 10;
+	se_add_explotion_at_contact_point(arb);
+
+	factory->hp_bar.value -= bt->damage;
 	if (factory->hp_bar.value <= 0) {
 
 		if (factory->data.alive) {
 			particles_get_emitter_at(EMITTER_EXPLOSION, a->body->p);
-			particles_add_score_popup(a->body->p, factory->param->score);
-			((object_group_player *) objects_first(ID_PLAYER))->score +=
-					factory->param->score;
+			se_add_score_and_popup(b->body->p, factory->param->score);
 		}
 		factory->data.alive = 0;
 	}

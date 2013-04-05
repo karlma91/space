@@ -22,6 +22,7 @@
 #include "bullet.h"
 
 #include "chipmunk.h"
+#include "spaceengine.h"
 
 static void init(object_data *);
 
@@ -81,19 +82,16 @@ object_group_player *object_create_player()
 	player->gun_timer = 0;
 
 	/* make and add new body */
-	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, radius, radius/2)));
+	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
 	cpBodySetPos(player->data.body, cpv(0,990));
 	cpBodySetVelLimit(player->data.body,700);
-	//player->data.body->velocity_func = playerVelocityFunc;
+
 	/* make and connect new shape to body */
-	player->shape = cpSpaceAddShape(space, cpCircleShapeNew(player->data.body, radius, cpvzero));
-	cpShapeSetFriction(player->shape, 0.8);
-	cpShapeSetElasticity(player->shape, 0.9f);
+	player->shape = se_add_circle_shape(player->data.body,radius,0.8,0.9);
+
 	cpShapeSetLayers(player->shape, LAYER_PLAYER);
 	cpShapeSetCollisionType(player->shape, ID_PLAYER);
 	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_BULLET_ENEMY, collision_enemy_bullet, NULL, NULL, NULL, NULL);
-
-	//TODO create a better solution for hurting the player when he hits other objects and ground
 	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_GROUND, NULL, NULL, collision_ground, NULL, NULL);
 	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_TANK_FACTORY, NULL, NULL, collision_factory, NULL, NULL);
 
@@ -101,16 +99,15 @@ object_group_player *object_create_player()
 	objects_add((object_data*)player);
 
 	hpbar_init(&(player->hp_bar), player->param->max_hp, 80, 16, -40, 30, &(player->data.body->p));
-	cpShapeSetGroup(player->shape, 341); // use a group to keep the car parts from colliding
 
+	cpShapeSetGroup(player->shape, 341); // use a group to keep the car parts from colliding
 
 	//FIXME cleanup
 	player->gunwheel = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(player->gunwheel, player->data.body->p);
 
-	cpShape *shape = cpSpaceAddShape(space, cpCircleShapeNew(player->gunwheel, radius, cpvzero));
-	cpShapeSetElasticity(shape, 0.9f);
-	cpShapeSetFriction(shape, 0.8f);
+	cpShape *shape = se_add_circle_shape(player->gunwheel,radius,0.9,0.8);
+
 	cpShapeSetGroup(shape, 341); // use a group to keep the car parts from colliding
 	cpShapeSetLayers(shape,LAYER_PLAYER_BULLET);
 
