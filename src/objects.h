@@ -5,6 +5,7 @@
 
 /* ID number of each object group*/
 enum OBJECT_ID {
+	ID_DEFAULT,
 	ID_PLAYER,
 	ID_GROUND,
 	ID_TANK_FACTORY,
@@ -12,6 +13,7 @@ enum OBJECT_ID {
 	ID_BULLET_PLAYER,
 	ID_BULLET_ENEMY,
 	ID_ROBOTARM,
+	ID_ABSTRACT_WHEEL,
 
 	ID_COUNT
 };
@@ -44,6 +46,7 @@ typedef struct _object_param_tankfactory object_param_tankfactory;
 /* layers for objects */
 extern int LAYER_PLAYER;
 extern int LAYER_TANK;
+extern int LAYER_WHEEL;
 extern int LAYER_TANK_FACTORY;
 extern int LAYER_PLAYER_BULLET;
 extern int LAYER_ENEMY_BULLET;

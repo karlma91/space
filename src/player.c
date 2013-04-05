@@ -34,7 +34,6 @@ static void collision_ground(cpArbiter *arb, cpSpace *space, void *unused);
 static void collision_factory(cpArbiter *arb, cpSpace *space, void *unused);
 
 static void player_controls(object_group_player *);
-static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 
 static void arcade_control(object_group_player *); //2
 static void action_shoot(object_group_player *);
@@ -91,6 +90,7 @@ object_group_player *object_create_player()
 	cpShapeSetFriction(player->shape, 0.8);
 	cpShapeSetElasticity(player->shape, 1.0f);
 	cpShapeSetLayers(player->shape, LAYER_PLAYER);
+	cpShapeSetCollisionType(player->shape, ID_PLAYER);
 	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_BULLET_ENEMY, collision_enemy_bullet, NULL, NULL, NULL, NULL);
 
 	//TODO create a better solution for hurting the player when he hits other objects and ground
@@ -125,22 +125,25 @@ static void player_render(object_group_player *player)
 {
 	//float s = 0.001;
 	float dir = cpBodyGetAngle(player->data.body);
-	//Color c = RGBAColor(1,0,0,1);
-	//draw_boxshape(player->shape,RGBAColor(1,1,1,1),c);
 
 	draw_texture(player->param->tex_id, &(player->gunwheel->p), &(tex_map[0]), 100, 100, player->aim_angle*180/M_PI);
 	draw_texture(player->param->tex_id, &(player->data.body->p), &(tex_map[1]), 100, 100, dir*180/M_PI);
 
-	hpbar_draw(&player->hp_bar);
+	if (player->hp_bar.hp_last > 0) { //alive
+		hpbar_draw(&player->hp_bar);
+	}
 }
 
 static void player_update(object_group_player *player)
 {
+	if (keys[SDLK_i])
+		player->hp_bar.value = 1000000;
+
 	player->gun_timer += dt;
 
+	cpBodySetForce(player->data.body, cpv(0,0));
 	//update physics and player
 	if (player->hp_bar.value > 0) { //alive
-		cpBodySetForce(player->data.body, cpv(0,0));
 		//cpBodySetAngVel(player->data.body,cpBodyGetAngVel(player->data.body)*0.8);
 		cpBodySetAngVel(player->data.body,0);
 		player->flame->p = player->data.body->p;
@@ -266,11 +269,11 @@ static void arcade_control(object_group_player *player)
 
 	if (angle_index != DIR_NONE) {
 		player_angle_target = dir8[angle_index];
-		dir_step = (5 * 2*M_PI) * dt; // 2.5 rps
+		dir_step = (2.5 * 2*M_PI) * dt; // 2.5 rps
 		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
 
 		//TODO use impulses instead?
-		cpBodySetForce(player->data.body, cpvmult(cpvforangle(player_angle),speed*1000));
+		cpBodySetForce(player->data.body, cpvmult(cpvforangle(player_angle),speed*500));
 
 		player->flame->disable = 0;
 	} else {
@@ -278,8 +281,6 @@ static void arcade_control(object_group_player *player)
 	}
 
 	cpBodySetAngle(player->data.body, cpvtoangle(cpBodyGetVel(player->data.body)));
-
-	cpSpaceReindexShapesForBody(space, player->data.body);
 
 	//static float aim_angle = 0;
 	float aim_angle_target = 0;
@@ -293,17 +294,6 @@ static void arcade_control(object_group_player *player)
 		action_shoot(player);
 	}
 }
-
-/**
- * Velocity function to remove gravity
- */
-static void playerVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
-{
-	cpVect g = cpv(0,0);
-	g = cpvproject(gravity,body->v);
-	cpBodyUpdateVelocity(body, g, damping, dt);
-}
-
 
 static void collision_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {

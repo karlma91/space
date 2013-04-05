@@ -246,7 +246,10 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset)
 	cpShapeSetElasticity(shape, 0.0f);
 	cpShapeSetFriction(shape, 0.7f);
 	cpShapeSetGroup(shape, 1); // use a group to keep the car parts from colliding
-	cpShapeSetLayers(shape,LAYER_TANK);
+
+	cpSpaceAddCollisionHandler(space, ID_TANK, ID_ABSTRACT_WHEEL, NULL, NULL, NULL, NULL, NULL);
+
+	cpShapeSetLayers(shape,LAYER_WHEEL);
 
 	return body;
 }
@@ -267,7 +270,7 @@ addChassis(cpSpace *space, cpVect pos, cpVect boxOffset)
 	tempShape = cpSpaceAddShape(space, cpBoxShapeNew(body, width, height));
 	cpShapeSetElasticity(tempShape, 0.0f);
 	cpShapeSetFriction(tempShape, 0.7f);
-	cpShapeSetGroup(tempShape, 1); // use a group to keep the car parts from colliding
+	//cpShapeSetGroup(tempShape, 1); // use a group to keep the car parts from colliding
 	cpShapeSetLayers(tempShape,LAYER_TANK);
 
 	return body;
