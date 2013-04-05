@@ -88,7 +88,7 @@ object_group_player *object_create_player()
 	/* make and connect new shape to body */
 	player->shape = cpSpaceAddShape(space, cpCircleShapeNew(player->data.body, radius, cpvzero));
 	cpShapeSetFriction(player->shape, 0.8);
-	cpShapeSetElasticity(player->shape, 1.0f);
+	cpShapeSetElasticity(player->shape, 0.9f);
 	cpShapeSetLayers(player->shape, LAYER_PLAYER);
 	cpShapeSetCollisionType(player->shape, ID_PLAYER);
 	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_BULLET_ENEMY, collision_enemy_bullet, NULL, NULL, NULL, NULL);
@@ -109,8 +109,8 @@ object_group_player *object_create_player()
 	cpBodySetPos(player->gunwheel, player->data.body->p);
 
 	cpShape *shape = cpSpaceAddShape(space, cpCircleShapeNew(player->gunwheel, radius, cpvzero));
-	cpShapeSetElasticity(shape, 0.0f);
-	cpShapeSetFriction(shape, 0.7f);
+	cpShapeSetElasticity(shape, 0.9f);
+	cpShapeSetFriction(shape, 0.8f);
 	cpShapeSetGroup(shape, 341); // use a group to keep the car parts from colliding
 	cpShapeSetLayers(shape,LAYER_PLAYER_BULLET);
 
@@ -298,15 +298,19 @@ static void collision_ground(cpArbiter *arb, cpSpace *space, void *unused)
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
 	object_group_player *player  = ((object_group_player *)(a->body->data));
+
 	if (player)  {
 		if (player->data.preset->ID == ID_PLAYER) {
-			player->hp_bar.value -= 1;
+			cpVect force = cpArbiterTotalImpulse(arb);
+			float f = cpvlength(force);
+
+			//todo create a super fancy formula for determining physical damagae
+			if (f > 20)
+				player->hp_bar.value -= f * 0.05;
 
 			cpVect v = cpArbiterGetPoint(arb, 0);
 			cpVect n = cpArbiterGetNormal(arb, 0);
 			float angle = cpvtoangle(n);
-			cpVect force = cpArbiterTotalImpulse(arb);
-			float f = cpvlength(force);
 			fprintf(stderr,"%f\n",f);
 			particles_add_sparks(v,angle,f);
 		} else {
@@ -324,10 +328,15 @@ static void collision_factory(cpArbiter *arb, cpSpace *space, void *unused)
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
 	object_group_player *player  = ((object_group_player *)(a->body->data));
-	if (player) {
-		player->hp_bar.value -= 1;
-		particles_get_emitter_at(EMITTER_SPARKS, player->data.body->p);
-	}
+
+	cpVect force = cpArbiterTotalImpulse(arb);
+	float f = cpvlength(force);
+
+	//todo create a super fancy formula for determining physical damagae
+	if (f > 20)
+		player->hp_bar.value -= f * 0.05;
+
+	particles_get_emitter_at(EMITTER_SPARKS, player->data.body->p);
 
 	//return 1;
 }

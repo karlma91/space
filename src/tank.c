@@ -50,6 +50,7 @@ static const texture_map tex_map[2] = {
 
 object_group_tank *object_create_tank(float xpos,object_group_tankfactory *factory, object_param_tank *param)
 {
+	//TODO use pointer value as group id
 	object_group_tank *tank = malloc(sizeof(*tank));
 	tank->data.preset = &type_tank;
 	tank->data.alive = 1;
@@ -279,9 +280,9 @@ addChassis(cpSpace *space, cpVect pos, cpVect boxOffset)
 static void render(object_group_tank *tank)
 {
 	if (tank->param->max_hp < 100)
-		glColor3f(1,1,1);
+		glColor4f(1,1,1,0.6);
 	else
-		glColor3f(1.0,0.4,0.4);
+		glColor4f(1,1,0,0.6);
 
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
 	 glBlendFunc(GL_SRC_ALPHA, GL_ONE);

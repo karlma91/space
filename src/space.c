@@ -705,12 +705,14 @@ void space_init_level(int space_station, int deck)
 	}
 
 	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), 15.0f)); // ground level at 0
-	cpShapeSetFriction(floor, 1.0f);
+	cpShapeSetFriction(floor, 0.8f);
 	cpShapeSetCollisionType(floor, ID_GROUND);
+	cpShapeSetElasticity(floor, 0.7f);
 
 	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), 15.0f));
-	cpShapeSetFriction(ceiling, 1.0f);
+	cpShapeSetFriction(ceiling, 0.8f);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
+	cpShapeSetElasticity(ceiling, 0.7f);
 
 	/*
 	 * puts all shapes in correct position
