@@ -122,7 +122,7 @@ void particles_update();
 void particles_release_emitter(emitter* e);
 
 emitter *particles_add_score_popup(cpVect p, int score);
-emitter *particles_add_sparks(cpVect p);
+emitter *particles_add_sparks(cpVect p, float angle, float force);
 
 void particles_clear();
 emitter *particles_get_emitter(int type);

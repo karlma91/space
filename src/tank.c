@@ -283,6 +283,9 @@ static void render(object_group_tank *tank)
 	else
 		glColor3f(1.0,0.4,0.4);
 
+	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
+	 glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
 	//draw_boxshape(temp->shape,RGBAColor(0.8,0.3,0.1,1),RGBAColor(0.8,0.6,0.3,1));
 	GLfloat dir = cpBodyGetAngle(tank->data.body)*(180/M_PI);
 	GLfloat rot = cpBodyGetAngle(tank->wheel1)*(180/M_PI);
@@ -313,6 +316,7 @@ static void render(object_group_tank *tank)
 	font_drawText(tank->data.body->p.x - 80,tank->data.body->p.y+60,debug_buf_left);
 	font_drawText(tank->data.body->p.x + 80,tank->data.body->p.y+60,debug_buf_right);
 	*/
+	glPopAttrib();
 }
 
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)

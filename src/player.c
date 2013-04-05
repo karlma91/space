@@ -301,7 +301,14 @@ static void collision_ground(cpArbiter *arb, cpSpace *space, void *unused)
 	if (player)  {
 		if (player->data.preset->ID == ID_PLAYER) {
 			player->hp_bar.value -= 1;
-			particles_get_emitter_at(EMITTER_SPARKS, player->data.body->p);
+
+			cpVect v = cpArbiterGetPoint(arb, 0);
+			cpVect n = cpArbiterGetNormal(arb, 0);
+			float angle = cpvtoangle(n);
+			cpVect force = cpArbiterTotalImpulse(arb);
+			float f = cpvlength(force);
+			fprintf(stderr,"%f\n",f);
+			particles_add_sparks(v,angle,f);
 		} else {
 			fprintf(stderr, "Expected object type ID %d, but got %d!\n", ID_PLAYER, player->data.preset->ID);
 		}
