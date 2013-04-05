@@ -13,7 +13,7 @@
 typedef struct {
 	float value;
 	float max_hp;
-	float hp_last;
+	float draw_value;
 	float hp_timer;
 	float width;
 	float height;

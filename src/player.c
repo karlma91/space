@@ -129,9 +129,7 @@ static void player_render(object_group_player *player)
 	draw_texture(player->param->tex_id, &(player->gunwheel->p), &(tex_map[0]), 100, 100, player->aim_angle*180/M_PI);
 	draw_texture(player->param->tex_id, &(player->data.body->p), &(tex_map[1]), 100, 100, dir*180/M_PI);
 
-	if (player->hp_bar.hp_last > 0) { //alive
-		hpbar_draw(&player->hp_bar);
-	}
+	hpbar_draw(&player->hp_bar);
 }
 
 static void player_update(object_group_player *player)
