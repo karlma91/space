@@ -30,10 +30,10 @@ typedef struct {
 
 struct _object_data {
 	object_group_preset *preset;
-	int instance_id;
-	int disabled;
 	int alive;
+	int instance_id;
 	int *remove;
+	int disabled;
 	cpBody *body;
 };
 

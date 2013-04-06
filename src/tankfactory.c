@@ -117,7 +117,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	struct bullet *bt = ((struct bullet*) (b->body->data));
 
-	bt->alive = 0;
+	bt->data.alive = 0;
 
 	se_add_explotion_at_contact_point(arb);
 

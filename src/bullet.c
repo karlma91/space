@@ -26,7 +26,42 @@ object_group_preset type_bullet_enemy= {
 	destroy
 };
 
-static struct bullet *temp;
+
+//TODO standardize bullet
+object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int type)
+{
+	struct bullet *temp = malloc(sizeof(struct bullet));
+
+		temp->data.alive = 1;
+
+		cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
+
+		temp->data.body = cpSpaceAddBody(space, cpBodyNew(1, moment));
+		cpBodySetPos(temp->data.body, cpvadd(pos, cpvmult(dir,60)));
+		cpBodySetUserData(temp->data.body, (object_data*)temp);
+		cpBodySetVel(temp->data.body,cpvadd(cpvmult(dir,3000),intit_vel));
+		temp->data.body->velocity_func = bulletVelocityFunc;
+
+		temp->shape =se_add_circle_shape(temp->data.body,15,1,0);
+
+		// Sets bullets collision type
+		cpShapeSetCollisionType(temp->shape, type);
+		cpSpaceAddCollisionHandler(space, ID_GROUND, type, NULL, NULL, callback_ground, NULL, NULL);
+		cpShapeSetGroup(temp->shape,10);
+
+		if(type == ID_BULLET_PLAYER){
+			temp->data.preset = &type_bullet_player;
+			cpShapeSetLayers(temp->shape,LAYER_PLAYER_BULLET);
+			temp->damage = 20;
+		}else{
+			temp->data.preset = &type_bullet_enemy;
+			cpShapeSetLayers(temp->shape,LAYER_ENEMY_BULLET);
+			temp->damage = 10;
+		}
+
+		objects_add((object_data*)temp);
+		return (object_data*)temp;
+}
 
 static void init(object_data *obj)
 {
@@ -35,13 +70,13 @@ static void init(object_data *obj)
 
 static void update(object_data *obj)
 {
-	temp = (struct bullet*)obj;
+	struct bullet *temp = (struct bullet*)obj;
 }
 
 static void render(object_data *obj)
 {
-	temp = (struct bullet*)obj;
-	if(temp->type->ID == ID_BULLET_PLAYER){
+	struct bullet *temp = (struct bullet*)obj;
+	if(temp->data.preset->ID == ID_BULLET_PLAYER){
 		glColor3f(0.9,0.3,0.3);
 	}else{
 		glColor3f(0.3,0.3,0.9);
@@ -56,40 +91,6 @@ static void render(object_data *obj)
 	}
 }
 
-//TODO standardize bullet
-object_data *bullet_init(cpVect pos, cpVect dir, cpVect intit_vel, int type)
-{
-		temp = malloc(sizeof(struct bullet));
-		temp->alive = 1;
-
-		cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
-
-		temp->body = cpSpaceAddBody(space, cpBodyNew(1, moment));
-		cpBodySetPos(temp->body, cpvadd(pos, cpvmult(dir,60)));
-		cpBodySetUserData(temp->body, (object_data*)temp);
-		cpBodySetVel(temp->body,cpvadd(cpvmult(dir,3000),intit_vel));
-		temp->body->velocity_func = bulletVelocityFunc;
-
-		temp->shape =se_add_circle_shape(temp->body,15,1,0);
-
-		// Sets bullets collision type
-		cpShapeSetCollisionType(temp->shape, type);
-		cpSpaceAddCollisionHandler(space, ID_GROUND, type, NULL, NULL, callback_ground, NULL, NULL);
-		cpShapeSetGroup(temp->shape,10);
-
-		if(type == ID_BULLET_PLAYER){
-			temp->type = &type_bullet_player;
-			cpShapeSetLayers(temp->shape,LAYER_PLAYER_BULLET);
-			temp->damage = 20;
-		}else{
-			temp->type = &type_bullet_enemy;
-			cpShapeSetLayers(temp->shape,LAYER_ENEMY_BULLET);
-			temp->damage = 10;
-		}
-
-		objects_add((object_data*)temp);
-		return (object_data*)temp;
-}
 
 /**
  * Velocity function to remove gravity
@@ -105,25 +106,27 @@ static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cp
 static void callback_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
-	temp = (struct bullet*)b->body->data;
-	cpVect v = cpArbiterGetPoint(arb, 0);
-	cpVect n = cpArbiterGetNormal(arb, 0);
-	n=cpvneg(n);
-	float angle = cpvtoangle(n);
-	cpVect force = cpArbiterTotalImpulseWithFriction(arb);
-	float f = cpvlength(force);
-	particles_add_sparks(v,angle,f);
-	temp->alive = 0;
+	struct bullet *temp = (struct bullet*)b->body->data;
+	if(cpArbiterGetCount(arb) >0){
+		cpVect v = cpArbiterGetPoint(arb, 0);
+		cpVect n = cpArbiterGetNormal(arb, 0);
+		n=cpvneg(n);
+		float angle = cpvtoangle(n);
+		cpVect force = cpArbiterTotalImpulseWithFriction(arb);
+		float f = cpvlength(force);
+		particles_add_sparks(v,angle,f);
+	}
+	temp->data.alive = 0;
 }
 
 static void destroy(object_data *bullet)
 {
-	temp = (struct bullet*)bullet;
+	*bullet->remove = 1;
+	struct bullet *temp = (struct bullet*)bullet;
 	cpSpaceRemoveShape(space, temp->shape);
-	cpSpaceRemoveBody(space, temp->body);
+	cpSpaceRemoveBody(space, temp->data.body);
 	cpShapeFree(temp->shape);
-	cpBodyFree(temp->body);
-	*(temp->remove) = 1;
+	cpBodyFree(temp->data.body);
 	free(temp);
 	temp = NULL;
 }

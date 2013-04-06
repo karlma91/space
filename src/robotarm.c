@@ -139,7 +139,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	struct bullet *bt = ((struct bullet*)(b->body->data));
 
-	bt->alive = 0;
+	bt->data.alive = 0;
 
 	particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 

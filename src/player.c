@@ -347,7 +347,7 @@ static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	struct bullet *bt = ((struct bullet*)(b->body->data));
 
-	bt->alive = 0;
+	bt->data.alive = 0;
 
 	//particles_add_explosion(b->body->p,0.3,1500,15,200);
 	if(player->hp_bar.value <= 0 ){
@@ -365,7 +365,7 @@ static void action_shoot(object_group_player *player)
 		int i;
 
 		for(i=0; i < player->gun_level;i++){
-			bullet_init(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
+			object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
 		}
 
 		player->gun_timer = 0;

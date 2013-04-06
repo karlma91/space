@@ -56,8 +56,10 @@ cpFloat get_angle(cpBody *a, cpBody *b)
 
 void se_add_explotion_at_contact_point(cpArbiter *arb)
 {
-	cpVect v = cpArbiterGetPoint(arb, 0);
-	particles_get_emitter_at(EMITTER_EXPLOSION, v);
+	if(cpArbiterGetCount(arb) >0){
+		cpVect v = cpArbiterGetPoint(arb, 0);
+		particles_get_emitter_at(EMITTER_EXPLOSION, v);
+	}
 }
 
 

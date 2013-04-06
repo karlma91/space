@@ -124,7 +124,7 @@ static void update(object_group_tank *tank)
 
 	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX)){
 		cpVect t = cpvforangle(tank->angle );
-		bullet_init(tank->data.body->p,t,tank->data.body->v,ID_BULLET_ENEMY);
+		object_create_bullet(tank->data.body->p,t,tank->data.body->v,ID_BULLET_ENEMY);
 		tank->timer = 0;
 	}
 
@@ -259,7 +259,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	struct bullet *bt = ((struct bullet*)(b->body->data));
 
-	bt->alive = 0;
+	bt->data.alive = 0;
 
 	se_add_explotion_at_contact_point(arb);
 
