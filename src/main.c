@@ -159,7 +159,38 @@ static int main_init()
 	float temph = H;
 	HEIGHT = (temph/W) * WIDTH;
 
-	if (!(screen = SDL_SetVideoMode(W, H, 32, (SDL_OPENGL| SDL_DOUBLEBUF) | (SDL_FULLSCREEN * config.fullscreen))))
+
+	/* NB: need to be set before call to SDL_SetVideoMode! */
+	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 32 );
+	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	//for antialiasing
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //TODO fix tile edges when AA is activated
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4); //TODO read AA-settings from config file
+
+	SDL_putenv("SDL_DEBUG");
+
+	SDL_putenv("SDL_VIDEO_CENTERED=center");
+	SDL_WM_SetCaption("SPACE", "NULL");
+
+	{
+		SDL_Surface     *image;
+#ifdef __WIN32__
+		image = SDL_LoadBMP("textures/icon_32.bmp"); // windows is only compatible with 32x32 icon
+#else
+		image = SDL_LoadBMP("textures/icon.bmp");
+#endif
+		SDL_WM_SetIcon(image, NULL); //TODO fix transparency
+		//Uint32          colorkey;
+		//colorkey = SDL_MapRGB(image->format, 255, 0, 0);
+		//SDL_SetColorKey(image, SDL_SRCCOLORKEY, colorkey);
+	}
+
+	if (!(screen = SDL_SetVideoMode(W, H, 32, (SDL_OPENGL| SDL_DOUBLEBUF | SDL_RESIZABLE) | (SDL_FULLSCREEN * config.fullscreen))))
 	{
 		printf("ERROR");
 		SDL_Quit();
@@ -244,6 +275,12 @@ static int main_run()
 			main_stop();
 		}
 
+		if (keys[SDLK_f] && keys[SDLK_LCTRL]) {
+			int ret = SDL_WM_ToggleFullScreen(screen);
+			fprintf(stderr,"TOGGLING FULLSCREEN SUCCESS: %d\n",ret);
+			keys[SDLK_f] = 0;
+		}
+
 		while(SDL_PollEvent(&event))
 		{
 			switch (event.type)
@@ -251,11 +288,26 @@ static int main_run()
 			case SDL_QUIT:
 			    main_stop();
 				break;
+			case SDL_VIDEORESIZE:
+				W = event.resize.w;
+				H = event.resize.h;
+				if (!(screen = SDL_SetVideoMode(W, H, 32, (SDL_OPENGL| SDL_DOUBLEBUF | SDL_RESIZABLE) | (SDL_FULLSCREEN * config.fullscreen))))
+				{
+					printf("ERROR");
+					SDL_Quit();
+					return 1;
+				}
+				break;
 			}
 		}
 
 		//not use 100% of cpu
-		SDL_Delay(SLEEP_TIME);
+		if (keys[SDLK_z])
+			 SDL_Delay(14);
+		else if (keys[SDLK_c])
+			SDL_Delay(50);
+		else
+			SDL_Delay(SLEEP_TIME);
 	}
 	return 0;
 }

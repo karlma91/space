@@ -264,11 +264,11 @@ static void arcade_control(object_group_player *player)
 
 	if (angle_index != DIR_NONE) {
 		player_angle_target = dir8[angle_index];
-		dir_step = (2.5 * 2*M_PI) * dt; // 2.5 rps
+		dir_step = (2.5 * 2*M_PI)*dt; // 2.5 rps
 		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
 
 		//TODO use impulses instead?
-		cpBodySetForce(player->data.body, cpvmult(cpvforangle(player_angle),speed*500));
+		cpBodySetForce(player->data.body, cpvmult(cpvforangle(player_angle),speed*600));
 
 		player->flame->disable = 0;
 	} else {

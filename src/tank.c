@@ -122,6 +122,14 @@ static void update(object_group_tank *tank)
 		/* som i matlab */
 		tank->angle += ((player_angle > tank->angle)*2 - 1) * tank->rot_speed;
 
+	//TODO FIXME !! Constrain aim angle within a range of 180 degrees !!
+	{
+		if (tank->angle > M_PI) //TODO use relative angle between tank and aim angle
+			tank->angle = M_PI;
+	}
+	fprintf(stderr,"print_angle: %f\n",tank->angle);
+
+
 	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX)){
 		cpVect t = cpvforangle(tank->angle );
 		object_create_bullet(tank->data.body->p,t,tank->data.body->v,ID_BULLET_ENEMY);
