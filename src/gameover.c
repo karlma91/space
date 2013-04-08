@@ -79,14 +79,14 @@ static void update() {
 		win = 1;
 		/* no break */
 	case enter_name:
-		if (keys[SDLK_UP]) {
+		if (keys[SDLK_DOWN]) {
 			if (key_dt<=0) {
 				key_dt = key_ddt;
 				key_ddt = key_ddt_min;
 
 				if (++valid_index[i] >= char_count) valid_index[i] -= char_count;
 			}
-		} else if (keys[SDLK_DOWN]) {
+		} else if (keys[SDLK_UP]) {
 			if (key_dt<=0) {
 				key_dt = key_ddt;
 				key_ddt = key_ddt_min;
@@ -160,6 +160,21 @@ static void draw()
 	case enter_name:
 		font_drawText(0,0, &input[0]);
 		font_drawText(1.5f*60*(i-2+0.5f),-60/4, "_");
+
+		char tmp[2];
+		tmp[1] = '\0';
+		int draw_offset = 3;
+		int from = ((valid_index[i] - draw_offset));
+		int to = (valid_index[i] + draw_offset);
+		int k = -draw_offset;
+		glColor3f(0.3,0.3,0.3);
+		int j;
+		for(j=from; j<=to; j++,k++){
+			tmp[0] = valid_char[j < 0 ? j + char_count : j % char_count];
+			if(k){
+				font_drawText(1.5f*60*(i-2+0.5f),-k*100,tmp);
+			}
+		}
 		break;
 	case confirm_name:
 		font_drawText(0,0, &input[0]);

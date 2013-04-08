@@ -158,7 +158,7 @@ int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead()
 {
 	update_all();
-	if(state_timer > 3){
+	if(keys[SDLK_RETURN]){//state_timer > 3){
 		lvl_cleared=0;
 		statesystem_set_state(STATESYSTEM_GAMEOVER);
 		gameover_setstate(enter_name);
@@ -599,7 +599,7 @@ static void SPACE_draw()
 			setTextSize(60);
 			glColor3f(1,0,0);
 			setTextAlign(TEXT_CENTER);
-			font_drawText(0, 0, "GAME OVER");
+			font_drawText(0, 0, "GAME OVER-PRESS ENTER");
 			setTextSize(120);font_drawText(0,-180,"\x49\x4e\x46\x33\x34\x38\x30");
 			break;
 		case LEVEL_STATE_COUNT:
