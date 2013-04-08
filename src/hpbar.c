@@ -24,6 +24,7 @@ void hpbar_init(hpbar *hp_bar, float max_hp, float width, float height, float x_
 void hpbar_draw(hpbar *hp_bar)
 {
 	float hp_percent = hp_bar->value / hp_bar->max_hp;
+	hp_percent = hp_percent < 0 ? 0 : hp_percent > 1 ? 1 : hp_percent;
 	float hp_dt = dt;
 
 	if (hp_bar->draw_value != hp_percent) {

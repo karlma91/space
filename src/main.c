@@ -89,16 +89,6 @@ static int init_config()
 
 static void initGL()
 {
-	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 32 );
-	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-	//for antialiasing
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-
 	//antialiasing
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
@@ -140,6 +130,11 @@ static void initGL()
 
 SDL_Surface *screen;
 
+void setAspectRatio() {
+	WIDTH = 1920;
+	HEIGHT = (1.0f * H/W) * WIDTH;
+}
+
 static int main_init()
 {
 	init_config();
@@ -155,17 +150,15 @@ static int main_init()
 		H = config.height;
 	}
 
-	WIDTH = 1920;
-	float temph = H;
-	HEIGHT = (temph/W) * WIDTH;
+	setAspectRatio();
 
+	//glOrtho(-(WIDTH/2),(WIDTH/2),-(HEIGHT/2),(HEIGHT/2),1,-1);
 
 	/* NB: need to be set before call to SDL_SetVideoMode! */
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
 	//for antialiasing
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //TODO fix tile edges when AA is activated
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 1); //TODO read AA-settings from config file
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2); //TODO read AA-settings from config file
 
 	SDL_putenv("SDL_DEBUG");
 
@@ -185,7 +178,7 @@ static int main_init()
 		//SDL_SetColorKey(image, SDL_SRCCOLORKEY, colorkey);
 	}
 
-	if (!(screen = SDL_SetVideoMode(W, H, 32, (SDL_OPENGL| SDL_DOUBLEBUF | SDL_RESIZABLE) | (SDL_FULLSCREEN * config.fullscreen))))
+	if (!(screen = SDL_SetVideoMode(W, H, 0, (SDL_OPENGL| SDL_DOUBLEBUF | SDL_RESIZABLE) | (SDL_FULLSCREEN * config.fullscreen))))
 	{
 		printf("ERROR");
 		SDL_Quit();
@@ -292,6 +285,8 @@ static int main_run()
 					SDL_Quit();
 					return 1;
 				}
+				glViewport(0,0,W,H);
+				setAspectRatio();
 				break;
 			}
 		}
