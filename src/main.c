@@ -161,21 +161,16 @@ static int main_init()
 
 
 	/* NB: need to be set before call to SDL_SetVideoMode! */
-	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 32 );
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
 	//for antialiasing
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //TODO fix tile edges when AA is activated
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4); //TODO read AA-settings from config file
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 1); //TODO read AA-settings from config file
 
 	SDL_putenv("SDL_DEBUG");
 
 	SDL_putenv("SDL_VIDEO_CENTERED=center");
-	SDL_WM_SetCaption("SPACE", "NULL");
+	SDL_WM_SetCaption("SPACE", "SPACE");
 
 	{
 		SDL_Surface     *image;

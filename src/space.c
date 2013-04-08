@@ -159,6 +159,7 @@ static void level_player_dead()
 {
 	update_all();
 	if(keys[SDLK_RETURN]){//state_timer > 3){
+		keys[SDLK_RETURN] = 0;
 		lvl_cleared=0;
 		statesystem_set_state(STATESYSTEM_GAMEOVER);
 		gameover_setstate(enter_name);
