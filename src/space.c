@@ -21,6 +21,7 @@
 
 /* Game components */
 #include "objects.h"
+#include "collisioncallbacks.h"
 #include "player.h"
 #include "tankfactory.h"
 #include "robotarm.h"
@@ -756,7 +757,9 @@ void space_init()
 	cpVect gravity = cpv(0, -600);
 	space = cpSpaceNew();
 	cpSpaceSetGravity(space, gravity);
-	//cpSpaceSetDamping(space, 0.999);
+	cpSpaceSetDamping(space, 0.99);
+
+    collisioncallbacks_init();
 
 	//init stars
 	srand(122531);

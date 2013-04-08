@@ -2,6 +2,7 @@
 #define OBJECTS_H_
 
 #include "chipmunk.h"
+#include "hpbar.h"
 
 /* ID number of each object group*/
 enum OBJECT_ID {
@@ -17,6 +18,16 @@ enum OBJECT_ID {
 
 	ID_COUNT
 };
+
+typedef struct {
+	hpbar *hp_bar;
+	int *score;
+	float *damage;
+	void *unused_3;
+	void *unused_4;
+	void *unused_5;
+	void *unused_6;
+} object_component_pointers;
 
 typedef struct _object_data object_data;
 
@@ -35,7 +46,9 @@ struct _object_data {
 	int *remove;
 	int disabled;
 	cpBody *body;
+	object_component_pointers components;
 };
+
 
 //TODO? move all object_param_* and object_group_* typedefs in here? (to avoid circular dependencies)
 /* object parameters */

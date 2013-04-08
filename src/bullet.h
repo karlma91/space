@@ -18,7 +18,7 @@ struct bullet{
 	/*Bullet*/
 	cpShape *shape;
 	int bullet_type;
-	cpFloat damage;
+	float damage;
 	cpFloat speed;
 	Color color;
 };

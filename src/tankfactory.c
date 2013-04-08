@@ -23,7 +23,6 @@ static void init(object_group_tankfactory *);
 static void update(object_group_tankfactory *);
 static void render(object_group_tankfactory *);
 static void destroy(object_group_tankfactory *);
-static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 static void remove_factory_from_tank(object_group_tank *);
 
 object_group_preset type_tank_factory =
@@ -38,6 +37,8 @@ object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tank
 	object_group_tankfactory *factory = malloc(sizeof(*factory));
 	factory->data.alive = 1;
 	factory->data.preset = &type_tank_factory;
+	factory->data.components.hp_bar = &(factory->hp_bar);
+	factory->data.components.score = &(param->score);
 	factory->param = param;
 
 	factory->cur = 0;
@@ -61,8 +62,6 @@ object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tank
 	cpShapeSetLayers(factory->shape, LAYER_TANK_FACTORY);
 
 	cpShapeSetCollisionType(factory->shape, ID_TANK_FACTORY);
-	cpSpaceAddCollisionHandler(space, ID_TANK_FACTORY, ID_BULLET_PLAYER,
-			collision_player_bullet, NULL, NULL, NULL, NULL );
 
 	cpBodySetUserData(factory->data.body, factory);
 	objects_add((object_data *) factory);
@@ -107,30 +106,6 @@ static void render(object_group_tankfactory *factory) {
 
 	draw_texture(TEX_WHEEL, &(factory->data.body->p), TEX_MAP_FULL, 150, 150, rot);
 	draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200, 200, 0);
-}
-
-static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused) {
-	cpShape *a, *b;
-	cpArbiterGetShapes(arb, &a, &b);
-
-	object_group_tankfactory *factory = (object_group_tankfactory *) a->body->data;
-
-	struct bullet *bt = ((struct bullet*) (b->body->data));
-
-	bt->data.alive = 0;
-
-	se_add_explotion_at_contact_point(arb);
-
-	factory->hp_bar.value -= bt->damage;
-	if (factory->hp_bar.value <= 0) {
-
-		if (factory->data.alive) {
-			particles_get_emitter_at(EMITTER_EXPLOSION, a->body->p);
-			se_add_score_and_popup(b->body->p, factory->param->score);
-		}
-		factory->data.alive = 0;
-	}
-	return 0;
 }
 
 //FIXME Somewhat slow temporary fix, as objects_iterate_type does not support extra arguments!

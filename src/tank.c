@@ -22,13 +22,13 @@
 #include "player.h"
 #include "bullet.h"
 #include "spaceengine.h"
+#include "collisioncallbacks.h"
 
 /* static prototypes */
 static void init(object_group_tank *);
 static void update(object_group_tank *);
 static void render(object_group_tank *);
 static void destroy(object_group_tank *);
-static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 static cpBody *addChassis(cpSpace *space, object_group_tank *tank, cpVect pos, cpVect boxOffset);
 static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset);
 
@@ -49,6 +49,8 @@ object_group_tank *object_create_tank(float xpos,object_group_tankfactory *facto
 	//TODO use pointer value as group id
 	object_group_tank *tank = malloc(sizeof(*tank));
 	tank->data.preset = &type_tank;
+	tank->data.components.hp_bar = &(tank->hp_bar);
+	tank->data.components.score = &(param->score);
 	tank->data.alive = 1;
 	tank->param = param;
 
@@ -61,8 +63,8 @@ object_group_tank *object_create_tank(float xpos,object_group_tankfactory *facto
 		height = factory->data.body->p.y;
 	}
 
-	tank->rot_speed = 0.01;
-	tank->angle = 0;
+	tank->rot_speed = M_PI/2;
+	tank->barrel_angle = 0;
 
 
 	// Make a car with some nice soft suspension
@@ -76,7 +78,6 @@ object_group_tank *object_create_tank(float xpos,object_group_tankfactory *facto
 	tank->debug_right_dist = -1;
 
 	cpShapeSetCollisionType(tank->shape, ID_TANK);
-	cpSpaceAddCollisionHandler(space, ID_TANK, ID_BULLET_PLAYER, collision_player_bullet, NULL, NULL, NULL, NULL);
 
 	tank->wheel1 = addWheel(space, posA, boxOffset);
 	tank->wheel2 = addWheel(space, posB, boxOffset);
@@ -113,28 +114,29 @@ static void update(object_group_tank *tank)
 	/* gets the player from the list */
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 
-	//TODO fix best_angle
-	cpFloat player_angle = se_get_best_shoot_angle(tank->data.body, player->data.body, 3000);
+	cpFloat best_angle = se_get_best_shoot_angle(tank->data.body, player->data.body, 3000);
 
-	//TODO bruke generell vinkel metode som u player.c!
-
-	/*TODO: stop shaking when at correct angle */
-		/* som i matlab */
-		tank->angle += ((player_angle > tank->angle)*2 - 1) * tank->rot_speed;
-
-	//TODO FIXME !! Constrain aim angle within a range of 180 degrees !!
-	{
-		if (tank->angle > M_PI) //TODO use relative angle between tank and aim angle
-			tank->angle = M_PI;
+	best_angle = best_angle - cpvtoangle(tank->data.body->rot);
+	if(best_angle < 0){
+		best_angle += 2*M_PI;
+	}else if(best_angle>2*M_PI){
+		best_angle -= 2*M_PI;
 	}
-	fprintf(stderr,"print_angle: %f\n",tank->angle);
+	tank->barrel_angle=turn_toangle(tank->barrel_angle, best_angle, tank->rot_speed * dt);
 
+
+	if(tank->barrel_angle > M_PI && tank->barrel_angle < 3*(M_PI/2)){
+		tank->barrel_angle = M_PI;
+	}else if(tank->barrel_angle<0 || tank->barrel_angle > 3*(M_PI/2)){
+		tank->barrel_angle = 0;
+	}
 
 	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX)){
-		cpVect t = cpvforangle(tank->angle );
-		object_create_bullet(tank->data.body->p,t,tank->data.body->v,ID_BULLET_ENEMY);
+		cpVect shoot_angle = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
+		object_create_bullet(tank->data.body->p,shoot_angle ,tank->data.body->v,ID_BULLET_ENEMY);
 		tank->timer = 0;
 	}
+
 
 	cpFloat tx = tank->data.body->p.x;
 	cpFloat px = player->data.body->p.x;
@@ -242,48 +244,21 @@ static void render(object_group_tank *tank)
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	GLfloat dir = cpBodyGetAngle(tank->data.body)*(180/M_PI);
+	GLfloat dir = cpBodyGetAngle(tank->data.body);
 	GLfloat rot = cpBodyGetAngle(tank->wheel1)*(180/M_PI);
 
-	cpVect r = cpvadd(tank->data.body->p, cpvmult(cpvforangle(tank->angle),80));
+	cpVect r = cpvadd(tank->data.body->p, cpvmult(cpvforangle(tank->barrel_angle + dir),80));
 	draw_line(tank->data.body->p.x,tank->data.body->p.y,r.x,r.y, 30);
 
 	hpbar_draw(&tank->hp_bar);
 
 	int texture = tank->param->tex_id;
 
-	draw_texture(texture, &(tank->data.body->p), &tex_map[0],200, 100, dir);
+	draw_texture(texture, &(tank->data.body->p), &tex_map[0],200, 100, dir*(180/M_PI));
 	draw_texture(texture, &tank->wheel1->p, &tex_map[1],100, 100, rot);
 	draw_texture(texture, &tank->wheel2->p, &tex_map[1],100, 100, rot);
 
 	glPopAttrib();
-}
-
-static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
-{
-	cpShape *a, *b;
-	cpArbiterGetShapes(arb, &a, &b);
-	object_group_tank *tank = ((object_group_tank *)(a->body->data));
-
-	struct bullet *bt = ((struct bullet*)(b->body->data));
-
-	bt->data.alive = 0;
-
-	se_add_explotion_at_contact_point(arb);
-
-	//TODO create a function for damaging other objects
-	tank->hp_bar.value -= bt->damage;
-
-	if (tank->hp_bar.value <= 0) {
-		if (tank->data.alive) {
-			particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
-			se_add_score_and_popup(b->body->p, tank->param->score);
-		}
-		//cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
-		tank->data.alive = 0;
-	}
-
-	return 0;
 }
 
 

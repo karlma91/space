@@ -30,9 +30,6 @@ static void player_render(object_group_player *);
 static void player_update(object_group_player *);
 static void player_destroy(object_group_player *);
 
-static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused);
-static void collision_ground(cpArbiter *arb, cpSpace *space, void *unused);
-static void collision_factory(cpArbiter *arb, cpSpace *space, void *unused);
 
 static void player_controls(object_group_player *);
 
@@ -72,6 +69,8 @@ object_group_player *object_create_player()
 	player->param = &default_player;
 	player->param->tex_id = TEX_PLAYER;
 
+	player->data.components.hp_bar = &player->hp_bar;
+
 	player->gun_level = 1;
 	player->lives = 3;
 	player->score = 0;
@@ -91,9 +90,6 @@ object_group_player *object_create_player()
 
 	cpShapeSetLayers(player->shape, LAYER_PLAYER);
 	cpShapeSetCollisionType(player->shape, ID_PLAYER);
-	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_BULLET_ENEMY, collision_enemy_bullet, NULL, NULL, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_GROUND, NULL, NULL, collision_ground, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_TANK_FACTORY, NULL, NULL, collision_factory, NULL, NULL);
 
 	cpBodySetUserData(player->data.body, (void*)player);
 	objects_add((object_data*)player);
@@ -195,39 +191,7 @@ static void player_controls(object_group_player *player)
 	}
 }
 
-//TODO add preferred angle to handle situations with two possible solutions
-//TODO move this method to objects.c?
-static float turn_toangle(float from_angle, float to_angle, float step_size)
-{
-	from_angle += from_angle >= (2*M_PI) ? -(2*M_PI) : from_angle < 0 ? (2*M_PI) : 0;
 
-	if (to_angle < from_angle - step_size) {
-		if ((from_angle - to_angle) < M_PI) {
-			from_angle -= step_size;
-		} else {
-			if (2*M_PI - (from_angle - to_angle) < step_size) {
-				from_angle = to_angle;
-			} else {
-				from_angle += step_size;
-			}
-		}
-	} else if (to_angle > from_angle + step_size) {
-		if ((to_angle - from_angle) < M_PI) {
-			from_angle += step_size;
-		} else {
-			if (2*M_PI - (to_angle - from_angle) < step_size) {
-				from_angle = to_angle;
-			} else {
-				from_angle -= step_size;
-			}
-		}
-	} else {
-		from_angle = to_angle;
-	}
-
-	//fprintf(stderr,"angle: %0.4f\n",from_angle*180/M_PI);
-	return from_angle;
-}
 
 typedef enum {
 	DIR_E, DIR_NE, DIR_N, DIR_NW, DIR_W, DIR_SW, DIR_S, DIR_SE, DIR_NONE = -1
@@ -290,74 +254,7 @@ static void arcade_control(object_group_player *player)
 	}
 }
 
-static void collision_ground(cpArbiter *arb, cpSpace *space, void *unused)
-{
-	cpShape *a, *b;
-	cpArbiterGetShapes(arb, &a, &b);
-	object_group_player *player  = ((object_group_player *)(a->body->data));
 
-	if (player)  {
-		if (player->data.preset->ID == ID_PLAYER) {
-			cpVect force = cpArbiterTotalImpulse(arb);
-			float f = cpvlength(force);
-
-			//todo create a super fancy formula for determining physical damagae
-			if (f > 20)
-				player->hp_bar.value -= f * 0.05;
-
-			cpVect v = cpArbiterGetPoint(arb, 0);
-			cpVect n = cpArbiterGetNormal(arb, 0);
-			float angle = cpvtoangle(n);
-			fprintf(stderr,"%f\n",f);
-			particles_add_sparks(v,angle,f);
-		} else {
-			fprintf(stderr, "Expected object type ID %d, but got %d!\n", ID_PLAYER, player->data.preset->ID);
-		}
-	} else {
-		fprintf(stderr, "Expected object from collision between player and ground, but got NULL\n");
-	}
-
-	//return 1;
-}
-
-static void collision_factory(cpArbiter *arb, cpSpace *space, void *unused)
-{
-	cpShape *a, *b;
-	cpArbiterGetShapes(arb, &a, &b);
-	object_group_player *player  = ((object_group_player *)(a->body->data));
-
-	cpVect force = cpArbiterTotalImpulse(arb);
-	float f = cpvlength(force);
-
-	//todo create a super fancy formula for determining physical damagae
-	if (f > 20)
-		player->hp_bar.value -= f * 0.05;
-
-	particles_get_emitter_at(EMITTER_SPARKS, player->data.body->p);
-
-	//return 1;
-}
-
-static int collision_enemy_bullet(cpArbiter *arb, cpSpace *space, void *unused)
-{
-	cpShape *a, *b;
-
-	cpArbiterGetShapes(arb, &a, &b);
-	object_group_player *player  = ((object_group_player *)(a->body->data));
-
-	struct bullet *bt = ((struct bullet*)(b->body->data));
-
-	bt->data.alive = 0;
-
-	//particles_add_explosion(b->body->p,0.3,1500,15,200);
-	if(player->hp_bar.value <= 0 ){
-		particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
-		player->lives--;
-	}else{
-		player->hp_bar.value -= 10;
-	}
-	return 0;
-}
 
 static void action_shoot(object_group_player *player)
 {

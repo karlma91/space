@@ -20,7 +20,7 @@ typedef struct {
 	/* tank */
 	cpShape *shape;
 	float timer;
-	float angle;
+	float barrel_angle;
 	float rot_speed;
 	hpbar hp_bar;
 	object_group_tankfactory *factory;

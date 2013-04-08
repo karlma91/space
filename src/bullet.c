@@ -8,7 +8,6 @@ static void update(object_data *obj);
 static void render(object_data *obj);
 static void destroy(object_data *obj);
 
-static void callback_ground(cpArbiter *arb, cpSpace *space, void *unused);
 static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 
 object_group_preset type_bullet_player= {
@@ -33,6 +32,7 @@ object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int 
 	struct bullet *temp = malloc(sizeof(struct bullet));
 
 		temp->data.alive = 1;
+		temp->data.components.damage = &(temp->damage);
 
 		cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
 
@@ -46,7 +46,6 @@ object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int 
 
 		// Sets bullets collision type
 		cpShapeSetCollisionType(temp->shape, type);
-		cpSpaceAddCollisionHandler(space, ID_GROUND, type, NULL, NULL, callback_ground, NULL, NULL);
 		cpShapeSetGroup(temp->shape,10);
 
 		if(type == ID_BULLET_PLAYER){
@@ -100,23 +99,6 @@ static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cp
 	cpVect g = cpv(0,-100);
 
 	cpBodyUpdateVelocity(body, g, damping, dt);
-}
-
-// from chipmunk docs
-static void callback_ground(cpArbiter *arb, cpSpace *space, void *unused)
-{
-	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
-	struct bullet *temp = (struct bullet*)b->body->data;
-	if(cpArbiterGetCount(arb) >0){
-		cpVect v = cpArbiterGetPoint(arb, 0);
-		cpVect n = cpArbiterGetNormal(arb, 0);
-		n=cpvneg(n);
-		float angle = cpvtoangle(n);
-		cpVect force = cpArbiterTotalImpulseWithFriction(arb);
-		float f = cpvlength(force);
-		particles_add_sparks(v,angle,f);
-	}
-	temp->data.alive = 0;
 }
 
 static void destroy(object_data *bullet)

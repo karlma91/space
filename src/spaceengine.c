@@ -26,6 +26,19 @@ void se_add_score_and_popup(cpVect p, int score)
 }
 
 /**
+ * return 1 if object is killed
+ */
+int se_damage_object(object_data *object, float damage)
+{
+	object->components.hp_bar->value -= damage;
+	if (object->components.hp_bar->value <= 0) {
+		object->alive = 0;
+		return 1;
+	}
+	return 0;
+}
+
+/**
  * returns the best angle to shoot at a moving object obj2 from obj1
  */
 cpFloat se_get_best_shoot_angle(cpBody *a, cpBody *b, cpFloat bullet_speed)
@@ -47,19 +60,10 @@ cpFloat se_get_best_shoot_angle(cpBody *a, cpBody *b, cpFloat bullet_speed)
 	return angle;
 }
 
-cpFloat get_angle(cpBody *a, cpBody *b)
+cpFloat get_angle(cpVect a, cpVect b)
 {
-	cpVect v = cpvsub(a->p, b->p);
-	cpFloat bc = cpvtoangle(v);
+	cpFloat bc = cpvtoangle(cpvsub(a,b));
 	return bc;
-}
-
-void se_add_explotion_at_contact_point(cpArbiter *arb)
-{
-	if(cpArbiterGetCount(arb) >0){
-		cpVect v = cpArbiterGetPoint(arb, 0);
-		particles_get_emitter_at(EMITTER_EXPLOSION, v);
-	}
 }
 
 
@@ -68,5 +72,39 @@ static void add_shape(cpShape *shape, cpFloat friction, cpFloat elasticity)
 	cpSpaceAddShape(space, shape);
 	cpShapeSetFriction(shape, friction);
 	cpShapeSetElasticity(shape, elasticity);
+}
+
+//TODO add preferred angle to handle situations with two possible solutions
+//TODO move this method to objects.c?
+float turn_toangle(float from_angle, float to_angle, float step_size)
+{
+	from_angle += from_angle >= (2*M_PI) ? -(2*M_PI) : from_angle < 0 ? (2*M_PI) : 0;
+
+	if (to_angle < from_angle - step_size) {
+		if ((from_angle - to_angle) < M_PI) {
+			from_angle -= step_size;
+		} else {
+			if (2*M_PI - (from_angle - to_angle) < step_size) {
+				from_angle = to_angle;
+			} else {
+				from_angle += step_size;
+			}
+		}
+	} else if (to_angle > from_angle + step_size) {
+		if ((to_angle - from_angle) < M_PI) {
+			from_angle += step_size;
+		} else {
+			if (2*M_PI - (to_angle - from_angle) < step_size) {
+				from_angle = to_angle;
+			} else {
+				from_angle -= step_size;
+			}
+		}
+	} else {
+		from_angle = to_angle;
+	}
+
+	//fprintf(stderr,"angle: %0.4f\n",from_angle*180/M_PI);
+	return from_angle;
 }
 
