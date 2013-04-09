@@ -36,6 +36,7 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 
 	//TODO create a function for damaging other objects
 	if (se_damage_object(object, *(bullet->components.damage))) {
+		object->alive = 0;
 		particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 		se_add_score_and_popup(b->body->p, *(object->components.score));
 	}

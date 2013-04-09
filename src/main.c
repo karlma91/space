@@ -32,8 +32,10 @@
 #include "gameover.h"
 #include "levelselect.h"
 
+#define FPS_SLEEP_TIME 16
 static float fps;
 static float frames;
+
 
 /* definition of external variables */
 char fps_buf[15];
@@ -296,8 +298,11 @@ static int main_run()
 			 SDL_Delay(14);
 		else if (keys[SDLK_c])
 			SDL_Delay(50);
-		else
-			SDL_Delay(SLEEP_TIME);
+
+		Uint32 sleep_delta = SDL_GetTicks() - thisTime;
+		if(  sleep_delta < FPS_SLEEP_TIME ) {
+			SDL_Delay( ( FPS_SLEEP_TIME ) - sleep_delta );
+		}
 	}
 	return 0;
 }
