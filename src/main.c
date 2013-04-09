@@ -299,9 +299,16 @@ static int main_run()
 		else if (keys[SDLK_c])
 			SDL_Delay(50);
 
+		static int FPS_EXTRA_SLEEP = 0;
+		if (FPS_EXTRA_SLEEP >= 2)
+			FPS_EXTRA_SLEEP = 0;
+		else
+			++FPS_EXTRA_SLEEP;
+
+
 		Uint32 sleep_delta = SDL_GetTicks() - thisTime;
 		if(  sleep_delta < FPS_SLEEP_TIME ) {
-			SDL_Delay( ( FPS_SLEEP_TIME ) - sleep_delta );
+			SDL_Delay( ( FPS_SLEEP_TIME ) - sleep_delta + (FPS_EXTRA_SLEEP != 0));
 		}
 	}
 	return 0;
