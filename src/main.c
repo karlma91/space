@@ -279,6 +279,7 @@ static int main_run()
 			    main_stop();
 				break;
 			case SDL_VIDEORESIZE:
+				if (config.fullscreen) break;
 				W = event.resize.w;
 				H = event.resize.h;
 				if (!(screen = SDL_SetVideoMode(W, H, 32, (SDL_OPENGL| SDL_DOUBLEBUF | SDL_RESIZABLE) | (SDL_FULLSCREEN * config.fullscreen))))
