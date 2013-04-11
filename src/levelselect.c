@@ -76,27 +76,27 @@ static void update()
 		ships[i].rotation += 360*ships[i].rotation_speed*dt;
 	}
 
-	if (keys[SDLK_ESCAPE]){
+	if (keys[SDL_SCANCODE_ESCAPE]){
 	    statesystem_set_state(STATESYSTEM_MENU);
-		keys[SDLK_ESCAPE] = 0;
+		keys[SDL_SCANCODE_ESCAPE] = 0;
 		}
 
 	if(overview){
 		float speed = 400;
-		if (keys[SDLK_UP]){
+		if (keys[SDL_SCANCODE_UP]){
 			//camera_y += speed*dt;
 			sel+=1;
-			keys[SDLK_UP] = 0;
+			keys[SDL_SCANCODE_UP] = 0;
 		}
-		if (keys[SDLK_DOWN]){
+		if (keys[SDL_SCANCODE_DOWN]){
 			//camera_y -= speed*dt;
 			sel-=1;
-			keys[SDLK_DOWN] = 0;
+			keys[SDL_SCANCODE_DOWN] = 0;
 		}
-		if (keys[SDLK_LEFT]){
+		if (keys[SDL_SCANCODE_LEFT]){
 			camera_x += speed*dt;
 		}
-		if (keys[SDLK_RIGHT]){
+		if (keys[SDL_SCANCODE_RIGHT]){
 			camera_x -= speed*dt;
 		}
 
@@ -105,34 +105,34 @@ static void update()
 		float temp_z =  (camera_zoom - 0.1)*5;
 		camera_zoom -= temp_z*dt;
 
-		if (keys[SDLK_RETURN]){
+		if (keys[SDL_SCANCODE_RETURN]){
 			overview = 0;
 			zoomed_temp_y = ((1.0f * HEIGHT)/(camera_zoom*2));
-			keys[SDLK_RETURN] = 0;
+			keys[SDL_SCANCODE_RETURN] = 0;
 		}
 
 	}else{
-		if (keys[SDLK_w] || keys[SDLK_UP]){
+		if (keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_UP]){
 			level_select--;
-			keys[SDLK_w] = 0, keys[SDLK_UP] = 0;
+			keys[SDL_SCANCODE_W] = 0, keys[SDL_SCANCODE_UP] = 0;
 		}
-		if (keys[SDLK_s] || keys[SDLK_DOWN]){
+		if (keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_DOWN]){
 			level_select++;
-			keys[SDLK_s] = 0, keys[SDLK_DOWN] = 0;
+			keys[SDL_SCANCODE_S] = 0, keys[SDL_SCANCODE_DOWN] = 0;
 		}
 
 		level_select = (level_select < 0) ? ships[sel].count - 1 : (level_select >= ships[sel].count ? 0 : level_select);;
 
-		if (keys[SDLK_SPACE] || keys[SDLK_RETURN]) {
+		if (keys[SDL_SCANCODE_SPACE] || keys[SDL_SCANCODE_RETURN]) {
 		    statesystem_set_state(STATESYSTEM_SPACE);
 			/* load correct level */
 			space_init_level(sel+1,level_select+1);
-			keys[SDLK_SPACE] = 0, keys[SDLK_RETURN] = 0;
+			keys[SDL_SCANCODE_SPACE] = 0, keys[SDL_SCANCODE_RETURN] = 0;
 		}
-		if(keys[SDLK_BACKSPACE]){
+		if(keys[SDL_SCANCODE_BACKSPACE]){
 			overview = 1;
 			level_select = 0;
-			keys[SDLK_BACKSPACE]=0;
+			keys[SDL_SCANCODE_BACKSPACE]=0;
 		}
 
 		camera_zoom = ((1.0f * HEIGHT)/(zoomed_temp_y*2));

@@ -127,7 +127,7 @@ static void player_render(object_group_player *player)
 
 static void player_update(object_group_player *player)
 {
-	if (keys[SDLK_i])
+	if (keys[SDL_SCANCODE_I])
 		player->hp_bar.value = 1000000;
 
 	player->gun_timer += dt;
@@ -158,36 +158,36 @@ static void player_controls(object_group_player *player)
 {
 	arcade_control(player);
 
-	if(keys[SDLK_g]){
-		keys[SDLK_g] = 0;
+	if(keys[SDL_SCANCODE_G]){
+		keys[SDL_SCANCODE_G] = 0;
 		cpVect gravity = cpv(0, -2);
 		cpSpaceSetGravity(space, gravity);
 	}
 
-	if (keys[SDLK_q]){
+	if (keys[SDL_SCANCODE_Q]){
 		cam_zoom /= dt+1.4f;
 	}
 
-	if (keys[SDLK_e]){
+	if (keys[SDL_SCANCODE_E]){
 		cam_zoom *= dt+1.4f;
-		if (keys[SDLK_q])
+		if (keys[SDL_SCANCODE_Q])
 			cam_zoom = 1;
 	}
-	if (keys[SDLK_r]){
+	if (keys[SDL_SCANCODE_E]){
 		player->data.body->p.x=0;
 		player->data.body->p.y=500;
 	}
 
-	if (keys[SDLK_h]) {
+	if (keys[SDL_SCANCODE_H]) {
 		cpBodySetVelLimit(player->data.body,5000);
 	}
 
-	if (keys[SDLK_x]) {
+	if (keys[SDL_SCANCODE_X]) {
 		particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
 	}
-	if (keys[SDLK_b]) {
+	if (keys[SDL_SCANCODE_B]) {
 		particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
-		keys[SDLK_b] = 0;
+		keys[SDL_SCANCODE_B] = 0;
 	}
 }
 
@@ -222,7 +222,7 @@ static void arcade_control(object_group_player *player)
 	float dir_step;
 	Direction angle_index = -1;
 
-	angle_index = angle_index_fromkeys(SDLK_a, SDLK_w, SDLK_d, SDLK_s);
+	angle_index = angle_index_fromkeys(SDL_SCANCODE_A, SDL_SCANCODE_W, SDL_SCANCODE_D, SDL_SCANCODE_D);
 
 	cpFloat speed = 700;
 
@@ -244,7 +244,7 @@ static void arcade_control(object_group_player *player)
 	//static float aim_angle = 0;
 	float aim_angle_target = 0;
 
-	angle_index = angle_index_fromkeys(SDLK_LEFT, SDLK_UP, SDLK_RIGHT, SDLK_DOWN);
+	angle_index = angle_index_fromkeys(SDL_SCANCODE_LEFT, SDL_SCANCODE_UP, SDL_SCANCODE_RIGHT, SDL_SCANCODE_DOWN);
 
 	if (angle_index != DIR_NONE) {
 		aim_angle_target = dir8[angle_index];

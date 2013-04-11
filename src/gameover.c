@@ -64,9 +64,9 @@ static int win = 0; //TMP solution for win screens
 
 static void update() {
 /*{ //DEBUG CODE
-	if (keys[SDLK_RETURN]) {
+	if (keys[SDL_SCANCODE_RETURN]) {
 		gameover_state = (1+gameover_state)%3;
-		keys[SDLK_RETURN] = 0;
+		keys[SDL_SCANCODE_RETURN] = 0;
 		return;
 	}
 */
@@ -79,14 +79,14 @@ static void update() {
 		win = 1;
 		/* no break */
 	case enter_name:
-		if (keys[SDLK_DOWN]) {
+		if (keys[SDL_SCANCODE_DOWN]) {
 			if (key_dt<=0) {
 				key_dt = key_ddt;
 				key_ddt = key_ddt_min;
 
 				if (++valid_index[cursor] >= char_count) valid_index[cursor] -= char_count;
 			}
-		} else if (keys[SDLK_UP]) {
+		} else if (keys[SDL_SCANCODE_UP]) {
 			if (key_dt<=0) {
 				key_dt = key_ddt;
 				key_ddt = key_ddt_min;
@@ -99,38 +99,38 @@ static void update() {
 		}
 		key_dt -= dt;
 
-		if (keys[SDLK_RIGHT] || keys[SDLK_RETURN]) {
+		if (keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_RETURN]) {
 			if (++cursor >= MAX_NAME_LENGTH) {
 				cursor = 0;
 				gameover_state = confirm_name;
 				win = 0;
 			}
-			keys[SDLK_RIGHT] = 0;
-			keys[SDLK_RETURN] = 0;
-		} else if (keys[SDLK_LEFT] || keys[SDLK_ESCAPE]) {
+			keys[SDL_SCANCODE_RIGHT] = 0;
+			keys[SDL_SCANCODE_RETURN] = 0;
+		} else if (keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_ESCAPE]) {
 			if (cursor > 0) --cursor;
-			keys[SDLK_LEFT] = 0;
-			keys[SDLK_ESCAPE] = 0;
+			keys[SDL_SCANCODE_LEFT] = 0;
+			keys[SDL_SCANCODE_ESCAPE] = 0;
 		}
 
 		input[cursor] = valid_char[valid_index[cursor]];
 		break;
 	case confirm_name:
-		if (keys[SDLK_LEFT]) {
+		if (keys[SDL_SCANCODE_LEFT]) {
 			gameover_state = enter_name;
-			keys[SDLK_LEFT] = 0;
-		} else if (keys[SDLK_RIGHT]) {
+			keys[SDL_SCANCODE_LEFT] = 0;
+		} else if (keys[SDL_SCANCODE_RIGHT]) {
 			/* add score */
 			gameover_state = show_highscore;
 			highscorelist_addscore(list,&input[0],getPlayerScore());
 		}
 		break;
 	case show_highscore:
-		if (keys[SDLK_ESCAPE] || keys[SDLK_RETURN]) {
+		if (keys[SDL_SCANCODE_ESCAPE] || keys[SDL_SCANCODE_RETURN]) {
 		    menu_change_current_menu(MENU_MAIN);
 		    statesystem_set_state(STATESYSTEM_MENU);
-			keys[SDLK_ESCAPE] = 0;
-			keys[SDLK_RETURN] = 0;
+			keys[SDL_SCANCODE_ESCAPE] = 0;
+			keys[SDL_SCANCODE_RETURN] = 0;
 		}
 		break;
 	}

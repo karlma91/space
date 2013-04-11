@@ -8,7 +8,7 @@
 /**
  * texture values (GLOBAL)
  */
-int *textures;
+GLuint *textures;
 
 static const texture_map TEX_MAP_FULL_ = {0,0,1,1};
 const texture_map *TEX_MAP_FULL = &TEX_MAP_FULL_;
@@ -38,41 +38,74 @@ int texture_load(char *file)
 	char filepath[100];
 	sprintf(filepath,"textures/%s",file);
 
-	SDL_Surface* Surf_Temp = NULL;
-	SDL_Surface* Surf_Return = NULL;
+	SDL_Surface* img = NULL;
+	SDL_Surface* img_rgba = NULL;
 
-	if((Surf_Temp = IMG_Load(filepath)) == NULL) {
+	if((img = IMG_Load(filepath)) == NULL) {
 		fprintf(stderr,"Unable to load texture: %s\n", filepath);
 		return -1;
 	}
 
-	tex_counter++;
+	++tex_counter;
 	names = realloc(names,(sizeof(char[tex_counter+1][51])));
 	strcpy(names[tex_counter],file);
 	textures = realloc(textures,sizeof(int[(tex_counter + 1)]));
 
+	{
+		/* OpenGL pixel format for destination surface. */
+		int bpp;
+		Uint32 Rmask, Gmask, Bmask, Amask;
+		SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_ABGR8888, &bpp, &Rmask,
+				&Gmask, &Bmask, &Amask);
 
-	//Surf_Return = SDL_DisplayFormatAlpha(Surf_Temp);  //FIXME SDL2 port break
+		/* Create surface that will hold pixels passed into OpenGL. */
+		SDL_Surface *img_rgba8888 = SDL_CreateRGBSurface(0, img->w, img->h, bpp,
+				Rmask, Gmask, Bmask, Amask);
+
+		/*
+		 * Disable blending for source surface. If this is not done, all
+		 * destination surface pixels end up with crazy alpha values.
+		 */
+		SDL_SetSurfaceAlphaMod(img, 0xFF);
+		SDL_SetSurfaceBlendMode(img, SDL_BLENDMODE_NONE);
+
+		/* Blit to this surface, effectively converting the format. */
+		SDL_BlitSurface(img, NULL, img_rgba8888, NULL);
+	} //ref -> http://sdl.5483.n7.nabble.com/SDL-2-0-Surface-to-OpenGL-Texture-td22971.html
+
+
+
+	img_rgba = SDL_ConvertSurfaceFormat(img,SDL_PIXELFORMAT_RGBA8888,0);
 
 	unsigned int Tex = 0;
 
 	/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
 	glGenTextures(1, &Tex);
+	fprintf(stderr,"LINE: %d  GL_ERROR: %d\n",__LINE__,glGetError()); //TODO REMOVE
+
 	glBindTexture(GL_TEXTURE_2D, Tex);
+	fprintf(stderr,"LINE: %d  GL_ERROR: %d\n",__LINE__,glGetError()); //TODO REMOVE
 
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,  GL_GENERATE_MIPMAP, GL_TRUE);
 /*
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Surf_Return->w, Surf_Return->h, 0, GL_BGRA,
-			GL_UNSIGNED_BYTE, Surf_Return->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img_rgba->w, Surf_Return->h, 0, GL_BGRA,
+			GL_UNSIGNED_BYTE, img_rgba->pixels);
 */
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Surf_Return->w, Surf_Return->h, 0, GL_BGRA,
-			GL_ENUM_TYPE, Surf_Return->pixels);
+
+	fprintf(stderr,"LINE: %d  GL_ERROR: %d\n",__LINE__,glGetError()); //TODO REMOVE
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img_rgba->w, img_rgba->h, 0,
+			GL_RGBA, GL_ENUM_TYPE, img_rgba->pixels);
+	fprintf(stderr,"LINE: %d  GL_ERROR: %d\n",__LINE__,glGetError()); //TODO REMOVE
 
 	textures[tex_counter] = Tex;
 
-	SDL_FreeSurface(Surf_Temp);
-	SDL_FreeSurface(Surf_Return);
+	SDL_FreeSurface(img);
+	SDL_FreeSurface(img_rgba);
 
 	fprintf(stderr,"loaded texture: %s\n", file);
 	return tex_counter;

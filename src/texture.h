@@ -10,7 +10,7 @@ typedef struct texture_map {
 	float by;
 } texture_map;
 
-extern int *textures;
+extern GLuint *textures;
 extern int texture_load(char *file);
 
 extern int texture_init(GLenum type);

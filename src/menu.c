@@ -94,27 +94,27 @@ void menu_change_current_menu(int menu)
 
 static void update()
 {
-	if (keys[SDLK_w] || keys[SDLK_UP]){
+	if (keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_UP]){
 		select_id--;
 		select_id = (select_id < 0) ? curMenu->num_items-1 : select_id;
-		keys[SDLK_w] = 0, keys[SDLK_UP] = 0;
+		keys[SDL_SCANCODE_W] = 0, keys[SDL_SCANCODE_UP] = 0;
 	}
 
-	if (keys[SDLK_s] || keys[SDLK_DOWN]){
+	if (keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_DOWN]){
 		select_id++;
 		select_id = select_id >= curMenu->num_items ? 0 : select_id;
-		keys[SDLK_s] = 0, keys[SDLK_DOWN] = 0;
+		keys[SDL_SCANCODE_S] = 0, keys[SDL_SCANCODE_DOWN] = 0;
 	}
 
-	if (keys[SDLK_SPACE] || keys[SDLK_RETURN]) {
+	if (keys[SDL_SCANCODE_SPACE] || keys[SDL_SCANCODE_RETURN]) {
 		curMenu->func();
-		keys[SDLK_SPACE] = 0, keys[SDLK_RETURN] = 0;
+		keys[SDL_SCANCODE_SPACE] = 0, keys[SDL_SCANCODE_RETURN] = 0;
 	}
 
-	if(keys[SDLK_ESCAPE]){
+	if(keys[SDL_SCANCODE_ESCAPE]){
 		select_id = curMenu->escape_item;
 		curMenu->func();
-		keys[SDLK_ESCAPE] = 0;
+		keys[SDL_SCANCODE_ESCAPE] = 0;
 	}
 }
 

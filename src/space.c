@@ -159,8 +159,8 @@ int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead()
 {
 	update_all();
-	if(keys[SDLK_RETURN]){//state_timer > 3){
-		keys[SDLK_RETURN] = 0;
+	if(keys[SDL_SCANCODE_RETURN]){//state_timer > 3){
+		keys[SDL_SCANCODE_RETURN] = 0;
 		lvl_cleared=0;
 		statesystem_set_state(STATESYSTEM_GAMEOVER);
 		gameover_setstate(enter_name);
@@ -229,33 +229,33 @@ static void pre_update()
 	/*
 	 * Camera modes
 	 */
-	if(keys[SDLK_F1]){
+	if(keys[SDL_SCANCODE_F1]){
 		cam_mode = 1;
-	}else if(keys[SDLK_F2]){
+	}else if(keys[SDL_SCANCODE_F2]){
 		cam_mode = 2;
-	}else if(keys[SDLK_F3]){
+	}else if(keys[SDL_SCANCODE_F3]){
 		cam_mode = 3;
-	}else if(keys[SDLK_F4]){
+	}else if(keys[SDL_SCANCODE_F4]){
 		cam_mode = 4;
-	}else if(keys[SDLK_F5]){
+	}else if(keys[SDL_SCANCODE_F5]){
 		cam_mode = 5;
-	}else if(keys[SDLK_F6]){
+	}else if(keys[SDL_SCANCODE_F6]){
 		cam_mode = 6;
-	}else if(keys[SDLK_F11]){
+	}else if(keys[SDL_SCANCODE_F11]){
 		game_time = currentlvl->timelimit;
 		return;
-	}else if(keys[SDLK_F8]){
+	}else if(keys[SDL_SCANCODE_F8]){
 		particles_reload_particles();
-		keys[SDLK_F8] = 0;
+		keys[SDL_SCANCODE_F8] = 0;
 	}
 
 	/*
 	 * Opens the pause menu
 	 */
-	if(keys[SDLK_ESCAPE] && gamestate == LEVEL_RUNNING){
+	if(keys[SDL_SCANCODE_ESCAPE] && gamestate == LEVEL_RUNNING){
 	    menu_change_current_menu(MENU_INGAME);
 		statesystem_push_state(STATESYSTEM_MENU);
-		keys[SDLK_ESCAPE] = 0;
+		keys[SDL_SCANCODE_ESCAPE] = 0;
 	}
 
 	/* runs the current state */
@@ -361,8 +361,6 @@ static void render()
 		SPACE_draw();
 	}
 	second_draw = 0;
-
-
 }
 
 static void update_camera_zoom(int cam_mode)

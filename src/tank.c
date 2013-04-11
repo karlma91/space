@@ -163,10 +163,10 @@ static void update(object_group_tank *tank)
 	tank->debug_right_dist = right ? right_dist : -1;
 
 	//TMP DEBUG OVERSTYRING AV TANK
-	if (keys[SDLK_LCTRL]) {
-		if (keys[SDLK_k])
+	if (keys[SDL_SCANCODE_LCTRL]) {
+		if (keys[SDL_SCANCODE_K])
 			set_wheel_velocity(tank, 500);
-		else if (keys[SDLK_l])
+		else if (keys[SDL_SCANCODE_L])
 			set_wheel_velocity(tank, -500);
 		else
 			set_wheel_velocity(tank, 0);

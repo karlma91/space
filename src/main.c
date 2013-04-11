@@ -50,6 +50,8 @@ float mdt;
 unsigned char *keys;
 state *currentState;
 
+SDL_GLContext glcontext;
+
 static int main_running = 1;
 
 configuration config;
@@ -92,13 +94,14 @@ static int init_config()
 
 static void initGL()
 {
+	// Create an OpenGL context associated with the window.
+	glcontext = SDL_GL_CreateContext(window);
+
 	//antialiasing
-	/*
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POLYGON_SMOOTH);
-	 */
 
 	//fra ttf opengl tutorial
 	fprintf(stderr,"GL_INIT STARTED\n");
@@ -124,6 +127,10 @@ static void initGL()
 	 * */
 	glMatrixMode(GL_MODELVIEW);
 
+	glLoadIdentity();
+
+	fprintf(stderr,"LINE: %d  GL_ERROR: %d\n",__LINE__,glGetError()); //TODO REMOVE
+
 	/* set the clear color to gray */
 	glClearColor(0,0.08,0.15, 1);
 
@@ -132,6 +139,9 @@ static void initGL()
 
 	/* Do draw back-facing polygons*/
 	glDisable(GL_CULL_FACE);
+
+	glEnable( GL_TEXTURE_2D );
+	glDisable(GL_DEPTH_TEST);
 }
 
 SDL_Window *window;
@@ -159,6 +169,7 @@ static int window_init()
 	return 0;
 }
 
+SDL_Rect fullscreen_dimensions;
 static int main_init()
 {
 	fprintf(stderr, "DEBUG - init_config\n");
@@ -172,23 +183,21 @@ static int main_init()
 	}
 	fprintf(stderr, "DEBUG - SDL_init done!\n");
 
-	 //FIXME SDL2 port break
-	//if (config.fullscreen) {
-		//const SDL_VideoInfo* myPointer = SDL_GetVideoInfo(); //FIXME SDL2 port break
-		//W = myPointer->current_w;
-		//H = myPointer->current_h;
-	//} else {
+	SDL_GetDisplayBounds(0, &fullscreen_dimensions);
+
+	//FIXME SDL2 port break
+	if (config.fullscreen) {
+		W = fullscreen_dimensions.w;
+		H = fullscreen_dimensions.h;
+	} else {
 		W = config.width;
 		H = config.height;
-	//}
+	}
 
 	setAspectRatio();
 
-	//glOrtho(-(WIDTH/2),(WIDTH/2),-(HEIGHT/2),(HEIGHT/2),1,-1);
-
 	/* NB: need to be set before call to SDL_SetVideoMode! */
 
-	//FIXME SDL2 port break
 	//SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	//for antialiasing
 	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //TODO fix tile edges when AA is activated
@@ -214,9 +223,6 @@ static int main_init()
 	if (window_init())
 		return 1;
 
-	SDL_Delay(5000);
-
-
 	// random seed
 	srand(time( NULL ));
 
@@ -227,8 +233,10 @@ static int main_init()
 
 	/* preload textures */
 	//FIXME SDL2 port break
-	//int color_type = window->format->Bshift ? GL_UNSIGNED_INT_8_8_8_8 : GL_UNSIGNED_INT_8_8_8_8_REV;
-	//texture_init(color_type);
+	SDL_Surface *surface = SDL_GetWindowSurface(window);
+	int color_type = ((surface)->format)->Bshift ? GL_UNSIGNED_INT_8_8_8_8 : GL_UNSIGNED_INT_8_8_8_8_REV;
+	color_type = 0;
+	texture_init(color_type);
 
 	error = draw_init();
 	if(error){
@@ -290,21 +298,20 @@ static int main_run()
 		statesystem_update();
 		statesystem_draw();
 
-		//SDL_GL_SwapBuffers();//FIXME SDL2 port break
 		SDL_GL_SwapWindow(window);
 
 		//input handler
-		if(keys[SDLK_F12]){
+		if(keys[SDL_SCANCODE_F12]){
 			main_stop();
 		}
 
-		if (keys[SDLK_f] && keys[SDLK_LCTRL]) {
+		if (keys[SDL_SCANCODE_F] && keys[SDL_SCANCODE_LCTRL]) {
 			config.fullscreen ^= 1; // Toggle fullscreen
 			if (SDL_SetWindowFullscreen(window, config.fullscreen)) {
 				SDL_GetError();
 				config.fullscreen ^= 1; // Re-toggle
 			} else {
-				keys[SDLK_f] = 0;
+				keys[SDL_SCANCODE_F] = 0;
 			}
 		}
 
@@ -316,9 +323,14 @@ static int main_run()
 			    main_stop();
 				break;
 			case SDL_WINDOWEVENT_RESIZED:
-				if (config.fullscreen) break;
-				W = event.window.data1;
-				H = event.window.data2;
+				//if (config.fullscreen) break;
+				//if (config.fullscreen) {
+				//	W = fullscreen_dimensions.w;
+				//	H = fullscreen_dimensions.h;
+				//} else {
+					W = event.window.data1;
+					H = event.window.data2;
+				//}
 				window_init();
 				glViewport(0,0,W,H);
 				setAspectRatio();
@@ -327,9 +339,9 @@ static int main_run()
 		}
 
 		//not use 100% of cpu
-		if (keys[SDLK_z])
+		if (keys[SDL_SCANCODE_Z])
 			 SDL_Delay(14);
-		else if (keys[SDLK_c])
+		else if (keys[SDL_SCANCODE_C])
 			SDL_Delay(50);
 
 		static int FPS_EXTRA_SLEEP = 0;
@@ -349,7 +361,6 @@ static int main_run()
 
 static int main_destroy()
 {
-#ifdef FINISHED_PORTING_TO_SDL_2
 	level_destroy();
 	//cpSpaceFreeChildren(space);
 
@@ -358,7 +369,10 @@ static int main_destroy()
 
 	draw_destroy();
 	font_destroy();
-#endif
+
+
+	// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
+	SDL_GL_DeleteContext(glcontext);
 
 	SDL_DestroyWindow(window);
 
@@ -370,7 +384,7 @@ static int main_destroy()
 int main( int argc, char *args[] )
 {
     main_init();
-	//main_run();
+	main_run();
 	main_destroy();
 
 	return 0;
