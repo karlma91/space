@@ -10,6 +10,7 @@
 /* SDL and OpenGL */
 #include "SDL.h"
 #include "SDL_opengl.h"
+#include "SDL_video.h"
 
 /* Chipmunk physics library */
 #include "chipmunk.h"
@@ -130,7 +131,7 @@ static void initGL()
 	glDisable(GL_CULL_FACE);
 }
 
-SDL_Surface *screen;
+SDL_Window *window;
 
 void setAspectRatio() {
 	WIDTH = 1920;
@@ -143,46 +144,50 @@ static int main_init()
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
 
-	if (config.fullscreen) {
-		const SDL_VideoInfo* myPointer = SDL_GetVideoInfo();
-		W = myPointer->current_w;
-		H = myPointer->current_h;
-	} else {
+	 //FIXME SDL2 port break
+	//if (config.fullscreen) {
+		//const SDL_VideoInfo* myPointer = SDL_GetVideoInfo(); //FIXME SDL2 port break
+		//W = myPointer->current_w;
+		//H = myPointer->current_h;
+	//} else {
 		W = config.width;
 		H = config.height;
-	}
+	//}
 
 	setAspectRatio();
 
 	//glOrtho(-(WIDTH/2),(WIDTH/2),-(HEIGHT/2),(HEIGHT/2),1,-1);
 
 	/* NB: need to be set before call to SDL_SetVideoMode! */
-	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+
+	//FIXME SDL2 port break
+	//SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	//for antialiasing
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //TODO fix tile edges when AA is activated
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2); //TODO read AA-settings from config file
-
-	SDL_putenv("SDL_DEBUG");
-
-	SDL_putenv("SDL_VIDEO_CENTERED=center");
-	SDL_WM_SetCaption("SPACE", "SPACE");
+	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //TODO fix tile edges when AA is activated
+	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2); //TODO read AA-settings from config file
 
 	{
+		/*
 		SDL_Surface     *image;
 #ifdef __WIN32__
 		image = SDL_LoadBMP("textures/icon_32.bmp"); // windows is only compatible with 32x32 icon
 #else
 		image = SDL_LoadBMP("textures/icon.bmp");
 #endif
-		SDL_WM_SetIcon(image, NULL); //TODO fix transparency
+		 *///FIXME SDL2 port break
+		//FIXME SDL2 port break
+		//SDL_WM_SetIcon(image, NULL); //TODO fix transparency
 		//Uint32          colorkey;
 		//colorkey = SDL_MapRGB(image->format, 255, 0, 0);
 		//SDL_SetColorKey(image, SDL_SRCCOLORKEY, colorkey);
 	}
 
-	if (!(screen = SDL_SetVideoMode(W, H, 0, (SDL_OPENGL| SDL_DOUBLEBUF | SDL_RESIZABLE) | (SDL_FULLSCREEN * config.fullscreen))))
+	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W, H,
+			(SDL_WINDOW_OPENGL| SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE) | (SDL_WINDOW_FULLSCREEN * config.fullscreen));
+
+	if (window == NULL)
 	{
-		printf("ERROR");
+		fprintf(stderr, "ERROR - could not create window!\n");
 		SDL_Quit();
 		return 1;
 	}
@@ -194,8 +199,9 @@ static int main_init()
 	initGL();
 
 	/* preload textures */
-	int color_type = screen->format->Bshift ? GL_UNSIGNED_INT_8_8_8_8 : GL_UNSIGNED_INT_8_8_8_8_REV;
-	texture_init(color_type);
+	//FIXME SDL2 port break
+	//int color_type = window->format->Bshift ? GL_UNSIGNED_INT_8_8_8_8 : GL_UNSIGNED_INT_8_8_8_8_REV;
+	//texture_init(color_type);
 
 	error = draw_init();
 	if(error){
@@ -266,7 +272,7 @@ static int main_run()
 		}
 
 		if (keys[SDLK_f] && keys[SDLK_LCTRL]) {
-			int ret = SDL_WM_ToggleFullScreen(screen);
+			int ret = SDL_WM_ToggleFullScreen(window);
 			fprintf(stderr,"TOGGLING FULLSCREEN SUCCESS: %d\n",ret);
 			keys[SDLK_f] = 0;
 		}
@@ -278,11 +284,11 @@ static int main_run()
 			case SDL_QUIT:
 			    main_stop();
 				break;
-			case SDL_VIDEORESIZE:
+			case SDL_WINDOWEVENT_RESIZED:
 				if (config.fullscreen) break;
-				W = event.resize.w;
-				H = event.resize.h;
-				if (!(screen = SDL_SetVideoMode(W, H, 32, (SDL_OPENGL| SDL_DOUBLEBUF | SDL_RESIZABLE) | (SDL_FULLSCREEN * config.fullscreen))))
+				W = event.window.data1;
+				H = event.window.data2;
+				if (!(window = SDL_SetVideoMode(W, H, 32, (SDL_OPENGL| SDL_DOUBLEBUF | SDL_RESIZABLE) | (SDL_FULLSCREEN * config.fullscreen))))
 				{
 					printf("ERROR");
 					SDL_Quit();
