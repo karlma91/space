@@ -208,7 +208,7 @@ static const float dir8[8] = {
 		M_PI/4*7,
 };
 
-static inline Direction angle_index_fromkeys(SDLKey key_left, SDLKey key_up, SDLKey key_right, SDLKey key_down)
+static inline Direction angle_index_fromkeys(SDL_Keycode key_left, SDL_Keycode key_up, SDL_Keycode key_right, SDL_Keycode key_down)
 {
 	return keys[key_up] ? (keys[key_right] ? DIR_NE : (keys[key_left] ? DIR_NW : DIR_N)) :
 		 keys[key_down] ? (keys[key_right] ? DIR_SE : (keys[key_left] ? DIR_SW : DIR_S)) :

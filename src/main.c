@@ -133,9 +133,24 @@ static void initGL()
 
 SDL_Window *window;
 
-void setAspectRatio() {
+static void setAspectRatio() {
 	WIDTH = 1920;
 	HEIGHT = (1.0f * H/W) * WIDTH;
+}
+
+static int window_init()
+{
+	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W, H,
+			(SDL_WINDOW_OPENGL| SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE) | (SDL_WINDOW_FULLSCREEN * config.fullscreen));
+
+	if (window == NULL)
+	{
+		fprintf(stderr, "ERROR - could not create window!\n");
+		SDL_Quit();
+		return 1;
+	}
+
+	return 0;
 }
 
 static int main_init()
@@ -182,21 +197,17 @@ static int main_init()
 		//SDL_SetColorKey(image, SDL_SRCCOLORKEY, colorkey);
 	}
 
-	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W, H,
-			(SDL_WINDOW_OPENGL| SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE) | (SDL_WINDOW_FULLSCREEN * config.fullscreen));
 
-	if (window == NULL)
-	{
-		fprintf(stderr, "ERROR - could not create window!\n");
-		SDL_Quit();
+	if (window_init())
 		return 1;
-	}
+
 	// random seed
 	srand(time( NULL ));
 
 	int error;
 
-	initGL();
+	 //FIXME SDL2 port break
+	//initGL();
 
 	/* preload textures */
 	//FIXME SDL2 port break
@@ -242,7 +253,7 @@ static int main_run()
 		lastTime = thisTime;
 
 		SDL_PumpEvents();
-		keys = SDL_GetKeyState(NULL);
+		keys = SDL_GetKeyboardState(NULL);
 
 		frames += deltaTime;
 		fps++;
@@ -264,7 +275,8 @@ static int main_run()
 		statesystem_update();
 		statesystem_draw();
 
-		SDL_GL_SwapBuffers();
+		//SDL_GL_SwapBuffers();//FIXME SDL2 port break
+		SDL_GL_SwapWindow(window);
 
 		//input handler
 		if(keys[SDLK_F12]){
@@ -272,9 +284,13 @@ static int main_run()
 		}
 
 		if (keys[SDLK_f] && keys[SDLK_LCTRL]) {
-			int ret = SDL_WM_ToggleFullScreen(window);
-			fprintf(stderr,"TOGGLING FULLSCREEN SUCCESS: %d\n",ret);
-			keys[SDLK_f] = 0;
+			config.fullscreen ^= 1; // Toggle fullscreen
+			if (SDL_SetWindowFullscreen(window, config.fullscreen)) {
+				SDL_GetError();
+				config.fullscreen ^= 1; // Re-toggle
+			} else {
+				keys[SDLK_f] = 0;
+			}
 		}
 
 		while(SDL_PollEvent(&event))
@@ -288,12 +304,7 @@ static int main_run()
 				if (config.fullscreen) break;
 				W = event.window.data1;
 				H = event.window.data2;
-				if (!(window = SDL_SetVideoMode(W, H, 32, (SDL_OPENGL| SDL_DOUBLEBUF | SDL_RESIZABLE) | (SDL_FULLSCREEN * config.fullscreen))))
-				{
-					printf("ERROR");
-					SDL_Quit();
-					return 1;
-				}
+				window_init();
 				glViewport(0,0,W,H);
 				setAspectRatio();
 				break;

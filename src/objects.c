@@ -11,6 +11,9 @@ int LAYER_TANK_FACTORY    =            1<<2  |        1<<4;
 int LAYER_PLAYER_BULLET   =                    1<<3 | 1<<4;
 int LAYER_ENEMY_BULLET    =                                 1<<5;
 
+#ifndef INT_MIN
+#define INT_MIN -2147483648
+#endif
 
 typedef struct _node node;
 struct _node {

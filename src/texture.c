@@ -52,7 +52,7 @@ int texture_load(char *file)
 	textures = realloc(textures,sizeof(int[(tex_counter + 1)]));
 
 
-	Surf_Return = SDL_DisplayFormatAlpha(Surf_Temp);
+	//Surf_Return = SDL_DisplayFormatAlpha(Surf_Temp);  //FIXME SDL2 port break
 
 	unsigned int Tex = 0;
 
