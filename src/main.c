@@ -93,12 +93,15 @@ static int init_config()
 static void initGL()
 {
 	//antialiasing
+	/*
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
 	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_POLYGON_SMOOTH);
+	 */
 
 	//fra ttf opengl tutorial
+	fprintf(stderr,"GL_INIT STARTED\n");
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
@@ -140,6 +143,7 @@ static void setAspectRatio() {
 
 static int window_init()
 {
+	fprintf(stderr, "DEBUG - creating window\n");
 	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W, H,
 			(SDL_WINDOW_OPENGL| SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE) | (SDL_WINDOW_FULLSCREEN * config.fullscreen));
 
@@ -149,15 +153,24 @@ static int window_init()
 		SDL_Quit();
 		return 1;
 	}
+	//TMP
+	fprintf(stderr, "DEBUG - window created\n");
 
 	return 0;
 }
 
 static int main_init()
 {
+	fprintf(stderr, "DEBUG - init_config\n");
 	init_config();
+	fprintf(stderr, "DEBUG - init_config done!\n");
 
-	if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
+	fprintf(stderr, "DEBUG - SDL_init\n");
+	if (SDL_Init(SDL_INIT_VIDEO)) {
+		SDL_GetError();
+		return 1;
+	}
+	fprintf(stderr, "DEBUG - SDL_init done!\n");
 
 	 //FIXME SDL2 port break
 	//if (config.fullscreen) {
@@ -201,13 +214,16 @@ static int main_init()
 	if (window_init())
 		return 1;
 
+	SDL_Delay(5000);
+
+
 	// random seed
 	srand(time( NULL ));
 
 	int error;
 
 	 //FIXME SDL2 port break
-	//initGL();
+	initGL();
 
 	/* preload textures */
 	//FIXME SDL2 port break
@@ -231,7 +247,6 @@ static int main_init()
 	/* init states */
 	statesystem_init();
 	statesystem_set_state(STATESYSTEM_MENU);
-
 	return 0;
 }
 
@@ -334,6 +349,7 @@ static int main_run()
 
 static int main_destroy()
 {
+#ifdef FINISHED_PORTING_TO_SDL_2
 	level_destroy();
 	//cpSpaceFreeChildren(space);
 
@@ -342,6 +358,9 @@ static int main_destroy()
 
 	draw_destroy();
 	font_destroy();
+#endif
+
+	SDL_DestroyWindow(window);
 
 	SDL_Quit();
 
@@ -351,7 +370,7 @@ static int main_destroy()
 int main( int argc, char *args[] )
 {
     main_init();
-	main_run();
+	//main_run();
 	main_destroy();
 
 	return 0;
