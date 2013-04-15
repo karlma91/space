@@ -1,5 +1,5 @@
-#ifndef TANKFACTORY_H_
-#define TANKFACTORY_H_
+#ifndef factory_H_
+#define factory_H_
 
 #include "chipmunk.h"
 #include "objects.h"
@@ -9,12 +9,14 @@
 /* the super tank_factory object */
 extern object_group_preset type_tank_factory;
 
-struct _object_param_tankfactory {
+struct _object_param_factory {
 	int max_tanks;
 	float max_hp;
 	float spawn_delay;
 	int score;
+	int type;
 	object_param_tank *t_param;
+	object_param_rocket *r_param;
 	int tex_id;
 };
 
@@ -33,9 +35,9 @@ typedef struct {
 	emitter *smoke;
 
 	/* paramerters */
-	object_param_tankfactory *param;
-} object_group_tankfactory;
+	object_param_factory *param;
+} object_group_factory;
 
-object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tankfactory *param);
+object_group_factory *object_create_factory(int x_pos, object_param_factory *param);
 
-#endif /* TANKFACTORY_H_ */
+#endif /* factory_H_ */

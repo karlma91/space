@@ -19,6 +19,8 @@ typedef struct level {
 	int left;
 	int right;
 	int timelimit;
+	int ceiling;
+	int floor;
 	tilemap *tiles;
 } level;
 
