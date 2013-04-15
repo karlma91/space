@@ -38,7 +38,13 @@ compile (mac):
 -I../lib/SDL/mac -I../lib/SDL_image -I../lib/chipmunk/include -I../lib/mxml/mac -I../lib/inih/include
 
 
+
 [SDL 2.0]
 mac:
 -framework AppKit -framework cocoa -L/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries -lGL -lGLU -L../lib/SDL2/mac -lSDL2main -lSDL2 -lSDL2_test -L../lib/SDL2_image/mac -lSDL2_image -L../lib/chipmunk/mac -lChipmunk -L../lib/mxml/mac -lmxml -L../lib/inih/mac -linih
 
+windows:
+-lmingw32 -L../lib/SDL2_image/win -lSDL2_image -L../lib/SDL2/win/ -lSDL2main -lSDL2 -lopengl32 -lpng15-15 -L../lib/chipmunk/win -lChipmunk -L../lib/mxml/win -lmxml -L../lib/inih/win -linih
+-c -fmessage-length=0 -mwindows -I../lib/chipmunk/include -I../lib/SDL2_image -I../lib/inih/include -I../lib/mxml/include -I../lib/SDL2/include
+
+linux:
