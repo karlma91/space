@@ -107,13 +107,14 @@ static void drawSymbol(char c)
 
 void font_drawText(GLfloat x, GLfloat y, char* text)
 {
+	glDisable(GL_TEXTURE_2D);
 	glPushAttrib(GL_COLOR_BUFFER_BIT);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glPushMatrix();
 	glTranslatef(x, y, 0.0f);
 	glRotatef(font_text_angle, 0, 0, 1);
 	glScalef(font_text_size, font_text_size, 1);
-	
+
 	switch(font_text_align) {
 		case TEXT_LEFT:
 			glTranslatef(0.5f, 0, 0);
@@ -126,7 +127,7 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 			glTranslatef(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING) - 0.5f  - CHAR_SPACING), 0,0);
 			break;
 	}
-	
+
 	i = 0;
 	while(text[i] != '\0') {
 		if (text[i] == '\n') {
@@ -143,10 +144,10 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 		i++;
 		glTranslatef((CHAR_WIDTH + CHAR_SPACING), 0, 0);
 	}
-	
+
 	if (font_text_align == TEXT_LEFT)
 		glPopMatrix();
-	
+
 	glPopMatrix();
 	glPopAttrib();
 }
@@ -164,8 +165,10 @@ void init_text(char c)
 
 void font_init()
 {
+    //enables gldraw array
+	glDisable(GL_TEXTURE_2D);
 	firstCharList = glGenLists(256);
-	
+
 	char i = 1;
 	do {
 		glNewList(firstCharList + i,GL_COMPILE);
@@ -176,5 +179,5 @@ void font_init()
 
 void font_destroy()
 {
-	glDeleteLists(firstCharList, 256); 
+	glDeleteLists(firstCharList, 256);
 }

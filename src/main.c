@@ -10,7 +10,6 @@
 /* SDL and OpenGL */
 #include "SDL.h"
 #include "SDL_opengl.h"
-#include "SDL_video.h"
 
 /* Chipmunk physics library */
 #include "chipmunk.h"
@@ -37,13 +36,12 @@
 static float fps;
 static float frames;
 
-
 /* definition of external variables */
 char fps_buf[15];
 int WIDTH;
 int HEIGHT;
 
-int W,H;
+int W, H;
 
 float dt;
 float mdt;
@@ -52,126 +50,110 @@ state *currentState;
 
 SDL_GLContext glcontext;
 
+SDL_Window *window;
+SDL_Renderer *displayRenderer;
+
 static int main_running = 1;
 
 configuration config;
 
-static int handler(void* config, const char* section, const char* name, const char* value)
-{
-  configuration* pconfig = (configuration*)config;
+static int handler(void* config, const char* section, const char* name,
+		const char* value) {
+	configuration* pconfig = (configuration*) config;
 
 #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
-  if (MATCH("video", "fullscreen")) {
-	  pconfig->fullscreen = atoi(value);
-  } else if (MATCH("video", "width")) {
-	  pconfig->width = atoi(value);
-  } else if (MATCH("video", "height")) {
-	  pconfig->height= atoi(value);
-  } else if (MATCH("keyboard", "key_left")) {
-	  pconfig->key_left = atoi(value);
-  } else if (MATCH("keyboard", "key_up")) {
-  	pconfig->key_up = atoi(value);
-  } else if (MATCH("keyboard", "key_right")) {
-  	pconfig->key_right = atoi(value);
-  } else if (MATCH("keyboard", "key_down")) {
-  	pconfig->key_down = atoi(value);
-  } else {
-      return 0;  /* unknown section/name, error */
-  }
-  return 1;
+	if (MATCH("video", "fullscreen")) {
+		pconfig->fullscreen = atoi(value);
+	} else if (MATCH("video", "width")) {
+		pconfig->width = atoi(value);
+	} else if (MATCH("video", "height")) {
+		pconfig->height = atoi(value);
+	} else if (MATCH("keyboard", "key_left")) {
+		pconfig->key_left = atoi(value);
+	} else if (MATCH("keyboard", "key_up")) {
+		pconfig->key_up = atoi(value);
+	} else if (MATCH("keyboard", "key_right")) {
+		pconfig->key_right = atoi(value);
+	} else if (MATCH("keyboard", "key_down")) {
+		pconfig->key_down = atoi(value);
+	} else {
+		return 0; /* unknown section/name, error */
+	}
+	return 1;
 }
 
-static int init_config()
-{
+static int init_config() {
 	if (ini_parse("bin/config.ini", handler, &config) < 0) {
 		printf("Could not load 'bin/config.ini'\n");
 		return 1;
 	}
-	fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d\n",
+	fprintf(stderr, "Config loaded from 'bin/config.ini': fullscreen=%d\n",
 			config.fullscreen);
 	return 0;
 }
 
-static void initGL()
-{
+static void initGL() {
 	// Create an OpenGL context associated with the window.
 	glcontext = SDL_GL_CreateContext(window);
 
-	//antialiasing
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_POLYGON_SMOOTH);
+	// TODO fix AA: find out when and where to store the attributes
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+    //for antialiasing
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //TODO fix tile edges when AA is activated
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4); //TODO read AA-settings from config file
 
-	//fra ttf opengl tutorial
-	fprintf(stderr,"GL_INIT STARTED\n");
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-	/* Make the viewport cover the whole window */
-	glViewport(0, 0, W, H);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-	/* Set the camera projection matrix:
-	 * field of view: 90 degrees
-	 * near clipping plane at 0.1
-	 * far clipping plane at 100.0
-	 */
+    /* set the clear color to dark blue */
+	glClearColor(0, 0.08, 0.15, 1);
+
+	/* print gl info */
+	fprintf(stderr, "GL_VENDOR: %s\n", glGetString(GL_VENDOR));
+	fprintf(stderr, "GL_RENDERER: %s\n", glGetString(GL_RENDERER));
+	fprintf(stderr, "GL_VERSION: %s\n", glGetString(GL_VERSION));
+	fprintf(stderr, "GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+	GLdouble W_2 = WIDTH / 2;
+	GLdouble H_2 = HEIGHT / 2;
+	glOrtho(-W_2, W_2, -H_2, H_2, 1, -1);
 
-	glOrtho(-(WIDTH/2),(WIDTH/2),-(HEIGHT/2),(HEIGHT/2),1,-1);
-
-	//gluPerspective(60.0, aspect, 0.1, 100.0);
-	/* We're done with the camera, now matrix operations
-	 * will affect the modelview matrix
-	 * */
 	glMatrixMode(GL_MODELVIEW);
-
 	glLoadIdentity();
 
-	fprintf(stderr,"LINE: %d  GL_ERROR: %d\n",__LINE__,glGetError()); //TODO REMOVE
+	glViewport(0, 0, W, H);
 
-	/* set the clear color to gray */
-	glClearColor(0,0.08,0.15, 1);
-
-	//enables gldraw array
 	glEnableClientState(GL_VERTEX_ARRAY);
-
-	/* Do draw back-facing polygons*/
-	glDisable(GL_CULL_FACE);
-
-	glEnable( GL_TEXTURE_2D );
-	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_MULTISAMPLE);
 }
-
-SDL_Window *window;
 
 static void setAspectRatio() {
 	WIDTH = 1920;
-	HEIGHT = (1.0f * H/W) * WIDTH;
+	HEIGHT = (1.0f * H / W) * WIDTH;
 }
 
-static int window_init()
-{
+static int window_init() {
+	Uint32 flags = (SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE)
+			| (SDL_WINDOW_FULLSCREEN * config.fullscreen);
 	fprintf(stderr, "DEBUG - creating window\n");
-	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W, H,
-			(SDL_WINDOW_OPENGL| SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE) | (SDL_WINDOW_FULLSCREEN * config.fullscreen));
+	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, W, H, flags);
+	displayRenderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-	if (window == NULL)
-	{
+	if (window == NULL ) {
 		fprintf(stderr, "ERROR - could not create window!\n");
 		SDL_Quit();
 		return 1;
 	}
-	//TMP
-	fprintf(stderr, "DEBUG - window created\n");
 
 	return 0;
 }
 
 SDL_Rect fullscreen_dimensions;
-static int main_init()
-{
+static int main_init() {
 	fprintf(stderr, "DEBUG - init_config\n");
 	init_config();
 	fprintf(stderr, "DEBUG - init_config done!\n");
@@ -185,7 +167,6 @@ static int main_init()
 
 	SDL_GetDisplayBounds(0, &fullscreen_dimensions);
 
-	//FIXME SDL2 port break
 	if (config.fullscreen) {
 		W = fullscreen_dimensions.w;
 		H = fullscreen_dimensions.h;
@@ -196,50 +177,22 @@ static int main_init()
 
 	setAspectRatio();
 
-	/* NB: need to be set before call to SDL_SetVideoMode! */
-
-	//SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-	//for antialiasing
-	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //TODO fix tile edges when AA is activated
-	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2); //TODO read AA-settings from config file
-
-	{
-		/*
-		SDL_Surface     *image;
-#ifdef __WIN32__
-		image = SDL_LoadBMP("textures/icon_32.bmp"); // windows is only compatible with 32x32 icon
-#else
-		image = SDL_LoadBMP("textures/icon.bmp");
-#endif
-		 *///FIXME SDL2 port break
-		//FIXME SDL2 port break
-		//SDL_WM_SetIcon(image, NULL); //TODO fix transparency
-		//Uint32          colorkey;
-		//colorkey = SDL_MapRGB(image->format, 255, 0, 0);
-		//SDL_SetColorKey(image, SDL_SRCCOLORKEY, colorkey);
-	}
-
-
 	if (window_init())
 		return 1;
 
 	// random seed
-	srand(time( NULL ));
+	srand(time(NULL ));
 
 	int error;
 
-	 //FIXME SDL2 port break
+	//FIXME SDL2 port break
 	initGL();
 
 	/* preload textures */
-	//FIXME SDL2 port break
-	SDL_Surface *surface = SDL_GetWindowSurface(window);
-	int color_type = ((surface)->format)->Bshift ? GL_UNSIGNED_INT_8_8_8_8 : GL_UNSIGNED_INT_8_8_8_8_REV;
-	color_type = 0;
-	texture_init(color_type);
+	texture_init(); //FIXME SDL2 port break
 
 	error = draw_init();
-	if(error){
+	if (error) {
 		return error;
 	}
 
@@ -248,7 +201,7 @@ static int main_init()
 
 	/* load levels */
 	error = level_init();
-	if(error){
+	if (error) {
 		return error;
 	}
 
@@ -258,9 +211,8 @@ static int main_init()
 	return 0;
 }
 
-static int main_run()
-{
-  SDL_Event event;
+static int main_run() {
+	SDL_Event event;
 	Uint32 thisTime = 0;
 	Uint32 lastTime;
 	float deltaTime = 0.0f;
@@ -269,39 +221,41 @@ static int main_run()
 
 	lastTime = SDL_GetTicks();
 
-	while(main_running) {
+	while (main_running) {
 
 		thisTime = SDL_GetTicks();
-		deltaTime = (float)(thisTime - lastTime)/1000.0f;
+		deltaTime = (float) (thisTime - lastTime) / 1000.0f;
 		lastTime = thisTime;
 
 		SDL_PumpEvents();
-		keys = SDL_GetKeyboardState(NULL);
+		keys = SDL_GetKeyboardState(NULL );
 
 		frames += deltaTime;
 		fps++;
-		if(frames>=1){
-			sprintf(fps_buf,"%.2f FPS",fps);
-			printf("%s\n",fps_buf);
+		if (frames >= 1) {
+			sprintf(fps_buf, "%.2f FPS", fps);
+			printf("%s\n", fps_buf);
 			frames = 0;
-			fps=0;
+			fps = 0;
 		}
 
 		deltaTime = deltaTime > 0.25 ? 0.25 : deltaTime;
 		dt = deltaTime;
-		mdt = dt*1000;
-		//Draw
-		//glClearColor(0.0f,0.0f,0.0f,0.0f);
+		mdt = dt * 1000;
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
 
 		statesystem_update();
 		statesystem_draw();
 
+		int gl_error = glGetError();
+		if (gl_error) fprintf(stderr,"main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error); //TODO REMOVE
+
 		SDL_GL_SwapWindow(window);
 
 		//input handler
-		if(keys[SDL_SCANCODE_F12]){
+		if (keys[SDL_SCANCODE_F12]) {
 			main_stop();
 		}
 
@@ -315,12 +269,10 @@ static int main_run()
 			}
 		}
 
-		while(SDL_PollEvent(&event))
-		{
-			switch (event.type)
-			{
+		while (SDL_PollEvent(&event)) {
+			switch (event.type) {
 			case SDL_QUIT:
-			    main_stop();
+				main_stop();
 				break;
 			case SDL_WINDOWEVENT_RESIZED:
 				//if (config.fullscreen) break;
@@ -328,11 +280,11 @@ static int main_run()
 				//	W = fullscreen_dimensions.w;
 				//	H = fullscreen_dimensions.h;
 				//} else {
-					W = event.window.data1;
-					H = event.window.data2;
+				W = event.window.data1;
+				H = event.window.data2;
 				//}
 				window_init();
-				glViewport(0,0,W,H);
+				glViewport(0, 0, W, H);
 				setAspectRatio();
 				break;
 			}
@@ -340,7 +292,7 @@ static int main_run()
 
 		//not use 100% of cpu
 		if (keys[SDL_SCANCODE_Z])
-			 SDL_Delay(14);
+			SDL_Delay(14);
 		else if (keys[SDL_SCANCODE_C])
 			SDL_Delay(50);
 
@@ -350,17 +302,15 @@ static int main_run()
 		else
 			++FPS_EXTRA_SLEEP;
 
-
 		Uint32 sleep_delta = SDL_GetTicks() - thisTime;
-		if(  sleep_delta < FPS_SLEEP_TIME ) {
-			SDL_Delay( ( FPS_SLEEP_TIME ) - sleep_delta + (FPS_EXTRA_SLEEP != 0));
+		if (sleep_delta < FPS_SLEEP_TIME) {
+			SDL_Delay((FPS_SLEEP_TIME) - sleep_delta + (FPS_EXTRA_SLEEP != 0));
 		}
 	}
 	return 0;
 }
 
-static int main_destroy()
-{
+static int main_destroy() {
 	level_destroy();
 	//cpSpaceFreeChildren(space);
 
@@ -370,20 +320,18 @@ static int main_destroy()
 	draw_destroy();
 	font_destroy();
 
-
 	// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
 	SDL_GL_DeleteContext(glcontext);
 
+	SDL_DestroyRenderer(displayRenderer);
 	SDL_DestroyWindow(window);
-
 	SDL_Quit();
 
 	return 0;
 }
 
-int main( int argc, char *args[] )
-{
-    main_init();
+int main(int argc, char *args[]) {
+	main_init();
 	main_run();
 	main_destroy();
 

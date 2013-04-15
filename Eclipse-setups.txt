@@ -36,3 +36,9 @@ linking (mac):
 -framework cocoa -framework OpenGL -L../lib/SDL/mac -framework SDL -lSDLmain -SDL -framework SDL_image -L../lib/chipmunk/mac -lChipmunk -L../lib/mxml/mac -lmxml -L../lib/inih/mac -linih
 compile (mac):
 -I../lib/SDL/mac -I../lib/SDL_image -I../lib/chipmunk/include -I../lib/mxml/mac -I../lib/inih/include
+
+
+[SDL 2.0]
+mac:
+-framework AppKit -framework cocoa -L/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries -lGL -lGLU -L../lib/SDL2/mac -lSDL2main -lSDL2 -lSDL2_test -L../lib/SDL2_image/mac -lSDL2_image -L../lib/chipmunk/mac -lChipmunk -L../lib/mxml/mac -lmxml -L../lib/inih/mac -linih
+

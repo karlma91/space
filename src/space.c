@@ -600,7 +600,6 @@ static void SPACE_draw()
 			glColor3f(1,0,0);
 			setTextAlign(TEXT_CENTER);
 			font_drawText(0, 0, "GAME OVER-PRESS ENTER");
-			setTextSize(120);font_drawText(0,-180,"\x49\x4e\x46\x33\x34\x38\x30");
 			break;
 		case LEVEL_STATE_COUNT:
 			/* invalid value */

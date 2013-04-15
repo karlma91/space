@@ -222,7 +222,7 @@ static void arcade_control(object_group_player *player)
 	float dir_step;
 	Direction angle_index = -1;
 
-	angle_index = angle_index_fromkeys(SDL_SCANCODE_A, SDL_SCANCODE_W, SDL_SCANCODE_D, SDL_SCANCODE_D);
+	angle_index = angle_index_fromkeys(SDL_SCANCODE_A, SDL_SCANCODE_W, SDL_SCANCODE_D, SDL_SCANCODE_S);
 
 	cpFloat speed = 700;
 

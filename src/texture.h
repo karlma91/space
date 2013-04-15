@@ -13,7 +13,7 @@ typedef struct texture_map {
 extern GLuint *textures;
 extern int texture_load(char *file);
 
-extern int texture_init(GLenum type);
+extern int texture_init();
 
 extern const texture_map *TEX_MAP_FULL;
 
