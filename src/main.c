@@ -60,6 +60,8 @@ static int handler(void* config, const char* section, const char* name, const ch
 #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
   if (MATCH("video", "fullscreen")) {
 	  pconfig->fullscreen = atoi(value);
+  }else if (MATCH("video", "arcade")) {
+	  pconfig->arcade = atoi(value);
   } else if (MATCH("video", "width")) {
 	  pconfig->width = atoi(value);
   } else if (MATCH("video", "height")) {

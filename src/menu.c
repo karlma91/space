@@ -20,6 +20,8 @@
 static void on_enter();
 static void update();
 static void draw();
+static void arcade_update();
+static void arcade_draw();
 static void on_leave();
 static void destroy();
 
@@ -52,6 +54,7 @@ static struct menu ingameMenu = {
 static struct menu *curMenu; //current active menu
 static int select_id = 0;
 static int i;
+static int current_menu;
 
 static const Color col_item   = {1,0,0,1};
 static const Color col_select = {0,0,1,1};
@@ -61,13 +64,24 @@ void menu_init()
 {
     curMenu = &mainMenuTest;
 
-    statesystem_init_state(STATESYSTEM_MENU, 0,
-            on_enter,
-            update,
-            NULL,
-            draw,
-            on_leave,
-            destroy);
+
+    if(config.arcade){
+    	statesystem_init_state(STATESYSTEM_MENU, 0,
+    	            on_enter,
+    	            arcade_update,
+    	            NULL,
+    	            arcade_draw,
+    	            on_leave,
+    	            destroy);
+    }else{
+    	statesystem_init_state(STATESYSTEM_MENU, 0,
+    			on_enter,
+    			update,
+    			NULL,
+    			draw,
+    			on_leave,
+    			destroy);
+    }
 
 }
 
@@ -82,6 +96,7 @@ static void on_leave()
 
 void menu_change_current_menu(int menu)
 {
+	current_menu = menu;
 	switch(menu){
 	case MENU_INGAME:
 		curMenu = &ingameMenu;
@@ -118,6 +133,9 @@ static void update()
 	}
 }
 
+
+
+
 static void draw()
 {
 	static float timer;
@@ -137,6 +155,59 @@ static void draw()
 		font_drawText(0,100 - 60 * i, curMenu->texts[i]);
 	}
 }
+
+
+static void arcade_update()
+{
+
+
+	if (keys[SDLK_SPACE] || keys[SDLK_RETURN]) {
+		switch(current_menu){
+			case MENU_MAIN:
+				space_init_level(1,1);
+				statesystem_set_state(STATESYSTEM_SPACE);
+				menu_change_current_menu(MENU_INGAME);
+				break;
+			case MENU_INGAME:
+				statesystem_set_state(STATESYSTEM_SPACE);
+				break;
+			}
+		keys[SDLK_SPACE] = 0, keys[SDLK_RETURN] = 0;
+	}
+
+	if(keys[SDLK_ESCAPE]){
+		menu_change_current_menu(MENU_MAIN);
+		statesystem_set_state(STATESYSTEM_MENU);
+		keys[SDLK_ESCAPE] = 0;
+	}
+}
+
+static void arcade_draw()
+{
+	static float timer;
+	timer +=dt;
+
+	setTextAngle(0);
+	setTextSize(80);
+	setTextAlign(TEXT_CENTER);
+	switch(current_menu){
+	case MENU_INGAME:
+		setTextAlign(TEXT_CENTER);
+		setTextSize(40);
+		font_drawText(0,0.5f*HEIGHT/2, "PAUSE");
+		break;
+	case MENU_MAIN:
+		glColor_from_color(draw_col_rainbow((int)(timer*1000)));
+		font_drawText(0,0.8f*HEIGHT/2, "SPACE");
+
+		setTextAlign(TEXT_CENTER);
+		setTextSize(40);
+
+		font_drawText(0,0.5f*HEIGHT/2, "PRESS GREEN");
+		break;
+	}
+}
+
 
 static void inner_main()
 {
