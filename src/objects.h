@@ -47,6 +47,7 @@ struct _object_data {
 	int instance_id;
 	int *remove;
 	int disabled;
+	int destroyed;
 	cpBody *body;
 	object_component_pointers components;
 };
