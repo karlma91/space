@@ -83,6 +83,7 @@ static void update(object_group_factory *factory) {
 	if (factory->timer > factory->param->spawn_delay
 			&& factory->cur < factory->param->max_tanks) {
 		factory->timer = 0;
+
 		if(factory->param->type == ID_ROCKET){
 			object_create_rocket(factory->data.body->p.x, factory,factory->param->r_param);
 		}else{
@@ -122,6 +123,11 @@ static void remove_factory_from_tank(object_group_tank *tank) {
 		tank->factory = objects_by_id(ID_FACTORY,tank->factory_id);
 	}
 }
+static void remove_factory_from_rocket(object_group_rocket *rocket) {
+	if (rocket->factory) {
+		rocket->factory = objects_by_id(ID_FACTORY,rocket->factory_id);
+	}
+}
 
 static void destroy(object_group_factory *factory) {
 	objects_remove(factory);
@@ -132,5 +138,6 @@ static void destroy(object_group_factory *factory) {
 	cpShapeFree(factory->shape);
 	cpBodyFree(factory->data.body);
 	objects_iterate_type(remove_factory_from_tank, ID_TANK);
+	objects_iterate_type(remove_factory_from_rocket, ID_ROCKET);
 	free(factory);
 }

@@ -12,6 +12,7 @@ enum OBJECT_ID {
 	ID_FACTORY,
 	ID_TANK,
 	ID_ROCKET,
+	ID_TURRET,
 	ID_BULLET_PLAYER,
 	ID_BULLET_ENEMY,
 	ID_ROBOTARM,
@@ -56,6 +57,7 @@ struct _object_data {
 typedef struct _object_param_player object_param_player;
 typedef struct _object_param_tank object_param_tank;
 typedef struct _object_param_rocket object_param_rocket;
+typedef struct _object_param_turret object_param_turret;
 typedef struct _object_param_factory object_param_factory;
 
 
