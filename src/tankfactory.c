@@ -16,25 +16,27 @@
 /* Game components */
 #include "player.h"
 #include "tank.h"
+#include "rocket.h"
 #include "bullet.h"
 #include "spaceengine.h"
+#include "texture.h"
 
-static void init(object_group_tankfactory *);
-static void update(object_group_tankfactory *);
-static void render(object_group_tankfactory *);
-static void destroy(object_group_tankfactory *);
+static void init(object_group_factory *);
+static void update(object_group_factory *);
+static void render(object_group_factory *);
+static void destroy(object_group_factory *);
 static void remove_factory_from_tank(object_group_tank *);
 
 object_group_preset type_tank_factory =
-	{ ID_TANK_FACTORY,
+	{ ID_FACTORY,
 			init,
 			update,
 			render,
 			destroy
 	};
 
-object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tankfactory *param) {
-	object_group_tankfactory *factory = malloc(sizeof(*factory));
+object_group_factory *object_create_factory(int x_pos, object_param_factory *param) {
+	object_group_factory *factory = malloc(sizeof(*factory));
 	factory->data.alive = 1;
 	factory->data.preset = &type_tank_factory;
 	factory->data.components.hp_bar = &(factory->hp_bar);
@@ -51,7 +53,7 @@ object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tank
 	/* make and add new body */
 	factory->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
-	cpBodySetPos(factory->data.body, cpv(x_pos, size));
+	cpBodySetPos(factory->data.body, cpv(x_pos,128 + size/2));
 
 	/* make and connect new shape to body */
 	factory->shape = cpSpaceAddShape(space,cpBoxShapeNew(factory->data.body, size, size));
@@ -61,7 +63,7 @@ object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tank
 
 	cpShapeSetLayers(factory->shape, LAYER_TANK_FACTORY);
 
-	cpShapeSetCollisionType(factory->shape, ID_TANK_FACTORY);
+	cpShapeSetCollisionType(factory->shape, ID_FACTORY);
 
 	cpBodySetUserData(factory->data.body, factory);
 	objects_add((object_data *) factory);
@@ -69,19 +71,25 @@ object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tank
 	hpbar_init(&factory->hp_bar, param->max_hp, 100, 16, -50, 90,
 			&(factory->data.body->p));
 
-	return (object_group_tankfactory*) factory;
+	return (object_group_factory*) factory;
 }
 
-static void init(object_group_tankfactory *factory) {
+static void init(object_group_factory *factory) {
 
 }
 
-static void update(object_group_tankfactory *factory) {
+static void update(object_group_factory *factory) {
 	factory->timer += dt;
 	if (factory->timer > factory->param->spawn_delay
 			&& factory->cur < factory->param->max_tanks) {
 		factory->timer = 0;
-		object_create_tank(factory->data.body->p.x, factory, factory->param->t_param);
+		if(factory->param->type == ID_ROCKET){
+			object_create_rocket(factory->data.body->p.x, factory,factory->param->r_param);
+		}else{
+			object_create_tank(factory->data.body->p.x, factory, factory->param->t_param);
+		}
+
+
 		factory->cur += 1;
 	}
 	if (factory->smoke) {
@@ -90,7 +98,7 @@ static void update(object_group_tankfactory *factory) {
 	}
 }
 
-static void render(object_group_tankfactory *factory) {
+static void render(object_group_factory *factory) {
 	//glColor3f(1,1,1);
 
 	hpbar_draw(&factory->hp_bar);
@@ -111,11 +119,11 @@ static void render(object_group_tankfactory *factory) {
 //FIXME Somewhat slow temporary fix, as objects_iterate_type does not support extra arguments!
 static void remove_factory_from_tank(object_group_tank *tank) {
 	if (tank->factory) {
-		tank->factory = objects_by_id(ID_TANK_FACTORY,tank->factory_id);
+		tank->factory = objects_by_id(ID_FACTORY,tank->factory_id);
 	}
 }
 
-static void destroy(object_group_tankfactory *factory) {
+static void destroy(object_group_factory *factory) {
 	objects_remove(factory);
 	particles_release_emitter(factory->smoke);
 

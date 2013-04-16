@@ -40,18 +40,18 @@ int se_damage_object(object_data *object, float damage)
 /**
  * returns the best angle to shoot at a moving object obj2 from obj1
  */
-cpFloat se_get_best_shoot_angle(cpBody *a, cpBody *b, cpFloat bullet_speed)
+cpFloat se_get_best_shoot_angle(cpVect a, cpVect va, cpVect b, cpVect vb, cpFloat bullet_speed)
 {
-	cpVect v = cpvsub(a->p, b->p);
+	cpVect v = cpvsub(a, b);
 
-	cpFloat c = cpvlength(b->v);
+	cpFloat c = cpvlength(vb);
 	cpFloat s = bullet_speed;
-	cpFloat G = acos(cpvdot(v, b->v)/(cpvlength(b->v) * cpvlength(v)));
+	cpFloat G = acos(cpvdot(v, vb)/(cpvlength(vb) * cpvlength(v)));
 	cpFloat angle = asin((c * sin(G)) / s);
 
 	cpFloat bc = cpvtoangle(v);
 
-	if(b->v.x < 0){
+	if(vb.x < 0){
 		angle  = -angle;
 	}
 	angle  = M_PI + (bc - angle);

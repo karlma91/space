@@ -9,6 +9,7 @@
 typedef struct
 {
     int fullscreen;
+    int arcade;
     char key_left;
     char key_up;
     char key_right;

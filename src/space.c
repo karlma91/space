@@ -113,7 +113,7 @@ static void change_state(int state);
 static void update_all();
 
 
-/* The state timer */
+/* The state timer0 */
 static float state_timer = 0;
 /**
  * Inner state functions
@@ -137,7 +137,7 @@ static void level_running()
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
-	if(objects_count(ID_TANK_FACTORY) == 0){
+	if(objects_count(ID_FACTORY) == 0){
 		change_state(LEVEL_CLEARED);
 	}
 
@@ -685,11 +685,12 @@ void space_init_level(int space_station, int deck)
 	}
 
 
+	float offset = currentlvl->tiles->tile_height;
 	/* SETS the gamestate */
 	change_state(LEVEL_START);
 
-	player->data.body->p.x = currentlvl->left + 50;
-	player->data.body->p.y = currentlvl->height - 50;
+	player->data.body->p.x = currentlvl->left + offset + 50;
+	player->data.body->p.y = currentlvl->height - offset - 50;
 	player->hp_bar.value = player->param->max_hp;
 	player->data.body->v.x = 0;
 	player->data.body->v.y = -10;
@@ -706,13 +707,15 @@ void space_init_level(int space_station, int deck)
 		cpSpaceRemoveStaticShape(space,ceiling);
 	}
 
-	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), 15.0f)); // ground level at 0
-	cpShapeSetFriction(floor, 0.8f);
+	currentlvl->floor = offset;
+	currentlvl->ceiling = currentlvl->height - offset/2;
+	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), offset)); // ground level at 0
+	cpShapeSetFriction(floor, 1);
 	cpShapeSetCollisionType(floor, ID_GROUND);
 	cpShapeSetElasticity(floor, 0.7f);
 
-	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), 15.0f));
-	cpShapeSetFriction(ceiling, 0.8f);
+	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), offset));
+	cpShapeSetFriction(ceiling, 1);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
 	cpShapeSetElasticity(ceiling, 0.7f);
 

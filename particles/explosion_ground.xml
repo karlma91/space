@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <emitter imageName="particle.png" name="Default" renderType="inherit" useAdditive="true" useOriented="false">
 <spawnInterval enabled="true" max="10.0" min="1.0"/>
-<spawnCount enabled="true" max="20.0" min="20.0"/>
-<initialLife enabled="true" max="500.0" min="250.0"/>
-<initialSize enabled="true" max="40.0" min="25.0"/>
+<spawnCount enabled="true" max="20" min="10"/>
+<initialLife enabled="true" max="350" min="150"/>
+<initialSize enabled="true" max="60" min="10"/>
 <xOffset enabled="false" max="0.0" min="0.0"/>
 <yOffset enabled="false" max="0.0" min="0.0"/>
 <initialDistance enabled="false" max="0.0" min="0.0"/>
-<speed enabled="true" max="700.0" min="50.0"/>
+<speed enabled="true" max="1000" min="200"/>
 <length enabled="false" max="1000.0" min="1000.0"/>
-<emitCount enabled="true" max="50.0" min="50.0"/>
+<emitCount enabled="true" max="50.0" min="25"/>
 <spread type="random" value="360.0"/>
 <angularOffset type="simple" value="0.0"/>
 <growthFactor type="simple" value="-16.0"/>
