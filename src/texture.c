@@ -104,6 +104,7 @@ extern int texture_init(GLenum type)
 	TEX_GLOW    = texture_load("glow.png");
 	TEX_GLOWDOT = texture_load("glowdot.png");
 	TEX_PLAYER = texture_load("player.png");
+	TEX_PARTICLE = texture_load("particle.png");
 
 	return 0;
 }

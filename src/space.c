@@ -28,10 +28,6 @@
 #include "level.h"
 #include "tank.h"
 
-#define star_count 1000
-static int stars_x[star_count];
-static int stars_y[star_count];
-static float stars_size[star_count];
 static void drawStars();
 static float accumulator = 0;
 
@@ -619,21 +615,44 @@ static void render_objects(object_data *obj)
 }
 
 
-#define SW (8000)
+
+
+#define star_count 100
+static int stars_x[star_count];
+static int stars_y[star_count];
+static float stars_size[star_count];
+#define SW 8000
+static void stars_init()
+{
+	//init stars
+	srand(122531);
+	int i;
+	for (i=0; i<star_count; i++) {
+		stars_x[i] = rand()%(WIDTH*2*2) - WIDTH*2; // make sure that radius is greater than WIDTH * sqrt(2)
+		stars_y[i] = rand()%(WIDTH*2*2) - WIDTH*2;
+		stars_size[i] = 2 + 5*(rand() % 1000) / 1000.0f;
+	}
+}
 static void drawStars()
 {
 	glPushMatrix();
 
-	glScalef(0.8f * cam_zoom,0.8f * cam_zoom, 1);
-	glTranslatef(-cam_center_x*0.5,-cam_center_y*0.5,0);
+	glScalef(0.5f * cam_zoom,0.5f * cam_zoom, 1);
 
-	glColor3f(1,1,1);
-	glBegin(GL_QUADS);
+	static float spaceship_angle;
+	spaceship_angle += 0.01f * 360*dt;
+	float cam_angle = (cam_center_x - currentlvl->left)  / (currentlvl->right - currentlvl->left) * 360 + spaceship_angle;
+
+	glRotatef(-cam_angle,0,0,1);
+
 	int i;
-	for (i=0;i<star_count;i++) {
+	glBegin(GL_QUADS);
+	glColor3f(1,1,1);
+	for (i = 0; i < star_count; i++) {
 		float size = stars_size[i];
 		float star_x = (stars_x[i]);
 		float star_y = (stars_y[i]);
+
 		glVertex2f(star_x - size, star_y - size);
 		glVertex2f(star_x + size, star_y - size);
 		glVertex2f(star_x + size, star_y + size);
@@ -764,14 +783,7 @@ void space_init()
 
     collisioncallbacks_init();
 
-	//init stars
-	srand(122531);
-	int i;
-	for (i=0; i<star_count; i++) {
-		stars_x[i] = rand()%(SW*2) - SW;
-		stars_y[i] = rand()%(SW*2) - SW;
-		stars_size[i] = 2 + 4*(rand() % 1000) / 1000.0f;
-	}
+  stars_init();
 }
 
 
