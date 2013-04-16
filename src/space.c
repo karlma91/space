@@ -216,7 +216,7 @@ static void change_state(int state)
 	fprintf(stderr,"DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
 }
 
-	static int cam_mode = 6;
+	static int cam_mode = 5;
 /**
  * Main space update function
  */
