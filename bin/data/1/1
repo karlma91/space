@@ -1,5 +1,3 @@
-tilemaps/level4.tmx
+tilemaps/level1.tmx
 1 1 300
-FACTORY BIG 200
-FACTORY FROCK -200
-TURRET TURE -600
+FACTORY SMALL 200
