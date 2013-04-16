@@ -685,7 +685,7 @@ void space_init_level(int space_station, int deck)
 	}
 
 
-	float offset = 128;
+	float offset = currentlvl->tiles->tile_height;
 	/* SETS the gamestate */
 	change_state(LEVEL_START);
 
