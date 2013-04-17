@@ -67,6 +67,7 @@ static float camera_width;
 static float cam_left_limit;
 static float cam_right_limit;
 
+static int cam_mode = 5;
 
 /* level data */
 level *currentlvl;
@@ -180,10 +181,10 @@ static void level_cleared()
 
 	update_all();
 
-	if(state_timer > 3){
+	//if(state_timer > 3){
 		lvl_cleared=1;
 		change_state(LEVEL_TRANSITION);
-	}
+	//}
 }
 static void level_transition()
 {
@@ -193,7 +194,7 @@ static void level_transition()
 			//TODO remove tmp next level
 			int next_lvl = currentlvl->deck + 1;
 			//TODO WARNING: final level index hard-coded!
-			if (next_lvl > 6) {
+			if (next_lvl > level_get_level_count(currentlvl->deck)) {
 				gameover_setstate(GAMEOVER_WIN);
 			    statesystem_set_state(STATESYSTEM_GAMEOVER);
 			} else {
@@ -218,7 +219,6 @@ static void change_state(int state)
 	//fprintf(stderr,"DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
 }
 
-	static int cam_mode = 5;
 /**
  * Main space update function
  */

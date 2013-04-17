@@ -32,6 +32,7 @@ int se_damage_object(object_data *object, float damage)
 {
 	object->components.hp_bar->value -= damage;
 	if (object->components.hp_bar->value <= 0) {
+		object->destroyed = 0;
 		return 1;
 	}
 	return 0;

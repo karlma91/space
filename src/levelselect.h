@@ -3,6 +3,6 @@
 
 #include "main.h"
 
-void levelselevt_init();
+void levelselect_init();
 
 #endif /* LEVELSELECT_H_ */

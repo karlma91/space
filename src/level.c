@@ -344,3 +344,13 @@ void level_destroy()
 	station_count = 0;
 	free(worlds);
 }
+
+int level_get_station_count()
+{
+	return station_count;
+}
+
+int level_get_level_count(int station)
+{
+	return (station > 0 && station <= station_count) ? 0 : worlds[station].count;
+}

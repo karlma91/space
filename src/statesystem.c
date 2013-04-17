@@ -50,7 +50,7 @@ void statesystem_init()
     menu_init();
     space_init();
     gameover_init();
-    levelselevt_init();
+    levelselect_init();
 
     statesystem_set_state(0);
 

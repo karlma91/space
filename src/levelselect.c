@@ -46,7 +46,7 @@ static float camera_zoom = 0.1; // start zoom
 static float zoomed_temp_y = 0;
 static float zoomed_cam_y = 0;
 
-void levelselevt_init()
+void levelselect_init()
 {
     statesystem_init_state(STATESYSTEM_LEVELSELECT, 0, on_enter, update, NULL, render, on_leave, destroy);
 

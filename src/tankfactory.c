@@ -113,8 +113,12 @@ static void render(object_group_factory *factory) {
 	factory->rot += 381 * dt;
 	float rot = factory->rot;
 
-	draw_texture(TEX_WHEEL, &(factory->data.body->p), TEX_MAP_FULL, 150, 150, rot);
-	draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200, 200, 0);
+	if (factory->param->type == ID_ROCKET) {
+		draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200, 200, 0);
+	} else {
+		draw_texture(TEX_WHEEL, &(factory->data.body->p), TEX_MAP_FULL, 150, 150, rot);
+		draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200, 200, 0);
+	}
 }
 
 //FIXME Somewhat slow temporary fix, as objects_iterate_type does not support extra arguments!
