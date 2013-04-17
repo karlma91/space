@@ -113,4 +113,14 @@ float turn_toangle(float from_angle, float to_angle, float step_size)
 	//fprintf(stderr,"angle: %0.4f\n",from_angle*180/M_PI);
 	return from_angle;
 }
+void se_shape_from_space(cpBody *body, cpShape *shape, void *data)
+{
+    cpSpaceRemoveShape(space, shape);
+    cpShapeFree(shape);
+}
+void se_constrain_from_space(cpBody *body, cpConstraint *constraint, void *data)
+{
+    cpSpaceRemoveConstraint(space, constraint);
+    cpConstraintFree(constraint);
+}
 

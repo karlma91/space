@@ -313,23 +313,43 @@ static void update_all()
  */
 static void update_objects(object_data *obj)
 {
+	int moved_left = 0;
+	int moved_right = 0;
 	if(obj->alive){
+
+		if(obj->body->p.y > currentlvl->height  || obj->body->p.y < 0){
+			obj->alive = 0;
+		}
+
 		if (obj->body->p.x < currentlvl->left ){
 			obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
+			moved_left = 1;
+		}
+
+		if(obj->destroyed || moved_left){
 			int i = 0;
 			for(i=0;i < obj->components.body_count; i++){
 				cpBody *body = obj->components.bodies[i];
-				body->p.x = currentlvl->right - abs(currentlvl->left -body->p.x );
+				if(body->p.x < currentlvl->left || moved_left){
+					body->p.x = currentlvl->right - (currentlvl->left -body->p.x );
+				}
 			}
 		}
+
 		if (obj->body->p.x > currentlvl->right){
 			obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
+			moved_right = 1;
+		}
+		if(obj->destroyed || moved_right){
 			int i = 0;
 			for(i=0;i < obj->components.body_count; i++){
 				cpBody *body = obj->components.bodies[i];
-				body->p.x = currentlvl->left + (body->p.x - currentlvl->right);
+				if(body->p.x > currentlvl->right || moved_right){
+					body->p.x = currentlvl->left + (body->p.x - currentlvl->right);
+				}
 			}
 		}
+
 		obj->preset->update(obj);
 	}else{
 		objects_remove(obj);
@@ -691,6 +711,9 @@ void space_init_level(int space_station, int deck)
 		}else{
 			player->aim_speed += 0.3;
 			player->rotation_speed += 0.3;
+			if(deck == 6){
+				player->gun_level = 3;
+			}
 		}
 	}
 
@@ -736,12 +759,12 @@ void space_init_level(int space_station, int deck)
 
 	currentlvl->floor = offset;
 	currentlvl->ceiling = currentlvl->height - offset/2;
-	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), offset)); // ground level at 0
+	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left-100,0), cpv(currentlvl->right+100,0), offset)); // ground level at 0
 	cpShapeSetFriction(floor, 1);
 	cpShapeSetCollisionType(floor, ID_GROUND);
 	cpShapeSetElasticity(floor, 0.7f);
 
-	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), offset));
+	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left-100,currentlvl->height), cpv(currentlvl->right+100,currentlvl->height), offset));
 	cpShapeSetFriction(ceiling, 1);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
 	cpShapeSetElasticity(ceiling, 0.7f);

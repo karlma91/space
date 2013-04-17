@@ -254,7 +254,6 @@ void particles_destroy()
  */
 void particles_clear()
 {
-
 	emitter **prev = &(emitters_in_use_list);
 	emitter *e = emitters_in_use_list;
 	while(e){
@@ -270,7 +269,6 @@ void particles_clear()
 		prev = &(e->next);
 		e = e->next;
 	}
-
 }
 
 
