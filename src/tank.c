@@ -59,6 +59,7 @@ object_group_tank *object_create_tank(float xpos, object_group_factory *factory,
 
 	tank->timer = 0;
 	tank->factory = factory;
+	tank->data.destroyed = 0;
 
 	cpFloat start_height = 30;
 	if (factory){
@@ -118,7 +119,6 @@ static void set_wheel_velocity(object_group_tank *tank, float velocity)
 static void update(object_group_tank *tank)
 {
 	tank->timer +=dt;
-
 	/* gets the player from the list */
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 
@@ -272,29 +272,18 @@ static void render(object_group_tank *tank)
 }
 
 
-static void shape_from_space(cpBody *body, cpShape *shape, void *data)
-{
-    cpSpaceRemoveShape(space, shape);
-    cpShapeFree(shape);
-}
-static void constrain_from_space(cpBody *body, cpConstraint *constraint, void *data)
-{
-    cpSpaceRemoveConstraint(space, constraint);
-    cpConstraintFree(constraint);
-}
-
 static void destroy(object_group_tank *tank)
 {
 	particles_get_emitter_at(EMITTER_FRAGMENTS, tank->data.body->p);
 
-	cpBodyEachShape(tank->data.body,shape_from_space,NULL);
-	cpBodyEachConstraint(tank->data.body,constrain_from_space,NULL);
+	cpBodyEachShape(tank->data.body,se_shape_from_space,NULL);
+	cpBodyEachConstraint(tank->data.body,se_constrain_from_space,NULL);
 
 	cpSpaceRemoveBody(space, tank->data.body);
 	cpBodyFree(tank->data.body);
 
-	cpBodyEachShape(tank->wheel1,shape_from_space,NULL);
-	cpBodyEachShape(tank->wheel2,shape_from_space,NULL);
+	cpBodyEachShape(tank->wheel1,se_shape_from_space,NULL);
+	cpBodyEachShape(tank->wheel2,se_shape_from_space,NULL);
 	cpSpaceRemoveBody(space, tank->wheel1);
 	cpSpaceRemoveBody(space, tank->wheel2);
 	cpBodyFree(tank->wheel1);

@@ -205,9 +205,6 @@ static void arcade_draw()
 
 		glColor3f(1,1,1);
 
-		cpVect player_tex_pos = {-WIDTH*0.4,-0.3f*HEIGHT/2};
-		draw_texture(TEX_WHEEL,&player_tex_pos,TEX_MAP_FULL,300,300,0);
-
 		setTextSize(30);
 		font_drawText(-WIDTH*0.4,-0.8f*HEIGHT/2, "STYR");
 		font_drawText(-WIDTH*0.4,-0.8f*HEIGHT/2-50, "VVV");

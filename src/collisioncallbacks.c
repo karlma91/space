@@ -14,7 +14,8 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 void collisioncallbacks_init()
 {
-	cpSpaceAddCollisionHandler(space, ID_TANK, ID_BULLET_PLAYER, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, ID_TANK, ID_BULLET_PLAYER, collision_object_bullet_with_score
+			, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(space, ID_ROCKET, ID_BULLET_PLAYER, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(space, ID_FACTORY, ID_BULLET_PLAYER, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(space, ID_BULLET_PLAYER, ID_GROUND, NULL, NULL, callback_bullet_ground, NULL, NULL);
@@ -50,7 +51,6 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 
 	return 0;
 }
-
 static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b;
