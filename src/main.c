@@ -159,10 +159,10 @@ static int main_init()
 	//glOrtho(-(WIDTH/2),(WIDTH/2),-(HEIGHT/2),(HEIGHT/2),1,-1);
 
 	/* NB: need to be set before call to SDL_SetVideoMode! */
-	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+	//SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	//for antialiasing
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //TODO fix tile edges when AA is activated
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2); //TODO read AA-settings from config file
+	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //TODO fix tile edges when AA is activated
+	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2); //TODO read AA-settings from config file
 
 	SDL_putenv("SDL_DEBUG");
 

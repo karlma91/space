@@ -244,10 +244,10 @@ static cpBody *addChassis(cpSpace *space, object_group_tank *tank, cpVect pos, c
 
 static void render(object_group_tank *tank)
 {
-	if (tank->param->max_hp < 100)
-		glColor4f(1,1,1,0.6);
+	if (tank->param->max_hp < 100) //TODO add color into param
+		glColor4f(1,1,1,0.9);
 	else
-		glColor4f(1,1,0,0.6);
+		glColor4f(1,1,0,0.9);
 
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -283,6 +283,8 @@ static void constrain_from_space(cpBody *body, cpConstraint *constraint, void *d
 
 static void destroy(object_group_tank *tank)
 {
+	particles_get_emitter_at(EMITTER_FRAGMENTS, tank->data.body->p);
+
 	cpBodyEachShape(tank->data.body,shape_from_space,NULL);
 	cpBodyEachConstraint(tank->data.body,constrain_from_space,NULL);
 

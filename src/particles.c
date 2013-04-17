@@ -79,6 +79,7 @@ void particles_init()
 	read_emitter_from_file(EMITTER_SPARKS,"particles/sparks.xml");
 	read_emitter_from_file(EMITTER_SMOKE,"particles/smoke.xml");
 	read_emitter_from_file(EMITTER_SCORE,"particles/score.xml");
+	read_emitter_from_file(EMITTER_FRAGMENTS,"particles/fragments.xml");
 
 	/* sets in use list empty */
 	emitters_in_use_list = NULL;

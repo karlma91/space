@@ -49,7 +49,7 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	factory->timer = (factory->param->spawn_delay) * 0.7;
 	//fac->hp = fac->param->max_hp; //TODO FIXME
 
-	cpFloat size = 100;
+	cpFloat size = 100*1.5;
 	/* make and add new body */
 	factory->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
@@ -104,11 +104,6 @@ static void render(object_group_factory *factory) {
 
 	hpbar_draw(&factory->hp_bar);
 
-	if (factory->param->max_hp < 300)
-		glColor3f(0.3, 0.6, 0.8);
-	else
-		glColor3f(0.8, 0.4, 0.4);
-
 	//draw_boxshape(factory->shape,RGBAColor(0.2,0.9,0.1,1),RGBAColor(0.6,0.9,0.4,1));
 	factory->rot += 381 * dt;
 	float rot = factory->rot;
@@ -118,9 +113,21 @@ static void render(object_group_factory *factory) {
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 		draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200, 200, 0);
 	} else {
-		draw_texture(TEX_WHEEL, &(factory->data.body->p), TEX_MAP_FULL, 150, 150, rot);
-		draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200, 200, 0);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		if (factory->param->max_hp < 300)
+			glColor4f(0.3, 0.6, 0.8,0.5);
+		else
+			glColor4f(0.8, 0.4, 0.4,0.5);
+		draw_texture(TEX_WHEEL, &(factory->data.body->p), TEX_MAP_FULL, 150*1.5, 150*1.5, rot);
+
+		if (factory->param->max_hp < 300)
+			glColor4f(0.3, 0.6, 0.8, 1);
+		else
+			glColor4f(0.8, 0.4, 0.4, 1);
+
+		draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200 * 1.5, 200*1.5, 0);
 	}
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 }
 
 //FIXME Somewhat slow temporary fix, as objects_iterate_type does not support extra arguments!
