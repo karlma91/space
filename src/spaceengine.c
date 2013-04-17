@@ -25,6 +25,12 @@ void se_add_score_and_popup(cpVect p, int score)
 	((object_group_player *) objects_first(ID_PLAYER))->score += score;
 }
 
+float se_distance_to_player(float x)
+{
+	object_group_player *player = ((object_group_player *) objects_first(ID_PLAYER));
+	return fabs(player->data.body->p.x-x);
+}
+
 /**
  * return 1 if object is killed
  */

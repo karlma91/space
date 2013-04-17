@@ -120,6 +120,8 @@ static void level_start()
 {
 	game_time = 0;
 	if(state_timer > 1.5){
+		object_group_player *player = (object_group_player*)objects_first(ID_PLAYER);
+		player->disable = 0;
 		change_state(LEVEL_RUNNING);
 	}
 }
@@ -181,14 +183,14 @@ static void level_cleared()
 
 	update_all();
 
-	//if(state_timer > 3){
+	if(state_timer > 2){
 		lvl_cleared=1;
 		change_state(LEVEL_TRANSITION);
-	//}
+	}
 }
 static void level_transition()
 {
-	if(state_timer > 1){
+	//if(state_timer > 1){
 		//space_init_level(1,1);
 		if (lvl_cleared==1) {
 			//TODO remove tmp next level
@@ -203,9 +205,10 @@ static void level_transition()
 		} else {
 			//space_init_level(1,1); //TODO TMP
 		}
+
 		/* update objects to move shapes to same position as body */
 		change_state(LEVEL_START);
-	}
+	//}
 }
 
 /**
@@ -588,7 +591,7 @@ static void SPACE_draw()
 			setTextSize(60);
 			glColor3f(0.8f,0.8f,0.8f);
 			setTextAlign(TEXT_CENTER);
-			font_drawText(0, 0, "LOADING LEVEL...");
+			//font_drawText(0, 0, "LOADING LEVEL...");
 			break;
 		case LEVEL_PLAYER_DEAD:
 			setTextSize(60);
@@ -678,14 +681,16 @@ void space_init_level(int space_station, int deck)
 
 	static object_group_player *player;
 
-
 	if(player==NULL){
 		player = (object_group_player*)object_create_player();
 	} else {
+		player->disable = 1;
 		player->hp_bar.value = player->param->max_hp;
-		player->disable = 0;
 		if (space_station == 1 && deck == 1) { // reset player score if level 1 is initializing
-			player->score = 0;
+			player->data.preset->init((object_data*) player);
+		}else{
+			player->aim_speed += 0.3;
+			player->rotation_speed += 0.3;
 		}
 	}
 
@@ -712,6 +717,7 @@ void space_init_level(int space_station, int deck)
 
 	player->data.body->p.x = currentlvl->left + offset + 50;
 	player->data.body->p.y = currentlvl->height - offset - 50;
+	cpBodySetAngle(player->data.body,3*(M_PI/2));
 	player->hp_bar.value = player->param->max_hp;
 	player->data.body->v.x = 0;
 	player->data.body->v.y = -10;
@@ -744,7 +750,6 @@ void space_init_level(int space_station, int deck)
 	 * puts all shapes in correct position
 	 */
 	update_all();
-
 }
 
 static void on_enter()

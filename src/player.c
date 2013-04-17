@@ -30,7 +30,6 @@ static void player_render(object_group_player *);
 static void player_update(object_group_player *);
 static void player_destroy(object_group_player *);
 
-
 static void player_controls(object_group_player *);
 
 static void arcade_control(object_group_player *); //2
@@ -72,14 +71,9 @@ object_group_player *object_create_player()
 	player->data.components.hp_bar = &player->hp_bar;
 	player->data.components.body_count = 0;
 
-	player->gun_level = 1;
-	player->lives = 3;
-	player->score = 0;
-	player->disable = 0;
-	player->rotation_speed = 8;
 	player->flame = particles_get_emitter(EMITTER_FLAME);
-	player->aim_angle = 0;
-	player->gun_timer = 0;
+	player->disable=0;
+	init((object_data*)player);
 
 	/* make and add new body */
 	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
@@ -111,8 +105,16 @@ object_group_player *object_create_player()
 	return player;
 }
 
-static void init(object_data *fac)
+static void init(object_data *pl)
 {
+	object_group_player *player = (object_group_player*) pl;
+	player->gun_level = 1;
+	player->lives = 3;
+	player->score = 0;
+	player->rotation_speed = 2.5;
+	player->aim_angle = 0;
+	player->aim_speed = 0.5;
+	player->gun_timer = 0;
 }
 
 static void player_render(object_group_player *player)
@@ -229,7 +231,7 @@ static void arcade_control(object_group_player *player)
 
 	if (angle_index != DIR_NONE) {
 		player_angle_target = dir8[angle_index];
-		dir_step = (2.5 * 2*M_PI)*dt; // 2.5 rps
+		dir_step = (player->rotation_speed * 2*M_PI)*dt; // 2.5 rps
 		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
 
 		//TODO use impulses instead?
@@ -249,8 +251,8 @@ static void arcade_control(object_group_player *player)
 
 	if (angle_index != DIR_NONE) {
 		aim_angle_target = dir8[angle_index];
-		dir_step = (0.5f * 2*M_PI) * dt; // 0.5 rps
-		player->aim_angle = turn_toangle(player->aim_angle,aim_angle_target,dir_step);
+		dir_step = (player->aim_speed * 2*M_PI) * dt; // 0.5 rps
+		player->aim_angle = turn_toangle(player->aim_angle, aim_angle_target, dir_step);
 		action_shoot(player);
 	}
 }

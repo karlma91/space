@@ -205,19 +205,19 @@ static void arcade_draw()
 		setTextSize(40);
 
 		static float button_timer = 0;
-		static button_down = 0;
+		static int button_down;
 		button_timer+=dt;
 		if(button_timer > 0.5){
 			button_down = !button_down;
 			button_timer = 0;
 		}
-		font_drawText(0,0.5f*HEIGHT/2, "START GAME");
+		font_drawText(0,-0.6f*HEIGHT/2, "START GAME");
 		glColor3f(0.1,0.9,0.1);
 		if(button_down){
 			cpVect t = cpv(0,0);
 			draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
 		}else{
-			cpVect t = cpv(0,-4);
+			cpVect t = cpv(0,-5.5);
 			draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
 		}
 		break;

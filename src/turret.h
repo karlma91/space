@@ -31,6 +31,7 @@ typedef struct {
 	float timer;
 	float barrel_angle;
 	int bullets;
+	float max_distance;
 	int shooting;
 	float rate;
 	hpbar hp_bar;

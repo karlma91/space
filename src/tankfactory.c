@@ -47,6 +47,7 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	factory->rot = 0;
 	factory->smoke = particles_get_emitter(EMITTER_SMOKE);
 	factory->timer = (factory->param->spawn_delay) * 0.7;
+	factory->max_distance = 800;
 	//fac->hp = fac->param->max_hp; //TODO FIXME
 
 	cpFloat size = 100;
@@ -81,12 +82,15 @@ static void init(object_group_factory *factory) {
 static void update(object_group_factory *factory) {
 	factory->timer += dt;
 	if (factory->timer > factory->param->spawn_delay
-			&& factory->cur < factory->param->max_tanks) {
-		factory->timer = 0;
+			&& factory->cur < factory->param->max_tanks ) {
 
 		if(factory->param->type == ID_ROCKET){
-			object_create_rocket(factory->data.body->p.x, factory,factory->param->r_param);
+			if(se_distance_to_player(factory->data.body->p.x) < factory->max_distance){
+				object_create_rocket(factory->data.body->p.x, factory,factory->param->r_param);
+			}
+			factory->timer = 0;
 		}else{
+			factory->timer = 0;
 			object_create_tank(factory->data.body->p.x, factory, factory->param->t_param);
 		}
 

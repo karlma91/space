@@ -55,6 +55,8 @@ object_group_tank *object_create_tank(float xpos, object_group_factory *factory,
 	tank->data.alive = 1;
 	tank->param = param;
 
+	tank->max_distance = 800;
+
 	tank->timer = 0;
 	tank->factory = factory;
 
@@ -153,7 +155,7 @@ static void update(object_group_tank *tank)
 		tank->barrel_angle = 0;
 	}
 
-	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX)){
+	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX) && se_distance_to_player(tank->data.body->p.x)<tank->max_distance){
 		cpVect shoot_angle = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
 		object_create_bullet(tank->data.body->p,shoot_angle ,tank->data.body->v,ID_BULLET_ENEMY);
 		tank->timer = 0;

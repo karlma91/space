@@ -56,6 +56,7 @@ object_group_turret *object_create_turret(float xpos, object_param_turret *param
 	turret->rate = 0.060;
 	turret->bullets = 0;
 	turret->barrel_angle = 3*(M_PI/2);
+	turret->max_distance = 800;
 
 	cpFloat size = 100;
 	turret->data.body = cpSpaceAddBody(space,
@@ -110,7 +111,7 @@ static void update(object_group_turret *turret)
 		turret->shooting = 1;
 		turret->timer = 0;
 	}
-	if(turret->shooting && turret->timer > turret->rate){
+	if(turret->shooting && turret->timer > turret->rate && se_distance_to_player(turret->data.body->p.x) < turret->max_distance){
 		turret->bullets += 1;
 		cpVect shoot_angle = cpvforangle(turret->barrel_angle + cpBodyGetAngle(turret->data.body));
 		object_create_bullet(turret->data.body->p,shoot_angle ,turret->data.body->v,ID_BULLET_ENEMY);
