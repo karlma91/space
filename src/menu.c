@@ -183,6 +183,7 @@ static void arcade_update()
 	}
 }
 
+
 static void arcade_draw()
 {
 	static float timer;
@@ -198,26 +199,39 @@ static void arcade_draw()
 		font_drawText(0,0.5f*HEIGHT/2, "PAUSE");
 		break;
 	case MENU_MAIN:
+		drawStars();
 		glColor_from_color(draw_col_rainbow((int)(timer*1000)));
 		font_drawText(0,0.8f*HEIGHT/2, "SPACE");
+
+		glColor3f(1,1,1);
+
+		cpVect player_tex_pos = {-WIDTH*0.4,-0.3f*HEIGHT/2};
+		draw_texture(TEX_WHEEL,&player_tex_pos,TEX_MAP_FULL,300,300,0);
+
+		setTextSize(30);
+		font_drawText(-WIDTH*0.4,-0.8f*HEIGHT/2, "STYR");
+		font_drawText(-WIDTH*0.4,-0.8f*HEIGHT/2-50, "VVV");
+
+		font_drawText(+WIDTH*0.4,-0.8f*HEIGHT/2, "SKYT");
+		font_drawText(+WIDTH*0.4,-0.8f*HEIGHT/2-50, "VVV");
 
 		setTextAlign(TEXT_CENTER);
 		setTextSize(40);
 
 		static float button_timer = 0;
-		static button_down = 0;
+		static int button_down;
 		button_timer+=dt;
 		if(button_timer > 0.5){
 			button_down = !button_down;
 			button_timer = 0;
 		}
-		font_drawText(0,0.5f*HEIGHT/2, "START GAME");
+		font_drawText(0,-0.5f*HEIGHT/2, "START SPILLET");
 		glColor3f(0.1,0.9,0.1);
 		if(button_down){
 			cpVect t = cpv(0,0);
 			draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
 		}else{
-			cpVect t = cpv(0,-4);
+			cpVect t = cpv(0,-5.5);
 			draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
 		}
 		break;

@@ -28,7 +28,6 @@
 #include "level.h"
 #include "tank.h"
 
-static void drawStars();
 static float accumulator = 0;
 
 /* state functions */
@@ -120,6 +119,8 @@ static void level_start()
 {
 	game_time = 0;
 	if(state_timer > 1.5){
+		object_group_player *player = (object_group_player*)objects_first(ID_PLAYER);
+		player->disable = 0;
 		change_state(LEVEL_RUNNING);
 	}
 }
@@ -181,14 +182,14 @@ static void level_cleared()
 
 	update_all();
 
-	//if(state_timer > 3){
+	if(state_timer > 2){
 		lvl_cleared=1;
 		change_state(LEVEL_TRANSITION);
-	//}
+	}
 }
 static void level_transition()
 {
-	if(state_timer > 1){
+	//if(state_timer > 1){
 		//space_init_level(1,1);
 		if (lvl_cleared==1) {
 			//TODO remove tmp next level
@@ -203,9 +204,10 @@ static void level_transition()
 		} else {
 			//space_init_level(1,1); //TODO TMP
 		}
+
 		/* update objects to move shapes to same position as body */
 		change_state(LEVEL_START);
-	}
+	//}
 }
 
 /**
@@ -588,7 +590,7 @@ static void SPACE_draw()
 			setTextSize(60);
 			glColor3f(0.8f,0.8f,0.8f);
 			setTextAlign(TEXT_CENTER);
-			font_drawText(0, 0, "LOADING LEVEL...");
+			//font_drawText(0, 0, "LOADING LEVEL...");
 			break;
 		case LEVEL_PLAYER_DEAD:
 			setTextSize(60);
@@ -635,15 +637,21 @@ static void stars_init()
 		stars_size[i] = 2 + 5*(rand() % 1000) / 1000.0f;
 	}
 }
-static void drawStars()
+void drawStars()
 {
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
 	glPushMatrix();
 
 	glScalef(0.5f * cam_zoom,0.5f * cam_zoom, 1);
 
 	static float spaceship_angle;
 	spaceship_angle += 0.01f * 360*dt;
-	float cam_angle = (cam_center_x - currentlvl->left)  / (currentlvl->right - currentlvl->left) * 360 + spaceship_angle;
+	float cam_angle;
+	if (currentlvl)
+		cam_angle = (cam_center_x - currentlvl->left)  / (currentlvl->right - currentlvl->left) * 360 + spaceship_angle;
+	else
+		cam_angle = spaceship_angle;
 
 	glRotatef(-cam_angle,0,0,1);
 
@@ -674,18 +682,18 @@ static void func(object_data* obj)
 
 void space_init_level(int space_station, int deck)
 {
-	particles_clear();
-
 	static object_group_player *player;
-
 
 	if(player==NULL){
 		player = (object_group_player*)object_create_player();
 	} else {
+		player->disable = 1;
 		player->hp_bar.value = player->param->max_hp;
-		player->disable = 0;
 		if (space_station == 1 && deck == 1) { // reset player score if level 1 is initializing
-			player->score = 0;
+			player->data.preset->init((object_data*) player);
+		}else{
+			player->aim_speed += 0.3;
+			player->rotation_speed += 0.3;
 		}
 	}
 
@@ -712,6 +720,7 @@ void space_init_level(int space_station, int deck)
 
 	player->data.body->p.x = currentlvl->left + offset + 50;
 	player->data.body->p.y = currentlvl->height - offset - 50;
+	cpBodySetAngle(player->data.body,3*(M_PI/2));
 	player->hp_bar.value = player->param->max_hp;
 	player->data.body->v.x = 0;
 	player->data.body->v.y = -10;
@@ -745,6 +754,7 @@ void space_init_level(int space_station, int deck)
 	 */
 	update_all();
 
+	particles_clear();
 }
 
 static void on_enter()

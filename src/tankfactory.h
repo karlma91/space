@@ -29,6 +29,7 @@ typedef struct {
 	cpFloat timer;
 	int cur;
 	hpbar hp_bar;
+	float max_distance;
 
 	/* animation */
 	float rot;

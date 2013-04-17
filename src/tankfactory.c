@@ -45,8 +45,9 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 
 	factory->cur = 0;
 	factory->rot = 0;
-	factory->smoke = particles_get_emitter(EMITTER_SMOKE);
+	//factory->smoke = particles_get_emitter(EMITTER_SMOKE);
 	factory->timer = (factory->param->spawn_delay) * 0.7;
+	factory->max_distance = 800;
 	//fac->hp = fac->param->max_hp; //TODO FIXME
 
 	cpFloat size = 100*1.5;
@@ -68,7 +69,7 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	cpBodySetUserData(factory->data.body, factory);
 	objects_add((object_data *) factory);
 
-	hpbar_init(&factory->hp_bar, param->max_hp, 100, 16, -50, 90,
+	hpbar_init(&factory->hp_bar, param->max_hp, 100, 16, -50, 135,
 			&(factory->data.body->p));
 
 	return (object_group_factory*) factory;
@@ -81,22 +82,25 @@ static void init(object_group_factory *factory) {
 static void update(object_group_factory *factory) {
 	factory->timer += dt;
 	if (factory->timer > factory->param->spawn_delay
-			&& factory->cur < factory->param->max_tanks) {
-		factory->timer = 0;
+			&& factory->cur < factory->param->max_tanks ) {
 
 		if(factory->param->type == ID_ROCKET){
-			object_create_rocket(factory->data.body->p.x, factory,factory->param->r_param);
+			if(se_distance_to_player(factory->data.body->p.x) < factory->max_distance){
+				object_create_rocket(factory->data.body->p.x, factory,factory->param->r_param);
+			}
+			factory->timer = 0;
 		}else{
+			factory->timer = 0;
 			object_create_tank(factory->data.body->p.x, factory, factory->param->t_param);
 		}
 
 
 		factory->cur += 1;
 	}
-	if (factory->smoke) {
-		factory->smoke->p.x = factory->data.body->p.x - 20;
-		factory->smoke->p.y = factory->data.body->p.y + 80;
-	}
+	//if (factory->smoke) {
+	//	factory->smoke->p.x = factory->data.body->p.x - 20;
+	//	factory->smoke->p.y = factory->data.body->p.y + 80;
+	//}
 }
 
 static void render(object_group_factory *factory) {
@@ -144,7 +148,8 @@ static void remove_factory_from_rocket(object_group_rocket *rocket) {
 
 static void destroy(object_group_factory *factory) {
 	objects_remove(factory);
-	particles_release_emitter(factory->smoke);
+	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);
+	//particles_release_emitter(factory->smoke);
 
 	cpSpaceRemoveShape(space, factory->shape);
 	cpSpaceRemoveBody(space, factory->data.body);

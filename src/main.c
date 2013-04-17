@@ -93,10 +93,16 @@ static int init_config()
 static void initGL()
 {
 	//antialiasing
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_POLYGON_SMOOTH);
+	//glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
+	//glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+	//glEnable(GL_LINE_SMOOTH);
+	//glEnable(GL_POLYGON_SMOOTH);
+	 glEnable(GL_NEAREST);
+	 glDisable(GL_POLYGON_SMOOTH);
+	 glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	 glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	//fra ttf opengl tutorial
 	glEnable(GL_BLEND);
@@ -159,7 +165,7 @@ static int main_init()
 	//glOrtho(-(WIDTH/2),(WIDTH/2),-(HEIGHT/2),(HEIGHT/2),1,-1);
 
 	/* NB: need to be set before call to SDL_SetVideoMode! */
-	//SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	//for antialiasing
 	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //TODO fix tile edges when AA is activated
 	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2); //TODO read AA-settings from config file

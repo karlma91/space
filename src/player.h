@@ -27,6 +27,7 @@ typedef struct {
 	float rotation_speed;
 	float gun_timer;
 	float aim_angle;
+	float aim_speed;
 	emitter *flame;
 	cpBody *gunwheel;
 

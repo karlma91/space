@@ -22,6 +22,7 @@ typedef struct {
 	float timer;
 	float barrel_angle;
 	float rot_speed;
+	float max_distance;
 	hpbar hp_bar;
 	object_group_factory *factory;
 	int factory_id;
