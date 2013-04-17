@@ -114,6 +114,8 @@ static void render(object_group_factory *factory) {
 	float rot = factory->rot;
 
 	if (factory->param->type == ID_ROCKET) {
+		glColor3f(1,1,1);
+		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 		draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200, 200, 0);
 	} else {
 		draw_texture(TEX_WHEEL, &(factory->data.body->p), TEX_MAP_FULL, 150, 150, rot);

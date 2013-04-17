@@ -141,19 +141,14 @@ static void update(object_group_rocket *rocket)
 
 static void render(object_group_rocket *rocket)
 {
-	if (rocket->param->max_hp < 100)
-		glColor4f(1,1,1,0.6);
-	else
-		glColor4f(1,1,0,0.6);
+		glColor4f(1,1,1,1);
 
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	hpbar_draw(&rocket->hp_bar);
 
-	int texture = rocket->param->tex_id;
-
-	draw_texture(texture, &(rocket->data.body->p),TEX_MAP_FULL,100, 100, rocket->angle*(180/M_PI));
+	draw_texture(rocket->param->tex_id, &(rocket->data.body->p),TEX_MAP_FULL,100, 100, rocket->angle*(180/M_PI));
 
 	glPopAttrib();
 }

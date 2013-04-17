@@ -194,7 +194,7 @@ static void level_transition()
 			//TODO remove tmp next level
 			int next_lvl = currentlvl->deck + 1;
 			//TODO WARNING: final level index hard-coded!
-			if (next_lvl > level_get_level_count(currentlvl->deck)) {
+			if (next_lvl > level_get_level_count(currentlvl->station)) {
 				gameover_setstate(GAMEOVER_WIN);
 			    statesystem_set_state(STATESYSTEM_GAMEOVER);
 			} else {

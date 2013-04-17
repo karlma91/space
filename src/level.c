@@ -352,5 +352,5 @@ int level_get_station_count()
 
 int level_get_level_count(int station)
 {
-	return (station > 0 && station <= station_count) ? 0 : worlds[station].count;
+	return (station > 0 && station <= station_count) ? worlds[station-1].count : 0;
 }

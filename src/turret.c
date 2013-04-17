@@ -40,7 +40,7 @@ object_group_preset type_turret= {
 };
 
 static const texture_map tex_map[2] = {
-		{0,0,1,0.5}, {0,0.5,0.5,1}
+		{0, 0, 0.5, 1}, {0.5, 0, 1, 1}
 };
 
 object_group_turret *object_create_turret(float xpos, object_param_turret *param)
@@ -90,8 +90,6 @@ static void init(object_group_turret *turret)
 
 static void update(object_group_turret *turret)
 {
-
-
 	/* gets the player from the list */
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 
@@ -129,25 +127,19 @@ static void update(object_group_turret *turret)
 
 static void render(object_group_turret *turret)
 {
-	if (turret->param->max_hp < 100)
-		glColor4f(1,1,1,0.6);
-	else
-		glColor4f(1,1,0,0.6);
-
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+	glColor4f(1,1,1,1);
 
 	GLfloat dir = cpBodyGetAngle(turret->data.body);
-
-	cpVect r = cpvadd(turret->data.body->p, cpvmult(cpvforangle(turret->barrel_angle + dir),80));
-	draw_line(turret->data.body->p.x,turret->data.body->p.y,r.x,r.y, 30);
-
-	hpbar_draw(&turret->hp_bar);
 
 	int texture = turret->param->tex_id;
 
 	draw_texture(texture, &(turret->data.body->p), &tex_map[0],200, 200, dir*(180/M_PI));
+	draw_texture(texture, &(turret->data.body->p), &tex_map[1],200, 200, turret->barrel_angle*(180/M_PI));
 
+	hpbar_draw(&turret->hp_bar);
 	glPopAttrib();
 }
 
