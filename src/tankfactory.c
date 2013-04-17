@@ -41,6 +41,7 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	factory->data.preset = &type_tank_factory;
 	factory->data.components.hp_bar = &(factory->hp_bar);
 	factory->data.components.score = &(param->score);
+	factory->data.components.body_count = 0;
 	factory->param = param;
 
 	factory->cur = 0;
@@ -51,6 +52,11 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	//fac->hp = fac->param->max_hp; //TODO FIXME
 
 	cpFloat size = 100*1.5;
+
+	if (factory->param->type == ID_ROCKET) {
+		size = 200;
+	}
+
 	/* make and add new body */
 	factory->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));

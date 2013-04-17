@@ -137,8 +137,8 @@ static void render(object_group_turret *turret)
 
 	int texture = turret->param->tex_id;
 
-	draw_texture(texture, &(turret->data.body->p), &tex_map[0],200, 200, dir*(180/M_PI));
-	draw_texture(texture, &(turret->data.body->p), &tex_map[1],200, 200, turret->barrel_angle*(180/M_PI));
+	draw_texture(texture, &(turret->data.body->p), &tex_map[0],100, 100, dir*(180/M_PI));
+	draw_texture(texture, &(turret->data.body->p), &tex_map[1],100, 100, turret->barrel_angle*(180/M_PI));
 
 	hpbar_draw(&turret->hp_bar);
 	glPopAttrib();
