@@ -27,7 +27,7 @@ typedef struct {
 	int factory_id;
 	cpBody *wheel1;
 	cpBody *wheel2;
-
+	int state;
 	/* tmp debug variables */
 	cpFloat debug_left_dist;
 	cpFloat debug_right_dist;

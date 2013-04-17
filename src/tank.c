@@ -51,6 +51,7 @@ object_group_tank *object_create_tank(float xpos, object_group_factory *factory,
 	tank->data.preset = &type_tank;
 	tank->data.components.hp_bar = &(tank->hp_bar);
 	tank->data.components.score = &(param->score);
+	tank->data.components.body_count = 2;
 	tank->data.alive = 1;
 	tank->param = param;
 
@@ -83,6 +84,9 @@ object_group_tank *object_create_tank(float xpos, object_group_factory *factory,
 
 	tank->wheel1 = addWheel(space, posA, boxOffset);
 	tank->wheel2 = addWheel(space, posB, boxOffset);
+
+	tank->data.components.bodies[0] = tank->wheel1;
+	tank->data.components.bodies[1] = tank->wheel2;
 
 	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel1 , cpv(-30, -10), cpv(-wheel_offset, -40), cpvzero));
 	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel2, cpv( 30, -10), cpv( wheel_offset, -40), cpvzero));

@@ -25,10 +25,8 @@ typedef struct {
 	hpbar *hp_bar;
 	int *score;
 	float *damage;
-	void *unused_3;
-	void *unused_4;
-	void *unused_5;
-	void *unused_6;
+	int body_count;
+	cpBody *(bodies[5]);
 } object_component_pointers;
 
 typedef struct _object_data object_data;

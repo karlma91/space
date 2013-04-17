@@ -111,7 +111,7 @@ int tilemap_create (tilemap *map, char *filename)
 		fclose(fp);
 		return 1;
 	}
-	fprintf(stderr,"tilemap.c parsing %s \n",filename);
+	//fprintf(stderr,"tilemap.c parsing %s \n",filename);
 
 	for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
 			node != NULL;
@@ -160,6 +160,6 @@ static int parse_data(tilemap *map, char *data)
 			data++;
 		}
 	}
-	fprintf(stderr,"HELLO %d TEXTUREMAP.c \n",__LINE__);
+	//fprintf(stderr,"HELLO %d TEXTUREMAP.c \n",__LINE__);
 	return 0;
 }

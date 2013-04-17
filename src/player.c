@@ -70,6 +70,7 @@ object_group_player *object_create_player()
 	player->param->tex_id = TEX_PLAYER;
 
 	player->data.components.hp_bar = &player->hp_bar;
+	player->data.components.body_count = 0;
 
 	player->gun_level = 1;
 	player->lives = 3;

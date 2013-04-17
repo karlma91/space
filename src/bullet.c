@@ -33,6 +33,7 @@ object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int 
 
 		temp->data.alive = 1;
 		temp->data.components.damage = &(temp->damage);
+		temp->data.components.body_count = 0;
 
 		cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
 

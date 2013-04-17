@@ -55,7 +55,7 @@ object_group_turret *object_create_turret(float xpos, object_param_turret *param
 	turret->timer = 0;
 	turret->rate = 0.060;
 	turret->bullets = 0;
-	turret->barrel_angle = 0;
+	turret->barrel_angle = 3*(M_PI/2);
 
 	cpFloat size = 100;
 	turret->data.body = cpSpaceAddBody(space,

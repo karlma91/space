@@ -126,7 +126,7 @@ int level_init()
 			break;
 		}
 
-		fprintf(stderr, "%s %s \n", group, subtype); //DEBUG
+		//fprintf(stderr, "%s %s \n", group, subtype); //DEBUG
 
 		/* find object type id */
 		int group_id = get_group_index(group);

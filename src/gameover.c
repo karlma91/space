@@ -29,10 +29,10 @@ static void draw();
 static void destroy();
 static void draw_highscore();
 
-#define MAX_NAME_LENGTH 4
+#define MAX_NAME_LENGTH 3
 
 /* static variables */
-static char input[MAX_NAME_LENGTH+1] = "    ";
+static char input[MAX_NAME_LENGTH+1] = "   ";
 static int valid_index[MAX_NAME_LENGTH];
 static const char valid_char[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
 static const int char_count = 37; /* valid_char length*/
@@ -51,7 +51,12 @@ void gameover_init()
 
 static void on_enter()
 {
-
+	if(config.arcade){
+		printf("exit %d\n", getPlayerScore());
+		statesystem_set_state(STATESYSTEM_MENU);
+		main_stop();
+		return;
+	}
 }
 static void on_leave()
 {
@@ -70,6 +75,7 @@ static void update() {
 		return;
 	}
 */
+
 	static float key_dt = 0;
 	static float key_ddt = 0.25;
 	static const float key_ddt_min = 0.12f;
@@ -159,7 +165,7 @@ static void draw()
 		/*no break*/
 	case enter_name:
 		font_drawText(0,0, &input[0]);
-		font_drawText(1.5f*60*(cursor-2+0.5f),-60/4, "_");
+		font_drawText(1.5f*60*(cursor - 1),-60/4, "_");
 
 		char tmp[2];
 		tmp[1] = '\0';
@@ -172,7 +178,7 @@ static void draw()
 		for(j=from; j<=to; j++,k++){
 			tmp[0] = valid_char[j < 0 ? j + char_count : j % char_count];
 			if(k){
-				font_drawText(1.5f*60*(cursor-2+0.5f),-k*100,tmp);
+				font_drawText(1.5f*60*(cursor - 1),-k*100,tmp);
 			}
 		}
 		break;

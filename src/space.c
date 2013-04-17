@@ -133,7 +133,9 @@ static void level_running()
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
-	if(objects_count(ID_FACTORY) == 0){
+	if(objects_count(ID_FACTORY) == 0 &&
+			objects_count(ID_TANK) == 0 &&
+			objects_count(ID_TURRET) == 0){
 		change_state(LEVEL_CLEARED);
 	}
 
@@ -191,7 +193,7 @@ static void level_transition()
 			//TODO remove tmp next level
 			int next_lvl = currentlvl->deck + 1;
 			//TODO WARNING: final level index hard-coded!
-			if (next_lvl > 3) {
+			if (next_lvl > 6) {
 				gameover_setstate(GAMEOVER_WIN);
 			    statesystem_set_state(STATESYSTEM_GAMEOVER);
 			} else {
@@ -213,7 +215,7 @@ static void change_state(int state)
 	state_timer = 0;
 	statesystem_set_inner_state(STATESYSTEM_SPACE,state);
 	gamestate = state;
-	fprintf(stderr,"DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
+	//fprintf(stderr,"DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
 }
 
 	static int cam_mode = 5;
@@ -306,30 +308,25 @@ static void update_all()
 /**
  * Used by object_iterate to update all objects
  */
-static object_group_tank *temptank = NULL;
 static void update_objects(object_data *obj)
 {
 	if(obj->alive){
-
-		//TODO: fix this shit
-		if(obj->preset->ID == ID_TANK){
-			temptank = ((object_group_tank*)obj);
-			if (obj->body->p.x < currentlvl->left ){
-				obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
-				temptank->wheel1->p.x = currentlvl->right - abs(currentlvl->left - temptank->wheel1->p.x );
-				temptank->wheel2->p.x = currentlvl->right - abs(currentlvl->left - temptank->wheel2->p.x );
-
+		if (obj->body->p.x < currentlvl->left ){
+			obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
+			int i = 0;
+			for(i=0;i < obj->components.body_count; i++){
+				cpBody *body = obj->components.bodies[i];
+				body->p.x = currentlvl->right - abs(currentlvl->left -body->p.x );
 			}
-			if (obj->body->p.x > currentlvl->right){
-				obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
-				temptank->wheel1->p.x = currentlvl->left + (temptank->wheel1->p.x - currentlvl->right);
-				temptank->wheel2->p.x = currentlvl->left + (temptank->wheel2->p.x - currentlvl->right);
-			}
-		}else{
-			if (obj->body->p.x < currentlvl->left ) obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
-			if (obj->body->p.x > currentlvl->right) obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
 		}
-
+		if (obj->body->p.x > currentlvl->right){
+			obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
+			int i = 0;
+			for(i=0;i < obj->components.body_count; i++){
+				cpBody *body = obj->components.bodies[i];
+				body->p.x = currentlvl->left + (body->p.x - currentlvl->right);
+			}
+		}
 		obj->preset->update(obj);
 	}else{
 		objects_remove(obj);
@@ -532,21 +529,21 @@ static void SPACE_draw()
 		sprintf(particles_temp,"%d",particles_active);
 		sprintf(particles2_temp,"%d",available_particle_counter);
 		sprintf(particles3_temp,"%d",(available_particle_counter + particles_active));
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,particles_temp);
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles2_temp);
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 180,particles3_temp);
+		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,particles_temp);
+		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles2_temp);
+		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 180,particles3_temp);
 
 		char pos_temp[20];
 		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->data.body->p.x,player->data.body->p.y);
-		font_drawText(-WIDTH/2+15,-HEIGHT/2+12,pos_temp);
+		//font_drawText(-WIDTH/2+15,-HEIGHT/2+12,pos_temp);
 
 		setTextAlign(TEXT_RIGHT);
-		font_drawText(WIDTH/2-25,-HEIGHT/2+15,game_state_names[gamestate]);
+		//font_drawText(WIDTH/2-25,-HEIGHT/2+15,game_state_names[gamestate]);
 
 		setTextSize(15);
 		char level_temp[20];
 		setTextAlign(TEXT_CENTER);
-		sprintf(level_temp,"STATION: %d DECK: %d",currentlvl->station, currentlvl->deck);
+		sprintf(level_temp,"STATION: %d DECK: %d", currentlvl->station, currentlvl->deck);
 		font_drawText(0, -HEIGHT/2+8, level_temp);
 
 
@@ -597,8 +594,13 @@ static void SPACE_draw()
 			setTextSize(60);
 			glColor3f(1,0,0);
 			setTextAlign(TEXT_CENTER);
-			font_drawText(0, 0, "GAME OVER-PRESS ENTER");
-			setTextSize(120);font_drawText(0,-180,"\x49\x4e\x46\x33\x34\x38\x30");
+			if(config.arcade){
+				font_drawText(0, 0, "GAME OVER-PRESS GREEN");
+			}else{
+				font_drawText(0, 0, "GAME OVER-PRESS ENTER");
+			}
+			setTextSize(120);
+			//font_drawText(0,-180,"\x49\x4e\x46\x33\x34\x38\x30");
 			break;
 		case LEVEL_STATE_COUNT:
 			/* invalid value */

@@ -51,11 +51,11 @@ void levelselevt_init()
     statesystem_init_state(STATESYSTEM_LEVELSELECT, 0, on_enter, update, NULL, render, on_leave, destroy);
 
 	level_get_ships(&ships, &decks);
-	fprintf(stderr, "decks: %d \n", decks);
-	int i;
-	for(i=0; i<decks; i++){
-		fprintf(stderr, "x: %f y: %f radius: %f \n", ships[i].x,ships[i].y,ships[i].radius);
-	}
+	//fprintf(stderr, "decks: %d \n", decks);
+	//int i;
+	//for(i=0; i<decks; i++){
+	//	fprintf(stderr, "x: %f y: %f radius: %f \n", ships[i].x,ships[i].y,ships[i].radius);
+	//}
 }
 
 static void on_enter()

@@ -595,7 +595,7 @@ static int read_emitter_from_file (int type,char *filename)
 		return 1;
 
 	}
-	fprintf(stderr,"particles.c parsing %s \n",filename);
+	//fprintf(stderr,"particles.c parsing %s \n",filename);
 	for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
 			node != NULL;
 			node=mxmlWalkNext (node, NULL, MXML_DESCEND)
@@ -606,7 +606,7 @@ static int read_emitter_from_file (int type,char *filename)
 			}else if(TESTNAME("emitter")){
 				char *(spint[1]);
 				parse_string(node,"imageName",spint);
-				fprintf(stderr, "HELLO TEXTURE: %s\n", *spint);
+				//fprintf(stderr, "HELLO TEXTURE: %s\n", *spint);
 				if(*spint != NULL){
 					emi->texture_id = texture_load(*spint);
 				}

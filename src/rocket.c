@@ -48,6 +48,7 @@ object_group_rocket *object_create_rocket(float xpos, object_group_factory *fact
 	rocket->data.components.hp_bar = &(rocket->hp_bar);
 	rocket->data.components.score = &(param->score);
 	rocket->data.components.damage = &(damage);
+	rocket->data.components.body_count = 0;
 	rocket->data.alive = 1;
 	rocket->param = param;
 	rocket->flame = particles_get_emitter(EMITTER_ROCKET_FLAME);

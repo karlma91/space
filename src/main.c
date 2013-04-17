@@ -86,8 +86,7 @@ static int init_config()
 		printf("Could not load 'bin/config.ini'\n");
 		return 1;
 	}
-	fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d\n",
-			config.fullscreen);
+	//fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d\n", config.fullscreen);
 	return 0;
 }
 
@@ -123,7 +122,8 @@ static void initGL()
 	glMatrixMode(GL_MODELVIEW);
 
 	/* set the clear color to gray */
-	glClearColor(0,0.08,0.15, 1);
+	//glClearColor(0,0.08,0.15, 1);
+	glClearColor(0,0,0, 1);
 
 	//enables gldraw array
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -231,6 +231,11 @@ static int main_run()
 
 	lastTime = SDL_GetTicks();
 
+	//START GAME
+	if(config.arcade){
+		printf("start %s\n", "999");
+	}
+
 	while(main_running) {
 
 		thisTime = SDL_GetTicks();
@@ -244,7 +249,7 @@ static int main_run()
 		fps++;
 		if(frames>=1){
 			sprintf(fps_buf,"%.2f FPS",fps);
-			printf("%s\n",fps_buf);
+			//printf("%s\n",fps_buf);
 			frames = 0;
 			fps=0;
 		}
