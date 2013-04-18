@@ -100,16 +100,16 @@ static void update() {
 		}
 		key_dt -= dt;
 
-		if (keys[KEY_RIGHT_2] || keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
+		if (keys[KEY_RIGHT_2] || keys[KEY_RIGHT_1] || keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 			if (++cursor >= MAX_NAME_LENGTH) {
 				cursor = 0;
 				gameover_state = confirm_name;
 				win = 0;
 			}
-			keys[KEY_RIGHT_2] = 0, keys[KEY_RETURN_1] = 0, keys[KEY_RETURN_2] = 0;
-		} else if (keys[KEY_LEFT_2] || keys[KEY_ESCAPE]) {
+			keys[KEY_RIGHT_2] = 0,keys[KEY_RIGHT_1] = 0, keys[KEY_RETURN_1] = 0, keys[KEY_RETURN_2] = 0;
+		} else if (keys[KEY_LEFT_2] ||keys[KEY_LEFT_1] || keys[KEY_ESCAPE]) {
 			if (cursor > 0) --cursor;
-			keys[KEY_LEFT_2] = 0, keys[KEY_ESCAPE] = 0;
+			keys[KEY_LEFT_2] = 0,keys[KEY_LEFT_1] = 0, keys[KEY_ESCAPE] = 0;
 		}
 
 		input[cursor] = valid_char[valid_index[cursor]];
