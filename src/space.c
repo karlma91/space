@@ -135,6 +135,7 @@ static void level_running()
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
+	fprintf(stderr,"FACTORY: %d TANK: %d TURRET: %d\n",objects_count(ID_FACTORY), objects_count(ID_TANK) ,objects_count(ID_TURRET));
 	if(objects_count(ID_FACTORY) == 0 &&
 			objects_count(ID_TANK) == 0 &&
 			objects_count(ID_TURRET) == 0){

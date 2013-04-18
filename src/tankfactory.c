@@ -50,7 +50,7 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	static int randomness= 0;
 	randomness += 123;
 	randomness *= randomness;
-	factory->timer = (factory->param->spawn_delay) * ((randomness % 0xFF) / 400.0f + 0.2f);
+	factory->timer = (factory->param->spawn_delay) * ((randomness % 0xFF + 160) / 400.0f + 0.2f);
 	factory->max_distance = 800;
 	//fac->hp = fac->param->max_hp; //TODO FIXME
 
@@ -63,7 +63,7 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	/* make and add new body */
 	factory->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
-	cpBodySetPos(factory->data.body, cpv(x_pos,128 + size/2));
+	cpBodySetPos(factory->data.body, cpv(x_pos,64 + size/2));
 
 	/* make and connect new shape to body */
 	factory->shape = cpSpaceAddShape(space,cpBoxShapeNew(factory->data.body, size, size));

@@ -97,7 +97,7 @@ static void render(object_data *obj)
  */
 static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
 {
-	cpVect g = cpv(0,-100);
+	cpVect g = cpv(0,-200);
 
 	cpBodyUpdateVelocity(body, g, damping, dt);
 }
