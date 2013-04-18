@@ -76,27 +76,27 @@ static void update()
 		ships[i].rotation += 360*ships[i].rotation_speed*dt;
 	}
 
-	if (keys[SDLK_ESCAPE]){
+	if (keys[KEY_ESCAPE]){
 	    statesystem_set_state(STATESYSTEM_MENU);
-		keys[SDLK_ESCAPE] = 0;
+		keys[KEY_ESCAPE] = 0;
 		}
 
 	if(overview){
 		float speed = 400;
-		if (keys[SDLK_UP]){
+		if (keys[KEY_UP_2]){
 			//camera_y += speed*dt;
 			sel+=1;
-			keys[SDLK_UP] = 0;
+			keys[KEY_UP_2] = 0;
 		}
-		if (keys[SDLK_DOWN]){
+		if (keys[KEY_DOWN_2]){
 			//camera_y -= speed*dt;
 			sel-=1;
-			keys[SDLK_DOWN] = 0;
+			keys[KEY_DOWN_2] = 0;
 		}
-		if (keys[SDLK_LEFT]){
+		if (keys[KEY_LEFT_2]){
 			camera_x += speed*dt;
 		}
-		if (keys[SDLK_RIGHT]){
+		if (keys[KEY_RIGHT_2]){
 			camera_x -= speed*dt;
 		}
 
@@ -105,29 +105,29 @@ static void update()
 		float temp_z =  (camera_zoom - 0.1)*5;
 		camera_zoom -= temp_z*dt;
 
-		if (keys[SDLK_RETURN]){
+		if (keys[KEY_RETURN]){
 			overview = 0;
 			zoomed_temp_y = ((1.0f * HEIGHT)/(camera_zoom*2));
-			keys[SDLK_RETURN] = 0;
+			keys[KEY_RETURN] = 0;
 		}
 
 	}else{
-		if (keys[SDLK_w] || keys[SDLK_UP]){
+		if (keys[KEY_UP_1] || keys[KEY_UP_2]){
 			level_select--;
-			keys[SDLK_w] = 0, keys[SDLK_UP] = 0;
+			keys[KEY_UP_1] = 0, keys[KEY_UP_2] = 0;
 		}
-		if (keys[SDLK_s] || keys[SDLK_DOWN]){
+		if (keys[KEY_DOWN_1] || keys[KEY_DOWN_2]){
 			level_select++;
-			keys[SDLK_s] = 0, keys[SDLK_DOWN] = 0;
+			keys[KEY_DOWN_1] = 0, keys[KEY_DOWN_2] = 0;
 		}
 
 		level_select = (level_select < 0) ? ships[sel].count - 1 : (level_select >= ships[sel].count ? 0 : level_select);;
 
-		if (keys[SDLK_SPACE] || keys[SDLK_RETURN]) {
+		if (keys[KEY_RETURN]) {
 		    statesystem_set_state(STATESYSTEM_SPACE);
 			/* load correct level */
 			space_init_level(sel+1,level_select+1);
-			keys[SDLK_SPACE] = 0, keys[SDLK_RETURN] = 0;
+			keys[KEY_RETURN] = 0;
 		}
 		if(keys[SDLK_BACKSPACE]){
 			overview = 1;

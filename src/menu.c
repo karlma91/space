@@ -110,27 +110,27 @@ void menu_change_current_menu(int menu)
 
 static void update()
 {
-	if (keys[SDLK_w] || keys[SDLK_UP]){
+	if (keys[KEY_UP_1] || keys[KEY_UP_2]){
 		select_id--;
 		select_id = (select_id < 0) ? curMenu->num_items-1 : select_id;
-		keys[SDLK_w] = 0, keys[SDLK_UP] = 0;
+		keys[KEY_UP_1] = 0, keys[KEY_UP_2] = 0;
 	}
 
-	if (keys[SDLK_s] || keys[SDLK_DOWN]){
+	if (keys[KEY_DOWN_1] || keys[KEY_DOWN_2]){
 		select_id++;
 		select_id = select_id >= curMenu->num_items ? 0 : select_id;
-		keys[SDLK_s] = 0, keys[SDLK_DOWN] = 0;
+		keys[KEY_DOWN_1] = 0, keys[KEY_DOWN_2] = 0;
 	}
 
-	if (keys[SDLK_SPACE] || keys[SDLK_RETURN]) {
+	if (keys[KEY_RETURN]) {
 		curMenu->func();
-		keys[SDLK_SPACE] = 0, keys[SDLK_RETURN] = 0;
+		keys[KEY_RETURN] = 0;
 	}
 
-	if(keys[SDLK_ESCAPE]){
+	if(keys[KEY_ESCAPE]){
 		select_id = curMenu->escape_item;
 		curMenu->func();
-		keys[SDLK_ESCAPE] = 0;
+		keys[KEY_ESCAPE] = 0;
 	}
 }
 
@@ -162,7 +162,7 @@ static void arcade_update()
 {
 
 
-	if (keys[SDLK_SPACE] || keys[SDLK_RETURN]) {
+	if (keys[KEY_RETURN]) {
 		switch(current_menu){
 			case MENU_MAIN:
 				space_init_level(1,1);
@@ -173,13 +173,13 @@ static void arcade_update()
 				statesystem_set_state(STATESYSTEM_SPACE);
 				break;
 			}
-		keys[SDLK_SPACE] = 0, keys[SDLK_RETURN] = 0;
+		keys[KEY_RETURN] = 0;
 	}
 
-	if(keys[SDLK_ESCAPE]){
+	if(keys[KEY_ESCAPE]){
 		menu_change_current_menu(MENU_MAIN);
 		statesystem_set_state(STATESYSTEM_MENU);
-		keys[SDLK_ESCAPE] = 0;
+		keys[KEY_ESCAPE] = 0;
 	}
 }
 
@@ -196,7 +196,7 @@ static void arcade_draw()
 	case MENU_INGAME:
 		setTextAlign(TEXT_CENTER);
 		setTextSize(40);
-		font_drawText(0,0.5f*HEIGHT/2, "PAUSE");
+		//font_drawText(0,0.5f*HEIGHT/2, "PAUSE");
 		break;
 	case MENU_MAIN:
 		drawStars();

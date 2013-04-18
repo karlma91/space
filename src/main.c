@@ -36,6 +36,17 @@
 static float fps;
 static float frames;
 
+unsigned int KEY_UP_1 = SDLK_w;
+unsigned int KEY_UP_2 = SDLK_UP;
+unsigned int KEY_LEFT_1 = SDLK_a;
+unsigned int KEY_LEFT_2 = SDLK_LEFT;
+unsigned int KEY_RIGHT_1 = SDLK_d;
+unsigned int KEY_RIGHT_2 = SDLK_RIGHT;
+unsigned int KEY_DOWN_1 = SDLK_s;
+unsigned int KEY_DOWN_2 = SDLK_DOWN;
+
+unsigned int KEY_RETURN = SDLK_RETURN;
+unsigned int KEY_ESCAPE = SDLK_ESCAPE;
 
 /* definition of external variables */
 char fps_buf[15];
@@ -62,6 +73,8 @@ static int handler(void* config, const char* section, const char* name, const ch
 	  pconfig->fullscreen = atoi(value);
   }else if (MATCH("video", "arcade")) {
 	  pconfig->arcade = atoi(value);
+  } else if (MATCH("video", "arcade_keys")) {
+	  pconfig->arcade_keys = atoi(value);
   } else if (MATCH("video", "width")) {
 	  pconfig->width = atoi(value);
   } else if (MATCH("video", "height")) {
@@ -87,6 +100,21 @@ static int init_config()
 		return 1;
 	}
 	//fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d\n", config.fullscreen);
+
+	if (config.arcade_keys) {
+		KEY_UP_1 = SDLK_UP;
+		KEY_UP_2 = SDLK_w;
+		KEY_LEFT_1 = SDLK_LEFT;
+		KEY_LEFT_2 = SDLK_a;
+		KEY_RIGHT_1 = SDLK_RIGHT;
+		KEY_RIGHT_2 = SDLK_d;
+		KEY_DOWN_1 = SDLK_DOWN;
+		KEY_DOWN_2 = SDLK_s;
+
+		KEY_RETURN = SDLK_g;
+		KEY_ESCAPE = SDLK_ESCAPE;
+	}
+
 	return 0;
 }
 
@@ -151,6 +179,8 @@ static int main_init()
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
 
+	SDL_ShowCursor(SDL_DISABLE);
+
 	if (config.fullscreen) {
 		const SDL_VideoInfo* myPointer = SDL_GetVideoInfo();
 		W = myPointer->current_w;
@@ -188,7 +218,7 @@ static int main_init()
 		//SDL_SetColorKey(image, SDL_SRCCOLORKEY, colorkey);
 	}
 
-	if (!(screen = SDL_SetVideoMode(W, H, 0, (SDL_OPENGL| SDL_DOUBLEBUF | SDL_RESIZABLE) | (SDL_FULLSCREEN * config.fullscreen))))
+	if (!(screen = SDL_SetVideoMode(W, H, 0, (SDL_OPENGL| SDL_DOUBLEBUF | SDL_RESIZABLE | SDL_NOFRAME) | (SDL_FULLSCREEN * config.fullscreen))))
 	{
 		printf("ERROR");
 		SDL_Quit();

@@ -130,7 +130,7 @@ static void player_render(object_group_player *player)
 
 static void player_update(object_group_player *player)
 {
-	if (keys[SDLK_i])
+	if (keys[SDLK_i] && !config.arcade_keys)
 		player->hp_bar.value = 1000000;
 
 	player->gun_timer += dt;
@@ -161,36 +161,38 @@ static void player_controls(object_group_player *player)
 {
 	arcade_control(player);
 
-	if(keys[SDLK_g]){
-		keys[SDLK_g] = 0;
-		cpVect gravity = cpv(0, -2);
-		cpSpaceSetGravity(space, gravity);
-	}
+	if (!config.arcade_keys) {
+		if(keys[SDLK_g]){
+			keys[SDLK_g] = 0;
+			cpVect gravity = cpv(0, -2);
+			cpSpaceSetGravity(space, gravity);
+		}
 
-	if (keys[SDLK_q]){
-		cam_zoom /= dt+1.4f;
-	}
+		if (keys[SDLK_q]){
+			cam_zoom /= dt+1.4f;
+		}
 
-	if (keys[SDLK_e]){
-		cam_zoom *= dt+1.4f;
-		if (keys[SDLK_q])
-			cam_zoom = 1;
-	}
-	if (keys[SDLK_r]){
-		player->data.body->p.x=0;
-		player->data.body->p.y=500;
-	}
+		if (keys[SDLK_e]){
+			cam_zoom *= dt+1.4f;
+			if (keys[SDLK_q])
+				cam_zoom = 1;
+		}
+		if (keys[SDLK_r]){
+			player->data.body->p.x=0;
+			player->data.body->p.y=500;
+		}
 
-	if (keys[SDLK_h]) {
-		cpBodySetVelLimit(player->data.body,5000);
-	}
+		if (keys[SDLK_h]) {
+			cpBodySetVelLimit(player->data.body,5000);
+		}
 
-	if (keys[SDLK_x]) {
-		particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
-	}
-	if (keys[SDLK_b]) {
-		particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
-		keys[SDLK_b] = 0;
+		if (keys[SDLK_x]) {
+			particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
+		}
+		if (keys[SDLK_b]) {
+			particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
+			keys[SDLK_b] = 0;
+		}
 	}
 }
 
@@ -225,7 +227,7 @@ static void arcade_control(object_group_player *player)
 	float dir_step;
 	Direction angle_index = -1;
 
-	angle_index = angle_index_fromkeys(SDLK_a, SDLK_w, SDLK_d, SDLK_s);
+	angle_index = angle_index_fromkeys(KEY_LEFT_1, KEY_UP_1, KEY_RIGHT_1, KEY_DOWN_1);
 
 	cpFloat speed = 700;
 
@@ -247,7 +249,7 @@ static void arcade_control(object_group_player *player)
 	//static float aim_angle = 0;
 	float aim_angle_target = 0;
 
-	angle_index = angle_index_fromkeys(SDLK_LEFT, SDLK_UP, SDLK_RIGHT, SDLK_DOWN);
+	angle_index = angle_index_fromkeys(KEY_LEFT_2, KEY_UP_2, KEY_RIGHT_2, KEY_DOWN_2);
 
 	if (angle_index != DIR_NONE) {
 		aim_angle_target = dir8[angle_index];

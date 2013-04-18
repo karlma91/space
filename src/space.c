@@ -135,7 +135,7 @@ static void level_running()
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
-	if (!config.arcade) fprintf(stderr,"FACTORY: %d TANK: %d TURRET: %d\n",objects_count(ID_FACTORY), objects_count(ID_TANK) ,objects_count(ID_TURRET));
+	//if (!config.arcade) fprintf(stderr,"FACTORY: %d TANK: %d TURRET: %d\n",objects_count(ID_FACTORY), objects_count(ID_TANK) ,objects_count(ID_TURRET));
 	if(objects_count(ID_FACTORY) == 0 &&
 			objects_count(ID_TANK) == 0 &&
 			objects_count(ID_TURRET) == 0){
@@ -160,8 +160,8 @@ int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead()
 {
 	update_all();
-	if(keys[SDLK_RETURN]){//state_timer > 3){
-		keys[SDLK_RETURN] = 0;
+	if(keys[KEY_RETURN]){//state_timer > 3){
+		keys[KEY_RETURN] = 0;
 		lvl_cleared=0;
 		statesystem_set_state(STATESYSTEM_GAMEOVER);
 		gameover_setstate(enter_name);
@@ -254,10 +254,10 @@ static void pre_update()
 	/*
 	 * Opens the pause menu
 	 */
-	if(keys[SDLK_ESCAPE] && gamestate == LEVEL_RUNNING){
+	if(keys[KEY_ESCAPE] && gamestate == LEVEL_RUNNING){
 	    menu_change_current_menu(MENU_INGAME);
 		statesystem_push_state(STATESYSTEM_MENU);
-		keys[SDLK_ESCAPE] = 0;
+		keys[KEY_ESCAPE] = 0;
 	}
 
 	/* runs the current state */
@@ -772,8 +772,6 @@ void space_init_level(int space_station, int deck)
 
 	objects_iterate(func);
 	objects_destroy();
-	//TODO REMOVE
-	if (!config.arcade) fprintf(stderr, "space.c:%d, no. tanks: %d\nno. factories: %d\nno. player: %d\nno. turrets: %d\n",__LINE__, objects_count(ID_TANK),objects_count(ID_FACTORY),objects_count(ID_PLAYER),objects_count(ID_TURRET));
 
 	objects_add((object_data*)player);
 
@@ -827,7 +825,7 @@ void space_init_level(int space_station, int deck)
 	/*
 	 * puts all shapes in correct position
 	 */
-	if (!config.arcade) fprintf(stderr, "space.c:%d, no. tanks: %d\nno. factories: %d\nno. player: %d\nno. turrets: %d\n",__LINE__, objects_count(ID_TANK),objects_count(ID_FACTORY),objects_count(ID_PLAYER),objects_count(ID_TURRET));
+	//if (!config.arcade) fprintf(stderr, "space.c:%d, no. tanks: %d\nno. factories: %d\nno. player: %d\nno. turrets: %d\n",__LINE__, objects_count(ID_TANK),objects_count(ID_FACTORY),objects_count(ID_PLAYER),objects_count(ID_TURRET));
 	update_all();
 
 	particles_clear();

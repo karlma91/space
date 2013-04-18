@@ -51,12 +51,7 @@ void gameover_init()
 
 static void on_enter()
 {
-	if(config.arcade){
-		printf("exit %d\n", getPlayerScore());
-		statesystem_set_state(STATESYSTEM_MENU);
-		main_stop();
-		return;
-	}
+
 }
 static void on_leave()
 {
@@ -69,9 +64,9 @@ static int win = 0; //TMP solution for win screens
 
 static void update() {
 /*{ //DEBUG CODE
-	if (keys[SDLK_RETURN]) {
+	if (keys[KEY_RETURN]) {
 		gameover_state = (1+gameover_state)%3;
-		keys[SDLK_RETURN] = 0;
+		keys[KEY_RETURN] = 0;
 		return;
 	}
 */
@@ -85,14 +80,14 @@ static void update() {
 		win = 1;
 		/* no break */
 	case enter_name:
-		if (keys[SDLK_DOWN]) {
+		if (keys[KEY_DOWN_2]) {
 			if (key_dt<=0) {
 				key_dt = key_ddt;
 				key_ddt = key_ddt_min;
 
 				if (++valid_index[cursor] >= char_count) valid_index[cursor] -= char_count;
 			}
-		} else if (keys[SDLK_UP]) {
+		} else if (keys[KEY_UP_2]) {
 			if (key_dt<=0) {
 				key_dt = key_ddt;
 				key_ddt = key_ddt_min;
@@ -105,38 +100,43 @@ static void update() {
 		}
 		key_dt -= dt;
 
-		if (keys[SDLK_RIGHT] || keys[SDLK_RETURN]) {
+		if (keys[KEY_RIGHT_2] || keys[KEY_RETURN]) {
 			if (++cursor >= MAX_NAME_LENGTH) {
 				cursor = 0;
 				gameover_state = confirm_name;
 				win = 0;
 			}
-			keys[SDLK_RIGHT] = 0;
-			keys[SDLK_RETURN] = 0;
-		} else if (keys[SDLK_LEFT] || keys[SDLK_ESCAPE]) {
+			keys[KEY_RIGHT_2] = 0;
+			keys[KEY_RETURN] = 0;
+		} else if (keys[KEY_LEFT_2] || keys[KEY_ESCAPE]) {
 			if (cursor > 0) --cursor;
-			keys[SDLK_LEFT] = 0;
-			keys[SDLK_ESCAPE] = 0;
+			keys[KEY_LEFT_2] = 0;
+			keys[KEY_ESCAPE] = 0;
 		}
 
 		input[cursor] = valid_char[valid_index[cursor]];
 		break;
 	case confirm_name:
-		if (keys[SDLK_LEFT]) {
+		if (keys[KEY_LEFT_2]) {
 			gameover_state = enter_name;
-			keys[SDLK_LEFT] = 0;
-		} else if (keys[SDLK_RIGHT]) {
+			keys[KEY_LEFT_2] = 0;
+		} else if (keys[KEY_RIGHT_2]) {
 			/* add score */
 			gameover_state = show_highscore;
 			highscorelist_addscore(list,&input[0],getPlayerScore());
 		}
 		break;
 	case show_highscore:
-		if (keys[SDLK_ESCAPE] || keys[SDLK_RETURN]) {
+		if (keys[KEY_ESCAPE] || keys[KEY_RETURN]) {
+			if(config.arcade){
+				printf("exit %d\n", getPlayerScore());
+				main_stop();
+				return;
+			}
 		    menu_change_current_menu(MENU_MAIN);
 		    statesystem_set_state(STATESYSTEM_MENU);
-			keys[SDLK_ESCAPE] = 0;
-			keys[SDLK_RETURN] = 0;
+			keys[KEY_ESCAPE] = 0;
+			keys[KEY_RETURN] = 0;
 		}
 		break;
 	}
@@ -225,7 +225,7 @@ char * covertToUpper(char *str)
 
 static void draw_highscore()
 {
-	scoreelement score = {"----",0,0,0};
+	scoreelement score = {"---",0,0,0};
 	char temp[100];
 	int i;
 	setTextAlign(TEXT_LEFT);
