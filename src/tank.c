@@ -40,8 +40,8 @@ object_group_preset type_tank= {
 	destroy
 };
 
-static const texture_map tex_map[2] = {
-		{0,0,1,0.5}, {0,0.5,0.5,1}
+static const texture_map tex_map[3] = {
+		{0,0,1,0.5}, {0,0.5,0.5,1}, {0.5,0.5,1,1}
 };
 
 object_group_tank *object_create_tank(float xpos, object_group_factory *factory, object_param_tank *param)
@@ -246,28 +246,29 @@ static cpBody *addChassis(cpSpace *space, object_group_tank *tank, cpVect pos, c
 
 static void render(object_group_tank *tank)
 {
-	if (tank->param->max_hp < 100) //TODO add color into param
-		glColor4f(1,1,1,0.9);
-	else
-		glColor4f(1,1,0,0.9);
 
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 	GLfloat dir = cpBodyGetAngle(tank->data.body);
 	GLfloat rot = cpBodyGetAngle(tank->wheel1)*(180/M_PI);
-
-	cpVect r = cpvadd(tank->data.body->p, cpvmult(cpvforangle(tank->barrel_angle + dir),80));
-	draw_line(tank->data.body->p.x,tank->data.body->p.y,r.x,r.y, 30);
+	GLfloat barrel_angle = (tank->barrel_angle + dir) * (180/M_PI);
 
 	hpbar_draw(&tank->hp_bar);
 
 	int texture = tank->param->tex_id;
 
-	draw_texture(texture, &(tank->data.body->p), &tex_map[0],200, 100, dir*(180/M_PI));
-	draw_texture(texture, &tank->wheel1->p, &tex_map[1],100, 100, rot);
-	draw_texture(texture, &tank->wheel2->p, &tex_map[1],100, 100, rot);
-
+		glColor4f(1,1,1,1);
+		draw_texture(texture, &tank->wheel1->p, &tex_map[1],100, 100, rot);
+		draw_texture(texture, &tank->wheel2->p, &tex_map[1],100, 100, rot);
+	if (tank->param->max_hp < 100) {//TODO add color into param
+		draw_texture(texture, &(tank->data.body->p), &tex_map[0],200, 100, dir*(180/M_PI));
+		draw_texture(texture, &(tank->data.body->p), &tex_map[2],150, 150, barrel_angle);
+	} else {
+		glColor4f(1,0.2,0,1);
+		draw_texture(texture, &(tank->data.body->p), &tex_map[0],200, 100, dir*(180/M_PI));
+		draw_texture(texture, &(tank->data.body->p), &tex_map[2],150, 150, barrel_angle);
+	}
 	glPopAttrib();
 }
 

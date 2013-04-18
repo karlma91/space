@@ -358,3 +358,17 @@ int main_stop() {
 
 	return main_running;
 }
+
+
+
+/*//FIXME CRASH? (just after LVL 2 cleared)
+ Thread 0 Crashed:  Dispatch queue: com.apple.main-thread
+0   ???                           	000000000000000000 0 + 0
+1   space_wSDL1_2                 	0x000000010001d527 main_run + 33 (main.c:238)
+2   space_wSDL1_2                 	0x000000010001d996 SDL_main + 35 (main.c:351)
+3   space_wSDL1_2                 	0x0000000100001590 -[SDLMain applicationDidFinishLaunching:] + 48
+4   com.apple.Foundation          	0x00007fff86411ad5 _nsnote_callback + 167
+5   com.apple.CoreFoundation      	0x00007fff89cdbfd0 __CFXNotificationPost + 1008
+6   com.apple.CoreFoundation      	0x00007fff89cc8548 _CFXNotificationPostNotification + 200
+7   com.apple.Foundation          	0x00007fff86408a36 -[NSNotificationCenter postNotificationName:object:userInfo:] + 101
+ */

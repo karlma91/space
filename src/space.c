@@ -218,7 +218,8 @@ static void change_state(int state)
 	state_timer = 0;
 	statesystem_set_inner_state(STATESYSTEM_SPACE,state);
 	gamestate = state;
-	//fprintf(stderr,"DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
+	if (!config.arcade)
+		fprintf(stderr,"DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
 }
 
 /**
@@ -314,10 +315,12 @@ static void update_objects(object_data *obj)
 {
 	int moved_left = 0;
 	int moved_right = 0;
-	if(obj->alive){
 
+	if(obj->alive){
 		if(obj->body->p.y > currentlvl->height  || obj->body->p.y < 0){
 			obj->alive = 0;
+			if (!config.arcade)
+				fprintf(stderr,"object killed outside of level!\n");
 		}
 
 		if (obj->body->p.x < currentlvl->left ){
@@ -327,11 +330,24 @@ static void update_objects(object_data *obj)
 
 		if(obj->destroyed || moved_left){
 			int i = 0;
-			for(i=0;i < obj->components.body_count; i++){
+			if (obj->components.body_count) { //fix?
+			for(i=0;i < obj->components.body_count; i++){ //FIXME krasj!!
 				cpBody *body = obj->components.bodies[i];
-				if(body->p.x < currentlvl->left || moved_left){
+				if (body) { //fix?
+				if(body->p.x < currentlvl->left || moved_left){ //FIXME STILL CAUSING RANDOM CRASHES! MULTIPLE TIMES!
+					/* CRASH LOG
+0   space_wSDL1_2                 	0x0000000100024362 update_objects + 379 (space.c:337)
+1   space_wSDL1_2                 	0x000000010001e8f8 objects_iterate + 256 (objects.c:77)
+2   space_wSDL1_2                 	0x0000000100024161 update_all + 47 (space.c:292)
+3   space_wSDL1_2                 	0x00000001000260ba space_init_level + 1385 (space.c:791)
+4   space_wSDL1_2                 	0x0000000100023edc level_transition + 94 (space.c:209)
+5   space_wSDL1_2                 	0x00000001000271ea statesystem_update + 112 (statesystem.c:128)
+6   space_wSDL1_2                 	0x000000010001d6eb main_run + 485 (main.c:272)
+					 */
 					body->p.x = currentlvl->right - (currentlvl->left -body->p.x );
 				}
+				}
+			}
 			}
 		}
 
@@ -341,11 +357,15 @@ static void update_objects(object_data *obj)
 		}
 		if(obj->destroyed || moved_right){
 			int i = 0;
+			if (obj->components.body_count) { //fix?
 			for(i=0;i < obj->components.body_count; i++){
 				cpBody *body = obj->components.bodies[i];
-				if(body->p.x > currentlvl->right || moved_right){
+				if (body) { //fix?
+				if(body->p.x > currentlvl->right || moved_right){//FIXME krasj!!
 					body->p.x = currentlvl->left + (body->p.x - currentlvl->right);
 				}
+				}
+			}
 			}
 		}
 
@@ -541,7 +561,7 @@ static void SPACE_draw()
 			score_adder = 1;
 		}
 		sprintf(score_temp,"%d",score_anim);
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 45,score_temp);
+		font_drawText(-WIDTH/2+20,HEIGHT/2 - 29,score_temp);
 
 
 		setTextSize(20);
@@ -562,15 +582,19 @@ static void SPACE_draw()
 		setTextAlign(TEXT_RIGHT);
 		//font_drawText(WIDTH/2-25,-HEIGHT/2+15,game_state_names[gamestate]);
 
+		glColor3f(1,1,1);
 		setTextSize(15);
 		char level_temp[20];
 		setTextAlign(TEXT_CENTER);
-		sprintf(level_temp,"STATION: %d DECK: %d", currentlvl->station, currentlvl->deck);
-		font_drawText(0, -HEIGHT/2+8, level_temp);
+//		sprintf(level_temp,"STATION: %d DECK: %d", currentlvl->station, currentlvl->deck);
+		sprintf(level_temp,"LEVEL %d", currentlvl->deck);
+		font_drawText(0, -HEIGHT/2+24, level_temp);
+
 
 
 		setTextAlign(TEXT_RIGHT);
-		font_drawText(WIDTH/2 - 15, HEIGHT/2 - 20, fps_buf);
+		if(!config.arcade)
+			font_drawText(WIDTH/2 - 15, HEIGHT/2 - 20, fps_buf);
 
 		switch(gamestate) {
 		case LEVEL_START:
@@ -593,12 +617,12 @@ static void SPACE_draw()
 				if (time_remaining % 2 == 0) {
 					glColor3f(1,0,0);
 				} else {
-					glColor3f(1,1,1);
+					glColor3f(1.0,1.0,1.0);
 				}
 			}
 			setTextAlign(TEXT_CENTER);
 			setTextSize(40 + extra_size);
-			font_drawText(0, HEIGHT/2 - 45 - extra_size*1.5, time_temp);
+			font_drawText(0, HEIGHT/2 - 29 - extra_size*1.5, time_temp);
 			break;
 		case LEVEL_CLEARED:
 			setTextSize(60);
@@ -722,6 +746,8 @@ void space_init_level(int space_station, int deck)
 
 	objects_iterate(func);
 	objects_destroy();
+	//TODO REMOVE
+	if (!config.arcade) fprintf(stderr, "space.c:%d, no. tanks: %d\nno. factories: %d\nno. player: %d\nno. turrets: %d\n",__LINE__, objects_count(ID_TANK),objects_count(ID_FACTORY),objects_count(ID_PLAYER),objects_count(ID_TURRET));
 
 	objects_add((object_data*)player);
 
@@ -775,6 +801,7 @@ void space_init_level(int space_station, int deck)
 	/*
 	 * puts all shapes in correct position
 	 */
+	if (!config.arcade) fprintf(stderr, "space.c:%d, no. tanks: %d\nno. factories: %d\nno. player: %d\nno. turrets: %d\n",__LINE__, objects_count(ID_TANK),objects_count(ID_FACTORY),objects_count(ID_PLAYER),objects_count(ID_TURRET));
 	update_all();
 
 	particles_clear();
@@ -836,3 +863,15 @@ int getPlayerScore()
 	else
 		return -1;
 }
+
+/*
+0   space_wSDL1_2                 	0x0000000100024196 update_objects + 379 (space.c:337)
+1   space_wSDL1_2                 	0x000000010001e72c objects_iterate + 256 (objects.c:77)
+2   space_wSDL1_2                 	0x0000000100023f95 update_all + 47 (space.c:292)
+3   space_wSDL1_2                 	0x0000000100025f5e space_init_level + 1469 (space.c:806)
+4   space_wSDL1_2                 	0x0000000100023d10 level_transition + 94 (space.c:209)
+5   space_wSDL1_2                 	0x0000000100027096 statesystem_update + 112 (statesystem.c:128)
+6   space_wSDL1_2                 	0x000000010001d51f main_run + 485 (main.c:272)
+7   space_wSDL1_2                 	0x000000010001d7ca SDL_main + 35 (main.c:351)
+8   space_wSDL1_2                 	0x00000001000014c0 -[SDLMain applicationDidFinishLaunching:] + 48
+*/

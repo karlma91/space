@@ -17,7 +17,7 @@ int draw_init(){
 		unit_circle[i] = sinf( 2*M_PI*i / (128-2));
 		unit_circle[i+1] = cosf( 2*M_PI*i / (128-2));
 	}
-	
+
 	/* Photoshop Outer glow settings:
 	 * Opacity 50%
 	 * Spread 60%
@@ -58,9 +58,9 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 		glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
 		GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
 		glScalef(1,w,1);
-	
+
 		w /=2; // tmp-fix
-	
+
 		texture_bind(TEX_GLOW);
 		glBegin(GL_QUAD_STRIP);
 			glTexCoord2d(0, 0); glVertex2d(-w, -0.5f);
@@ -118,7 +118,7 @@ void draw_line_strip(const GLfloat *strip, int l, float w)
 
 void draw_destroy()
 {
-	
+
 	//TODO! --> release texture resources
 	//...
 }
@@ -179,12 +179,12 @@ void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
 #else
 	glVertexPointer(2, GL_FLOAT, 0, verts);
 #endif
-	
+
 	if(fillColor.a > 0){
 		glColor_from_color(fillColor);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, count);
 	}
-	
+
 	if(lineColor.a > 0){
 		glColor_from_color(lineColor);
 		glDrawArrays(GL_LINE_LOOP, 0, count);
@@ -268,10 +268,8 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 		glColor3f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1);
 		draw_simple_box(x + border, y + border, (w - border * 2) * p2, h - border * 2);
 	} else {
-		glColor3f(1,0,0);
+		glColor3f(1-p,1-p,1);
 		draw_simple_box(x + border, y + border, w - border * 2, (h - border * 2) * p);
-		glColor3f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1);
-		draw_simple_box(x + border, y + border, w - border * 2, (h - border * 2) * p2);
 	}
 
 
