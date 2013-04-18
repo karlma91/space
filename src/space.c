@@ -135,7 +135,7 @@ static void level_running()
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
-	fprintf(stderr,"FACTORY: %d TANK: %d TURRET: %d\n",objects_count(ID_FACTORY), objects_count(ID_TANK) ,objects_count(ID_TURRET));
+	if (!config.arcade) fprintf(stderr,"FACTORY: %d TANK: %d TURRET: %d\n",objects_count(ID_FACTORY), objects_count(ID_TANK) ,objects_count(ID_TURRET));
 	if(objects_count(ID_FACTORY) == 0 &&
 			objects_count(ID_TANK) == 0 &&
 			objects_count(ID_TURRET) == 0){
@@ -543,7 +543,7 @@ static void SPACE_draw()
 		/* draw GUI */
 		setTextAngle(0); // TODO don't use global variables for setting font properties
 		setTextAlign(TEXT_LEFT);
-		setTextSize(40);
+		setTextSize(35);
 
 		glColor3f(1,1,1);
 		//font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
@@ -562,9 +562,18 @@ static void SPACE_draw()
 			score_adder = 1;
 		}
 		sprintf(score_temp,"%d",score_anim);
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 29,score_temp);
+		font_drawText(-WIDTH/2+20,HEIGHT/2 - 26,score_temp);
 
+		glColor3f(1,0,0);
+		setTextSize(20);
+		char goals_left[100];
+		sprintf(goals_left, "OBJEKTER: %d",
+					objects_count(ID_FACTORY)+
+					objects_count(ID_TURRET)+
+					objects_count(ID_TANK));
+		font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,goals_left);
 
+		glColor3f(1,1,1);
 		setTextSize(20);
 		char particles_temp[20];
 		char particles2_temp[20];
@@ -642,7 +651,23 @@ static void SPACE_draw()
 			glColor3f(1,0,0);
 			setTextAlign(TEXT_CENTER);
 			if(config.arcade){
-				font_drawText(0, 0, "GAME OVER-PRESS GREEN");
+				font_drawText(0, 0, "GAME OVER");
+				glColor3f(0.1,0.9,0.1);
+
+				static float button_timer = 0;
+				static int button_down;
+				button_timer+=dt;
+				if(button_timer > 0.5){
+					button_down = !button_down;
+					button_timer = 0;
+				}
+				if(button_down){
+					cpVect t = cpv(0,0-HEIGHT/4);
+					draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
+				}else{
+					cpVect t = cpv(0,-5.5-HEIGHT/4);
+					draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
+				}
 			}else{
 				font_drawText(0, 0, "GAME OVER-PRESS ENTER");
 			}
