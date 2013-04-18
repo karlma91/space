@@ -122,9 +122,10 @@ static void update()
 		keys[KEY_DOWN_1] = 0, keys[KEY_DOWN_2] = 0;
 	}
 
-	if (keys[KEY_RETURN]) {
+	if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 		curMenu->func();
-		keys[KEY_RETURN] = 0;
+		keys[KEY_RETURN_2] = 0;
+		keys[KEY_RETURN_1] = 0;
 	}
 
 	if(keys[KEY_ESCAPE]){
@@ -162,7 +163,7 @@ static void arcade_update()
 {
 
 
-	if (keys[KEY_RETURN]) {
+	if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 		switch(current_menu){
 			case MENU_MAIN:
 				space_init_level(1,1);
@@ -173,7 +174,8 @@ static void arcade_update()
 				statesystem_set_state(STATESYSTEM_SPACE);
 				break;
 			}
-		keys[KEY_RETURN] = 0;
+		keys[KEY_RETURN_2] = 0;
+		keys[KEY_RETURN_1] = 0;
 	}
 
 	if(keys[KEY_ESCAPE]){

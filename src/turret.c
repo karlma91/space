@@ -50,6 +50,7 @@ object_group_turret *object_create_turret(float xpos, object_param_turret *param
 	turret->data.preset = &type_turret;
 	turret->data.components.hp_bar = &(turret->hp_bar);
 	turret->data.components.score = &(param->score);
+	turret->data.components.body_count = 0;
 	turret->data.alive = 1;
 	turret->param = param;
 	turret->timer = 0;

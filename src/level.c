@@ -131,7 +131,7 @@ int level_init()
 		/* find object type id */
 		int group_id = get_group_index(group);
 		if (group_id == -1) {
-			fprintf(stderr, "Unrecognised object group: '%s'\n", group);
+			fprintf(stderr, "Unrecognized object group: '%s'\n", group);
 			return 4;
 		}
 
@@ -283,7 +283,7 @@ level *level_load(int space_station, int deck)
 	ret = fscanf(file,"%d %d %d\n", &(lvl->station),&(lvl->deck), &(lvl->timelimit));
 	retExp = 3;
 	if (ret != retExp) {
-		fprintf(stderr, "Error while parsing level header. Wrong number of arguemnts. Got %d, expected %d.\n", ret, retExp);
+		fprintf(stderr, "Error while parsing level header. Wrong number of arguments. Got %d, expected %d.\n", ret, retExp);
 		return NULL;
 	}
 

@@ -105,10 +105,11 @@ static void update()
 		float temp_z =  (camera_zoom - 0.1)*5;
 		camera_zoom -= temp_z*dt;
 
-		if (keys[KEY_RETURN]){
+		if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]){
 			overview = 0;
 			zoomed_temp_y = ((1.0f * HEIGHT)/(camera_zoom*2));
-			keys[KEY_RETURN] = 0;
+			keys[KEY_RETURN_2] = 0;
+			keys[KEY_RETURN_1] = 0;
 		}
 
 	}else{
@@ -123,11 +124,12 @@ static void update()
 
 		level_select = (level_select < 0) ? ships[sel].count - 1 : (level_select >= ships[sel].count ? 0 : level_select);;
 
-		if (keys[KEY_RETURN]) {
+		if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 		    statesystem_set_state(STATESYSTEM_SPACE);
 			/* load correct level */
 			space_init_level(sel+1,level_select+1);
-			keys[KEY_RETURN] = 0;
+			keys[KEY_RETURN_2] = 0;
+			keys[KEY_RETURN_1] = 0;
 		}
 		if(keys[SDLK_BACKSPACE]){
 			overview = 1;

@@ -160,8 +160,9 @@ int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead()
 {
 	update_all();
-	if(keys[KEY_RETURN]){//state_timer > 3){
-		keys[KEY_RETURN] = 0;
+	if(keys[KEY_RETURN_2] || keys[KEY_RETURN_1]){//state_timer > 3){
+		keys[KEY_RETURN_2] = 0;
+		keys[KEY_RETURN_1] = 0;
 		lvl_cleared=0;
 		statesystem_set_state(STATESYSTEM_GAMEOVER);
 		gameover_setstate(enter_name);

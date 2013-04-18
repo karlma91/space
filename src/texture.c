@@ -42,7 +42,7 @@ int texture_load(char *file)
 	SDL_Surface* Surf_Return = NULL;
 
 	if((Surf_Temp = IMG_Load(filepath)) == NULL) {
-		fprintf(stderr,"Unable to load texture: %s\n", filepath);
+		fprintf(stderr,"Unable to load texture: %s\n IMG_ERROR: %s\n", filepath, IMG_GetError());
 		return -1;
 	}
 

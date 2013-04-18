@@ -100,34 +100,33 @@ static void update() {
 		}
 		key_dt -= dt;
 
-		if (keys[KEY_RIGHT_2] || keys[KEY_RETURN]) {
+		if (keys[KEY_RIGHT_2] || keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 			if (++cursor >= MAX_NAME_LENGTH) {
 				cursor = 0;
 				gameover_state = confirm_name;
 				win = 0;
 			}
-			keys[KEY_RIGHT_2] = 0;
-			keys[KEY_RETURN] = 0;
+			keys[KEY_RIGHT_2] = 0, keys[KEY_RETURN_1] = 0, keys[KEY_RETURN_2] = 0;
 		} else if (keys[KEY_LEFT_2] || keys[KEY_ESCAPE]) {
 			if (cursor > 0) --cursor;
-			keys[KEY_LEFT_2] = 0;
-			keys[KEY_ESCAPE] = 0;
+			keys[KEY_LEFT_2] = 0, keys[KEY_ESCAPE] = 0;
 		}
 
 		input[cursor] = valid_char[valid_index[cursor]];
 		break;
 	case confirm_name:
-		if (keys[KEY_LEFT_2]) {
+		if (keys[KEY_LEFT_2] || keys[KEY_LEFT_1]) {
 			gameover_state = enter_name;
 			keys[KEY_LEFT_2] = 0;
-		} else if (keys[KEY_RIGHT_2]) {
+			keys[KEY_LEFT_1] = 0;
+		} else if (keys[KEY_RIGHT_2] || keys[KEY_RIGHT_1]) {
 			/* add score */
 			gameover_state = show_highscore;
 			highscorelist_addscore(list,&input[0],getPlayerScore());
 		}
 		break;
 	case show_highscore:
-		if (keys[KEY_ESCAPE] || keys[KEY_RETURN]) {
+		if (keys[KEY_ESCAPE] || keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 			if(config.arcade){
 				printf("exit %d\n", getPlayerScore());
 				main_stop();
@@ -136,7 +135,8 @@ static void update() {
 		    menu_change_current_menu(MENU_MAIN);
 		    statesystem_set_state(STATESYSTEM_MENU);
 			keys[KEY_ESCAPE] = 0;
-			keys[KEY_RETURN] = 0;
+			keys[KEY_RETURN_1] = 0;
+			keys[KEY_RETURN_2] = 0;
 		}
 		break;
 	}
@@ -186,8 +186,8 @@ static void draw()
 		font_drawText(0,0, &input[0]);
 		setTextSize(25);
 		if (timer<1) {
-			font_drawText(200,-100,"RIGHT TO CONFIRM");
-			font_drawText(-200,-150,"LEFT TO RENAME");
+			font_drawText(200,-100,"MOVE RIGHT TO CONFIRM");
+			font_drawText(-200,-150,"MOVE LEFT TO RENAME");
 		} else if(timer>=2) timer=0;
 		break;
 	case show_highscore:

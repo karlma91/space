@@ -120,8 +120,8 @@ static void render(object_group_factory *factory) {
 
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	if (factory->param->type == ID_ROCKET) {
-		glColor3f(1,1,1);
-		draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200, 200, 0);
+		texture_map tmp_texmap = {0,0.05,1,1};
+		draw_texture(factory->param->tex_id, &(factory->data.body->p), &tmp_texmap, 200, 200, 0);
 	} else {
 		//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		if (factory->param->max_hp < 300)

@@ -118,6 +118,10 @@ static void set_wheel_velocity(object_group_tank *tank, float velocity)
 
 static void update(object_group_tank *tank)
 {
+	if (!config.arcade) {
+		fprintf(stderr,"TANK %6d pos: x=%6.1f y=%6.1f\n",tank->data.instance_id, tank->data.body->p.x, tank->data.body->p.y);
+	}
+
 	tank->timer +=dt;
 	/* gets the player from the list */
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));

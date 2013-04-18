@@ -58,7 +58,8 @@ extern unsigned int KEY_RIGHT_2;
 extern unsigned int KEY_DOWN_1;
 extern unsigned int KEY_DOWN_2;
 
-extern unsigned int KEY_RETURN;
+extern unsigned int KEY_RETURN_1;
+extern unsigned int KEY_RETURN_2;
 extern unsigned int KEY_ESCAPE;
 
 #endif /* MAIN_H_ */

@@ -45,7 +45,8 @@ unsigned int KEY_RIGHT_2 = SDLK_RIGHT;
 unsigned int KEY_DOWN_1 = SDLK_s;
 unsigned int KEY_DOWN_2 = SDLK_DOWN;
 
-unsigned int KEY_RETURN = SDLK_RETURN;
+unsigned int KEY_RETURN_1 = SDLK_SPACE;
+unsigned int KEY_RETURN_2 = SDLK_RETURN;
 unsigned int KEY_ESCAPE = SDLK_ESCAPE;
 
 /* definition of external variables */
@@ -111,7 +112,8 @@ static int init_config()
 		KEY_DOWN_1 = SDLK_DOWN;
 		KEY_DOWN_2 = SDLK_s;
 
-		KEY_RETURN = SDLK_g;
+		KEY_RETURN_1 = SDLK_k;
+		KEY_RETURN_2 = SDLK_g;
 		KEY_ESCAPE = SDLK_ESCAPE;
 	}
 
