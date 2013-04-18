@@ -112,7 +112,7 @@ static void update(object_group_factory *factory) {
 }
 
 static void render(object_group_factory *factory) {
-	//glColor3f(1,1,1);
+	glColor3f(1,1,1);
 
 	//draw_boxshape(factory->shape,RGBAColor(0.2,0.9,0.1,1),RGBAColor(0.6,0.9,0.4,1));
 	factory->rot += 381 * dt;

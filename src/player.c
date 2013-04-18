@@ -128,8 +128,18 @@ static void player_render(object_group_player *player)
 	hpbar_draw(&player->hp_bar);
 }
 
+#include <time.h>
 static void player_update(object_group_player *player)
 {
+	if (!config.arcade) {
+		fprintf(stderr,"PLAYER %6d pos: x=%6.1f y=%6.1f\n",player->data.instance_id, player->data.body->p.x, player->data.body->p.y);
+		if (keys[SDLK_F1]) {
+			time_t t;
+			time(&t);
+			fprintf(stderr,"TIMESTAMP: %d\n",t);
+		}
+	}
+
 	if (keys[SDLK_i] && !config.arcade_keys)
 		player->hp_bar.value = 1000000;
 

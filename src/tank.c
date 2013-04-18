@@ -120,6 +120,10 @@ static void update(object_group_tank *tank)
 {
 	if (!config.arcade) {
 		fprintf(stderr,"TANK %6d pos: x=%6.1f y=%6.1f\n",tank->data.instance_id, tank->data.body->p.x, tank->data.body->p.y);
+		if (keys[SDLK_F2]) {
+			tank->data.body->p.x = 0;
+			tank->data.body->p.y = 200;
+		}
 	}
 
 	tank->timer +=dt;

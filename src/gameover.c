@@ -104,7 +104,6 @@ static void update() {
 			if (++cursor >= MAX_NAME_LENGTH) {
 				cursor = 0;
 				gameover_state = confirm_name;
-				win = 0;
 			}
 			keys[KEY_RIGHT_2] = 0,keys[KEY_RIGHT_1] = 0, keys[KEY_RETURN_1] = 0, keys[KEY_RETURN_2] = 0;
 		} else if (keys[KEY_LEFT_2] ||keys[KEY_LEFT_1] || keys[KEY_ESCAPE]) {
@@ -122,6 +121,7 @@ static void update() {
 		} else if (keys[KEY_RIGHT_2] || keys[KEY_RIGHT_1]) {
 			/* add score */
 			gameover_state = show_highscore;
+			win = 0;
 			highscorelist_addscore(list,&input[0],getPlayerScore());
 		}
 		break;
@@ -137,6 +137,7 @@ static void update() {
 			keys[KEY_ESCAPE] = 0;
 			keys[KEY_RETURN_1] = 0;
 			keys[KEY_RETURN_2] = 0;
+			win = 0;
 		}
 		break;
 	}
