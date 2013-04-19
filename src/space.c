@@ -28,11 +28,6 @@
 #include "level.h"
 #include "tank.h"
 
-#define star_count 1000
-static int stars_x[star_count];
-static int stars_y[star_count];
-static float stars_size[star_count];
-static void drawStars();
 static float accumulator = 0;
 
 /* state functions */
@@ -71,6 +66,7 @@ static float camera_width;
 static float cam_left_limit;
 static float cam_right_limit;
 
+static int cam_mode = 5;
 
 /* level data */
 level *currentlvl;
@@ -113,7 +109,7 @@ static void change_state(int state);
 static void update_all();
 
 
-/* The state timer */
+/* The state timer0 */
 static float state_timer = 0;
 /**
  * Inner state functions
@@ -123,6 +119,8 @@ static void level_start()
 {
 	game_time = 0;
 	if(state_timer > 1.5){
+		object_group_player *player = (object_group_player*)objects_first(ID_PLAYER);
+		player->disable = 0;
 		change_state(LEVEL_RUNNING);
 	}
 }
@@ -137,7 +135,8 @@ static void level_running()
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
-	if(objects_count(ID_TANK_FACTORY) == 0){
+	if (!config.arcade && keys[SDLK_F1]) fprintf(stderr,"FACTORY: %d TANK: %d TURRET: %d\n",objects_count(ID_FACTORY), objects_count(ID_TANK) ,objects_count(ID_TURRET));
+	if ((objects_count(ID_FACTORY) + objects_count(ID_TANK) + objects_count(ID_TURRET)) == 0) {
 		change_state(LEVEL_CLEARED);
 	}
 
@@ -159,8 +158,8 @@ int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead()
 {
 	update_all();
-	if(keys[SDL_SCANCODE_RETURN]){//state_timer > 3){
-		keys[SDL_SCANCODE_RETURN] = 0;
+	if(keys[KEY_RETURN_2] || keys[KEY_RETURN_1]){//state_timer > 3){
+		keys[KEY_RETURN_2] = 0, keys[KEY_RETURN_1] = 0;
 		lvl_cleared=0;
 		statesystem_set_state(STATESYSTEM_GAMEOVER);
 		gameover_setstate(enter_name);
@@ -182,20 +181,20 @@ static void level_cleared()
 
 	update_all();
 
-	if(state_timer > 3){
+	if(state_timer > 2){
 		lvl_cleared=1;
 		change_state(LEVEL_TRANSITION);
 	}
 }
 static void level_transition()
 {
-	if(state_timer > 1){
+	//if(state_timer > 1){
 		//space_init_level(1,1);
 		if (lvl_cleared==1) {
 			//TODO remove tmp next level
 			int next_lvl = currentlvl->deck + 1;
 			//TODO WARNING: final level index hard-coded!
-			if (next_lvl > 3) {
+			if (next_lvl > level_get_level_count(currentlvl->station)) {
 				gameover_setstate(GAMEOVER_WIN);
 			    statesystem_set_state(STATESYSTEM_GAMEOVER);
 			} else {
@@ -204,9 +203,10 @@ static void level_transition()
 		} else {
 			//space_init_level(1,1); //TODO TMP
 		}
+
 		/* update objects to move shapes to same position as body */
 		change_state(LEVEL_START);
-	}
+	//}
 }
 
 /**
@@ -217,10 +217,10 @@ static void change_state(int state)
 	state_timer = 0;
 	statesystem_set_inner_state(STATESYSTEM_SPACE,state);
 	gamestate = state;
-	fprintf(stderr,"DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
+	if (!config.arcade)
+		fprintf(stderr,"DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
 }
 
-	static int cam_mode = 6;
 /**
  * Main space update function
  */
@@ -252,10 +252,10 @@ static void pre_update()
 	/*
 	 * Opens the pause menu
 	 */
-	if(keys[SDL_SCANCODE_ESCAPE] && gamestate == LEVEL_RUNNING){
+	if(keys[KEY_ESCAPE] && gamestate == LEVEL_RUNNING){
 	    menu_change_current_menu(MENU_INGAME);
 		statesystem_push_state(STATESYSTEM_MENU);
-		keys[SDL_SCANCODE_ESCAPE] = 0;
+		keys[KEY_ESCAPE] = 0;
 	}
 
 	/* runs the current state */
@@ -310,28 +310,54 @@ static void update_all()
 /**
  * Used by object_iterate to update all objects
  */
-static object_group_tank *temptank = NULL;
 static void update_objects(object_data *obj)
 {
+	int moved_left = 0;
+	int moved_right = 0;
+
 	if(obj->alive){
+		if(obj->body->p.y > currentlvl->height  || obj->body->p.y < 0){
+			obj->alive = 0;
+			if (!config.arcade)
+				fprintf(stderr,"object killed outside of level!\n");
+		}
 
-		//TODO: fix this shit
-		if(obj->preset->ID == ID_TANK){
-			temptank = ((object_group_tank*)obj);
-			if (obj->body->p.x < currentlvl->left ){
-				obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
-				temptank->wheel1->p.x = currentlvl->right - abs(currentlvl->left - temptank->wheel1->p.x );
-				temptank->wheel2->p.x = currentlvl->right - abs(currentlvl->left - temptank->wheel2->p.x );
+		if (obj->body->p.x < currentlvl->left ){
+			obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
+			moved_left = 1;
+		}
 
+
+		if(obj->destroyed || moved_left){
+			int i = 0;
+			if (obj->components.body_count) {
+			for(i=0;i < obj->components.body_count; i++){
+				cpBody *body = obj->components.bodies[i];
+				if (body) {
+				if(body->p.x < currentlvl->left || moved_left){
+					body->p.x = currentlvl->right - (currentlvl->left -body->p.x );
+				}
+				}
 			}
-			if (obj->body->p.x > currentlvl->right){
-				obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
-				temptank->wheel1->p.x = currentlvl->left + (temptank->wheel1->p.x - currentlvl->right);
-				temptank->wheel2->p.x = currentlvl->left + (temptank->wheel2->p.x - currentlvl->right);
 			}
-		}else{
-			if (obj->body->p.x < currentlvl->left ) obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
-			if (obj->body->p.x > currentlvl->right) obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
+		}
+
+		if (obj->body->p.x > currentlvl->right){
+			obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
+			moved_right = 1;
+		}
+		if(obj->destroyed || moved_right){
+			int i = 0;
+			if (obj->components.body_count) {
+			for(i=0;i < obj->components.body_count; i++){
+				cpBody *body = obj->components.bodies[i];
+				if (body) {
+				if(body->p.x > currentlvl->right || moved_right){
+					body->p.x = currentlvl->left + (body->p.x - currentlvl->right);
+				}
+				}
+			}
+			}
 		}
 
 		obj->preset->update(obj);
@@ -361,6 +387,8 @@ static void render()
 		SPACE_draw();
 	}
 	second_draw = 0;
+	
+	
 }
 
 static void update_camera_zoom(int cam_mode)
@@ -505,7 +533,7 @@ static void SPACE_draw()
 		/* draw GUI */
 		setTextAngle(0); // TODO don't use global variables for setting font properties
 		setTextAlign(TEXT_LEFT);
-		setTextSize(40);
+		setTextSize(35);
 
 		glColor3f(1,1,1);
 		//font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
@@ -524,9 +552,18 @@ static void SPACE_draw()
 			score_adder = 1;
 		}
 		sprintf(score_temp,"%d",score_anim);
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 45,score_temp);
+		font_drawText(-WIDTH/2+20,HEIGHT/2 - 26,score_temp);
 
+		glColor3f(1,0,0);
+		setTextSize(20);
+		char goals_left[100];
+		sprintf(goals_left, "OBJEKTER: %d",
+					objects_count(ID_FACTORY)+
+					objects_count(ID_TURRET)+
+					objects_count(ID_TANK));
+		font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,goals_left);
 
+		glColor3f(1,1,1);
 		setTextSize(20);
 		char particles_temp[20];
 		char particles2_temp[20];
@@ -534,26 +571,30 @@ static void SPACE_draw()
 		sprintf(particles_temp,"%d",particles_active);
 		sprintf(particles2_temp,"%d",available_particle_counter);
 		sprintf(particles3_temp,"%d",(available_particle_counter + particles_active));
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,particles_temp);
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles2_temp);
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 180,particles3_temp);
+		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,particles_temp);
+		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles2_temp);
+		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 180,particles3_temp);
 
 		char pos_temp[20];
 		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->data.body->p.x,player->data.body->p.y);
-		font_drawText(-WIDTH/2+15,-HEIGHT/2+12,pos_temp);
+		//font_drawText(-WIDTH/2+15,-HEIGHT/2+12,pos_temp);
 
 		setTextAlign(TEXT_RIGHT);
-		font_drawText(WIDTH/2-25,-HEIGHT/2+15,game_state_names[gamestate]);
+		//font_drawText(WIDTH/2-25,-HEIGHT/2+15,game_state_names[gamestate]);
 
+		glColor3f(1,1,1);
 		setTextSize(15);
 		char level_temp[20];
 		setTextAlign(TEXT_CENTER);
-		sprintf(level_temp,"STATION: %d DECK: %d",currentlvl->station, currentlvl->deck);
-		font_drawText(0, -HEIGHT/2+8, level_temp);
+//		sprintf(level_temp,"STATION: %d DECK: %d", currentlvl->station, currentlvl->deck);
+		sprintf(level_temp,"LEVEL %d", currentlvl->deck);
+		font_drawText(0, -HEIGHT/2+24, level_temp);
+
 
 
 		setTextAlign(TEXT_RIGHT);
-		font_drawText(WIDTH/2 - 15, HEIGHT/2 - 20, fps_buf);
+		if(!config.arcade)
+			font_drawText(WIDTH/2 - 15, HEIGHT/2 - 20, fps_buf);
 
 		switch(gamestate) {
 		case LEVEL_START:
@@ -576,12 +617,12 @@ static void SPACE_draw()
 				if (time_remaining % 2 == 0) {
 					glColor3f(1,0,0);
 				} else {
-					glColor3f(1,1,1);
+					glColor3f(1.0,1.0,1.0);
 				}
 			}
 			setTextAlign(TEXT_CENTER);
 			setTextSize(40 + extra_size);
-			font_drawText(0, HEIGHT/2 - 45 - extra_size*1.5, time_temp);
+			font_drawText(0, HEIGHT/2 - 29 - extra_size*1.5, time_temp);
 			break;
 		case LEVEL_CLEARED:
 			setTextSize(60);
@@ -593,13 +634,35 @@ static void SPACE_draw()
 			setTextSize(60);
 			glColor3f(0.8f,0.8f,0.8f);
 			setTextAlign(TEXT_CENTER);
-			font_drawText(0, 0, "LOADING LEVEL...");
+			//font_drawText(0, 0, "LOADING LEVEL...");
 			break;
 		case LEVEL_PLAYER_DEAD:
 			setTextSize(60);
 			glColor3f(1,0,0);
 			setTextAlign(TEXT_CENTER);
-			font_drawText(0, 0, "GAME OVER-PRESS ENTER");
+			if(config.arcade){
+				font_drawText(0, 0, "GAME OVER");
+				glColor3f(0.1,0.9,0.1);
+
+				static float button_timer = 0;
+				static int button_down;
+				button_timer+=dt;
+				if(button_timer > 0.5){
+					button_down = !button_down;
+					button_timer = 0;
+				}
+				if(button_down){
+					cpVect t = cpv(0,0-HEIGHT/4);
+					draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
+				}else{
+					cpVect t = cpv(0,-5.5-HEIGHT/4);
+					draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
+				}
+			}else{
+				font_drawText(0, 0, "GAME OVER-PRESS ENTER");
+			}
+			setTextSize(120);
+			//font_drawText(0,-180,"\x49\x4e\x46\x33\x34\x38\x30");
 			break;
 		case LEVEL_STATE_COUNT:
 			/* invalid value */
@@ -616,21 +679,50 @@ static void render_objects(object_data *obj)
 }
 
 
-#define SW (8000)
-static void drawStars()
+
+
+#define star_count 100
+static int stars_x[star_count];
+static int stars_y[star_count];
+static float stars_size[star_count];
+#define SW 8000
+static void stars_init()
 {
+	//init stars
+	srand(122531);
+	int i;
+	for (i=0; i<star_count; i++) {
+		stars_x[i] = rand()%(WIDTH*2*2) - WIDTH*2; // make sure that radius is greater than WIDTH * sqrt(2)
+		stars_y[i] = rand()%(WIDTH*2*2) - WIDTH*2;
+		stars_size[i] = 2 + 5*(rand() % 1000) / 1000.0f;
+	}
+}
+void drawStars()
+{
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
 	glPushMatrix();
 
-	glScalef(0.8f * cam_zoom,0.8f * cam_zoom, 1);
-	glTranslatef(-cam_center_x*0.5,-cam_center_y*0.5,0);
+	glScalef(0.5f * cam_zoom,0.5f * cam_zoom, 1);
 
-	glColor3f(1,1,1);
-	glBegin(GL_QUADS);
+	static float spaceship_angle;
+	spaceship_angle += 0.01f * 360*dt;
+	float cam_angle;
+	if (currentlvl)
+		cam_angle = (cam_center_x - currentlvl->left)  / (currentlvl->right - currentlvl->left) * 360 + spaceship_angle;
+	else
+		cam_angle = spaceship_angle;
+
+	glRotatef(-cam_angle,0,0,1);
+
 	int i;
-	for (i=0;i<star_count;i++) {
+	glBegin(GL_QUADS);
+	glColor3f(1,1,1);
+	for (i = 0; i < star_count; i++) {
 		float size = stars_size[i];
 		float star_x = (stars_x[i]);
 		float star_y = (stars_y[i]);
+
 		glVertex2f(star_x - size, star_y - size);
 		glVertex2f(star_x + size, star_y - size);
 		glVertex2f(star_x + size, star_y + size);
@@ -650,18 +742,21 @@ static void func(object_data* obj)
 
 void space_init_level(int space_station, int deck)
 {
-	particles_clear();
-
 	static object_group_player *player;
-
 
 	if(player==NULL){
 		player = (object_group_player*)object_create_player();
 	} else {
+		player->disable = 1;
 		player->hp_bar.value = player->param->max_hp;
-		player->disable = 0;
 		if (space_station == 1 && deck == 1) { // reset player score if level 1 is initializing
-			player->score = 0;
+			player->data.preset->init((object_data*) player);
+		}else{
+			player->aim_speed += 0.3;
+			player->rotation_speed += 0.3;
+			if(deck == 6){
+				player->gun_level = 3;
+			}
 		}
 	}
 
@@ -682,11 +777,13 @@ void space_init_level(int space_station, int deck)
 	}
 
 
+	float offset = currentlvl->tiles->tile_height;
 	/* SETS the gamestate */
 	change_state(LEVEL_START);
 
-	player->data.body->p.x = currentlvl->left + 50;
-	player->data.body->p.y = currentlvl->height - 50;
+	player->data.body->p.x = currentlvl->left + offset + 50;
+	player->data.body->p.y = currentlvl->height - offset - 50;
+	cpBodySetAngle(player->data.body,3*(M_PI/2));
 	player->hp_bar.value = player->param->max_hp;
 	player->data.body->v.x = 0;
 	player->data.body->v.y = -10;
@@ -703,21 +800,25 @@ void space_init_level(int space_station, int deck)
 		cpSpaceRemoveStaticShape(space,ceiling);
 	}
 
-	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,0), cpv(currentlvl->right,0), 15.0f)); // ground level at 0
-	cpShapeSetFriction(floor, 0.8f);
+	currentlvl->floor = offset;
+	currentlvl->ceiling = currentlvl->height - offset/2;
+	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left-100,0), cpv(currentlvl->right+100,0), offset)); // ground level at 0
+	cpShapeSetFriction(floor, 1);
 	cpShapeSetCollisionType(floor, ID_GROUND);
 	cpShapeSetElasticity(floor, 0.7f);
 
-	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left,currentlvl->height), cpv(currentlvl->right,currentlvl->height), 15.0f));
-	cpShapeSetFriction(ceiling, 0.8f);
+	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left-100,currentlvl->height), cpv(currentlvl->right+100,currentlvl->height), offset));
+	cpShapeSetFriction(ceiling, 1);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
 	cpShapeSetElasticity(ceiling, 0.7f);
 
 	/*
 	 * puts all shapes in correct position
 	 */
+	//if (!config.arcade) fprintf(stderr, "space.c:%d, no. tanks: %d\nno. factories: %d\nno. player: %d\nno. turrets: %d\n",__LINE__, objects_count(ID_TANK),objects_count(ID_FACTORY),objects_count(ID_PLAYER),objects_count(ID_TURRET));
 	update_all();
 
+	particles_clear();
 }
 
 static void on_enter()
@@ -758,14 +859,7 @@ void space_init()
 
     collisioncallbacks_init();
 
-	//init stars
-	srand(122531);
-	int i;
-	for (i=0; i<star_count; i++) {
-		stars_x[i] = rand()%(SW*2) - SW;
-		stars_y[i] = rand()%(SW*2) - SW;
-		stars_size[i] = 2 + 4*(rand() % 1000) / 1000.0f;
-	}
+  stars_init();
 }
 
 
@@ -783,3 +877,15 @@ int getPlayerScore()
 	else
 		return -1;
 }
+
+/*
+0   space_wSDL1_2                 	0x0000000100024196 update_objects + 379 (space.c:337)
+1   space_wSDL1_2                 	0x000000010001e72c objects_iterate + 256 (objects.c:77)
+2   space_wSDL1_2                 	0x0000000100023f95 update_all + 47 (space.c:292)
+3   space_wSDL1_2                 	0x0000000100025f5e space_init_level + 1469 (space.c:806)
+4   space_wSDL1_2                 	0x0000000100023d10 level_transition + 94 (space.c:209)
+5   space_wSDL1_2                 	0x0000000100027096 statesystem_update + 112 (statesystem.c:128)
+6   space_wSDL1_2                 	0x000000010001d51f main_run + 485 (main.c:272)
+7   space_wSDL1_2                 	0x000000010001d7ca SDL_main + 35 (main.c:351)
+8   space_wSDL1_2                 	0x00000001000014c0 -[SDLMain applicationDidFinishLaunching:] + 48
+*/

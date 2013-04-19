@@ -16,42 +16,54 @@
 /* Game components */
 #include "player.h"
 #include "tank.h"
+#include "rocket.h"
 #include "bullet.h"
 #include "spaceengine.h"
+#include "texture.h"
 
-static void init(object_group_tankfactory *);
-static void update(object_group_tankfactory *);
-static void render(object_group_tankfactory *);
-static void destroy(object_group_tankfactory *);
+static void init(object_group_factory *);
+static void update(object_group_factory *);
+static void render(object_group_factory *);
+static void destroy(object_group_factory *);
 static void remove_factory_from_tank(object_group_tank *);
 
 object_group_preset type_tank_factory =
-	{ ID_TANK_FACTORY,
+	{ ID_FACTORY,
 			init,
 			update,
 			render,
 			destroy
 	};
 
-object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tankfactory *param) {
-	object_group_tankfactory *factory = malloc(sizeof(*factory));
+object_group_factory *object_create_factory(int x_pos, object_param_factory *param) {
+	object_group_factory *factory = malloc(sizeof(*factory));
 	factory->data.alive = 1;
 	factory->data.preset = &type_tank_factory;
 	factory->data.components.hp_bar = &(factory->hp_bar);
 	factory->data.components.score = &(param->score);
+	factory->data.components.body_count = 0;
 	factory->param = param;
 
 	factory->cur = 0;
 	factory->rot = 0;
-	factory->smoke = particles_get_emitter(EMITTER_SMOKE);
-	factory->timer = (factory->param->spawn_delay) * 0.7;
+	//factory->smoke = particles_get_emitter(EMITTER_SMOKE);
+	static int randomness= 0;
+	randomness += 123;
+	randomness *= randomness;
+	factory->timer = (factory->param->spawn_delay) * ((randomness % 0xFF + 160) / 400.0f + 0.2f);
+	factory->max_distance = 800;
 	//fac->hp = fac->param->max_hp; //TODO FIXME
 
-	cpFloat size = 100;
+	cpFloat size = 100*1.5;
+
+	if (factory->param->type == ID_ROCKET) {
+		size = 200;
+	}
+
 	/* make and add new body */
 	factory->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
-	cpBodySetPos(factory->data.body, cpv(x_pos, size));
+	cpBodySetPos(factory->data.body, cpv(x_pos,64 + size/2));
 
 	/* make and connect new shape to body */
 	factory->shape = cpSpaceAddShape(space,cpBoxShapeNew(factory->data.body, size, size));
@@ -61,68 +73,94 @@ object_group_tankfactory *object_create_tankfactory(int x_pos, object_param_tank
 
 	cpShapeSetLayers(factory->shape, LAYER_TANK_FACTORY);
 
-	cpShapeSetCollisionType(factory->shape, ID_TANK_FACTORY);
+	cpShapeSetCollisionType(factory->shape, ID_FACTORY);
 
 	cpBodySetUserData(factory->data.body, factory);
 	objects_add((object_data *) factory);
 
-	hpbar_init(&factory->hp_bar, param->max_hp, 100, 16, -50, 90,
+	hpbar_init(&factory->hp_bar, param->max_hp, 100, 16, -50, 135,
 			&(factory->data.body->p));
 
-	return (object_group_tankfactory*) factory;
+	return (object_group_factory*) factory;
 }
 
-static void init(object_group_tankfactory *factory) {
+static void init(object_group_factory *factory) {
 
 }
 
-static void update(object_group_tankfactory *factory) {
+static void update(object_group_factory *factory) {
 	factory->timer += dt;
 	if (factory->timer > factory->param->spawn_delay
-			&& factory->cur < factory->param->max_tanks) {
-		factory->timer = 0;
-		object_create_tank(factory->data.body->p.x, factory, factory->param->t_param);
-		factory->cur += 1;
+			&& factory->cur < factory->param->max_tanks ) {
+
+		if(factory->param->type == ID_ROCKET){
+			if(se_distance_to_player(factory->data.body->p.x) < factory->max_distance){
+				object_create_rocket(factory->data.body->p.x, factory,factory->param->r_param);
+				factory->timer = 0;
+				factory->cur += 1;
+			}
+		}else{
+			factory->timer = 0;
+			object_create_tank(factory->data.body->p.x, factory, factory->param->t_param);
+			factory->cur += 1;
+		}
 	}
-	if (factory->smoke) {
-		factory->smoke->p.x = factory->data.body->p.x - 20;
-		factory->smoke->p.y = factory->data.body->p.y + 80;
-	}
+	//if (factory->smoke) {
+	//	factory->smoke->p.x = factory->data.body->p.x - 20;
+	//	factory->smoke->p.y = factory->data.body->p.y + 80;
+	//}
 }
 
-static void render(object_group_tankfactory *factory) {
-	//glColor3f(1,1,1);
-
-	hpbar_draw(&factory->hp_bar);
-
-	if (factory->param->max_hp < 300)
-		glColor3f(0.3, 0.6, 0.8);
-	else
-		glColor3f(0.8, 0.4, 0.4);
+static void render(object_group_factory *factory) {
+	glColor3f(1,1,1);
 
 	//draw_boxshape(factory->shape,RGBAColor(0.2,0.9,0.1,1),RGBAColor(0.6,0.9,0.4,1));
 	factory->rot += 381 * dt;
 	float rot = factory->rot;
 
-	draw_texture(TEX_WHEEL, &(factory->data.body->p), TEX_MAP_FULL, 150, 150, rot);
-	draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200, 200, 0);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	if (factory->param->type == ID_ROCKET) {
+		texture_map tmp_texmap = {0,0.05,1,1};
+		draw_texture(factory->param->tex_id, &(factory->data.body->p), &tmp_texmap, 200, 200, 0);
+	} else {
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		if (factory->param->max_hp < 300)
+			glColor4f(1,1,1,1);
+		else
+			glColor4f(1,0.2,0,1);
+
+		draw_texture(TEX_WHEEL, &(factory->data.body->p), TEX_MAP_FULL, 150*1.5, 150*1.5, rot);
+		draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200 * 1.5, 200*1.5, 0);
+	}
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+
+	hpbar_draw(&factory->hp_bar);
+	draw_bar(factory->data.body->p.x+65,factory->data.body->p.y-50,10,100,factory->timer / factory->param->spawn_delay,0);
 }
 
 //FIXME Somewhat slow temporary fix, as objects_iterate_type does not support extra arguments!
 static void remove_factory_from_tank(object_group_tank *tank) {
 	if (tank->factory) {
-		tank->factory = objects_by_id(ID_TANK_FACTORY,tank->factory_id);
+		tank->factory = objects_by_id(ID_FACTORY,tank->factory_id);
+	}
+}
+static void remove_factory_from_rocket(object_group_rocket *rocket) {
+	if (rocket->factory) {
+		rocket->factory = objects_by_id(ID_FACTORY,rocket->factory_id);
 	}
 }
 
-static void destroy(object_group_tankfactory *factory) {
+static void destroy(object_group_factory *factory) {
 	objects_remove(factory);
-	particles_release_emitter(factory->smoke);
+	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);
+	//particles_release_emitter(factory->smoke);
 
 	cpSpaceRemoveShape(space, factory->shape);
 	cpSpaceRemoveBody(space, factory->data.body);
 	cpShapeFree(factory->shape);
 	cpBodyFree(factory->data.body);
 	objects_iterate_type(remove_factory_from_tank, ID_TANK);
+	objects_iterate_type(remove_factory_from_rocket, ID_ROCKET);
 	free(factory);
 }

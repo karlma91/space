@@ -60,7 +60,6 @@ unsigned int particles_active = 0;
 
 static particle main_partice_pool[MAX_PARTICLES];
 int available_particle_counter;
-static particle *particles_in_use;
 static particle *(available_particle_stack[MAX_PARTICLES]);
 
 
@@ -75,14 +74,15 @@ void particles_init()
 {
 	int i;
 	read_emitter_from_file(EMITTER_FLAME,"particles/flame_3.xml");
+	read_emitter_from_file(EMITTER_ROCKET_FLAME,"particles/rocket_flame.xml");
 	read_emitter_from_file(EMITTER_EXPLOSION,"particles/explosion_ground.xml");
 	read_emitter_from_file(EMITTER_SPARKS,"particles/sparks.xml");
 	read_emitter_from_file(EMITTER_SMOKE,"particles/smoke.xml");
 	read_emitter_from_file(EMITTER_SCORE,"particles/score.xml");
+	read_emitter_from_file(EMITTER_FRAGMENTS,"particles/fragments.xml");
 
 	/* sets in use list empty */
 	emitters_in_use_list = NULL;
-	particles_in_use = NULL;
 
 	available_particle_counter = -1;
 	/* sets all particles available */
@@ -255,12 +255,21 @@ void particles_destroy()
  */
 void particles_clear()
 {
-	particle *p = particles_in_use;
-	while(p){
-		set_particle_available(p);
-		p = p->next;
+	emitter **prev = &(emitters_in_use_list);
+	emitter *e = emitters_in_use_list;
+	while(e){
+		particle **prev = &(e->head);
+		particle *p = e->head;
+		while(p){
+			p->alive = 0;
+			*prev = p->next;
+			set_particle_available(p);
+			e->list_length--;
+			p = *prev;
+		}
+		prev = &(e->next);
+		e = e->next;
 	}
-	particles_in_use = NULL;
 }
 
 
@@ -518,24 +527,24 @@ static void draw_all_particles(emitter *em)
 
 static void default_particle_draw(emitter *em, particle *p)
 {
+	glPushMatrix();
+	glTranslatef(p->p.x, p->p.y, 0.0f);
+	glScalef(p->size,p->size,1);
 	if(em->rotation){
 		//float angle = (atan2(p->v.y,p->v.x) + M_PI)*(180/M_PI);
-		glRotatef(p->angle*(180/M_PI), 0, 0, 1);
-		p->angle += p->rot_speed;
-	}else{
-		glPushMatrix();
-		glTranslatef(p->p.x, p->p.y, 0.0f);
-		glScalef(p->size,p->size,1);
-
-		glBegin(GL_QUAD_STRIP);
-		glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
-		glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
-		glTexCoord2d(1, 0); glVertex2d(0.5, -0.5);
-		glTexCoord2d(1, 1); glVertex2d(0.5, 0.5);
-		glEnd();
-
-		glPopMatrix();
+		glRotatef(p->angle, 0, 0, 1);
+		p->angle += p->rot_speed*dt;
 	}
+
+	glBegin(GL_QUAD_STRIP);
+	glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
+	glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
+	glTexCoord2d(1, 0); glVertex2d(0.5, -0.5);
+	glTexCoord2d(1, 1); glVertex2d(0.5, 0.5);
+	glEnd();
+
+	glPopMatrix();
+
 }
 
 
@@ -585,7 +594,7 @@ static int read_emitter_from_file (int type,char *filename)
 		return 1;
 
 	}
-	fprintf(stderr,"particles.c parsing %s \n",filename);
+	//fprintf(stderr,"particles.c parsing %s \n",filename);
 	for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
 			node != NULL;
 			node=mxmlWalkNext (node, NULL, MXML_DESCEND)
@@ -596,7 +605,7 @@ static int read_emitter_from_file (int type,char *filename)
 			}else if(TESTNAME("emitter")){
 				char *(spint[1]);
 				parse_string(node,"imageName",spint);
-				fprintf(stderr, "HELLO TEXTURE: %s\n", *spint);
+				//fprintf(stderr, "HELLO TEXTURE: %s\n", *spint);
 				if(*spint != NULL){
 					emi->texture_id = texture_load(*spint);
 				}

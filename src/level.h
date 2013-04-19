@@ -2,6 +2,7 @@
 #define LEVEL_H_
 
 #include "tilemap.h"
+#include "objects.h"
 
 typedef struct level_ship {
 	float x;
@@ -19,6 +20,8 @@ typedef struct level {
 	int left;
 	int right;
 	int timelimit;
+	int ceiling;
+	int floor;
 	tilemap *tiles;
 } level;
 
@@ -27,5 +30,10 @@ extern level *level_load(int space_station, int deck);
 extern void level_unload(level *);
 extern void level_destroy();
 extern void level_get_ships(level_ship **,int *);
+
+extern int level_get_station_count();
+extern int level_get_level_count(int station);
+
+extern char *(group_names[ID_COUNT]);
 
 #endif /* LEVEL_H_ */

@@ -1,4 +1,5 @@
 #include "objects.h"
+#include "level.h"
 
 #include <limits.h>
 #include <stdlib.h>
@@ -23,6 +24,7 @@ struct _node {
 };
 
 //TODO put these static variables into a structure, for easier simultaneous parallel level storage
+static int object_actual_count[ID_COUNT];
 static int object_count[ID_COUNT];
 static int instance_counter[ID_COUNT];
 static node *(head_all[ID_COUNT]);
@@ -58,21 +60,32 @@ void objects_add(object_data* obj)
 	++object_count[i];
 }
 
+
+static void errchk_obj_count(obj_id)
+{
+	if (object_count[obj_id] != object_actual_count[obj_id]) {
+		fprintf(stderr,"Data structure warning for obj_id: %s(%d) expected %d, but got %d. Re-adjusting data count.\n", group_names[obj_id],obj_id, object_count[obj_id], object_actual_count[obj_id]);
+		object_count[obj_id] = object_actual_count[obj_id];
+	}
+}
+
 /* iterate through all lists of objects */
 void objects_iterate(void (*f)(object_data *))
 {
-	for (i = 0; i < ID_COUNT; i++) {
-		if (head_all[i] == NULL) continue;
+	int obj_id;
+	for (obj_id = 0; obj_id < ID_COUNT; obj_id++) {
+		object_actual_count[obj_id] = 0;
+		if (head_all[obj_id] == NULL) continue;
 
 		node *n;
-		node **prev = &(head_all[i]);
+		node **prev = &(head_all[obj_id]);
 
-		for (n = (head_all[i]); n != NULL;  ) {
+		for (n = (head_all[obj_id]); n != NULL;  ) {
 			if (n->remove) {
 				(*prev) = n->next;
 				free(n);
 				n = (*prev);
-				--object_count[i];
+				--object_count[obj_id];
 			} else {
 				f(n->obj);
 
@@ -81,54 +94,59 @@ void objects_iterate(void (*f)(object_data *))
 					(*prev) = n->next;
 					free(n);
 					n = (*prev);
-					--object_count[i];
+					--object_count[obj_id];
 				} else {
 					prev = &(n->next);
 					n = n->next;
+					++object_actual_count[obj_id];
 				}
 			}
 		}
-		last_all[i] = prev;
+		last_all[obj_id] = prev;
+		errchk_obj_count(obj_id);
 	}
 }
 
 /* iterate through one type of object */
-void objects_iterate_type(void (*f)(object_data *), int obj_id)
-{
+void objects_iterate_type(void (*f)(object_data *), int obj_id) {
 	/* error check obj_id */
 	if (obj_id < 0 || obj_id >= ID_COUNT) {
 		fprintf(stderr,"list_iterate_type: Invalid obj_id %d\n", obj_id);
 		return;
 	}
 
-	/* return if list is empty */
-	if ((head_all[obj_id]) == NULL) return;
+	object_actual_count[obj_id] = 0;
 
-	node *n;
-	node **prev = &(head_all[obj_id]);
+	/* check if list is not empty */
+	if (head_all[obj_id]) {
 
-	for (n = (head_all[obj_id]); n != NULL;  ) {
-		if (n->remove) {
-			(*prev) = n->next;
-			free(n);
-			n = (*prev);
-			--object_count[i];
-		} else {
-			f(n->obj);
+		node *n;
+		node **prev = &(head_all[obj_id]);
 
+		for (n = (head_all[obj_id]); n != NULL;  ) {
 			if (n->remove) {
 				(*prev) = n->next;
 				free(n);
 				n = (*prev);
 				--object_count[i];
 			} else {
-				prev = &(n->next);
-				n = n->next;
-			}
+				f(n->obj);
 
+				if (n->remove) {
+					(*prev) = n->next;
+					free(n);
+					n = (*prev);
+					--object_count[i];
+				} else {
+					prev = &(n->next);
+					n = n->next;
+					++object_actual_count[obj_id];
+				}
+			}
 		}
+		last_all[obj_id] = prev;
 	}
-	last_all[obj_id] = prev;
+	errchk_obj_count(obj_id);
 }
 
 /* frees all nodes in all lists */

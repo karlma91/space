@@ -41,7 +41,7 @@ void hpbar_draw(hpbar *hp_bar)
 
 	if ((hp_bar->hp_timer > 0 || hp_percent < 0.5) && hp_bar->draw_value > 0) {
 		hp_bar->hp_timer -= dt;
-		draw_bar(*(hp_bar->x) + hp_bar->x_offset, *(hp_bar->y) + hp_bar->y_offset, hp_bar->width, hp_bar->height, keys[SDL_SCANCODE_LSHIFT] ? hp_percent : hp_bar->draw_value);
+		draw_bar(*(hp_bar->x) + hp_bar->x_offset, *(hp_bar->y) + hp_bar->y_offset, hp_bar->width, hp_bar->height, hp_bar->draw_value, hp_percent);
 	}
 }
 

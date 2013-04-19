@@ -10,6 +10,7 @@
 #include "gameover.h"
 #include "levelselect.h"
 #include "statesystem.h"
+#include "draw.h"
 
 
 /* Drawing */
@@ -20,6 +21,8 @@
 static void on_enter();
 static void update();
 static void draw();
+static void arcade_update();
+static void arcade_draw();
 static void on_leave();
 static void destroy();
 
@@ -52,6 +55,7 @@ static struct menu ingameMenu = {
 static struct menu *curMenu; //current active menu
 static int select_id = 0;
 static int i;
+static int current_menu;
 
 static const Color col_item   = {1,0,0,1};
 static const Color col_select = {0,0,1,1};
@@ -61,13 +65,24 @@ void menu_init()
 {
     curMenu = &mainMenuTest;
 
-    statesystem_init_state(STATESYSTEM_MENU, 0,
-            on_enter,
-            update,
-            NULL,
-            draw,
-            on_leave,
-            destroy);
+
+    if(config.arcade){
+    	statesystem_init_state(STATESYSTEM_MENU, 0,
+    	            on_enter,
+    	            arcade_update,
+    	            NULL,
+    	            arcade_draw,
+    	            on_leave,
+    	            destroy);
+    }else{
+    	statesystem_init_state(STATESYSTEM_MENU, 0,
+    			on_enter,
+    			update,
+    			NULL,
+    			draw,
+    			on_leave,
+    			destroy);
+    }
 
 }
 
@@ -82,6 +97,7 @@ static void on_leave()
 
 void menu_change_current_menu(int menu)
 {
+	current_menu = menu;
 	switch(menu){
 	case MENU_INGAME:
 		curMenu = &ingameMenu;
@@ -94,29 +110,32 @@ void menu_change_current_menu(int menu)
 
 static void update()
 {
-	if (keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_UP]){
+	if (keys[KEY_UP_1] || keys[KEY_UP_2]){
 		select_id--;
 		select_id = (select_id < 0) ? curMenu->num_items-1 : select_id;
-		keys[SDL_SCANCODE_W] = 0, keys[SDL_SCANCODE_UP] = 0;
+		keys[KEY_UP_1] = 0, keys[KEY_UP_2] = 0;
 	}
 
-	if (keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_DOWN]){
+	if (keys[KEY_DOWN_1] || keys[KEY_DOWN_2]){
 		select_id++;
 		select_id = select_id >= curMenu->num_items ? 0 : select_id;
-		keys[SDL_SCANCODE_S] = 0, keys[SDL_SCANCODE_DOWN] = 0;
+		keys[KEY_DOWN_1] = 0, keys[KEY_DOWN_2] = 0;
 	}
 
-	if (keys[SDL_SCANCODE_SPACE] || keys[SDL_SCANCODE_RETURN]) {
+	if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 		curMenu->func();
-		keys[SDL_SCANCODE_SPACE] = 0, keys[SDL_SCANCODE_RETURN] = 0;
+		keys[KEY_RETURN_2] = 0, keys[KEY_RETURN_1] = 0;
 	}
 
-	if(keys[SDL_SCANCODE_ESCAPE]){
+	if(keys[KEY_ESCAPE]){
 		select_id = curMenu->escape_item;
 		curMenu->func();
-		keys[SDL_SCANCODE_ESCAPE] = 0;
+		keys[KEY_ESCAPE] = 0;
 	}
 }
+
+
+
 
 static void draw()
 {
@@ -137,6 +156,86 @@ static void draw()
 		font_drawText(0,100 - 60 * i, curMenu->texts[i]);
 	}
 }
+
+
+static void arcade_update()
+{
+
+
+	if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
+		switch(current_menu){
+			case MENU_MAIN:
+				space_init_level(1,1);
+				statesystem_set_state(STATESYSTEM_SPACE);
+				menu_change_current_menu(MENU_INGAME);
+				break;
+			case MENU_INGAME:
+				statesystem_set_state(STATESYSTEM_SPACE);
+				break;
+			}
+		keys[KEY_RETURN_2] = 0;
+		keys[KEY_RETURN_1] = 0;
+	}
+
+	if(keys[KEY_ESCAPE]){
+		menu_change_current_menu(MENU_MAIN);
+		statesystem_set_state(STATESYSTEM_MENU);
+		keys[KEY_ESCAPE] = 0;
+	}
+}
+
+
+static void arcade_draw()
+{
+	static float timer;
+	timer +=dt;
+
+	setTextAngle(0);
+	setTextSize(80);
+	setTextAlign(TEXT_CENTER);
+	switch(current_menu){
+	case MENU_INGAME:
+		setTextAlign(TEXT_CENTER);
+		setTextSize(40);
+		//font_drawText(0,0.5f*HEIGHT/2, "PAUSE");
+		break;
+	case MENU_MAIN:
+		drawStars();
+		glColor_from_color(draw_col_rainbow((int)(timer*1000)));
+		font_drawText(0,0.8f*HEIGHT/2, "SPACE");
+
+		glColor3f(1,1,1);
+
+		setTextSize(30);
+		font_drawText(-WIDTH*0.4,-0.8f*HEIGHT/2, "STYR");
+		font_drawText(-WIDTH*0.4,-0.8f*HEIGHT/2-50, "VVV");
+
+		font_drawText(+WIDTH*0.4,-0.8f*HEIGHT/2, "SKYT");
+		font_drawText(+WIDTH*0.4,-0.8f*HEIGHT/2-50, "VVV");
+
+		setTextAlign(TEXT_CENTER);
+		setTextSize(40);
+
+		static float button_timer = 0;
+		static int button_down;
+		button_timer+=dt;
+		if(button_timer > 0.5){
+			button_down = !button_down;
+			button_timer = 0;
+		}
+		font_drawText(0,-0.5f*HEIGHT/2, "START SPILLET");
+		glColor3f(0.1,0.9,0.1);
+		if(button_down){
+			cpVect t = cpv(0,0);
+			draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
+		}else{
+			cpVect t = cpv(0,-5.5);
+			draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
+		}
+		break;
+	}
+}
+
 
 static void inner_main()
 {

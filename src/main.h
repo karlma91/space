@@ -1,6 +1,7 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+#include "SDL.h"
 #include <stdlib.h>
 
 #define SLEEP_TIME 1
@@ -9,6 +10,8 @@
 typedef struct
 {
     int fullscreen;
+    int arcade;
+    int arcade_keys;
     char key_left;
     char key_up;
     char key_right;
@@ -44,7 +47,19 @@ extern state *currentState;
 
 extern int main_stop();
 
-#include "SDL.h"
 extern SDL_Window *window; //TODO TMP
+
+extern unsigned int KEY_UP_1;
+extern unsigned int KEY_UP_2;
+extern unsigned int KEY_LEFT_1;
+extern unsigned int KEY_LEFT_2;
+extern unsigned int KEY_RIGHT_1;
+extern unsigned int KEY_RIGHT_2;
+extern unsigned int KEY_DOWN_1;
+extern unsigned int KEY_DOWN_2;
+
+extern unsigned int KEY_RETURN_1;
+extern unsigned int KEY_RETURN_2;
+extern unsigned int KEY_ESCAPE;
 
 #endif /* MAIN_H_ */

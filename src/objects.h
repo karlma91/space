@@ -9,8 +9,10 @@ enum OBJECT_ID {
 	ID_DEFAULT,
 	ID_PLAYER,
 	ID_GROUND,
-	ID_TANK_FACTORY,
+	ID_FACTORY,
 	ID_TANK,
+	ID_ROCKET,
+	ID_TURRET,
 	ID_BULLET_PLAYER,
 	ID_BULLET_ENEMY,
 	ID_ROBOTARM,
@@ -23,10 +25,8 @@ typedef struct {
 	hpbar *hp_bar;
 	int *score;
 	float *damage;
-	void *unused_3;
-	void *unused_4;
-	void *unused_5;
-	void *unused_6;
+	int body_count;
+	cpBody *(bodies[5]);
 } object_component_pointers;
 
 typedef struct _object_data object_data;
@@ -45,6 +45,7 @@ struct _object_data {
 	int instance_id;
 	int *remove;
 	int disabled;
+	int destroyed;
 	cpBody *body;
 	object_component_pointers components;
 };
@@ -54,7 +55,9 @@ struct _object_data {
 /* object parameters */
 typedef struct _object_param_player object_param_player;
 typedef struct _object_param_tank object_param_tank;
-typedef struct _object_param_tankfactory object_param_tankfactory;
+typedef struct _object_param_rocket object_param_rocket;
+typedef struct _object_param_turret object_param_turret;
+typedef struct _object_param_factory object_param_factory;
 
 
 /* layers for objects */

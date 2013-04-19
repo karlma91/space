@@ -46,16 +46,16 @@ static float camera_zoom = 0.1; // start zoom
 static float zoomed_temp_y = 0;
 static float zoomed_cam_y = 0;
 
-void levelselevt_init()
+void levelselect_init()
 {
     statesystem_init_state(STATESYSTEM_LEVELSELECT, 0, on_enter, update, NULL, render, on_leave, destroy);
 
 	level_get_ships(&ships, &decks);
-	fprintf(stderr, "decks: %d \n", decks);
-	int i;
-	for(i=0; i<decks; i++){
-		fprintf(stderr, "x: %f y: %f radius: %f \n", ships[i].x,ships[i].y,ships[i].radius);
-	}
+	//fprintf(stderr, "decks: %d \n", decks);
+	//int i;
+	//for(i=0; i<decks; i++){
+	//	fprintf(stderr, "x: %f y: %f radius: %f \n", ships[i].x,ships[i].y,ships[i].radius);
+	//}
 }
 
 static void on_enter()
@@ -76,27 +76,27 @@ static void update()
 		ships[i].rotation += 360*ships[i].rotation_speed*dt;
 	}
 
-	if (keys[SDL_SCANCODE_ESCAPE]){
+	if (keys[KEY_ESCAPE]){
 	    statesystem_set_state(STATESYSTEM_MENU);
-		keys[SDL_SCANCODE_ESCAPE] = 0;
+		keys[KEY_ESCAPE] = 0;
 		}
 
 	if(overview){
 		float speed = 400;
-		if (keys[SDL_SCANCODE_UP]){
+		if (keys[KEY_UP_2]){
 			//camera_y += speed*dt;
 			sel+=1;
-			keys[SDL_SCANCODE_UP] = 0;
+			keys[KEY_UP_2] = 0;
 		}
-		if (keys[SDL_SCANCODE_DOWN]){
+		if (keys[KEY_DOWN_2]){
 			//camera_y -= speed*dt;
 			sel-=1;
-			keys[SDL_SCANCODE_DOWN] = 0;
+			keys[KEY_DOWN_2] = 0;
 		}
-		if (keys[SDL_SCANCODE_LEFT]){
+		if (keys[KEY_LEFT_2]){
 			camera_x += speed*dt;
 		}
-		if (keys[SDL_SCANCODE_RIGHT]){
+		if (keys[KEY_RIGHT_2]){
 			camera_x -= speed*dt;
 		}
 
@@ -105,29 +105,29 @@ static void update()
 		float temp_z =  (camera_zoom - 0.1)*5;
 		camera_zoom -= temp_z*dt;
 
-		if (keys[SDL_SCANCODE_RETURN]){
+		if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]){
 			overview = 0;
 			zoomed_temp_y = ((1.0f * HEIGHT)/(camera_zoom*2));
-			keys[SDL_SCANCODE_RETURN] = 0;
+			keys[KEY_RETURN_2] = 0, keys[KEY_RETURN_1] = 0;
 		}
 
 	}else{
-		if (keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_UP]){
+		if (keys[KEY_UP_1] || keys[KEY_UP_2]){
 			level_select--;
-			keys[SDL_SCANCODE_W] = 0, keys[SDL_SCANCODE_UP] = 0;
+			keys[KEY_UP_1] = 0, keys[KEY_UP_2] = 0;
 		}
-		if (keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_DOWN]){
+		if (keys[KEY_DOWN_1] || keys[KEY_DOWN_2]){
 			level_select++;
-			keys[SDL_SCANCODE_S] = 0, keys[SDL_SCANCODE_DOWN] = 0;
+			keys[KEY_DOWN_1] = 0, keys[KEY_DOWN_2] = 0;
 		}
 
 		level_select = (level_select < 0) ? ships[sel].count - 1 : (level_select >= ships[sel].count ? 0 : level_select);;
 
-		if (keys[SDL_SCANCODE_SPACE] || keys[SDL_SCANCODE_RETURN]) {
+		if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 		    statesystem_set_state(STATESYSTEM_SPACE);
 			/* load correct level */
 			space_init_level(sel+1,level_select+1);
-			keys[SDL_SCANCODE_SPACE] = 0, keys[SDL_SCANCODE_RETURN] = 0;
+			keys[KEY_RETURN_2] = 0, keys[KEY_RETURN_1] = 0;
 		}
 		if(keys[SDL_SCANCODE_BACKSPACE]){
 			overview = 1;

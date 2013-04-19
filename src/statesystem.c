@@ -50,7 +50,7 @@ void statesystem_init()
     menu_init();
     space_init();
     gameover_init();
-    levelselevt_init();
+    levelselect_init();
 
     statesystem_set_state(0);
 
@@ -112,6 +112,7 @@ void statesystem_set_state(int state)
         states[i].prev = NULL;
         states[i].next = NULL;
     }
+    states[state].on_enter();
     states[state].time_alive = 0;
     stack_top = &(states[state]);
     stack_bot = &(states[state]);
@@ -119,11 +120,11 @@ void statesystem_set_state(int state)
 
 void statesystem_update()
 {
-    stack_top->pre_update();
-    if(stack_top->inner_states > 0 &&
-            stack_top->inner_update[stack_top->current_inner_state]){
-        stack_top->inner_update[stack_top->current_inner_state]();
-    }
+	stack_top->pre_update();
+	if(stack_top->inner_states > 0 &&
+			stack_top->inner_update[stack_top->current_inner_state]){
+		stack_top->inner_update[stack_top->current_inner_state]();
+	}
     if( stack_top->post_update){
         stack_top->post_update();
     }

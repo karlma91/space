@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<emitter imageName="spark.png" name="spark" renderType="inherit" useAdditive="true" useOriented="true">
+<emitter imageName="particle.png" name="spark" renderType="inherit" useAdditive="true" useOriented="true">
 <spawnInterval enabled="true" max="10.0" min="1.0"/>
 <spawnCount enabled="false" max="3.0" min="1.0"/>
 <initialLife enabled="true" max="50" min="10"/>

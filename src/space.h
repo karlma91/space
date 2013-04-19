@@ -26,4 +26,6 @@ void space_init_level(int space_station, int deck);
 float extern getGameTime();
 extern int getPlayerScore();
 
+extern void drawStars();
+
 #endif /* SPACE_H_ */

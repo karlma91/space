@@ -25,6 +25,12 @@ void se_add_score_and_popup(cpVect p, int score)
 	((object_group_player *) objects_first(ID_PLAYER))->score += score;
 }
 
+float se_distance_to_player(float x)
+{
+	object_group_player *player = ((object_group_player *) objects_first(ID_PLAYER));
+	return fabs(player->data.body->p.x-x);
+}
+
 /**
  * return 1 if object is killed
  */
@@ -32,6 +38,7 @@ int se_damage_object(object_data *object, float damage)
 {
 	object->components.hp_bar->value -= damage;
 	if (object->components.hp_bar->value <= 0) {
+		object->destroyed = 0;
 		return 1;
 	}
 	return 0;
@@ -40,18 +47,18 @@ int se_damage_object(object_data *object, float damage)
 /**
  * returns the best angle to shoot at a moving object obj2 from obj1
  */
-cpFloat se_get_best_shoot_angle(cpBody *a, cpBody *b, cpFloat bullet_speed)
+cpFloat se_get_best_shoot_angle(cpVect a, cpVect va, cpVect b, cpVect vb, cpFloat bullet_speed)
 {
-	cpVect v = cpvsub(a->p, b->p);
+	cpVect v = cpvsub(a, b);
 
-	cpFloat c = cpvlength(b->v);
+	cpFloat c = cpvlength(vb);
 	cpFloat s = bullet_speed;
-	cpFloat G = acos(cpvdot(v, b->v)/(cpvlength(b->v) * cpvlength(v)));
+	cpFloat G = acos(cpvdot(v, vb)/(cpvlength(vb) * cpvlength(v)));
 	cpFloat angle = asin((c * sin(G)) / s);
 
 	cpFloat bc = cpvtoangle(v);
 
-	if(b->v.x < 0){
+	if(vb.x < 0){
 		angle  = -angle;
 	}
 	angle  = M_PI + (bc - angle);
@@ -105,5 +112,15 @@ float turn_toangle(float from_angle, float to_angle, float step_size)
 
 	//fprintf(stderr,"angle: %0.4f\n",from_angle*180/M_PI);
 	return from_angle;
+}
+void se_shape_from_space(cpBody *body, cpShape *shape, void *data)
+{
+    cpSpaceRemoveShape(space, shape);
+    cpShapeFree(shape);
+}
+void se_constrain_from_space(cpBody *body, cpConstraint *constraint, void *data)
+{
+    cpSpaceRemoveConstraint(space, constraint);
+    cpConstraintFree(constraint);
 }
 

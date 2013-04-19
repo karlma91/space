@@ -36,6 +36,19 @@
 static float fps;
 static float frames;
 
+unsigned int KEY_UP_1 = SDLK_w;
+unsigned int KEY_UP_2 = SDLK_UP;
+unsigned int KEY_LEFT_1 = SDLK_a;
+unsigned int KEY_LEFT_2 = SDLK_LEFT;
+unsigned int KEY_RIGHT_1 = SDLK_d;
+unsigned int KEY_RIGHT_2 = SDLK_RIGHT;
+unsigned int KEY_DOWN_1 = SDLK_s;
+unsigned int KEY_DOWN_2 = SDLK_DOWN;
+
+unsigned int KEY_RETURN_1 = SDLK_SPACE;
+unsigned int KEY_RETURN_2 = SDLK_RETURN;
+unsigned int KEY_ESCAPE = SDLK_ESCAPE;
+
 /* definition of external variables */
 char fps_buf[15];
 int WIDTH;
@@ -64,6 +77,11 @@ static int handler(void* config, const char* section, const char* name,
 #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
 	if (MATCH("video", "fullscreen")) {
 		pconfig->fullscreen = atoi(value);
+  }else if (MATCH("video", "arcade")) {
+	  pconfig->arcade = atoi(value);
+  } else if (MATCH("video", "arcade_keys")) {
+	  pconfig->arcade_keys = atoi(value);
+  
 	} else if (MATCH("video", "width")) {
 		pconfig->width = atoi(value);
 	} else if (MATCH("video", "height")) {
@@ -82,13 +100,29 @@ static int handler(void* config, const char* section, const char* name,
 	return 1;
 }
 
-static int init_config() {
+static int init_config()
+{
 	if (ini_parse("bin/config.ini", handler, &config) < 0) {
 		printf("Could not load 'bin/config.ini'\n");
 		return 1;
 	}
-	fprintf(stderr, "Config loaded from 'bin/config.ini': fullscreen=%d\n",
-			config.fullscreen);
+	//fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d\n", config.fullscreen);
+	
+	if (config.arcade_keys) {
+		KEY_UP_2 = SDLK_UP;
+		KEY_UP_1 = SDLK_w;
+		KEY_LEFT_2 = SDLK_LEFT;
+		KEY_LEFT_1 = SDLK_a;
+		KEY_RIGHT_2 = SDLK_RIGHT;
+		KEY_RIGHT_1 = SDLK_d;
+		KEY_DOWN_2 = SDLK_DOWN;
+		KEY_DOWN_1 = SDLK_s;
+
+		KEY_RETURN_1 = SDLK_k;
+		KEY_RETURN_2 = SDLK_g;
+		KEY_ESCAPE = SDLK_ESCAPE;
+	}
+	
 	return 0;
 }
 
@@ -125,6 +159,7 @@ static void initGL() {
 	glLoadIdentity();
 
 	glViewport(0, 0, W, H);
+	glClearColor(0,0,0, 1);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnable(GL_TEXTURE_2D);
@@ -166,6 +201,8 @@ static int main_init() {
 	fprintf(stderr, "DEBUG - SDL_init done!\n");
 
 	SDL_GetDisplayBounds(0, &fullscreen_dimensions);
+
+	SDL_ShowCursor(SDL_DISABLE);
 
 	if (config.fullscreen) {
 		W = fullscreen_dimensions.w;
@@ -220,6 +257,16 @@ static int main_run() {
 	statesystem_set_state(STATESYSTEM_MENU);
 
 	lastTime = SDL_GetTicks();
+
+	//START GAME
+	if(config.arcade){
+		printf("start %s\n", "999");
+	}
+
+	//START GAME
+	if(config.arcade){
+		printf("start %s\n", "999");
+	}
 
 	while (main_running) {
 

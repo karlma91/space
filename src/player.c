@@ -30,7 +30,6 @@ static void player_render(object_group_player *);
 static void player_update(object_group_player *);
 static void player_destroy(object_group_player *);
 
-
 static void player_controls(object_group_player *);
 
 static void arcade_control(object_group_player *); //2
@@ -70,15 +69,11 @@ object_group_player *object_create_player()
 	player->param->tex_id = TEX_PLAYER;
 
 	player->data.components.hp_bar = &player->hp_bar;
+	player->data.components.body_count = 0;
 
-	player->gun_level = 1;
-	player->lives = 3;
-	player->score = 0;
-	player->disable = 0;
-	player->rotation_speed = 8;
 	player->flame = particles_get_emitter(EMITTER_FLAME);
-	player->aim_angle = 0;
-	player->gun_timer = 0;
+	player->disable=0;
+	init((object_data*)player);
 
 	/* make and add new body */
 	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
@@ -110,8 +105,16 @@ object_group_player *object_create_player()
 	return player;
 }
 
-static void init(object_data *fac)
+static void init(object_data *pl)
 {
+	object_group_player *player = (object_group_player*) pl;
+	player->gun_level = 1;
+	player->lives = 3;
+	player->score = 0;
+	player->rotation_speed = 2.5;
+	player->aim_angle = 0;
+	player->aim_speed = 0.5;
+	player->gun_timer = 0;
 }
 
 static void player_render(object_group_player *player)
@@ -125,9 +128,19 @@ static void player_render(object_group_player *player)
 	hpbar_draw(&player->hp_bar);
 }
 
+#include <time.h>
 static void player_update(object_group_player *player)
 {
-	if (keys[SDL_SCANCODE_I])
+	if (!config.arcade) {
+		fprintf(stderr,"PLAYER %6d pos: x=%6.1f y=%6.1f\n",player->data.instance_id, player->data.body->p.x, player->data.body->p.y);
+		if (keys[SDLK_F1]) {
+			time_t t;
+			time(&t);
+			fprintf(stderr,"TIMESTAMP: %d\n",t);
+		}
+	}
+
+	if (keys[SDLK_i] && !config.arcade_keys)
 		player->hp_bar.value = 1000000;
 
 	player->gun_timer += dt;
@@ -158,36 +171,38 @@ static void player_controls(object_group_player *player)
 {
 	arcade_control(player);
 
-	if(keys[SDL_SCANCODE_G]){
-		keys[SDL_SCANCODE_G] = 0;
-		cpVect gravity = cpv(0, -2);
-		cpSpaceSetGravity(space, gravity);
-	}
+	if (!config.arcade_keys) {
+		if(keys[SDL_SCANCODE_G]){
+			keys[SDL_SCANCODE_G] = 0;
+			cpVect gravity = cpv(0, -2);
+			cpSpaceSetGravity(space, gravity);
+		}
 
-	if (keys[SDL_SCANCODE_Q]){
-		cam_zoom /= dt+1.4f;
-	}
+		if (keys[SDL_SCANCODE_Q]){
+			cam_zoom /= dt+1.4f;
+		}
 
-	if (keys[SDL_SCANCODE_E]){
-		cam_zoom *= dt+1.4f;
-		if (keys[SDL_SCANCODE_Q])
-			cam_zoom = 1;
-	}
-	if (keys[SDL_SCANCODE_E]){
-		player->data.body->p.x=0;
-		player->data.body->p.y=500;
-	}
+		if (keys[SDL_SCANCODE_E]){
+			cam_zoom *= dt+1.4f;
+			if (keys[SDL_SCANCODE_Q])
+				cam_zoom = 1;
+		}
+		if (keys[SDL_SCANCODE_E]){
+			player->data.body->p.x=0;
+			player->data.body->p.y=500;
+		}
 
-	if (keys[SDL_SCANCODE_H]) {
-		cpBodySetVelLimit(player->data.body,5000);
-	}
+		if (keys[SDL_SCANCODE_H]) {
+			cpBodySetVelLimit(player->data.body,5000);
+		}
 
-	if (keys[SDL_SCANCODE_X]) {
-		particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
-	}
-	if (keys[SDL_SCANCODE_B]) {
-		particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
-		keys[SDL_SCANCODE_B] = 0;
+		if (keys[SDL_SCANCODE_X]) {
+			particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
+		}
+		if (keys[SDL_SCANCODE_B]) {
+			particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
+			keys[SDL_SCANCODE_B] = 0;
+		}
 	}
 }
 
@@ -222,13 +237,13 @@ static void arcade_control(object_group_player *player)
 	float dir_step;
 	Direction angle_index = -1;
 
-	angle_index = angle_index_fromkeys(SDL_SCANCODE_A, SDL_SCANCODE_W, SDL_SCANCODE_D, SDL_SCANCODE_S);
+	angle_index = angle_index_fromkeys(KEY_LEFT_1, KEY_UP_1, KEY_RIGHT_1, KEY_DOWN_1);
 
 	cpFloat speed = 700;
 
 	if (angle_index != DIR_NONE) {
 		player_angle_target = dir8[angle_index];
-		dir_step = (2.5 * 2*M_PI)*dt; // 2.5 rps
+		dir_step = (player->rotation_speed * 2*M_PI)*dt; // 2.5 rps
 		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
 
 		//TODO use impulses instead?
@@ -244,12 +259,12 @@ static void arcade_control(object_group_player *player)
 	//static float aim_angle = 0;
 	float aim_angle_target = 0;
 
-	angle_index = angle_index_fromkeys(SDL_SCANCODE_LEFT, SDL_SCANCODE_UP, SDL_SCANCODE_RIGHT, SDL_SCANCODE_DOWN);
+	angle_index = angle_index_fromkeys(KEY_LEFT_2, KEY_UP_2, KEY_RIGHT_2, KEY_DOWN_2);
 
 	if (angle_index != DIR_NONE) {
 		aim_angle_target = dir8[angle_index];
-		dir_step = (0.5f * 2*M_PI) * dt; // 0.5 rps
-		player->aim_angle = turn_toangle(player->aim_angle,aim_angle_target,dir_step);
+		dir_step = (player->aim_speed * 2*M_PI) * dt; // 0.5 rps
+		player->aim_angle = turn_toangle(player->aim_angle, aim_angle_target, dir_step);
 		action_shoot(player);
 	}
 }

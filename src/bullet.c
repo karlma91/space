@@ -30,9 +30,9 @@ object_group_preset type_bullet_enemy= {
 object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int type)
 {
 	struct bullet *temp = malloc(sizeof(struct bullet));
-
 		temp->data.alive = 1;
 		temp->data.components.damage = &(temp->damage);
+		temp->data.components.body_count = 0;
 
 		cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
 
@@ -96,7 +96,7 @@ static void render(object_data *obj)
  */
 static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
 {
-	cpVect g = cpv(0,-100);
+	cpVect g = cpv(0,-200);
 
 	cpBodyUpdateVelocity(body, g, damping, dt);
 }

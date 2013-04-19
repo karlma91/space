@@ -9,7 +9,7 @@
 
 static FILE * file;
 
-static scoreelement score_def = {"----",0,1352918808,NULL};
+static scoreelement score_def = {"---",0,1352918808,NULL};
 static int read_addscore(scorelist *list, char *name, int score,long time,int from_file);
 /**
  * inits a list struct
@@ -56,7 +56,7 @@ static int read_addscore(scorelist *list, char *name, int score,long time,int fr
 				element->next = *cur;
 				*cur = element;
 				list->elements++;
-				return position;
+				return position - 1;
 			}
 			cur = &((*cur)->next);
 		}

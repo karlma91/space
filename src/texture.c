@@ -32,7 +32,7 @@ int texture_load(char *file)
 
 	int have_texture = texture_from_name(file);
 	if(have_texture >=0){
-		fprintf(stderr,"have texture: %s\n", file);
+		//fprintf(stderr,"have texture: %s\n", file);
 		return have_texture;
 	}
 
@@ -75,12 +75,12 @@ int texture_load(char *file)
 
 		SDL_FreeSurface(img);
 
-		fprintf(stderr,"Texture loaded: %s\n", file);
+		//fprintf(stderr,"Texture loaded: %s\n", file);
 
 		return tex_counter;
 
 	} else {
-		fprintf(stderr,"Error -> Texture not loaded: %s\n", filepath);
+		fprintf(stderr,"Unable to load texture: %s\n IMG_ERROR: %s\n", filepath, IMG_GetError());
 		return -1;
 	}
 }
@@ -109,6 +109,9 @@ extern int texture_init()
 	TEX_GLOW    = texture_load("glow.png");
 	TEX_GLOWDOT = texture_load("glowdot.png");
 	TEX_PLAYER = texture_load("player.png");
+	TEX_PARTICLE = texture_load("particle.png");
+	TEX_BUTTON = texture_load("button.png");
+	TEX_BUTTON_DOWN = texture_load("button_down.png");
 
 	return 0;
 }
