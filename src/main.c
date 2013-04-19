@@ -103,14 +103,14 @@ static int init_config()
 	//fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d\n", config.fullscreen);
 
 	if (config.arcade_keys) {
-		KEY_UP_1 = SDLK_UP;
-		KEY_UP_2 = SDLK_w;
-		KEY_LEFT_1 = SDLK_LEFT;
-		KEY_LEFT_2 = SDLK_a;
-		KEY_RIGHT_1 = SDLK_RIGHT;
-		KEY_RIGHT_2 = SDLK_d;
-		KEY_DOWN_1 = SDLK_DOWN;
-		KEY_DOWN_2 = SDLK_s;
+		KEY_UP_2 = SDLK_UP;
+		KEY_UP_1 = SDLK_w;
+		KEY_LEFT_2 = SDLK_LEFT;
+		KEY_LEFT_1 = SDLK_a;
+		KEY_RIGHT_2 = SDLK_RIGHT;
+		KEY_RIGHT_1 = SDLK_d;
+		KEY_DOWN_2 = SDLK_DOWN;
+		KEY_DOWN_1 = SDLK_s;
 
 		KEY_RETURN_1 = SDLK_k;
 		KEY_RETURN_2 = SDLK_g;
