@@ -13,7 +13,7 @@
 static int station_count;
 static level_ship *worlds;
 
-static char *(group_names[ID_COUNT]);
+char *(group_names[ID_COUNT]);
 
 static int (count[ID_COUNT]);
 static char (*(names[ID_COUNT]))[21];
