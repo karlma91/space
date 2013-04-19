@@ -56,7 +56,7 @@ static int read_addscore(scorelist *list, char *name, int score,long time,int fr
 				element->next = *cur;
 				*cur = element;
 				list->elements++;
-				return position;
+				return position - 1;
 			}
 			cur = &((*cur)->next);
 		}

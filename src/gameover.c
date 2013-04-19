@@ -38,6 +38,10 @@ static const char valid_char[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
 static const int char_count = 37; /* valid_char length*/
 static scorelist * list;
 
+static int score_position;
+static int score_value;
+static int score_newly_added;
+
 void gameover_init()
 {
 	list = malloc(sizeof(scorelist));
@@ -80,14 +84,14 @@ static void update() {
 		win = 1;
 		/* no break */
 	case enter_name:
-		if (keys[KEY_DOWN_2]) {
+		if (keys[KEY_DOWN_2] || keys[KEY_DOWN_1]) {
 			if (key_dt<=0) {
 				key_dt = key_ddt;
 				key_ddt = key_ddt_min;
 
 				if (++valid_index[cursor] >= char_count) valid_index[cursor] -= char_count;
 			}
-		} else if (keys[KEY_UP_2]) {
+		} else if (keys[KEY_UP_2] || keys[KEY_UP_1]) {
 			if (key_dt<=0) {
 				key_dt = key_ddt;
 				key_ddt = key_ddt_min;
@@ -122,11 +126,14 @@ static void update() {
 			/* add score */
 			gameover_state = show_highscore;
 			win = 0;
-			highscorelist_addscore(list,&input[0],getPlayerScore());
+			score_value = getPlayerScore();
+			score_position = highscorelist_addscore(list,&input[0], score_value);
+			score_newly_added = 1;
 		}
 		break;
 	case show_highscore:
 		if (keys[KEY_ESCAPE] || keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
+			score_newly_added = 0;
 			if(config.arcade){
 				printf("exit %d\n", getPlayerScore());
 				main_stop();
@@ -192,10 +199,20 @@ static void draw()
 		} else if(timer>=2) timer=0;
 		break;
 	case show_highscore:
-		draw_highscore();
 		setTextSize(80);
 		setTextAlign(TEXT_CENTER);
 		font_drawText(0,0.4f*HEIGHT, "HIGHSCORES");
+
+		draw_highscore();
+
+		if (score_newly_added) {
+			char current_score_buffer[100];
+			setTextSize(35);
+			setTextAlign(TEXT_CENTER);
+			sprintf(&current_score_buffer[0], "%s FIKK %d. PLASS MED %d POENG!", &input[0], score_position, score_value);
+			glColor3f(1,1,1);
+			font_drawText(0,-0.4f*HEIGHT, &current_score_buffer[0]);
+		}
 		break;
 	}
 }
