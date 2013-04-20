@@ -40,7 +40,7 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 
 	bullet->alive = 0;
 
-//	se_add_explotion_at_contact_point(arb);
+	se_add_explotion_at_contact_point(arb);
 
 	//TODO create a function for damaging other objects
 	if (se_damage_object(object, *(bullet->components.damage))) {
@@ -61,7 +61,7 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	bullet->alive = 0;
 
-//	se_add_explotion_at_contact_point(arb);
+	se_add_explotion_at_contact_point(arb);
 
 	if (se_damage_object(object, *(bullet->components.damage))) {
 		particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
@@ -78,7 +78,7 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 
 	if (player)  {
 		if (player->preset->ID == ID_PLAYER) {
-//				add_sparks_at_contactpoint(arb);
+			add_sparks_at_contactpoint(arb);
 			cpVect force = cpArbiterTotalImpulse(arb);
 			float f = cpvlength(force);
 			//todo create a super fancy formula for determining physical damagae
@@ -97,7 +97,7 @@ static void callback_bullet_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
 	object_data *object = ((object_data *)(a->body->data));
-	//		add_sparks_at_contactpoint(arb);
+	add_sparks_at_contactpoint(arb);
 	object->alive = 0;
 }
 

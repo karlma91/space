@@ -36,18 +36,18 @@
 static float fps;
 static float frames;
 
-unsigned int KEY_UP_1 = SDLK_w;
-unsigned int KEY_UP_2 = SDLK_UP;
-unsigned int KEY_LEFT_1 = SDLK_a;
-unsigned int KEY_LEFT_2 = SDLK_LEFT;
-unsigned int KEY_RIGHT_1 = SDLK_d;
-unsigned int KEY_RIGHT_2 = SDLK_RIGHT;
-unsigned int KEY_DOWN_1 = SDLK_s;
-unsigned int KEY_DOWN_2 = SDLK_DOWN;
+unsigned int KEY_UP_1 = SDL_SCANCODE_W;
+unsigned int KEY_UP_2 = SDL_SCANCODE_UP;
+unsigned int KEY_LEFT_1 = SDL_SCANCODE_A;
+unsigned int KEY_LEFT_2 = SDL_SCANCODE_LEFT;
+unsigned int KEY_RIGHT_1 = SDL_SCANCODE_D;
+unsigned int KEY_RIGHT_2 = SDL_SCANCODE_RIGHT;
+unsigned int KEY_DOWN_1 = SDL_SCANCODE_S;
+unsigned int KEY_DOWN_2 = SDL_SCANCODE_DOWN;
 
-unsigned int KEY_RETURN_1 = SDLK_SPACE;
-unsigned int KEY_RETURN_2 = SDLK_RETURN;
-unsigned int KEY_ESCAPE = SDLK_ESCAPE;
+unsigned int KEY_RETURN_1 = SDL_SCANCODE_SPACE;
+unsigned int KEY_RETURN_2 = SDL_SCANCODE_RETURN;
+unsigned int KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
 
 /* definition of external variables */
 char fps_buf[15];
@@ -81,7 +81,7 @@ static int handler(void* config, const char* section, const char* name,
 	  pconfig->arcade = atoi(value);
   } else if (MATCH("video", "arcade_keys")) {
 	  pconfig->arcade_keys = atoi(value);
-  
+
 	} else if (MATCH("video", "width")) {
 		pconfig->width = atoi(value);
 	} else if (MATCH("video", "height")) {
@@ -107,22 +107,22 @@ static int init_config()
 		return 1;
 	}
 	//fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d\n", config.fullscreen);
-	
-	if (config.arcade_keys) {
-		KEY_UP_2 = SDLK_UP;
-		KEY_UP_1 = SDLK_w;
-		KEY_LEFT_2 = SDLK_LEFT;
-		KEY_LEFT_1 = SDLK_a;
-		KEY_RIGHT_2 = SDLK_RIGHT;
-		KEY_RIGHT_1 = SDLK_d;
-		KEY_DOWN_2 = SDLK_DOWN;
-		KEY_DOWN_1 = SDLK_s;
 
-		KEY_RETURN_1 = SDLK_k;
-		KEY_RETURN_2 = SDLK_g;
-		KEY_ESCAPE = SDLK_ESCAPE;
+	if (config.arcade_keys) {
+		KEY_UP_2 = SDL_SCANCODE_UP;
+		KEY_UP_1 = SDL_SCANCODE_W;
+		KEY_LEFT_2 = SDL_SCANCODE_LEFT;
+		KEY_LEFT_1 = SDL_SCANCODE_A;
+		KEY_RIGHT_2 = SDL_SCANCODE_RIGHT;
+		KEY_RIGHT_1 = SDL_SCANCODE_D;
+		KEY_DOWN_2 = SDL_SCANCODE_DOWN;
+		KEY_DOWN_1 = SDL_SCANCODE_S;
+
+		KEY_RETURN_1 = SDL_SCANCODE_K;
+		KEY_RETURN_2 = SDL_SCANCODE_G;
+		KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
 	}
-	
+
 	return 0;
 }
 
@@ -257,11 +257,6 @@ static int main_run() {
 	statesystem_set_state(STATESYSTEM_MENU);
 
 	lastTime = SDL_GetTicks();
-
-	//START GAME
-	if(config.arcade){
-		printf("start %s\n", "999");
-	}
 
 	//START GAME
 	if(config.arcade){

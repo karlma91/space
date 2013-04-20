@@ -133,14 +133,14 @@ static void player_update(object_group_player *player)
 {
 	if (!config.arcade) {
 		fprintf(stderr,"PLAYER %6d pos: x=%6.1f y=%6.1f\n",player->data.instance_id, player->data.body->p.x, player->data.body->p.y);
-		if (keys[SDLK_F1]) {
+		if (keys[SDL_SCANCODE_F1]) {
 			time_t t;
 			time(&t);
 			fprintf(stderr,"TIMESTAMP: %d\n",t);
 		}
 	}
 
-	if (keys[SDLK_i] && !config.arcade_keys)
+	if (keys[SDL_SCANCODE_I] && !config.arcade_keys)
 		player->hp_bar.value = 1000000;
 
 	player->gun_timer += dt;

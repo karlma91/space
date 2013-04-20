@@ -135,7 +135,7 @@ static void level_running()
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
-	if (!config.arcade && keys[SDLK_F1]) fprintf(stderr,"FACTORY: %d TANK: %d TURRET: %d\n",objects_count(ID_FACTORY), objects_count(ID_TANK) ,objects_count(ID_TURRET));
+	if (!config.arcade && keys[SDL_SCANCODE_F1]) fprintf(stderr,"FACTORY: %d TANK: %d TURRET: %d\n",objects_count(ID_FACTORY), objects_count(ID_TANK) ,objects_count(ID_TURRET));
 	if ((objects_count(ID_FACTORY) + objects_count(ID_TANK) + objects_count(ID_TURRET)) == 0) {
 		change_state(LEVEL_CLEARED);
 	}
@@ -387,8 +387,8 @@ static void render()
 		SPACE_draw();
 	}
 	second_draw = 0;
-	
-	
+
+
 }
 
 static void update_camera_zoom(int cam_mode)
