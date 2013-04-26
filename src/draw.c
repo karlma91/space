@@ -3,6 +3,10 @@
 
 
 GLfloat array[CIRCLE_MAX_RES];
+GLfloat triangle_quad[8] = {-0.5, -0.5,
+						 0.5,  -0.5,
+						  -0.5, 0.5,
+						  0.5,  0.5};
 
 Color rainbow_col[1536];
 
@@ -115,6 +119,15 @@ void draw_line_strip(const GLfloat *strip, int l, float w)
 	}
 }
 
+
+void draw_color3f(float r, float g, float b)
+{
+	glColor3f(r,g,b);
+}
+void draw_color4f(float r, float g, float b, float a)
+{
+	glColor4f(r,g,b,a);
+}
 
 void draw_destroy()
 {
@@ -286,12 +299,24 @@ void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float wid
 
 	texture_bind(tex_id);
 
-	glBegin(GL_QUAD_STRIP);
-	glTexCoord2d(tex_map->ax, tex_map->ay); glVertex2d(-0.5, 0.5);
-	glTexCoord2d(tex_map->ax, tex_map->by); glVertex2d(-0.5, -0.5);
-	glTexCoord2d(tex_map->bx, tex_map->ay); glVertex2d(0.5, 0.5);
-	glTexCoord2d(tex_map->bx, tex_map->by); glVertex2d(0.5, -0.5);
-	glEnd();
+	glVertexPointer(2, GL_FLOAT, 0, triangle_quad);
+	glTexCoordPointer( 2, GL_FLOAT, 0, tex_map );
+	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+
+	glPopMatrix();
+	glDisable(GL_TEXTURE_2D);
+}
+void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
+{
+	glEnable(GL_TEXTURE_2D);
+	glPushMatrix();
+	glTranslatef(pos->x, pos->y, 0.0f);
+	glRotatef(angle,0,0,1);
+	glScalef(width,height,1);
+
+	glVertexPointer(2, GL_FLOAT, 0, triangle_quad);
+	glTexCoordPointer( 2, GL_FLOAT, 0, tex_map );
+	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
 
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);

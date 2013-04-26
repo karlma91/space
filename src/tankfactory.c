@@ -112,7 +112,7 @@ static void update(object_group_factory *factory) {
 }
 
 static void render(object_group_factory *factory) {
-	glColor3f(1,1,1);
+	draw_color4f(1,1,1,1);
 
 	//draw_boxshape(factory->shape,RGBAColor(0.2,0.9,0.1,1),RGBAColor(0.6,0.9,0.4,1));
 	factory->rot += 381 * dt;
@@ -120,20 +120,18 @@ static void render(object_group_factory *factory) {
 
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	if (factory->param->type == ID_ROCKET) {
-		texture_map tmp_texmap = {0,0.05,1,1};
+		texture_map tmp_texmap = {0,1, 1,1, 0,0, 1,0};
 		draw_texture(factory->param->tex_id, &(factory->data.body->p), &tmp_texmap, 200, 200, 0);
 	} else {
 		//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		if (factory->param->max_hp < 300)
-			glColor4f(1,1,1,1);
+			draw_color4f(1,1,1,1);
 		else
-			glColor4f(1,0.2,0,1);
+			draw_color4f(1,0.2,0,1);
 
 		draw_texture(TEX_WHEEL, &(factory->data.body->p), TEX_MAP_FULL, 150*1.5, 150*1.5, rot);
 		draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200 * 1.5, 200*1.5, 0);
 	}
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
 
 	hpbar_draw(&factory->hp_bar);
 	draw_bar(factory->data.body->p.x+65,factory->data.body->p.y-50,10,100,factory->timer / factory->param->spawn_delay,0);

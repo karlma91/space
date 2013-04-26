@@ -46,7 +46,7 @@ object_group_preset object_type_player = {
 //static float timer = 0;
 
 static const texture_map tex_map[2] = {
-		{0,0,0.5,1}, {0.5,0,1,1}
+		{0,1, 0.5,1, 0,0, 0.5,0}, {0.5,1, 1,1, 0.5,0, 1,0}
 };
 
 object_param_player default_player = {

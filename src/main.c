@@ -137,6 +137,9 @@ static void initGL() {
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4); //TODO read AA-settings from config file
 
 
+    glEnableClientState( GL_VERTEX_ARRAY );	 // Enable Vertex Arrays
+    glEnableClientState( GL_TEXTURE_COORD_ARRAY );	// Enable Texture Coord Arrays
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 

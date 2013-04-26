@@ -4,10 +4,7 @@
 #include "SDL_opengl.h"
 
 typedef struct texture_map {
-	float ax;
-	float ay;
-	float bx;
-	float by;
+	float map[8];
 } texture_map;
 
 extern GLuint *textures;

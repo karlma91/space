@@ -286,7 +286,6 @@ void particles_clear()
 
 static void draw_particle_as_score(emitter *em, particle *p)
 {
-	glDisable(GL_TEXTURE_2D);
 	char temp[10];
 	int score = ((int)em->data);
 	sprintf(temp,"%d",score);
@@ -512,8 +511,7 @@ static void draw_all_particles(emitter *em)
 				c.b = (a.b * coloffset) + (b.b * colinv);
 			}
 		}
-
-		glColor4f(c.r,c.g,c.b,alpha);
+		draw_color4f(c.r,c.g,c.b,alpha);
 
 		/** call the draw function **/
 		em->draw_particle(em,p);
@@ -527,24 +525,11 @@ static void draw_all_particles(emitter *em)
 
 static void default_particle_draw(emitter *em, particle *p)
 {
-	glPushMatrix();
-	glTranslatef(p->p.x, p->p.y, 0.0f);
-	glScalef(p->size,p->size,1);
 	if(em->rotation){
-		//float angle = (atan2(p->v.y,p->v.x) + M_PI)*(180/M_PI);
 		glRotatef(p->angle, 0, 0, 1);
 		p->angle += p->rot_speed*dt;
 	}
-
-	glBegin(GL_QUAD_STRIP);
-	glTexCoord2d(0, 0); glVertex2d(-0.5, -0.5);
-	glTexCoord2d(0, 1); glVertex2d(-0.5, 0.5);
-	glTexCoord2d(1, 0); glVertex2d(0.5, -0.5);
-	glTexCoord2d(1, 1); glVertex2d(0.5, 0.5);
-	glEnd();
-
-	glPopMatrix();
-
+	draw_current_texture(&(p->p),TEX_MAP_FULL,p->size,p->size,p->angle);
 }
 
 

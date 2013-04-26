@@ -141,16 +141,13 @@ static void update(object_group_rocket *rocket)
 
 static void render(object_group_rocket *rocket)
 {
-		glColor4f(1,1,1,1);
+	draw_color4f(1,1,1,1);
 
-	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	hpbar_draw(&rocket->hp_bar);
 
 	draw_texture(rocket->param->tex_id, &(rocket->data.body->p),TEX_MAP_FULL,100, 100, rocket->angle*(180/M_PI));
 
-	glPopAttrib();
 }
 
 

@@ -10,7 +10,7 @@
  */
 GLuint *textures;
 
-static const texture_map TEX_MAP_FULL_ = {0,0,1,1};
+static const texture_map TEX_MAP_FULL_ = {0,1, 1,1, 0,0, 1,0};
 const texture_map *TEX_MAP_FULL = &TEX_MAP_FULL_;
 
 /**
@@ -69,7 +69,7 @@ int texture_load(char *file)
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_ENUM_TYPE, img->pixels);
 
 		textures[tex_counter] = tex_id;
 

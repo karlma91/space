@@ -40,7 +40,7 @@ object_group_preset type_turret= {
 };
 
 static const texture_map tex_map[2] = {
-		{0, 0, 0.5, 0.9}, {0.5, 0, 1, 1}
+		{0,1, 0.5,1, 0,0, 0.5,0}, {0.5,1, 1,1, 0.5,0, 1,0}
 };
 
 object_group_turret *object_create_turret(float xpos, object_param_turret *param)
@@ -129,10 +129,8 @@ static void update(object_group_turret *turret)
 
 static void render(object_group_turret *turret)
 {
-	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-	glColor4f(1,1,1,1);
+	draw_color4f(1,1,1,1);
 
 	GLfloat dir = cpBodyGetAngle(turret->data.body);
 
@@ -142,7 +140,6 @@ static void render(object_group_turret *turret)
 	draw_texture(texture, &(turret->data.body->p), &tex_map[1],100, 100, turret->barrel_angle*(180/M_PI));
 
 	hpbar_draw(&turret->hp_bar);
-	glPopAttrib();
 }
 
 
