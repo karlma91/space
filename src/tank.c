@@ -119,7 +119,6 @@ static void set_wheel_velocity(object_group_tank *tank, float velocity)
 static void update(object_group_tank *tank)
 {
 	if (!config.arcade) {
-		fprintf(stderr,"TANK %6d pos: x=%6.1f y=%6.1f\n",tank->data.instance_id, tank->data.body->p.x, tank->data.body->p.y);
 		if (keys[SDL_SCANCODE_F2]) {
 			tank->data.body->p.x = 0;
 			tank->data.body->p.y = 200;
@@ -295,6 +294,5 @@ static void destroy(object_group_tank *tank)
 		tank->factory->cur--;
 	}
 
-	objects_remove((object_data *)tank);
 	free(tank);
 }

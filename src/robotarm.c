@@ -165,7 +165,6 @@ static void destroy(object_data *obj)
 	cpSpaceRemoveBody(space, obj->body);
 	cpSpaceRemoveShape(space, temp->shape);
 
-	objects_remove(obj);
 	free(obj);
 }
 

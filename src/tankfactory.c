@@ -150,7 +150,6 @@ static void remove_factory_from_rocket(object_group_rocket *rocket) {
 }
 
 static void destroy(object_group_factory *factory) {
-	objects_remove(factory);
 	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);
 	//particles_release_emitter(factory->smoke);
 

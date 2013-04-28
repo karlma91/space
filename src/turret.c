@@ -163,6 +163,5 @@ static void destroy(object_group_turret *turret)
 	cpSpaceRemoveBody(space, turret->data.body);
 	cpBodyFree(turret->data.body);
 
-	objects_remove((object_data *)turret);
 	free(turret);
 }

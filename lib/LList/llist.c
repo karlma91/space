@@ -60,7 +60,7 @@ int llist_create()
 	list->head = NULL;
 	list->tail = NULL;
 	list->iteration_index = -1;
-
+	list->size = 0;
 	list->remove_callback = NULL;
 
 #ifdef DEBUG

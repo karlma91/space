@@ -172,6 +172,5 @@ static void destroy(object_group_rocket *rocket)
 		rocket->factory->cur--;
 	}
 
-	objects_remove((object_data *)rocket);
 	free(rocket);
 }
