@@ -68,6 +68,9 @@ object_group_rocket *object_create_rocket(float xpos, object_group_factory *fact
 	}
 
 
+	//TODO REMOVE TMP
+	fprintf(stderr, "rocket.c:%d rocket pointer = %p\n", __LINE__, rocket);
+
 	// Make a car with some nice soft suspension
 	cpVect boxOffset = cpv(0, 0);
 

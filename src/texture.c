@@ -69,7 +69,7 @@ int texture_load(char *file)
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_ENUM_TYPE, img->pixels);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
 
 		textures[tex_counter] = tex_id;
 
@@ -96,10 +96,16 @@ static int texture_from_name(char *file)
 	return -1;
 }
 
+#include "SDL_endian.h"
 /* NEED TO BE CALLED BEFORE ANY texture_load() CALLS! */
 extern int texture_init()
 {
-	GL_ENUM_TYPE = GL_UNSIGNED_INT_8_8_8_8_REV; //TODO support big and small endiannes
+
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+	GL_ENUM_TYPE = GL_UNSIGNED_INT_8_8_8_8_REV;
+#else
+	GL_ENUM_TYPE = GL_UNSIGNED_INT_8_8_8_8;
+#endif
 
 	TEX_CLOUD = texture_load("cloud.png");
 	TEX_CLOUD_ULQ = texture_load("cloud_ultralow.png");

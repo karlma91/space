@@ -43,7 +43,7 @@ struct _object_data {
 	object_group_preset *preset;
 	int alive;
 	int instance_id;
-	int *remove;
+	//int *remove;
 	int disabled;
 	int destroyed;
 	cpBody *body;
@@ -72,6 +72,7 @@ extern void objects_init();
 extern void objects_add(object_data *);
 extern void objects_iterate(void (*f)(object_data *));
 extern void objects_iterate_type(void (*f)(object_data *), int ID);
+extern void objects_clear();
 extern void objects_destroy();
 extern inline void objects_remove(object_data *);
 

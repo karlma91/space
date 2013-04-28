@@ -103,7 +103,6 @@ static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cp
 
 static void destroy(object_data *bullet)
 {
-	*bullet->remove = 1;
 	struct bullet *temp = (struct bullet*)bullet;
 	cpSpaceRemoveShape(space, temp->shape);
 	cpSpaceRemoveBody(space, temp->data.body);

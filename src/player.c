@@ -288,5 +288,5 @@ static void action_shoot(object_group_player *player)
 static void player_destroy(object_group_player *player)
 {
 	objects_remove((object_data *) player);
-	//free(player); // does not work since player is currently static inside space.c
+	free(player); // does not work since player is currently static inside space.c
 }

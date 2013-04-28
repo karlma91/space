@@ -760,8 +760,8 @@ void space_init_level(int space_station, int deck)
 		}
 	}
 
-	objects_iterate(func);
-	objects_destroy();
+	//objects_iterate(func); //TMP ignored
+	objects_clear();
 
 	objects_add((object_data*)player);
 
@@ -877,15 +877,3 @@ int getPlayerScore()
 	else
 		return -1;
 }
-
-/*
-0   space_wSDL1_2                 	0x0000000100024196 update_objects + 379 (space.c:337)
-1   space_wSDL1_2                 	0x000000010001e72c objects_iterate + 256 (objects.c:77)
-2   space_wSDL1_2                 	0x0000000100023f95 update_all + 47 (space.c:292)
-3   space_wSDL1_2                 	0x0000000100025f5e space_init_level + 1469 (space.c:806)
-4   space_wSDL1_2                 	0x0000000100023d10 level_transition + 94 (space.c:209)
-5   space_wSDL1_2                 	0x0000000100027096 statesystem_update + 112 (statesystem.c:128)
-6   space_wSDL1_2                 	0x000000010001d51f main_run + 485 (main.c:272)
-7   space_wSDL1_2                 	0x000000010001d7ca SDL_main + 35 (main.c:351)
-8   space_wSDL1_2                 	0x00000001000014c0 -[SDLMain applicationDidFinishLaunching:] + 48
-*/
