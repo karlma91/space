@@ -74,7 +74,7 @@ extern void objects_iterate(void (*f)(object_data *));
 extern void objects_iterate_type(void (*f)(object_data *), int ID);
 extern void objects_clear();
 extern void objects_destroy();
-extern inline void objects_remove(object_data *);
+extern void objects_remove(object_data *);
 
 extern void objects_nearest_x_two(object_data *object, int obj_id, object_data **left, object_data **right, cpFloat *left_distance, cpFloat *right_distance);
 extern object_data *objects_nearest(cpVect pos, int obj_id);

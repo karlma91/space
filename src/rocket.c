@@ -102,6 +102,7 @@ static void update(object_group_rocket *rocket)
 {
 	rocket->timer +=dt;
 
+	//TODO FIXME: Will crash if no particles emitter available!!
 	rocket->flame->p = rocket->data.body->p;
 	rocket->flame->angular_offset = rocket->angle * (180/M_PI)+90;
 

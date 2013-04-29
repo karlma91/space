@@ -733,7 +733,7 @@ void drawStars()
 	glPopMatrix();
 }
 
-static void func(object_data* obj)
+static void destroy_func(object_data* obj)
 {
 	obj->preset->destroy(obj);
 }
@@ -760,7 +760,9 @@ void space_init_level(int space_station, int deck)
 		}
 	}
 
-	//objects_iterate(func); //TMP ignored
+	//TODO manage persistent objects(like player) in a better way, instead of removing and then re-adding
+
+	objects_iterate(destroy_func); //TMP ignored
 	objects_clear();
 
 	objects_add((object_data*)player);

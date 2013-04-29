@@ -148,7 +148,7 @@ int objects_count(int obj_id)
 	return llist_size(lists[obj_id]);
 }
 
-inline void objects_remove(object_data *obj)
+void objects_remove(object_data *obj)
 {
 	//TODO restructure removal method completely
 	llist_remove(lists[obj->preset->ID], obj); //*obj->remove = 1;

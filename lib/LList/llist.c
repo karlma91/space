@@ -10,8 +10,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "llist.h"
+#include "assert.h"
 
 #define DEBUG
+//#define DEBUG_3
+//#define DEBUG_4
 
 #define MAX_CONCURRENT_ITERATIONS 10
 
@@ -26,13 +29,15 @@ struct node {
 struct llist {
 	LList id;
 	int size;
+
 	node *head;
 	node *tail;
 
-	int iteration_index;
-	node *iteration_stack[MAX_CONCURRENT_ITERATIONS];
-
 	void (*remove_callback)(void *);
+
+	int iteration_index;
+	node *iteration_stack[MAX_CONCURRENT_ITERATIONS]; //FIXME possibly causing random memory writes!!
+	node *NULL_TEST;
 };
 
 
@@ -42,7 +47,15 @@ static int list_count = 0;
 
 /* private function definitions */
 static int is_valid(int index) {
-	return ((index >= 0 && index < list_count) && (all_lists[index]));
+	if ((index >= 0 && index < list_count) && (all_lists[index])) {
+		if (all_lists[index]->NULL_TEST) {
+			fprintf(stderr, "Error -> LList's NULL test failed for list#%d, got %p instead of %p!\n", index, all_lists[index]->NULL_TEST, NULL);
+			exit(-1000);
+			return 0;
+		}
+		return 1;
+	}
+	return 0;
 }
 
 
@@ -61,10 +74,11 @@ int llist_create()
 	list->tail = NULL;
 	list->iteration_index = -1;
 	list->size = 0;
-	list->remove_callback = NULL;
+	list->remove_callback = 0;
+	list->NULL_TEST = 0;
 
 #ifdef DEBUG
-	fprintf(stderr,"list#%02d: created\n", i);
+	fprintf(stderr,"list#%02d: created with callback: %p\n", i, list->remove_callback);
 #endif
 
 	return list->id;
@@ -96,7 +110,7 @@ int llist_add(LList id, void *p)
 	list->size++;
 
 #ifdef DEBUG
-	fprintf(stderr,"list#%02d: added %p\n", id, p);
+	fprintf(stderr,"list#%02d: added %p\n", id,p);
 #endif
 
 	return 1;
@@ -104,6 +118,10 @@ int llist_add(LList id, void *p)
 
 int llist_remove(LList id, void *p)
 {
+#ifdef DEBUG_4
+	fprintf(stderr,"removing -> list#%02d: removal of %p step 0\n", id, p);
+#endif
+
 	struct llist *list;
 	void *item;
 	node *n = NULL;
@@ -133,19 +151,29 @@ int llist_remove(LList id, void *p)
 			}
 		}
 	}
-
+#ifdef DEBUG_4
+	fprintf(stderr,"removing -> list#%02d: removal of %p step 1\n", id, p);
+#endif
 	if (n == NULL) {
 		n = list->head;
 	}
 
 	while (n) {
+#ifdef DEBUG_4
+	fprintf(stderr,"removing -> list#%02d: removal of %p step 2 comparing with: %p\n", id, p, n->item);
+#endif
 		if (n->item == p) {
+#ifdef DEBUG_4
+	fprintf(stderr,"removing -> list#%02d: removal of %p step 3 pointer identified\n", id, p);
+#endif
 			if (n->prev) {
 				n->prev->next = n->next;
 			} else {
 				list->head = n->next;
 			}
-
+#ifdef DEBUG_4
+	fprintf(stderr,"removing -> list#%02d: removal of %p step 4 prev and head adjusted\n", id, p);
+#endif
 			if (n->next) {
 				n->next->prev = n->prev;
 			} else {
@@ -155,14 +183,22 @@ int llist_remove(LList id, void *p)
 					list->tail = list->head;
 				}
 			}
+#ifdef DEBUG_4
+	fprintf(stderr,"removing -> list#%02d: removal of %p step 5 next and tail adjusted\n", id, p);
+#endif
 
 			item = n->item;
 
 			n->item = NULL;
+#ifdef DEBUG_4
+	fprintf(stderr,"removing -> list#%02d: removal of %p step 5 free...\n", id, p);
+#endif
 			free(n); /*todo move node into unused node list*/
 			list->size--;
-
-			if (list->remove_callback) {
+#ifdef DEBUG_4
+	fprintf(stderr,"removing -> list#%02d: removal of %p step 6 remove callback to func: %p\n", id, p, list->remove_callback);
+#endif
+			if (list->remove_callback != NULL) {
 				list->remove_callback(item);
 			}
 
