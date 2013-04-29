@@ -301,7 +301,7 @@ int llist_begin(LList id)
 	struct llist *list;
 	if (is_valid(id)) {
 		list = all_lists[id];
-		if (list->iteration_index < MAX_CONCURRENT_ITERATIONS) {
+		if (list->iteration_index + 1 < MAX_CONCURRENT_ITERATIONS) {
 			list->iteration_index++;
 			list->iteration_stack[list->iteration_index] = list->head;
 #ifdef DEBUG_3
@@ -354,7 +354,7 @@ int llist_end(LList id)
 	struct llist *list;
 	if (is_valid(id)) {
 		list = all_lists[id];
-		if (list->iteration_index >= -1) {
+		if (list->iteration_index > -1) {
 			list->iteration_stack[list->iteration_index] = NULL;
 #ifdef DEBUG_3
 	fprintf(stderr,"list#%02d: end %d\n", id, list->iteration_index);
