@@ -363,7 +363,6 @@ static void update_objects(object_data *obj)
 		obj->preset->update(obj);
 	}else{
 		objects_remove(obj);
-		obj->preset->destroy(obj);
 	}
 }
 
@@ -679,8 +678,6 @@ static void render_objects(object_data *obj)
 }
 
 
-
-
 #define star_count 100
 static int stars_x[star_count];
 static int stars_y[star_count];
@@ -733,13 +730,6 @@ void drawStars()
 	glPopMatrix();
 }
 
-static void destroy_func(object_data* obj)
-{
-	obj->preset->destroy(obj);
-}
-
-
-
 void space_init_level(int space_station, int deck)
 {
 	static object_group_player *player;
@@ -762,7 +752,6 @@ void space_init_level(int space_station, int deck)
 
 	//TODO manage persistent objects(like player) in a better way, instead of removing and then re-adding
 
-	objects_iterate(destroy_func); //TMP ignored
 	objects_clear();
 
 	objects_add((object_data*)player);
@@ -835,8 +824,8 @@ static void on_leave()
 
 static void SPACE_destroy()
 {
-    cpSpaceDestroy(space);
     objects_destroy();
+    cpSpaceDestroy(space);
 }
 
 void space_init()

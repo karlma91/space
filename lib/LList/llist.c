@@ -12,7 +12,7 @@
 #include "llist.h"
 #include "assert.h"
 
-#define DEBUG
+//#define DEBUG
 //#define DEBUG_3
 //#define DEBUG_4
 
@@ -36,7 +36,7 @@ struct llist {
 	void (*remove_callback)(void *);
 
 	int iteration_index;
-	node *iteration_stack[MAX_CONCURRENT_ITERATIONS]; //FIXME possibly causing random memory writes!!
+	node *iteration_stack[MAX_CONCURRENT_ITERATIONS];
 	node *NULL_TEST;
 };
 

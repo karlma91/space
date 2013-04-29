@@ -67,14 +67,6 @@ static int cursor = 0;
 static int win = 0; //TMP solution for win screens
 
 static void update() {
-/*{ //DEBUG CODE
-	if (keys[KEY_RETURN]) {
-		gameover_state = (1+gameover_state)%3;
-		keys[KEY_RETURN] = 0;
-		return;
-	}
-*/
-
 	static float key_dt = 0;
 	static float key_ddt = 0.25;
 	static const float key_ddt_min = 0.12f;

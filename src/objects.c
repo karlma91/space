@@ -20,11 +20,19 @@ int LAYER_ENEMY_BULLET    =                                 1<<5;
 static LList lists[ID_COUNT];
 static int instance_counter[ID_COUNT];
 
+static void destroy_func(object_data* obj)
+{
+	obj->preset->destroy(obj);
+}
+
+
+
 /* initializes head and last values */
 void objects_init() {
 	int i;
 	for (i = 0; i < ID_COUNT; i++) {
 		lists[i] = llist_create();
+		llist_set_remove_callback(lists[i], destroy_func);
 		instance_counter[i] = 0;
 	}
 }
