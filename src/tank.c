@@ -47,7 +47,7 @@ static const texture_map tex_map[3] = {
 object_group_tank *object_create_tank(float xpos, object_group_factory *factory, object_param_tank *param)
 {
 	//TODO use pointer value as group id
-	object_group_tank *tank = malloc(sizeof(*tank));
+	object_group_tank *tank = (object_group_tank *)objects_super_malloc(ID_TANK, sizeof(*tank));
 	tank->data.preset = &type_tank;
 	tank->data.components.hp_bar = &(tank->hp_bar);
 	tank->data.components.score = &(param->score);
@@ -294,5 +294,5 @@ static void destroy(object_group_tank *tank)
 		tank->factory->cur--;
 	}
 
-	free(tank);
+	objects_super_free((object_data *)tank);
 }

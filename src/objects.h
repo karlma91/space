@@ -43,7 +43,6 @@ struct _object_data {
 	object_group_preset *preset;
 	int alive;
 	int instance_id;
-	//int *remove;
 	int disabled;
 	int destroyed;
 	cpBody *body;
@@ -67,6 +66,9 @@ extern int LAYER_WHEEL;
 extern int LAYER_TANK_FACTORY;
 extern int LAYER_PLAYER_BULLET;
 extern int LAYER_ENEMY_BULLET;
+
+extern object_data *objects_super_malloc(enum OBJECT_ID, size_t); /* allocates and initializes a new object of size_t */
+extern void objects_super_free(object_data *);
 
 extern void objects_init();
 extern void objects_add(object_data *);

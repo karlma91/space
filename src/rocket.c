@@ -43,7 +43,7 @@ float damage = 50;
 object_group_rocket *object_create_rocket(float xpos, object_group_factory *factory, object_param_rocket *param)
 {
 	//TODO use pointer value as group id
-	object_group_rocket *rocket = malloc(sizeof(*rocket));
+	object_group_rocket *rocket = (object_group_rocket *)objects_super_malloc(ID_ROCKET,sizeof(*rocket));
 	rocket->data.preset = &type_rocket;
 	rocket->data.components.hp_bar = &(rocket->hp_bar);
 	rocket->data.components.score = &(param->score);
@@ -168,5 +168,5 @@ static void destroy(object_group_rocket *rocket)
 		rocket->factory->cur--;
 	}
 
-	free(rocket);
+	objects_super_free((object_data *)rocket);
 }

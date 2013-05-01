@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+//#define DEBUG_MEMORY
+
 int LAYER_PLAYER          =     1<<1 | 1<<2 |                1<<5;
 int LAYER_TANK            =     1<<1 |         1<<3;
 int LAYER_WHEEL           =                                        1<<6;
@@ -18,6 +20,7 @@ int LAYER_ENEMY_BULLET    =                                 1<<5;
 #endif
 
 static LList lists[ID_COUNT];
+static LList lists_pool[ID_COUNT];
 static int instance_counter[ID_COUNT];
 
 static void destroy_func(object_data* obj)
@@ -26,16 +29,51 @@ static void destroy_func(object_data* obj)
 }
 
 
-
 /* initializes head and last values */
 void objects_init() {
 	int i;
 	for (i = 0; i < ID_COUNT; i++) {
 		lists[i] = llist_create();
-		llist_set_remove_callback(lists[i], destroy_func);
+		llist_set_remove_callback(lists[i], (void (*) (void *))destroy_func);
 		instance_counter[i] = 0;
 	}
+
+	for (i = 0; i < ID_COUNT; i++) {
+		lists_pool[i] = llist_create(); //TODO use lists_pool
+	}
 }
+
+object_data *objects_super_malloc(enum OBJECT_ID id, size_t size)
+{
+	LList list = lists_pool[id];
+	object_data *obj = llist_first(list);
+
+	if (obj == NULL) {
+#ifdef DEBUG_MEMORY
+		fprintf(stderr, "Info: Allocating new object id %d of size %u\n", id, size);
+#endif
+		obj = malloc(size);
+	} else {
+		llist_remove(list, (void *)obj);
+	}
+
+	//TODO clear and initialize general object_data memory
+	//...
+	memset(obj,0,size); //temporary solution
+
+	return obj;
+}
+
+void objects_super_free(object_data *obj)
+{
+	int id = obj->preset->ID;
+	LList list = lists_pool[id];
+	llist_add(list, (void *)obj);
+#ifdef DEBUG_MEMORY
+	fprintf(stderr, "Info: object id %d has now %d unused allocations\n", id, llist_size(list));
+#endif
+}
+
 
 /* add object into its corresponding list */
 void objects_add(object_data* obj)
@@ -159,7 +197,7 @@ int objects_count(int obj_id)
 void objects_remove(object_data *obj)
 {
 	//TODO restructure removal method completely
-	llist_remove(lists[obj->preset->ID], obj); //*obj->remove = 1;
+	llist_remove(lists[obj->preset->ID], obj);
 }
 
 //TODO compute the shortest distance considering wrap-around

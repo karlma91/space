@@ -29,7 +29,7 @@ object_group_preset type_bullet_enemy= {
 //TODO standardize bullet
 object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int type)
 {
-	struct bullet *temp = malloc(sizeof(struct bullet));
+	struct bullet *temp = (struct bullet *)objects_super_malloc(type, sizeof(struct bullet));
 		temp->data.alive = 1;
 		temp->data.components.damage = &(temp->damage);
 		temp->data.components.body_count = 0;
@@ -110,6 +110,6 @@ static void destroy(object_data *bullet)
 	cpSpaceRemoveBody(space, temp->data.body);
 	cpShapeFree(temp->shape);
 	cpBodyFree(temp->data.body);
-	free(temp);
+	objects_super_free((object_data *)temp);
 	temp = NULL;
 }

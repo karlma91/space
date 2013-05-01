@@ -36,7 +36,7 @@ object_group_preset type_tank_factory =
 	};
 
 object_group_factory *object_create_factory(int x_pos, object_param_factory *param) {
-	object_group_factory *factory = malloc(sizeof(*factory));
+	object_group_factory *factory = (object_group_factory *)objects_super_malloc(ID_FACTORY, sizeof(*factory));
 	factory->data.alive = 1;
 	factory->data.preset = &type_tank_factory;
 	factory->data.components.hp_bar = &(factory->hp_bar);
@@ -159,5 +159,5 @@ static void destroy(object_group_factory *factory) {
 	cpBodyFree(factory->data.body);
 	objects_iterate_type(remove_factory_from_tank, ID_TANK);
 	objects_iterate_type(remove_factory_from_rocket, ID_ROCKET);
-	free(factory);
+	objects_super_free((object_data *)factory);
 }

@@ -60,7 +60,8 @@ object_group_player *object_create_player()
 	cpFloat radius = 25;
 	cpFloat mass = 2;
 
-	object_group_player *player = malloc(sizeof(object_group_player));
+	object_group_player *player = (object_group_player *)objects_super_malloc(ID_PLAYER, sizeof(object_group_player));
+
 
 	player->data.preset = &object_type_player;
 	player->data.alive = 1;

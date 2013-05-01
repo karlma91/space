@@ -46,7 +46,7 @@ static const texture_map tex_map[2] = {
 object_group_turret *object_create_turret(float xpos, object_param_turret *param)
 {
 	//TODO use pointer value as group id
-	object_group_turret *turret = malloc(sizeof(*turret));
+	object_group_turret *turret = (object_group_turret *)objects_super_malloc(ID_TURRET, sizeof(*turret));
 	turret->data.preset = &type_turret;
 	turret->data.components.hp_bar = &(turret->hp_bar);
 	turret->data.components.score = &(param->score);
@@ -163,5 +163,5 @@ static void destroy(object_group_turret *turret)
 	cpSpaceRemoveBody(space, turret->data.body);
 	cpBodyFree(turret->data.body);
 
-	free(turret);
+	objects_super_free((object_data *)turret);
 }
