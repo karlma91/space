@@ -1,7 +1,10 @@
 /*
  * llist.c
  *
- *	General purpose Linked List implementation in C
+ *	General purpose Linked List implementation in C.
+ *
+ *	NB! Does not support more than INT_MAX number
+ *	of calls to llist_create().
  *
  *  Created on: Apr 26, 2013
  *      Author: Mathias H. Wilhelmsen
@@ -10,7 +13,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "llist.h"
-#include "assert.h"
 
 //#define DEBUG
 //#define DEBUG_3
@@ -45,6 +47,14 @@ struct llist {
 static struct llist **all_lists;
 static int list_count = 0;
 
+static node *node_pool = NULL;
+static const node node_null = {0,0,0};
+
+#ifdef DEBUG
+static int stats_max_node_count = 0;
+static int stats_node_count = 0;
+#endif
+
 /* private function definitions */
 static int is_valid(int index) {
 	if ((index >= 0 && index < list_count) && (all_lists[index])) {
@@ -58,13 +68,54 @@ static int is_valid(int index) {
 	return 0;
 }
 
+static __inline__ node* new_node() {
+	node *node;
+
+#ifdef DEBUG
+	if (++stats_node_count > stats_max_node_count) {
+		stats_max_node_count = stats_node_count;
+		fprintf(stderr, "List -> expanding node capacity: %d\n", stats_max_node_count);
+	}
+#endif
+
+	if (node_pool) {
+		node = node_pool;
+		node_pool = node_pool->next;
+	} else {
+		node = malloc(sizeof(*node));
+#ifdef DEBUG
+		fprintf(stderr, "List -> node capacity expanded!\n");
+#endif
+	}
+
+	*node = node_null;
+	return node;
+}
+
+static void __inline__ free_node(node *node) {
+#ifdef DEBUG
+	--stats_node_count;
+#endif
+
+	*node = node_null;
+
+	if (node_pool) {
+		node->next = node_pool;
+		node_pool = node;
+	} else {
+		node_pool = node;
+	}
+}
 
 /* global function definitions */
 
 int llist_create()
 {
 	struct llist *list;
+
+	//TODO search for an empty llist position in array to support ridiculous number of calls to llist_create()
 	int i = list_count++;
+
 	all_lists = realloc(all_lists, sizeof(struct llist *[list_count]));
 	all_lists[i] = malloc(sizeof(struct llist));
 
@@ -94,7 +145,7 @@ int llist_add(LList id, void *p)
 
 	list = all_lists[id];
 
-	node = malloc(sizeof(*node));
+	node = new_node();
 
 	node->item = p;
 	node->next = NULL;
@@ -193,7 +244,7 @@ int llist_remove(LList id, void *p)
 #ifdef DEBUG_4
 	fprintf(stderr,"removing -> list#%02d: removal of %p step 5 free...\n", id, p);
 #endif
-			free(n); /*todo move node into unused node list*/
+			free_node(n);
 			list->size--;
 #ifdef DEBUG_4
 	fprintf(stderr,"removing -> list#%02d: removal of %p step 6 remove callback to func: %p\n", id, p, list->remove_callback);
@@ -217,7 +268,6 @@ int llist_remove(LList id, void *p)
 
 	return 0;
 }
-
 
 
 int llist_size(LList id)
@@ -405,4 +455,14 @@ void llist_freeall()
 
 	list_count = 0;
 	free(all_lists);
+
+	llist_free_nodes();
+}
+
+void llist_free_nodes() {
+	node *node = node_pool;
+	while (node_pool) {
+		node_pool = node->next;
+		free(node);
+	}
 }

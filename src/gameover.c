@@ -32,7 +32,7 @@ static void draw_highscore();
 #define MAX_NAME_LENGTH 3
 
 /* static variables */
-static char input[MAX_NAME_LENGTH+1] = "   ";
+static char input[MAX_NAME_LENGTH+1] = "AAA";
 static int valid_index[MAX_NAME_LENGTH];
 static const char valid_char[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
 static const int char_count = 37; /* valid_char length*/

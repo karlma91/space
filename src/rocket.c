@@ -67,13 +67,8 @@ object_group_rocket *object_create_rocket(float xpos, object_group_factory *fact
 		start_height = 200 + 100;
 	}
 
-
-	//TODO REMOVE TMP
-	fprintf(stderr, "rocket.c:%d rocket pointer = %p\n", __LINE__, rocket);
-
 	// Make a car with some nice soft suspension
 	cpVect boxOffset = cpv(0, 0);
-
 
 	rocket->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, width, height)));
 	cpBodySetPos(rocket->data.body , cpvadd(cpv(xpos, start_height), boxOffset));
