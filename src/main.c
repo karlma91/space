@@ -15,7 +15,9 @@
 #include "chipmunk.h"
 
 /* ini loader lib */
+#if !(TARGET_OS_IPHONE)
 #include "ini.h"
+#endif
 
 #include "statesystem.h"
 
@@ -70,6 +72,8 @@ static int main_running = 1;
 
 configuration config;
 
+
+#if !(TARGET_OS_IPHONE)
 static int handler(void* config, const char* section, const char* name,
 		const char* value) {
 	configuration* pconfig = (configuration*) config;
@@ -99,13 +103,18 @@ static int handler(void* config, const char* section, const char* name,
 	}
 	return 1;
 }
+#endif
 
 static int init_config()
 {
+#if !(TARGET_OS_IPHONE)
 	if (ini_parse("bin/config.ini", handler, &config) < 0) {
 		printf("Could not load 'bin/config.ini'\n");
 		return 1;
 	}
+#else
+	
+#endif
 	//fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d\n", config.fullscreen);
 
 	if (config.arcade_keys) {
@@ -126,7 +135,10 @@ static int init_config()
 	return 0;
 }
 
+
 static void initGL() {
+	
+#if !(TARGET_OS_IPHONE)
 	// Create an OpenGL context associated with the window.
 	glcontext = SDL_GL_CreateContext(window);
 
@@ -167,6 +179,9 @@ static void initGL() {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_MULTISAMPLE);
+#else
+	
+#endif
 }
 
 static void setAspectRatio() {
@@ -289,7 +304,7 @@ static int main_run() {
 		mdt = dt * 1000;
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glLoadIdentity();
+		///glLoadIdentity();
 
 		statesystem_update();
 		statesystem_draw();

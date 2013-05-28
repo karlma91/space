@@ -75,6 +75,10 @@ void tilemap_render(tilemap *map)
 
 static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height)
 {
+#if TARGET_OS_IPHONE
+	
+	
+#else
 	glPushMatrix();
 	glTranslatef(x,y,0);
 	glBegin(GL_QUADS);
@@ -84,6 +88,7 @@ static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat 
 	glTexCoord2d(tx+w, (ty+h)); glVertex2d(tile_width, 0);
 	glEnd();
 	glPopMatrix();
+#endif
 }
 
 

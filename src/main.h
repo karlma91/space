@@ -4,6 +4,11 @@
 #include "SDL.h"
 #include <stdlib.h>
 
+#if TARGET_OS_IPHONE
+#include <OpenGLES/ES2/gl.h>
+#include <OpenGLES/ES2/glext.h>
+#endif
+
 #define SLEEP_TIME 1
 
 /* config struct */

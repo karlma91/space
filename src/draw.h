@@ -3,6 +3,13 @@
 
 #include "SDL.h"
 #include "SDL_opengl.h"
+
+#if TARGET_OS_IPHONE
+#include <OpenGLES/ES2/gl.h>
+#include <OpenGLES/ES2/glext.h>
+#endif
+
+
 #include "chipmunk.h"
 #include "texture.h"
 
@@ -20,7 +27,12 @@ typedef struct Color {
 //??? static functions i header filen ???
 static inline void glColor_from_color(Color color)
 {
+#if TARGET_OS_IPHONE
+	
+	
+#else
 	glColor4fv((GLfloat *)&color);
+#endif
 }
 
 static inline Color RGBAColor(float r, float g, float b, float a)

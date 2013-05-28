@@ -5,6 +5,12 @@
 #include "SDL_opengl.h"
 #include "SDL_image.h"
 
+#if TARGET_OS_IPHONE
+#include <OpenGLES/ES2/gl.h>
+#include <OpenGLES/ES2/glext.h>
+#endif
+
+
 /**
  * texture values (GLOBAL)
  */
@@ -65,7 +71,7 @@ int texture_load(char *file)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		glTexParameteri(GL_TEXTURE_2D,  GL_GENERATE_MIPMAP, GL_TRUE);
+		///glTexParameteri(GL_TEXTURE_2D,  GL_GENERATE_MIPMAP, GL_TRUE);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -101,12 +107,18 @@ static int texture_from_name(char *file)
 extern int texture_init()
 {
 
+	
+	
+#if TARGET_OS_IPHONE
+#else
+
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	GL_ENUM_TYPE = GL_UNSIGNED_INT_8_8_8_8_REV;
 #else
 	GL_ENUM_TYPE = GL_UNSIGNED_INT_8_8_8_8;
 #endif
-
+#endif
+	
 	TEX_CLOUD = texture_load("cloud.png");
 	TEX_CLOUD_ULQ = texture_load("cloud_ultralow.png");
 	TEX_CLOUD_LQ = texture_load("cloud_low.png");

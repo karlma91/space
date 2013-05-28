@@ -7,6 +7,12 @@
 /* SDL */
 #include "SDL_opengl.h"
 
+#if TARGET_OS_IPHONE
+#include <OpenGLES/ES2/gl.h>
+#include <OpenGLES/ES2/glext.h>
+#endif
+
+
 /* Game state */
 #include "main.h"
 #include "menu.h"
@@ -696,6 +702,10 @@ static void stars_init()
 }
 void drawStars()
 {
+#if TARGET_OS_IPHONE
+	
+	
+#else
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	glPushMatrix();
@@ -728,6 +738,7 @@ void drawStars()
 	glEnd();
 
 	glPopMatrix();
+#endif
 }
 
 void space_init_level(int space_station, int deck)

@@ -3,6 +3,12 @@
 
 #include "SDL_opengl.h"
 
+#if TARGET_OS_IPHONE
+#include <OpenGLES/ES2/gl.h>
+#include <OpenGLES/ES2/glext.h>
+#endif
+
+
 typedef struct texture_map {
 	float map[8];
 } texture_map;

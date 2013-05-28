@@ -4,7 +4,7 @@
 #include "draw.h"
 #include "space.h"
 #include "font.h"
-#include <mxml.h>
+#include "mxml.h"
 #include "xmlh.h"
 
 #define MAX_PARTICLES 10000
@@ -476,6 +476,8 @@ static float range_get_random(range r)
 
 static void draw_all_particles(emitter *em)
 {
+#if TARGET_OS_IPHONE
+#else
 	glEnable(GL_TEXTURE_2D);
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
 	texture_bind(em->texture_id);
@@ -521,6 +523,8 @@ static void draw_all_particles(emitter *em)
 	}
 		glPopAttrib();
 	glDisable(GL_TEXTURE_2D);
+
+#endif
 }
 
 static void default_particle_draw(emitter *em, particle *p)
