@@ -160,6 +160,10 @@ void draw_destroy()
 
 void draw_circle(GLfloat x, GLfloat y, GLfloat radius)
 {
+#if TARGET_OS_IPHONE
+	
+	
+#else
 	int i;
 	glBegin(GL_TRIANGLE_FAN);
 	glVertex2f(0,0);
@@ -167,10 +171,15 @@ void draw_circle(GLfloat x, GLfloat y, GLfloat radius)
 		glVertex2f(unit_circle[i]*radius, unit_circle[i+1]*radius);
 	}
 	glEnd();
+#endif
 }
 
 void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 {
+#if TARGET_OS_IPHONE
+	
+	
+#else
 	int i;
 	glBegin(GL_TRIANGLE_STRIP);
 	for(i = 0;i<128; i+=2){
@@ -178,6 +187,7 @@ void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 		glVertex2f(unit_circle[i]*outer_r, unit_circle[i+1]*outer_r);
 	}
 	glEnd();
+#endif
 }
 
 void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h)
@@ -219,6 +229,10 @@ void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot)
 
 void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
 {
+#if TARGET_OS_IPHONE
+	
+	
+#else
 #if CP_USE_DOUBLES
 	glVertexPointer(2, GL_DOUBLE, 0, verts);
 #else
@@ -234,6 +248,7 @@ void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
 		glColor_from_color(lineColor);
 		glDrawArrays(GL_LINE_LOOP, 0, count);
 	}
+#endif
 }
 
 void draw_segment(cpVect a, cpVect b, cpFloat w, Color lineColor)

@@ -9,6 +9,10 @@
 #include <OpenGLES/ES2/glext.h>
 #endif
 
+#ifndef glColor3f
+#define glColor3f if (0) glColor3f
+#endif
+
 
 #include "chipmunk.h"
 #include "texture.h"

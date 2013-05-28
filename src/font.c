@@ -201,5 +201,10 @@ void font_init()
 
 void font_destroy()
 {
+#if TARGET_OS_IPHONE
+	
+	
+#else
 	glDeleteLists(firstCharList, 256);
+#endif
 }
