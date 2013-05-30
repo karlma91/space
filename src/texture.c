@@ -2,13 +2,7 @@
 #include <string.h>
 #include "texture.h"
 #include "SDL.h"
-#include "SDL_opengl.h"
 #include "SDL_image.h"
-
-#if TARGET_OS_IPHONE
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#endif
 
 
 /**
@@ -30,7 +24,7 @@ static char (*names)[51];
 static int tex_counter = -1;
 
 static int texture_from_name(char *file);
-static GLenum GL_ENUM_TYPE;
+static GLenum GL_ENUM_TYPE = GL_UNSIGNED_INT_8_8_8_8;
 
 int texture_load(char *file)
 {
@@ -107,9 +101,9 @@ static int texture_from_name(char *file)
 extern int texture_init()
 {
 
-	
-	
-#if TARGET_OS_IPHONE
+
+
+#if GLES2
 #else
 
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
@@ -118,7 +112,7 @@ extern int texture_init()
 	GL_ENUM_TYPE = GL_UNSIGNED_INT_8_8_8_8;
 #endif
 #endif
-	
+
 	TEX_CLOUD = texture_load("cloud.png");
 	TEX_CLOUD_ULQ = texture_load("cloud_ultralow.png");
 	TEX_CLOUD_LQ = texture_load("cloud_low.png");

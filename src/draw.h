@@ -9,10 +9,19 @@
 #include <OpenGLES/ES2/glext.h>
 #endif
 
-#ifndef glColor3f
-#define glColor3f if (0) glColor3f
+#if __ANDROID__
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #endif
 
+#if TARGET_OS_IPHONE || __ANDROID__
+#define GLES2 1
+#endif
+
+#if GLES2
+#define glColor3f draw_color3f
+#define glColor4f draw_color4f
+#endif
 
 #include "chipmunk.h"
 #include "texture.h"
@@ -31,9 +40,9 @@ typedef struct Color {
 //??? static functions i header filen ???
 static inline void glColor_from_color(Color color)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	glColor4fv((GLfloat *)&color);
 #endif

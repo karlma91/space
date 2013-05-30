@@ -11,13 +11,6 @@
 #include "particles.h"
 
 
-
-#if TARGET_OS_IPHONE
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#endif
-
-
 // initialize global variables
 int font_text_align = TEXT_CENTER;
 float font_text_size = 12;
@@ -85,9 +78,9 @@ const GLfloat DOT[] = {-0.1,-0.5,	-0.1,-0.3,	0.1,-0.3,	0.1,-0.5, -0.1,-0.5f};
 
 static void drawSymbol(char c)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	switch(c) {
 		case '_':
@@ -119,9 +112,9 @@ static void drawSymbol(char c)
 
 void font_drawText(GLfloat x, GLfloat y, char* text)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	glDisable(GL_TEXTURE_2D);
 	glPushAttrib(GL_COLOR_BUFFER_BIT);
@@ -182,9 +175,9 @@ void init_text(char c)
 
 void font_init()
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
     //enables gldraw array
 	glDisable(GL_TEXTURE_2D);
@@ -201,9 +194,9 @@ void font_init()
 
 void font_destroy()
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	glDeleteLists(firstCharList, 256);
 #endif

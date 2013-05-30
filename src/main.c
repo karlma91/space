@@ -9,20 +9,19 @@
 
 /* SDL and OpenGL */
 #include "SDL.h"
-#include "SDL_opengl.h"
 
 /* Chipmunk physics library */
 #include "chipmunk.h"
 
 /* ini loader lib */
-#if !(TARGET_OS_IPHONE)
+#if !(TARGET_OS_IPHONE || __ANDROID__)
 #include "ini.h"
 #endif
 
 #include "statesystem.h"
 
 /* drawing code */
-#include "draw.h"
+#include "draw.h"	//opengl included in draw.h
 #include "font.h"
 #include "particles.h"
 
@@ -107,15 +106,15 @@ static int handler(void* config, const char* section, const char* name,
 
 static int init_config()
 {
-#if !(TARGET_OS_IPHONE)
+#if !(TARGET_OS_IPHONE || __ANDROID__)
 	if (ini_parse("bin/config.ini", handler, &config) < 0) {
 		printf("Could not load 'bin/config.ini'\n");
 		return 1;
 	}
-#else
-	
-#endif
 	//fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d\n", config.fullscreen);
+#else
+
+#endif
 
 	if (config.arcade_keys) {
 		KEY_UP_2 = SDL_SCANCODE_UP;
@@ -137,8 +136,8 @@ static int init_config()
 
 
 static void initGL() {
-	
-#if !(TARGET_OS_IPHONE)
+
+#if !(GLES2)
 	// Create an OpenGL context associated with the window.
 	glcontext = SDL_GL_CreateContext(window);
 
@@ -180,7 +179,7 @@ static void initGL() {
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_MULTISAMPLE);
 #else
-	
+
 #endif
 }
 
@@ -304,7 +303,9 @@ static int main_run() {
 		mdt = dt * 1000;
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		///glLoadIdentity();
+#if GLES2
+		glLoadIdentity();
+#endif
 
 		statesystem_update();
 		statesystem_draw();

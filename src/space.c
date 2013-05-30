@@ -4,15 +4,6 @@
 /* standard c-libraries */
 #include <stdio.h>
 
-/* SDL */
-#include "SDL_opengl.h"
-
-#if TARGET_OS_IPHONE
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#endif
-
-
 /* Game state */
 #include "main.h"
 #include "menu.h"
@@ -702,9 +693,9 @@ static void stars_init()
 }
 void drawStars()
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 

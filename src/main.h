@@ -5,8 +5,16 @@
 #include <stdlib.h>
 
 #if TARGET_OS_IPHONE
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
+
+#endif
+
+#if __ANDROID__
+#include <jni.h>
+#include <android/log.h>
+#endif
+
+#if TARGET_OS_IPHONE || __ANDROID__
+#define GLES2 1
 #endif
 
 #define SLEEP_TIME 1

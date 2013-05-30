@@ -75,9 +75,9 @@ void tilemap_render(tilemap *map)
 
 static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	glPushMatrix();
 	glTranslatef(x,y,0);

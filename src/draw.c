@@ -1,7 +1,6 @@
 #include "draw.h"
 #include "texture.h"
 
-
 GLfloat array[CIRCLE_MAX_RES];
 GLfloat triangle_quad[8] = {-0.5, -0.5,
 						 0.5,  -0.5,
@@ -53,11 +52,11 @@ int draw_init(){
 
 void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
-	
+
 	glEnable(GL_TEXTURE_2D);
 
 	glPushMatrix();
@@ -99,13 +98,13 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
 #endif
-	
+
 }
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	glPushMatrix();
 		glTranslatef(x0, y0, 0.0f);
@@ -134,18 +133,18 @@ void draw_line_strip(const GLfloat *strip, int l, float w)
 
 void draw_color3f(float r, float g, float b)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	glColor3f(r,g,b);
 #endif
 }
 void draw_color4f(float r, float g, float b, float a)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	glColor4f(r,g,b,a);
 #endif
@@ -160,9 +159,9 @@ void draw_destroy()
 
 void draw_circle(GLfloat x, GLfloat y, GLfloat radius)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	int i;
 	glBegin(GL_TRIANGLE_FAN);
@@ -176,9 +175,9 @@ void draw_circle(GLfloat x, GLfloat y, GLfloat radius)
 
 void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	int i;
 	glBegin(GL_TRIANGLE_STRIP);
@@ -192,9 +191,9 @@ void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 
 void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	glBegin(GL_QUADS);
 		glVertex2d(x, y);
@@ -207,9 +206,9 @@ void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h)
 
 void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	int i;
 	glPushMatrix();
@@ -229,9 +228,9 @@ void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot)
 
 void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 #if CP_USE_DOUBLES
 	glVertexPointer(2, GL_DOUBLE, 0, verts);
@@ -253,9 +252,9 @@ void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
 
 void draw_segment(cpVect a, cpVect b, cpFloat w, Color lineColor)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	glColor_from_color(lineColor);
 	glBegin(GL_QUADS);
@@ -309,9 +308,9 @@ Color draw_col_grad(int hue)
 //TODO: color customization
 void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	float border;
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
@@ -348,9 +347,9 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 
 void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	glEnable(GL_TEXTURE_2D);
 	glPushMatrix();
@@ -370,9 +369,9 @@ void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float wid
 }
 void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
-#if TARGET_OS_IPHONE
-	
-	
+#if GLES2
+
+
 #else
 	glEnable(GL_TEXTURE_2D);
 	glPushMatrix();

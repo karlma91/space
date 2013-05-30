@@ -476,7 +476,9 @@ static float range_get_random(range r)
 
 static void draw_all_particles(emitter *em)
 {
-#if TARGET_OS_IPHONE
+#if GLES2
+
+
 #else
 	glEnable(GL_TEXTURE_2D);
 	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
