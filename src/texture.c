@@ -24,7 +24,7 @@ static char (*names)[51];
 static int tex_counter = -1;
 
 static int texture_from_name(char *file);
-static GLenum GL_ENUM_TYPE = GL_UNSIGNED_INT_8_8_8_8;
+static GLenum GL_ENUM_TYPE = GL_UNSIGNED_BYTE;
 
 int texture_load(char *file)
 {
@@ -100,19 +100,9 @@ static int texture_from_name(char *file)
 /* NEED TO BE CALLED BEFORE ANY texture_load() CALLS! */
 extern int texture_init()
 {
-
-
-
 #if GLES2
-#else
 
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-	GL_ENUM_TYPE = GL_UNSIGNED_INT_8_8_8_8_REV;
 #else
-	GL_ENUM_TYPE = GL_UNSIGNED_INT_8_8_8_8;
-#endif
-#endif
-
 	TEX_CLOUD = texture_load("cloud.png");
 	TEX_CLOUD_ULQ = texture_load("cloud_ultralow.png");
 	TEX_CLOUD_LQ = texture_load("cloud_low.png");
@@ -126,6 +116,7 @@ extern int texture_init()
 	TEX_BUTTON_DOWN = texture_load("button_down.png");
 
 	return 0;
+#endif
 }
 
 extern int texture_destroy()
