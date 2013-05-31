@@ -1,5 +1,4 @@
 #include "stdlib.h"
-#include "SDL_opengl.h"
 #include "statesystem.h"
 #include "menu.h"
 #include "space.h"
@@ -132,6 +131,11 @@ void statesystem_update()
 
 void statesystem_draw()
 {
+	//TODO move all gl dependent code out of this file!
+#if GLES2
+
+
+#else
     sstate *stack_temp = stack_bot;
     while(stack_temp){
         glLoadIdentity();
@@ -142,6 +146,7 @@ void statesystem_draw()
         }
         stack_temp = stack_temp->next;
     }
+#endif
 }
 
 void statesystem_destroy()

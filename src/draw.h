@@ -2,16 +2,18 @@
 #define DRAW_H_
 
 #include "SDL.h"
-#include "SDL_opengl.h"
 
 #if TARGET_OS_IPHONE
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
-#endif
 
-#if __ANDROID__
+#elif __ANDROID__
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+
+#else
+#include "SDL_opengl.h"
+
 #endif
 
 #if TARGET_OS_IPHONE || __ANDROID__

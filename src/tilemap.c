@@ -18,6 +18,11 @@ static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat 
 
 void tilemap_render(tilemap *map)
 {
+	//TODO move all gl dependent code out of this file!
+#if GLES2
+
+
+#else
     glPushMatrix();
     glEnable(GL_TEXTURE_2D);
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
@@ -71,6 +76,7 @@ void tilemap_render(tilemap *map)
     }
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
+#endif
 }
 
 static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height)

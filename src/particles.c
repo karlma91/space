@@ -531,11 +531,16 @@ static void draw_all_particles(emitter *em)
 
 static void default_particle_draw(emitter *em, particle *p)
 {
+#if GLES2
+
+
+#else
 	if(em->rotation){
 		glRotatef(p->angle, 0, 0, 1);
 		p->angle += p->rot_speed*dt;
 	}
 	draw_current_texture(&(p->p),TEX_MAP_FULL,p->size,p->size,p->angle);
+#endif
 }
 
 

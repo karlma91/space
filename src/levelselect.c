@@ -150,6 +150,10 @@ static void update()
 
 static void render()
 {
+#if GLES2
+
+
+#else
 	//if(overview){
 		glPushMatrix();
 		glScalef(camera_zoom,camera_zoom,1);
@@ -165,10 +169,15 @@ static void render()
 //	}else{
 
 	//}
+#endif
 }
 
 static void render_ship(struct level_ship *ship, int selected)
 {
+#if GLES2
+
+
+#else
 		glPushMatrix();
 
 //		float gravity = (4*M_PI*M_PI * ship->radius) * (ship->rotation_speed * ship->rotation_speed);
@@ -202,6 +211,7 @@ static void render_ship(struct level_ship *ship, int selected)
 
 		}
 		glPopMatrix();
+#endif
 }
 
 static void destroy()

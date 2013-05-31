@@ -498,7 +498,11 @@ static void update_camera_position()
 
 static void SPACE_draw()
 {
+	//TODO move all gl dependent code out of this file!
+#if GLES2
 
+
+#else
 	/* draw background */
 	if(!second_draw){
 		drawStars();
@@ -665,6 +669,7 @@ static void SPACE_draw()
 			break;
 		}
 	}
+#endif
 }
 
 static void render_objects(object_data *obj)
