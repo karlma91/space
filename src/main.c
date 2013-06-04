@@ -1,5 +1,6 @@
 /* header */
 #include "main.h"
+#include "waffle_utils.h"
 
 /* standard c-libraries */
 #include <stdio.h>
@@ -137,19 +138,12 @@ static int init_config()
 
 static void initGL() {
 
-#if !(GLES2)
 	// Create an OpenGL context associated with the window.
 	glcontext = SDL_GL_CreateContext(window);
+	SDL_GL_MakeCurrent(window, glcontext);
 
-	// TODO fix AA: find out when and where to store the attributes
-    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-    //for antialiasing
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //TODO fix tile edges when AA is activated
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4); //TODO read AA-settings from config file
+	SDL_GL_SetSwapInterval(1);
 
-
-    glEnableClientState( GL_VERTEX_ARRAY );	 // Enable Vertex Arrays
-    glEnableClientState( GL_TEXTURE_COORD_ARRAY );	// Enable Texture Coord Arrays
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -158,11 +152,14 @@ static void initGL() {
 	glClearColor(0, 0.08, 0.15, 1);
 
 	/* print gl info */
-	fprintf(stderr, "GL_VENDOR: %s\n", glGetString(GL_VENDOR));
-	fprintf(stderr, "GL_RENDERER: %s\n", glGetString(GL_RENDERER));
-	fprintf(stderr, "GL_VERSION: %s\n", glGetString(GL_VERSION));
-	fprintf(stderr, "GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
+	printf("GL_VENDOR: %s\n", glGetString(GL_VENDOR));
+	printf("GL_RENDERER: %s\n", glGetString(GL_RENDERER));
+	printf("GL_VERSION: %s\n", glGetString(GL_VERSION));
+	printf("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
 
+#if !(GLES2)
+    glEnableClientState( GL_VERTEX_ARRAY );	 // Enable Vertex Arrays
+    glEnableClientState( GL_TEXTURE_COORD_ARRAY );	// Enable Texture Coord Arrays
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	GLdouble W_2 = WIDTH / 2;
@@ -191,12 +188,12 @@ static void setAspectRatio() {
 static int window_init() {
 	Uint32 flags = (SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE)
 			| (SDL_WINDOW_FULLSCREEN * config.fullscreen);
-	fprintf(stderr, "DEBUG - creating window\n");
+	printf("DEBUG - creating window\n");
+
 	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, W, H, flags);
-	displayRenderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
 	if (window == NULL ) {
-		fprintf(stderr, "ERROR - could not create window!\n");
+		printf("ERROR - could not create window!\n");
 		SDL_Quit();
 		return 1;
 	}
@@ -206,16 +203,16 @@ static int window_init() {
 
 SDL_Rect fullscreen_dimensions;
 static int main_init() {
-	fprintf(stderr, "DEBUG - init_config\n");
+	printf("DEBUG - init_config\n");
 	init_config();
-	fprintf(stderr, "DEBUG - init_config done!\n");
+	printf("DEBUG - init_config done!\n");
 
-	fprintf(stderr, "DEBUG - SDL_init\n");
+	printf("DEBUG - SDL_init\n");
 	if (SDL_Init(SDL_INIT_VIDEO)) {
 		SDL_GetError();
 		return 1;
 	}
-	fprintf(stderr, "DEBUG - SDL_init done!\n");
+	printf("DEBUG - SDL_init done!\n");
 
 	SDL_GetDisplayBounds(0, &fullscreen_dimensions);
 
@@ -231,20 +228,31 @@ static int main_init() {
 
 	setAspectRatio();
 
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
 	if (window_init())
 		return 1;
-
-	// random seed
-	srand(time(NULL ));
-
-	int error;
 
 	//FIXME SDL2 port break
 	initGL();
 
+	// random seed
+	srand(time(NULL ));
+
 	/* preload textures */
 	texture_init(); //FIXME SDL2 port break
 
+	int error;
 	error = draw_init();
 	if (error) {
 		return error;
@@ -311,7 +319,7 @@ static int main_run() {
 		statesystem_draw();
 
 		int gl_error = glGetError();
-		if (gl_error) fprintf(stderr,"main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error); //TODO REMOVE
+		if (gl_error) printf("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error); //TODO REMOVE
 
 		SDL_GL_SwapWindow(window);
 
@@ -382,9 +390,8 @@ static int main_destroy() {
 	font_destroy();
 
 	// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
+	SDL_GL_MakeCurrent(NULL, NULL);
 	SDL_GL_DeleteContext(glcontext);
-
-	SDL_DestroyRenderer(displayRenderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 

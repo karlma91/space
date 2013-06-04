@@ -5,6 +5,8 @@
 
 #include "highscorelist.h"
 
+#include "waffle_utils.h"
+
 #define DEBUG fprintf(stderr,"Line: %d\n",__LINE__);
 
 static FILE * file;

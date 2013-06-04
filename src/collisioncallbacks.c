@@ -5,6 +5,8 @@
 #include "space.h"
 #include "stdio.h"
 
+#include "waffle_utils.h"
+
 static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, void *unused);
 static void callback_bullet_ground(cpArbiter *arb, cpSpace *space, void *unused);
 static void callback_rocket_ground(cpArbiter *arb, cpSpace *space, void *unused);

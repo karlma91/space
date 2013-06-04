@@ -3,6 +3,9 @@
 #include "objects.h"
 #include "particles.h"
 #include "player.h"
+
+#include "waffle_utils.h"
+
 static void add_shape(cpShape *shape, cpFloat friction, cpFloat elasticity);
 
 cpShape *se_add_circle_shape(cpBody *body, cpFloat radius, cpFloat friction, cpFloat elasticity)

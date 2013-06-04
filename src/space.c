@@ -25,6 +25,8 @@
 #include "level.h"
 #include "tank.h"
 
+#include "waffle_utils.h"
+
 static float accumulator = 0;
 
 /* state functions */

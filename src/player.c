@@ -24,6 +24,8 @@
 #include "chipmunk.h"
 #include "spaceengine.h"
 
+#include "waffle_utils.h"
+
 static void init(object_data *);
 
 static void player_render(object_group_player *);

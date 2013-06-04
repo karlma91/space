@@ -4,6 +4,7 @@
 #include "SDL.h"
 #include "SDL_image.h"
 
+#include "waffle_utils.h"
 
 /**
  * texture values (GLOBAL)

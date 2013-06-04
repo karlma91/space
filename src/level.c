@@ -10,6 +10,8 @@
 #include "player.h"
 #include "bullet.h"
 
+#include "waffle_utils.h"
+
 static int station_count;
 static level_ship *worlds;
 

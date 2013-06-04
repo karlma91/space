@@ -7,6 +7,8 @@
 #include "mxml.h"
 #include "xmlh.h"
 
+#include "waffle_utils.h"
+
 #define MAX_PARTICLES 10000
 
 /**

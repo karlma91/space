@@ -13,6 +13,9 @@
 #include "draw.h"
 #include "space.h"
 
+
+#include "waffle_utils.h"
+
 static int parse_data(tilemap *map, char *data);
 static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height);
 

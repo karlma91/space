@@ -18,6 +18,8 @@
 #include "font.h"
 #include "level.h"
 
+#include "waffle_utils.h"
+
 /* static prototypes */
 static void update();
 static void render();

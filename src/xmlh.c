@@ -2,6 +2,8 @@
 #include "stdio.h"
 #include "xmlh.h"
 
+#include "waffle_utils.h"
+
 /**
  * Parses the atributes of a node to a value v
  * return 0 on ok, else -1

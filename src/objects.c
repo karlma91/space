@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "waffle_utils.h"
+
+
 //#define DEBUG_MEMORY
 
 int LAYER_PLAYER          =     1<<1 | 1<<2 |                1<<5;

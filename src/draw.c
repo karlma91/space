@@ -1,6 +1,8 @@
 #include "draw.h"
 #include "texture.h"
 
+#include "waffle_utils.h"
+
 GLfloat array[CIRCLE_MAX_RES];
 GLfloat triangle_quad[8] = {-0.5, -0.5,
 						 0.5,  -0.5,
