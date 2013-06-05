@@ -12,6 +12,15 @@
 
 #include "waffle_utils.h"
 
+#if TARGET_OS_IPHONE
+#define LEVEL_PATH ""
+#define DATA_PATH ""
+#else
+#define LEVEL_PATH "bin/data/level/"
+#define DATA_PATH "bin/data/"
+#endif
+
+
 static int station_count;
 static level_ship *worlds;
 
@@ -22,8 +31,18 @@ static char (*(names[ID_COUNT]))[21];
 static void *(params[ID_COUNT]);
 
 static int i;
+#define SDL_RW_IMPLEMENTED 0
 
-static FILE * file;
+#if SDL_RW_IMPLEMENTED
+
+static SDL_RWops *file;
+
+#else
+
+static FILE *file;
+#define SDL_RWFromFile fopen
+
+#endif
 
 static char buf[21];
 static char object_buf[21];
@@ -79,14 +98,27 @@ int level_init()
 
 
 	/* read space station data */
-	file = fopen("bin/data/space","r");
+#if TARGET_OS_IPHONE
+	file = SDL_RWFromFile("space","r");
+#else
+	file = SDL_RWFromFile("bin/data/space","r");
+#endif
+
+	char space_path[200];
+	sprintf(space_path, "%sspace", DATA_PATH);
+	file = SDL_RWFromFile(space_path,"r");
 
 	if (file == NULL) {
-		fprintf(stderr, "Could not load level data!\n");
+		SDL_Log("Could not load level data!\n");
 		return 1;
 	}
 
 	ret = fscanf(file, "%d\n", &station_count);
+
+	///file->read(file);
+
+	if (ret != 1) SDL_Log("Could not find station count!");
+
 	worlds = calloc(station_count,sizeof(level_ship));
 
 	for (i = 0; i < station_count; i++) {
@@ -96,11 +128,11 @@ int level_init()
 
 		if (ret == EOF) {
 			i = station_count;
-			fprintf(stderr, "Error while loading level data!\n");
+			SDL_Log("Error while loading level data, reached EOF!\n");
 			return 2;
 		}
 
-		//fprintf(stderr, "%d %d %d %d %f\n", x, y, count, radius, spd);
+		//SDL_Log("%d %d %d %d %f\n", x, y, count, radius, spd);
 		worlds[i].x = x;
 		worlds[i].y = y;
 		worlds[i].count = count;
@@ -108,17 +140,19 @@ int level_init()
 		worlds[i].rotation_speed = spd;
 	}
 	fclose(file);
+
 	if (i != station_count || i <= 0) {
-		i = station_count;
-		fprintf(stderr, "Error while loading level data!\n");
+		SDL_Log("Error while loading level data, could not load all stations! (%d of %d loaded)\n", i, station_count);
 		return 2;
 	}
 
 	/* read object sub groups / object sub types */
-	file = fopen("bin/data/objects","r");
+	char object_path[200];
+	sprintf(object_path, "%sobjects", DATA_PATH);
+	file = SDL_RWFromFile(object_path,"r");
 
 	if (file == NULL) {
-		fprintf(stderr, "Could not load object data!\n");
+		SDL_Log("Could not load object data!\n");
 		return 3;
 	}
 
@@ -128,19 +162,19 @@ int level_init()
 			break;
 		}
 
-		//fprintf(stderr, "%s %s \n", group, subtype); //DEBUG
+		//SDL_Log("%s %s \n", group, subtype); //DEBUG
 
 		/* find object type id */
 		int group_id = get_group_index(group);
 		if (group_id == -1) {
-			fprintf(stderr, "Unrecognized object group: '%s'\n", group);
+			SDL_Log("Unrecognized object group: '%s'\n", group);
 			return 4;
 		}
 
 		/* check if subtype allready exists */
 		int sub_id = get_sub_index(group_id, subtype);
 		if (sub_id != -1) {
-			fprintf(stderr, "Duplicate sub object definitions: %s %s\n", group, subtype);
+			SDL_Log("Duplicate sub object definitions: %s %s\n", group, subtype);
 			return 5;
 		}
 
@@ -196,7 +230,7 @@ int level_init()
 				factory.type = ID_ROCKET;
 			}
 			if (sub_id == -1) {
-				fprintf(stderr, "ERROR while reading tank factory data, TANK %s not defined before\n", buf);
+				SDL_Log("ERROR while reading tank factory data, TANK %s not defined before\n", buf);
 				return 7;
 			}
 			factory.r_param = NULL;
@@ -218,7 +252,7 @@ int level_init()
 
 		/* check if all expected parameters were defined */
 		if (ret != expected) {
-			fprintf(stderr, "Wrong number of parameters for %s %s got: %d expected %d\n", group, subtype, ret, expected);
+			SDL_Log("Wrong number of parameters for %s %s got: %d expected %d\n", group, subtype, ret, expected);
 			return 6;
 		}
 
@@ -251,30 +285,33 @@ level *level_load(int space_station, int deck)
 {
 	int ret;
 	if (space_station < 1 || space_station > station_count) {
-		fprintf(stderr, "Space station no. %d does not exist!\n", space_station);
+		SDL_Log("Space station no. %d does not exist!\n", space_station);
 		return NULL;
 	}
 
 	if (deck < 1 || deck > worlds[space_station - 1].count) {
-		fprintf(stderr, "Deck no. %d on space station no. %d does not exist!\n", deck, space_station);
+		SDL_Log("Deck no. %d on space station no. %d does not exist!\n", deck, space_station);
 		return NULL;
 	}
+
 	char levelpath[200];
-	sprintf(levelpath, "bin/data/%d/%d", space_station, deck);
+	sprintf(levelpath, "%s%02d_%02d.lvl", LEVEL_PATH, space_station, deck);
+
 	level *lvl = malloc(sizeof(*lvl));
 	currentlvl = lvl;
-	file = fopen(levelpath,"r");
+	file = SDL_RWFromFile(levelpath,"r");
 	if (file == NULL) {
-		fprintf(stderr, "Could not find level %d.%d\n",space_station,deck);
+		SDL_Log("Could not find level %d.%d\n",space_station,deck);
 		return NULL;
 	}
+
 	char tilemap_name[100];
-	ret = fscanf(file,"%s\n",tilemap_name);
+	ret = fscanf(file,"%s\n", tilemap_name);
 	int retExp = 0;
 	lvl->tiles = malloc(sizeof(tilemap));
 	ret = tilemap_create(lvl->tiles,tilemap_name);
 	if (ret != retExp) {
-		fprintf(stderr, "Error while parsing level header. Could not load tilemap %s.\n", tilemap_name);
+		SDL_Log("Error while parsing level header. Could not load tilemap %s.\n", tilemap_name);
 		return NULL;
 	}
 	lvl->height = lvl->tiles->height*lvl->tiles->tile_height;
@@ -285,7 +322,7 @@ level *level_load(int space_station, int deck)
 	ret = fscanf(file,"%d %d %d\n", &(lvl->station),&(lvl->deck), &(lvl->timelimit));
 	retExp = 3;
 	if (ret != retExp) {
-		fprintf(stderr, "Error while parsing level header. Wrong number of arguments. Got %d, expected %d.\n", ret, retExp);
+		SDL_Log("Error while parsing level header. Wrong number of arguments. Got %d, expected %d.\n", ret, retExp);
 		return NULL;
 	}
 
@@ -296,7 +333,7 @@ level *level_load(int space_station, int deck)
 		if (ret == EOF) {
 			break;
 		} else if (ret != 3) {
-			fprintf(stderr, "Error while parsing level data. Wrong number of arguments\n");
+			SDL_Log("Error while parsing level data. Wrong number of arguments\n");
 			return NULL;
 		}
 

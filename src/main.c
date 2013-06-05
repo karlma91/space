@@ -109,7 +109,7 @@ static int init_config()
 {
 #if !(TARGET_OS_IPHONE || __ANDROID__)
 	if (ini_parse("bin/config.ini", handler, &config) < 0) {
-		printf("Could not load 'bin/config.ini'\n");
+		SDL_Log("Could not load 'bin/config.ini'\n");
 		return 1;
 	}
 	//fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d\n", config.fullscreen);
@@ -152,10 +152,10 @@ static void initGL() {
 	glClearColor(0, 0.08, 0.15, 1);
 
 	/* print gl info */
-	printf("GL_VENDOR: %s\n", glGetString(GL_VENDOR));
-	printf("GL_RENDERER: %s\n", glGetString(GL_RENDERER));
-	printf("GL_VERSION: %s\n", glGetString(GL_VERSION));
-	printf("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
+	SDL_Log("GL_VENDOR: %s\n", glGetString(GL_VENDOR));
+	SDL_Log("GL_RENDERER: %s\n", glGetString(GL_RENDERER));
+	SDL_Log("GL_VERSION: %s\n", glGetString(GL_VERSION));
+	SDL_Log("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
 
 #if !(GLES2)
     glEnableClientState( GL_VERTEX_ARRAY );	 // Enable Vertex Arrays
@@ -188,12 +188,12 @@ static void setAspectRatio() {
 static int window_init() {
 	Uint32 flags = (SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE)
 			| (SDL_WINDOW_FULLSCREEN * config.fullscreen);
-	printf("DEBUG - creating window\n");
+	SDL_Log("DEBUG - creating window\n");
 
 	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, W, H, flags);
 
 	if (window == NULL ) {
-		printf("ERROR - could not create window!\n");
+		SDL_Log("ERROR - could not create window!\n");
 		SDL_Quit();
 		return 1;
 	}
@@ -203,16 +203,16 @@ static int window_init() {
 
 SDL_Rect fullscreen_dimensions;
 static int main_init() {
-	printf("DEBUG - init_config\n");
+	SDL_Log("DEBUG - init_config\n");
 	init_config();
-	printf("DEBUG - init_config done!\n");
+	SDL_Log("DEBUG - init_config done!\n");
 
-	printf("DEBUG - SDL_init\n");
+	SDL_Log("DEBUG - SDL_init\n");
 	if (SDL_Init(SDL_INIT_VIDEO)) {
 		SDL_GetError();
 		return 1;
 	}
-	printf("DEBUG - SDL_init done!\n");
+	SDL_Log("DEBUG - SDL_init done!\n");
 
 	SDL_GetDisplayBounds(0, &fullscreen_dimensions);
 
@@ -285,7 +285,7 @@ static int main_run() {
 
 	//START GAME
 	if(config.arcade){
-		printf("start %s\n", "999");
+		SDL_Log("start %s\n", "999");
 	}
 
 	while (main_running) {
@@ -301,7 +301,7 @@ static int main_run() {
 		fps++;
 		if (frames >= 1) {
 			sprintf(fps_buf, "%.2f FPS", fps);
-			printf("%s\n", fps_buf);
+			SDL_Log("%s\n", fps_buf);
 			frames = 0;
 			fps = 0;
 		}
@@ -319,7 +319,7 @@ static int main_run() {
 		statesystem_draw();
 
 		int gl_error = glGetError();
-		if (gl_error) printf("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error); //TODO REMOVE
+		if (gl_error) SDL_Log("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error); //TODO REMOVE
 
 		SDL_GL_SwapWindow(window);
 

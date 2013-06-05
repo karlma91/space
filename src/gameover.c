@@ -127,7 +127,7 @@ static void update() {
 		if (keys[KEY_ESCAPE] || keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 			score_newly_added = 0;
 			if(config.arcade){
-				printf("exit %d\n", getPlayerScore());
+				SDL_Log("exit %d\n", getPlayerScore());
 				main_stop();
 				return;
 			}

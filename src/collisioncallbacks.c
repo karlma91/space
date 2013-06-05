@@ -92,10 +92,10 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 		   // cpSpaceAddPostStepCallback(space,postStepEffects,b,NULL);
 		    player->components.hp_bar->value -= 10 * 0.05;
 		} else {
-			fprintf(stderr, "Expected object type ID %d, but got %d!\n", ID_PLAYER, player->preset->ID);
+			SDL_Log( "Expected object type ID %d, but got %d!\n", ID_PLAYER, player->preset->ID);
 		}
 	} else {
-		fprintf(stderr, "Expected object from collision between player and ground, but got NULL\n");
+		SDL_Log( "Expected object from collision between player and ground, but got NULL\n");
 	}
 
 }
@@ -141,7 +141,7 @@ static void se_add_explotion_at_contact_point(cpArbiter *arb)
 {
 	if(arb != NULL && cpArbiterGetCount(arb) >0){
 		//cpVect v = cpArbiterGetPoint(arb, 0);
-		//fprintf(stderr,"HELLO: x: %f y: %f",v.x,v.y);
+		//SDL_Log("HELLO: x: %f y: %f",v.x,v.y);
 		//emitter *e = particles_get_emitter_at(EMITTER_EXPLOSION, cpv());
 	}
 }

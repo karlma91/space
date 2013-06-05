@@ -9,6 +9,12 @@
 
 #include "waffle_utils.h"
 
+#if TARGET_OS_IPHONE
+#define PARTICLES_FOLDER ""
+#else
+#define PARTICLES_FOLDER "particles/"
+#endif
+
 #define MAX_PARTICLES 10000
 
 /**
@@ -75,13 +81,13 @@ static particle *(available_particle_stack[MAX_PARTICLES]);
 void particles_init()
 {
 	int i;
-	read_emitter_from_file(EMITTER_FLAME,"particles/flame_3.xml");
-	read_emitter_from_file(EMITTER_ROCKET_FLAME,"particles/rocket_flame.xml");
-	read_emitter_from_file(EMITTER_EXPLOSION,"particles/explosion_ground.xml");
-	read_emitter_from_file(EMITTER_SPARKS,"particles/sparks.xml");
-	read_emitter_from_file(EMITTER_SMOKE,"particles/smoke.xml");
-	read_emitter_from_file(EMITTER_SCORE,"particles/score.xml");
-	read_emitter_from_file(EMITTER_FRAGMENTS,"particles/fragments.xml");
+	read_emitter_from_file(EMITTER_FLAME,"flame_3.xml");
+	read_emitter_from_file(EMITTER_ROCKET_FLAME,"rocket_flame.xml");
+	read_emitter_from_file(EMITTER_EXPLOSION,"explosion_ground.xml");
+	read_emitter_from_file(EMITTER_SPARKS,"sparks.xml");
+	read_emitter_from_file(EMITTER_SMOKE,"smoke.xml");
+	read_emitter_from_file(EMITTER_SCORE,"score.xml");
+	read_emitter_from_file(EMITTER_FRAGMENTS,"fragments.xml");
 
 	/* sets in use list empty */
 	emitters_in_use_list = NULL;
@@ -138,6 +144,7 @@ void particles_draw()
 
 void particles_reload_particles()
 {
+	//TODO remove redundant code!
 	read_emitter_from_file(EMITTER_FLAME,"particles/flame_3.xml");
 	read_emitter_from_file(EMITTER_EXPLOSION,"particles/explosion_ground.xml");
 	read_emitter_from_file(EMITTER_SPARKS,"particles/sparks.xml");
@@ -580,7 +587,10 @@ static int read_emitter_from_file (int type,char *filename)
 	mxml_node_t * tree = NULL;
 	mxml_node_t * node  = NULL;
 
-	fp = fopen (filename, "r");
+	char particle_path[200];
+	sprintf(particle_path, "%s%s", PARTICLES_FOLDER, filename);
+
+	fp = fopen (particle_path, "r");
 	if (fp ){
 		tree = mxmlLoadFile (NULL , fp , MXML_OPAQUE_CALLBACK);
 	}else {
@@ -592,7 +602,6 @@ static int read_emitter_from_file (int type,char *filename)
 		return 1;
 
 	}
-	//fprintf(stderr,"particles.c parsing %s \n",filename);
 	for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
 			node != NULL;
 			node=mxmlWalkNext (node, NULL, MXML_DESCEND)

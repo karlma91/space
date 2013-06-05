@@ -7,7 +7,7 @@
 
 #include "waffle_utils.h"
 
-#define DEBUG fprintf(stderr,"Line: %d\n",__LINE__);
+#define DEBUG SDL_Log("Line: %d\n",__LINE__);
 
 static FILE * file;
 
@@ -35,13 +35,13 @@ int highscorelist_addscore(scorelist *list, char *name, int score)
 
 static int read_addscore(scorelist *list, char *name, int score,long time,int from_file)
 {
-	//fprintf(stderr, "%s %d %d %d\n",name,score,time,from_file);
+	//SDL_Log( "%s %d %d %d\n",name,score,time,from_file);
 	if(strlen(name)>4 || strlen(name)<3){
-			//fprintf(stderr,"%s to long or short name",name);
+			//SDL_Log("%s to long or short name",name);
 			return -1;
 		}
 		if(score < 0){
-			//fprintf(stderr,"negative score %d\n",score);
+			//SDL_Log("negative score %d\n",score);
 			return -1;
 		}
 		scoreelement **cur = &(list->head);
@@ -116,7 +116,7 @@ int highscorelist_readfile(scorelist *list, char *filename)
 {
 	file = fopen(filename,"r");
 	if (file == NULL) {
-		fprintf(stderr, "Could not load %s\n",filename);
+		SDL_Log( "Could not load %s\n",filename);
 		return 1;
 	}
 
@@ -130,7 +130,7 @@ int highscorelist_readfile(scorelist *list, char *filename)
 			if (ret == 3) {
 				read_addscore(list,name,score,time,1);
 			} else {
-				fprintf(stderr,"error reading highscore file\n");
+				SDL_Log("error reading highscore file\n");
 				break;
 			}
 		} else {
@@ -148,7 +148,7 @@ int highscorelist_writefile(scorelist *list, char *filename)
 {
 	file = fopen(filename,"w");
 	if (file == NULL) {
-		fprintf(stderr, "Could not load %s\n",filename);
+		SDL_Log( "Could not load %s\n",filename);
 		return 1;
 	}
 

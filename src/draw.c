@@ -13,7 +13,7 @@ Color rainbow_col[1536];
 
 static GLfloat unit_circle[128];
 
-#define DEBUG fprintf(stderr, "line: %d\n", __LINE__);
+#define DEBUG SDL_Log( "line: %d\n", __LINE__);
 
 int draw_init(){
 

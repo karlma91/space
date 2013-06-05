@@ -13,8 +13,15 @@
 #include "draw.h"
 #include "space.h"
 
-
 #include "waffle_utils.h"
+#include "SDL_log.h"
+
+#if TARGET_OS_IPHONE
+#define TILEMAP_FOLDER ""
+#else
+#define TILEMAP_FOLDER "tilemaps/"
+#endif
+
 
 static int parse_data(tilemap *map, char *data);
 static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height);
@@ -113,19 +120,21 @@ int tilemap_create (tilemap *map, char *filename)
 	mxml_node_t * tree = NULL;
 	mxml_node_t * node  = NULL;
 
-	fp = fopen (filename, "r");
+	char tilemap_name[200];
+	sprintf(tilemap_name,"%s%s", TILEMAP_FOLDER, filename);
+
+	fp = fopen(tilemap_name, "r");
 	if (fp ){
 		tree = mxmlLoadFile (NULL , fp , MXML_OPAQUE_CALLBACK);
 	}else {
-		fprintf(stderr,"Could Not Open the File Provided");
+		SDL_Log("tilemap.c file: %s could not be loaded\n",tilemap_name);
 		return 1;
 	}
 	if(tree == NULL){
-		fprintf(stderr,"tilemap.c file: %s is empty \n",filename);
+		SDL_Log("tilemap.c file: %s is empty \n",tilemap_name);
 		fclose(fp);
 		return 1;
 	}
-	//fprintf(stderr,"tilemap.c parsing %s \n",filename);
 
 	for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
 			node != NULL;

@@ -12,7 +12,7 @@
 #include <android/log.h>
 
 #define  LOG_TAG    "waffle_tag"
-#define  printf(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
+#define  SDL_Log(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #define  fprintf(TYPE,...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__);__android_log_print(ANDROID_LOG_ERROR,LOG_TAG,"file: %s line:%d\n",__FILE__,__LINE__)
 
 #else
