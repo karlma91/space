@@ -9,6 +9,8 @@ Debug/*
 .project
 .cproject
 .settings
+.temporary_res/**
+game_data.zip
 *~
 src/*~
 resources/win/space.res.o

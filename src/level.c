@@ -10,16 +10,9 @@
 #include "player.h"
 #include "bullet.h"
 
+//#include "zlib.h"
+
 #include "waffle_utils.h"
-
-#if TARGET_OS_IPHONE
-#define LEVEL_PATH ""
-#define DATA_PATH ""
-#else
-#define LEVEL_PATH "bin/data/level/"
-#define DATA_PATH "bin/data/"
-#endif
-
 
 static int station_count;
 static level_ship *worlds;
@@ -31,18 +24,11 @@ static char (*(names[ID_COUNT]))[21];
 static void *(params[ID_COUNT]);
 
 static int i;
-#define SDL_RW_IMPLEMENTED 0
 
-#if SDL_RW_IMPLEMENTED
+static SDL_RWops *rw;
 
-static SDL_RWops *file;
-
-#else
-
-static FILE *file;
-#define SDL_RWFromFile fopen
-
-#endif
+#include "zzip/lib.h"
+static ZZIP_FILE *file;
 
 static char buf[21];
 static char object_buf[21];
@@ -50,6 +36,11 @@ static char group[21];
 static char subtype[21];
 static char fname[51];
 
+#define FILE_BUFFER_SIZE 8192 /* NB! make sure buffer is large enough */
+static char buffer[FILE_BUFFER_SIZE];
+static int offset = 0;
+static int offset_add = 0;
+static int filesize = 0;
 
 /** return group_name's index in group_names, or -1 if not found  */
 int get_group_index(const char* group_name) {
@@ -98,24 +89,20 @@ int level_init()
 
 
 	/* read space station data */
-#if TARGET_OS_IPHONE
-	file = SDL_RWFromFile("space","r");
-#else
-	file = SDL_RWFromFile("bin/data/space","r");
-#endif
-
-	char space_path[200];
-	sprintf(space_path, "%sspace", DATA_PATH);
-	file = SDL_RWFromFile(space_path,"r");
-
-	if (file == NULL) {
+	if (!(file = waffle_open("space"))) {
 		SDL_Log("Could not load level data!\n");
 		return 1;
 	}
 
-	ret = fscanf(file, "%d\n", &station_count);
+	/* read file contents into buffer */
+	filesize = zzip_read(file, &buffer[0], FILE_BUFFER_SIZE);
 
-	///file->read(file);
+	/* free file */
+	zzip_close(file);
+
+	SDL_Log("filesize: %d\nfile:\n%s\n", filesize, &buffer[0]);
+
+	ret = sscanf(buffer, "%d\n%n", &station_count, &offset);
 
 	if (ret != 1) SDL_Log("Could not find station count!");
 
@@ -124,7 +111,8 @@ int level_init()
 	for (i = 0; i < station_count; i++) {
 		int x, y, count, radius;
 		float spd;
-		ret = fscanf(file, "%d %d %d %d %f\n", &x, &y, &count, &radius, &spd);
+		ret = sscanf(&buffer[offset], "%d %d %d %d %f\n%n", &x, &y, &count, &radius, &spd, &offset_add);
+		offset += offset_add;
 
 		if (ret == EOF) {
 			i = station_count;
@@ -132,14 +120,13 @@ int level_init()
 			return 2;
 		}
 
-		//SDL_Log("%d %d %d %d %f\n", x, y, count, radius, spd);
+		SDL_Log("Data read: %d %d %d %d %f\n", x, y, count, radius, spd);
 		worlds[i].x = x;
 		worlds[i].y = y;
 		worlds[i].count = count;
 		worlds[i].radius = radius;
 		worlds[i].rotation_speed = spd;
 	}
-	fclose(file);
 
 	if (i != station_count || i <= 0) {
 		SDL_Log("Error while loading level data, could not load all stations! (%d of %d loaded)\n", i, station_count);
@@ -147,22 +134,26 @@ int level_init()
 	}
 
 	/* read object sub groups / object sub types */
-	char object_path[200];
-	sprintf(object_path, "%sobjects", DATA_PATH);
-	file = SDL_RWFromFile(object_path,"r");
-
-	if (file == NULL) {
+	if (!(file = waffle_open("objects"))) {
 		SDL_Log("Could not load object data!\n");
 		return 3;
 	}
 
-	for (;;) {
-		ret = fscanf(file, "%s %s ", &group[0], &subtype[0]);
+	/* read file contents into buffer */
+	filesize = zzip_read(file, &buffer[0], FILE_BUFFER_SIZE);
+	zzip_close(file);
+	offset = 0;
+	offset_add = 0;
+
+	for (;offset < filesize;) {
+		ret = sscanf(&buffer[offset], "%s %s %n", &group[0], &subtype[0], &offset_add);
+		offset += offset_add;
+
 		if (ret == EOF) {
 			break;
 		}
 
-		//SDL_Log("%s %s \n", group, subtype); //DEBUG
+		SDL_Log("DEBUG: Parsing %s %s \n", group, subtype); //DEBUG
 
 		/* find object type id */
 		int group_id = get_group_index(group);
@@ -200,25 +191,29 @@ int level_init()
 		case ID_TANK:
 			expected = 3;
 			paramsize = sizeof(object_param_tank);
-			ret = fscanf(file, "%f %d %s\n", &tank.max_hp, &tank.score, &fname[0]);
+			ret = sscanf(&buffer[offset], "%f %d %s\n%n", &tank.max_hp, &tank.score, &fname[0], &offset_add);
+			offset += offset_add;
 			tank.tex_id = texture_load(fname);
 			break;
 		case ID_TURRET:
 			expected = 6;
 			paramsize = sizeof(object_param_turret);
-			ret = fscanf(file, "%f %d %f %f %d %s\n", &turret.max_hp, &turret.score, &turret.rot_speed, &turret.shoot_interval,&turret.burst_number, &fname[0]);
+			ret = sscanf(&buffer[offset], "%f %d %f %f %d %s\n%n", &turret.max_hp, &turret.score, &turret.rot_speed, &turret.shoot_interval,&turret.burst_number, &fname[0], &offset_add);
+			offset += offset_add;
 			turret.tex_id = texture_load(fname);
 			break;
 		case ID_ROCKET:
 			expected = 4;
 			paramsize = sizeof(object_param_rocket);
-			ret = fscanf(file, "%f %d %s %f\n", &rocket.max_hp, &rocket.score, &fname[0], &rocket.force);
+			ret = sscanf(&buffer[offset], "%f %d %s %f\n%n", &rocket.max_hp, &rocket.score, &fname[0], &rocket.force, &offset_add);
+			offset += offset_add;
 			rocket.tex_id = texture_load(fname);
 			break;
 		case ID_FACTORY:
 			expected = 7;
 			paramsize = sizeof(object_param_factory);
-			ret = fscanf(file, "%d %f %f %d %s %s %s\n", &factory.max_tanks, &factory.max_hp, &factory.spawn_delay, &factory.score, object_buf, buf, &fname[0]);
+			ret = sscanf(&buffer[offset], "%d %f %f %d %s %s %s\n%n", &factory.max_tanks, &factory.max_hp, &factory.spawn_delay, &factory.score, object_buf, buf, &fname[0], &offset_add);
+			offset += offset_add;
 
 			int sub_id = -1;
 			/* find tank subtype */
@@ -277,7 +272,9 @@ int level_init()
 			/* currently unsupported */ break;
 		}
 	}
-	fclose(file);
+
+	SDL_Log("DEBUG: Finished parsing Game Object Definitions");
+
 	return 0;
 }
 
@@ -294,19 +291,28 @@ level *level_load(int space_station, int deck)
 		return NULL;
 	}
 
-	char levelpath[200];
-	sprintf(levelpath, "%s%02d_%02d.lvl", LEVEL_PATH, space_station, deck);
+	char levelpath[32];
+	sprintf(levelpath, "level/%02d_%02d.lvl", space_station, deck);
 
 	level *lvl = malloc(sizeof(*lvl));
 	currentlvl = lvl;
-	file = SDL_RWFromFile(levelpath,"r");
-	if (file == NULL) {
+
+	/* open file from archive */
+	if (!(file = waffle_open(levelpath))) {
 		SDL_Log("Could not find level %d.%d\n",space_station,deck);
 		return NULL;
 	}
 
+	/* read file contents into buffer */
+	filesize = zzip_read(file, &buffer[0], FILE_BUFFER_SIZE);
+	zzip_close(file);
+	offset = 0;
+	offset_add = 0;
+
 	char tilemap_name[100];
-	ret = fscanf(file,"%s\n", tilemap_name);
+	ret = sscanf(&buffer[offset],"%s%n\n", tilemap_name, &offset_add);
+	offset += offset_add;
+
 	int retExp = 0;
 	lvl->tiles = malloc(sizeof(tilemap));
 	ret = tilemap_create(lvl->tiles,tilemap_name);
@@ -319,8 +325,10 @@ level *level_load(int space_station, int deck)
 	lvl->right = (lvl->tiles->width*lvl->tiles->tile_width)/2;
 
 	/* read level specific data */
-	ret = fscanf(file,"%d %d %d\n", &(lvl->station),&(lvl->deck), &(lvl->timelimit));
 	retExp = 3;
+	ret = sscanf(&buffer[offset],"%d %d %d%n\n", &(lvl->station),&(lvl->deck), &(lvl->timelimit), &offset_add);
+	offset += offset_add;
+
 	if (ret != retExp) {
 		SDL_Log("Error while parsing level header. Wrong number of arguments. Got %d, expected %d.\n", ret, retExp);
 		return NULL;
@@ -328,24 +336,30 @@ level *level_load(int space_station, int deck)
 
 	int x;
 	/* add objects */
-	for (;;) {
-		ret = fscanf(file, "%s %s %d\n", group, subtype, &x);
+	while (offset < filesize) {
+		ret = sscanf(&buffer[offset], "%s %s %d\n%n", group, subtype, &x, &offset_add);
+		offset += offset_add;
+
 		if (ret == EOF) {
 			break;
+		} else if (ret == 0) {
+			SDL_Log("WARNING: missing level input before EOF? No arguments\n");
+			break;
 		} else if (ret != 3) {
-			SDL_Log("Error while parsing level data. Wrong number of arguments\n");
+			SDL_Log("Error while parsing level data. Wrong number of arguments: %d\n", ret);
 			return NULL;
 		}
 
 		int group_id = get_group_index(group);
 		int sub_id = get_sub_index(group_id, subtype);
+		SDL_Log("Adding object: %s %s x=%d\n", group, subtype, x);
 
 		switch (group_id) {
 		case ID_PLAYER:
 			/* currently unsupported */
 			break;
 		case ID_TANK:
-			object_create_tank(x,NULL,  &(((object_param_tank *)params[group_id])[sub_id])  );
+			object_create_tank(x,NULL, &(((object_param_tank *)params[group_id])[sub_id]));
 			break;
 		case ID_TURRET:
 			object_create_turret(x, &(((object_param_turret *)params[group_id])[sub_id]));

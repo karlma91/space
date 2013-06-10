@@ -6,6 +6,8 @@
 
 #include "waffle_utils.h"
 
+#define MAX_IMAGE_BUFFER 1048576 /* ( 1 MiB) */
+
 /**
  * texture values (GLOBAL)
  */
@@ -37,10 +39,23 @@ int texture_load(char *file)
 		return have_texture;
 	}
 
-	char filepath[100];
-	sprintf(filepath,"textures/%s",file);
+	char filepath[64];
+	sprintf(filepath,"textures/%s", file);
 
-	SDL_Surface* img = IMG_Load(filepath);
+	ZZIP_FILE *zf;
+	SDL_RWops *rw;
+
+	if (!(zf = waffle_open(filepath))) {
+		SDL_Log("Unable to find texture: %s", file);
+	}
+
+	char buffer[MAX_IMAGE_BUFFER];
+	int file_size = zzip_read(zf, buffer, MAX_IMAGE_BUFFER);
+	zzip_close(zf);
+
+	rw = SDL_RWFromMem(&buffer[0], file_size);
+
+	SDL_Surface* img = IMG_Load_RW(rw, 0);
 
 	if (img) {
 		unsigned int tex_id;

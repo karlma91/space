@@ -70,8 +70,13 @@ SDL_Renderer *displayRenderer;
 
 static int main_running = 1;
 
-configuration config;
-
+configuration config = {
+		.fullscreen = 1,
+	    .arcade = 1,
+	    .arcade_keys = 1,
+	    .width = 1920,
+	    .height = 1200
+};
 
 #if !(TARGET_OS_IPHONE)
 static int handler(void* config, const char* section, const char* name,
@@ -144,7 +149,6 @@ static void initGL() {
 
 	SDL_GL_SetSwapInterval(1);
 
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
@@ -155,7 +159,7 @@ static void initGL() {
 	SDL_Log("GL_VENDOR: %s\n", glGetString(GL_VENDOR));
 	SDL_Log("GL_RENDERER: %s\n", glGetString(GL_RENDERER));
 	SDL_Log("GL_VERSION: %s\n", glGetString(GL_VERSION));
-	SDL_Log("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
+	////SDL_Log("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
 
 #if !(GLES2)
     glEnableClientState( GL_VERTEX_ARRAY );	 // Enable Vertex Arrays
@@ -203,6 +207,8 @@ static int window_init() {
 
 SDL_Rect fullscreen_dimensions;
 static int main_init() {
+	waffle_init();
+
 	SDL_Log("DEBUG - init_config\n");
 	init_config();
 	SDL_Log("DEBUG - init_config done!\n");
@@ -246,26 +252,35 @@ static int main_init() {
 	//FIXME SDL2 port break
 	initGL();
 
+SDL_Log("DEBUG - initGL done!\n");
+
 	// random seed
 	srand(time(NULL ));
 
 	/* preload textures */
 	texture_init(); //FIXME SDL2 port break
 
+SDL_Log("DEBUG - texture_init done!\n");
+
 	int error;
+	/* load levels */
 	error = draw_init();
 	if (error) {
 		return error;
 	}
 
-	font_init();
-	particles_init();
+SDL_Log("DEBUG - draw_init done!\n");
 
-	/* load levels */
 	error = level_init();
 	if (error) {
 		return error;
 	}
+
+SDL_Log("DEBUG - level_init done!\n");
+
+	font_init();
+	particles_init();
+
 
 	/* init states */
 	statesystem_init();
@@ -380,6 +395,7 @@ static int main_run() {
 }
 
 static int main_destroy() {
+SDL_Log("DEBUG - SDL_destroy\n");
 	level_destroy();
 	//cpSpaceFreeChildren(space);
 
@@ -388,6 +404,8 @@ static int main_destroy() {
 
 	draw_destroy();
 	font_destroy();
+
+	waffle_destroy();
 
 	// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
 	SDL_GL_MakeCurrent(NULL, NULL);
@@ -399,9 +417,10 @@ static int main_destroy() {
 }
 
 int main(int argc, char *args[]) {
-	main_init();
-	main_run();
-	main_destroy();
+	if (main_init() == 0) {
+		main_run();
+	}
+	//main_destroy();
 
 	return 0;
 }
