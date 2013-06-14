@@ -29,7 +29,7 @@ static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat 
 void tilemap_render(tilemap *map)
 {
 	//TODO move all gl dependent code out of this file!
-#if GLES2
+#if GLES1
 
 
 #else
@@ -91,7 +91,7 @@ void tilemap_render(tilemap *map)
 
 static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height)
 {
-#if GLES2
+#if GLES1
 
 
 #else

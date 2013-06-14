@@ -485,7 +485,7 @@ static float range_get_random(range r)
 
 static void draw_all_particles(emitter *em)
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -540,7 +540,7 @@ static void draw_all_particles(emitter *em)
 
 static void default_particle_draw(emitter *em, particle *p)
 {
-#if GLES2
+#if GLES1
 
 
 #else

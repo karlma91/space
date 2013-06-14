@@ -78,7 +78,7 @@ const GLfloat DOT[] = {-0.1,-0.5,	-0.1,-0.3,	0.1,-0.3,	0.1,-0.5, -0.1,-0.5f};
 
 static void drawSymbol(char c)
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -112,7 +112,7 @@ static void drawSymbol(char c)
 
 void font_drawText(GLfloat x, GLfloat y, char* text)
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -175,7 +175,7 @@ void init_text(char c)
 
 void font_init()
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -194,7 +194,7 @@ void font_init()
 
 void font_destroy()
 {
-#if GLES2
+#if GLES1
 
 
 #else

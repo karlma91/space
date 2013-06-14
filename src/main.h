@@ -14,7 +14,7 @@
 #endif
 
 #if TARGET_OS_IPHONE || __ANDROID__
-#define GLES2 1
+#define GLES1 1
 #endif
 
 #define SLEEP_TIME 1

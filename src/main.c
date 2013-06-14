@@ -34,7 +34,7 @@
 #include "gameover.h"
 #include "levelselect.h"
 
-#define FPS_SLEEP_TIME 16
+#define FPS_SLEEP_TIME 33
 static float fps;
 static float frames;
 
@@ -145,6 +145,11 @@ static void initGL() {
 
 	// Create an OpenGL context associated with the window.
 	glcontext = SDL_GL_CreateContext(window);
+
+	if (!glcontext) {
+		SDL_Log("SDL ERROR: %s", SDL_GetError());
+	}
+
 	SDL_GL_MakeCurrent(window, glcontext);
 
 	SDL_GL_SetSwapInterval(1);
@@ -161,14 +166,18 @@ static void initGL() {
 	SDL_Log("GL_VERSION: %s\n", glGetString(GL_VERSION));
 	////SDL_Log("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
 
-#if !(GLES2)
     glEnableClientState( GL_VERTEX_ARRAY );	 // Enable Vertex Arrays
     glEnableClientState( GL_TEXTURE_COORD_ARRAY );	// Enable Texture Coord Arrays
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	GLdouble W_2 = WIDTH / 2;
-	GLdouble H_2 = HEIGHT / 2;
+	GLfloat W_2 = WIDTH / 2;
+	GLfloat H_2 = HEIGHT / 2;
+
+#if (GLES1)
+	glOrthof(-W_2, W_2, -H_2, H_2, 1, -1);
+#else
 	glOrtho(-W_2, W_2, -H_2, H_2, 1, -1);
+#endif
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -179,6 +188,8 @@ static void initGL() {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_MULTISAMPLE);
+
+#if !(GLES1)
 #else
 
 #endif
@@ -326,9 +337,8 @@ static int main_run() {
 		mdt = dt * 1000;
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-#if !GLES2
+
 		glLoadIdentity();
-#endif
 
 		statesystem_update();
 		statesystem_draw();
@@ -417,10 +427,9 @@ SDL_Log("DEBUG - SDL_destroy\n");
 }
 
 int main(int argc, char *args[]) {
-	if (main_init() == 0) {
-		main_run();
-	}
-	//main_destroy();
+	main_init();
+	main_run();
+	main_destroy();
 
 	return 0;
 }

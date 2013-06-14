@@ -4,35 +4,31 @@
 #include "SDL.h"
 
 #if TARGET_OS_IPHONE
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
+#include <OpenGLES/ES1/gl.h>
+#include <OpenGLES/ES1/glext.h>
 
 #elif __ANDROID__
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-
+#include <GLES/gl.h>
+#include <GLES/glext.h>
 #else
 #include "SDL_opengl.h"
 
 #endif
 
 #if TARGET_OS_IPHONE || __ANDROID__
-#define GLES2 1
+#define GLES1 1
+#define GLES1 1
 #endif
 
-#if GLES2
-#define glColor3f draw_color3f
-#define glColor4f draw_color4f
+#if GLES1
+	#define glColor3f(r,g,b) glColor4f(r,g,b,1)
+#elif GLES1
+	#define glColor3f draw_color3f
+	#define glColor4f draw_color4f
 #endif
 
 #include "chipmunk.h"
 #include "texture.h"
-
-#define CIRCLE_SMALL 16
-#define CIRCLE_MEDIUM 32
-#define CIRCLE_BIG 128
-#define CIRCLE_EXTRA 256
-#define CIRCLE_MAX_RES 256
 
 //fra chipmunkDemo.h
 typedef struct Color {
@@ -42,7 +38,7 @@ typedef struct Color {
 //??? static functions i header filen ???
 static inline void glColor_from_color(Color color)
 {
-#if GLES2
+#if GLES1
 
 
 #else

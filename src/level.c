@@ -280,6 +280,7 @@ int level_init()
 
 level *level_load(int space_station, int deck)
 {
+	SDL_Log("DEBUG: Starting to load level %d.%d", space_station, deck);
 	int ret;
 	if (space_station < 1 || space_station > station_count) {
 		SDL_Log("Space station no. %d does not exist!\n", space_station);
@@ -334,6 +335,7 @@ level *level_load(int space_station, int deck)
 		return NULL;
 	}
 
+	SDL_Log("DEBUG: Starting to add objects to level");
 	int x;
 	/* add objects */
 	while (offset < filesize) {
@@ -375,6 +377,8 @@ level *level_load(int space_station, int deck)
 			break;
 		}
 	}
+	
+	SDL_Log("DEBUG: Finished adding objects to level");
 
 	return lvl;
 }

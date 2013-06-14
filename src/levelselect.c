@@ -152,7 +152,7 @@ static void update()
 
 static void render()
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -176,7 +176,7 @@ static void render()
 
 static void render_ship(struct level_ship *ship, int selected)
 {
-#if GLES2
+#if GLES1
 
 
 #else

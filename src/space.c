@@ -501,7 +501,7 @@ static void update_camera_position()
 static void SPACE_draw()
 {
 	//TODO move all gl dependent code out of this file!
-#if GLES2
+#if GLES1
 
 
 #else
@@ -700,7 +700,7 @@ static void stars_init()
 }
 void drawStars()
 {
-#if GLES2
+#if GLES1
 
 
 #else

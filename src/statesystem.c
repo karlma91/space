@@ -132,13 +132,8 @@ void statesystem_update()
 void statesystem_draw()
 {
 	//TODO move all gl dependent code out of this file!
-#if GLES2
-
-
-#else
     sstate *stack_temp = stack_bot;
     while(stack_temp){
-        glLoadIdentity();
         stack_temp->draw();
         if(stack_temp->inner_states > 0 &&
                 stack_temp->inner_draw[stack_temp->current_inner_state]){
@@ -146,7 +141,6 @@ void statesystem_draw()
         }
         stack_temp = stack_temp->next;
     }
-#endif
 }
 
 void statesystem_destroy()

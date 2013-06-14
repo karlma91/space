@@ -3,7 +3,6 @@
 
 #include "waffle_utils.h"
 
-GLfloat array[CIRCLE_MAX_RES];
 GLfloat triangle_quad[8] = {-0.5, -0.5,
 						 0.5,  -0.5,
 						  -0.5, 0.5,
@@ -54,7 +53,7 @@ int draw_init(){
 
 void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -104,7 +103,7 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 }
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -135,7 +134,9 @@ void draw_line_strip(const GLfloat *strip, int l, float w)
 
 void draw_color3f(float r, float g, float b)
 {
-#if GLES2
+#if GLES1
+	glColor4f(r,g,b,1);
+#elif GLES1
 
 
 #else
@@ -144,7 +145,7 @@ void draw_color3f(float r, float g, float b)
 }
 void draw_color4f(float r, float g, float b, float a)
 {
-#if GLES2
+#if GLES1 && !GLES1
 
 
 #else
@@ -161,7 +162,7 @@ void draw_destroy()
 
 void draw_circle(GLfloat x, GLfloat y, GLfloat radius)
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -177,7 +178,7 @@ void draw_circle(GLfloat x, GLfloat y, GLfloat radius)
 
 void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -193,7 +194,7 @@ void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 
 void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h)
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -208,7 +209,7 @@ void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h)
 
 void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot)
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -230,7 +231,7 @@ void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot)
 
 void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -254,7 +255,7 @@ void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
 
 void draw_segment(cpVect a, cpVect b, cpFloat w, Color lineColor)
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -310,7 +311,7 @@ Color draw_col_grad(int hue)
 //TODO: color customization
 void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 {
-#if GLES2
+#if GLES1
 
 
 #else
@@ -349,10 +350,7 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 
 void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
-#if GLES2
 
-
-#else
 	glEnable(GL_TEXTURE_2D);
 	glPushMatrix();
 	glTranslatef(pos->x, pos->y, 0.0f);
@@ -367,11 +365,13 @@ void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float wid
 
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
+#if GLES1
+#else
 #endif
 }
 void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
-#if GLES2
+#if GLES1
 
 
 #else

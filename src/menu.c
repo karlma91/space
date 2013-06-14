@@ -29,6 +29,8 @@ static void destroy();
 static void inner_ingame();
 static void inner_main();
 
+#define AUTO_ENTER 0
+
 #define MAX_MENU_ITEMS 5
 
 struct menu {
@@ -160,8 +162,10 @@ static void draw()
 
 static void arcade_update()
 {
-
-
+#if (TARGET_OS_IPHONE || __ANDROID__) && AUTO_ENTER //TMP define for fake input on mobile devices
+	keys[KEY_RETURN_1] = 1;
+#endif
+	
 	if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 		switch(current_menu){
 			case MENU_MAIN:

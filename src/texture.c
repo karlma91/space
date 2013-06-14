@@ -120,7 +120,7 @@ static int texture_from_name(char *file)
 /* NEED TO BE CALLED BEFORE ANY texture_load() CALLS! */
 extern int texture_init()
 {
-#if GLES2
+#if GLES1
 
 #else
 	TEX_CLOUD = texture_load("cloud.png");
