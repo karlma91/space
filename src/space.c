@@ -534,7 +534,7 @@ static void SPACE_draw()
 		setTextAlign(TEXT_LEFT);
 		setTextSize(35);
 
-		glColor3f(1,1,1);
+		draw_color4f(1,1,1,1);
 		//font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
 
 		object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
@@ -553,7 +553,7 @@ static void SPACE_draw()
 		sprintf(score_temp,"%d",score_anim);
 		font_drawText(-WIDTH/2+20,HEIGHT/2 - 26,score_temp);
 
-		glColor3f(1,0,0);
+		draw_color4f(1,0,0,1);
 		setTextSize(20);
 		char goals_left[100];
 		sprintf(goals_left, "OBJEKTER: %d",
@@ -562,7 +562,7 @@ static void SPACE_draw()
 					objects_count(ID_TANK));
 		font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,goals_left);
 
-		glColor3f(1,1,1);
+		draw_color4f(1,1,1,1);
 		setTextSize(20);
 		char particles_temp[20];
 		char particles2_temp[20];
@@ -581,7 +581,7 @@ static void SPACE_draw()
 		setTextAlign(TEXT_RIGHT);
 		//font_drawText(WIDTH/2-25,-HEIGHT/2+15,game_state_names[gamestate]);
 
-		glColor3f(1,1,1);
+		draw_color4f(1,1,1,1);
 		setTextSize(15);
 		char level_temp[20];
 		setTextAlign(TEXT_CENTER);
@@ -598,12 +598,12 @@ static void SPACE_draw()
 		switch(gamestate) {
 		case LEVEL_START:
 			setTextSize(60);
-			glColor3f(1,1,1);
+			draw_color4f(1,1,1,1);
 			setTextAlign(TEXT_CENTER);
 			font_drawText(0, 0, "GET READY!");
 			break;
 		case LEVEL_RUNNING: case LEVEL_TIMESUP:
-			glColor3f(1,1,1);
+			draw_color4f(1,1,1,1);
 			char time_temp[20];
 			int time_remaining, min, sec;
 			time_remaining = (currentlvl->timelimit - game_time + 0.5f);
@@ -614,9 +614,9 @@ static void SPACE_draw()
 			int extra_size = (time_remaining < 10 ? 10 - time_remaining : 0) * 30;
 			if (time_remaining < 10) {
 				if (time_remaining % 2 == 0) {
-					glColor3f(1,0,0);
+					draw_color4f(1,0,0,1);
 				} else {
-					glColor3f(1.0,1.0,1.0);
+					draw_color4f(1.0,1.0,1.0,1);
 				}
 			}
 			setTextAlign(TEXT_CENTER);
@@ -625,23 +625,23 @@ static void SPACE_draw()
 			break;
 		case LEVEL_CLEARED:
 			setTextSize(60);
-			glColor3f(1,1,1);
+			draw_color4f(1,1,1,1);
 			setTextAlign(TEXT_CENTER);
 			font_drawText(0, 0, "LEVEL CLEARED!");
 			break;
 		case LEVEL_TRANSITION:
 			setTextSize(60);
-			glColor3f(0.8f,0.8f,0.8f);
+			draw_color4f(0.8f,0.8f,0.8f,1);
 			setTextAlign(TEXT_CENTER);
 			//font_drawText(0, 0, "LOADING LEVEL...");
 			break;
 		case LEVEL_PLAYER_DEAD:
 			setTextSize(60);
-			glColor3f(1,0,0);
+			draw_color4f(1,0,0,1);
 			setTextAlign(TEXT_CENTER);
 			if(config.arcade){
 				font_drawText(0, 0, "GAME OVER");
-				glColor3f(0.1,0.9,0.1);
+				draw_color4f(0.1,0.9,0.1,1);
 
 				static float button_timer = 0;
 				static int button_down;
@@ -696,10 +696,6 @@ static void stars_init()
 }
 void drawStars()
 {
-#if GLES1
-
-
-#else
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	glPushMatrix();
@@ -723,16 +719,11 @@ void drawStars()
 		float size = stars_size[i];
 		float star_x = (stars_x[i]);
 		float star_y = (stars_y[i]);
-
-		glVertex2f(star_x - size, star_y - size);
-		glVertex2f(star_x + size, star_y - size);
-		glVertex2f(star_x + size, star_y + size);
-		glVertex2f(star_x - size, star_y + size);
+		draw_box(star_x,star_y,size,size,0,1);
 	}
 	glEnd();
 
 	glPopMatrix();
-#endif
 }
 
 void space_init_level(int space_station, int deck)

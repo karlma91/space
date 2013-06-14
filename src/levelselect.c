@@ -199,7 +199,7 @@ static void render_ship(struct level_ship *ship, int selected)
 		draw_circle(0,0,(ship->radius) + 120);
 
 		glColor3f(0.8,0.1,0.1);
-		draw_simple_box(-5,0,(ship->radius - (ship->count-1)*100),30,0);
+		draw_box(-5,0,(ship->radius - (ship->count-1)*100),30,0,0);
 
 		int i;
 		for(i = 0; i < ship->count; i++){

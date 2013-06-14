@@ -480,10 +480,6 @@ static float range_get_random(range r)
 
 static void draw_all_particles(emitter *em)
 {
-#if GLES1
-
-
-#else
 	glEnable(GL_TEXTURE_2D);
 	draw_push_blend();
 	texture_bind(em->texture_id);
@@ -530,7 +526,6 @@ static void draw_all_particles(emitter *em)
 	draw_pop_blend();
 	glDisable(GL_TEXTURE_2D);
 
-#endif
 }
 
 static void default_particle_draw(emitter *em, particle *p)

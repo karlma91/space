@@ -79,7 +79,7 @@ void draw_segmentshape(cpShape *shape);
 void draw_boxshape(cpShape *shape, Color a, Color b);
 void draw_velocity_line(cpShape *shape);
 void draw_shape(cpShape *shape, void *unused);
-void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle);
+draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered);
 void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot);
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2);

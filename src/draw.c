@@ -216,18 +216,21 @@ void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 #endif
 }
 
-void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle)
+draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered)
 {
-
 	glPushMatrix();
 	glTranslatef(x,y,0);
 	glRotatef(angle,0,0,1);
 	glScalef(w,h,1);
-	glVertexPointer(2, GL_FLOAT, 0, corner_quad);
+	if(centered){
+		glVertexPointer(2, GL_FLOAT, 0, corner_quad);
+	}else{
+		glVertexPointer(2, GL_FLOAT, 0, triangle_quad);
+	}
 	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
 	glPopMatrix();
-
 }
+
 
 void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot)
 {
@@ -246,7 +249,7 @@ void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot)
 	}
 	glEnd();
 	glColor3f(1,1,1);
-	draw_simple_box(0, 0, radius, 5, 0);
+	draw_box(0, 0, radius, 5, 0, 1);
 	glPopMatrix();
 #endif
 }
@@ -346,24 +349,24 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 	/* outer edge */
 	draw_color4f(1, 1, 1, 1);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	draw_simple_box(x, y, w, h, 0);
+	draw_box(x, y, w, h, 0, 0);
 
 	/* inner edge */
 
 	border = 0.1 * (w > h ? h : w);
 	draw_color4f(0, 0, 0, 1);
-	draw_simple_box(x + border, y + border, w - border * 2, h - border * 2, 0);
+	draw_box(x + border, y + border, w - border * 2, h - border * 2, 0, 0);
 
 	/* hp bar */
 	border *= 2;
 	if (w > h) {
 		draw_color4f(1,0,0, 1);
-		draw_simple_box(x + border, y + border, (w - border * 2) * p, h - border * 2, 0);
+		draw_box(x + border, y + border, (w - border * 2) * p, h - border * 2, 0, 0);
 		draw_color4f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1, 1);
-		draw_simple_box(x + border, y + border, (w - border * 2) * p2, h - border * 2, 0);
+		draw_box(x + border, y + border, (w - border * 2) * p2, h - border * 2, 0, 0);
 	} else {
 		draw_color4f(1-p,1-p,1,1);
-		draw_simple_box(x + border, y + border, w - border * 2, (h - border * 2) * p, 0);
+		draw_box(x + border, y + border, w - border * 2, (h - border * 2) * p, 0, 0);
 	}
 
 	draw_pop_color();
