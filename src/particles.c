@@ -671,7 +671,6 @@ static int read_emitter_from_file (int type,char *filename)
 	}
 
 	mxmlDelete(tree);
-	fclose(fp);
 	return 0;
 }
 

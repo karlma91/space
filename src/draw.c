@@ -245,7 +245,7 @@ void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot)
 	}
 	glEnd();
 	glColor3f(1,1,1);
-	draw_simple_box(0, 0, radius, 5);
+	draw_simple_box(0, 0, radius, 5, 0);
 	glPopMatrix();
 #endif
 }
@@ -374,7 +374,7 @@ void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float wid
 
 	glEnable(GL_TEXTURE_2D);
 	texture_bind(tex_id);
-	 draw_current_texture(pos, tex_map, width, height, angle)
+	draw_current_texture(pos, tex_map, width, height, angle);
 	glDisable(GL_TEXTURE_2D);
 #if GLES1
 #else

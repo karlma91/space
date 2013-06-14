@@ -76,7 +76,7 @@ void tilemap_render(tilemap *map)
 
 static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height)
 {
-	texture_map sub_map = {tx,ty, tx+w,ty, tx,ty+h, tx+w,ty+h};
+	texture_map sub_map = {tx,ty+h, tx+w,ty+h, tx,ty, tx+w,ty};
 	glPushMatrix();
 	glTranslatef(x,y,0);
 	cpVect p = cpv(0,0);
@@ -113,7 +113,6 @@ int tilemap_create (tilemap *map, char *filename)
 	}
 	if(tree == NULL){
 		SDL_Log("tilemap.c file: %s is empty \n",tilemap_name);
-		fclose(fp);
 		return 1;
 	}
 
@@ -146,7 +145,6 @@ int tilemap_create (tilemap *map, char *filename)
 		}
 	}
 	mxmlDelete(tree);
-	fclose(fp);
 	return 0;
 }
 
