@@ -78,10 +78,6 @@ const GLfloat DOT[] = {-0.1,-0.5,	-0.1,-0.3,	0.1,-0.3,	0.1,-0.5, -0.1,-0.5f};
 
 static void drawSymbol(char c)
 {
-#if GLES1
-
-
-#else
 	switch(c) {
 		case '_':
 		draw_line_strip(UNDERSCORE,4, 0.5f);
@@ -107,17 +103,14 @@ static void drawSymbol(char c)
 			break;
 			//do nothing
 	}
-#endif
 }
 
 void font_drawText(GLfloat x, GLfloat y, char* text)
 {
-#if GLES1
 
-
-#else
 	glDisable(GL_TEXTURE_2D);
-	glPushAttrib(GL_COLOR_BUFFER_BIT);
+	draw_push_color();
+	draw_push_blend();
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glPushMatrix();
 	glTranslatef(x, y, 0.0f);
@@ -148,7 +141,8 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 				continue;
 			}
 		} else {
-			glCallList(firstCharList + text[i]);
+			init_text(text[i]);
+			//glCallList(firstCharList + text[i]);
 		}
 		i++;
 		glTranslatef((CHAR_WIDTH + CHAR_SPACING), 0, 0);
@@ -158,8 +152,8 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 		glPopMatrix();
 
 	glPopMatrix();
-	glPopAttrib();
-#endif
+	draw_pop_color();
+	draw_pop_blend();
 }
 
 void init_text(char c)

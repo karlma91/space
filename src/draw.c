@@ -111,7 +111,7 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 
 	w /=2; // tmp-fix
 
-	GLfloat line_mesh[8] = {-w, -0.5,
+	GLfloat line_mesh[16] = {-w, -0.5,
 			-w,  0.5,
 			0, -0.5,
 			0,  0.5,
@@ -120,7 +120,7 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 			length+w, -0.5,
 			length+w,  0.5};
 
-	GLfloat line_texture[8] = {0, 0,
+	GLfloat line_texture[16] = {0, 0,
 			0,  1,
 			0.5, 0,
 			0.5,  1,
@@ -147,24 +147,21 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
-#if GLES1
-
-
-#else
 	glPushMatrix();
 		glTranslatef(x0, y0, 0.0f);
 		glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
 		GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
 		glScalef(1,w,1);
 		w /= 2;
-		glBegin(GL_QUAD_STRIP);
-			glVertex2d(-w, -0.5f);
-			glVertex2d(-w, 0.5f);
-			glVertex2d(length + w, -0.5f);
-			glVertex2d(length + w, 0.5f);
-		glEnd();
-	glPopMatrix();
-#endif
+		GLfloat line[8] = { -w, -0.5,
+							-w,  0.5,
+							length + w, -0.5,
+							length + w,  0.5};
+
+		glVertexPointer(2, GL_FLOAT, 0, line);
+		glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+
+		glPopMatrix();
 }
 
 void draw_line_strip(const GLfloat *strip, int l, float w)
@@ -375,13 +372,21 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 
 void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
-
-	glEnable(GL_TEXTURE_2D);
 	texture_bind(tex_id);
-	draw_current_texture(pos, tex_map, width, height, angle);
-	glDisable(GL_TEXTURE_2D);
+	draw_current_texture_full(pos, tex_map, width, height, angle, triangle_quad);
 }
 void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
+{
+	draw_current_texture_full(pos, tex_map, width, height, angle, triangle_quad);
+}
+
+void draw_current_texture_tilemap(const texture_map *tex_map, float width, float height)
+{
+	cpVect p = cpv(0,0);
+	draw_current_texture_full(&p, tex_map, width, height, 0, corner_quad);
+}
+
+void draw_current_texture_all(cpVect *pos, const texture_map *tex_map, float width, float height, float angle, GLfloat *mesh)
 {
 	glEnable(GL_TEXTURE_2D);
 	glPushMatrix();
@@ -389,10 +394,11 @@ void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, 
 	glRotatef(angle,0,0,1);
 	glScalef(width,height,1);
 
-	glVertexPointer(2, GL_FLOAT, 0, triangle_quad);
+	glVertexPointer(2, GL_FLOAT, 0, mesh);
 	glTexCoordPointer( 2, GL_FLOAT, 0, tex_map );
 	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
 
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
 }
+
