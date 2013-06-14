@@ -52,7 +52,7 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 
 	bullet->alive = 0;
 
-	//cpSpaceAddPostStepCallback(space,postStepEffects,b,NULL);
+	cpSpaceAddPostStepCallback(space,postStepEffects,b,NULL);
 
 	//TODO create a function for damaging other objects
 	if (se_damage_object(object, *(bullet->components.damage))) {
@@ -73,7 +73,7 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	bullet->alive = 0;
 
-	//cpSpaceAddPostStepCallback(space,postStepEffects,b,NULL);
+	cpSpaceAddPostStepCallback(space,postStepEffects,b,NULL);
 	if (se_damage_object(object, *(bullet->components.damage))) {
 		particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 	}
@@ -104,7 +104,7 @@ static void callback_bullet_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
 	object_data *object = ((object_data *)(a->body->data));
-	//cpSpaceAddPostStepCallback(space,(cpPostStepFunc)postStepEffects,b,NULL);
+	cpSpaceAddPostStepCallback(space,(cpPostStepFunc)postStepEffects,b,NULL);
 	particles_get_emitter_at(EMITTER_EXPLOSION, a->body->p);
 	object->alive = 0;
 }
@@ -113,7 +113,7 @@ static void callback_rocket_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
 	object_data *object = ((object_data *)(a->body->data));
-	//cpSpaceAddPostStepCallback(space,postStepEffects,b,NULL);
+	cpSpaceAddPostStepCallback(space,postStepEffects,b,NULL);
 	object->alive = 0;
 }
 
@@ -140,9 +140,9 @@ static void add_sparks_at_contactpoint(cpArbiter *arb)
 static void se_add_explotion_at_contact_point(cpArbiter *arb)
 {
 	if(arb != NULL && cpArbiterGetCount(arb) >0){
-		//cpVect v = cpArbiterGetPoint(arb, 0);
+		cpVect v = cpArbiterGetPoint(arb, 0);
 		//SDL_Log("HELLO: x: %f y: %f",v.x,v.y);
-		//emitter *e = particles_get_emitter_at(EMITTER_EXPLOSION, cpv());
+		emitter *e = particles_get_emitter_at(EMITTER_EXPLOSION, cpv());
 	}
 }
 

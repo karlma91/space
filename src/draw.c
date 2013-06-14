@@ -223,9 +223,9 @@ draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered)
 	glRotatef(angle,0,0,1);
 	glScalef(w,h,1);
 	if(centered){
-		glVertexPointer(2, GL_FLOAT, 0, corner_quad);
-	}else{
 		glVertexPointer(2, GL_FLOAT, 0, triangle_quad);
+	}else{
+		glVertexPointer(2, GL_FLOAT, 0, corner_quad);
 	}
 	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
 	glPopMatrix();
