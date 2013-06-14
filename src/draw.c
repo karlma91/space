@@ -133,11 +133,11 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 	glTexCoordPointer( 2, GL_FLOAT, 0, line_texture );
 
 	texture_bind(TEX_GLOW);
-	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+	glDrawArrays(GL_TRIANGLE_STRIP,0, 8);
 
 	glColor3f(1,1,1);
 	texture_bind(TEX_DOT);
-	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+	glDrawArrays(GL_TRIANGLE_STRIP,0, 8);
 
 	draw_pop_blend();
 	glPopMatrix();

@@ -79,7 +79,7 @@ static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat 
 	texture_map sub_map = {tx,ty+h, tx+w,ty+h, tx,ty, tx+w,ty};
 	glPushMatrix();
 	glTranslatef(x,y,0);
-	cpVect p = cpv(0,0);
+	cpVect p = cpv(0.5,0.5);
 	draw_current_texture(&p, &sub_map,tile_width,tile_height,0);
 	glPopMatrix();
 }
