@@ -1,6 +1,6 @@
 #include "draw.h"
 #include "texture.h"
-
+#include "stack.h"
 #include "waffle_utils.h"
 
 GLfloat triangle_quad[8] = {-0.5, -0.5,
@@ -13,6 +13,9 @@ Color rainbow_col[1536];
 static GLfloat unit_circle[128];
 
 #define DEBUG SDL_Log( "line: %d\n", __LINE__);
+
+GLfloat color_stack[10];
+
 
 int draw_init(){
 
@@ -49,6 +52,43 @@ int draw_init(){
 	for(i=0; i <= 255; i++, c++)
 		c->r = 1, c->g = min_col, c->b = 1 - i/255.0f, c->a = 1;
 	return 0;
+}
+
+
+void draw_push_color()
+{
+	GLfloat color[4];
+	glGetFloatv(GL_CURRENT_COLOR, color);
+	stack_push_float(color[0]);
+	stack_push_float(color[1]);
+	stack_push_float(color[2]);
+	stack_push_float(color[3]);
+}
+
+void draw_pop_color()
+{
+	GLfloat a = stack_pop_float();
+	GLfloat b = stack_pop_float();
+	GLfloat g = stack_pop_float();
+	GLfloat r = stack_pop_float();
+	draw_color4f(r,g,b,a);
+}
+
+void draw_push_blend()
+{
+	int dst;
+	int src;
+	glGetIntegerv(GL_BLEND_DST, &dst);
+	glGetIntegerv(GL_BLEND_SRC, &src);
+	stack_push_int(dst);
+	stack_push_int(src);
+}
+
+void draw_pop_blend()
+{
+	int src = stack_pop_int();
+	int dst = stack_pop_int();
+	glBlendFunc(src, dst);
 }
 
 void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
@@ -131,26 +171,9 @@ void draw_line_strip(const GLfloat *strip, int l, float w)
 	}
 }
 
-
-void draw_color3f(float r, float g, float b)
-{
-#if GLES1
-	glColor4f(r,g,b,1);
-#elif GLES1
-
-
-#else
-	glColor3f(r,g,b);
-#endif
-}
 void draw_color4f(float r, float g, float b, float a)
 {
-#if GLES1 && !GLES1
-
-
-#else
 	glColor4f(r,g,b,a);
-#endif
 }
 
 void draw_destroy()
@@ -192,19 +215,17 @@ void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 #endif
 }
 
-void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h)
+void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle)
 {
-#if GLES1
 
+	glPushMatrix();
+	glTranslatef(x,y,0);
+	glRotatef(angle,0,0,1);
+	glScalef(w,h,1);
+	glVertexPointer(2, GL_FLOAT, 0, triangle_quad);
+	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+	glPopMatrix();
 
-#else
-	glBegin(GL_QUADS);
-		glVertex2d(x, y);
-		glVertex2d(x, y + h);
-		glVertex2d(x + w, y + h );
-		glVertex2d(x + w, y);
-	glEnd();
-#endif
 }
 
 void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot)
@@ -283,12 +304,14 @@ void draw_velocity_line(cpShape *shape)
 	cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
 	draw_line(circle->tc.x, circle->tc.y, circle->tc.x - vel.x/64, circle->tc.y - vel.y/64, 32); //40 = 4 * radius
 }
+
 void draw_boxshape(cpShape *shape, Color a, Color b)
 {
 	glLineWidth(2);
 	cpPolyShape *poly = (cpPolyShape *)shape;
 	draw_polygon(poly->numVerts, poly->tVerts,a,b);
 }
+
 void draw_segmentshape(cpShape *shape)
 {
 	cpSegmentShape *seg = (cpSegmentShape *)shape;
@@ -311,59 +334,47 @@ Color draw_col_grad(int hue)
 //TODO: color customization
 void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 {
-#if GLES1
-
-
-#else
 	float border;
-	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
+	/* save current blend function and color */
+	draw_push_color();
+	draw_push_blend();
+
 	p = (p < 1 ? (p > 0 ? p : 0) : 1);
 	p2 = (p2 < 1 ? (p2 > 0 ? p2 : 0) : 1);
 
 	/* outer edge */
-	glColor4f(1, 1, 1, 1);
+	draw_color4f(1, 1, 1, 1);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	draw_simple_box(x, y, w, h);
+	draw_simple_box(x, y, w, h, 0);
 
 	/* inner edge */
 
 	border = 0.1 * (w > h ? h : w);
-	glColor3f(0, 0, 0);
-	draw_simple_box(x + border, y + border, w - border * 2, h - border * 2);
+	draw_color4f(0, 0, 0, 1);
+	draw_simple_box(x + border, y + border, w - border * 2, h - border * 2, 0);
 
 	/* hp bar */
 	border *= 2;
 	if (w > h) {
-		glColor3f(1,0,0);
-		draw_simple_box(x + border, y + border, (w - border * 2) * p, h - border * 2);
-		glColor3f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1);
-		draw_simple_box(x + border, y + border, (w - border * 2) * p2, h - border * 2);
+		draw_color4f(1,0,0, 1);
+		draw_simple_box(x + border, y + border, (w - border * 2) * p, h - border * 2, 0);
+		draw_color4f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1, 1);
+		draw_simple_box(x + border, y + border, (w - border * 2) * p2, h - border * 2, 0);
 	} else {
-		glColor3f(1-p,1-p,1);
-		draw_simple_box(x + border, y + border, w - border * 2, (h - border * 2) * p);
+		draw_color4f(1-p,1-p,1,1);
+		draw_simple_box(x + border, y + border, w - border * 2, (h - border * 2) * p, 0);
 	}
 
-
-	glPopAttrib();
-#endif
+	draw_pop_color();
+	draw_pop_blend();
 }
 
 void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
 
 	glEnable(GL_TEXTURE_2D);
-	glPushMatrix();
-	glTranslatef(pos->x, pos->y, 0.0f);
-	glRotatef(angle,0,0,1);
-	glScalef(width,height,1);
-
 	texture_bind(tex_id);
-
-	glVertexPointer(2, GL_FLOAT, 0, triangle_quad);
-	glTexCoordPointer( 2, GL_FLOAT, 0, tex_map );
-	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
-
-	glPopMatrix();
+	 draw_current_texture(pos, tex_map, width, height, angle)
 	glDisable(GL_TEXTURE_2D);
 #if GLES1
 #else
@@ -371,10 +382,6 @@ void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float wid
 }
 void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
-#if GLES1
-
-
-#else
 	glEnable(GL_TEXTURE_2D);
 	glPushMatrix();
 	glTranslatef(pos->x, pos->y, 0.0f);
@@ -387,5 +394,4 @@ void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, 
 
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
-#endif
 }
