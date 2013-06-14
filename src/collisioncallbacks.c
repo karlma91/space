@@ -142,7 +142,7 @@ static void se_add_explotion_at_contact_point(cpArbiter *arb)
 	if(arb != NULL && cpArbiterGetCount(arb) >0){
 		cpVect v = cpArbiterGetPoint(arb, 0);
 		//SDL_Log("HELLO: x: %f y: %f",v.x,v.y);
-		emitter *e = particles_get_emitter_at(EMITTER_EXPLOSION, cpv());
+		particles_get_emitter_at(EMITTER_EXPLOSION, v);
 	}
 }
 

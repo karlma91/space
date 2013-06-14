@@ -66,7 +66,18 @@ static enum gameover_state gameover_state = enter_name;
 static int cursor = 0;
 static int win = 0; //TMP solution for win screens
 
+static int score_index = 0;
+static int score_page = 0;
+
 static void update() {
+/*{ //DEBUG CODE
+	if (keys[KEY_RETURN]) {
+		gameover_state = (1+gameover_state)%3;
+		keys[KEY_RETURN] = 0;
+		return;
+	}
+*/
+
 	static float key_dt = 0;
 	static float key_ddt = 0.25;
 	static const float key_ddt_min = 0.12f;
@@ -126,8 +137,10 @@ static void update() {
 	case show_highscore:
 		if (keys[KEY_ESCAPE] || keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 			score_newly_added = 0;
+			score_index = 0;
+			score_page = 0;
 			if(config.arcade){
-				SDL_Log("exit %d\n", getPlayerScore());
+				printf("exit %d\n", getPlayerScore());
 				main_stop();
 				return;
 			}
@@ -138,10 +151,32 @@ static void update() {
 			keys[KEY_RETURN_2] = 0;
 			win = 0;
 		}
+
+		// highscore scrolling
+		if (keys[KEY_DOWN_1] || keys[KEY_DOWN_2]) {
+				++score_page;
+				keys[KEY_DOWN_1] = 0;
+				keys[KEY_DOWN_2] = 0;
+		}
+		if (keys[KEY_UP_1] || keys[KEY_UP_2]) {
+			if (score_page > 0) {
+				--score_page;
+			}
+			keys[KEY_UP_1] = 0;
+			keys[KEY_UP_2] = 0;
+		}
+
+		if (score_index < score_page*10) {
+				++score_index;
+		} else if (score_index > score_page*10) {
+			--score_index;
+		}
+
 		break;
 	}
 }
 
+Color color;
 static void draw()
 {
 	static float timer;
@@ -150,7 +185,8 @@ static void draw()
 	setTextAngle(0);
 	setTextSize(80);
 	setTextAlign(TEXT_CENTER);
-	glColor_from_color(draw_col_rainbow((int)(timer*1000)));
+	color = draw_col_rainbow((int)(timer*1000));
+	glColor_from_color(color);
 
 	if (gameover_state != show_highscore) {
 		if (win)
@@ -201,6 +237,7 @@ static void draw()
 			char current_score_buffer[100];
 			setTextSize(35);
 			setTextAlign(TEXT_CENTER);
+			glColor_from_color(color);
 			sprintf(&current_score_buffer[0], "%s FIKK %d. PLASS MED %d POENG!", &input[0], score_position, score_value);
 			glColor3f(1,1,1);
 			font_drawText(0,-0.4f*HEIGHT, &current_score_buffer[0]);
@@ -233,7 +270,7 @@ char * covertToUpper(char *str)
 
     }
 
-static void draw_highscore()
+static void draw_highscore(int start_index)
 {
 	scoreelement score = {"---",0,0,0};
 	char temp[100];
@@ -241,14 +278,21 @@ static void draw_highscore()
 	setTextAlign(TEXT_LEFT);
 	setTextSize(20);
 	for(i=0;i<10;i++){
-		if(highscorelist_getscore(list,i+1,&score) != 0) {
+		int position = i+1+score_index;
+		if(highscorelist_getscore(list,position,&score) != 0) {
 
 		}
 		time_t tim = (time_t)(score.time);
 		 struct tm *tmm = gmtime(&tim);
 
-		sprintf(temp,"%2d %-5s %10d         %02d-%02d-%02d", (i+1), score.name, score.score,tmm->tm_mday,tmm->tm_mon+1,tmm->tm_year%100);
-		font_drawText(-10*40*1.5f, 300 - i*50*1.5f, temp);
+		sprintf(temp,"%9d %-5s %10d      %02d-%02d-%02d", position, score.name, score.score,tmm->tm_mday,tmm->tm_mon+1,tmm->tm_year%100);
+
+		if (score_position == position) {
+			glColor_from_color(color);
+		} else {
+			glColor3f(1,1,1);
+		}
+		font_drawText(-10*45*1.5f, 300 - i*50*1.5f, temp);
 	}
 }
 

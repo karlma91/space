@@ -114,6 +114,7 @@ void highscorelist_destroy(scorelist *list)
  */
 int highscorelist_readfile(scorelist *list, char *filename)
 {
+	//TODO read file from internal storage
 	file = fopen(filename,"r");
 	if (file == NULL) {
 		SDL_Log( "Could not load %s\n",filename);
@@ -146,6 +147,7 @@ int highscorelist_readfile(scorelist *list, char *filename)
  */
 int highscorelist_writefile(scorelist *list, char *filename)
 {
+	//TODO write file to internal storage
 	file = fopen(filename,"w");
 	if (file == NULL) {
 		SDL_Log( "Could not load %s\n",filename);

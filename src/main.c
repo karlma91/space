@@ -220,6 +220,8 @@ SDL_Rect fullscreen_dimensions;
 static int main_init() {
 	waffle_init();
 
+    SDL_SetHint("SDL_HINT_ORIENTATIONS", "LandscapeLeft LandscapeRight");
+
 	SDL_Log("DEBUG - init_config\n");
 	init_config();
 	SDL_Log("DEBUG - init_config done!\n");
