@@ -8,6 +8,11 @@ GLfloat triangle_quad[8] = {-0.5, -0.5,
 						  -0.5, 0.5,
 						  0.5,  0.5};
 
+GLfloat corner_quad[8] = {0, 0,
+							 1,  0,
+							  0, 1,
+							  1,  1};
+
 Color rainbow_col[1536];
 
 static GLfloat unit_circle[128];
@@ -93,54 +98,53 @@ void draw_pop_blend()
 
 void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
-#if GLES1
-
-
-#else
 
 	glEnable(GL_TEXTURE_2D);
 
 	glPushMatrix();
-	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
-	 glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		glTranslatef(x0, y0, 0.0f);
-		glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
-		GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
-		glScalef(1,w,1);
+	draw_push_blend();
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glTranslatef(x0, y0, 0.0f);
+	glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
+	GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
+	glScalef(1,w,1);
 
-		w /=2; // tmp-fix
+	w /=2; // tmp-fix
 
-		texture_bind(TEX_GLOW);
-		glBegin(GL_QUAD_STRIP);
-			glTexCoord2d(0, 0); glVertex2d(-w, -0.5f);
-			glTexCoord2d(0, 1); glVertex2d(-w, 0.5f);
-			glTexCoord2d(0.5f, 0); glVertex2d(0, -0.5f);
-			glTexCoord2d(0.5f, 1); glVertex2d(0, 0.5f);
-			glTexCoord2d(0.5f, 0); glVertex2d(length, -0.5f);
-			glTexCoord2d(0.5f, 1); glVertex2d(length, 0.5f);
-			glTexCoord2d(1.0f, 0); glVertex2d(length+w, -0.5f);
-			glTexCoord2d(1.0f, 1); glVertex2d(length+w, 0.5f);
-		glEnd();
+	GLfloat line_mesh[8] = {-w, -0.5,
+			-w,  0.5,
+			0, -0.5,
+			0,  0.5,
+			length, -0.5,
+			length,  0.5,
+			length+w, -0.5,
+			length+w,  0.5};
 
-		glColor3f(1,1,1);
-		texture_bind(TEX_DOT);
-		glBegin(GL_QUAD_STRIP);
-			glTexCoord2d(0, 0); glVertex2d(-w, -0.5f);
-			glTexCoord2d(0, 1); glVertex2d(-w, 0.5f);
-			glTexCoord2d(0.5f, 0); glVertex2d(0, -0.5f);
-			glTexCoord2d(0.5f, 1); glVertex2d(0, 0.5f);
-			glTexCoord2d(0.5f, 0); glVertex2d(length, -0.5f);
-			glTexCoord2d(0.5f, 1); glVertex2d(length, 0.5f);
-			glTexCoord2d(1.0f, 0); glVertex2d(length+w, -0.5f);
-			glTexCoord2d(1.0f, 1); glVertex2d(length+w, 0.5f);
-		glEnd();
+	GLfloat line_texture[8] = {0, 0,
+			0,  1,
+			0.5, 0,
+			0.5,  1,
+			0.5, 0,
+			0.5,  1,
+			1, 0,
+			1,  1};
 
-	glPopAttrib();
+	glVertexPointer(2, GL_FLOAT, 0, line_mesh);
+	glTexCoordPointer( 2, GL_FLOAT, 0, line_texture );
+
+	texture_bind(TEX_GLOW);
+	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+
+	glColor3f(1,1,1);
+	texture_bind(TEX_DOT);
+	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+
+	draw_pop_blend();
 	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
-#endif
 
 }
+
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
 #if GLES1
@@ -222,7 +226,7 @@ void draw_simple_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle)
 	glTranslatef(x,y,0);
 	glRotatef(angle,0,0,1);
 	glScalef(w,h,1);
-	glVertexPointer(2, GL_FLOAT, 0, triangle_quad);
+	glVertexPointer(2, GL_FLOAT, 0, corner_quad);
 	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
 	glPopMatrix();
 
@@ -376,9 +380,6 @@ void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float wid
 	texture_bind(tex_id);
 	draw_current_texture(pos, tex_map, width, height, angle);
 	glDisable(GL_TEXTURE_2D);
-#if GLES1
-#else
-#endif
 }
 void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {

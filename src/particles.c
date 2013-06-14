@@ -485,7 +485,7 @@ static void draw_all_particles(emitter *em)
 
 #else
 	glEnable(GL_TEXTURE_2D);
-	glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT);
+	draw_push_blend();
 	texture_bind(em->texture_id);
 	if(em->additive){
 	    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -527,7 +527,7 @@ static void draw_all_particles(emitter *em)
 
 		p = p->next;
 	}
-		glPopAttrib();
+	draw_pop_blend();
 	glDisable(GL_TEXTURE_2D);
 
 #endif
@@ -535,16 +535,11 @@ static void draw_all_particles(emitter *em)
 
 static void default_particle_draw(emitter *em, particle *p)
 {
-#if GLES1
-
-
-#else
 	if(em->rotation){
 		glRotatef(p->angle, 0, 0, 1);
 		p->angle += p->rot_speed*dt;
 	}
 	draw_current_texture(&(p->p),TEX_MAP_FULL,p->size,p->size,p->angle);
-#endif
 }
 
 
