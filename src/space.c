@@ -696,6 +696,13 @@ static void stars_init()
 }
 void drawStars()
 {
+	static int tick2death = 1;
+
+	if (tick2death > 0) {
+		tick2death--;
+		return;
+	}
+
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	glPushMatrix();
@@ -713,16 +720,13 @@ void drawStars()
 	glRotatef(-cam_angle,0,0,1);
 
 	int i;
-	glBegin(GL_QUADS);
-	glColor3f(1,1,1);
+	draw_color4f(1,1,1,1);
 	for (i = 0; i < star_count; i++) {
 		float size = stars_size[i];
 		float star_x = (stars_x[i]);
 		float star_y = (stars_y[i]);
 		draw_box(star_x,star_y,size,size,0,1);
 	}
-	glEnd();
-
 	glPopMatrix();
 }
 

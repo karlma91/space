@@ -122,11 +122,11 @@ static void update(object_data *obj)
 static void render(object_data *obj)
 {
 	temp = ((struct robotarm*)obj);
-	glColor3f(1,0,0);
+	draw_color4f(1,0,0,1);
 	draw_quad_line(temp->x[0],temp->y[0],temp->x[0] + cos(temp->angle[0])*temp->seg_length, temp->y[0] + sin(temp->angle[0])*temp->seg_length, 20);
 	int i;
 	for(i=0; i<temp->segments-1; i++){
-		glColor3f(1*(1-(1.0f*i/(temp->segments-1))),0,0);
+		draw_color4f(1*(1-(1.0f*i/(temp->segments-1))),0,0,1);
 		draw_quad_line(temp->x[i],temp->y[i],temp->x[i+1],temp->y[i+1], 20);
 	}
 }

@@ -209,7 +209,7 @@ static void draw()
 		int from = ((valid_index[cursor] - draw_offset));
 		int to = (valid_index[cursor] + draw_offset);
 		int k = -draw_offset;
-		glColor3f(0.3,0.3,0.3);
+		draw_color4f(0.3,0.3,0.3,1);
 		int j;
 		for(j=from; j<=to; j++,k++){
 			tmp[0] = valid_char[j < 0 ? j + char_count : j % char_count];
@@ -239,7 +239,7 @@ static void draw()
 			setTextAlign(TEXT_CENTER);
 			glColor_from_color(color);
 			sprintf(&current_score_buffer[0], "%s FIKK %d. PLASS MED %d POENG!", &input[0], score_position, score_value);
-			glColor3f(1,1,1);
+			draw_color4f(1,1,1,1);
 			font_drawText(0,-0.4f*HEIGHT, &current_score_buffer[0]);
 		}
 		break;
@@ -290,7 +290,7 @@ static void draw_highscore(int start_index)
 		if (score_position == position) {
 			glColor_from_color(color);
 		} else {
-			glColor3f(1,1,1);
+			draw_color4f(1,1,1,1);
 		}
 		font_drawText(-10*45*1.5f, 300 - i*50*1.5f, temp);
 	}

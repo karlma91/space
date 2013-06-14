@@ -188,26 +188,26 @@ static void render_ship(struct level_ship *ship, int selected)
 
 		char te[30];
 		sprintf(te,"GRAV: %.3f ROT: %.3f",gravity, ship->rotation_speed );
-		glColor3f(1,1,1);
+		draw_color4f(1,1,1,1);
 		setTextSize(100);
 		font_drawText(ship->x,ship->y + ship->radius + 200,te);
 
 		glTranslatef(ship->x,ship->y,0);
 		glRotatef(ship->rotation,0,0,1);
 
-		glColor3f(0.1,0.1,0.1);
+		draw_color4f(0.1,0.1,0.1,1);
 		draw_circle(0,0,(ship->radius) + 120);
 
-		glColor3f(0.8,0.1,0.1);
+		draw_color4f(0.8,0.1,0.1,1);
 		draw_box(-5,0,(ship->radius - (ship->count-1)*100),30,0,0);
 
 		int i;
 		for(i = 0; i < ship->count; i++){
 
 			if(selected && i == ship->count-level_select - 1){
-				glColor3f(0,0,1);
+				draw_color4f(0,0,1,1);
 			}else{
-				glColor3f(1.0f,0,0);
+				draw_color4f(1.0f,0,0,1);
 			}
 			draw_donut(0,0,(ship->radius - i*100) + 20,(ship->radius - i*100) + 100);
 

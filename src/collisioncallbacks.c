@@ -3,9 +3,6 @@
 #include "spaceengine.h"
 #include "particles.h"
 #include "space.h"
-#include "stdio.h"
-
-#include "waffle_utils.h"
 
 static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, void *unused);
 static void callback_bullet_ground(cpArbiter *arb, cpSpace *space, void *unused);
@@ -33,16 +30,6 @@ void collisioncallbacks_init()
 
 }
 
-static void ScaleIterator(cpBody *body, cpArbiter *arb, void *data)
-{
-    se_add_explotion_at_contact_point(arb);
-}
-static void postStepEffects(cpSpace *space, cpShape *shape, void *unused)
-{
-    cpBodyEachArbiter(shape->body, ScaleIterator, NULL);
-
-}
-
 static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b;
@@ -52,7 +39,7 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 
 	bullet->alive = 0;
 
-	cpSpaceAddPostStepCallback(space,postStepEffects,b,NULL);
+	se_add_explotion_at_contact_point(arb);
 
 	//TODO create a function for damaging other objects
 	if (se_damage_object(object, *(bullet->components.damage))) {
@@ -73,7 +60,8 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	bullet->alive = 0;
 
-	cpSpaceAddPostStepCallback(space,postStepEffects,b,NULL);
+	se_add_explotion_at_contact_point(arb);
+
 	if (se_damage_object(object, *(bullet->components.damage))) {
 		particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 	}
@@ -89,13 +77,17 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 
 	if (player)  {
 		if (player->preset->ID == ID_PLAYER) {
-		   // cpSpaceAddPostStepCallback(space,postStepEffects,b,NULL);
-		    player->components.hp_bar->value -= 10 * 0.05;
+			add_sparks_at_contactpoint(arb);
+			cpVect force = cpArbiterTotalImpulse(arb);
+			float f = cpvlength(force);
+			//todo create a super fancy formula for determining physical damagae
+			if (f > 20)
+				player->components.hp_bar->value -= f * 0.05;
 		} else {
-			SDL_Log( "Expected object type ID %d, but got %d!\n", ID_PLAYER, player->preset->ID);
+			fprintf(stderr, "Expected object type ID %d, but got %d!\n", ID_PLAYER, player->preset->ID);
 		}
 	} else {
-		SDL_Log( "Expected object from collision between player and ground, but got NULL\n");
+		fprintf(stderr, "Expected object from collision between player and ground, but got NULL\n");
 	}
 
 }
@@ -104,8 +96,7 @@ static void callback_bullet_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
 	object_data *object = ((object_data *)(a->body->data));
-	cpSpaceAddPostStepCallback(space,(cpPostStepFunc)postStepEffects,b,NULL);
-	particles_get_emitter_at(EMITTER_EXPLOSION, a->body->p);
+	add_sparks_at_contactpoint(arb);
 	object->alive = 0;
 }
 
@@ -113,7 +104,7 @@ static void callback_rocket_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
 	object_data *object = ((object_data *)(a->body->data));
-	cpSpaceAddPostStepCallback(space,postStepEffects,b,NULL);
+	se_add_explotion_at_contact_point(arb);
 	object->alive = 0;
 }
 
@@ -139,9 +130,8 @@ static void add_sparks_at_contactpoint(cpArbiter *arb)
 
 static void se_add_explotion_at_contact_point(cpArbiter *arb)
 {
-	if(arb != NULL && cpArbiterGetCount(arb) >0){
+	if(cpArbiterGetCount(arb) >0){
 		cpVect v = cpArbiterGetPoint(arb, 0);
-		//SDL_Log("HELLO: x: %f y: %f",v.x,v.y);
 		particles_get_emitter_at(EMITTER_EXPLOSION, v);
 	}
 }

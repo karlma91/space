@@ -165,7 +165,7 @@ static void arcade_update()
 #if (TARGET_OS_IPHONE || __ANDROID__) && AUTO_ENTER //TMP define for fake input on mobile devices
 	keys[KEY_RETURN_1] = 1;
 #endif
-	
+
 	if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 		switch(current_menu){
 			case MENU_MAIN:
@@ -208,7 +208,7 @@ static void arcade_draw()
 		glColor_from_color(draw_col_rainbow((int)(timer*1000)));
 		font_drawText(0,0.8f*HEIGHT/2, "SPACE");
 
-		glColor3f(1,1,1);
+		draw_color4f(1,1,1,1);
 
 		setTextSize(30);
 		font_drawText(-WIDTH*0.4,-0.8f*HEIGHT/2, "STYR");
@@ -228,7 +228,7 @@ static void arcade_draw()
 			button_timer = 0;
 		}
 		font_drawText(0,-0.5f*HEIGHT/2, "START SPILLET");
-		glColor3f(0.1,0.9,0.1);
+		draw_color4f(0.1,0.9,0.1,1);
 		if(button_down){
 			cpVect t = cpv(0,0);
 			draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);

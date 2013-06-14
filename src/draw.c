@@ -3,12 +3,12 @@
 #include "stack.h"
 #include "waffle_utils.h"
 
-GLfloat triangle_quad[8] = {-0.5, -0.5,
+static GLfloat triangle_quad[8] = {-0.5, -0.5,
 						 0.5,  -0.5,
 						  -0.5, 0.5,
 						  0.5,  0.5};
 
-GLfloat corner_quad[8] = {0, 0,
+static GLfloat corner_quad[8] = {0, 0,
 							 1,  0,
 							  0, 1,
 							  1,  1};
@@ -135,7 +135,7 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 	texture_bind(TEX_GLOW);
 	glDrawArrays(GL_TRIANGLE_STRIP,0, 8);
 
-	glColor3f(1,1,1);
+	draw_color4f(1,1,1,1);
 	texture_bind(TEX_DOT);
 	glDrawArrays(GL_TRIANGLE_STRIP,0, 8);
 
@@ -216,17 +216,13 @@ void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 #endif
 }
 
-draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered)
+void draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered)
 {
 	glPushMatrix();
 	glTranslatef(x,y,0);
 	glRotatef(angle,0,0,1);
 	glScalef(w,h,1);
-	if(centered){
-		glVertexPointer(2, GL_FLOAT, 0, triangle_quad);
-	}else{
-		glVertexPointer(2, GL_FLOAT, 0, corner_quad);
-	}
+	glVertexPointer(2, GL_FLOAT, 0, centered ? triangle_quad : corner_quad);
 	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
 	glPopMatrix();
 }
@@ -248,7 +244,7 @@ void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot)
 		glVertex2f(unit_circle[i]*radius, unit_circle[i+1]*radius);
 	}
 	glEnd();
-	glColor3f(1,1,1);
+	draw_color4f(1,1,1,1);
 	draw_box(0, 0, radius, 5, 0, 1);
 	glPopMatrix();
 #endif

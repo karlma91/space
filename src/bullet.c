@@ -78,9 +78,9 @@ static void render(object_data *obj)
 {
 	struct bullet *temp = (struct bullet*)obj;
 	if(temp->data.preset->ID == ID_BULLET_PLAYER){
-		glColor3f(0.9,0.3,0.3);
+		draw_color4f(0.9,0.3,0.3,1);
 	}else{
-		glColor3f(0.3,0.3,0.9);
+		draw_color4f(0.3,0.3,0.9,1);
 	}
 
 	{
