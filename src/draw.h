@@ -58,6 +58,11 @@ static inline Color LAColor(float l, float a)
 	return color;
 }
 
+void draw_push_color();
+void draw_pop_color();
+void draw_push_blend();
+void draw_pop_blend();
+
 Color draw_col_rainbow(int hue);
 Color draw_col_grad(int hue);
 void draw_color4f(float r, float g, float b, float a);

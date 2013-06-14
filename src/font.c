@@ -109,7 +109,6 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 {
 
 	glDisable(GL_TEXTURE_2D);
-	draw_push_color();
 	draw_push_blend();
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glPushMatrix();
@@ -152,7 +151,6 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 		glPopMatrix();
 
 	glPopMatrix();
-	draw_pop_color();
 	draw_pop_blend();
 }
 
@@ -169,21 +167,7 @@ void init_text(char c)
 
 void font_init()
 {
-#if GLES1
 
-
-#else
-    //enables gldraw array
-	glDisable(GL_TEXTURE_2D);
-	firstCharList = glGenLists(256);
-
-	char i = 1;
-	do {
-		glNewList(firstCharList + i,GL_COMPILE);
-		init_text(i);
-		glEndList();
-	}	while (i++);
-#endif
 }
 
 void font_destroy()

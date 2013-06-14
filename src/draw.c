@@ -148,20 +148,20 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
 	glPushMatrix();
-		glTranslatef(x0, y0, 0.0f);
-		glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
-		GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
-		glScalef(1,w,1);
-		w /= 2;
-		GLfloat line[8] = { -w, -0.5,
-							-w,  0.5,
-							length + w, -0.5,
-							length + w,  0.5};
+	glTranslatef(x0, y0, 0.0f);
+	glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
+	GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
+	glScalef(1,w,1);
+	w /= 2;
+	GLfloat line[8] = { -w, -0.5,
+			-w,  0.5,
+			length + w, -0.5,
+			length + w,  0.5};
 
-		glVertexPointer(2, GL_FLOAT, 0, line);
-		glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+	glVertexPointer(2, GL_FLOAT, 0, line);
+	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
 
-		glPopMatrix();
+	glPopMatrix();
 }
 
 void draw_line_strip(const GLfloat *strip, int l, float w)
