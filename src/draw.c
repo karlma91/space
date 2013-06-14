@@ -373,17 +373,17 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
 	texture_bind(tex_id);
-	draw_current_texture_full(pos, tex_map, width, height, angle, triangle_quad);
+	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
 }
 void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
-	draw_current_texture_full(pos, tex_map, width, height, angle, triangle_quad);
+	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
 }
 
 void draw_current_texture_tilemap(const texture_map *tex_map, float width, float height)
 {
 	cpVect p = cpv(0,0);
-	draw_current_texture_full(&p, tex_map, width, height, 0, corner_quad);
+	draw_current_texture_all(&p, tex_map, width, height, 0, corner_quad);
 }
 
 void draw_current_texture_all(cpVect *pos, const texture_map *tex_map, float width, float height, float angle, GLfloat *mesh)
