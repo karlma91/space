@@ -53,7 +53,7 @@ object_data *objects_super_malloc(enum OBJECT_ID id, size_t size)
 
 	if (obj == NULL) {
 #ifdef DEBUG_MEMORY
-		fprintf(stderr, "Info: Allocating new object id %d of size %u\n", id, size);
+		SDL_Log( "Info: Allocating new object id %d of size %u\n", id, size);
 #endif
 		obj = malloc(size);
 	} else {
@@ -73,7 +73,7 @@ void objects_super_free(object_data *obj)
 	LList list = lists_pool[id];
 	llist_add(list, (void *)obj);
 #ifdef DEBUG_MEMORY
-	fprintf(stderr, "Info: object id %d has now %d unused allocations\n", id, llist_size(list));
+	SDL_Log( "Info: object id %d has now %d unused allocations\n", id, llist_size(list));
 #endif
 }
 
@@ -106,7 +106,7 @@ void objects_iterate_type(void (*f)(object_data *), int obj_id) {
 	if (obj_id >= 0 && obj_id < ID_COUNT) {
 		llist_iterate_func(lists[obj_id], (void (*)(void *))f);
 	} else {
-		fprintf(stderr,"list_iterate_type: Invalid obj_id %d\n", obj_id);
+		SDL_Log("list_iterate_type: Invalid obj_id %d\n", obj_id);
 		return;
 	}
 }

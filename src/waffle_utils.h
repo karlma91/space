@@ -24,7 +24,14 @@ extern char APK_PATH[200];
 extern int waffle_init();
 extern int waffle_destroy();
 
+/*
+ * waffle_open
+ *
+ * opens a file relative to the zip-archive opened in waffle_init
+ * use zzip_read(ZZIP_FILE * fp, void * buf, zzip_size_t len) to read
+ * the returned ZZIP_FILE to buf
+ *
+ */
 extern ZZIP_FILE *waffle_open(char *path);
-
 
 #endif //WAFFLE_UTILS_H_

@@ -113,7 +113,7 @@ float turn_toangle(float from_angle, float to_angle, float step_size)
 		from_angle = to_angle;
 	}
 
-	//fprintf(stderr,"angle: %0.4f\n",from_angle*180/M_PI);
+	//SDL_Log("angle: %0.4f\n",from_angle*180/M_PI);
 	return from_angle;
 }
 void se_shape_from_space(cpBody *body, cpShape *shape, void *data)

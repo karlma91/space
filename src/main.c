@@ -117,7 +117,7 @@ static int init_config()
 		SDL_Log("Could not load 'bin/config.ini'\n");
 		return 1;
 	}
-	//fprintf(stderr,"Config loaded from 'bin/config.ini': fullscreen=%d\n", config.fullscreen);
+	//SDL_Log("Config loaded from 'bin/config.ini': fullscreen=%d\n", config.fullscreen);
 #else
 
 #endif

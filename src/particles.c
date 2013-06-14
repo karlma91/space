@@ -9,12 +9,7 @@
 
 #include "waffle_utils.h"
 
-#if TARGET_OS_IPHONE
-#define PARTICLES_FOLDER ""
-#else
-#define PARTICLES_FOLDER "particles/"
-#endif
-
+#define PARTICLE_READ_BUFFER_SIZE 4096
 #define MAX_PARTICLES 10000
 
 /**
@@ -582,23 +577,27 @@ static int read_emitter_from_file (int type,char *filename)
 	emi->waiting_to_die = 0;
 	emi->draw_particle = default_particle_draw;
 
-	FILE *fp  = NULL;
-
 	mxml_node_t * tree = NULL;
 	mxml_node_t * node  = NULL;
 
 	char particle_path[200];
-	sprintf(particle_path, "%s%s", PARTICLES_FOLDER, filename);
+	sprintf(particle_path, "particles/%s", filename);
 
-	fp = fopen (particle_path, "r");
+	ZZIP_FILE *fp = waffle_open(particle_path);
+
 	if (fp ){
-		tree = mxmlLoadFile (NULL , fp , MXML_OPAQUE_CALLBACK);
+		char buffer[PARTICLE_READ_BUFFER_SIZE];
+		int filesize = zzip_file_read(fp, buffer, PARTICLE_READ_BUFFER_SIZE);
+		zzip_file_close(fp);
+		buffer[filesize] = '\0';
+
+		tree = mxmlLoadString(NULL, buffer, MXML_OPAQUE_CALLBACK);
 	}else {
-		fprintf(stderr,"Could Not Open the File Provided");
+		SDL_Log("Could Not Open the File Provided");
 		return 1;
 	}
 	if(tree == NULL){
-		fprintf(stderr,"particles.c file is empty \n");
+		SDL_Log("particles.c: file is empty \n");
 		return 1;
 
 	}
@@ -612,7 +611,7 @@ static int read_emitter_from_file (int type,char *filename)
 			}else if(TESTNAME("emitter")){
 				char *(spint[1]);
 				parse_string(node,"imageName",spint);
-				//fprintf(stderr, "HELLO TEXTURE: %s\n", *spint);
+				//SDL_Log( "HELLO TEXTURE: %s\n", *spint);
 				if(*spint != NULL){
 					emi->texture_id = texture_load(*spint);
 				}
@@ -667,7 +666,7 @@ static int read_emitter_from_file (int type,char *filename)
 			}
 
 		}else {
-			// fprintf(stderr,"Type Default Node is %s \n", node->value.element.name);
+			// SDL_Log("Type Default Node is %s \n", node->value.element.name);
 		}
 	}
 

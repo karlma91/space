@@ -109,7 +109,7 @@ static void __inline__ free_node(node *node) {
 
 /* global function definitions */
 
-int llist_create()
+LList llist_create()
 {
 	struct llist *list;
 

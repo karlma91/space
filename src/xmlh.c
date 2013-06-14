@@ -21,7 +21,7 @@ int parse_float(mxml_node_t *node, char *name, float *v)
 	if(ok == 1){
 		return 0;
 	}else{
-		fprintf(stderr,"Error parsing atribute: %s in node %s \n", name, node->value.element.name);
+		SDL_Log("Error parsing atribute: %s in node %s \n", name, node->value.element.name);
 		return -1;
 	}
 }
@@ -42,7 +42,7 @@ int parse_int(mxml_node_t *node, char *name, int *v)
 	if(ok == 1){
 		return 0;
 	}else{
-		fprintf(stderr,"Error parsing atribute: %s in node %s \n", name, node->value.element.name);
+		SDL_Log("Error parsing atribute: %s in node %s \n", name, node->value.element.name);
 		return -1;
 	}
 }
@@ -68,7 +68,7 @@ int parse_bool(mxml_node_t *node, char *name, int *v)
     if(ok == 1){
     	return 0;
     }else{
-    	fprintf(stderr,"Error parsing boolean in node %s \n", node->value.element.name);
+    	SDL_Log("Error parsing boolean in node %s \n", node->value.element.name);
     	return -1;
     }
 }

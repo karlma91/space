@@ -134,7 +134,7 @@ static void level_running()
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
-	if (!config.arcade && keys[SDL_SCANCODE_F1]) fprintf(stderr,"FACTORY: %d TANK: %d TURRET: %d\n",objects_count(ID_FACTORY), objects_count(ID_TANK) ,objects_count(ID_TURRET));
+	if (!config.arcade && keys[SDL_SCANCODE_F1]) SDL_Log("FACTORY: %d TANK: %d TURRET: %d\n",objects_count(ID_FACTORY), objects_count(ID_TANK) ,objects_count(ID_TURRET));
 	if ((objects_count(ID_FACTORY) + objects_count(ID_TANK) + objects_count(ID_TURRET)) == 0) {
 		change_state(LEVEL_CLEARED);
 	}
@@ -217,7 +217,7 @@ static void change_state(int state)
 	statesystem_set_inner_state(STATESYSTEM_SPACE,state);
 	gamestate = state;
 	if (!config.arcade)
-		fprintf(stderr,"DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
+		SDL_Log("DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
 }
 
 /**
@@ -318,7 +318,7 @@ static void update_objects(object_data *obj)
 		if(obj->body->p.y > currentlvl->height  || obj->body->p.y < 0){
 			obj->alive = 0;
 			if (!config.arcade)
-				fprintf(stderr,"object killed outside of level!\n");
+				SDL_Log("object killed outside of level!\n");
 		}
 
 		if (obj->body->p.x < currentlvl->left ){
@@ -772,7 +772,7 @@ void space_init_level(int space_station, int deck)
 	currentlvl = level_load(space_station,deck);
 
 	if (currentlvl == NULL) {
-		fprintf(stderr, "space_level_init failed!\n");
+		SDL_Log( "space_level_init failed!\n");
 		exit(-1);
 	}
 
@@ -815,7 +815,7 @@ void space_init_level(int space_station, int deck)
 	/*
 	 * puts all shapes in correct position
 	 */
-	//if (!config.arcade) fprintf(stderr, "space.c:%d, no. tanks: %d\nno. factories: %d\nno. player: %d\nno. turrets: %d\n",__LINE__, objects_count(ID_TANK),objects_count(ID_FACTORY),objects_count(ID_PLAYER),objects_count(ID_TURRET));
+	//if (!config.arcade) SDL_Log( "space.c:%d, no. tanks: %d\nno. factories: %d\nno. player: %d\nno. turrets: %d\n",__LINE__, objects_count(ID_TANK),objects_count(ID_FACTORY),objects_count(ID_PLAYER),objects_count(ID_TURRET));
 	update_all();
 
 	particles_clear();

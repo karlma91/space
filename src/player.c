@@ -138,7 +138,7 @@ static void player_update(object_group_player *player)
 		if (keys[SDL_SCANCODE_F1]) {
 			time_t t;
 			time(&t);
-			fprintf(stderr,"TIMESTAMP: %d\n",t);
+			SDL_Log("TIMESTAMP: %d\n",t);
 		}
 	}
 

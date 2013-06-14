@@ -29,7 +29,7 @@ static void destroy();
 static void inner_ingame();
 static void inner_main();
 
-#define AUTO_ENTER 0
+#define AUTO_ENTER 1
 
 #define MAX_MENU_ITEMS 5
 

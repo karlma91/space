@@ -16,12 +16,7 @@
 #include "waffle_utils.h"
 #include "SDL_log.h"
 
-#if TARGET_OS_IPHONE
-#define TILEMAP_FOLDER ""
-#else
-#define TILEMAP_FOLDER "tilemaps/"
-#endif
-
+#define TILEMAP_READ_BUFFER_SIZE 128000
 
 static int parse_data(tilemap *map, char *data);
 static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height);
@@ -114,20 +109,24 @@ static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat 
  */
 int tilemap_create (tilemap *map, char *filename)
 {
-
-	FILE *fp  = NULL;
-
 	mxml_node_t * tree = NULL;
 	mxml_node_t * node  = NULL;
 
 	char tilemap_name[200];
-	sprintf(tilemap_name,"%s%s", TILEMAP_FOLDER, filename);
+	sprintf(tilemap_name,"tilemaps/%s", filename);
 
-	fp = fopen(tilemap_name, "r");
+	ZZIP_FILE *fp = waffle_open(tilemap_name);
+
 	if (fp ){
-		tree = mxmlLoadFile (NULL , fp , MXML_OPAQUE_CALLBACK);
+		char buffer[TILEMAP_READ_BUFFER_SIZE];
+		int filesize = zzip_file_read(fp, buffer, TILEMAP_READ_BUFFER_SIZE);
+		SDL_Log("filesize: %d", filesize);
+		zzip_file_close(fp);
+		buffer[filesize] = '\0';
+
+		tree = mxmlLoadString (NULL , buffer , MXML_OPAQUE_CALLBACK);
 	}else {
-		SDL_Log("tilemap.c file: %s could not be loaded\n",tilemap_name);
+		SDL_Log("tilemap.c: file: %s could not be loaded\n",tilemap_name);
 		return 1;
 	}
 	if(tree == NULL){
@@ -183,6 +182,6 @@ static int parse_data(tilemap *map, char *data)
 			data++;
 		}
 	}
-	//fprintf(stderr,"HELLO %d TEXTUREMAP.c \n",__LINE__);
+	//SDL_Log("HELLO %d TEXTUREMAP.c \n",__LINE__);
 	return 0;
 }

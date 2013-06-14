@@ -35,7 +35,7 @@ int texture_load(char *file)
 
 	int have_texture = texture_from_name(file);
 	if(have_texture >=0){
-		//fprintf(stderr,"have texture: %s\n", file);
+		//SDL_Log("have texture: %s\n", file);
 		return have_texture;
 	}
 
@@ -95,12 +95,12 @@ int texture_load(char *file)
 
 		SDL_FreeSurface(img);
 
-		//fprintf(stderr,"Texture loaded: %s\n", file);
+		//SDL_Log("Texture loaded: %s\n", file);
 
 		return tex_counter;
 
 	} else {
-		fprintf(stderr,"Unable to load texture: %s\n IMG_ERROR: %s\n", filepath, IMG_GetError());
+		SDL_Log("Unable to load texture: %s\n IMG_ERROR: %s\n", filepath, IMG_GetError());
 		return -1;
 	}
 }
@@ -120,9 +120,6 @@ static int texture_from_name(char *file)
 /* NEED TO BE CALLED BEFORE ANY texture_load() CALLS! */
 extern int texture_init()
 {
-#if GLES1
-
-#else
 	TEX_CLOUD = texture_load("cloud.png");
 	TEX_CLOUD_ULQ = texture_load("cloud_ultralow.png");
 	TEX_CLOUD_LQ = texture_load("cloud_low.png");
@@ -136,7 +133,6 @@ extern int texture_init()
 	TEX_BUTTON_DOWN = texture_load("button_down.png");
 
 	return 0;
-#endif
 }
 
 extern int texture_destroy()
