@@ -3,12 +3,12 @@
 #include "stack.h"
 #include "waffle_utils.h"
 
-static GLfloat triangle_quad[8] = {-0.5, -0.5,
+GLfloat triangle_quad[8] = {-0.5, -0.5,
 						 0.5,  -0.5,
 						  -0.5, 0.5,
 						  0.5,  0.5};
 
-static GLfloat corner_quad[8] = {0, 0,
+GLfloat corner_quad[8] = {0, 0,
 							 1,  0,
 							  0, 1,
 							  1,  1};
@@ -369,35 +369,35 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 	draw_pop_blend();
 }
 
-void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
+__inline__ void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
 	texture_bind(tex_id);
 	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
 }
-void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
+__inline__ void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
 	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
 }
 
-void draw_current_texture_tilemap(const texture_map *tex_map, float width, float height)
+__inline__ void draw_current_texture_basic(const texture_map *tex_map, GLfloat *mesh)
 {
-	cpVect p = cpv(0,0);
-	draw_current_texture_all(&p, tex_map, width, height, 0, corner_quad);
+	glVertexPointer(2, GL_FLOAT, 0, mesh);
+	glTexCoordPointer( 2, GL_FLOAT, 0, tex_map );
+
+	glEnable(GL_TEXTURE_2D);
+	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+	glDisable(GL_TEXTURE_2D);
 }
 
-void draw_current_texture_all(cpVect *pos, const texture_map *tex_map, float width, float height, float angle, GLfloat *mesh)
+__inline__ void draw_current_texture_all(cpVect *pos, const texture_map *tex_map, float width, float height, float angle, GLfloat *mesh)
 {
-	glEnable(GL_TEXTURE_2D);
 	glPushMatrix();
 	glTranslatef(pos->x, pos->y, 0.0f);
 	glRotatef(angle,0,0,1);
 	glScalef(width,height,1);
 
-	glVertexPointer(2, GL_FLOAT, 0, mesh);
-	glTexCoordPointer( 2, GL_FLOAT, 0, tex_map );
-	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+	draw_current_texture_basic(tex_map, mesh);
 
 	glPopMatrix();
-	glDisable(GL_TEXTURE_2D);
 }
 

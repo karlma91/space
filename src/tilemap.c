@@ -23,9 +23,6 @@ static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat 
 
 void tilemap_render(tilemap *map)
 {
-    glPushMatrix();
-    glEnable(GL_TEXTURE_2D);
-
     draw_color4f(1,1,1,1);
     texture_bind(map->texture_id);
 
@@ -66,21 +63,52 @@ void tilemap_render(tilemap *map)
 
     		if(map->data[k + i*map->width] > 0){
     			int lvl_x = j*map->tile_width - (map->width*map->tile_width)/2;
+
+#define EXPERIMENTAL_GRAPHICS 1
+#if EXPERIMENTAL_GRAPHICS
+    			/* tmp test displacement modifiers */
+    			float p = 1.0f * (j-j_start) / (j_end - j_start);
+
+    			float theta_max = M_PI/8;
+    			float theta = - theta_max * (cam_center_x - lvl_x) / ((cam_right - cam_left)/2);
+
+    			static float r_1 = 2100; // inner space station radius
+
+    			float o_x = cam_center_x;
+    			float o_y = currentlvl->height + r_1;
+
+    			float ry = i * map->tile_height;
+
+    			float new_x = o_x + (r_1 + ry) * sin(theta);
+    			float new_y = o_y - (r_1 + ry + 64) * cos(theta);
+
+    			float next_theta = - theta_max * (cam_center_x - (lvl_x - map->tile_width)) / ((cam_right - cam_left)/2);
+    			float next_x = o_x + (r_1 + ry) * sin(next_theta);
+
+    			float computed_size = new_x - next_x + 0.01f;
+
+    			{
+    				GLfloat tx = (x*w), ty = (y*h);
+    				cpVect p = cpv(new_x,new_y);
+    				texture_map sub_map = {{tx,ty+h, tx+w,ty+h, tx,ty, tx+w,ty}};
+
+    				draw_current_texture_all(&p, &sub_map,computed_size,map->tile_height,theta*180/M_PI,corner_quad);
+    			}
+
+#else
     			draw_subimage(lvl_x, lvl_y, (x*w), (y*h), w, h, map->tile_width, map->tile_height);
+#endif
     		}
     	}
     }
-    glDisable(GL_TEXTURE_2D);
-    glPopMatrix();
 }
 
 static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height)
 {
-	texture_map sub_map = {tx,ty+h, tx+w,ty+h, tx,ty, tx+w,ty};
-	glPushMatrix();
-	glTranslatef(x,y,0);
-	draw_current_texture_tilemap(&sub_map,tile_width,tile_height);
-	glPopMatrix();
+	cpVect p = cpv(x,y);
+	texture_map sub_map = {{tx,ty+h, tx+w,ty+h, tx,ty, tx+w,ty}};
+
+	draw_current_texture_all(&p, &sub_map,tile_width,tile_height,0,corner_quad);
 }
 
 

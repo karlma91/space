@@ -49,6 +49,9 @@ static inline Color LAColor(float l, float a)
 	return color;
 }
 
+GLfloat triangle_quad[8];
+GLfloat corner_quad[8];
+
 void draw_push_color();
 void draw_pop_color();
 void draw_push_blend();
@@ -76,7 +79,6 @@ void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2);
 extern void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle);
 void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle);
-void draw_current_texture_tilemap(const texture_map *tex_map, float width, float height);
 void draw_current_texture_all(cpVect *pos, const texture_map *tex_map, float width, float height, float angle, GLfloat *mesh);
 
 
