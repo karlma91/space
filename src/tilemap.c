@@ -12,6 +12,7 @@
 #include "constants.h"
 #include "draw.h"
 #include "space.h"
+#include "main.h"
 
 #include "waffle_utils.h"
 #include "SDL_log.h"
@@ -36,6 +37,17 @@ void tilemap_render(tilemap *map)
     int j_start, j_end;
     j_start = (cam_left - map->tile_width) / map->tile_width + map->width / 2; //OLD: 0
     j_end = (cam_right + map->tile_width) / map->tile_width + map->width / 2; //OLD: map->width
+
+    //DEBUG
+    static int DEBUG_TILEMAP = 0;
+    if (keys[SDL_SCANCODE_Y]) {
+    	keys[SDL_SCANCODE_Y] = 0;
+    	DEBUG_TILEMAP ^=1;
+    }
+    if (DEBUG_TILEMAP) {
+    	j_start = 0;
+    	j_end = map->width;
+    }
 
     //TODO: fix special case, when supposed to render two sides, add another loop
     //if (j_start < 0) j_start = 0; //special case
@@ -69,10 +81,21 @@ void tilemap_render(tilemap *map)
     			/* tmp test displacement modifiers */
     			float p = 1.0f * (j-j_start) / (j_end - j_start);
 
-    			float theta_max = M_PI/8;
+    			static float r_1 = 2100; // inner space station radius
+
+    			//TMP CONTROL TEST
+    			if (keys[SDL_SCANCODE_R]) {
+    				r_1 += 1;
+    			} else if (keys[SDL_SCANCODE_T]) {
+    				r_1 -= 1;
+    			}
+
+    			float r_1_tmp = r_1;
+    			r_1 += MOUSE_X*4 - MOUSE_Y*16;
+
+    			float theta_max = atan((WIDTH/2) / r_1);//M_PI/8;
     			float theta = - theta_max * (cam_center_x - lvl_x) / ((cam_right - cam_left)/2);
 
-    			static float r_1 = 2100; // inner space station radius
 
     			float o_x = cam_center_x;
     			float o_y = currentlvl->height + r_1;
@@ -94,6 +117,8 @@ void tilemap_render(tilemap *map)
 
     				draw_current_texture_all(&p, &sub_map,computed_size,map->tile_height,theta*180/M_PI,corner_quad);
     			}
+
+    			r_1 = r_1_tmp;
 
 #else
     			draw_subimage(lvl_x, lvl_y, (x*w), (y*h), w, h, map->tile_width, map->tile_height);

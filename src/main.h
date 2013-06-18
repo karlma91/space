@@ -13,10 +13,6 @@
 #include <android/log.h>
 #endif
 
-#if TARGET_OS_IPHONE || __ANDROID__
-#define GLES1 1
-#endif
-
 #define SLEEP_TIME 1
 
 /* config struct */
@@ -61,6 +57,8 @@ extern state *currentState;
 extern int main_stop();
 
 extern SDL_Window *window; //TODO TMP
+
+extern Sint32 MOUSE_X_PRESSED, MOUSE_Y_PRESSED, MOUSE_X, MOUSE_Y;
 
 extern unsigned int KEY_UP_1;
 extern unsigned int KEY_UP_2;

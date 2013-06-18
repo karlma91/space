@@ -59,6 +59,14 @@ int draw_init(){
 	return 0;
 }
 
+void glColor_from_color(Color color)
+{
+#if GLES1
+	draw_color4f(color.r, color.g, color.b, color.a);
+#else
+	glColor4fv((GLfloat *)&color);
+#endif
+}
 
 void draw_push_color()
 {
@@ -369,27 +377,18 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 	draw_pop_blend();
 }
 
-__inline__ void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
+void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
 	texture_bind(tex_id);
 	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
 }
-__inline__ void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
+
+void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
 	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
 }
 
-__inline__ void draw_current_texture_basic(const texture_map *tex_map, GLfloat *mesh)
-{
-	glVertexPointer(2, GL_FLOAT, 0, mesh);
-	glTexCoordPointer( 2, GL_FLOAT, 0, tex_map );
-
-	glEnable(GL_TEXTURE_2D);
-	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
-	glDisable(GL_TEXTURE_2D);
-}
-
-__inline__ void draw_current_texture_all(cpVect *pos, const texture_map *tex_map, float width, float height, float angle, GLfloat *mesh)
+void draw_current_texture_all(cpVect *pos, const texture_map *tex_map, float width, float height, float angle, GLfloat *mesh)
 {
 	glPushMatrix();
 	glTranslatef(pos->x, pos->y, 0.0f);
@@ -401,3 +400,12 @@ __inline__ void draw_current_texture_all(cpVect *pos, const texture_map *tex_map
 	glPopMatrix();
 }
 
+void draw_current_texture_basic(const texture_map *tex_map, GLfloat *mesh)
+{
+	glVertexPointer(2, GL_FLOAT, 0, mesh);
+	glTexCoordPointer( 2, GL_FLOAT, 0, tex_map );
+
+	glEnable(GL_TEXTURE_2D);
+	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+	glDisable(GL_TEXTURE_2D);
+}

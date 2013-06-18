@@ -32,6 +32,6 @@ LOCAL_SRC_FILES := lib/SDL2/android/SDL_android_main.cpp \
 	lib/LList/llist.c
 
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES
-LOCAL_LDLIBS := -ldl -lGLESv1_CM -lGLESv2 -llog -landroid -lc -lz
+LOCAL_LDLIBS := -ldl -lGLESv1_CM -landroid -llog -lc -lz
 
 include $(BUILD_SHARED_LIBRARY)

@@ -10,8 +10,6 @@
 #include "player.h"
 #include "bullet.h"
 
-//#include "zlib.h"
-
 #include "waffle_utils.h"
 
 static int station_count;
@@ -24,8 +22,6 @@ static char (*(names[ID_COUNT]))[21];
 static void *(params[ID_COUNT]);
 
 static int i;
-
-static SDL_RWops *rw;
 
 #include "zzip/lib.h"
 static ZZIP_FILE *file;
@@ -91,7 +87,7 @@ int level_init()
 	/* read space station data */
 	if (!(file = waffle_open("space"))) {
 		SDL_Log("Could not load level data!\n");
-		return 1;
+		exit(1);
 	}
 
 	/* read file contents into buffer */
@@ -117,7 +113,7 @@ int level_init()
 		if (ret == EOF) {
 			i = station_count;
 			SDL_Log("Error while loading level data, reached EOF!\n");
-			return 2;
+			exit(2);
 		}
 
 		SDL_Log("Data read: %d %d %d %d %f\n", x, y, count, radius, spd);
@@ -130,13 +126,13 @@ int level_init()
 
 	if (i != station_count || i <= 0) {
 		SDL_Log("Error while loading level data, could not load all stations! (%d of %d loaded)\n", i, station_count);
-		return 2;
+		exit(2);
 	}
 
 	/* read object sub groups / object sub types */
 	if (!(file = waffle_open("objects"))) {
 		SDL_Log("Could not load object data!\n");
-		return 3;
+		exit(3);
 	}
 
 	/* read file contents into buffer */
@@ -159,14 +155,14 @@ int level_init()
 		int group_id = get_group_index(group);
 		if (group_id == -1) {
 			SDL_Log("Unrecognized object group: '%s'\n", group);
-			return 4;
+			exit(4);
 		}
 
 		/* check if subtype allready exists */
 		int sub_id = get_sub_index(group_id, subtype);
 		if (sub_id != -1) {
 			SDL_Log("Duplicate sub object definitions: %s %s\n", group, subtype);
-			return 5;
+			exit(5);
 		}
 
 		/* reallocates arrays so they have room for one more object */
@@ -226,7 +222,7 @@ int level_init()
 			}
 			if (sub_id == -1) {
 				SDL_Log("ERROR while reading tank factory data, TANK %s not defined before\n", buf);
-				return 7;
+				exit(7);
 			}
 			factory.r_param = NULL;
 			factory.t_param = NULL;
@@ -248,7 +244,7 @@ int level_init()
 		/* check if all expected parameters were defined */
 		if (ret != expected) {
 			SDL_Log("Wrong number of parameters for %s %s got: %d expected %d\n", group, subtype, ret, expected);
-			return 6;
+			exit(6);
 		}
 
 		/* reallocate current array */
@@ -377,7 +373,7 @@ level *level_load(int space_station, int deck)
 			break;
 		}
 	}
-	
+
 	SDL_Log("DEBUG: Finished adding objects to level");
 
 	return lvl;

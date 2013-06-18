@@ -141,6 +141,8 @@ static void update()
 
 static void draw()
 {
+	glLoadIdentity();
+
 	static float timer;
 	timer +=dt;
 

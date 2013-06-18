@@ -10,6 +10,7 @@
 
 /* SDL and OpenGL */
 #include "SDL.h"
+#include "SDL_main.h"
 
 /* Chipmunk physics library */
 #include "chipmunk.h"
@@ -34,7 +35,19 @@
 #include "gameover.h"
 #include "levelselect.h"
 
+
+#if (GLES1)
+#define glOrtho glOrthof
+
 #define FPS_SLEEP_TIME 33
+#else
+#define FPS_SLEEP_TIME 16
+#endif
+
+
+Sint32 MOUSE_X_PRESSED = 0, MOUSE_Y_PRESSED = 0, MOUSE_X, MOUSE_Y;
+
+
 static float fps;
 static float frames;
 
@@ -66,7 +79,7 @@ state *currentState;
 SDL_GLContext glcontext;
 
 SDL_Window *window;
-SDL_Renderer *displayRenderer;
+SDL_Rect fullscreen_dimensions;
 
 static int main_running = 1;
 
@@ -78,7 +91,7 @@ configuration config = {
 	    .height = 1200
 };
 
-#if !(TARGET_OS_IPHONE)
+#if !(TARGET_OS_IPHONE || __ANDROID__)
 static int handler(void* config, const char* section, const char* name,
 		const char* value) {
 	configuration* pconfig = (configuration*) config;
@@ -117,7 +130,6 @@ static int init_config()
 		SDL_Log("Could not load 'bin/config.ini'\n");
 		return 1;
 	}
-	//SDL_Log("Config loaded from 'bin/config.ini': fullscreen=%d\n", config.fullscreen);
 #else
 
 #endif
@@ -140,6 +152,75 @@ static int init_config()
 	return 0;
 }
 
+static void setAspectRatio() {
+	SDL_ShowCursor(!config.fullscreen);
+
+	if (config.fullscreen) {
+		W = fullscreen_dimensions.w;
+		H = fullscreen_dimensions.h;
+	} else {
+		W = config.width;
+		H = config.height;
+	}
+
+	WIDTH = 1920;
+	HEIGHT = (1.0f * H / W) * WIDTH;
+}
+
+static void display_init()
+{
+	SDL_Log("DEBUG - SDL_init\n");
+	if (SDL_Init(SDL_INIT_VIDEO)) {
+		SDL_Log("ERROR: SDL_INIT_VIDEO: %s", SDL_GetError());
+		exit(-1);
+	}
+	SDL_Log("DEBUG - SDL_init done!\n");
+
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 5);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+
+    SDL_SetHint("SDL_HINT_ORIENTATIONS", "LandscapeLeft LandscapeRight");
+
+	Uint32 flags = SDL_WINDOW_OPENGL |
+			       SDL_WINDOW_RESIZABLE |
+			       SDL_WINDOW_BORDERLESS |
+			       (config.fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
+
+	SDL_GetDisplayBounds(0, &fullscreen_dimensions);
+	setAspectRatio();
+
+	int bpp;
+	SDL_DisplayMode mode;
+	Uint32 Rmask, Gmask, Bmask, Amask;
+
+	SDL_GetDesktopDisplayMode(0, &mode);
+	SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask, &Bmask, &Amask);
+
+	SDL_Log("Current mode: %dx%d@%dHz, %d bits-per-pixel (%s)", mode.w, mode.h, mode.refresh_rate, bpp,
+	   SDL_GetPixelFormatName(mode.format));
+
+
+	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, W, H, flags);
+
+	if (!window) {
+		SDL_Log("ERROR - could not create window!\n");
+		SDL_Quit();
+		exit(-1);
+	}
+
+	SDL_ShowWindow(window);
+}
 
 static void initGL() {
 
@@ -149,8 +230,6 @@ static void initGL() {
 	if (!glcontext) {
 		SDL_Log("SDL ERROR: %s", SDL_GetError());
 	}
-
-	SDL_GL_MakeCurrent(window, glcontext);
 
 	SDL_GL_SetSwapInterval(1);
 
@@ -166,18 +245,15 @@ static void initGL() {
 	SDL_Log("GL_VERSION: %s\n", glGetString(GL_VERSION));
 	////SDL_Log("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
 
-    glEnableClientState( GL_VERTEX_ARRAY );	 // Enable Vertex Arrays
-    glEnableClientState( GL_TEXTURE_COORD_ARRAY );	// Enable Texture Coord Arrays
-	glMatrixMode(GL_PROJECTION);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	GLfloat W_2 = WIDTH / 2;
 	GLfloat H_2 = HEIGHT / 2;
 
-#if (GLES1)
-	glOrthof(-W_2, W_2, -H_2, H_2, 1, -1);
-#else
 	glOrtho(-W_2, W_2, -H_2, H_2, 1, -1);
-#endif
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -186,119 +262,31 @@ static void initGL() {
 	glClearColor(0,0,0, 1);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnable(GL_TEXTURE_2D);
+
 	glEnable(GL_MULTISAMPLE);
+	glDisable(GL_DEPTH_TEST);
 
-#if !(GLES1)
-#else
-
-#endif
+	SDL_Log("DEBUG - initGL done!\n");
 }
 
-static void setAspectRatio() {
-	WIDTH = 1920;
-	HEIGHT = (1.0f * H / W) * WIDTH;
-}
+static void main_init() {
+	srand(time(0)); /* init pseudo-random generator */
 
-static int window_init() {
-	Uint32 flags = (SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE)
-			| (SDL_WINDOW_FULLSCREEN * config.fullscreen);
-	SDL_Log("DEBUG - creating window\n");
+	//TODO Make sure faulty inits stops the program from proceeding
+	init_config();      /* load default and user-changed settings */
 
-	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, W, H, flags);
+	display_init();     /* sets attributes and creates windows and renderer*/
+	initGL();           /* setup a gl context */
 
-	if (window == NULL ) {
-		SDL_Log("ERROR - could not create window!\n");
-		SDL_Quit();
-		return 1;
-	}
+	waffle_init();      /* prepare game resources and general methods*/
+	texture_init();     /* preload textures */
+	draw_init();        /* initializes circular shapes and rainbow colors */
+	level_init();       /* load levels */
+	//font_init();      /* (currently not in use) */
+	particles_init();   /* load and prepare all particle systems */
+	statesystem_init(); /* init all states */
 
-	return 0;
-}
-
-SDL_Rect fullscreen_dimensions;
-static int main_init() {
-	waffle_init();
-
-    SDL_SetHint("SDL_HINT_ORIENTATIONS", "LandscapeLeft LandscapeRight");
-
-	SDL_Log("DEBUG - init_config\n");
-	init_config();
-	SDL_Log("DEBUG - init_config done!\n");
-
-	SDL_Log("DEBUG - SDL_init\n");
-	if (SDL_Init(SDL_INIT_VIDEO)) {
-		SDL_GetError();
-		return 1;
-	}
-	SDL_Log("DEBUG - SDL_init done!\n");
-
-	SDL_GetDisplayBounds(0, &fullscreen_dimensions);
-
-	SDL_ShowCursor(SDL_DISABLE);
-
-	if (config.fullscreen) {
-		W = fullscreen_dimensions.w;
-		H = fullscreen_dimensions.h;
-	} else {
-		W = config.width;
-		H = config.height;
-	}
-
-	setAspectRatio();
-
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 2);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-
-	if (window_init())
-		return 1;
-
-	//FIXME SDL2 port break
-	initGL();
-
-SDL_Log("DEBUG - initGL done!\n");
-
-	// random seed
-	srand(time(NULL ));
-
-	/* preload textures */
-	texture_init(); //FIXME SDL2 port break
-
-SDL_Log("DEBUG - texture_init done!\n");
-
-	int error;
-	/* load levels */
-	error = draw_init();
-	if (error) {
-		return error;
-	}
-
-SDL_Log("DEBUG - draw_init done!\n");
-
-	error = level_init();
-	if (error) {
-		return error;
-	}
-
-SDL_Log("DEBUG - level_init done!\n");
-
-	font_init();
-	particles_init();
-
-
-	/* init states */
-	statesystem_init();
 	statesystem_set_state(STATESYSTEM_MENU);
-	return 0;
 }
 
 static int main_run() {
@@ -340,13 +328,12 @@ static int main_run() {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glLoadIdentity();
-
 		statesystem_update();
+		glLoadIdentity();
 		statesystem_draw();
 
 		int gl_error = glGetError();
-		if (gl_error) SDL_Log("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error); //TODO REMOVE
+		if (gl_error) SDL_Log("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error);
 
 		SDL_GL_SwapWindow(window);
 
@@ -358,11 +345,13 @@ static int main_run() {
 		if (keys[SDL_SCANCODE_F] && keys[SDL_SCANCODE_LCTRL]) {
 			config.fullscreen ^= 1; // Toggle fullscreen
 			if (SDL_SetWindowFullscreen(window, config.fullscreen)) {
-				SDL_GetError();
+				SDL_Log(SDL_GetError());
 				config.fullscreen ^= 1; // Re-toggle
 			} else {
-				keys[SDL_SCANCODE_F] = 0;
+				glViewport(0, 0, W, H);
+				setAspectRatio();
 			}
+			keys[SDL_SCANCODE_F] = 0;
 		}
 
 		while (SDL_PollEvent(&event)) {
@@ -371,17 +360,27 @@ static int main_run() {
 				main_stop();
 				break;
 			case SDL_WINDOWEVENT_RESIZED:
-				//if (config.fullscreen) break;
-				//if (config.fullscreen) {
-				//	W = fullscreen_dimensions.w;
-				//	H = fullscreen_dimensions.h;
-				//} else {
-				W = event.window.data1;
-				H = event.window.data2;
-				//}
-				window_init();
-				glViewport(0, 0, W, H);
-				setAspectRatio();
+				if (event.window.windowID == SDL_GetWindowID(window)) {
+					W = event.window.data1;
+					H = event.window.data2;
+
+					int status = SDL_GL_MakeCurrent(window,glcontext);
+					if (status) {
+						SDL_Log("SDL_GL_MakeCurrent(): %s", SDL_GetError());
+					}
+
+					glViewport(0, 0, W, H);
+
+					setAspectRatio();
+				}
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				MOUSE_X_PRESSED = event.button.x;
+				MOUSE_Y_PRESSED = event.button.y;
+				break;
+			case SDL_MOUSEMOTION:
+				MOUSE_X = event.button.x;
+				MOUSE_Y = event.button.y;
 				break;
 			}
 		}
@@ -419,9 +418,17 @@ SDL_Log("DEBUG - SDL_destroy\n");
 
 	waffle_destroy();
 
+	/*TODO idea:
+	 * add stack with callback functions to both destroy- and init methods of modules
+	 * and then loop through stack to call the functions automatically
+	 */
+
 	// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
-	SDL_GL_MakeCurrent(NULL, NULL);
+	//SDL_GL_MakeCurrent(NULL, NULL);
 	SDL_GL_DeleteContext(glcontext);
+
+	SDL_VideoQuit();
+
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 
