@@ -3,17 +3,7 @@
 
 #include "SDL.h"
 
-#if TARGET_OS_IPHONE
-//#include <OpenGLES/ES1/gl.h>
-//#include <OpenGLES/ES1/glext.h>
-
-#elif __ANDROID__
-//#include <GLES/gl.h>
-//#include <GLES/glext.h>
-#else
-#include "SDL_opengl.h"
-
-#endif
+#define LOAD_TEXTURES 1 //FOR DEBUG PURPOSES
 
 #if TARGET_OS_IPHONE || __ANDROID__
 #define GLES1 1
@@ -21,6 +11,8 @@
 
 #if GLES1
 #include "SDL_opengles.h"
+#else
+#include "SDL_opengl.h"
 #endif
 
 #include "chipmunk.h"

@@ -31,6 +31,10 @@ static GLenum GL_ENUM_TYPE = GL_UNSIGNED_BYTE;
 
 int texture_load(char *file)
 {
+#if !LOAD_TEXTURES
+	return 0;
+#endif
+
 	glEnable(GL_TEXTURE_2D);
 
 	int have_texture = texture_from_name(file);
@@ -68,7 +72,9 @@ int texture_load(char *file)
 		strcpy(names[tex_counter],file);
 		textures = realloc(textures,sizeof(int[(tex_counter + 1)]));
 
+//#if __ANDROID__
 		SDL_ConvertSurfaceFormat(img,SDL_PIXELFORMAT_RGBA8888,0);
+//#endif
 
 		/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
 		glGenTextures(1, &tex_id);
@@ -140,6 +146,9 @@ int texture_destroy()
 }
 
 int texture_bind(int tex_id) {
+#if !LOAD_TEXTURES
+	return 0;
+#endif
 	static int last_tex_id = -1;
 	if (tex_id != last_tex_id && tex_id >= 0) {
 		last_tex_id = tex_id;

@@ -42,10 +42,13 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 	se_add_explotion_at_contact_point(arb);
 
 	//TODO create a function for damaging other objects
+	//FIXME how to deal with objects already killed?
 	if (se_damage_object(object, *(bullet->components.damage))) {
-		object->alive = 0;
-		particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
-		se_add_score_and_popup(b->body->p, *(object->components.score));
+		if (object->alive) {
+			object->alive = 0;
+			particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
+			se_add_score_and_popup(b->body->p, *(object->components.score));
+		}
 	}
 	//cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
 
@@ -84,10 +87,10 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 			if (f > 20)
 				player->components.hp_bar->value -= f * 0.05;
 		} else {
-			fprintf(stderr, "Expected object type ID %d, but got %d!\n", ID_PLAYER, player->preset->ID);
+			SDL_Log("Expected object type ID %d, but got %d!\n", ID_PLAYER, player->preset->ID);
 		}
 	} else {
-		fprintf(stderr, "Expected object from collision between player and ground, but got NULL\n");
+		SDL_Log("Expected object from collision between player and ground, but got NULL\n");
 	}
 
 }
