@@ -12,6 +12,8 @@
 
 #include "waffle_utils.h"
 
+#define FILE_PERCENT (100.0f* offset / filesize)
+
 static int station_count;
 static level_ship *worlds;
 
@@ -92,6 +94,7 @@ int level_init()
 
 	/* read file contents into buffer */
 	filesize = zzip_read(file, &buffer[0], FILE_BUFFER_SIZE);
+	buffer[filesize] = 0;
 
 	/* free file */
 	zzip_close(file);
@@ -137,9 +140,12 @@ int level_init()
 
 	/* read file contents into buffer */
 	filesize = zzip_read(file, &buffer[0], FILE_BUFFER_SIZE);
+	buffer[filesize] = 0;
 	zzip_close(file);
 	offset = 0;
 	offset_add = 0;
+
+	SDL_Log("DEBUG: read_buffer:\n%s", buffer);
 
 	for (;offset < filesize;) {
 		ret = sscanf(&buffer[offset], "%s %s %n", &group[0], &subtype[0], &offset_add);
@@ -149,7 +155,7 @@ int level_init()
 			break;
 		}
 
-		SDL_Log("DEBUG: Parsing %s %s \n", group, subtype); //DEBUG
+		SDL_Log("DEBUG: %5.1f %% - Parsing %s %s - characters left: %d\n", FILE_PERCENT, group, subtype, filesize - offset); //DEBUG
 
 		/* find object type id */
 		int group_id = get_group_index(group);
@@ -187,28 +193,28 @@ int level_init()
 		case ID_TANK:
 			expected = 3;
 			paramsize = sizeof(object_param_tank);
-			ret = sscanf(&buffer[offset], "%f %d %s\n%n", &tank.max_hp, &tank.score, &fname[0], &offset_add);
+			ret = sscanf(&buffer[offset], "%f %d %s%n\n", &tank.max_hp, &tank.score, &fname[0], &offset_add);
 			offset += offset_add;
 			tank.tex_id = texture_load(fname);
 			break;
 		case ID_TURRET:
 			expected = 6;
 			paramsize = sizeof(object_param_turret);
-			ret = sscanf(&buffer[offset], "%f %d %f %f %d %s\n%n", &turret.max_hp, &turret.score, &turret.rot_speed, &turret.shoot_interval,&turret.burst_number, &fname[0], &offset_add);
+			ret = sscanf(&buffer[offset], "%f %d %f %f %d %s%n\n", &turret.max_hp, &turret.score, &turret.rot_speed, &turret.shoot_interval,&turret.burst_number, &fname[0], &offset_add);
 			offset += offset_add;
 			turret.tex_id = texture_load(fname);
 			break;
 		case ID_ROCKET:
 			expected = 4;
 			paramsize = sizeof(object_param_rocket);
-			ret = sscanf(&buffer[offset], "%f %d %s %f\n%n", &rocket.max_hp, &rocket.score, &fname[0], &rocket.force, &offset_add);
+			ret = sscanf(&buffer[offset], "%f %d %s %f%n\n", &rocket.max_hp, &rocket.score, &fname[0], &rocket.force, &offset_add);
 			offset += offset_add;
 			rocket.tex_id = texture_load(fname);
 			break;
 		case ID_FACTORY:
 			expected = 7;
 			paramsize = sizeof(object_param_factory);
-			ret = sscanf(&buffer[offset], "%d %f %f %d %s %s %s\n%n", &factory.max_tanks, &factory.max_hp, &factory.spawn_delay, &factory.score, object_buf, buf, &fname[0], &offset_add);
+			ret = sscanf(&buffer[offset], "%d %f %f %d %s %s %s%n\n", &factory.max_tanks, &factory.max_hp, &factory.spawn_delay, &factory.score, object_buf, buf, &fname[0], &offset_add);
 			offset += offset_add;
 
 			int sub_id = -1;
@@ -302,7 +308,11 @@ level *level_load(int space_station, int deck)
 
 	/* read file contents into buffer */
 	filesize = zzip_read(file, &buffer[0], FILE_BUFFER_SIZE);
+	buffer[filesize] = 0;
 	zzip_close(file);
+
+	SDL_Log("DEBUG: level data\n%s", buffer);
+
 	offset = 0;
 	offset_add = 0;
 
@@ -335,8 +345,12 @@ level *level_load(int space_station, int deck)
 	int x;
 	/* add objects */
 	while (offset < filesize) {
-		ret = sscanf(&buffer[offset], "%s %s %d\n%n", group, subtype, &x, &offset_add);
+		SDL_Log("DEBUG: Adding objects - %5.1f %% - characters left: %d", FILE_PERCENT, filesize - offset);
+
+		ret = sscanf(&buffer[offset], "%s %s %d%n\n", &group[0], &subtype[0], &x, &offset_add);
+		SDL_Log("DEBUG: Characters read: %d", offset_add);
 		offset += offset_add;
+
 
 		if (ret == EOF) {
 			break;
@@ -344,13 +358,14 @@ level *level_load(int space_station, int deck)
 			SDL_Log("WARNING: missing level input before EOF? No arguments\n");
 			break;
 		} else if (ret != 3) {
-			SDL_Log("Error while parsing level data. Wrong number of arguments: %d\n", ret);
+			SDL_Log("Error while parsing level data. Wrong number of arguments: %d\n"
+					"%s:%s:%d", ret, group, subtype, x);
 			return NULL;
 		}
 
 		int group_id = get_group_index(group);
 		int sub_id = get_sub_index(group_id, subtype);
-		SDL_Log("Adding object: %s %s x=%d\n", group, subtype, x);
+		SDL_Log("Adding object: %s_%s x=%d\n", group, subtype, x);
 
 		switch (group_id) {
 		case ID_PLAYER:

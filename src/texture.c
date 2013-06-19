@@ -54,10 +54,11 @@ int texture_load(char *file)
 	}
 
 	char buffer[MAX_IMAGE_BUFFER];
-	int file_size = zzip_read(zf, buffer, MAX_IMAGE_BUFFER);
+	int filesize = zzip_read(zf, buffer, MAX_IMAGE_BUFFER);
+	buffer[filesize] = 0;
 	zzip_close(zf);
 
-	rw = SDL_RWFromMem(&buffer[0], file_size);
+	rw = SDL_RWFromMem(&buffer[0], filesize);
 
 	SDL_Surface* img = IMG_Load_RW(rw, 0);
 
@@ -92,6 +93,8 @@ int texture_load(char *file)
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 #if __ANDROID__
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_ENUM_TYPE, img->pixels);
+#elif __WIN32__
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_ENUM_TYPE, img->pixels);
 #else
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
