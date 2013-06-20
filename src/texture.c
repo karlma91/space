@@ -73,9 +73,9 @@ int texture_load(char *file)
 		strcpy(names[tex_counter],file);
 		textures = realloc(textures,sizeof(int[(tex_counter + 1)]));
 
-//#if __ANDROID__
+#if !__ANDROID__
 		SDL_ConvertSurfaceFormat(img,SDL_PIXELFORMAT_RGBA8888,0);
-//#endif
+#endif
 
 		/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
 		glGenTextures(1, &tex_id);
@@ -88,7 +88,8 @@ int texture_load(char *file)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		///glTexParameteri(GL_TEXTURE_2D,  GL_GENERATE_MIPMAP, GL_TRUE);
+		///glTexParameteri(GL_TEXTURE_2D,  GL_GENERATE_MIPMAP, GL_TRUE); //not working on android?
+
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
