@@ -176,6 +176,7 @@ static void update() {
 	}
 }
 
+//FIXME bug when holding both down/up and right when entering gameover state!
 Color color;
 static void draw()
 {
