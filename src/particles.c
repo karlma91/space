@@ -550,7 +550,7 @@ static void default_particle_draw(emitter *em, particle *p)
 
 	if(em->rotation){
 #if !EXPERIMENTAL_GRAPHICS
-		glRotatef(p->angle, 0, 0, 1);  //TODO move gl code // unsupported by EXPERIMENTAL_GRAPHICS
+		draw_rotate(p->angle, 0, 0, 1);  //TODO move gl code // unsupported by EXPERIMENTAL_GRAPHICS
 #endif
 		p->angle += p->rot_speed*dt;
 	}

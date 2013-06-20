@@ -35,8 +35,6 @@ int texture_load(char *file)
 	return 0;
 #endif
 
-	glEnable(GL_TEXTURE_2D);
-
 	int have_texture = texture_from_name(file);
 	if(have_texture >=0){
 		//SDL_Log("have texture: %s\n", file);
@@ -73,6 +71,7 @@ int texture_load(char *file)
 		strcpy(names[tex_counter],file);
 		textures = realloc(textures,sizeof(int[(tex_counter + 1)]));
 
+		//FIXME on android
 #if !__ANDROID__
 		SDL_ConvertSurfaceFormat(img,SDL_PIXELFORMAT_RGBA8888,0);
 #endif
@@ -81,32 +80,24 @@ int texture_load(char *file)
 		glGenTextures(1, &tex_id);
 		glBindTexture(GL_TEXTURE_2D, tex_id);
 
-
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-		///glTexParameteri(GL_TEXTURE_2D,  GL_GENERATE_MIPMAP, GL_TRUE); //not working on android?
-
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-#if __ANDROID__
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_ENUM_TYPE, img->pixels);
-#elif __WIN32__
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_ENUM_TYPE, img->pixels);
-#else
+#if __MACOSX__
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
+#else
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_ENUM_TYPE, img->pixels);
 #endif
+		SDL_FreeSurface(img);
 
 		textures[tex_counter] = tex_id;
 
-		SDL_FreeSurface(img);
 
 		SDL_Log("DEBUG: Texture loaded: %s\n", file);
-
 		return tex_counter;
 
 	} else {
@@ -127,7 +118,7 @@ static int texture_from_name(char *file)
 }
 
 #include "SDL_endian.h"
-extern int texture_init()
+int texture_init()
 {
 	TEX_CLOUD = texture_load("cloud.png");
 	TEX_CLOUD_ULQ = texture_load("cloud_ultralow.png");

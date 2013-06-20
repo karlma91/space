@@ -249,14 +249,14 @@ static void initGL() {
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	draw_load_identity();
 	GLfloat W_2 = WIDTH / 2;
 	GLfloat H_2 = HEIGHT / 2;
 
 	glOrtho(-W_2, W_2, -H_2, H_2, 1, -1);
 
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	draw_load_identity();
 
 	glViewport(0, 0, W, H);
 	glClearColor(0,0,0, 1);
@@ -329,7 +329,7 @@ static int main_run() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		statesystem_update();
-		glLoadIdentity();
+		draw_load_identity();
 		statesystem_draw();
 
 		int gl_error = glGetError();

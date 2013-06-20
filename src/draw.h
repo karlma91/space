@@ -44,10 +44,18 @@ void draw_pop_color();
 void draw_push_blend();
 void draw_pop_blend();
 
+void draw_translate(GLfloat x, GLfloat y, GLfloat z);
+void draw_rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
+void draw_scale(GLfloat x, GLfloat y, GLfloat z);
+void draw_push_matrix();
+void draw_pop_matrix();
+void draw_load_identity();
+
+
 Color draw_col_rainbow(int hue);
 Color draw_col_grad(int hue);
 void draw_color4f(float r, float g, float b, float a);
-void glColor_from_color(Color color);
+void draw_color(Color color);
 void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_line_strip(const GLfloat *strip, int l, float w);
 int draw_init();

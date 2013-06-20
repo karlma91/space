@@ -141,7 +141,7 @@ static void update()
 
 static void draw()
 {
-	glLoadIdentity();
+	draw_load_identity();
 
 	static float timer;
 	timer +=dt;
@@ -149,14 +149,14 @@ static void draw()
 	setTextAngle(0);
 	setTextSize(80);
 	setTextAlign(TEXT_CENTER);
-	glColor_from_color(draw_col_rainbow((int)(timer*1000)));
+	draw_color(draw_col_rainbow((int)(timer*1000)));
 	font_drawText(0,0.8f*HEIGHT/2, "SPACE");
 
 	setTextAlign(TEXT_CENTER);
 	setTextSize(40);
 
 	for (i = 0; i < curMenu->num_items; i++) {
-		glColor_from_color((select_id == i) ? col_select : col_item);
+		draw_color((select_id == i) ? col_select : col_item);
 		font_drawText(0,100 - 60 * i, curMenu->texts[i]);
 	}
 }
@@ -207,7 +207,7 @@ static void arcade_draw()
 		break;
 	case MENU_MAIN:
 		drawStars();
-		glColor_from_color(draw_col_rainbow((int)(timer*1000)));
+		draw_color(draw_col_rainbow((int)(timer*1000)));
 		font_drawText(0,0.8f*HEIGHT/2, "SPACE");
 
 		draw_color4f(1,1,1,1);

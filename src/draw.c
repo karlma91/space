@@ -60,7 +60,7 @@ int draw_init(){
 	return 0;
 }
 
-void glColor_from_color(Color color)
+void draw_color(Color color)
 {
 #if GLES1
 	draw_color4f(color.r, color.g, color.b, color.a);
@@ -272,12 +272,12 @@ void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
 #endif
 
 	if(fillColor.a > 0){
-		glColor_from_color(fillColor);
+		draw_color(fillColor);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, count);
 	}
 
 	if(lineColor.a > 0){
-		glColor_from_color(lineColor);
+		draw_color(lineColor);
 		glDrawArrays(GL_LINE_LOOP, 0, count);
 	}
 #endif
@@ -289,7 +289,7 @@ void draw_segment(cpVect a, cpVect b, cpFloat w, Color lineColor)
 
 
 #else
-	glColor_from_color(lineColor);
+	draw_color(lineColor);
 	glBegin(GL_QUADS);
 	glVertex2f(a.x, a.y - w);
 	glVertex2f(a.x, a.y + w);
@@ -424,4 +424,34 @@ void draw_current_texture_basic(const texture_map *tex_map, GLfloat *mesh, GLsiz
 	glEnable(GL_TEXTURE_2D);
 	glDrawArrays(GL_TRIANGLE_STRIP,0, count);
 	glDisable(GL_TEXTURE_2D);
+}
+
+void draw_translate(GLfloat x, GLfloat y, GLfloat z)
+{
+	glTranslatef(x,y,z);
+}
+
+void draw_rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+{
+	glRotatef(angle,x,y,z);
+}
+
+void draw_scale(GLfloat x, GLfloat y, GLfloat z)
+{
+	glScalef(x,y,z);
+}
+
+void draw_push_matrix()
+{
+	glPushMatrix();
+}
+
+void draw_pop_matrix()
+{
+	glPopMatrix();
+}
+
+void draw_load_identity()
+{
+	glLoadIdentity();
 }

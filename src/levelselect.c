@@ -157,9 +157,9 @@ static void render()
 
 #else
 	//if(overview){
-		glPushMatrix();
-		glScalef(camera_zoom,camera_zoom,1);
-		glTranslatef(-camera_x,-camera_y,0);
+		draw_push_matrix();
+		draw_scale(camera_zoom,camera_zoom,1);
+		draw_translate(-camera_x,-camera_y,0);
 		int i;
 		for(i = 0; i < decks; i++){
 			if(i<decks-1){
@@ -167,7 +167,7 @@ static void render()
 			}
 			render_ship(&ships[i], sel == i);
 		}
-		glPopMatrix();
+		draw_pop_matrix();
 //	}else{
 
 	//}
@@ -180,7 +180,7 @@ static void render_ship(struct level_ship *ship, int selected)
 
 
 #else
-		glPushMatrix();
+		draw_push_matrix();
 
 //		float gravity = (4*M_PI*M_PI * ship->radius) * (ship->rotation_speed * ship->rotation_speed);
 		float gravity = 300;
@@ -192,8 +192,8 @@ static void render_ship(struct level_ship *ship, int selected)
 		setTextSize(100);
 		font_drawText(ship->x,ship->y + ship->radius + 200,te);
 
-		glTranslatef(ship->x,ship->y,0);
-		glRotatef(ship->rotation,0,0,1);
+		draw_translate(ship->x,ship->y,0);
+		draw_rotate(ship->rotation,0,0,1);
 
 		draw_color4f(0.1,0.1,0.1,1);
 		draw_circle(0,0,(ship->radius) + 120);
@@ -212,7 +212,7 @@ static void render_ship(struct level_ship *ship, int selected)
 			draw_donut(0,0,(ship->radius - i*100) + 20,(ship->radius - i*100) + 100);
 
 		}
-		glPopMatrix();
+		draw_pop_matrix();
 #endif
 }
 

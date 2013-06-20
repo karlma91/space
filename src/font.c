@@ -19,8 +19,6 @@ float font_text_angle = 0;
 // local variables
 static int i,j;
 
-static GLuint firstCharList;
-
 // 7-segment display style for digits
 static const GLint digits[] = {0x3F,0x21,0x5B,0x73,0x65,0x76,0x7E,0x23,0x7F,0x67};
 static const GLfloat digits_x[] = {0.5f,0.5f,-0.5f,-0.5f,-0.5f, 0.5f,0.5f,-0.5f};
@@ -92,9 +90,9 @@ static void drawSymbol(char c)
 			draw_line_strip(COMMA,4, 0.5f);
 			break;
 		case ':':
-			glTranslatef(0,0.8f,0);
+			draw_translate(0,0.8f,0);
 			draw_line_strip(DOT,10, 0.5f);
-			glTranslatef(0,-0.8f,0);
+			draw_translate(0,-0.8f,0);
 			/* no break */
 		case '.':
 			draw_line_strip(DOT,10, 0.5f);
@@ -108,24 +106,23 @@ static void drawSymbol(char c)
 void font_drawText(GLfloat x, GLfloat y, char* text)
 {
 
-	glDisable(GL_TEXTURE_2D);
 	draw_push_blend();
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-	glPushMatrix();
-	glTranslatef(x, y, 0.0f);
-	glRotatef(font_text_angle, 0, 0, 1);
-	glScalef(font_text_size, font_text_size, 1);
+	draw_push_matrix();
+	draw_translate(x, y, 0.0f);
+	draw_rotate(font_text_angle, 0, 0, 1);
+	draw_scale(font_text_size, font_text_size, 1);
 
 	switch(font_text_align) {
 		case TEXT_LEFT:
-			glTranslatef(0.5f, 0, 0);
-			glPushMatrix();
+			draw_translate(0.5f, 0, 0);
+			draw_push_matrix();
 			break;
 		case TEXT_CENTER:
-			glTranslatef(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING))/2.0f + 0.5f + CHAR_SPACING/2, 0, 0.0f);
+			draw_translate(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING))/2.0f + 0.5f + CHAR_SPACING/2, 0, 0.0f);
 			break;
 		case TEXT_RIGHT:
-			glTranslatef(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING) - 0.5f  - CHAR_SPACING), 0,0);
+			draw_translate(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING) - 0.5f  - CHAR_SPACING), 0,0);
 			break;
 	}
 
@@ -133,24 +130,23 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 	while(text[i] != '\0') {
 		if (text[i] == '\n') {
 			if (font_text_align == TEXT_LEFT) {
-				glPopMatrix();
-				glTranslatef(0, -(CHAR_WIDTH+CHAR_SPACING), 0);
-				glPushMatrix();
+				draw_pop_matrix();
+				draw_translate(0, -(CHAR_WIDTH+CHAR_SPACING), 0);
+				draw_push_matrix();
 				i++;
 				continue;
 			}
 		} else {
 			init_text(text[i]);
-			//glCallList(firstCharList + text[i]);
 		}
 		i++;
-		glTranslatef((CHAR_WIDTH + CHAR_SPACING), 0, 0);
+		draw_translate((CHAR_WIDTH + CHAR_SPACING), 0, 0);
 	}
 
 	if (font_text_align == TEXT_LEFT)
-		glPopMatrix();
+		draw_pop_matrix();
 
-	glPopMatrix();
+	draw_pop_matrix();
 	draw_pop_blend();
 }
 
@@ -172,10 +168,5 @@ void font_init()
 
 void font_destroy()
 {
-#if GLES1
 
-
-#else
-	glDeleteLists(firstCharList, 256);
-#endif
 }

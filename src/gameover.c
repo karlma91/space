@@ -187,7 +187,7 @@ static void draw()
 	setTextSize(80);
 	setTextAlign(TEXT_CENTER);
 	color = draw_col_rainbow((int)(timer*1000));
-	glColor_from_color(color);
+	draw_color(color);
 
 	if (gameover_state != show_highscore) {
 		if (win)
@@ -238,7 +238,7 @@ static void draw()
 			char current_score_buffer[100];
 			setTextSize(35);
 			setTextAlign(TEXT_CENTER);
-			glColor_from_color(color);
+			draw_color(color);
 			sprintf(&current_score_buffer[0], "%s FIKK %d. PLASS MED %d POENG!", &input[0], score_position, score_value);
 			draw_color4f(1,1,1,1);
 			font_drawText(0,-0.4f*HEIGHT, &current_score_buffer[0]);
@@ -289,7 +289,7 @@ static void draw_highscore(int start_index)
 		sprintf(temp,"%9d %-5s %10d      %02d-%02d-%02d", position, score.name, score.score,tmm->tm_mday,tmm->tm_mon+1,tmm->tm_year%100);
 
 		if (score_position == position) {
-			glColor_from_color(color);
+			draw_color(color);
 		} else {
 			draw_color4f(1,1,1,1);
 		}

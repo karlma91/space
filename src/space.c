@@ -172,9 +172,11 @@ static void level_cleared()
 
 	if (time_remaining > 0) {
 		object_group_player *player = (object_group_player *)objects_first(ID_PLAYER);
-		int time_bonus = time_remaining * 75; // tidligere 25!
-		player->score += time_bonus; //Time bonus (75 * sec left)
-		particles_add_score_popup(player->data.body->p, time_bonus);
+		int score_bonus = time_remaining * 75; // tidligere 25!
+		score_bonus += (player->hp_bar.value / player->hp_bar.max_hp) * 100 * 35; // adds score bonus for remaining hp
+
+		player->score += score_bonus; //Time bonus (75 * sec left)
+		particles_add_score_popup(player->data.body->p, score_bonus);
 		game_time = currentlvl->timelimit;
 	}
 
@@ -508,9 +510,9 @@ static void SPACE_draw()
 	}
 
 	/* translate view */
-	glLoadIdentity();
-	glScalef(cam_zoom,cam_zoom,1);
-	glTranslatef(-cam_center_x, -cam_center_y, 0.0f);
+	draw_load_identity();
+	draw_scale(cam_zoom,cam_zoom,1);
+	draw_translate(-cam_center_x, -cam_center_y, 0.0f);
 
 	/* draw tilemap */
 	if(!second_draw){
@@ -527,7 +529,7 @@ static void SPACE_draw()
 	if(!second_draw){
 
 		/* reset transform matrix */
-		glLoadIdentity();
+		draw_load_identity();
 
 		/* draw GUI */
 		setTextAngle(0); // TODO don't use global variables for setting font properties
@@ -595,6 +597,7 @@ static void SPACE_draw()
 		if(!config.arcade)
 			font_drawText(WIDTH/2 - 15, HEIGHT/2 - 20, fps_buf);
 
+		char time_temp[20];
 		switch(gamestate) {
 		case LEVEL_START:
 			setTextSize(60);
@@ -604,7 +607,6 @@ static void SPACE_draw()
 			break;
 		case LEVEL_RUNNING: case LEVEL_TIMESUP:
 			draw_color4f(1,1,1,1);
-			char time_temp[20];
 			int time_remaining, min, sec;
 			time_remaining = (currentlvl->timelimit - game_time + 0.5f);
 			//if (time_remaining < 0) time_remaining = 0;
@@ -625,7 +627,6 @@ static void SPACE_draw()
 			break;
 		case LEVEL_CLEARED:
 			setTextSize(60);
-			draw_color4f(1,1,1,1);
 			setTextAlign(TEXT_CENTER);
 			font_drawText(0, 0, "LEVEL CLEARED!");
 			break;
@@ -705,9 +706,9 @@ void drawStars()
 
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-	glPushMatrix();
+	draw_push_matrix();
 
-	glScalef(0.5f * cam_zoom,0.5f * cam_zoom, 1);
+	draw_scale(0.5f * cam_zoom,0.5f * cam_zoom, 1);
 
 	static float spaceship_angle;
 	spaceship_angle += 0.01f * 360*dt;
@@ -717,7 +718,7 @@ void drawStars()
 	else
 		cam_angle = spaceship_angle;
 
-	glRotatef(-cam_angle,0,0,1);
+	draw_rotate(-cam_angle,0,0,1);
 
 	int i;
 	draw_color4f(1,1,1,1);
@@ -727,7 +728,7 @@ void drawStars()
 		float star_y = (stars_y[i]);
 		draw_box(star_x,star_y,size,size,0,1);
 	}
-	glPopMatrix();
+	draw_pop_matrix();
 }
 
 void space_init_level(int space_station, int deck)
