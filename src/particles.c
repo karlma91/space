@@ -8,6 +8,7 @@
 #include "xmlh.h"
 
 #include "waffle_utils.h"
+#include "spaceengine.h"
 
 #define PARTICLE_READ_BUFFER_SIZE 4096
 #define MAX_PARTICLES 10000
@@ -295,13 +296,26 @@ static void draw_particle_as_score(emitter *em, particle *p)
 	sprintf(temp,"%d",score);
 	setTextAlign(TEXT_CENTER);
 	setTextSize(p->size);
-	font_drawText(p->p.x,p->p.y,temp);
+
+	float angle = 0;
+	cpVect pos = p->p;
+#if EXPERIMENTAL_GRAPHICS
+	angle = se_rect2arch(&pos) * 180 / M_PI;
+#endif
+
+	setTextAngle(angle);
+	font_drawText(pos.x,pos.y,temp);
+	setTextAngle(0);
 }
 
 
 static void draw_particle_as_spark(emitter *em, particle *p)
 {
-	draw_line(p->p.x,p->p.y,p->p.x + p->v.x*p->size,p->p.y+ p->v.y*p->size, p->size);
+	cpVect pos = p->p;
+#if EXPERIMENTAL_GRAPHICS
+	se_rect2arch(&pos);
+#endif
+	draw_line(pos.x,pos.y,pos.x + p->v.x*p->size,pos.y+ p->v.y*p->size, p->size);
 }
 
 /**
@@ -480,7 +494,6 @@ static float range_get_random(range r)
 
 static void draw_all_particles(emitter *em)
 {
-	glEnable(GL_TEXTURE_2D);
 	draw_push_blend();
 	texture_bind(em->texture_id);
 	if(em->additive){
@@ -524,17 +537,24 @@ static void draw_all_particles(emitter *em)
 		p = p->next;
 	}
 	draw_pop_blend();
-	glDisable(GL_TEXTURE_2D);
 
 }
 
 static void default_particle_draw(emitter *em, particle *p)
 {
+	float angle = 0;
+	cpVect pos = p->p;
+#if EXPERIMENTAL_GRAPHICS
+	angle = se_rect2arch(&pos) * 180 / M_PI;
+#endif
+
 	if(em->rotation){
-		glRotatef(p->angle, 0, 0, 1);
+#if !EXPERIMENTAL_GRAPHICS
+		glRotatef(p->angle, 0, 0, 1);  //TODO move gl code // unsupported by EXPERIMENTAL_GRAPHICS
+#endif
 		p->angle += p->rot_speed*dt;
 	}
-	draw_current_texture(&(p->p),TEX_MAP_FULL,p->size,p->size,p->angle);
+	draw_current_texture(&pos,TEX_MAP_FULL,p->size,p->size,p->angle + angle);
 }
 
 

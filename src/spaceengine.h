@@ -1,5 +1,7 @@
 #ifndef SPACEENGINE_H_
 #define SPACEENGINE_H_
+#include "chipmunk.h"
+#include "objects.h"
 
 cpShape *se_add_circle_shape(cpBody *body, cpFloat radius, cpFloat friction,
 		cpFloat elasticity);
@@ -13,4 +15,7 @@ float turn_toangle(float from_angle, float to_angle, float step_size);
 float se_distance_to_player(float x);
 void se_shape_from_space(cpBody *body, cpShape *shape, void *data);
 void se_constrain_from_space(cpBody *body, cpConstraint *constraint, void *data);
+
+extern float se_rect2arch(cpVect *pos);
+
 #endif /* SPACEENGINE_H_ */

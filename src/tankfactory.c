@@ -51,7 +51,7 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	randomness += 123;
 	randomness *= randomness;
 	factory->timer = (factory->param->spawn_delay) * ((randomness % 0xFF + 160) / 400.0f + 0.2f);
-	factory->max_distance = 800;
+	factory->max_distance = 900; //TODO read from object definition?
 	//fac->hp = fac->param->max_hp; //TODO FIXME
 
 	cpFloat size = 100*1.5;
@@ -118,10 +118,12 @@ static void render(object_group_factory *factory) {
 	factory->rot += 381 * dt;
 	float rot = factory->rot;
 
+	cpVect pos = factory->data.body->p;
+
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	if (factory->param->type == ID_ROCKET) {
 		texture_map tmp_texmap = {0,1, 1,1, 0,0, 1,0};
-		draw_texture(factory->param->tex_id, &(factory->data.body->p), &tmp_texmap, 200, 200, 0);
+		draw_texture(factory->param->tex_id, &(pos), &tmp_texmap, 200, 200, 0);
 	} else {
 		//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		if (factory->param->max_hp < 300)
@@ -129,8 +131,8 @@ static void render(object_group_factory *factory) {
 		else
 			draw_color4f(1,0.2,0,1);
 
-		draw_texture(TEX_WHEEL, &(factory->data.body->p), TEX_MAP_FULL, 150*1.5, 150*1.5, rot);
-		draw_texture(factory->param->tex_id, &(factory->data.body->p), TEX_MAP_FULL, 200 * 1.5, 200*1.5, 0);
+		draw_texture(TEX_WHEEL, &(pos), TEX_MAP_FULL, 150*1.5, 150*1.5, rot);
+		draw_texture(factory->param->tex_id, &(pos), TEX_MAP_FULL, 200 * 1.5, 200*1.5, 0);
 	}
 
 	hpbar_draw(&factory->hp_bar);

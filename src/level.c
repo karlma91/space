@@ -330,6 +330,7 @@ level *level_load(int space_station, int deck)
 	lvl->height = lvl->tiles->height*lvl->tiles->tile_height;
 	lvl->left = -(lvl->tiles->width*lvl->tiles->tile_width)/2;
 	lvl->right = (lvl->tiles->width*lvl->tiles->tile_width)/2;
+	lvl->width = (lvl->tiles->width*lvl->tiles->tile_width);
 
 	/* read level specific data */
 	retExp = 3;

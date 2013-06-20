@@ -4,9 +4,9 @@
 #include "spaceengine.h"
 
 static void init(object_data *obj);
-static void update(object_data *obj);
+static void update(struct bullet *);
 static void render(object_data *obj);
-static void destroy(object_data *obj);
+static void destroy(struct bullet *);
 
 static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 
@@ -39,7 +39,7 @@ object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int 
 		temp->data.body = cpSpaceAddBody(space, cpBodyNew(1, moment));
 		cpBodySetPos(temp->data.body, cpvadd(pos, cpvmult(dir,60)));
 		cpBodySetUserData(temp->data.body, (object_data*)temp);
-		cpBodySetVel(temp->data.body,cpvadd(cpvmult(dir,3000),intit_vel));
+		cpBodySetVel(temp->data.body,cpvadd(cpvmult(dir,1500),intit_vel)); //3000
 		temp->data.body->velocity_func = bulletVelocityFunc;
 
 		temp->shape =se_add_circle_shape(temp->data.body,15,1,0);
@@ -60,6 +60,8 @@ object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int 
 			temp->damage = 10;
 		}
 
+		temp->energy = 750; // number of msec energy
+
 		objects_add((object_data*)temp);
 		return (object_data*)temp;
 }
@@ -69,18 +71,26 @@ static void init(object_data *obj)
 
 }
 
-static void update(object_data *obj)
+static void update(struct bullet *bullet)
 {
-	struct bullet *temp = (struct bullet*)obj;
+	if (bullet->energy < 0) {
+		bullet->data.alive = 0;
+	} else {
+		bullet->energy -= mdt;
+	}
 }
 
 static void render(object_data *obj)
 {
+
 	struct bullet *temp = (struct bullet*)obj;
+
+	float alpha = temp->energy < 500 ? temp->energy / 500 : 1 ;
+
 	if(temp->data.preset->ID == ID_BULLET_PLAYER){
-		draw_color4f(0.9,0.3,0.3,1);
+		draw_color4f(0.3,0.3,0.9,alpha);
 	}else{
-		draw_color4f(0.3,0.3,0.9,1);
+		draw_color4f(0.9,0.3,0.3,alpha);
 	}
 
 	{
@@ -88,7 +98,17 @@ static void render(object_data *obj)
 
 		cpCircleShape *circle = (cpCircleShape *)shape;
 		cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
-		draw_line(circle->tc.x, circle->tc.y, circle->tc.x - vel.x/128, circle->tc.y - vel.y/128, 64); //40 = 4 * radius
+
+		cpVect pos_from = circle->tc;
+		cpVect pos_to = circle->tc;
+		pos_to.x -= vel.x/128;
+		pos_to.y -= vel.y/128;
+
+#if EXPERIMENTAL_GRAPHICS
+		se_rect2arch(&pos_from);
+		se_rect2arch(&pos_to);
+#endif
+		draw_line(pos_from.x, pos_from.y, pos_to.x, pos_to.y, 64); //40 = 4 * radius
 	}
 }
 
@@ -98,18 +118,17 @@ static void render(object_data *obj)
  */
 static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
 {
-	cpVect g = cpv(0,-200);
+	cpVect g = cpv(0, 0); //-1000 //200
 
 	cpBodyUpdateVelocity(body, g, damping, dt);
 }
 
-static void destroy(object_data *bullet)
+static void destroy(struct bullet *bullet)
 {
-	struct bullet *temp = (struct bullet*)bullet;
-	cpSpaceRemoveShape(space, temp->shape);
-	cpSpaceRemoveBody(space, temp->data.body);
-	cpShapeFree(temp->shape);
-	cpBodyFree(temp->data.body);
-	objects_super_free((object_data *)temp);
-	temp = NULL;
+	cpSpaceRemoveShape(space, bullet->shape);
+	cpSpaceRemoveBody(space, bullet->data.body);
+	cpShapeFree(bullet->shape);
+	cpBodyFree(bullet->data.body);
+	objects_super_free((object_data *)bullet);
+	bullet = NULL;
 }

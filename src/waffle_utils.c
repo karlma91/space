@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "waffle_utils.h"
+#include "SDL_log.h"
 
+#define RESOURCE_VERSION 1
 
 #if __ANDROID__
 
@@ -31,23 +33,50 @@ JNIEXPORT void JNICALL Java_org_libsdl_app_SDLActivity_set_1apk_1path
 
 static ZZIP_DIR *game_data = NULL;
 
-int waffle_init()
+void waffle_init()
 {
 	zzip_error_t zzip_err;
 #if __ANDROID__
 	game_data = zzip_dir_open(APK_PATH, &zzip_err); // NB! is actually .apk, not game_data
 #else
 	game_data = zzip_dir_open("game_data.zip", &zzip_err);
+	if (!game_data) {
+		SDL_Log("ERROR: game_data.zip could not be found!\n"
+				"Run ./zip_res.sh to compress current game data");
+		exit(-1);
+	}
 #endif
 
-	return 0;
+	ZZIP_FILE *zf = waffle_open("ver");
+	if (zf) {
+		char buffer[4096];
+		int filesize = zzip_file_read(zf, buffer, 4096);
+		buffer[filesize] = 0;
+		zzip_file_close(zf);
+
+		int version = 0;
+		sscanf(buffer, "%d", &version);
+
+		if (version != RESOURCE_VERSION) {
+			SDL_Log("ERROR: you need to update game_data.zip, found version %d, but needs version %d.\n"
+					"Run ./zip_res.sh to compress current game data", version, RESOURCE_VERSION);
+			exit(-1);
+		}
+
+	} else {
+		SDL_Log("ERROR: could not open version file! Make sure your game_data.zip is up to date!\n"
+				"Run ./zip_res.sh to compress current game data");
+		exit(-1);
+	}
+
 }
 
-int waffle_destroy()
+void waffle_destroy()
 {
 	zzip_dir_close(game_data);
-	return 0;
 }
+
+//TODO create general read to buffer method
 
 ZZIP_FILE *waffle_open(char *path)
 {

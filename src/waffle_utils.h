@@ -21,8 +21,8 @@ extern char APK_PATH[200];
 
 #include "zzip/lib.h"
 
-extern int waffle_init();
-extern int waffle_destroy();
+extern void waffle_init();
+extern void waffle_destroy();
 
 /*
  * waffle_open

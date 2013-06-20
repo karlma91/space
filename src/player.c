@@ -81,7 +81,7 @@ object_group_player *object_create_player()
 	/* make and add new body */
 	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
 	cpBodySetPos(player->data.body, cpv(0,990));
-	cpBodySetVelLimit(player->data.body,700);
+	cpBodySetVelLimit(player->data.body,550); //700
 
 	/* make and connect new shape to body */
 	player->shape = se_add_circle_shape(player->data.body,radius,0.8,0.9);
@@ -125,8 +125,11 @@ static void player_render(object_group_player *player)
 	//float s = 0.001;
 	float dir = cpBodyGetAngle(player->data.body);
 
-	draw_texture(player->param->tex_id, &(player->gunwheel->p), &(tex_map[0]), 100, 100, player->aim_angle*180/M_PI);
-	draw_texture(player->param->tex_id, &(player->data.body->p), &(tex_map[1]), 100, 100, dir*180/M_PI);
+	cpVect pos_body = player->data.body->p;
+	cpVect pos_gun = player->gunwheel->p;
+
+	draw_texture(player->param->tex_id, &(pos_gun), &(tex_map[0]), 100, 100, player->aim_angle * 180/M_PI);
+	draw_texture(player->param->tex_id, &(pos_body), &(tex_map[1]), 100, 100, dir*180/M_PI);
 
 	hpbar_draw(&player->hp_bar);
 }
@@ -249,7 +252,7 @@ static void arcade_control(object_group_player *player)
 		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
 
 		//TODO use impulses instead?
-		cpBodySetForce(player->data.body, cpvmult(cpvforangle(player_angle),speed*600));
+		cpBodySetForce(player->data.body, cpvmult(cpvforangle(player_angle),speed*300)); //*600
 
 		player->flame->disable = 0;
 	} else {

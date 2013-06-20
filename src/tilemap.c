@@ -13,6 +13,7 @@
 #include "draw.h"
 #include "space.h"
 #include "main.h"
+#include "spaceengine.h"
 
 #include "waffle_utils.h"
 #include "SDL_log.h"
@@ -35,8 +36,8 @@ void tilemap_render(tilemap *map)
 
     //TODO: check if cam_left and cam_right is correct
     int j_start, j_end;
-    j_start = (cam_left - map->tile_width) / map->tile_width + map->width / 2; //OLD: 0
-    j_end = (cam_right + map->tile_width) / map->tile_width + map->width / 2; //OLD: map->width
+    j_start = (cam_left - map->tile_width) / map->tile_width + map->width / 2 - 2; //OLD: 0
+    j_end = (cam_right + map->tile_width) / map->tile_width + map->width / 2 + 2; //OLD: map->width
 
     //DEBUG
     static int DEBUG_TILEMAP = 0;
@@ -53,8 +54,13 @@ void tilemap_render(tilemap *map)
     //if (j_start < 0) j_start = 0; //special case
     //if (j_end > map->width) j_end = map->width; //special case
 
+    int map_height = map->height;
+#if EXPERIMENTAL_GRAPHICS
+    map_height +=4;
+#endif
+
     /** draws from top and down **/
-    for(i = 0; i < map->height; i++){
+    for(i = 0; i < map_height; i++){
     	int lvl_y = i*map->tile_height;
     	lvl_y = map->tile_height * (map->height-1) - lvl_y;
     	for(j = j_start; j < j_end; j++){
@@ -76,49 +82,49 @@ void tilemap_render(tilemap *map)
     		if(map->data[k + i*map->width] > 0){
     			int lvl_x = j*map->tile_width - (map->width*map->tile_width)/2;
 
-#define EXPERIMENTAL_GRAPHICS 1
 #if EXPERIMENTAL_GRAPHICS
     			/* tmp test displacement modifiers */
-    			float p = 1.0f * (j-j_start) / (j_end - j_start);
+    			//float p = 1.0f * (j-j_start) / (j_end - j_start);
 
-    			static float r_1 = 2100; // inner space station radius
-
-    			//TMP CONTROL TEST
-    			if (keys[SDL_SCANCODE_R]) {
-    				r_1 += 1;
-    			} else if (keys[SDL_SCANCODE_T]) {
-    				r_1 -= 1;
-    			}
-
-    			float r_1_tmp = r_1;
-    			r_1 += MOUSE_X*4 - MOUSE_Y*16;
-
-    			float theta_max = atan((WIDTH/2) / r_1);//M_PI/8;
-    			float theta = - theta_max * (cam_center_x - lvl_x) / ((cam_right - cam_left)/2);
+    			//float r_1 = (currentlvl->right - currentlvl->left)/(2*M_PI);//2100; // inner space station radius
 
 
-    			float o_x = cam_center_x;
-    			float o_y = currentlvl->height + r_1;
 
-    			float ry = i * map->tile_height;
+    			//float r_1_tmp = r_1;
+    			//r_1 += MOUSE_X*4 - MOUSE_Y*16;
 
-    			float new_x = o_x + (r_1 + ry) * sin(theta);
-    			float new_y = o_y - (r_1 + ry + 64) * cos(theta);
+    			//float next_theta = - theta_max * (cam_center_x - (lvl_x - map->tile_width)) / ((cam_right - cam_left)/2);
+    			//float next_x = o_x + (r_1 + ry) * sin(next_theta);
 
-    			float next_theta = - theta_max * (cam_center_x - (lvl_x - map->tile_width)) / ((cam_right - cam_left)/2);
-    			float next_x = o_x + (r_1 + ry) * sin(next_theta);
-
-    			float computed_size = new_x - next_x + 0.01f;
+    			//float computed_size = new_x - next_x + 0.01f;
 
     			{
     				GLfloat tx = (x*w), ty = (y*h);
-    				cpVect p = cpv(new_x,new_y);
+    				cpVect p = cpv(lvl_x,lvl_y);
+    				float angle = se_rect2arch(&p);
+
     				texture_map sub_map = {{tx,ty+h, tx+w,ty+h, tx,ty, tx+w,ty}};
 
-    				draw_current_texture_all(&p, &sub_map,computed_size,map->tile_height,theta*180/M_PI,corner_quad);
+    				cpVect
+    					p1 = {lvl_x, lvl_y},
+    					p2 = {lvl_x+map->tile_width, lvl_y},
+    					p3 = {lvl_x, lvl_y+map->tile_height},
+    					p4 = {lvl_x+map->tile_width, lvl_y+map->tile_height};
+
+    				 se_rect2arch(&p1);
+    				 se_rect2arch(&p2);
+    				 se_rect2arch(&p3);
+    				 se_rect2arch(&p4);
+
+    				GLfloat texture_quad[8] = {p1.x, p1.y,
+    										p2.x,  p2.y,
+    										p3.x,  p3.y,
+    										p4.x,  p4.y};
+
+    				draw_current_texture_basic(&sub_map,texture_quad,4);
     			}
 
-    			r_1 = r_1_tmp;
+    			//r_1 = r_1_tmp;
 
 #else
     			draw_subimage(lvl_x, lvl_y, (x*w), (y*h), w, h, map->tile_width, map->tile_height);
@@ -197,6 +203,10 @@ int tilemap_create (tilemap *map, char *filename)
 		}
 	}
 	mxmlDelete(tree);
+
+	// post-edit height (so we later draw to tiles below ground)
+	map->height -= 4;
+
 	return 0;
 }
 

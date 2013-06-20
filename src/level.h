@@ -19,6 +19,7 @@ typedef struct level {
 	int height;
 	int left;
 	int right;
+	int width;
 	int timelimit;
 	int ceiling;
 	int floor;

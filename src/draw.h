@@ -4,6 +4,7 @@
 #include "SDL.h"
 
 #define LOAD_TEXTURES 1 //FOR DEBUG PURPOSES
+#define EXPERIMENTAL_GRAPHICS 1
 
 #if TARGET_OS_IPHONE || __ANDROID__
 #define GLES1 1
@@ -65,7 +66,7 @@ void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot);
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2);
 extern void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle);
-void draw_current_texture_basic(const texture_map *tex_map, GLfloat *mesh);
+void draw_current_texture_basic(const texture_map *tex_map, GLfloat *mesh, GLsizei count);
 void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle);
 void draw_current_texture_all(cpVect *pos, const texture_map *tex_map, float width, float height, float angle, GLfloat *mesh);
 

@@ -86,7 +86,7 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 			float f = cpvlength(force);
 			//todo create a super fancy formula for determining physical damagae
 			if (f > 20)
-				player->components.hp_bar->value -= f * 0.05;
+				player->components.hp_bar->value -= f * 0.01; // f * 0.05
 		} else {
 			SDL_Log("Expected object type ID %d, but got %d!\n", ID_PLAYER, player->preset->ID);
 		}

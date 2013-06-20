@@ -172,8 +172,8 @@ static void level_cleared()
 
 	if (time_remaining > 0) {
 		object_group_player *player = (object_group_player *)objects_first(ID_PLAYER);
-		int time_bonus = time_remaining * 25;
-		player->score += time_bonus; //Time bonus (25 * sec)
+		int time_bonus = time_remaining * 35; // tidligere 25!
+		player->score += time_bonus; //Time bonus (35 * sec)
 		particles_add_score_popup(player->data.body->p, time_bonus);
 		game_time = currentlvl->timelimit;
 	}

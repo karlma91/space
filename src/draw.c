@@ -2,6 +2,7 @@
 #include "texture.h"
 #include "stack.h"
 #include "waffle_utils.h"
+#include "spaceengine.h"
 
 GLfloat triangle_quad[8] = {-0.5, -0.5,
 						 0.5,  -0.5,
@@ -342,6 +343,16 @@ Color draw_col_grad(int hue)
 //TODO: color customization
 void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 {
+	cpVect pos = {x, y};
+	float angle = 0;
+
+#if EXPERIMENTAL_GRAPHICS
+	angle = se_rect2arch(&pos) * 180 / M_PI;
+#endif
+
+	x = pos.x;
+	y = pos.y;
+
 	float border;
 	/* save current blend function and color */
 	draw_push_color();
@@ -353,24 +364,24 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 	/* outer edge */
 	draw_color4f(1, 1, 1, 1);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	draw_box(x, y, w, h, 0, 0);
+	draw_box(x, y, w, h, angle, 0);
 
 	/* inner edge */
 
 	border = 0.1 * (w > h ? h : w);
 	draw_color4f(0, 0, 0, 1);
-	draw_box(x + border, y + border, w - border * 2, h - border * 2, 0, 0);
+	draw_box(x + border, y + border, w - border * 2, h - border * 2, angle, 0);
 
 	/* hp bar */
 	border *= 2;
 	if (w > h) {
 		draw_color4f(1,0,0, 1);
-		draw_box(x + border, y + border, (w - border * 2) * p, h - border * 2, 0, 0);
+		draw_box(x + border, y + border, (w - border * 2) * p, h - border * 2, angle, 0);
 		draw_color4f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1, 1);
-		draw_box(x + border, y + border, (w - border * 2) * p2, h - border * 2, 0, 0);
+		draw_box(x + border, y + border, (w - border * 2) * p2, h - border * 2, angle, 0);
 	} else {
 		draw_color4f(1-p,1-p,1,1);
-		draw_box(x + border, y + border, w - border * 2, (h - border * 2) * p, 0, 0);
+		draw_box(x + border, y + border, w - border * 2, (h - border * 2) * p, angle, 0);
 	}
 
 	draw_pop_color();
@@ -379,8 +390,13 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 
 void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
 {
+	cpVect pos_buf = *pos;
+#if EXPERIMENTAL_GRAPHICS
+	angle += se_rect2arch(&pos_buf) * 180 / M_PI; //EXPERIMENTAL GRAPHICS
+#endif
+
 	texture_bind(tex_id);
-	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
+	draw_current_texture_all(&pos_buf, tex_map, width, height, angle, triangle_quad);
 }
 
 void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
@@ -395,17 +411,17 @@ void draw_current_texture_all(cpVect *pos, const texture_map *tex_map, float wid
 	glRotatef(angle,0,0,1);
 	glScalef(width,height,1);
 
-	draw_current_texture_basic(tex_map, mesh);
+	draw_current_texture_basic(tex_map, mesh, 4);
 
 	glPopMatrix();
 }
 
-void draw_current_texture_basic(const texture_map *tex_map, GLfloat *mesh)
+void draw_current_texture_basic(const texture_map *tex_map, GLfloat *mesh, GLsizei count)
 {
 	glVertexPointer(2, GL_FLOAT, 0, mesh);
 	glTexCoordPointer( 2, GL_FLOAT, 0, tex_map );
 
 	glEnable(GL_TEXTURE_2D);
-	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+	glDrawArrays(GL_TRIANGLE_STRIP,0, count);
 	glDisable(GL_TEXTURE_2D);
 }

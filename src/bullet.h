@@ -21,6 +21,7 @@ struct bullet{
 	float damage;
 	cpFloat speed;
 	Color color;
+	float energy;
 };
 
 #endif /* BULLET_H_ */

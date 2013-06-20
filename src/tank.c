@@ -263,13 +263,21 @@ static void render(object_group_tank *tank)
 	int texture = tank->param->tex_id;
 
 	draw_color4f(1,1,1,1);
-	draw_texture(texture, &tank->wheel1->p, &tex_map[1],100, 100, rot);
-	draw_texture(texture, &tank->wheel2->p, &tex_map[1],100, 100, rot);
-	if (tank->param->max_hp > 100) {//TODO add color into param
+
+	cpVect pos_w1 = tank->wheel1->p;
+	draw_texture(texture, &pos_w1, &tex_map[1],100, 100, rot);
+
+	cpVect pos_w2 = tank->wheel2->p;
+	draw_texture(texture, &pos_w2, &tex_map[1],100, 100, rot);
+
+	if (tank->param->max_hp >= 100) {//TODO add color into param
 		draw_color4f(1,0.2,0,1);
 	}
-	draw_texture(texture, &(tank->data.body->p), &tex_map[0],200, 100, dir*(180/M_PI));
-	draw_texture(texture, &(tank->data.body->p), &tex_map[2],150, 150, barrel_angle);
+
+	cpVect pos = tank->data.body->p;
+
+	draw_texture(texture, &pos, &tex_map[0],200, 100, dir);
+	draw_texture(texture, &pos, &tex_map[2],150, 150, barrel_angle);
 }
 
 
