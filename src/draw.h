@@ -6,7 +6,7 @@
 #define LOAD_TEXTURES 1 //FOR DEBUG PURPOSES
 #define EXPERIMENTAL_GRAPHICS 1
 
-#if TARGET_OS_IPHONE || __ANDROID__
+#if __IPHONEOS__ || __ANDROID__
 #define GLES1 1
 #endif
 

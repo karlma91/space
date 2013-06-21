@@ -24,14 +24,28 @@ extern char APK_PATH[200];
 extern void waffle_init();
 extern void waffle_destroy();
 
+int checksum(char *data, int length);
+
 /*
  * waffle_open
  *
  * opens a file relative to the zip-archive opened in waffle_init
- * use zzip_read(ZZIP_FILE * fp, void * buf, zzip_size_t len) to read
- * the returned ZZIP_FILE to buf
- *
  */
 extern ZZIP_FILE *waffle_open(char *path);
+
+/* waffle_read
+ *
+ * Reads an open file into buffer of given length,
+ * returns size of file read.
+ * NB! zf is closed after use
+ */
+extern int waffle_read(ZZIP_FILE *fp, char *buffer, int len);
+
+/* waffle_read_file
+ *
+ * opens file with the given name and reads into buffer of given length,
+ * closes the file and return size of file
+ */
+extern int waffle_read_file(char *filename, char *buffer, int len);
 
 #endif //WAFFLE_UTILS_H_

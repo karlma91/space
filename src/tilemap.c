@@ -152,25 +152,20 @@ int tilemap_create (tilemap *map, char *filename)
 	mxml_node_t * tree = NULL;
 	mxml_node_t * node  = NULL;
 
-	char tilemap_name[200];
-	sprintf(tilemap_name,"tilemaps/%s", filename);
+	char tilemap_path[200];
+	sprintf(tilemap_path,"tilemaps/%s", filename);
 
-	ZZIP_FILE *fp = waffle_open(tilemap_name);
+	char buffer[TILEMAP_READ_BUFFER_SIZE];
+	int filesize = waffle_read_file(tilemap_path, buffer, TILEMAP_READ_BUFFER_SIZE);
 
-	if (fp ){
-		char buffer[TILEMAP_READ_BUFFER_SIZE];
-		int filesize = zzip_file_read(fp, buffer, TILEMAP_READ_BUFFER_SIZE);
-		SDL_Log("filesize: %d", filesize);
-		zzip_file_close(fp);
-		buffer[filesize] = '\0';
-
+	if (filesize){
 		tree = mxmlLoadString (NULL , buffer , MXML_OPAQUE_CALLBACK);
 	}else {
-		SDL_Log("tilemap.c: file: %s could not be loaded\n",tilemap_name);
+		SDL_Log("tilemap.c: file: %s could not be loaded\n",tilemap_path);
 		return 1;
 	}
 	if(tree == NULL){
-		SDL_Log("tilemap.c file: %s is empty \n",tilemap_name);
+		SDL_Log("tilemap.c file: %s is empty \n",tilemap_path);
 		return 1;
 	}
 

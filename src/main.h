@@ -4,11 +4,12 @@
 #include "SDL.h"
 #include <stdlib.h>
 
-#if TARGET_OS_IPHONE
-
+#if __IPHONEOS__
+#define IS_APP 1
 #endif
 
 #if __ANDROID__
+#define IS_APP 1
 #include <jni.h>
 #include <android/log.h>
 #endif

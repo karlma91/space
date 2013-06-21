@@ -6,7 +6,7 @@
 
 #include "waffle_utils.h"
 
-#define MAX_IMAGE_BUFFER 1048576 /* ( 1 MiB) */
+#define MAX_IMAGE_BUFFER 524288 /* ( 0.5 MiB) */
 
 /**
  * texture values (GLOBAL)
@@ -44,17 +44,13 @@ int texture_load(char *file)
 	char filepath[64];
 	sprintf(filepath,"textures/%s", file);
 
-	ZZIP_FILE *zf;
 	SDL_RWops *rw;
 
-	if (!(zf = waffle_open(filepath))) {
+	char buffer[MAX_IMAGE_BUFFER];
+	int filesize = waffle_read_file(filepath, buffer, MAX_IMAGE_BUFFER);
+	if (!filesize) {
 		SDL_Log("DEBUG: Unable to find texture: %s", file);
 	}
-
-	char buffer[MAX_IMAGE_BUFFER];
-	int filesize = zzip_read(zf, buffer, MAX_IMAGE_BUFFER);
-	buffer[filesize] = 0;
-	zzip_close(zf);
 
 	rw = SDL_RWFromMem(&buffer[0], filesize);
 
@@ -72,9 +68,9 @@ int texture_load(char *file)
 		textures = realloc(textures,sizeof(int[(tex_counter + 1)]));
 
 		//FIXME on android
-#if !__ANDROID__
+//#if !__ANDROID__
 		SDL_ConvertSurfaceFormat(img,SDL_PIXELFORMAT_RGBA8888,0);
-#endif
+//#endif
 
 		/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
 		glGenTextures(1, &tex_id);
@@ -87,7 +83,7 @@ int texture_load(char *file)
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-#if __MACOSX__
+#if (__MACOSX__ | __IPHONEOS__)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
 #else
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_ENUM_TYPE, img->pixels);

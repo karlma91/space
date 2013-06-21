@@ -593,14 +593,10 @@ static int read_emitter_from_file (int type,char *filename)
 	char particle_path[200];
 	sprintf(particle_path, "particles/%s", filename);
 
-	ZZIP_FILE *fp = waffle_open(particle_path);
+	char buffer[PARTICLE_READ_BUFFER_SIZE];
+	int filesize = waffle_read_file(particle_path, buffer, PARTICLE_READ_BUFFER_SIZE);
 
-	if (fp ){
-		char buffer[PARTICLE_READ_BUFFER_SIZE];
-		int filesize = zzip_file_read(fp, buffer, PARTICLE_READ_BUFFER_SIZE);
-		zzip_file_close(fp);
-		buffer[filesize] = '\0';
-
+	if (filesize) {
 		tree = mxmlLoadString(NULL, buffer, MXML_OPAQUE_CALLBACK);
 	}else {
 		SDL_Log("Could Not Open the File Provided");

@@ -1,4 +1,3 @@
-
 make -C bin/data
 make -C particles
 make -C textures
@@ -16,6 +15,6 @@ unzip -quo -d textures ../textures.zip
 unzip -quo -d tilemaps ../tilemaps.zip
 
 rm ../../game_data.zip
-zip -rX9 ../../game_data.zip . -x "*/.*" -x ".*"
+zip -rX0 ../../game_data.zip . -x "*/.*" -x ".*"
 
 cd ..

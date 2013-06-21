@@ -182,15 +182,15 @@ static void display_init()
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 5);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 2);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-    SDL_SetHint("SDL_HINT_ORIENTATIONS", "LandscapeLeft LandscapeRight");
+    SDL_SetHint("SDL_IOS_ORIENTATIONS", "LandscapeLeft LandscapeRight");
 
 	Uint32 flags = SDL_WINDOW_OPENGL |
 			       SDL_WINDOW_RESIZABLE |
@@ -282,8 +282,8 @@ static void main_init() {
 	texture_init();     /* preload textures */
 	draw_init();        /* initializes circular shapes and rainbow colors */
 	level_init();       /* load levels */
-	//font_init();      /* (currently not in use) */
 	particles_init();   /* load and prepare all particle systems */
+	//font_init();      /* (currently not in use) */
 	statesystem_init(); /* init all states */
 
 	statesystem_set_state(STATESYSTEM_MENU);
@@ -377,6 +377,20 @@ static int main_run() {
 			case SDL_MOUSEBUTTONDOWN:
 				MOUSE_X_PRESSED = event.button.x;
 				MOUSE_Y_PRESSED = event.button.y;
+				// very tmp touch controller
+				keys[KEY_RETURN_1] = 1;
+				keys[KEY_RETURN_2] = 1;
+				keys[KEY_RIGHT_1] = 1;
+				keys[KEY_UP_1] = 1;
+				keys[KEY_RIGHT_2] = 1;
+				break;
+			case SDL_MOUSEBUTTONUP:
+				// very tmp touch controller
+				keys[KEY_RETURN_1] = 0;
+				keys[KEY_RETURN_2] = 0;
+				keys[KEY_RIGHT_1] = 0;
+				keys[KEY_UP_1] = 0;
+				keys[KEY_RIGHT_2] = 0;
 				break;
 			case SDL_MOUSEMOTION:
 				MOUSE_X = event.button.x;
@@ -426,10 +440,7 @@ SDL_Log("DEBUG - SDL_destroy\n");
 	// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
 	//SDL_GL_MakeCurrent(NULL, NULL);
 	SDL_GL_DeleteContext(glcontext);
-
 	SDL_VideoQuit();
-
-	SDL_DestroyWindow(window);
 	SDL_Quit();
 
 	return 0;
@@ -440,6 +451,7 @@ int main(int argc, char *args[]) {
 	main_run();
 	main_destroy();
 
+	exit(0);
 	return 0;
 }
 

@@ -276,7 +276,7 @@ static void render(object_group_tank *tank)
 
 	cpVect pos = tank->data.body->p;
 
-	draw_texture(texture, &pos, &tex_map[0],200, 100, dir);
+	draw_texture(texture, &pos, &tex_map[0],200, 100, dir*180/M_PI);
 	draw_texture(texture, &pos, &tex_map[2],150, 150, barrel_angle);
 }
 

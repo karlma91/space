@@ -87,23 +87,17 @@ int level_init()
 
 
 	/* read space station data */
-	if (!(file = waffle_open("space"))) {
-		SDL_Log("Could not load level data!\n");
+	filesize = waffle_read_file("space", &buffer[0], FILE_BUFFER_SIZE);
+	if (!filesize) {
+		SDL_Log("Could not load level data!");
 		exit(1);
 	}
 
-	/* read file contents into buffer */
-	filesize = zzip_read(file, &buffer[0], FILE_BUFFER_SIZE);
-	buffer[filesize] = 0;
-
-	/* free file */
-	zzip_close(file);
-
-	SDL_Log("filesize: %d\nfile:\n%s\n", filesize, &buffer[0]);
-
 	ret = sscanf(buffer, "%d\n%n", &station_count, &offset);
-
-	if (ret != 1) SDL_Log("Could not find station count!");
+	if (ret != 1) {
+		SDL_Log("Could not find station count!");
+		exit(1);
+	}
 
 	worlds = calloc(station_count,sizeof(level_ship));
 
@@ -132,16 +126,14 @@ int level_init()
 		exit(2);
 	}
 
-	/* read object sub groups / object sub types */
-	if (!(file = waffle_open("objects"))) {
+	/* read object definitions (sub groups / object sub types) */
+	filesize = waffle_read_file("objects", &buffer[0], FILE_BUFFER_SIZE);
+	if (!filesize) {
 		SDL_Log("Could not load object data!\n");
 		exit(3);
 	}
 
 	/* read file contents into buffer */
-	filesize = zzip_read(file, &buffer[0], FILE_BUFFER_SIZE);
-	buffer[filesize] = 0;
-	zzip_close(file);
 	offset = 0;
 	offset_add = 0;
 
@@ -300,18 +292,12 @@ level *level_load(int space_station, int deck)
 	level *lvl = malloc(sizeof(*lvl));
 	currentlvl = lvl;
 
-	/* open file from archive */
-	if (!(file = waffle_open(levelpath))) {
+	/* open and read level data */
+	filesize = waffle_read_file(levelpath, &buffer[0], FILE_BUFFER_SIZE);
+	if (!filesize) {
 		SDL_Log("Could not find level %d.%d\n",space_station,deck);
 		return NULL;
 	}
-
-	/* read file contents into buffer */
-	filesize = zzip_read(file, &buffer[0], FILE_BUFFER_SIZE);
-	buffer[filesize] = 0;
-	zzip_close(file);
-
-	SDL_Log("DEBUG: level data\n%s", buffer);
 
 	offset = 0;
 	offset_add = 0;
