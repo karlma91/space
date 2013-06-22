@@ -158,6 +158,11 @@ static void setAspectRatio() {
 	if (config.fullscreen) {
 		W = fullscreen_dimensions.w;
 		H = fullscreen_dimensions.h;
+		if (W < H) {
+			int t = H;
+			H = W;
+			W = t;
+		}
 	} else {
 		W = config.width;
 		H = config.height;
@@ -237,7 +242,7 @@ static void initGL() {
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
     /* set the clear color to dark blue */
-	glClearColor(0, 0.08, 0.15, 1);
+//	glClearColor(0, 0.08, 0.15, 1);
 
 	/* print gl info */
 	SDL_Log("GL_VENDOR: %s\n", glGetString(GL_VENDOR));

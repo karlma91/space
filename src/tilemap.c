@@ -3,6 +3,7 @@
  *
  *  Created on: 17. mars 2013
  *      Author: Karl
+ *      Author: Mathias
  */
 
 #include "stdio.h"
@@ -16,20 +17,15 @@
 #include "spaceengine.h"
 
 #include "waffle_utils.h"
-#include "SDL_log.h"
 
 #define TILEMAP_READ_BUFFER_SIZE 128000
 
 static int parse_data(tilemap *map, char *data);
-static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height);
 
 void tilemap_render(tilemap *map)
 {
     draw_color4f(1,1,1,1);
     texture_bind(map->texture_id);
-
-    GLfloat w = ((GLfloat)map->tile_width)/map->image_width;
-    GLfloat h = ((GLfloat)map->tile_height)/map->image_height;
 
     int i,j;
     int x,y;
@@ -63,6 +59,7 @@ void tilemap_render(tilemap *map)
     for(i = 0; i < map_height; i++){
     	int lvl_y = i*map->tile_height;
     	lvl_y = map->tile_height * (map->height-1) - lvl_y;
+
     	for(j = j_start; j < j_end; j++){
 
     		/** Circular indexing **/
@@ -82,34 +79,27 @@ void tilemap_render(tilemap *map)
     		if(map->data[k + i*map->width] > 0){
     			int lvl_x = j*map->tile_width - (map->width*map->tile_width)/2;
 
+				float tx_1 = map->x2tc[x];
+				float tx_2 = map->x2tc[x+1];
+				float ty_2 = map->y2tc[y];
+				float ty_1 = map->y2tc[y+1];
+
+				texture_map sub_map = {{
+						tx_1, ty_1,
+						tx_2, ty_1,
+						tx_1, ty_2,
+						tx_2, ty_2,
+				}};
+
 #if EXPERIMENTAL_GRAPHICS
-    			/* tmp test displacement modifiers */
-    			//float p = 1.0f * (j-j_start) / (j_end - j_start);
-
-    			//float r_1 = (currentlvl->right - currentlvl->left)/(2*M_PI);//2100; // inner space station radius
-
-
-
-    			//float r_1_tmp = r_1;
-    			//r_1 += MOUSE_X*4 - MOUSE_Y*16;
-
-    			//float next_theta = - theta_max * (cam_center_x - (lvl_x - map->tile_width)) / ((cam_right - cam_left)/2);
-    			//float next_x = o_x + (r_1 + ry) * sin(next_theta);
-
-    			//float computed_size = new_x - next_x + 0.01f;
-
     			{
-    				GLfloat tx = (x*w), ty = (y*h);
-    				cpVect p = cpv(lvl_x,lvl_y);
-    				float angle = se_rect2arch(&p);
-
-    				texture_map sub_map = {{tx,ty+h, tx+w,ty+h, tx,ty, tx+w,ty}};
-
     				cpVect
     					p1 = {lvl_x, lvl_y},
     					p2 = {lvl_x+map->tile_width, lvl_y},
     					p3 = {lvl_x, lvl_y+map->tile_height},
     					p4 = {lvl_x+map->tile_width, lvl_y+map->tile_height};
+
+    				//TODO compute 2d map of transformed points before entering loop
 
     				 se_rect2arch(&p1);
     				 se_rect2arch(&p2);
@@ -127,19 +117,15 @@ void tilemap_render(tilemap *map)
     			//r_1 = r_1_tmp;
 
 #else
-    			draw_subimage(lvl_x, lvl_y, (x*w), (y*h), w, h, map->tile_width, map->tile_height);
+    			{
+    				cpVect p = cpv(lvl_x,lvl_y);
+
+    				draw_current_texture_all(&p, &sub_map,map->tile_width,map->tile_height,0,corner_quad);
+    			}
 #endif
     		}
     	}
     }
-}
-
-static void draw_subimage(GLfloat x, GLfloat y, GLfloat tx, GLfloat ty, GLfloat w, GLfloat h, GLfloat tile_width, GLfloat tile_height)
-{
-	cpVect p = cpv(x,y);
-	texture_map sub_map = {{tx,ty+h, tx+w,ty+h, tx,ty, tx+w,ty}};
-
-	draw_current_texture_all(&p, &sub_map,tile_width,tile_height,0,corner_quad);
 }
 
 
@@ -185,6 +171,7 @@ int tilemap_create (tilemap *map, char *filename)
 				char name[40];
 				parse_string(node,"source",temp);
 				sscanf(*temp,"../textures/%s", name);
+
 				map->texture_id = texture_load(name);
 
 				parse_int(node,"width",&(map->image_width));
@@ -199,8 +186,19 @@ int tilemap_create (tilemap *map, char *filename)
 	}
 	mxmlDelete(tree);
 
-	// post-edit height (so we later draw to tiles below ground)
+	// post-edit height (to be able to draw tiles below ground)
 	map->height -= 4;
+
+	int width = map->image_width / map->tile_width;
+	int height = map->image_height / map->tile_height;
+
+	int i;
+	for (i = 0;  i <= width; i++) {
+		map->x2tc[i] = 1.0f * i / width;
+	}
+	for (i = 0;  i <= height; i++) {
+		map->y2tc[i] = 1.0f * (i) / height;
+	}
 
 	return 0;
 }

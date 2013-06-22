@@ -1,6 +1,8 @@
 #ifndef WAFFLE_UTILS_H_
 #define WAFFLE_UTILS_H_
 
+#include "SDL_log.h"
+
 #if TARGET_OS_IPHONE
 
 

@@ -1,7 +1,6 @@
 #ifndef TEXTURE_H_
 #define TEXTURE_H_
 
-
 typedef struct texture_map {
 	float map[8];
 } texture_map;

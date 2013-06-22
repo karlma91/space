@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "waffle_utils.h"
-//#include "SDL_log.h"
 
 #define RESOURCE_VERSION 1
 
@@ -121,7 +120,7 @@ int waffle_read(ZZIP_FILE *zf, char *buffer, int len)
 
 int waffle_read_file(char *filename, char *buffer, int len)
 {
-	SDL_Log("Reading file: '%s'",filename);
+	//SDL_Log("Reading file: '%s'",filename); //verbose
 	ZZIP_FILE *fp = waffle_open(filename);
 
 	if (fp) {

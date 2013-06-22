@@ -8,6 +8,10 @@
 #ifndef TILEMAP_H_
 #define TILEMAP_H_
 
+#include "draw.h"
+
+#define MAX_SINGLE_TILE_COUNT 64
+
 typedef struct tilemap {
 
     int total_width; /* total width in pixels */
@@ -20,8 +24,11 @@ typedef struct tilemap {
     int image_height;
     int texture_id;
 
-    int width; /* number of tiles */
+    int width; /* number of tiles in level */
     int height;
+
+    GLfloat x2tc[MAX_SINGLE_TILE_COUNT];
+    GLfloat y2tc[MAX_SINGLE_TILE_COUNT];
 
     int *data; /* tilmap data array */
 

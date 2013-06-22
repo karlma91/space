@@ -6,7 +6,13 @@
 
 #include "waffle_utils.h"
 
-#define MAX_IMAGE_BUFFER 524288 /* ( 0.5 MiB) */
+#if TARGET_OS_IPHONE | __ANDROID__
+#define TEXTURE_RESOLUTION "_low"
+#else
+#define TEXTURE_RESOLUTION ""
+#endif
+
+#define MAX_IMAGE_BUFFER 524288 /* ( 0.5 MiB) NB! make sure it is enough RAM to hold buffer */
 
 /**
  * texture values (GLOBAL)
@@ -29,6 +35,7 @@ static int tex_counter = -1;
 static int texture_from_name(char *file);
 static GLenum GL_ENUM_TYPE = GL_UNSIGNED_BYTE;
 
+
 int texture_load(char *file)
 {
 #if !LOAD_TEXTURES
@@ -44,12 +51,16 @@ int texture_load(char *file)
 	char filepath[64];
 	sprintf(filepath,"textures/%s", file);
 
+	/* append texture resolution suffix */
+	filepath[strlen(filepath) - 4] = 0; // ignore .png suffix
+	strcat(filepath,TEXTURE_RESOLUTION ".png");
+
 	SDL_RWops *rw;
 
 	char buffer[MAX_IMAGE_BUFFER];
 	int filesize = waffle_read_file(filepath, buffer, MAX_IMAGE_BUFFER);
 	if (!filesize) {
-		SDL_Log("DEBUG: Unable to find texture: %s", file);
+		SDL_Log("ERROR: Unable to find texture: %s", file);
 	}
 
 	rw = SDL_RWFromMem(&buffer[0], filesize);
@@ -67,19 +78,18 @@ int texture_load(char *file)
 		strcpy(names[tex_counter],file);
 		textures = realloc(textures,sizeof(int[(tex_counter + 1)]));
 
-		//FIXME on android
-//#if !__ANDROID__
 		SDL_ConvertSurfaceFormat(img,SDL_PIXELFORMAT_RGBA8888,0);
-//#endif
 
 		/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
 		glGenTextures(1, &tex_id);
 		glBindTexture(GL_TEXTURE_2D, tex_id);
 
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -91,7 +101,6 @@ int texture_load(char *file)
 		SDL_FreeSurface(img);
 
 		textures[tex_counter] = tex_id;
-
 
 		SDL_Log("DEBUG: Texture loaded: %s\n", file);
 		return tex_counter;
