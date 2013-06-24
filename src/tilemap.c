@@ -239,6 +239,13 @@ int tilemap_create (tilemap *map, char *filename)
 void tilemap_destroy(tilemap *map)
 {
 	free(map->data);
+	int i;
+    for (i = 0; i < map->width; i++){
+        free(map->vertex[i]);
+        free(map->textco[i]);
+    }
+    free(map->vertex);
+    free(map->textco);
 }
 
 static int parse_data(tilemap *map, char *data)
