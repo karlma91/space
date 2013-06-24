@@ -318,14 +318,7 @@ static int main_run() {
 		SDL_PumpEvents();
 		keys = SDL_GetKeyboardState(NULL );
 
-		frames += deltaTime;
-		fps++;
-		if (frames >= 1) {
-			sprintf(fps_buf, "%.2f FPS", fps);
-			SDL_Log("%s\n", fps_buf);
-			frames = 0;
-			fps = 0;
-		}
+
 
 		deltaTime = deltaTime > 0.25 ? 0.25 : deltaTime;
 		dt = deltaTime;
@@ -336,6 +329,18 @@ static int main_run() {
 		statesystem_update();
 		draw_load_identity();
 		statesystem_draw();
+
+
+        frames += deltaTime;
+        fps++;
+        if (frames >= 1) {
+            sprintf(fps_buf, "%.2f FPS", fps);
+            SDL_Log("%s\n", fps_buf);
+            frames = 0;
+            fps = 0;
+            fprintf(stderr,"Frametime: %d \n",SDL_GetTicks() - thisTime);
+        }
+
 
 		int gl_error = glGetError();
 		if (gl_error) SDL_Log("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error);

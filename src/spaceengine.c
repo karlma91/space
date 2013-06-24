@@ -129,6 +129,17 @@ void se_constrain_from_space(cpBody *body, cpConstraint *constraint, void *data)
 }
 
 
+void se_rect2arch_column(float x, float *data)
+{
+    float r_1 = 4*(currentlvl->right - currentlvl->left)/(2*M_PI);//2100; // inner space station radius
+    float theta_max = atan((WIDTH/2) / r_1);//M_PI/8;
+    float theta = - theta_max * (cam_center_x - x) / ((cam_right - cam_left)/2);
+
+    data[0] = r_1;
+    data[1] = sin(theta);
+    data[2] = cos(theta);
+
+}
 
 float se_rect2arch(cpVect *pos)
 {
@@ -147,3 +158,19 @@ float se_rect2arch(cpVect *pos)
 
 	return theta;
 }
+
+
+void se_rect2arch_from_data(cpVect *pos, float *data)
+{
+    float o_x = cam_center_x;
+    float o_y = currentlvl->height + data[0];
+
+    float ry = currentlvl->height - pos->y;
+
+    pos->x = o_x + (data[0] + ry) * data[1];
+    pos->y = o_y - (data[0] + ry) * data[2];
+}
+
+
+
+

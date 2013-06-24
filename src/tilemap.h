@@ -30,6 +30,9 @@ typedef struct tilemap {
     GLfloat x2tc[MAX_SINGLE_TILE_COUNT];
     GLfloat y2tc[MAX_SINGLE_TILE_COUNT];
 
+    GLfloat **vertex;
+    GLfloat **textco;
+
     int *data; /* tilmap data array */
 
 }tilemap;

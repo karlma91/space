@@ -679,7 +679,7 @@ static void render_objects(object_data *obj)
 }
 
 
-#define star_count 100
+#define star_count 10
 static int stars_x[star_count];
 static int stars_y[star_count];
 static float stars_size[star_count];
