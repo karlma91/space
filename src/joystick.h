@@ -15,14 +15,16 @@ typedef struct {
 	float direction; /* [0, 2pi] */
 	float amplitude; /* [0, 1] */
 
-	int active;
-	float size; /* normalized size */
+	int active; /* if currently in use */
+	float size; /* normalized size, percentage of height or width*/
 
-	float pos_x;
+	float pos_x; /* normalized screen position */
 	float pos_y;
+
+	float min_range; /* minimum distance from center of joystick before responding */
 } joystick;
 
-#define JOYSTICK_DEFAULT {0, 0, 0, 0, 0, 0.1f, -1, -1}
+#define JOYSTICK_DEFAULT {0, 0, 0, 0, 0, 0.07f, -1, -1, 0.3}
 
 void joystick_place(joystick *stick, float pos_x, float pos_y);
 void joystick_axis(joystick *stick, float x, float y);

@@ -17,8 +17,25 @@ void joystick_touch(joystick *stick, float pos_x, float pos_y)
 	} else {
 		float dx = (pos_x - stick->pos_x) / stick->size;
 		float dy = -(pos_y - stick->pos_y) / stick->size; //dy inverted //todo ta hensyn til ratio
-		joystick_axis(stick, dx, dy);
-		//TODO move axis after hand
+
+		float length = hypotf(dx, dy);
+		dx /= length;
+		dy /= length;
+
+		if (length > stick->min_range) {
+			if (length > 1) {
+				stick->pos_x = pos_x - stick->size * dx;
+				stick->pos_y = pos_y + stick->size * dy;
+				stick->amplitude = 1;
+			} else {
+				stick->amplitude = length;
+			}
+			float dir = atan2f(dy,dx);
+			stick->direction = dir < 0 ? dir + 2*M_PI : dir;
+
+			stick->axis_x = dx;
+			stick->axis_y = dy;
+		}
 	}
 }
 
