@@ -17,5 +17,7 @@ void se_shape_from_space(cpBody *body, cpShape *shape, void *data);
 void se_constrain_from_space(cpBody *body, cpConstraint *constraint, void *data);
 
 float se_rect2arch(cpVect *pos);
+void se_rect2arch_column(float x, cpVect *polar);
+void se_rect2arch_from_data(cpVect *pos, cpVect *polar);
 
 #endif /* SPACEENGINE_H_ */

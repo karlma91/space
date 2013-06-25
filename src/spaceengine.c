@@ -131,8 +131,6 @@ void se_constrain_from_space(cpBody *body, cpConstraint *constraint, void *data)
     cpConstraintFree(constraint);
 }
 
-
-
 float se_rect2arch(cpVect *pos)
 {
 #if EXPERIMENTAL_GRAPHICS
@@ -152,3 +150,28 @@ float se_rect2arch(cpVect *pos)
 	return 0;
 #endif
 }
+
+void se_rect2arch_column(float x, cpVect *polar)
+{
+	float theta = -currentlvl->theta_max *(cam_center_x - x) / ((cam_right - cam_left)/2);
+
+    polar->x = sin(theta);
+    polar->y = cos(theta);
+
+}
+
+void se_rect2arch_from_data(cpVect *pos, cpVect *polar)
+{
+	float inner_radius = currentlvl->inner_radius;
+    float o_x = cam_center_x;
+    float o_y = currentlvl->height + inner_radius;
+
+    float ry = currentlvl->height - pos->y;
+
+    pos->x = o_x + (inner_radius + ry) * polar->x;
+    pos->y = o_y - (inner_radius + ry) * polar->y;
+}
+
+
+
+

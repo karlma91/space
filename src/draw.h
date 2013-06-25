@@ -78,5 +78,7 @@ void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei cou
 void draw_current_texture(cpVect *pos, const float *tex_map, float width, float height, float angle);
 void draw_current_texture_all(cpVect *pos, const float *tex_map, float width, float height, float angle, GLfloat *mesh);
 
+float *draw_append_quad(float *data, float *mesh);
+void draw_flush(float *vertex, float *uv, int size);
 
 #endif /* DRAW_H_ */

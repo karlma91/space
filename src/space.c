@@ -652,7 +652,13 @@ static void render_objects(object_data *obj)
 }
 
 
+
+#if GLES1
+#define star_count 0
+#else
 #define star_count 100
+#endif
+
 static int stars_x[star_count];
 static int stars_y[star_count];
 static float stars_size[star_count];

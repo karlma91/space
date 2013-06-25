@@ -455,3 +455,32 @@ void draw_load_identity()
 {
 	glLoadIdentity();
 }
+
+// todo combine different gl pointers into an interleaved array
+float *draw_append_quad(float *data, float *mesh)
+{
+	// {A, B, C, D} -> {A, B, C, B, C, D}
+	*data++ = mesh[0]; //A.x
+	*data++ = mesh[1]; //A.y
+	*data++ = mesh[2]; //B.x
+	*data++ = mesh[3]; //B.y
+	*data++ = mesh[4]; //C.x
+	*data++ = mesh[5]; //C.y
+	*data++ = mesh[4]; //C.x
+	*data++ = mesh[5]; //C.y
+	*data++ = mesh[2]; //B.x
+	*data++ = mesh[3]; //B.y
+	*data++ = mesh[6]; //D.x
+	*data++ = mesh[7]; //D.y
+
+	return data;
+}
+
+void draw_flush(float *vertex, float *uv, int size)
+{
+	glVertexPointer(2, GL_FLOAT, 0, vertex);
+	glTexCoordPointer(2, GL_FLOAT, 0, uv);
+
+	glDrawArrays(GL_TRIANGLES, 0, size / 2);
+}
+

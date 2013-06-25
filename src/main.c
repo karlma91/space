@@ -35,6 +35,7 @@
 #include "gameover.h"
 #include "levelselect.h"
 
+#define FPS_LIMIT 0
 
 #if (GLES1)
 #define glOrtho glOrthof
@@ -239,7 +240,7 @@ static void initGL() {
 		SDL_Log("SDL ERROR: %s", SDL_GetError());
 	}
 
-	SDL_GL_SetSwapInterval(1);
+	SDL_GL_SetSwapInterval(FPS_LIMIT); // 1 = v-sync on
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -321,14 +322,7 @@ static int main_run() {
 		SDL_PumpEvents();
 		keys = SDL_GetKeyboardState(NULL );
 
-		frames += deltaTime;
-		fps++;
-		if (frames >= 1) {
-			sprintf(fps_buf, "%.2f FPS", fps);
-			SDL_Log("%s\n", fps_buf);
-			frames = 0;
-			fps = 0;
-		}
+
 
 		deltaTime = deltaTime > 0.25 ? 0.25 : deltaTime;
 		dt = deltaTime;
@@ -339,6 +333,18 @@ static int main_run() {
 		statesystem_update();
 		draw_load_identity();
 		statesystem_draw();
+
+
+        frames += deltaTime;
+        fps++;
+        if (frames >= 1) {
+            sprintf(fps_buf, "%.2f FPS", fps);
+            SDL_Log("%s\n", fps_buf);
+            frames = 0;
+            fps = 0;
+            fprintf(stderr,"Frametime: %d \n",SDL_GetTicks() - thisTime);
+        }
+
 
 		int gl_error = glGetError();
 		if (gl_error) SDL_Log("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error);
@@ -411,6 +417,8 @@ static int main_run() {
 			}
 		}
 
+
+#if FPS_LIMIT
 		//not use 100% of cpu
 		if (keys[SDL_SCANCODE_Z])
 			SDL_Delay(14);
@@ -427,6 +435,9 @@ static int main_run() {
 		if (sleep_delta < FPS_SLEEP_TIME) {
 			SDL_Delay((FPS_SLEEP_TIME) - sleep_delta + (FPS_EXTRA_SLEEP != 0));
 		}
+#else
+		SDL_Delay(1);
+#endif
 	}
 	return 0;
 }
