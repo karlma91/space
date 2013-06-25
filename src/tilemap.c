@@ -112,15 +112,14 @@ void tilemap_render(tilemap *map)
 				p3 = {lvl_x, lvl_y+map->tile_height},
 				p4 = {lvl_x+map->tile_width, lvl_y+map->tile_height};
 
+#if EXPERIMENTAL_GRAPHICS
 				se_rect2arch_from_data(&p1, &data1);
 				se_rect2arch_from_data(&p2, &data2);
 				se_rect2arch_from_data(&p3, &data1);
 				se_rect2arch_from_data(&p4, &data2);
+#endif
 
-				GLfloat vertex_quad[8] = {p1.x, p1.y,
-						p2.x,  p2.y,
-						p3.x,  p3.y,
-						p4.x,  p4.y};
+				GLfloat vertex_quad[8] = {p1.x, p1.y, p2.x,  p2.y, p3.x,  p3.y, p4.x,  p4.y};
 
 				vertex_pointer = draw_append_quad(vertex_pointer, &vertex_quad[0]);
 				uv_pointer = draw_append_quad(uv_pointer, &sub_map[0]);

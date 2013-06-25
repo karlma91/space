@@ -497,7 +497,7 @@ static void SPACE_draw()
 	objects_iterate(render_objects);
 
 	/* draw particle effects */
-	particles_draw(dt);
+	//particles_draw(dt);
 
 	if(!second_draw){
 

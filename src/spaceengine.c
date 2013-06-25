@@ -153,15 +153,17 @@ float se_rect2arch(cpVect *pos)
 
 void se_rect2arch_column(float x, cpVect *polar)
 {
+#if EXPERIMENTAL_GRAPHICS
 	float theta = -currentlvl->theta_max *(cam_center_x - x) / ((cam_right - cam_left)/2);
 
-    polar->x = sin(theta);
-    polar->y = cos(theta);
-
+    polar->x = sinf(theta);
+    polar->y = cosf(theta);
+#endif
 }
 
 void se_rect2arch_from_data(cpVect *pos, cpVect *polar)
 {
+#if EXPERIMENTAL_GRAPHICS
 	float inner_radius = currentlvl->inner_radius;
     float o_x = cam_center_x;
     float o_y = currentlvl->height + inner_radius;
@@ -170,6 +172,7 @@ void se_rect2arch_from_data(cpVect *pos, cpVect *polar)
 
     pos->x = o_x + (inner_radius + ry) * polar->x;
     pos->y = o_y - (inner_radius + ry) * polar->y;
+#endif
 }
 
 
