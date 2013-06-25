@@ -22,110 +22,139 @@
 
 static int parse_data(tilemap *map, char *data);
 
+//todo remove prototype:
+static float *append_quad(float *data, float *mesh); //TMP
+static void flush(float *vertex_pointer, float *uv_pointer); //TMP
+
+#define TILEMAP_ARRAY_BUFFER_SIZE 1000
+
+static float vertex_buffer[TILEMAP_ARRAY_BUFFER_SIZE];
+static float uv_buffer[TILEMAP_ARRAY_BUFFER_SIZE];
+
+
 void tilemap_render(tilemap *map)
 {
-    draw_color4f(1,1,1,1);
-    texture_bind(map->texture_id);
+	draw_color4f(1,1,1,1);
+	texture_bind(map->texture_id);
 
-    int i,j;
-    int x,y;
+	int i,j;
+	int x,y;
 
-    //TODO: check if cam_left and cam_right is correct
-    int j_start, j_end;
-    j_start = (cam_left - map->tile_width) / map->tile_width + map->width / 2 - 2; //OLD: 0
-    j_end = (cam_right + map->tile_width) / map->tile_width + map->width / 2 + 2; //OLD: map->width
+	//TODO: check if cam_left and cam_right is correct
+	int j_start, j_end;
+	j_start = (cam_left - map->tile_width) / map->tile_width + map->width / 2 - 2; //OLD: 0
+	j_end = (cam_right + map->tile_width) / map->tile_width + map->width / 2 + 2; //OLD: map->width
 
-    //DEBUG
-    static int DEBUG_TILEMAP = 0;
-    if (keys[SDL_SCANCODE_Y]) {
-    	keys[SDL_SCANCODE_Y] = 0;
-    	DEBUG_TILEMAP ^=1;
-    }
-    if (DEBUG_TILEMAP) {
-    	j_start = 0;
-    	j_end = map->width;
-    }
+	//DEBUG
+	static int DEBUG_TILEMAP = 0;
+	if (keys[SDL_SCANCODE_Y]) {
+		keys[SDL_SCANCODE_Y] = 0;
+		DEBUG_TILEMAP ^=1;
+	}
+	if (DEBUG_TILEMAP) {
+		j_start = 0;
+		j_end = map->width;
+	}
 
-    //TODO: fix special case, when supposed to render two sides, add another loop
-    //if (j_start < 0) j_start = 0; //special case
-    //if (j_end > map->width) j_end = map->width; //special case
+	//TODO: fix special case, when supposed to render two sides, add another loop
+	//if (j_start < 0) j_start = 0; //special case
+	//if (j_end > map->width) j_end = map->width; //special case
 
-    int map_height = map->height;
-#if EXPERIMENTAL_GRAPHICS
-    map_height +=4;
-#endif
+	int map_height = map->height;
 
-    /** draws from top and down **/
-    for(i = 0; i < map_height; i++){
-    	int lvl_y = i*map->tile_height;
-    	lvl_y = map->tile_height * (map->height-1) - lvl_y;
+	static int tile_count_max = 0;
+	int tile_count = 0;
 
-    	for(j = j_start; j < j_end; j++){
+	map_height +=4;
 
-    		/** Circular indexing **/
-    		int k = 0;
-    		if(j < 0){
-    			/* + because (j % map->width) is negative */
-    			k = map->width + (j % map->width);
-    		}else if(j >= map->width){
-    			k = j % map->width;
-    		}else{
-    			k = j;
-    		}
+	// prepare vertex and uv buffers
+	float *vertex_pointer = &vertex_buffer[0];
+	float *uv_pointer = &uv_buffer[0];
 
-    		x = map->data[k + i * map->width] % (map->image_width / map->tile_width) - 1;
-    		y = map->data[k + i * map->width] / (map->image_height / map->tile_height);
+	int flush_count = 0; //stats
+	static int flush_count_max = 0;
+	glEnable(GL_TEXTURE_2D);
 
-    		if(map->data[k + i*map->width] > 0){
-    			int lvl_x = j*map->tile_width - (map->width*map->tile_width)/2;
+	/** draws from top and down **/
+	for(j = j_start; j < j_end; j++){
+		for(i = 0; i < map_height; i++){
+			int lvl_y = map->tile_height * (map->height - 1 - i);
 
+			/** Circular indexing **/
+			int k = 0;
+			if(j < 0){
+				/* + because (j % map->width) is negative */
+				k = map->width + (j % map->width);
+			}else if(j >= map->width){
+				k = j % map->width;
+			}else{
+				k = j;
+			}
+
+			x = map->data[k + i * map->width] % (map->image_width / map->tile_width) - 1;
+			y = map->data[k + i * map->width] / (map->image_height / map->tile_height);
+
+			if(map->data[k + i*map->width] > 0){
 				float tx_1 = map->x2tc[x];
 				float tx_2 = map->x2tc[x+1];
 				float ty_2 = map->y2tc[y];
 				float ty_1 = map->y2tc[y+1];
 
-				texture_map sub_map = {{
+				float sub_map[8] = {
 						tx_1, ty_1,
 						tx_2, ty_1,
 						tx_1, ty_2,
 						tx_2, ty_2,
-				}};
+				};
 
-#if EXPERIMENTAL_GRAPHICS
-    			{
-    				cpVect
-    					p1 = {lvl_x, lvl_y},
-    					p2 = {lvl_x+map->tile_width, lvl_y},
-    					p3 = {lvl_x, lvl_y+map->tile_height},
-    					p4 = {lvl_x+map->tile_width, lvl_y+map->tile_height};
 
-    				//TODO compute 2d map of transformed points before entering loop
+				int lvl_x = j*map->tile_width - (map->width*map->tile_width)/2;
+				cpVect
+				p1 = {lvl_x, lvl_y},
+				p2 = {lvl_x+map->tile_width, lvl_y},
+				p3 = {lvl_x, lvl_y+map->tile_height},
+				p4 = {lvl_x+map->tile_width, lvl_y+map->tile_height};
 
-    				 se_rect2arch(&p1);
-    				 se_rect2arch(&p2);
-    				 se_rect2arch(&p3);
-    				 se_rect2arch(&p4);
+				//TODO compute 2d map of transformed points before entering loop
 
-    				GLfloat texture_quad[8] = {p1.x, p1.y,
-    										p2.x,  p2.y,
-    										p3.x,  p3.y,
-    										p4.x,  p4.y};
+				se_rect2arch(&p1);
+				se_rect2arch(&p2);
+				se_rect2arch(&p3);
+				se_rect2arch(&p4);
 
-    				draw_current_texture_basic(&sub_map,texture_quad,4);
-    			}
+				GLfloat vertex_quad[8] = {p1.x, p1.y,
+						p2.x,  p2.y,
+						p3.x,  p3.y,
+						p4.x,  p4.y};
 
-    			//r_1 = r_1_tmp;
+				vertex_pointer = append_quad(vertex_pointer, &vertex_quad[0]);
+				uv_pointer = append_quad(uv_pointer, &sub_map[0]);
 
-#else
-    			{
-    				cpVect p = cpv(lvl_x,lvl_y);
+				if (vertex_pointer - &vertex_buffer[0] >= TILEMAP_ARRAY_BUFFER_SIZE - 12) {
+					++flush_count;
+					flush(vertex_pointer, uv_pointer);
+					vertex_pointer = &vertex_buffer[0];
+					uv_pointer = &uv_buffer[0];
+				}
+				++tile_count;
+			}
+		}
+	}
+	// flush buffers
+	if (vertex_pointer > &vertex_buffer[0]) {
+		flush(vertex_pointer, uv_pointer);
+		++flush_count;
+	}
 
-    				draw_current_texture_all(&p, &sub_map,map->tile_width,map->tile_height,0,corner_quad);
-    			}
-#endif
-    		}
-    	}
-    }
+	if (flush_count > flush_count_max) {
+		flush_count_max = flush_count;
+		SDL_Log("max tilemap flush count: %d",flush_count);
+	}
+	glDisable(GL_TEXTURE_2D);
+	if (tile_count > tile_count_max) {
+		tile_count_max = tile_count;
+		SDL_Log("max tile count rendered: %d",tile_count);
+	}
 }
 
 
@@ -220,3 +249,36 @@ static int parse_data(tilemap *map, char *data)
 	//SDL_Log("HELLO %d TEXTUREMAP.c \n",__LINE__);
 	return 0;
 }
+
+
+//TODO: move method to a more appropriate file
+static float *append_quad(float *data, float *mesh)
+{
+	// {A, B, C, D} -> {A, B, C, B, C, D}
+	*data++ = mesh[0]; //A.x
+	*data++ = mesh[1]; //A.y
+	*data++ = mesh[2]; //B.x
+	*data++ = mesh[3]; //B.y
+	*data++ = mesh[4]; //C.x
+	*data++ = mesh[5]; //C.y
+	*data++ = mesh[4]; //C.x
+	*data++ = mesh[5]; //C.y
+	*data++ = mesh[2]; //B.x
+	*data++ = mesh[3]; //B.y
+	*data++ = mesh[6]; //D.x
+	*data++ = mesh[7]; //D.y
+
+	return data;
+}
+
+static void flush(float *vertex_pointer, float *uv_pointer)
+{
+	int size = (vertex_pointer - &vertex_buffer[0]) / 2;
+
+	glVertexPointer(2, GL_FLOAT, 0, &vertex_buffer[0]);
+	glTexCoordPointer(2, GL_FLOAT, 0, &uv_buffer[0]);
+
+	glDrawArrays(GL_TRIANGLES, 0, size);
+}
+
+

@@ -47,8 +47,9 @@ object_group_preset object_type_player = {
 
 //static float timer = 0;
 
-static const texture_map tex_map[2] = {
-		{0,1, 0.5,1, 0,0, 0.5,0}, {0.5,1, 1,1, 0.5,0, 1,0}
+static const float tex_map[2][8] = {
+		{0,1, 0.5,1, 0,0, 0.5,0},
+		{0.5,1, 1,1, 0.5,0, 1,0}
 };
 
 object_param_player default_player = {
@@ -137,15 +138,7 @@ static void player_render(object_group_player *player)
 #include <time.h>
 static void player_update(object_group_player *player)
 {
-	if (!config.arcade) {
-		if (keys[SDL_SCANCODE_F1]) {
-			time_t t;
-			time(&t);
-			SDL_Log("TIMESTAMP: %d\n",t);
-		}
-	}
-
-	if (keys[SDL_SCANCODE_I] && !config.arcade_keys)
+	if (keys[SDL_SCANCODE_I] && !config.arcade_keys) //CHEAT
 		player->hp_bar.value = 1000000;
 
 	player->gun_timer += dt;
@@ -176,22 +169,8 @@ static void player_controls(object_group_player *player)
 {
 	arcade_control(player);
 
+	/* DEBUG KEYS */
 	if (!config.arcade_keys) {
-		if(keys[SDL_SCANCODE_G]){
-			keys[SDL_SCANCODE_G] = 0;
-			cpVect gravity = cpv(0, -2);
-			cpSpaceSetGravity(space, gravity);
-		}
-
-		if (keys[SDL_SCANCODE_Q]){
-			cam_zoom /= dt+1.4f;
-		}
-
-		if (keys[SDL_SCANCODE_E]){
-			cam_zoom *= dt+1.4f;
-			if (keys[SDL_SCANCODE_Q])
-				cam_zoom = 1;
-		}
 		if (keys[SDL_SCANCODE_E]){
 			player->data.body->p.x=0;
 			player->data.body->p.y=500;
@@ -200,39 +179,7 @@ static void player_controls(object_group_player *player)
 		if (keys[SDL_SCANCODE_H]) {
 			cpBodySetVelLimit(player->data.body,5000);
 		}
-
-		if (keys[SDL_SCANCODE_X]) {
-			particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
-		}
-		if (keys[SDL_SCANCODE_B]) {
-			particles_get_emitter_at(EMITTER_EXPLOSION, player->data.body->p);
-			keys[SDL_SCANCODE_B] = 0;
-		}
 	}
-}
-
-
-
-typedef enum {
-	DIR_E, DIR_NE, DIR_N, DIR_NW, DIR_W, DIR_SW, DIR_S, DIR_SE, DIR_NONE = -1
-} Direction;
-
-static const float dir8[8] = {
-		M_PI/4*0,
-		M_PI/4*1,
-		M_PI/4*2,
-		M_PI/4*3,
-		M_PI/4*4,
-		M_PI/4*5,
-		M_PI/4*6,
-		M_PI/4*7,
-};
-
-static inline Direction angle_index_fromkeys(SDL_Keycode key_left, SDL_Keycode key_up, SDL_Keycode key_right, SDL_Keycode key_down)
-{
-	return keys[key_up] ? (keys[key_right] ? DIR_NE : (keys[key_left] ? DIR_NW : DIR_N)) :
-		 keys[key_down] ? (keys[key_right] ? DIR_SE : (keys[key_left] ? DIR_SW : DIR_S)) :
-		(keys[key_right] ? DIR_E : (keys[key_left] ? DIR_W : DIR_NONE));
 }
 
 static void arcade_control(object_group_player *player)
@@ -240,14 +187,12 @@ static void arcade_control(object_group_player *player)
 	float player_angle = cpBodyGetAngle(player->data.body);
 	float player_angle_target;
 	float dir_step;
-	Direction angle_index = -1;
-
-	angle_index = angle_index_fromkeys(KEY_LEFT_1, KEY_UP_1, KEY_RIGHT_1, KEY_DOWN_1);
 
 	cpFloat speed = 700;
 
-	if (angle_index != DIR_NONE) {
-		player_angle_target = dir8[angle_index];
+	if (joy_left.amplitude) {
+		player_angle_target = joy_left.direction;
+
 		dir_step = (player->rotation_speed * 2*M_PI)*dt; // 2.5 rps
 		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
 
@@ -261,13 +206,10 @@ static void arcade_control(object_group_player *player)
 
 	cpBodySetAngle(player->data.body, cpvtoangle(cpBodyGetVel(player->data.body)));
 
-	//static float aim_angle = 0;
 	float aim_angle_target = 0;
 
-	angle_index = angle_index_fromkeys(KEY_LEFT_2, KEY_UP_2, KEY_RIGHT_2, KEY_DOWN_2);
-
-	if (angle_index != DIR_NONE) {
-		aim_angle_target = dir8[angle_index];
+	if (joy_right.amplitude) {
+		aim_angle_target = joy_right.direction;
 		dir_step = (player->aim_speed * 2*M_PI) * dt; // 0.5 rps
 		player->aim_angle = turn_toangle(player->aim_angle, aim_angle_target, dir_step);
 		action_shoot(player);

@@ -318,6 +318,11 @@ level *level_load(int space_station, int deck)
 	lvl->right = (lvl->tiles->width*lvl->tiles->tile_width)/2;
 	lvl->width = (lvl->tiles->width*lvl->tiles->tile_width);
 
+	// level render transformation data
+	lvl->inner_radius = 4*(currentlvl->right - currentlvl->left)/(2*M_PI);//2100;
+	lvl->theta_max = atan2f(WIDTH/2, lvl->inner_radius);//M_PI/8;
+
+
 	/* read level specific data */
 	retExp = 3;
 	ret = sscanf(&buffer[offset],"%d %d %d%n\n", &(lvl->station),&(lvl->deck), &(lvl->timelimit), &offset_add);

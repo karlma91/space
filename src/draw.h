@@ -73,10 +73,10 @@ void draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int cente
 void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot);
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2);
-extern void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle);
-void draw_current_texture_basic(const texture_map *tex_map, GLfloat *mesh, GLsizei count);
-void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle);
-void draw_current_texture_all(cpVect *pos, const texture_map *tex_map, float width, float height, float angle, GLfloat *mesh);
+extern void draw_texture(int tex_id, cpVect *pos, const float *tex_map, float width, float height, float angle);
+void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei count);
+void draw_current_texture(cpVect *pos, const float *tex_map, float width, float height, float angle);
+void draw_current_texture_all(cpVect *pos, const float *tex_map, float width, float height, float angle, GLfloat *mesh);
 
 
 #endif /* DRAW_H_ */

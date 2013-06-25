@@ -40,8 +40,8 @@ object_group_preset type_tank= {
 	destroy
 };
 
-static const texture_map tex_map[3] = {
-		{0,0.5, 1,0.5, 0,0, 1,0}, {0,1, 0.5,1, 0,0.5, 0.5,0.5},  {0.5,1, 1,1, 0.5,0.5, 1,0.5}
+static const float tex_map[3][8] = {
+		{0,0.5, 1,0.5, 0,0, 1,0}, {0,1, 0.5,1, 0,0.5, 0.5,0.5}, {0.5,1, 1,1, 0.5,0.5, 1,0.5}
 };
 
 object_group_tank *object_create_tank(float xpos, object_group_factory *factory, object_param_tank *param)
@@ -265,10 +265,10 @@ static void render(object_group_tank *tank)
 	draw_color4f(1,1,1,1);
 
 	cpVect pos_w1 = tank->wheel1->p;
-	draw_texture(texture, &pos_w1, &tex_map[1],100, 100, rot);
+	draw_texture(texture, &pos_w1, tex_map[1],100, 100, rot);
 
 	cpVect pos_w2 = tank->wheel2->p;
-	draw_texture(texture, &pos_w2, &tex_map[1],100, 100, rot);
+	draw_texture(texture, &pos_w2, tex_map[1],100, 100, rot);
 
 	if (tank->param->max_hp >= 100) {//TODO add color into param
 		draw_color4f(1,0.2,0,1);
@@ -276,8 +276,8 @@ static void render(object_group_tank *tank)
 
 	cpVect pos = tank->data.body->p;
 
-	draw_texture(texture, &pos, &tex_map[0],200, 100, dir*180/M_PI);
-	draw_texture(texture, &pos, &tex_map[2],150, 150, barrel_angle);
+	draw_texture(texture, &pos, tex_map[0],200, 100, dir*180/M_PI);
+	draw_texture(texture, &pos, tex_map[2],150, 150, barrel_angle);
 }
 
 

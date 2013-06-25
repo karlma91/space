@@ -108,7 +108,7 @@ static void update(object_data *obj)
 	for(i=0; i<temp->segments; i++){
 		float dx = targetx - temp->x[i];
 		float dy = targety - temp->y[i];
-		temp->angle[i] = atan2(dy,dx);
+		temp->angle[i] = atan2f(dy,dx);
 		targetx = targetx - cos(temp->angle[i])*temp->seg_length;
 		targety = targety - sin(temp->angle[i])*temp->seg_length;
 	}

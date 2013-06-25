@@ -39,8 +39,9 @@ object_group_preset type_turret= {
 	destroy
 };
 
-static const texture_map tex_map[2] = {
-		{0,1, 0.5,1, 0,0, 0.5,0}, {0.5,1, 1,1, 0.5,0, 1,0}
+static const float tex_map[2][8] = {
+		{0,1, 0.5,1, 0,0, 0.5,0},
+		{0.5,1, 1,1, 0.5,0, 1,0}
 };
 
 object_group_turret *object_create_turret(float xpos, object_param_turret *param)

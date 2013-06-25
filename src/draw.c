@@ -114,8 +114,8 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 	draw_push_blend();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glTranslatef(x0, y0, 0.0f);
-	glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
-	GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
+	glRotatef(atan2f(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
+	GLfloat length = sqrtf((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
 	glScalef(1,w,1);
 
 	w /=2; // tmp-fix
@@ -158,8 +158,8 @@ void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
 	glPushMatrix();
 	glTranslatef(x0, y0, 0.0f);
-	glRotatef(atan2(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
-	GLfloat length = sqrt((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
+	glRotatef(atan2f(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
+	GLfloat length = sqrtf((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
 	glScalef(1,w,1);
 	w /= 2;
 	GLfloat line[8] = { -w, -0.5,
@@ -388,7 +388,7 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 	draw_pop_blend();
 }
 
-void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
+void draw_texture(int tex_id, cpVect *pos, const float *tex_map, float width, float height, float angle)
 {
 	cpVect pos_buf = *pos;
 #if EXPERIMENTAL_GRAPHICS
@@ -399,12 +399,12 @@ void draw_texture(int tex_id, cpVect *pos, const texture_map *tex_map, float wid
 	draw_current_texture_all(&pos_buf, tex_map, width, height, angle, triangle_quad);
 }
 
-void draw_current_texture(cpVect *pos, const texture_map *tex_map, float width, float height, float angle)
+void draw_current_texture(cpVect *pos, const float *tex_map, float width, float height, float angle)
 {
 	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
 }
 
-void draw_current_texture_all(cpVect *pos, const texture_map *tex_map, float width, float height, float angle, GLfloat *mesh)
+void draw_current_texture_all(cpVect *pos, const float *tex_map, float width, float height, float angle, GLfloat *mesh)
 {
 	glPushMatrix();
 	glTranslatef(pos->x, pos->y, 0.0f);
@@ -416,10 +416,10 @@ void draw_current_texture_all(cpVect *pos, const texture_map *tex_map, float wid
 	glPopMatrix();
 }
 
-void draw_current_texture_basic(const texture_map *tex_map, GLfloat *mesh, GLsizei count)
+void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei count)
 {
 	glVertexPointer(2, GL_FLOAT, 0, mesh);
-	glTexCoordPointer( 2, GL_FLOAT, 0, tex_map );
+	glTexCoordPointer(2, GL_FLOAT, 0, tex_map);
 
 	glEnable(GL_TEXTURE_2D);
 	glDrawArrays(GL_TRIANGLE_STRIP,0, count);

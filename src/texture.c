@@ -19,8 +19,7 @@
  */
 GLuint *textures;
 
-static const texture_map TEX_MAP_FULL_ = {{0,1, 1,1, 0,0, 1,0}};
-const texture_map *TEX_MAP_FULL = &TEX_MAP_FULL_;
+const float TEX_MAP_FULL[8] = {0,1, 1,1, 0,0, 1,0};
 
 /**
  * Texture names

@@ -1,15 +1,19 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#include "SDL.h"
 #include <stdlib.h>
+#include "SDL.h"
+
+#include "joystick.h"
 
 #if __IPHONEOS__
 #define IS_APP 1
+#define GOT_TOUCH 1
 #endif
 
 #if __ANDROID__
 #define IS_APP 1
+#define GOT_TOUCH 1
 #include <jni.h>
 #include <android/log.h>
 #endif
@@ -43,6 +47,9 @@ struct state_ {
 	state *parentState;
 };
 
+
+extern joystick joy_left, joy_right;
+
 extern int WIDTH;
 extern int HEIGHT;
 /* The delta time */
@@ -60,6 +67,7 @@ extern int main_stop();
 extern SDL_Window *window; //TODO TMP
 
 extern Sint32 MOUSE_X_PRESSED, MOUSE_Y_PRESSED, MOUSE_X, MOUSE_Y;
+extern float TOUCH_X, TOUCH_Y;
 
 extern unsigned int KEY_UP_1;
 extern unsigned int KEY_UP_2;

@@ -184,7 +184,7 @@ static void render_ship(struct level_ship *ship, int selected)
 
 //		float gravity = (4*M_PI*M_PI * ship->radius) * (ship->rotation_speed * ship->rotation_speed);
 		float gravity = 300;
-		ship->rotation_speed = sqrt((gravity)/(4*M_PI*M_PI*ship->radius));
+		ship->rotation_speed = sqrtf((gravity)/(4*M_PI*M_PI*ship->radius));
 
 		char te[30];
 		sprintf(te,"GRAV: %.3f ROT: %.3f",gravity, ship->rotation_speed );

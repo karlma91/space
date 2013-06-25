@@ -70,6 +70,8 @@ static int cam_mode = 5;
 /* level data */
 level *currentlvl;
 
+static void input();
+
 /*
  * The ingame states for level transition and delays
  */
@@ -127,6 +129,8 @@ static void level_running()
 {
 	/* update game time */
 	game_time += dt;
+
+	input();
 
 	update_all();
 	object_group_player *player = (object_group_player*)objects_first(ID_PLAYER);
@@ -194,7 +198,6 @@ static void level_transition()
 		if (lvl_cleared==1) {
 			//TODO remove tmp next level
 			int next_lvl = currentlvl->deck + 1;
-			//TODO WARNING: final level index hard-coded!
 			if (next_lvl > level_get_level_count(currentlvl->station)) {
 				gameover_setstate(GAMEOVER_WIN);
 			    statesystem_set_state(STATESYSTEM_GAMEOVER);
@@ -227,37 +230,7 @@ static void change_state(int state)
  */
 static void pre_update()
 {
-	/*
-	 * Camera modes
-	 */
-	if(keys[SDL_SCANCODE_F1]){
-		cam_mode = 1;
-	}else if(keys[SDL_SCANCODE_F2]){
-		cam_mode = 2;
-	}else if(keys[SDL_SCANCODE_F3]){
-		cam_mode = 3;
-	}else if(keys[SDL_SCANCODE_F4]){
-		cam_mode = 4;
-	}else if(keys[SDL_SCANCODE_F5]){
-		cam_mode = 5;
-	}else if(keys[SDL_SCANCODE_F6]){
-		cam_mode = 6;
-	}else if(keys[SDL_SCANCODE_F11]){
-		game_time = currentlvl->timelimit;
-		return;
-	}else if(keys[SDL_SCANCODE_F8]){
-		particles_reload_particles();
-		keys[SDL_SCANCODE_F8] = 0;
-	}
-
-	/*
-	 * Opens the pause menu
-	 */
-	if(keys[KEY_ESCAPE] && gamestate == LEVEL_RUNNING){
-	    menu_change_current_menu(MENU_INGAME);
-		statesystem_push_state(STATESYSTEM_MENU);
-		keys[KEY_ESCAPE] = 0;
-	}
+	input();
 
 	/* runs the current state */
 	state_timer+=dt; /* updates the timer */
@@ -807,7 +780,6 @@ void space_init_level(int space_station, int deck)
 	/*
 	 * puts all shapes in correct position
 	 */
-	//if (!config.arcade) SDL_Log( "space.c:%d, no. tanks: %d\nno. factories: %d\nno. player: %d\nno. turrets: %d\n",__LINE__, objects_count(ID_TANK),objects_count(ID_FACTORY),objects_count(ID_PLAYER),objects_count(ID_TURRET));
 	update_all();
 
 	particles_clear();
@@ -868,4 +840,63 @@ int getPlayerScore()
 		return player->score;
 	else
 		return -1;
+}
+
+void input()
+{
+
+#if GOT_TOUCH
+	joystick_axis(&joy_left, TOUCH_X, TOUCH_Y);
+	joystick_axis(&joy_right, TOUCH_X, TOUCH_Y);
+#else
+	/* update joystick positions */
+	int axis_x = keys[KEY_RIGHT_1] - keys[KEY_LEFT_1];
+	int axis_y = keys[KEY_UP_1] - keys[KEY_DOWN_1];
+	joystick_axis(&joy_left, axis_x, axis_y);
+
+	axis_x = keys[KEY_RIGHT_2] - keys[KEY_LEFT_2];
+	axis_y = keys[KEY_UP_2] - keys[KEY_DOWN_2];
+	joystick_axis(&joy_right, axis_x, axis_y);
+
+	/*
+	 * Camera modes + F11 = timeout + F8 = reload particles (broken)
+	 */
+	if (keys[SDL_SCANCODE_F1]) {
+		cam_mode = 1;
+	} else if (keys[SDL_SCANCODE_F2]) {
+		cam_mode = 2;
+	} else if (keys[SDL_SCANCODE_F3]) {
+		cam_mode = 3;
+	} else if (keys[SDL_SCANCODE_F4]) {
+		cam_mode = 4;
+	} else if (keys[SDL_SCANCODE_F5]) {
+		cam_mode = 5;
+	} else if (keys[SDL_SCANCODE_F6]) {
+		cam_mode = 6;
+	} else if (keys[SDL_SCANCODE_F11]) {
+		game_time = currentlvl->timelimit;
+		return;
+	} else if (keys[SDL_SCANCODE_F8]) {
+		particles_reload_particles();
+		keys[SDL_SCANCODE_F8] = 0;
+	}
+
+	/* DEBUG KEYS*/
+	if (!config.arcade_keys) {
+		if(keys[SDL_SCANCODE_G]){
+			keys[SDL_SCANCODE_G] = 0;
+			cpVect gravity = cpv(0, -2);
+			cpSpaceSetGravity(space, gravity);
+		}
+	}
+
+	/*
+	 * Opens the pause menu
+	 */
+	if (keys[KEY_ESCAPE] && gamestate == LEVEL_RUNNING) {
+		menu_change_current_menu(MENU_INGAME);
+		statesystem_push_state(STATESYSTEM_MENU);
+		keys[KEY_ESCAPE] = 0;
+	}
+#endif
 }

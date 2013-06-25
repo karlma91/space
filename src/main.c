@@ -46,6 +46,7 @@
 
 
 Sint32 MOUSE_X_PRESSED = 0, MOUSE_Y_PRESSED = 0, MOUSE_X, MOUSE_Y;
+float TOUCH_X, TOUCH_Y;
 
 
 static float fps;
@@ -90,6 +91,8 @@ configuration config = {
 	    .width = 1920,
 	    .height = 1200
 };
+
+joystick joy_left, joy_right;
 
 #if !(TARGET_OS_IPHONE || __ANDROID__)
 static int handler(void* config, const char* section, const char* name,
@@ -398,8 +401,12 @@ static int main_run() {
 				keys[KEY_RIGHT_2] = 0;
 				break;
 			case SDL_MOUSEMOTION:
-				MOUSE_X = event.button.x;
-				MOUSE_Y = event.button.y;
+				//MOUSE_X = event.button.x;
+				//MOUSE_Y = event.button.y;
+				break;
+			case SDL_FINGERMOTION:
+				TOUCH_X = 2 * event.tfinger.x - 1; //TMP
+				TOUCH_Y = 1 - 2 * event.tfinger.y; //TMP
 				break;
 			}
 		}

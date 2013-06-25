@@ -29,10 +29,13 @@ void se_add_score_and_popup(cpVect p, int score)
 }
 
 float se_distance_to_player(float x)
-{//TODO hent ekte x-avstand ogsŒ med hensyn til at banen er sirkul¾r!
+{
 	object_group_player *player = ((object_group_player *) objects_first(ID_PLAYER));
-	float px = player->data.body->p.x;
-	return (fabsf(px-x));
+
+	float dx = player->data.body->p.x - x;
+	int lvl_width = currentlvl->width;
+
+	return (dx < -lvl_width/2) ? dx + lvl_width : (dx > lvl_width/2) ? dx - lvl_width : fabsf(dx);
 }
 
 /**
@@ -132,18 +135,20 @@ void se_constrain_from_space(cpBody *body, cpConstraint *constraint, void *data)
 
 float se_rect2arch(cpVect *pos)
 {
-	float r_1 = 4*(currentlvl->right - currentlvl->left)/(2*M_PI);//2100; // inner space station radius
-	float theta_max = atan((WIDTH/2) / r_1);//M_PI/8;
-
-	float theta = - theta_max * (cam_center_x - pos->x) / ((cam_right - cam_left)/2);
+#if EXPERIMENTAL_GRAPHICS
+	float inner_radius = currentlvl->inner_radius;
+	float theta = -currentlvl->theta_max * (cam_center_x - pos->x) / ((cam_right - cam_left)/2);
 
 	float o_x = cam_center_x;
-	float o_y = currentlvl->height + r_1;
+	float o_y = currentlvl->height + inner_radius;
 
 	float ry = currentlvl->height - pos->y;
 
-	pos->x = o_x + (r_1 + ry) * sin(theta);
-	pos->y = o_y - (r_1 + ry) * cos(theta);
+	pos->x = o_x + (inner_radius + ry) * sinf(theta);
+	pos->y = o_y - (inner_radius + ry) * cosf(theta);
 
 	return theta;
+#else
+	return 0;
+#endif
 }

@@ -46,6 +46,7 @@ void statesystem_init()
         states[i].time_in_inner_state = 0;
     }
 
+    //TODO move Space-dependent code out of game engine
     menu_init();
     space_init();
     gameover_init();
