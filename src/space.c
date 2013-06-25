@@ -109,6 +109,7 @@ static void level_transition();
 static void change_state(int state);
 static void update_all();
 
+static void render_gui();
 
 /* The state timer0 */
 static float state_timer = 0;
@@ -497,150 +498,167 @@ static void SPACE_draw()
 	objects_iterate(render_objects);
 
 	/* draw particle effects */
-	//particles_draw(dt);
+	particles_draw(dt);
 
 	if(!second_draw){
+		render_gui();
+	}
+}
 
-		/* reset transform matrix */
-		draw_load_identity();
+void render_gui()
+{
+	/* reset transform matrix */
+	draw_load_identity();
 
-		/* draw GUI */
-		setTextAngle(0); // TODO don't use global variables for setting font properties
-		setTextAlign(TEXT_LEFT);
-		setTextSize(35);
+#if GOT_TOUCH
+	draw_color4f(1,1,1,1);
+	float x0 = joy_left.pos_x * WIDTH - WIDTH/2;
+	float y0 = -joy_left.pos_y * HEIGHT + HEIGHT/2;
+	float x1 = x0 + joy_left.axis_x * WIDTH * joy_left.size;
+	float y1 = y0 + joy_left.axis_y * HEIGHT * joy_left.size;
+	draw_quad_line(x0,y0,x1,y1, 20);
 
+	x0 = joy_right.pos_x * WIDTH - WIDTH/2;
+	y0 = -joy_right.pos_y * HEIGHT + HEIGHT/2;
+	x1 = x0 + joy_right.axis_x * WIDTH * joy_right.size;
+	y1 = y0 + joy_right.axis_y * HEIGHT * joy_right.size;
+	draw_quad_line(x0,y0,x1,y1, 20);
+#endif
+
+	/* draw GUI */
+	setTextAngle(0); // TODO don't use global variables for setting font properties
+	setTextAlign(TEXT_LEFT);
+	setTextSize(35);
+	draw_color4f(1,1,1,1);
+
+	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
+
+	/* simple score animation */
+	char score_temp[20];
+	static int score_anim = 0;
+	static int score_adder = 1;
+	if (score_anim + score_adder < player->score) {
+		score_anim += score_adder;
+		score_adder += 11;
+	} else {
+		score_anim = player->score;
+		score_adder = 1;
+	}
+	sprintf(score_temp,"%d",score_anim);
+	font_drawText(-WIDTH/2+20,HEIGHT/2 - 26,score_temp);
+
+	draw_color4f(1,0,0,1);
+	setTextSize(20);
+	char goals_left[100];
+	sprintf(goals_left, "OBJEKTER: %d",
+			objects_count(ID_FACTORY)+
+			objects_count(ID_TURRET)+
+			objects_count(ID_TANK));
+	font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,goals_left);
+
+	draw_color4f(1,1,1,1);
+	setTextSize(20);
+	char particles_temp[20];
+	char particles2_temp[20];
+	char particles3_temp[20];
+	sprintf(particles_temp,"%d",particles_active);
+	sprintf(particles2_temp,"%d",available_particle_counter);
+	sprintf(particles3_temp,"%d",(available_particle_counter + particles_active));
+	//font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,particles_temp);
+	//font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles2_temp);
+	//font_drawText(-WIDTH/2+20,HEIGHT/2 - 180,particles3_temp);
+
+	char pos_temp[20];
+	sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->data.body->p.x,player->data.body->p.y);
+	//font_drawText(-WIDTH/2+15,-HEIGHT/2+12,pos_temp);
+
+	setTextAlign(TEXT_RIGHT);
+	//font_drawText(WIDTH/2-25,-HEIGHT/2+15,game_state_names[gamestate]);
+
+	draw_color4f(1,1,1,1);
+	setTextSize(15);
+	char level_temp[20];
+	setTextAlign(TEXT_CENTER);
+	//		sprintf(level_temp,"STATION: %d DECK: %d", currentlvl->station, currentlvl->deck);
+	sprintf(level_temp,"LEVEL %d", currentlvl->deck);
+	font_drawText(0, -HEIGHT/2+24, level_temp);
+
+
+
+	setTextAlign(TEXT_RIGHT);
+	if(!config.arcade)
+		font_drawText(WIDTH/2 - 15, HEIGHT/2 - 20, fps_buf);
+
+	char time_temp[20];
+	switch(gamestate) {
+	case LEVEL_START:
+		setTextSize(60);
 		draw_color4f(1,1,1,1);
-		//font_drawText(-WIDTH/2+15,HEIGHT/2 - 10,"WASD     MOVE\nQE       ZOOM\nSPACE   SHOOT\nH        STOP\nESCAPE   QUIT");
-
-		object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
-
-		/* simple score animation */
-		char score_temp[20];
-		static int score_anim = 0;
-		static int score_adder = 1;
-		if (score_anim + score_adder < player->score) {
-			score_anim += score_adder;
-			score_adder += 11;
-		} else {
-			score_anim = player->score;
-			score_adder = 1;
-		}
-		sprintf(score_temp,"%d",score_anim);
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 26,score_temp);
-
-		draw_color4f(1,0,0,1);
-		setTextSize(20);
-		char goals_left[100];
-		sprintf(goals_left, "OBJEKTER: %d",
-					objects_count(ID_FACTORY)+
-					objects_count(ID_TURRET)+
-					objects_count(ID_TANK));
-		font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,goals_left);
-
-		draw_color4f(1,1,1,1);
-		setTextSize(20);
-		char particles_temp[20];
-		char particles2_temp[20];
-		char particles3_temp[20];
-		sprintf(particles_temp,"%d",particles_active);
-		sprintf(particles2_temp,"%d",available_particle_counter);
-		sprintf(particles3_temp,"%d",(available_particle_counter + particles_active));
-		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,particles_temp);
-		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles2_temp);
-		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 180,particles3_temp);
-
-		char pos_temp[20];
-		sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->data.body->p.x,player->data.body->p.y);
-		//font_drawText(-WIDTH/2+15,-HEIGHT/2+12,pos_temp);
-
-		setTextAlign(TEXT_RIGHT);
-		//font_drawText(WIDTH/2-25,-HEIGHT/2+15,game_state_names[gamestate]);
-
-		draw_color4f(1,1,1,1);
-		setTextSize(15);
-		char level_temp[20];
 		setTextAlign(TEXT_CENTER);
-//		sprintf(level_temp,"STATION: %d DECK: %d", currentlvl->station, currentlvl->deck);
-		sprintf(level_temp,"LEVEL %d", currentlvl->deck);
-		font_drawText(0, -HEIGHT/2+24, level_temp);
-
-
-
-		setTextAlign(TEXT_RIGHT);
-		if(!config.arcade)
-			font_drawText(WIDTH/2 - 15, HEIGHT/2 - 20, fps_buf);
-
-		char time_temp[20];
-		switch(gamestate) {
-		case LEVEL_START:
-			setTextSize(60);
-			draw_color4f(1,1,1,1);
-			setTextAlign(TEXT_CENTER);
-			font_drawText(0, 0, "GET READY!");
-			break;
-		case LEVEL_RUNNING: case LEVEL_TIMESUP:
-			draw_color4f(1,1,1,1);
-			int time_remaining, min, sec;
-			time_remaining = (currentlvl->timelimit - game_time + 0.5f);
-			//if (time_remaining < 0) time_remaining = 0;
-			min = time_remaining / 60;
-			sec = time_remaining % 60;
-			sprintf(time_temp,"%01d:%02d",min,sec);
-			int extra_size = (time_remaining < 10 ? 10 - time_remaining : 0) * 30;
-			if (time_remaining < 10) {
-				if (time_remaining % 2 == 0) {
-					draw_color4f(1,0,0,1);
-				} else {
-					draw_color4f(1.0,1.0,1.0,1);
-				}
+		font_drawText(0, 0, "GET READY!");
+		break;
+	case LEVEL_RUNNING: case LEVEL_TIMESUP:
+		draw_color4f(1,1,1,1);
+		int time_remaining, min, sec;
+		time_remaining = (currentlvl->timelimit - game_time + 0.5f);
+		//if (time_remaining < 0) time_remaining = 0;
+		min = time_remaining / 60;
+		sec = time_remaining % 60;
+		sprintf(time_temp,"%01d:%02d",min,sec);
+		int extra_size = (time_remaining < 10 ? 10 - time_remaining : 0) * 30;
+		if (time_remaining < 10) {
+			if (time_remaining % 2 == 0) {
+				draw_color4f(1,0,0,1);
+			} else {
+				draw_color4f(1.0,1.0,1.0,1);
 			}
-			setTextAlign(TEXT_CENTER);
-			setTextSize(40 + extra_size);
-			font_drawText(0, HEIGHT/2 - 29 - extra_size*1.5, time_temp);
-			break;
-		case LEVEL_CLEARED:
-			setTextSize(60);
-			setTextAlign(TEXT_CENTER);
-			font_drawText(0, 0, "LEVEL CLEARED!");
-			break;
-		case LEVEL_TRANSITION:
-			setTextSize(60);
-			draw_color4f(0.8f,0.8f,0.8f,1);
-			setTextAlign(TEXT_CENTER);
-			//font_drawText(0, 0, "LOADING LEVEL...");
-			break;
-		case LEVEL_PLAYER_DEAD:
-			setTextSize(60);
-			draw_color4f(1,0,0,1);
-			setTextAlign(TEXT_CENTER);
-			if(config.arcade){
-				font_drawText(0, 0, "GAME OVER");
-				draw_color4f(0.1,0.9,0.1,1);
-
-				static float button_timer = 0;
-				static int button_down;
-				button_timer+=dt;
-				if(button_timer > 0.5){
-					button_down = !button_down;
-					button_timer = 0;
-				}
-				if(button_down){
-					cpVect t = cpv(0,0-HEIGHT/4);
-					draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
-				}else{
-					cpVect t = cpv(0,-5.5-HEIGHT/4);
-					draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
-				}
-			}else{
-				font_drawText(0, 0, "GAME OVER-PRESS ENTER");
-			}
-			setTextSize(120);
-			//font_drawText(0,-180,"\x49\x4e\x46\x33\x34\x38\x30");
-			break;
-		case LEVEL_STATE_COUNT:
-			/* invalid value */
-			break;
 		}
+		setTextAlign(TEXT_CENTER);
+		setTextSize(40 + extra_size);
+		font_drawText(0, HEIGHT/2 - 29 - extra_size*1.5, time_temp);
+		break;
+	case LEVEL_CLEARED:
+		setTextSize(60);
+		setTextAlign(TEXT_CENTER);
+		font_drawText(0, 0, "LEVEL CLEARED!");
+		break;
+	case LEVEL_TRANSITION:
+		setTextSize(60);
+		draw_color4f(0.8f,0.8f,0.8f,1);
+		setTextAlign(TEXT_CENTER);
+		//font_drawText(0, 0, "LOADING LEVEL...");
+		break;
+	case LEVEL_PLAYER_DEAD:
+		setTextSize(60);
+		draw_color4f(1,0,0,1);
+		setTextAlign(TEXT_CENTER);
+		if(config.arcade){
+			font_drawText(0, 0, "GAME OVER");
+			draw_color4f(0.1,0.9,0.1,1);
+
+			static float button_timer = 0;
+			static int button_down;
+			button_timer+=dt;
+			if(button_timer > 0.5){
+				button_down = !button_down;
+				button_timer = 0;
+			}
+			if(button_down){
+				cpVect t = cpv(0,0-HEIGHT/4);
+				draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
+			}else{
+				cpVect t = cpv(0,-5.5-HEIGHT/4);
+				draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
+			}
+		}else{
+			font_drawText(0, 0, "GAME OVER-PRESS ENTER");
+		}
+		setTextSize(120);
+		//font_drawText(0,-180,"\x49\x4e\x46\x33\x34\x38\x30");
+		break;
+	case LEVEL_STATE_COUNT:
+		/* invalid value */
+		break;
 	}
 }
 
@@ -850,10 +868,34 @@ int getPlayerScore()
 
 void input()
 {
-
 #if GOT_TOUCH
-	joystick_axis(&joy_left, TOUCH_X, TOUCH_Y);
-	joystick_axis(&joy_right, TOUCH_X, TOUCH_Y);
+	int left = 0, right = 0;
+	SDL_TouchID touchID = SDL_GetTouchDevice(0); //constant
+	if (touchID) {
+		int fingers = SDL_GetNumTouchFingers(touchID);
+		int i;
+		for (i=0; i < fingers; i++) {
+			SDL_Finger *t = SDL_GetTouchFinger(touchID, i);
+			if (t) {
+				if (!left && t->x < 0.5) { // left side of screen
+					left = 1;
+					joystick_touch(&joy_left, t->x, t->y);
+					//SDL_Log("left -> t.x = %f \t t.y = %f \t t.p = %f \t t.id = %d", t->x, t->y, t->pressure, t->id);
+				} else if (!right && t->x > 0.5) {
+					right = 1;
+					joystick_touch(&joy_right, t->x, t->y);
+					//SDL_Log("right -> t.x = %f \t t.y = %f \t t.p = %f \t t.id = %d", t->x, t->y, t->pressure, t->id);
+				}
+			}
+		}
+
+		if (!left) {
+			joy_left.active = 0;
+		}
+		if (!right) {
+			joystick_release(&joy_right);
+		}
+	}
 #else
 	/* update joystick positions */
 	int axis_x = keys[KEY_RIGHT_1] - keys[KEY_LEFT_1];

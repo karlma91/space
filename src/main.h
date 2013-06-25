@@ -67,7 +67,6 @@ extern int main_stop();
 extern SDL_Window *window; //TODO TMP
 
 extern Sint32 MOUSE_X_PRESSED, MOUSE_Y_PRESSED, MOUSE_X, MOUSE_Y;
-extern float TOUCH_X, TOUCH_Y;
 
 extern unsigned int KEY_UP_1;
 extern unsigned int KEY_UP_2;
@@ -81,5 +80,7 @@ extern unsigned int KEY_DOWN_2;
 extern unsigned int KEY_RETURN_1;
 extern unsigned int KEY_RETURN_2;
 extern unsigned int KEY_ESCAPE;
+
+extern SDL_TouchFingerEvent touch[10];
 
 #endif /* MAIN_H_ */

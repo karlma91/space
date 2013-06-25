@@ -20,6 +20,7 @@
 #include "ini.h"
 #endif
 
+#include "joystick.h"
 #include "statesystem.h"
 
 /* drawing code */
@@ -35,7 +36,7 @@
 #include "gameover.h"
 #include "levelselect.h"
 
-#define FPS_LIMIT 0
+#define FPS_LIMIT 1
 
 #if (GLES1)
 #define glOrtho glOrthof
@@ -47,7 +48,6 @@
 
 
 Sint32 MOUSE_X_PRESSED = 0, MOUSE_Y_PRESSED = 0, MOUSE_X, MOUSE_Y;
-float TOUCH_X, TOUCH_Y;
 
 
 static float fps;
@@ -93,7 +93,10 @@ configuration config = {
 	    .height = 1200
 };
 
-joystick joy_left, joy_right;
+SDL_TouchFingerEvent touch[10];
+
+joystick joy_left = JOYSTICK_DEFAULT;
+joystick joy_right = JOYSTICK_DEFAULT;
 
 #if !(TARGET_OS_IPHONE || __ANDROID__)
 static int handler(void* config, const char* section, const char* name,
@@ -411,8 +414,22 @@ static int main_run() {
 				//MOUSE_Y = event.button.y;
 				break;
 			case SDL_FINGERMOTION:
-				TOUCH_X = 2 * event.tfinger.x - 1; //TMP
-				TOUCH_Y = 1 - 2 * event.tfinger.y; //TMP
+				//SDL_FingerID index = event.tfinger.fingerId;
+				//SDL_Finger *finger = SDL_GetTouchFinger(index, 0);
+				//finger->
+
+				/*
+				if (index < 10) {
+					touch[index].dx = event.tfinger.dx;
+					touch[index].dy = event.tfinger.dy;
+					touch[index].fingerId = event.tfinger.fingerId;
+					touch[index].pressure = event.tfinger.pressure;
+					touch[index].timestamp = event.tfinger.timestamp;
+					touch[index].touchId = event.tfinger.touchId;
+					touch[index].type = event.tfinger.type;
+					touch[index].x = event.tfinger.x;
+					touch[index].y = event.tfinger.y;
+				}*/
 				break;
 			}
 		}
