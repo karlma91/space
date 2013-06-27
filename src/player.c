@@ -189,13 +189,17 @@ static void arcade_control(object_group_player *player)
 	float dir_step;
 
 	cpFloat speed = 700;
+	int instant = 1; //tmp instant direction
 
 	if (joy_left.amplitude) {
 		player_angle_target = joy_left.direction;
 
-		dir_step = (player->rotation_speed * 2*M_PI)*dt; // 2.5 rps
-		player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
-
+		if (!instant) {
+			dir_step = (player->rotation_speed * 2*M_PI)*dt; // 2.5 rps
+			player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
+		} else {
+			player_angle = player_angle_target;
+		}
 		//TODO use impulses instead?
 		cpBodySetForce(player->data.body, cpvmult(cpvforangle(player_angle),speed*300)); //*600
 
@@ -210,8 +214,12 @@ static void arcade_control(object_group_player *player)
 
 	if (joy_right.amplitude) {
 		aim_angle_target = joy_right.direction;
-		dir_step = (player->aim_speed * 2*M_PI) * dt; // 0.5 rps
-		player->aim_angle = turn_toangle(player->aim_angle, aim_angle_target, dir_step);
+		if (!instant) {
+			dir_step = (player->aim_speed * 2*M_PI) * dt; // 0.5 rps
+			player->aim_angle = turn_toangle(player->aim_angle, aim_angle_target, dir_step);
+		} else {
+			player->aim_angle = aim_angle_target;
+		}
 		action_shoot(player);
 	}
 }

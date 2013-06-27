@@ -46,7 +46,7 @@ void gameover_init()
 {
 	list = malloc(sizeof(scorelist));
 	highscorelist_create(list);
-	highscorelist_readfile(list,"bin/data/highscores");
+	highscorelist_readfile(list,"highscores"); // NB! moved from bin/data/highscores
 
 	statesystem_init_state(STATESYSTEM_GAMEOVER,0, on_enter,update,NULL,draw, on_leave, destroy);
 
@@ -249,7 +249,7 @@ static void draw()
 
 static void destroy()
 {
-	highscorelist_writefile(list,"bin/data/highscores");
+	highscorelist_writefile(list);
 	highscorelist_destroy(list);
 	free(list);
 }

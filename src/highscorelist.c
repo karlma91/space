@@ -112,10 +112,12 @@ void highscorelist_destroy(scorelist *list)
 /**
  * reads a from a file to the list
  */
-int highscorelist_readfile(scorelist *list, char *filename)
+int highscorelist_readfile(scorelist *list, const char *filename)
 {
 	//TODO read file from internal storage
-	file = fopen(filename,"r");
+	file = waffle_internal_fopen(filename,"r");
+	strcpy(list->filename, filename);
+
 	if (file == NULL) {
 		SDL_Log( "Could not load %s\n",filename);
 		return 1;
@@ -145,12 +147,12 @@ int highscorelist_readfile(scorelist *list, char *filename)
 /**
  * write list to file
  */
-int highscorelist_writefile(scorelist *list, char *filename)
+int highscorelist_writefile(scorelist *list)
 {
 	//TODO write file to internal storage
-	file = fopen(filename,"w");
+	file = waffle_internal_fopen(list->filename,"w");
 	if (file == NULL) {
-		SDL_Log( "Could not load %s\n",filename);
+		SDL_Log( "Could not write to %s\n",list->filename);
 		return 1;
 	}
 

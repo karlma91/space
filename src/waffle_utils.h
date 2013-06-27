@@ -2,6 +2,7 @@
 #define WAFFLE_UTILS_H_
 
 #include "SDL_log.h"
+#include "SDL_system.h"
 
 #if TARGET_OS_IPHONE
 
@@ -13,9 +14,8 @@
 
 #define  LOG_TAG    "waffle_tag"
 #define  SDL_Log(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
-#define  fprintf(TYPE,...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__);__android_log_print(ANDROID_LOG_ERROR,LOG_TAG,"file: %s line:%d\n",__FILE__,__LINE__)
 
-extern char APK_PATH[200];
+//extern char APK_PATH[200];
 #else
 
 #endif
@@ -49,5 +49,12 @@ extern int waffle_read(ZZIP_FILE *fp, char *buffer, int len);
  * closes the file and return size of file
  */
 extern int waffle_read_file(char *filename, char *buffer, int len);
+
+
+/* waffle_internal_fopen
+ *
+ * Use this method to return a IO-stream to filename on the device internal storage
+ */
+extern FILE *waffle_internal_fopen(const char *filename, const char *opentype);
 
 #endif //WAFFLE_UTILS_H_

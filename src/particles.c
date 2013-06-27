@@ -668,7 +668,7 @@ static int read_emitter_from_file (int type,char *filename)
 			}else if(TESTNAME("step")){
 				parse_color_step(node,emi);
 			}else{
-				// fprintf (stderr,"unused element %s \n", node->value.element.name);
+				// SDL_Log("unused element %s \n", node->value.element.name);
 			}
 
 		}else {

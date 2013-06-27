@@ -188,13 +188,15 @@ static void display_init()
 	}
 	SDL_Log("DEBUG - SDL_init done!\n");
 
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 5);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+	SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING,1);
+
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0); //AA not supported on Android test device
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
@@ -342,10 +344,9 @@ static int main_run() {
         fps++;
         if (frames >= 1) {
             sprintf(fps_buf, "%.2f FPS", fps);
-            SDL_Log("%s\n", fps_buf);
+            SDL_Log("%s frame: %d ms", fps_buf, SDL_GetTicks() - thisTime);
             frames = 0;
             fps = 0;
-            fprintf(stderr,"Frametime: %d \n",SDL_GetTicks() - thisTime);
         }
 
 
@@ -458,6 +459,14 @@ static int main_run() {
 	}
 	return 0;
 }
+
+/*
+ * TODO support animation callback with:
+ * int SDL_iPhoneSetAnimationCallback(SDL_Window * window, int interval, void (*callback)(void*), void *callbackParam);
+ * 1. main need to exit
+ * 2. need one single tick-method withouth sleep
+ * 3. need to call main_destroy from somewhere else (maybe directly from main_stop()?)
+ */
 
 static int main_destroy() {
 SDL_Log("DEBUG - SDL_destroy\n");

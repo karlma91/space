@@ -2,11 +2,12 @@
 #include <stdio.h>
 #include "waffle_utils.h"
 
-#define RESOURCE_VERSION 1
+#define RESOURCE_VERSION 1 //TODO add change-date here
 
 #if __ANDROID__
 
-char APK_PATH[200] = "";
+static char APK_PATH[200] = "";
+static char INTERNAL_PATH[200] = "";
 
 /*
  * Native method called from java to obtain full path to the .apk package
@@ -38,6 +39,7 @@ void waffle_init()
 	SDL_Log("Loading game resources...");
 #if __ANDROID__
 	game_data = zzip_dir_open(APK_PATH, &zzip_err); // NB! is actually .apk, not game_data
+	strcpy(&INTERNAL_PATH[0], SDL_AndroidGetInternalStoragePath());
 #else
 	game_data = zzip_dir_open("game_data.zip", &zzip_err);
 	if (!game_data) {
@@ -137,3 +139,34 @@ int waffle_read_file(char *filename, char *buffer, int len)
 		return 0;
 	}
 }
+
+FILE *waffle_internal_fopen(const char *filename, const char *opentype)
+{
+	char *folder = "";
+	char path[200] = "";
+#if __ANDROID__
+	folder = &INTERNAL_PATH[0];
+#elif TARGET_OS_IPHONE
+	folder = "../Documents/";
+#else // win, linux, mac
+	folder = "bin/data/"; //tmp code to not change highscore path
+#endif
+	strcpy(&path[0], folder);
+	strcat(&path[0], filename);
+	return fopen(path, opentype);
+}
+
+
+/*
+int waffle_write_internal(char *filename, char *data)
+{
+
+	return 0;
+}
+
+int waffle_read_internal(char *filename, char *data)
+{
+
+	return 0;
+}
+*/
