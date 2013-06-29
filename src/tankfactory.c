@@ -46,7 +46,6 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 
 	factory->cur = 0;
 	factory->rot = 0;
-	factory->smoke = particles_get_emitter(EMITTER_SMOKE);
 
 	static int randomness= 0;
 	randomness += 123;
@@ -56,6 +55,10 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	//fac->hp = fac->param->max_hp; //TODO FIXME
 
 	cpFloat size = 375;
+
+	if (factory->param->type == ID_TANK) {
+		factory->smoke = particles_get_emitter(EMITTER_SMOKE);
+	}
 
 	/* make and add new body */
 	factory->data.body = cpSpaceAddBody(space,
