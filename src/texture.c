@@ -6,7 +6,7 @@
 
 #include "waffle_utils.h"
 
-#if TARGET_OS_IPHONE | __ANDROID__
+#if __ANDROID__ // | TARGET_OS_IPHONE
 #define TEXTURE_RESOLUTION "_low"
 #else
 #define TEXTURE_RESOLUTION ""

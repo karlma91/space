@@ -61,10 +61,11 @@ object_group_tank *object_create_tank(float xpos, object_group_factory *factory,
 	tank->factory = factory;
 	tank->data.destroyed = 0;
 
-	cpFloat start_height = 30;
+	cpFloat start_height = 30; // default start height (if spawned without factory)
+
 	if (factory){
 		tank->factory_id = factory->data.instance_id;
-		start_height = factory->data.body->p.y;
+		start_height = factory->data.body->p.y - 100;
 	}
 
 	tank->rot_speed = M_PI/2;

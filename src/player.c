@@ -93,7 +93,7 @@ object_group_player *object_create_player()
 	cpBodySetUserData(player->data.body, (void*)player);
 	objects_add((object_data*)player);
 
-	hpbar_init(&(player->hp_bar), player->param->max_hp, 80, 16, -40, 30, &(player->data.body->p));
+	hpbar_init(&(player->hp_bar), player->param->max_hp, 120, 25, -59, 50, &(player->data.body->p));
 
 	cpShapeSetGroup(player->shape, 341); // use a group to keep the car parts from colliding
 

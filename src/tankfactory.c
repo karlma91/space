@@ -46,7 +46,8 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 
 	factory->cur = 0;
 	factory->rot = 0;
-	//factory->smoke = particles_get_emitter(EMITTER_SMOKE);
+	factory->smoke = particles_get_emitter(EMITTER_SMOKE);
+
 	static int randomness= 0;
 	randomness += 123;
 	randomness *= randomness;
@@ -54,16 +55,12 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	factory->max_distance = 900; //TODO read from object definition?
 	//fac->hp = fac->param->max_hp; //TODO FIXME
 
-	cpFloat size = 100*1.5;
-
-	if (factory->param->type == ID_ROCKET) {
-		size = 200;
-	}
+	cpFloat size = 375;
 
 	/* make and add new body */
 	factory->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
-	cpBodySetPos(factory->data.body, cpv(x_pos,64 + size/2));
+	cpBodySetPos(factory->data.body, cpv(x_pos,64+size/2));
 
 	/* make and connect new shape to body */
 	factory->shape = cpSpaceAddShape(space,cpBoxShapeNew(factory->data.body, size, size));
@@ -78,7 +75,7 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	cpBodySetUserData(factory->data.body, factory);
 	objects_add((object_data *) factory);
 
-	hpbar_init(&factory->hp_bar, param->max_hp, 100, 16, -50, 135,
+	hpbar_init(&factory->hp_bar, param->max_hp, 200, 35, -50, 180,
 			&(factory->data.body->p));
 
 	return (object_group_factory*) factory;
@@ -105,10 +102,10 @@ static void update(object_group_factory *factory) {
 			factory->cur += 1;
 		}
 	}
-	//if (factory->smoke) {
-	//	factory->smoke->p.x = factory->data.body->p.x - 20;
-	//	factory->smoke->p.y = factory->data.body->p.y + 80;
-	//}
+	if (factory->param->type == ID_TANK && factory->smoke) {
+		factory->smoke->p.x = factory->data.body->p.x - 80;
+		factory->smoke->p.y = factory->data.body->p.y + 255;
+	}
 }
 
 static void render(object_group_factory *factory) {
@@ -116,27 +113,15 @@ static void render(object_group_factory *factory) {
 
 	//draw_boxshape(factory->shape,RGBAColor(0.2,0.9,0.1,1),RGBAColor(0.6,0.9,0.4,1));
 	factory->rot += 381 * dt;
-	float rot = factory->rot;
-
-	cpVect pos = factory->data.body->p;
+	cpVect draw_pos = factory->data.body->p;
+	draw_pos.y += 8;
 
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-	if (factory->param->type == ID_ROCKET) {
-		float tmp_texmap[8] = {0,1, 1,1, 0,0, 1,0};
-		draw_texture(factory->param->tex_id, &(pos), &tmp_texmap[0], 200, 200, 0);
-	} else {
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		if (factory->param->max_hp < 300)
-			draw_color4f(1,1,1,1);
-		else
-			draw_color4f(1,0.2,0,1);
-
-		draw_texture(TEX_WHEEL, &(pos), TEX_MAP_FULL, 150*1.5, 150*1.5, rot);
-		draw_texture(factory->param->tex_id, &(pos), TEX_MAP_FULL, 200 * 1.5, 200*1.5, 0);
-	}
+	float tmp_texmap[8] = {0,1, 1,1, 0,0, 1,0};
+	draw_texture(factory->param->tex_id, &(draw_pos), &tmp_texmap[0], 400, 400, 0);
 
 	hpbar_draw(&factory->hp_bar);
-	draw_bar(factory->data.body->p.x+65,factory->data.body->p.y-50,10,100,factory->timer / factory->param->spawn_delay,0);
+	draw_bar(factory->data.body->p.x+160,factory->data.body->p.y-150,40,150,factory->timer / factory->param->spawn_delay,0);
 }
 
 //FIXME Somewhat slow temporary fix, as objects_iterate_type does not support extra arguments!
@@ -153,7 +138,7 @@ static void remove_factory_from_rocket(object_group_rocket *rocket) {
 
 static void destroy(object_group_factory *factory) {
 	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);
-	//particles_release_emitter(factory->smoke);
+	particles_release_emitter(factory->smoke);
 
 	cpSpaceRemoveShape(space, factory->shape);
 	cpSpaceRemoveBody(space, factory->data.body);

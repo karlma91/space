@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <emitter imageName="cloud_low.png" name="Default" renderType="inherit" useAdditive="false" useOriented="true">
-<spawnInterval enabled="true" max="250.0" min="200.0"/>
-<spawnCount enabled="true" max="4.0" min="1.0"/>
-<initialLife enabled="true" max="1000.0" min="700.0"/>
-<initialSize enabled="true" max="30.0" min="20.0"/>
+<spawnInterval enabled="true" max="80.0" min="50.0"/>
+<spawnCount enabled="true" max="1.0" min="1.0"/>
+<initialLife enabled="true" max="1500.0" min="1000.0"/>
+<initialSize enabled="true" max="150.0" min="100.0"/>
 <initialRotation enabled="true" max="0.0" min="180.0"/>
-<rotationSpeed enabled="true" max="0.0" min="360.0"/>
+<rotationSpeed enabled="true" max="0.0" min="10.0"/>
 <xOffset enabled="false" max="0.0" min="0.0"/>
 <yOffset enabled="false" max="0.0" min="0.0"/>
 <initialDistance enabled="false" max="0.0" min="0.0"/>
-<speed enabled="true" max="60.0" min="40.0"/>
+<speed enabled="true" max="200.0" min="50.0"/>
 <length enabled="false" max="1000.0" min="1000.0"/>
 <emitCount enabled="false" max="1000.0" min="1000.0"/>
 <spread type="random" value="60.0"/>
@@ -36,8 +36,8 @@
 <point x="1.0" y="1.0"/>
 </scaleY>
 <color>
-<step b="0.5" g="0.5" offset="0.0" r="0.5"/>
-<step b="0.6" g="0.6" offset="0.5" r="0.6"/>
-<step b="0.7" g="0.8" offset="1.0" r="0.8"/>
+<step b="0.7" g="0.7" offset="0.0" r="0.7"/>
+<step b="0.8" g="0.8" offset="0.5" r="0.8"/>
+<step b="0.9" g="0.9" offset="1.0" r="0.9"/>
 </color>
 </emitter>
