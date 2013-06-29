@@ -12,6 +12,7 @@
 #include "statesystem.h"
 #include "draw.h"
 
+STATE_ID STATE_MENU;
 
 /* Drawing */
 #include "draw.h"
@@ -65,27 +66,12 @@ static const Color col_select = {0,0,1,1};
 
 void menu_init()
 {
-    curMenu = &mainMenuTest;
+	curMenu = &mainMenuTest;
 
-
-    if(config.arcade){
-    	statesystem_init_state(STATESYSTEM_MENU, 0,
-    	            on_enter,
-    	            arcade_update,
-    	            NULL,
-    	            arcade_draw,
-    	            on_leave,
-    	            destroy);
-    }else{
-    	statesystem_init_state(STATESYSTEM_MENU, 0,
-    			on_enter,
-    			update,
-    			NULL,
-    			draw,
-    			on_leave,
-    			destroy);
-    }
-
+	STATE_MENU = config.arcade ?
+			statesystem_add_state(0, on_enter, arcade_update, NULL, arcade_draw, on_leave, destroy)
+	:
+			statesystem_add_state(0, on_enter, update, NULL, draw, on_leave, destroy);
 }
 
 static void on_enter()
@@ -172,11 +158,11 @@ static void arcade_update()
 		switch(current_menu){
 			case MENU_MAIN:
 				space_init_level(1,1);
-				statesystem_set_state(STATESYSTEM_SPACE);
+				statesystem_set_state(STATE_SPACE);
 				menu_change_current_menu(MENU_INGAME);
 				break;
 			case MENU_INGAME:
-				statesystem_set_state(STATESYSTEM_SPACE);
+				statesystem_set_state(STATE_SPACE);
 				break;
 			}
 		keys[KEY_RETURN_2] = 0;
@@ -185,7 +171,7 @@ static void arcade_update()
 
 	if(keys[KEY_ESCAPE]){
 		menu_change_current_menu(MENU_MAIN);
-		statesystem_set_state(STATESYSTEM_MENU);
+		statesystem_set_state(STATE_MENU);
 		keys[KEY_ESCAPE] = 0;
 	}
 }
@@ -248,15 +234,15 @@ static void inner_main()
 	switch (select_id) {
 	case 0: //START GAME
 		space_init_level(1,1);
-		statesystem_set_state(STATESYSTEM_SPACE);
+		statesystem_set_state(STATE_SPACE);
 		curMenu = &ingameMenu;
 		break;
 	case 1: //LEVEL SELECT
-	    statesystem_set_state(STATESYSTEM_LEVELSELECT);
+	    statesystem_set_state(STATE_LEVELSELECT);
 		break;
 	case 2: //HIGHSCORE
 		gameover_setstate(show_highscore);
-		statesystem_set_state(STATESYSTEM_GAMEOVER);
+		statesystem_set_state(STATE_GAMEOVER);
 		break;
 	case 3: //CREDITS
 		break;
@@ -272,16 +258,16 @@ static void inner_ingame()
 {
 	switch (select_id) {
 	case 0: //RESUME GAME
-		statesystem_set_state(STATESYSTEM_SPACE);
+		statesystem_set_state(STATE_SPACE);
 		break;
 	case 1: //RESTART GAME
-	    statesystem_set_state(STATESYSTEM_SPACE);
+	    statesystem_set_state(STATE_SPACE);
 	    menu_change_current_menu(MENU_INGAME);
 		space_init_level(1,1);
 		break;
 	case 2:
 		curMenu = &mainMenuTest;
-		statesystem_set_state(STATESYSTEM_MENU);
+		statesystem_set_state(STATE_MENU);
 		break;
 	default:
 		break;

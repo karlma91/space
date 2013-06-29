@@ -20,6 +20,8 @@
 
 #include "waffle_utils.h"
 
+STATE_ID STATE_LEVELSELECT;
+
 /* static prototypes */
 static void update();
 static void render();
@@ -50,7 +52,7 @@ static float zoomed_cam_y = 0;
 
 void levelselect_init()
 {
-    statesystem_init_state(STATESYSTEM_LEVELSELECT, 0, on_enter, update, NULL, render, on_leave, destroy);
+	STATE_LEVELSELECT = statesystem_add_state(0, on_enter, update, NULL, render, on_leave, destroy);
 
 	level_get_ships(&ships, &decks);
 	//SDL_Log( "decks: %d \n", decks);
@@ -79,7 +81,7 @@ static void update()
 	}
 
 	if (keys[KEY_ESCAPE]){
-	    statesystem_set_state(STATESYSTEM_MENU);
+	    statesystem_set_state(STATE_MENU);
 		keys[KEY_ESCAPE] = 0;
 		}
 
@@ -126,7 +128,7 @@ static void update()
 		level_select = (level_select < 0) ? ships[sel].count - 1 : (level_select >= ships[sel].count ? 0 : level_select);;
 
 		if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
-		    statesystem_set_state(STATESYSTEM_SPACE);
+		    statesystem_set_state(STATE_SPACE);
 			/* load correct level */
 			space_init_level(sel+1,level_select+1);
 			keys[KEY_RETURN_2] = 0, keys[KEY_RETURN_1] = 0;

@@ -20,6 +20,7 @@
 
 #define SLEEP_TIME 1
 
+//TODO move to game.h
 /* config struct */
 typedef struct
 {
@@ -35,7 +36,7 @@ typedef struct
     unsigned int height;
 } configuration;
 
-extern configuration config;
+extern configuration config; //TODO move to game.h
 
 /* State  struct */
 typedef struct state_ state;
@@ -54,7 +55,7 @@ extern int WIDTH;
 extern int HEIGHT;
 /* The delta time */
 extern float dt;
-extern float mdt;
+extern int mdt;
 
 extern unsigned char *keys;
 
@@ -62,7 +63,7 @@ extern char fps_buf[];
 /* current state in use */
 extern state *currentState;
 
-extern int main_stop();
+extern void main_stop();
 
 extern SDL_Window *window; //TODO TMP
 

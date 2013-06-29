@@ -1,7 +1,6 @@
 /* header */
 #include "gameover.h"
 
-
 /* standard c-libraries */
 #include <stdio.h>
 #include <string.h>
@@ -20,6 +19,8 @@
 
 /* Game components */
 #include "highscorelist.h"
+
+STATE_ID STATE_GAMEOVER;
 
 /* static prototypes */
 static void on_enter();
@@ -48,7 +49,7 @@ void gameover_init()
 	highscorelist_create(list);
 	highscorelist_readfile(list,"highscores"); // NB! moved from bin/data/highscores
 
-	statesystem_init_state(STATESYSTEM_GAMEOVER,0, on_enter,update,NULL,draw, on_leave, destroy);
+	STATE_GAMEOVER = statesystem_add_state(0, on_enter,update,NULL,draw, on_leave, destroy);
 
 }
 
@@ -145,7 +146,7 @@ static void update() {
 				return;
 			}
 		    menu_change_current_menu(MENU_MAIN);
-		    statesystem_set_state(STATESYSTEM_MENU);
+		    statesystem_set_state(STATE_MENU);
 			keys[KEY_ESCAPE] = 0;
 			keys[KEY_RETURN_1] = 0;
 			keys[KEY_RETURN_2] = 0;

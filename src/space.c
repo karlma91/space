@@ -29,6 +29,8 @@
 
 static float accumulator = 0;
 
+STATE_ID STATE_SPACE;
+
 /* state functions */
 static void pre_update();
 static void post_update();
@@ -165,7 +167,7 @@ static void level_player_dead()
 	if(keys[KEY_RETURN_2] || keys[KEY_RETURN_1]){//state_timer > 3){
 		keys[KEY_RETURN_2] = 0, keys[KEY_RETURN_1] = 0;
 		lvl_cleared=0;
-		statesystem_set_state(STATESYSTEM_GAMEOVER);
+		statesystem_set_state(STATE_GAMEOVER);
 		gameover_setstate(enter_name);
 		//change_state(LEVEL_TRANSITION);
 	}
@@ -201,7 +203,7 @@ static void level_transition()
 			int next_lvl = currentlvl->deck + 1;
 			if (next_lvl > level_get_level_count(currentlvl->station)) {
 				gameover_setstate(GAMEOVER_WIN);
-			    statesystem_set_state(STATESYSTEM_GAMEOVER);
+			    statesystem_set_state(STATE_GAMEOVER);
 			} else {
 				space_init_level(1,next_lvl); //TODO TMP
 			}
@@ -220,7 +222,7 @@ static void level_transition()
 static void change_state(int state)
 {
 	state_timer = 0;
-	statesystem_set_inner_state(STATESYSTEM_SPACE,state);
+	statesystem_set_inner_state(STATE_SPACE,state);
 	gamestate = state;
 	if (!config.arcade)
 		SDL_Log("DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
@@ -586,8 +588,8 @@ void render_gui()
 
 
 	setTextAlign(TEXT_RIGHT);
-	if(!config.arcade)
-		font_drawText(WIDTH/2 - 15, HEIGHT/2 - 20, fps_buf);
+	//if(!config.arcade)
+	font_drawText(WIDTH/2 - 15, HEIGHT/2 - 20, fps_buf);
 
 	char time_temp[20];
 	switch(gamestate) {
@@ -672,7 +674,7 @@ static void render_objects(object_data *obj)
 
 
 #if GLES1
-#define star_count 0
+#define star_count 100
 #else
 #define star_count 100
 #endif
@@ -827,13 +829,13 @@ static void SPACE_destroy()
 
 void space_init()
 {
-    statesystem_init_state(STATESYSTEM_SPACE,LEVEL_STATE_COUNT,on_enter,pre_update,post_update,render,on_leave,SPACE_destroy);
-    statesystem_add_inner_state(STATESYSTEM_SPACE,LEVEL_START,level_start,NULL);
-    statesystem_add_inner_state(STATESYSTEM_SPACE,LEVEL_RUNNING,level_running,NULL);
-    statesystem_add_inner_state(STATESYSTEM_SPACE,LEVEL_TIMESUP,level_timesup,NULL);
-    statesystem_add_inner_state(STATESYSTEM_SPACE,LEVEL_PLAYER_DEAD,level_player_dead,NULL);
-    statesystem_add_inner_state(STATESYSTEM_SPACE,LEVEL_CLEARED,level_cleared,NULL);
-    statesystem_add_inner_state(STATESYSTEM_SPACE,LEVEL_TRANSITION,level_transition,NULL);
+	STATE_SPACE = statesystem_add_state(LEVEL_STATE_COUNT,on_enter,pre_update,post_update,render,on_leave,SPACE_destroy);
+    statesystem_add_inner_state(STATE_SPACE,LEVEL_START,level_start,NULL);
+    statesystem_add_inner_state(STATE_SPACE,LEVEL_RUNNING,level_running,NULL);
+    statesystem_add_inner_state(STATE_SPACE,LEVEL_TIMESUP,level_timesup,NULL);
+    statesystem_add_inner_state(STATE_SPACE,LEVEL_PLAYER_DEAD,level_player_dead,NULL);
+    statesystem_add_inner_state(STATE_SPACE,LEVEL_CLEARED,level_cleared,NULL);
+    statesystem_add_inner_state(STATE_SPACE,LEVEL_TRANSITION,level_transition,NULL);
 
 	objects_init();
 
@@ -847,7 +849,7 @@ void space_init()
 
     collisioncallbacks_init();
 
-  stars_init();
+    stars_init();
 }
 
 
@@ -943,7 +945,7 @@ void input()
 	 */
 	if (keys[KEY_ESCAPE] && gamestate == LEVEL_RUNNING) {
 		menu_change_current_menu(MENU_INGAME);
-		statesystem_push_state(STATESYSTEM_MENU);
+		statesystem_push_state(STATE_MENU);
 		keys[KEY_ESCAPE] = 0;
 	}
 #endif

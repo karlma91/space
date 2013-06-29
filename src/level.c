@@ -26,7 +26,6 @@ static void *(params[ID_COUNT]);
 static int i;
 
 #include "zzip/lib.h"
-static ZZIP_FILE *file;
 
 static char buf[21];
 static char object_buf[21];

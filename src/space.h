@@ -4,6 +4,9 @@
 #include "chipmunk.h"
 #include "main.h"
 #include "level.h"
+#include "statesystem.h"
+
+extern STATE_ID STATE_SPACE;
 
 void space_init();
 

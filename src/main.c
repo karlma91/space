@@ -8,6 +8,8 @@
 #include <string.h>
 #include <time.h>
 
+#include "game.h"
+
 /* SDL and OpenGL */
 #include "SDL.h"
 #include "SDL_main.h"
@@ -30,18 +32,12 @@
 
 #include "level.h"
 
-/* Game states */
-#include "menu.h"
-#include "space.h"
-#include "gameover.h"
-#include "levelselect.h"
-
 #define FPS_LIMIT 1
 
 #if (GLES1)
 #define glOrtho glOrthof
 
-#define FPS_SLEEP_TIME 33
+#define FPS_SLEEP_TIME 16//33
 #else
 #define FPS_SLEEP_TIME 16
 #endif
@@ -49,6 +45,10 @@
 
 Sint32 MOUSE_X_PRESSED = 0, MOUSE_Y_PRESSED = 0, MOUSE_X, MOUSE_Y;
 
+static Uint32 thisTime = 0;
+static Uint32 lastTime;
+
+static int paused = 0;
 
 static float fps;
 static float frames;
@@ -73,8 +73,8 @@ int HEIGHT;
 
 int W, H;
 
-float dt;
-float mdt;
+float dt = 0;
+int mdt = 0;
 unsigned char *keys;
 state *currentState;
 
@@ -87,16 +87,18 @@ static int main_running = 1;
 
 configuration config = {
 		.fullscreen = 1,
-	    .arcade = 1,
-	    .arcade_keys = 1,
-	    .width = 1920,
-	    .height = 1200
+		.arcade = 1,
+		.arcade_keys = 1,
+		.width = 1920,
+		.height = 1200
 };
 
 SDL_TouchFingerEvent touch[10];
 
 joystick joy_left = JOYSTICK_DEFAULT;
 joystick joy_right = JOYSTICK_DEFAULT;
+
+static int main_destroy();
 
 #if !(TARGET_OS_IPHONE || __ANDROID__)
 static int handler(void* config, const char* section, const char* name,
@@ -106,10 +108,10 @@ static int handler(void* config, const char* section, const char* name,
 #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
 	if (MATCH("video", "fullscreen")) {
 		pconfig->fullscreen = atoi(value);
-  }else if (MATCH("video", "arcade")) {
-	  pconfig->arcade = atoi(value);
-  } else if (MATCH("video", "arcade_keys")) {
-	  pconfig->arcade_keys = atoi(value);
+	}else if (MATCH("video", "arcade")) {
+		pconfig->arcade = atoi(value);
+	} else if (MATCH("video", "arcade_keys")) {
+		pconfig->arcade_keys = atoi(value);
 
 	} else if (MATCH("video", "width")) {
 		pconfig->width = atoi(value);
@@ -159,6 +161,74 @@ static int init_config()
 	return 0;
 }
 
+static void main_pause()
+{
+	//TODO implement and call statesystem pause
+	paused = 1;
+}
+
+static void main_unpause()
+{
+	//TODO implement and call statesystem unpause
+	paused = 0;
+}
+
+static int HandleAppEvents(void *userdata, SDL_Event *event)
+{
+	switch (event->type)
+	{
+	case SDL_QUIT:
+		main_stop();
+		return 1;
+#if TARGET_OS_IPHONE
+	case SDL_APP_TERMINATING:
+		/* Terminate the app.
+           Shut everything down before returning from this function.
+		 */
+		SDL_Log("SDL_APP_TERMINATING");
+		return 0;
+	case SDL_APP_LOWMEMORY:
+		/* You will get this when your app is paused and iOS wants more memory.
+           Release as much memory as possible.
+		 */
+		SDL_Log("SDL_APP_LOWMEMORY");
+		return 0;
+	case SDL_APP_WILLENTERBACKGROUND:
+		/* Prepare your app to go into the background.  Stop loops, etc.
+           This gets called when the user hits the home button, or gets a call.
+		 */
+		main_pause();
+		SDL_Log("SDL_APP_WILLENTERBACKGROUND");
+		return 0;
+	case SDL_APP_DIDENTERBACKGROUND:
+		/* This will get called if the user accepted whatever sent your app to the background.
+           If the user got a phone call and canceled it, you'll instead get an SDL_APP_DIDENTERFOREGROUND event and restart your loops.
+           When you get this, you have 5 seconds to save all your state or the app will be terminated.
+           Your app is NOT active at this point.
+		 */
+		SDL_Log("SDL_APP_DIDENTERBACKGROUND");
+		return 0;
+	case SDL_APP_WILLENTERFOREGROUND:
+		/* This call happens when your app is coming back to the foreground.
+           Restore all your state here.
+		 */
+		main_unpause();
+		SDL_Log("SDL_APP_WILLENTERFOREGROUND");
+		return 0;
+	case SDL_APP_DIDENTERFOREGROUND:
+		/* Restart your loops here.
+           Your app is interactive and getting CPU again.
+		 */
+		main_unpause();
+		SDL_Log("SDL_APP_DIDENTERFOREGROUND");
+		return 0;
+#endif
+	default:
+		/* No special processing, add it to the event queue */
+		return 1;
+	}
+}
+
 static void setAspectRatio() {
 	SDL_ShowCursor(!config.fullscreen);
 
@@ -175,8 +245,8 @@ static void setAspectRatio() {
 		H = config.height;
 	}
 
-	WIDTH = 1920;
-	HEIGHT = (1.0f * H / W) * WIDTH;
+	HEIGHT = 1200; //TODO change this to reveal hard-coded coordinates/sizes
+	WIDTH = (1.0f * W / H) * HEIGHT;
 }
 
 static void display_init()
@@ -195,21 +265,21 @@ static void display_init()
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 	SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING,1);
 
-    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0); //AA not supported on Android test device
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
+	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0); //AA not supported on Android test device
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-    SDL_SetHint("SDL_IOS_ORIENTATIONS", "LandscapeLeft LandscapeRight");
+	SDL_SetHint("SDL_IOS_ORIENTATIONS", "LandscapeLeft LandscapeRight");
 
 	Uint32 flags = SDL_WINDOW_OPENGL |
-			       SDL_WINDOW_RESIZABLE |
-			       SDL_WINDOW_BORDERLESS |
-			       (config.fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
+			SDL_WINDOW_RESIZABLE |
+			SDL_WINDOW_BORDERLESS |
+			(config.fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
 
 	SDL_GetDisplayBounds(0, &fullscreen_dimensions);
 	setAspectRatio();
@@ -222,7 +292,7 @@ static void display_init()
 	SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask, &Bmask, &Amask);
 
 	SDL_Log("Current mode: %dx%d@%dHz, %d bits-per-pixel (%s)", mode.w, mode.h, mode.refresh_rate, bpp,
-	   SDL_GetPixelFormatName(mode.format));
+			SDL_GetPixelFormatName(mode.format));
 
 
 	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, W, H, flags);
@@ -247,11 +317,11 @@ static void initGL() {
 
 	SDL_GL_SetSwapInterval(FPS_LIMIT); // 1 = v-sync on
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-    /* set the clear color to dark blue */
-//	glClearColor(0, 0.08, 0.15, 1);
+	/* set the clear color to dark blue */
+	//	glClearColor(0, 0.08, 0.15, 1);
 
 	/* print gl info */
 	SDL_Log("GL_VENDOR: %s\n", glGetString(GL_VENDOR));
@@ -259,10 +329,10 @@ static void initGL() {
 	SDL_Log("GL_VERSION: %s\n", glGetString(GL_VERSION));
 	////SDL_Log("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    glMatrixMode(GL_PROJECTION);
+	glMatrixMode(GL_PROJECTION);
 	draw_load_identity();
 	GLfloat W_2 = WIDTH / 2;
 	GLfloat H_2 = HEIGHT / 2;
@@ -299,143 +369,84 @@ static void main_init() {
 	particles_init();   /* load and prepare all particle systems */
 	//font_init();      /* (currently not in use) */
 	statesystem_init(); /* init all states */
+	game_init();
 
-	statesystem_set_state(STATESYSTEM_MENU);
-}
+    statesystem_set_state(0);
 
-static int main_run() {
-	SDL_Event event;
-	Uint32 thisTime = 0;
-	Uint32 lastTime;
-	float deltaTime = 0.0f;
+	// Handle iOS app-events (pause, low-memory, terminating, etc...) and SDL_QUIT
+	SDL_SetEventFilter(HandleAppEvents, NULL);
 
-	statesystem_set_state(STATESYSTEM_MENU);
+#if TARGET_OS_IPHONE
+	// Initialize the Game Center for scoring and matchmaking
+    //InitGameCenter(); //TODO support GameCenter
+#endif
 
 	lastTime = SDL_GetTicks();
+}
 
-	//START GAME
-	if(config.arcade){
-		SDL_Log("start %s\n", "999");
-	}
+static void check_events()
+{
+	SDL_Event event;
+	SDL_PumpEvents();
+	keys = SDL_GetKeyboardState(NULL);
 
-	while (main_running) {
+	//TODO add keypress callbacks
+	while (SDL_PollEvent(&event)) {
+		switch (event.type) {
+		case SDL_WINDOWEVENT_RESIZED:
+			if (event.window.windowID == SDL_GetWindowID(window)) {
+				W = event.window.data1;
+				H = event.window.data2;
 
-		thisTime = SDL_GetTicks();
-		deltaTime = (float) (thisTime - lastTime) / 1000.0f;
-		lastTime = thisTime;
-
-		SDL_PumpEvents();
-		keys = SDL_GetKeyboardState(NULL );
-
-
-
-		deltaTime = deltaTime > 0.25 ? 0.25 : deltaTime;
-		dt = deltaTime;
-		mdt = dt * 1000;
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		statesystem_update();
-		draw_load_identity();
-		statesystem_draw();
-
-
-        frames += deltaTime;
-        fps++;
-        if (frames >= 1) {
-            sprintf(fps_buf, "%.2f FPS", fps);
-            SDL_Log("%s frame: %d ms", fps_buf, SDL_GetTicks() - thisTime);
-            frames = 0;
-            fps = 0;
-        }
-
-
-		int gl_error = glGetError();
-		if (gl_error) SDL_Log("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error);
-
-		SDL_GL_SwapWindow(window);
-
-		//input handler
-		if (keys[SDL_SCANCODE_F12]) {
-			main_stop();
-		}
-
-		if (keys[SDL_SCANCODE_F] && keys[SDL_SCANCODE_LCTRL]) {
-			config.fullscreen ^= 1; // Toggle fullscreen
-			if (SDL_SetWindowFullscreen(window, config.fullscreen)) {
-				SDL_Log(SDL_GetError());
-				config.fullscreen ^= 1; // Re-toggle
-			} else {
-				glViewport(0, 0, W, H);
-				setAspectRatio();
-			}
-			keys[SDL_SCANCODE_F] = 0;
-		}
-
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
-			case SDL_QUIT:
-				main_stop();
-				break;
-			case SDL_WINDOWEVENT_RESIZED:
-				if (event.window.windowID == SDL_GetWindowID(window)) {
-					W = event.window.data1;
-					H = event.window.data2;
-
-					int status = SDL_GL_MakeCurrent(window,glcontext);
-					if (status) {
-						SDL_Log("SDL_GL_MakeCurrent(): %s", SDL_GetError());
-					}
-
-					glViewport(0, 0, W, H);
-
-					setAspectRatio();
+				int status = SDL_GL_MakeCurrent(window,glcontext);
+				if (status) {
+					SDL_Log("SDL_GL_MakeCurrent(): %s", SDL_GetError());
 				}
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-				MOUSE_X_PRESSED = event.button.x;
-				MOUSE_Y_PRESSED = event.button.y;
-				// very tmp touch controller
-				keys[KEY_RETURN_1] = 1;
-				keys[KEY_RETURN_2] = 1;
-				keys[KEY_RIGHT_1] = 1;
-				keys[KEY_UP_1] = 1;
-				keys[KEY_RIGHT_2] = 1;
-				break;
-			case SDL_MOUSEBUTTONUP:
-				// very tmp touch controller
-				keys[KEY_RETURN_1] = 0;
-				keys[KEY_RETURN_2] = 0;
-				keys[KEY_RIGHT_1] = 0;
-				keys[KEY_UP_1] = 0;
-				keys[KEY_RIGHT_2] = 0;
-				break;
-			case SDL_MOUSEMOTION:
-				//MOUSE_X = event.button.x;
-				//MOUSE_Y = event.button.y;
-				break;
-			case SDL_FINGERMOTION:
-				//SDL_FingerID index = event.tfinger.fingerId;
-				//SDL_Finger *finger = SDL_GetTouchFinger(index, 0);
-				//finger->
 
-				/*
-				if (index < 10) {
-					touch[index].dx = event.tfinger.dx;
-					touch[index].dy = event.tfinger.dy;
-					touch[index].fingerId = event.tfinger.fingerId;
-					touch[index].pressure = event.tfinger.pressure;
-					touch[index].timestamp = event.tfinger.timestamp;
-					touch[index].touchId = event.tfinger.touchId;
-					touch[index].type = event.tfinger.type;
-					touch[index].x = event.tfinger.x;
-					touch[index].y = event.tfinger.y;
-				}*/
-				break;
+				glViewport(0, 0, W, H);
+
+				setAspectRatio();
+				SDL_Log("DEBUG: WINDOW RESIZED");
 			}
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			MOUSE_X_PRESSED = event.button.x;
+			MOUSE_Y_PRESSED = event.button.y;
+			// very tmp touch controller
+			keys[KEY_RETURN_1] = 1;
+			keys[KEY_RIGHT_2] = 1;
+			break;
+		case SDL_MOUSEBUTTONUP:
+			// very tmp touch controller
+			keys[KEY_RETURN_1] = 0;
+			keys[KEY_RIGHT_2] = 0;
+			break;
+		case SDL_MOUSEMOTION:
+			break;
+		case SDL_FINGERMOTION:
+			//SDL_FingerID index = event.tfinger.fingerId;
+			//SDL_Finger *finger = SDL_GetTouchFinger(index, 0);
+			//finger->
+
+			/*
+					if (index < 10) {
+						touch[index].dx = event.tfinger.dx;
+						touch[index].dy = event.tfinger.dy;
+						touch[index].fingerId = event.tfinger.fingerId;
+						touch[index].pressure = event.tfinger.pressure;
+						touch[index].timestamp = event.tfinger.timestamp;
+						touch[index].touchId = event.tfinger.touchId;
+						touch[index].type = event.tfinger.type;
+						touch[index].x = event.tfinger.x;
+						touch[index].y = event.tfinger.y;
+					}*/
+			break;
 		}
+	}
+}
 
-
+static void main_sleep()
+{
 #if FPS_LIMIT
 		//not use 100% of cpu
 		if (keys[SDL_SCANCODE_Z])
@@ -456,20 +467,91 @@ static int main_run() {
 #else
 		SDL_Delay(1);
 #endif
+}
+
+static void main_tick(void *data)
+{
+	thisTime = SDL_GetTicks();
+	dt = (thisTime - lastTime) / 1000.0f;
+	lastTime = thisTime;
+
+	dt = dt > 0.1 ? 0.1 : dt;
+	mdt = dt * 1000;
+
+	frames += dt;
+	fps++;
+
+	draw_load_identity();
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	if (!paused) {
+		check_events();
+
+		statesystem_update();
+		statesystem_draw();
+
+		int gl_error = glGetError();
+		if (gl_error) SDL_Log("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error);
+
+		if (frames >= 1) {
+			sprintf(fps_buf, "%.2f FPS", fps);
+			SDL_Log("%s frame: %d ms", fps_buf, SDL_GetTicks() - thisTime);
+			frames = 0;
+			fps = 0;
+		}
+
+		SDL_GL_SwapWindow(window);
 	}
+
+	//input handler
+	if (keys[SDL_SCANCODE_F12]) {
+		main_stop();
+	}
+
+	if (keys[SDL_SCANCODE_F] && keys[SDL_SCANCODE_LCTRL]) {
+		config.fullscreen ^= 1; // Toggle fullscreen
+		if (SDL_SetWindowFullscreen(window, config.fullscreen)) {
+			SDL_Log(SDL_GetError());
+			config.fullscreen ^= 1; // Re-toggle
+		} else {
+			glViewport(0, 0, W, H);
+			setAspectRatio();
+			SDL_Log("DEBUG: WINDOW FULLSCREEN CHANGED -> %d", config.fullscreen);
+		}
+		keys[SDL_SCANCODE_F] = 0;
+
+	}
+
+	if (!main_running) {
+		main_destroy();
+	}
+}
+
+static int main_run()
+{
+#if __IPHONEOS__
+    // Initialize the Game Center for scoring and matchmaking
+    //InitGameCenter(); //TODO support GameCenter
+
+    // Set up the game to run in the window animation callback on iOS
+    // so that Game Center and so forth works correctly.
+	SDL_iPhoneSetAnimationCallback(window, 1, main_tick, NULL);
+#else
+	//START GAME
+	if(config.arcade){
+		SDL_Log("start %s\n", "999");
+	}
+
+	while (main_running) {
+		main_tick(NULL);
+		main_sleep();
+	}
+#endif
 	return 0;
 }
 
-/*
- * TODO support animation callback with:
- * int SDL_iPhoneSetAnimationCallback(SDL_Window * window, int interval, void (*callback)(void*), void *callbackParam);
- * 1. main need to exit
- * 2. need one single tick-method withouth sleep
- * 3. need to call main_destroy from somewhere else (maybe directly from main_stop()?)
- */
-
 static int main_destroy() {
-SDL_Log("DEBUG - SDL_destroy\n");
+	SDL_Log("DEBUG - SDL_destroy\n");
 	level_destroy();
 	//cpSpaceFreeChildren(space);
 
@@ -492,20 +574,16 @@ SDL_Log("DEBUG - SDL_destroy\n");
 	SDL_VideoQuit();
 	SDL_Quit();
 
+	exit(0);
 	return 0;
 }
 
 int main(int argc, char *args[]) {
 	main_init();
 	main_run();
-	main_destroy();
-
-	exit(0);
 	return 0;
 }
 
-int main_stop() {
+void main_stop() {
 	main_running = 0;
-
-	return main_running;
 }

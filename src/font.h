@@ -31,5 +31,7 @@ void font_drawText(float x, float y, char* text);
 void font_init();
 void font_destroy();
 
+void init_text(char c);
+
 
 #endif /* FONT_H_ */

@@ -5,9 +5,13 @@
 #include "gameover.h"
 #include "levelselect.h"
 
+#define MAX_STATES 10
+#define MAX_INNER_STATES 10
+
+static int state_count = 0;
+
 typedef struct systemstate sstate;
 struct systemstate {
-
     sstate *prev;
 
     int inner_states;
@@ -15,8 +19,8 @@ struct systemstate {
     float time_alive;
     float time_in_inner_state;
 
-    void (*inner_update[10])();
-    void (*inner_draw[10])();
+    void (*inner_update[MAX_INNER_STATES])();
+    void (*inner_draw[MAX_INNER_STATES])();
 
     void (*on_enter)(void);
     void (*pre_update)(void);
@@ -29,34 +33,24 @@ struct systemstate {
 
 };
 
-sstate states[STATESYSTEM_COUNT];
+sstate states[MAX_STATES];
 
 sstate *stack_bot;
 sstate *stack_top;
 
-
 void statesystem_init()
 {
     int i;
-    for(i = 0; i<STATESYSTEM_COUNT; i++){
+    for(i = 0; i<state_count; i++){
         states[i].prev = NULL;
         states[i].next = NULL;
         states[i].current_inner_state = 0;
         states[i].time_alive = 0;
         states[i].time_in_inner_state = 0;
     }
-
-    //TODO move Space-dependent code out of game engine
-    menu_init();
-    space_init();
-    gameover_init();
-    levelselect_init();
-
-    statesystem_set_state(0);
-
 }
 
-void statesystem_init_state(int state, int inner_states,
+STATE_ID statesystem_add_state(int inner_states,
         void (*on_enter)(),
         void (*pre_update)(),
         void (*post_update)(),
@@ -64,6 +58,7 @@ void statesystem_init_state(int state, int inner_states,
         void (*on_leave)(),
         void (*destroy)())
 {
+	STATE_ID state = state_count++;
 
     states[state].inner_states = inner_states;
     if(inner_states > 0){
@@ -76,20 +71,22 @@ void statesystem_init_state(int state, int inner_states,
     states[state].draw = draw;
     states[state].on_leave = on_leave;
     states[state].destroy = destroy;
+
+    return state;
 }
-void statesystem_add_inner_state(int state, int inner_state, void (*update)(), void (*draw)())
+void statesystem_add_inner_state(STATE_ID state, int inner_state, void (*update)(), void (*draw)())
 {
     states[state].inner_update[inner_state] = update;
     states[state].inner_draw[inner_state] = draw;
 }
 
-void statesystem_set_inner_state(int state, int inner_state)
+void statesystem_set_inner_state(STATE_ID state, int inner_state)
 {
     states[state].time_in_inner_state = 0;
     states[state].current_inner_state = inner_state;
 }
 
-void statesystem_push_state(int state)
+void statesystem_push_state(STATE_ID state)
 {
     states[state].time_alive = 0;
     stack_top->next = &(states[state]);
@@ -97,7 +94,7 @@ void statesystem_push_state(int state)
     stack_top = stack_top->next;
 }
 
-void statesystem_pop_state(int state)
+void statesystem_pop_state(STATE_ID state)
 {
     sstate *temp = stack_top;
     stack_top = stack_top->prev;
@@ -105,10 +102,10 @@ void statesystem_pop_state(int state)
     stack_top->next = NULL;
 }
 
-void statesystem_set_state(int state)
+void statesystem_set_state(STATE_ID state)
 {
     int i;
-    for(i = 0; i<STATESYSTEM_COUNT; i++){
+    for(i = 0; i<state_count; i++){
         states[i].prev = NULL;
         states[i].next = NULL;
     }
@@ -147,7 +144,7 @@ void statesystem_draw()
 void statesystem_destroy()
 {
     int i = 0;
-    for(i=0; i<STATESYSTEM_COUNT; i++){
+    for(i=0; i<state_count; i++){
         if(states[i].destroy){
             states[i].destroy();
         }
@@ -157,4 +154,3 @@ void statesystem_destroy()
         }
     }
 }
-

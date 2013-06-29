@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "waffle_utils.h"
 
-#define RESOURCE_VERSION 1 //TODO add change-date here
+#define RESOURCE_VERSION 2 // changed: 30.06.13
 
 #if __ANDROID__
 
@@ -61,7 +61,7 @@ void waffle_init()
 		sscanf(buffer, "%d", &version);
 
 		if (version != RESOURCE_VERSION) {
-			SDL_Log("ERROR: you need to update game_data.zip, found version %d, but needs version %d.\n"
+			SDL_Log("ERROR: you need to update game_data.zip, found version %d, but expected version %d.\n"
 					"Run ./zip_res.sh to compress current game data", version, RESOURCE_VERSION);
 			exit(-1);
 		}
