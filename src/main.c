@@ -87,8 +87,6 @@ static int main_running = 1;
 
 configuration config = {
 		.fullscreen = 1,
-		.arcade = 1,
-		.arcade_keys = 1,
 		.width = 1920,
 		.height = 1200
 };
@@ -143,7 +141,7 @@ static int init_config()
 
 #endif
 
-	if (config.arcade_keys) {
+#if ARCADE_MODE
 		KEY_UP_2 = SDL_SCANCODE_UP;
 		KEY_UP_1 = SDL_SCANCODE_W;
 		KEY_LEFT_2 = SDL_SCANCODE_LEFT;
@@ -156,11 +154,12 @@ static int init_config()
 		KEY_RETURN_1 = SDL_SCANCODE_K;
 		KEY_RETURN_2 = SDL_SCANCODE_G;
 		KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
-	}
+#endif
 
 	return 0;
 }
 
+#if TARGET_OS_IPHONE
 static void main_pause()
 {
 	//TODO implement and call statesystem pause
@@ -172,6 +171,7 @@ static void main_unpause()
 	//TODO implement and call statesystem unpause
 	paused = 0;
 }
+#endif
 
 static int HandleAppEvents(void *userdata, SDL_Event *event)
 {
@@ -390,56 +390,22 @@ static void check_events()
 	SDL_PumpEvents();
 	keys = SDL_GetKeyboardState(NULL);
 
-	//TODO add keypress callbacks
 	while (SDL_PollEvent(&event)) {
+		statesystem_push_event(&event);
+		SDL_Event sim_event;
+
 		switch (event.type) {
-		case SDL_WINDOWEVENT_RESIZED:
-			if (event.window.windowID == SDL_GetWindowID(window)) {
-				W = event.window.data1;
-				H = event.window.data2;
-
-				int status = SDL_GL_MakeCurrent(window,glcontext);
-				if (status) {
-					SDL_Log("SDL_GL_MakeCurrent(): %s", SDL_GetError());
-				}
-
-				glViewport(0, 0, W, H);
-
-				setAspectRatio();
-				SDL_Log("DEBUG: WINDOW RESIZED");
-			}
-			break;
 		case SDL_MOUSEBUTTONDOWN:
-			MOUSE_X_PRESSED = event.button.x;
-			MOUSE_Y_PRESSED = event.button.y;
-			// very tmp touch controller
-			keys[KEY_RETURN_1] = 1;
-			keys[KEY_RIGHT_2] = 1;
+			sim_event.type = SDL_FINGERDOWN;
+			sim_event.tfinger.x = (float) event.button.x / W;
+			sim_event.tfinger.y = (float) event.button.y / H;
+			statesystem_push_event(&sim_event);
 			break;
 		case SDL_MOUSEBUTTONUP:
-			// very tmp touch controller
-			keys[KEY_RETURN_1] = 0;
-			keys[KEY_RIGHT_2] = 0;
-			break;
-		case SDL_MOUSEMOTION:
-			break;
-		case SDL_FINGERMOTION:
-			//SDL_FingerID index = event.tfinger.fingerId;
-			//SDL_Finger *finger = SDL_GetTouchFinger(index, 0);
-			//finger->
-
-			/*
-					if (index < 10) {
-						touch[index].dx = event.tfinger.dx;
-						touch[index].dy = event.tfinger.dy;
-						touch[index].fingerId = event.tfinger.fingerId;
-						touch[index].pressure = event.tfinger.pressure;
-						touch[index].timestamp = event.tfinger.timestamp;
-						touch[index].touchId = event.tfinger.touchId;
-						touch[index].type = event.tfinger.type;
-						touch[index].x = event.tfinger.x;
-						touch[index].y = event.tfinger.y;
-					}*/
+			sim_event.type = SDL_FINGERUP;
+			sim_event.tfinger.x = (float) event.button.x / W;
+			sim_event.tfinger.y = 1-(float) event.button.y / H;
+			statesystem_push_event(&sim_event);
 			break;
 		}
 	}
@@ -538,9 +504,9 @@ static int main_run()
 	SDL_iPhoneSetAnimationCallback(window, 1, main_tick, NULL);
 #else
 	//START GAME
-	if(config.arcade){
+#if ARCADE_MODE
 		SDL_Log("start %s\n", "999");
-	}
+#endif
 
 	while (main_running) {
 		main_tick(NULL);

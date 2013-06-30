@@ -8,6 +8,7 @@
 #include "joystick.h"
 #include "math.h"
 
+//FIXME constrain joystick inside view
 void joystick_touch(joystick *stick, float pos_x, float pos_y)
 {
 	if (!stick->active) {

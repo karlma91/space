@@ -22,6 +22,8 @@
 
 STATE_ID STATE_LEVELSELECT;
 
+#define deck_height 800
+
 /* static prototypes */
 static void update();
 static void render();
@@ -50,16 +52,59 @@ static float camera_zoom = 0.1; // start zoom
 static float zoomed_temp_y = 0;
 static float zoomed_cam_y = 0;
 
+static void sdl_event(SDL_Event *event)
+{
+
+	SDL_Scancode key;
+	switch (event->type) {
+	case SDL_KEYDOWN:
+		key = event->key.keysym.scancode;
+
+		if (overview) {
+			if (key == KEY_UP_2) {
+				sel += 1;
+				sel = (sel >= decks) ? 0 : sel;
+
+			} else if (key == KEY_DOWN_2) {
+				sel -= 1;
+				sel = (sel < 0) ? decks - 1 : sel;
+
+			} else if (key == KEY_RETURN_2 || key == KEY_RETURN_1) {
+				overview = 0;
+				zoomed_temp_y = (1.0f * HEIGHT) / (camera_zoom * 2);
+
+			} else if (key == KEY_ESCAPE) {
+				statesystem_set_state(STATE_MENU);
+
+			}
+		} else {
+			if (key == KEY_UP_1 || key == KEY_UP_2) {
+				level_select--;
+				level_select = (level_select < 0) ? ships[sel].count - 1 : level_select;
+
+			} else if (key == KEY_DOWN_1 || key == KEY_DOWN_2) {
+				level_select++;
+				level_select = (level_select >= ships[sel].count) ? 0 : level_select;
+
+			} else if (key == KEY_RETURN_2 || key == KEY_RETURN_1) {
+				statesystem_set_state(STATE_SPACE);
+				/* load correct level */
+				space_init_level(sel + 1, level_select + 1);
+
+			} else if (key == KEY_ESCAPE || key == SDL_SCANCODE_BACKSPACE) {
+				overview = 1;
+				level_select = 0;
+
+			}
+		}
+		break;
+	}
+}
+
 void levelselect_init()
 {
-	STATE_LEVELSELECT = statesystem_add_state(0, on_enter, update, NULL, render, on_leave, destroy);
-
+	STATE_LEVELSELECT = statesystem_add_state(0, on_enter, update, NULL, render, sdl_event, on_leave, destroy);
 	level_get_ships(&ships, &decks);
-	//SDL_Log( "decks: %d \n", decks);
-	//int i;
-	//for(i=0; i<decks; i++){
-	//	SDL_Log( "x: %f y: %f radius: %f \n", ships[i].x,ships[i].y,ships[i].radius);
-	//}
 }
 
 static void on_enter()
@@ -74,74 +119,17 @@ static void on_leave()
 
 static void update()
 {
-
 	int i;
 	for(i = 0; i < decks; i++){
 		ships[i].rotation += 360*ships[i].rotation_speed*dt;
 	}
 
-	if (keys[KEY_ESCAPE]){
-	    statesystem_set_state(STATE_MENU);
-		keys[KEY_ESCAPE] = 0;
-		}
-
-	if(overview){
-		float speed = 400;
-		if (keys[KEY_UP_2]){
-			//camera_y += speed*dt;
-			sel+=1;
-			keys[KEY_UP_2] = 0;
-		}
-		if (keys[KEY_DOWN_2]){
-			//camera_y -= speed*dt;
-			sel-=1;
-			keys[KEY_DOWN_2] = 0;
-		}
-		if (keys[KEY_LEFT_2]){
-			camera_x += speed*dt;
-		}
-		if (keys[KEY_RIGHT_2]){
-			camera_x -= speed*dt;
-		}
-
-		sel = (sel < 0) ? decks - 1 : (sel >= decks ? 0 : sel);;
-
-		float temp_z =  (camera_zoom - 0.1)*5;
-		camera_zoom -= temp_z*dt;
-
-		if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]){
-			overview = 0;
-			zoomed_temp_y = ((1.0f * HEIGHT)/(camera_zoom*2));
-			keys[KEY_RETURN_2] = 0, keys[KEY_RETURN_1] = 0;
-		}
-
-	}else{
-		if (keys[KEY_UP_1] || keys[KEY_UP_2]){
-			level_select--;
-			keys[KEY_UP_1] = 0, keys[KEY_UP_2] = 0;
-		}
-		if (keys[KEY_DOWN_1] || keys[KEY_DOWN_2]){
-			level_select++;
-			keys[KEY_DOWN_1] = 0, keys[KEY_DOWN_2] = 0;
-		}
-
-		level_select = (level_select < 0) ? ships[sel].count - 1 : (level_select >= ships[sel].count ? 0 : level_select);;
-
-		if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
-		    statesystem_set_state(STATE_SPACE);
-			/* load correct level */
-			space_init_level(sel+1,level_select+1);
-			keys[KEY_RETURN_2] = 0, keys[KEY_RETURN_1] = 0;
-		}
-		if(keys[SDL_SCANCODE_BACKSPACE]){
-			overview = 1;
-			level_select = 0;
-			keys[SDL_SCANCODE_BACKSPACE]=0;
-		}
-
-		camera_zoom = ((1.0f * HEIGHT)/(zoomed_temp_y*2));
-		zoomed_cam_y =  (ships[sel].radius + (level_select )*100 + 200 - zoomed_temp_y)*5;
-		zoomed_temp_y += zoomed_cam_y*dt;
+	if (overview) {
+		camera_zoom -= (camera_zoom - 0.1) * 5 * dt;
+	} else {
+		camera_zoom = (1.0f * HEIGHT) / (zoomed_temp_y * 2);
+		zoomed_cam_y = (ships[sel].radius + (level_select) * deck_height + 200 - zoomed_temp_y) * 5;
+		zoomed_temp_y += zoomed_cam_y * dt;
 	}
 
 	camera_speedx = (ships[sel].x - camera_x)*5;
@@ -201,7 +189,7 @@ static void render_ship(struct level_ship *ship, int selected)
 		draw_circle(0,0,(ship->radius) + 120);
 
 		draw_color4f(0.8,0.1,0.1,1);
-		draw_box(-5,0,(ship->radius - (ship->count-1)*100),30,0,0);
+		draw_box(-5,0,(ship->radius - (ship->count-1)*deck_height),30,0,0);
 
 		int i;
 		for(i = 0; i < ship->count; i++){
@@ -211,7 +199,7 @@ static void render_ship(struct level_ship *ship, int selected)
 			}else{
 				draw_color4f(1.0f,0,0,1);
 			}
-			draw_donut(0,0,(ship->radius - i*100) + 20,(ship->radius - i*100) + 100);
+			draw_donut(0,0,(ship->radius - i*deck_height) + 100,(ship->radius - i*deck_height) + deck_height);
 
 		}
 		draw_pop_matrix();

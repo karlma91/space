@@ -6,6 +6,8 @@
 #include <string.h>
 #include <time.h>
 
+#include "game.h"
+
 /* Game state */
 #include "main.h"
 #include "menu.h"
@@ -43,13 +45,115 @@ static int score_position;
 static int score_value;
 static int score_newly_added;
 
+static enum gameover_state gameover_state = enter_name;
+
+static int cursor = 0;
+static int win = 0; //TMP solution for win screens
+
+static int score_index = 0;
+static int score_page = 0;
+
+static void sdl_event(SDL_Event *event)
+{
+	SDL_Scancode key;
+	switch (event->type) {
+	case SDL_KEYDOWN:
+		key = event->key.keysym.scancode;
+		switch(gameover_state) {
+		case enter_name:
+			if (key == KEY_RIGHT_2 || key == KEY_RIGHT_1 || key == KEY_RETURN_2 || key == KEY_RETURN_1) {
+				if (++cursor >= MAX_NAME_LENGTH) {
+					cursor = 0;
+					gameover_state = confirm_name;
+				}
+			} else if (key == KEY_LEFT_2 ||key == KEY_LEFT_1 || key == KEY_ESCAPE) {
+				if (cursor > 0) --cursor;
+			}
+			break;
+		case confirm_name:
+			if (key == KEY_LEFT_2 || key == KEY_LEFT_1 || key == KEY_ESCAPE) {
+				gameover_state = enter_name;
+			} else if (key == KEY_RIGHT_2 || key == KEY_RIGHT_1) {
+				/* add score */
+				gameover_state = show_highscore;
+				win = 0;
+				score_value = getPlayerScore();
+				score_position = highscorelist_addscore(list,&input[0], score_value);
+				score_newly_added = 1;
+			}
+			break;
+		case show_highscore:
+			if (key == KEY_DOWN_1 || key == KEY_DOWN_2) {
+					++score_page;
+			} else if (key == KEY_UP_1 || key == KEY_UP_2) {
+				if (score_page > 0) {
+					--score_page;
+				}
+			} else if (key == KEY_RETURN_2 || key == KEY_RETURN_1 || key == KEY_ESCAPE) {
+				score_newly_added = 0;
+				score_index = 0;
+				score_page = 0;
+#if ARCADE_MODE
+				printf("exit %d\n", getPlayerScore());
+				main_stop();
+				return;
+#else
+				menu_change_current_menu(MENU_MAIN);
+				statesystem_set_state(STATE_MENU);
+				win = 0;
+#endif
+			}
+			break;
+		default:
+			break;
+		}
+		break;
+		case SDL_FINGERDOWN:
+			break;
+		case SDL_FINGERUP: //tmp touch
+			switch(gameover_state) {
+			case enter_name:
+				if (++cursor >= MAX_NAME_LENGTH) {
+					cursor = 0;
+					gameover_state = confirm_name;
+				}
+				break;
+			case confirm_name:
+					/* add score */
+					gameover_state = show_highscore;
+					win = 0;
+					score_value = getPlayerScore();
+					score_position = highscorelist_addscore(list,&input[0], score_value);
+					score_newly_added = 1;
+				break;
+			case show_highscore:
+				if (++score_page > 2) {
+					score_newly_added = 0;
+					score_index = 0;
+					score_page = 0;
+	#if ARCADE_MODE
+					printf("exit %d\n", getPlayerScore());
+					main_stop();
+					return;
+	#else
+					menu_change_current_menu(MENU_MAIN);
+					statesystem_set_state(STATE_MENU);
+					win = 0;
+	#endif
+				}
+				break;
+			}
+			break;
+	}
+}
+
 void gameover_init()
 {
 	list = malloc(sizeof(scorelist));
 	highscorelist_create(list);
 	highscorelist_readfile(list,"highscores"); // NB! moved from bin/data/highscores
 
-	STATE_GAMEOVER = statesystem_add_state(0, on_enter,update,NULL,draw, on_leave, destroy);
+	STATE_GAMEOVER = statesystem_add_state(0, on_enter,update,NULL,draw, sdl_event, on_leave, destroy);
 
 }
 
@@ -62,23 +166,8 @@ static void on_leave()
 {
 
 }
-static enum gameover_state gameover_state = enter_name;
-
-static int cursor = 0;
-static int win = 0; //TMP solution for win screens
-
-static int score_index = 0;
-static int score_page = 0;
 
 static void update() {
-/*{ //DEBUG CODE
-	if (keys[KEY_RETURN]) {
-		gameover_state = (1+gameover_state)%3;
-		keys[KEY_RETURN] = 0;
-		return;
-	}
-*/
-
 	static float key_dt = 0;
 	static float key_ddt = 0.25;
 	static const float key_ddt_min = 0.12f;
@@ -108,67 +197,14 @@ static void update() {
 		}
 		key_dt -= dt;
 
-		if (keys[KEY_RIGHT_2] || keys[KEY_RIGHT_1] || keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
-			if (++cursor >= MAX_NAME_LENGTH) {
-				cursor = 0;
-				gameover_state = confirm_name;
-			}
-			keys[KEY_RIGHT_2] = 0,keys[KEY_RIGHT_1] = 0, keys[KEY_RETURN_1] = 0, keys[KEY_RETURN_2] = 0;
-		} else if (keys[KEY_LEFT_2] ||keys[KEY_LEFT_1] || keys[KEY_ESCAPE]) {
-			if (cursor > 0) --cursor;
-			keys[KEY_LEFT_2] = 0,keys[KEY_LEFT_1] = 0, keys[KEY_ESCAPE] = 0;
-		}
-
 		input[cursor] = valid_char[valid_index[cursor]];
 		break;
 	case confirm_name:
-		if (keys[KEY_LEFT_2] || keys[KEY_LEFT_1]) {
-			gameover_state = enter_name;
-			keys[KEY_LEFT_2] = 0;
-			keys[KEY_LEFT_1] = 0;
-		} else if (keys[KEY_RIGHT_2] || keys[KEY_RIGHT_1]) {
-			/* add score */
-			gameover_state = show_highscore;
-			win = 0;
-			score_value = getPlayerScore();
-			score_position = highscorelist_addscore(list,&input[0], score_value);
-			score_newly_added = 1;
-		}
 		break;
 	case show_highscore:
-		if (keys[KEY_ESCAPE] || keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
-			score_newly_added = 0;
-			score_index = 0;
-			score_page = 0;
-			if(config.arcade){
-				printf("exit %d\n", getPlayerScore());
-				main_stop();
-				return;
-			}
-		    menu_change_current_menu(MENU_MAIN);
-		    statesystem_set_state(STATE_MENU);
-			keys[KEY_ESCAPE] = 0;
-			keys[KEY_RETURN_1] = 0;
-			keys[KEY_RETURN_2] = 0;
-			win = 0;
-		}
-
 		// highscore scrolling
-		if (keys[KEY_DOWN_1] || keys[KEY_DOWN_2]) {
-				++score_page;
-				keys[KEY_DOWN_1] = 0;
-				keys[KEY_DOWN_2] = 0;
-		}
-		if (keys[KEY_UP_1] || keys[KEY_UP_2]) {
-			if (score_page > 0) {
-				--score_page;
-			}
-			keys[KEY_UP_1] = 0;
-			keys[KEY_UP_2] = 0;
-		}
-
 		if (score_index < score_page*10) {
-				++score_index;
+			++score_index;
 		} else if (score_index > score_page*10) {
 			--score_index;
 		}
@@ -177,7 +213,6 @@ static void update() {
 	}
 }
 
-//FIXME bug when holding both down/up and right when entering gameover state!
 Color color;
 static void draw()
 {

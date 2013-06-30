@@ -134,6 +134,9 @@ void se_constrain_from_space(cpBody *body, cpConstraint *constraint, void *data)
 float se_rect2arch(cpVect *pos)
 {
 #if EXPERIMENTAL_GRAPHICS
+	if (!space_rendering_map)
+		return 0;
+
 	float inner_radius = currentlvl->inner_radius;
 	float theta = -currentlvl->theta_max * (cam_center_x - pos->x) / ((cam_right - cam_left)/2);
 

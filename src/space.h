@@ -23,6 +23,8 @@ extern cpSpace *space;
 
 extern level *currentlvl;
 
+extern int space_rendering_map;
+
 /* init new level */
 void space_init_level(int space_station, int deck);
 

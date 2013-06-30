@@ -135,6 +135,7 @@ int texture_init()
 	TEX_PARTICLE = texture_load("particle.png");
 	TEX_BUTTON = texture_load("button.png");
 	TEX_BUTTON_DOWN = texture_load("button_down.png");
+	TEX_BUTTON_PAUSE = texture_load("button_pause.png");
 
 	return 0;
 }

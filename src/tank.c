@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "game.h"
+
 /* Chipmunk physics library */
 #include "chipmunk.h"
 
@@ -119,12 +121,13 @@ static void set_wheel_velocity(object_group_tank *tank, float velocity)
 
 static void update(object_group_tank *tank)
 {
-	if (!config.arcade) {
-		if (keys[SDL_SCANCODE_F2]) {
-			tank->data.body->p.x = 0;
-			tank->data.body->p.y = 200;
-		}
+
+#if !ARCADE_MODE
+	if (keys[SDL_SCANCODE_F2]) {
+		tank->data.body->p.x = 0;
+		tank->data.body->p.y = 200;
 	}
+#endif
 
 	tank->timer +=dt;
 	/* gets the player from the list */

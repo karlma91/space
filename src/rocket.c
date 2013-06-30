@@ -98,8 +98,10 @@ static void update(object_group_rocket *rocket)
 	rocket->timer +=dt;
 
 	//TODO FIXME: Will crash if no particles emitter available!!
-	rocket->flame->p = rocket->data.body->p;
-	rocket->flame->angular_offset = rocket->angle * (180/M_PI)+90;
+	if (rocket->flame){
+		rocket->flame->p = rocket->data.body->p;
+		rocket->flame->angular_offset = rocket->angle * (180/M_PI)+90;
+	}
 
 	/* gets the player from the list */
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));

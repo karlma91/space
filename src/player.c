@@ -6,6 +6,8 @@
 #include <time.h>
 #include <assert.h>
 
+#include "game.h"
+
 /* Game state */
 #include "space.h"
 #include "levelselect.h"
@@ -138,8 +140,10 @@ static void player_render(object_group_player *player)
 #include <time.h>
 static void player_update(object_group_player *player)
 {
-	if (keys[SDL_SCANCODE_I] && !config.arcade_keys) //CHEAT
+#if !ARCADE_MODE
+	if (keys[SDL_SCANCODE_I]) //CHEAT
 		player->hp_bar.value = 1000000;
+#endif
 
 	player->gun_timer += dt;
 
@@ -170,7 +174,7 @@ static void player_controls(object_group_player *player)
 	arcade_control(player);
 
 	/* DEBUG KEYS */
-	if (!config.arcade_keys) {
+#if !ARCADE_MODE
 		if (keys[SDL_SCANCODE_E]){
 			player->data.body->p.x=0;
 			player->data.body->p.y=500;
@@ -179,7 +183,7 @@ static void player_controls(object_group_player *player)
 		if (keys[SDL_SCANCODE_H]) {
 			cpBodySetVelLimit(player->data.body,5000);
 		}
-	}
+#endif
 }
 
 static void arcade_control(object_group_player *player)

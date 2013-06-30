@@ -4,6 +4,8 @@
 /* standard c-libraries */
 #include <stdio.h>
 
+#include "game.h"
+
 /* Game state */
 #include "main.h"
 #include "menu.h"
@@ -24,6 +26,7 @@
 #include "robotarm.h"
 #include "level.h"
 #include "tank.h"
+#include "button.h"
 
 #include "waffle_utils.h"
 
@@ -46,7 +49,11 @@ static void render_objects(object_data *obj);
 static void update_camera_zoom(int cam_mode);
 static void update_camera_position();
 
+int space_rendering_map = 0;
+
 static int second_draw = 0;
+
+static button btn_pause;
 
 static float game_time;
 
@@ -141,7 +148,7 @@ static void level_running()
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
-	if (!config.arcade && keys[SDL_SCANCODE_F1]) SDL_Log("FACTORY: %d TANK: %d TURRET: %d\n",objects_count(ID_FACTORY), objects_count(ID_TANK) ,objects_count(ID_TURRET));
+
 	if ((objects_count(ID_FACTORY) + objects_count(ID_TANK) + objects_count(ID_TURRET)) == 0) {
 		change_state(LEVEL_CLEARED);
 	}
@@ -164,13 +171,6 @@ int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead()
 {
 	update_all();
-	if(keys[KEY_RETURN_2] || keys[KEY_RETURN_1]){//state_timer > 3){
-		keys[KEY_RETURN_2] = 0, keys[KEY_RETURN_1] = 0;
-		lvl_cleared=0;
-		statesystem_set_state(STATE_GAMEOVER);
-		gameover_setstate(enter_name);
-		//change_state(LEVEL_TRANSITION);
-	}
 }
 static void level_cleared()
 {
@@ -224,8 +224,10 @@ static void change_state(int state)
 	state_timer = 0;
 	statesystem_set_inner_state(STATE_SPACE,state);
 	gamestate = state;
-	if (!config.arcade)
-		SDL_Log("DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
+
+#if !ARCADE_MODE
+	SDL_Log("DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
+#endif
 }
 
 /**
@@ -295,8 +297,7 @@ static void update_objects(object_data *obj)
 	if(obj->alive){
 		if(obj->body->p.y > currentlvl->height  || obj->body->p.y < 0){
 			obj->alive = 0;
-			if (!config.arcade)
-				SDL_Log("object killed outside of level!\n");
+			SDL_Log("WARNING: object killed outside of level!");
 		}
 
 		if (obj->body->p.x < currentlvl->left ){
@@ -453,7 +454,6 @@ static void update_camera_zoom(int cam_mode)
 
 static void update_camera_position()
 {
-
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 	/* dynamic camera pos */
 	static const float pos_delay = 0.99f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
@@ -465,9 +465,7 @@ static void update_camera_position()
 	cam_center_x = player->data.body->p.x + cam_dx;
 
 	/* camera constraints */
-
 	camera_width = WIDTH / (2 * cam_zoom);
-
 
 	cam_left_limit = currentlvl->left + camera_width;
 	cam_right_limit = currentlvl->right - camera_width;
@@ -478,8 +476,7 @@ static void update_camera_position()
 
 static void SPACE_draw()
 {
-	//TODO move all gl dependent code out of this file!
-
+	space_rendering_map = 1;
 	/* draw background */
 	if(!second_draw){
 		drawStars();
@@ -502,6 +499,7 @@ static void SPACE_draw()
 	/* draw particle effects */
 	particles_draw(dt);
 
+	space_rendering_map = 0;
 	if(!second_draw){
 		render_gui();
 	}
@@ -511,6 +509,7 @@ void render_gui()
 {
 	/* reset transform matrix */
 	draw_load_identity();
+	draw_color4f(1,1,1,1);
 
 #if GOT_TOUCH
 	draw_color4f(1,1,1,1);
@@ -525,13 +524,15 @@ void render_gui()
 	x1 = x0 + joy_right.axis_x * WIDTH * joy_right.size;
 	y1 = y0 + joy_right.axis_y * HEIGHT * joy_right.size;
 	draw_quad_line(x0,y0,x1,y1, 20);
+
 #endif
+	cpVect pause_pos = {WIDTH/2-70,HEIGHT/2-70};
+	draw_texture(TEX_BUTTON_PAUSE, &pause_pos, TEX_MAP_FULL, 80, 80, 0);
 
 	/* draw GUI */
 	setTextAngle(0); // TODO don't use global variables for setting font properties
 	setTextAlign(TEXT_LEFT);
 	setTextSize(35);
-	draw_color4f(1,1,1,1);
 
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 
@@ -588,8 +589,10 @@ void render_gui()
 
 
 	setTextAlign(TEXT_RIGHT);
-	//if(!config.arcade)
+
+#if !ARCADE_MODE
 	font_drawText(WIDTH/2 - 15, HEIGHT/2 - 20, fps_buf);
+#endif
 
 	char time_temp[20];
 	switch(gamestate) {
@@ -634,29 +637,29 @@ void render_gui()
 		setTextSize(60);
 		draw_color4f(1,0,0,1);
 		setTextAlign(TEXT_CENTER);
-		if(config.arcade){
-			font_drawText(0, 0, "GAME OVER");
-			draw_color4f(0.1,0.9,0.1,1);
 
-			static float button_timer = 0;
-			static int button_down;
-			button_timer+=dt;
-			if(button_timer > 0.5){
-				button_down = !button_down;
-				button_timer = 0;
-			}
-			if(button_down){
-				cpVect t = cpv(0,0-HEIGHT/4);
-				draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
-			}else{
-				cpVect t = cpv(0,-5.5-HEIGHT/4);
-				draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
-			}
-		}else{
-			font_drawText(0, 0, "GAME OVER-PRESS ENTER");
+#if ARCADE_MODE
+		font_drawText(0, 0, "GAME OVER");
+		draw_color4f(0.1,0.9,0.1,1);
+
+		static float button_timer = 0;
+		static int button_down;
+		button_timer+=dt;
+		if(button_timer > 0.5){
+			button_down = !button_down;
+			button_timer = 0;
 		}
+		if(button_down){
+			cpVect t = cpv(0,0-HEIGHT/4);
+			draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
+		}else{
+			cpVect t = cpv(0,-5.5-HEIGHT/4);
+			draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
+		}
+#else
+		font_drawText(0, 0, "GAME OVER-PRESS ENTER");
+#endif
 		setTextSize(120);
-		//font_drawText(0,-180,"\x49\x4e\x46\x33\x34\x38\x30");
 		break;
 	case LEVEL_STATE_COUNT:
 		/* invalid value */
@@ -670,7 +673,6 @@ static void render_objects(object_data *obj)
 		obj->preset->render(obj);
 	}
 }
-
 
 
 #if GLES1
@@ -816,6 +818,52 @@ static void on_enter()
 
 }
 
+static void sdl_event(SDL_Event *event)
+{
+	SDL_Scancode key;
+	switch(event->type) {
+	case SDL_KEYDOWN:
+		key = event->key.keysym.scancode;
+
+		/* Opens the pause menu */
+		if (key == KEY_ESCAPE && gamestate == LEVEL_RUNNING) {
+			menu_change_current_menu(MENU_INGAME);
+			statesystem_push_state(STATE_MENU);
+		}
+
+		switch (gamestate) {
+		case LEVEL_PLAYER_DEAD:
+			if(key == KEY_RETURN_2 || key == KEY_RETURN_1){//state_timer > 3){
+				lvl_cleared=0;
+				statesystem_set_state(STATE_GAMEOVER);
+				gameover_setstate(enter_name);
+				//change_state(LEVEL_TRANSITION);
+			}
+			break;
+		default:
+			break;
+		}
+		break;
+		case SDL_FINGERDOWN:
+			button_push(&btn_pause);
+			break;
+		case SDL_FINGERUP:
+			if (gamestate == LEVEL_RUNNING) {
+				if (event->tfinger.x > 0.9 && event->tfinger.y > 0.9) {
+					//if (button_release(&btn_pause)) {
+					menu_change_current_menu(MENU_INGAME);
+					statesystem_push_state(STATE_MENU);
+					//}
+				}
+			} else if (gamestate == LEVEL_PLAYER_DEAD) {
+				lvl_cleared=0;
+				statesystem_set_state(STATE_GAMEOVER);
+				gameover_setstate(enter_name);
+			}
+			break;
+	}
+}
+
 static void on_leave()
 {
 
@@ -829,7 +877,7 @@ static void SPACE_destroy()
 
 void space_init()
 {
-	STATE_SPACE = statesystem_add_state(LEVEL_STATE_COUNT,on_enter,pre_update,post_update,render,on_leave,SPACE_destroy);
+	STATE_SPACE = statesystem_add_state(LEVEL_STATE_COUNT,on_enter,pre_update,post_update,render,sdl_event,on_leave,SPACE_destroy);
     statesystem_add_inner_state(STATE_SPACE,LEVEL_START,level_start,NULL);
     statesystem_add_inner_state(STATE_SPACE,LEVEL_RUNNING,level_running,NULL);
     statesystem_add_inner_state(STATE_SPACE,LEVEL_TIMESUP,level_timesup,NULL);
@@ -851,7 +899,6 @@ void space_init()
 
     stars_init();
 }
-
 
 
 float getGameTime()
@@ -932,21 +979,13 @@ void input()
 	}
 
 	/* DEBUG KEYS*/
-	if (!config.arcade_keys) {
-		if(keys[SDL_SCANCODE_G]){
-			keys[SDL_SCANCODE_G] = 0;
-			cpVect gravity = cpv(0, -2);
-			cpSpaceSetGravity(space, gravity);
-		}
-	}
 
-	/*
-	 * Opens the pause menu
-	 */
-	if (keys[KEY_ESCAPE] && gamestate == LEVEL_RUNNING) {
-		menu_change_current_menu(MENU_INGAME);
-		statesystem_push_state(STATE_MENU);
-		keys[KEY_ESCAPE] = 0;
+#if !ARCADE_MODE
+	if(keys[SDL_SCANCODE_G]){
+		keys[SDL_SCANCODE_G] = 0;
+		cpVect gravity = cpv(0, -2);
+		cpSpaceSetGravity(space, gravity);
 	}
+#endif
 #endif
 }
