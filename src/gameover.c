@@ -109,39 +109,44 @@ static void sdl_event(SDL_Event *event)
 		}
 		break;
 		case SDL_FINGERDOWN:
+			button_finger_down(&btn_fullscreen, &event->tfinger);
 			break;
-		case SDL_FINGERUP: //tmp touch
-			switch(gameover_state) {
-			case enter_name:
-				if (++cursor >= MAX_NAME_LENGTH) {
-					cursor = 0;
-					gameover_state = confirm_name;
-				}
-				break;
-			case confirm_name:
+		case SDL_FINGERUP:
+			if (button_finger_up(&btn_fullscreen, &event->tfinger)) {
+				switch(gameover_state) {
+				case enter_name:
+					if (++cursor >= MAX_NAME_LENGTH) {
+						cursor = 0;
+						gameover_state = confirm_name;
+					}
+					break;
+				case confirm_name:
 					/* add score */
 					gameover_state = show_highscore;
 					win = 0;
 					score_value = getPlayerScore();
 					score_position = highscorelist_addscore(list,&input[0], score_value);
 					score_newly_added = 1;
-				break;
-			case show_highscore:
-				if (++score_page > 2) {
-					score_newly_added = 0;
-					score_index = 0;
-					score_page = 0;
-	#if ARCADE_MODE
-					printf("exit %d\n", getPlayerScore());
-					main_stop();
-					return;
-	#else
-					menu_change_current_menu(MENU_MAIN);
-					statesystem_set_state(STATE_MENU);
-					win = 0;
-	#endif
+					break;
+				case show_highscore:
+					if (++score_page > 2) {
+						score_newly_added = 0;
+						score_index = 0;
+						score_page = 0;
+#if ARCADE_MODE
+						printf("exit %d\n", getPlayerScore());
+						main_stop();
+						return;
+#else
+						menu_change_current_menu(MENU_MAIN);
+						statesystem_set_state(STATE_MENU);
+						win = 0;
+#endif
+					}
+					break;
+				default:
+					break;
 				}
-				break;
 			}
 			break;
 	}
@@ -227,9 +232,9 @@ static void draw()
 
 	if (gameover_state != show_highscore) {
 		if (win)
-			font_drawText(0,0.4f*HEIGHT, "YOU WON");
+			font_drawText(0,0.4f*GAME_HEIGHT, "YOU WON");
 		else
-			font_drawText(0,0.4f*HEIGHT, "GAME OVER");
+			font_drawText(0,0.4f*GAME_HEIGHT, "GAME OVER");
 	}
 	setTextSize(60);
 
@@ -266,18 +271,18 @@ static void draw()
 	case show_highscore:
 		setTextSize(80);
 		setTextAlign(TEXT_CENTER);
-		font_drawText(0,0.4f*HEIGHT, "HIGHSCORES");
+		font_drawText(0,0.4f*GAME_HEIGHT, "HIGHSCORES");
 
 		draw_highscore();
 
 		if (score_newly_added) {
 			char current_score_buffer[100];
-			setTextSize(35);
+			setTextSize(30);
 			setTextAlign(TEXT_CENTER);
 			draw_color(color);
 			sprintf(&current_score_buffer[0], "%s FIKK %d. PLASS MED %d POENG!", &input[0], score_position, score_value);
 			draw_color4f(1,1,1,1);
-			font_drawText(0,-0.4f*HEIGHT, &current_score_buffer[0]);
+			font_drawText(0,-0.4f*GAME_HEIGHT, &current_score_buffer[0]);
 		}
 		break;
 	}

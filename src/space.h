@@ -5,6 +5,7 @@
 #include "main.h"
 #include "level.h"
 #include "statesystem.h"
+#include "joystick.h"
 
 extern STATE_ID STATE_SPACE;
 
@@ -22,6 +23,8 @@ extern int cam_right;
 extern cpSpace *space;
 
 extern level *currentlvl;
+
+extern joystick joy_left, joy_right;
 
 extern int space_rendering_map;
 

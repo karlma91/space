@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include "SDL.h"
 
-#include "joystick.h"
-
 #if __IPHONEOS__
 #define IS_APP 1
 #define GOT_TOUCH 1
@@ -20,7 +18,6 @@
 
 #define SLEEP_TIME 1
 
-//TODO move to game.h
 /* config struct */
 typedef struct
 {
@@ -36,7 +33,7 @@ typedef struct
     unsigned int height;
 } configuration;
 
-extern configuration config; //TODO move to game.h
+extern configuration config;
 
 /* State  struct */
 typedef struct state_ state;
@@ -49,10 +46,10 @@ struct state_ {
 };
 
 
-extern joystick joy_left, joy_right;
+#define  GAME_HEIGHT 1200
+extern int GAME_WIDTH; // expected minimum width = 4:3 -> 1600
+extern float ASPECT_RATIO; // 2:1 <-> 8:5 <-> 4:3
 
-extern int WIDTH;
-extern int HEIGHT;
 /* The delta time */
 extern float dt;
 extern int mdt;
@@ -63,25 +60,11 @@ extern char fps_buf[];
 /* current state in use */
 extern state *currentState;
 
+#include "button.h"
+extern button btn_fullscreen;
+
 extern void main_stop();
 
-extern SDL_Window *window; //TODO TMP
-
-extern Sint32 MOUSE_X_PRESSED, MOUSE_Y_PRESSED, MOUSE_X, MOUSE_Y;
-
-extern unsigned int KEY_UP_1;
-extern unsigned int KEY_UP_2;
-extern unsigned int KEY_LEFT_1;
-extern unsigned int KEY_LEFT_2;
-extern unsigned int KEY_RIGHT_1;
-extern unsigned int KEY_RIGHT_2;
-extern unsigned int KEY_DOWN_1;
-extern unsigned int KEY_DOWN_2;
-
-extern unsigned int KEY_RETURN_1;
-extern unsigned int KEY_RETURN_2;
-extern unsigned int KEY_ESCAPE;
-
-extern SDL_TouchFingerEvent touch[10];
+void normalized2game(float *x, float *y);
 
 #endif /* MAIN_H_ */

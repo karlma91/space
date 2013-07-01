@@ -7,6 +7,7 @@
 /* Chipmunk physics library */
 #include "chipmunk.h"
 
+#include "game.h"
 /* Game state */
 #include "main.h"
 #include "menu.h"
@@ -71,7 +72,7 @@ static void sdl_event(SDL_Event *event)
 
 			} else if (key == KEY_RETURN_2 || key == KEY_RETURN_1) {
 				overview = 0;
-				zoomed_temp_y = (1.0f * HEIGHT) / (camera_zoom * 2);
+				zoomed_temp_y = (1.0f * GAME_HEIGHT) / (camera_zoom * 2);
 
 			} else if (key == KEY_ESCAPE) {
 				statesystem_set_state(STATE_MENU);
@@ -127,7 +128,7 @@ static void update()
 	if (overview) {
 		camera_zoom -= (camera_zoom - 0.1) * 5 * dt;
 	} else {
-		camera_zoom = (1.0f * HEIGHT) / (zoomed_temp_y * 2);
+		camera_zoom = (1.0f * GAME_HEIGHT) / (zoomed_temp_y * 2);
 		zoomed_cam_y = (ships[sel].radius + (level_select) * deck_height + 200 - zoomed_temp_y) * 5;
 		zoomed_temp_y += zoomed_cam_y * dt;
 	}

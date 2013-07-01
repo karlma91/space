@@ -62,7 +62,7 @@ static void sdl_event(SDL_Event *event)
 	case SDL_KEYDOWN:
 		key = event->key.keysym.scancode;
 
-#if !ARCADE_MODE
+#if !ARCADE_MODE // because there is no menus in arcade mode
 		if (key == KEY_UP_1 || key == KEY_UP_2) {
 			--select_id;
 			select_id = (select_id < 0) ? curMenu->num_items-1 : select_id;
@@ -84,9 +84,12 @@ static void sdl_event(SDL_Event *event)
 #endif
 		break;
 	case SDL_FINGERDOWN:
+		button_finger_down(&btn_fullscreen, &event->tfinger);
 		break;
 	case SDL_FINGERUP:
-		curMenu->func();
+		if (button_finger_up(&btn_fullscreen, &event->tfinger)) {
+			curMenu->func();
+		}
 		break;
 	}
 }
@@ -155,16 +158,16 @@ static void arcade_draw()
 	case MENU_MAIN:
 		drawStars();
 		draw_color(draw_col_rainbow((int)(timer*1000)));
-		font_drawText(0,0.8f*HEIGHT/2, "SPACE");
+		font_drawText(0,0.8f*GAME_HEIGHT/2, "SPACE");
 
 		draw_color4f(1,1,1,1);
 
 		setTextSize(30);
-		font_drawText(-WIDTH*0.4,-0.8f*HEIGHT/2, "STYR");
-		font_drawText(-WIDTH*0.4,-0.8f*HEIGHT/2-50, "VVV");
+		font_drawText(-GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2, "STYR");
+		font_drawText(-GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2-50, "VVV");
 
-		font_drawText(+WIDTH*0.4,-0.8f*HEIGHT/2, "SKYT");
-		font_drawText(+WIDTH*0.4,-0.8f*HEIGHT/2-50, "VVV");
+		font_drawText(+GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2, "SKYT");
+		font_drawText(+GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2-50, "VVV");
 
 		setTextAlign(TEXT_CENTER);
 		setTextSize(40);
@@ -176,7 +179,7 @@ static void arcade_draw()
 			button_down = !button_down;
 			button_timer = 0;
 		}
-		font_drawText(0,-0.5f*HEIGHT/2, "START SPILLET");
+		font_drawText(0,-0.5f*GAME_HEIGHT/2, "START SPILLET");
 		draw_color4f(0.1,0.9,0.1,1);
 		if(button_down){
 			cpVect t = cpv(0,0);
@@ -200,7 +203,7 @@ static void draw()
 	setTextSize(80);
 	setTextAlign(TEXT_CENTER);
 	draw_color(draw_col_rainbow((int)(timer*1000)));
-	font_drawText(0,0.8f*HEIGHT/2, "SPACE");
+	font_drawText(0,0.8f*GAME_HEIGHT/2, "SPACE");
 
 	setTextAlign(TEXT_CENTER);
 	setTextSize(40);

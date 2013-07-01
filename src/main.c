@@ -17,20 +17,12 @@
 /* Chipmunk physics library */
 #include "chipmunk.h"
 
-/* ini loader lib */
-#if !(TARGET_OS_IPHONE || __ANDROID__)
-#include "ini.h"
-#endif
-
-#include "joystick.h"
 #include "statesystem.h"
 
 /* drawing code */
 #include "draw.h"	//opengl included in draw.h
 #include "font.h"
 #include "particles.h"
-
-#include "level.h"
 
 #define FPS_LIMIT 1
 
@@ -42,9 +34,6 @@
 #define FPS_SLEEP_TIME 16
 #endif
 
-
-Sint32 MOUSE_X_PRESSED = 0, MOUSE_Y_PRESSED = 0, MOUSE_X, MOUSE_Y;
-
 static Uint32 thisTime = 0;
 static Uint32 lastTime;
 
@@ -53,35 +42,25 @@ static int paused = 0;
 static float fps;
 static float frames;
 
-unsigned int KEY_UP_1 = SDL_SCANCODE_W;
-unsigned int KEY_UP_2 = SDL_SCANCODE_UP;
-unsigned int KEY_LEFT_1 = SDL_SCANCODE_A;
-unsigned int KEY_LEFT_2 = SDL_SCANCODE_LEFT;
-unsigned int KEY_RIGHT_1 = SDL_SCANCODE_D;
-unsigned int KEY_RIGHT_2 = SDL_SCANCODE_RIGHT;
-unsigned int KEY_DOWN_1 = SDL_SCANCODE_S;
-unsigned int KEY_DOWN_2 = SDL_SCANCODE_DOWN;
-
-unsigned int KEY_RETURN_1 = SDL_SCANCODE_SPACE;
-unsigned int KEY_RETURN_2 = SDL_SCANCODE_RETURN;
-unsigned int KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
-
 /* definition of external variables */
 char fps_buf[15];
-int WIDTH;
-int HEIGHT;
+int GAME_WIDTH;
+float ASPECT_RATIO;
 
-int W, H;
+int WINDOW_WIDTH, WINDOW_HEIGHT;
 
 float dt = 0;
 int mdt = 0;
 unsigned char *keys;
 state *currentState;
 
-SDL_GLContext glcontext;
+static SDL_GLContext glcontext;
 
-SDL_Window *window;
-SDL_Rect fullscreen_dimensions;
+static SDL_Window *window;
+static SDL_Rect fullscreen_dimensions;
+
+#include "button.h"
+button btn_fullscreen;
 
 static int main_running = 1;
 
@@ -91,73 +70,7 @@ configuration config = {
 		.height = 1200
 };
 
-SDL_TouchFingerEvent touch[10];
-
-joystick joy_left = JOYSTICK_DEFAULT;
-joystick joy_right = JOYSTICK_DEFAULT;
-
 static int main_destroy();
-
-#if !(TARGET_OS_IPHONE || __ANDROID__)
-static int handler(void* config, const char* section, const char* name,
-		const char* value) {
-	configuration* pconfig = (configuration*) config;
-
-#define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
-	if (MATCH("video", "fullscreen")) {
-		pconfig->fullscreen = atoi(value);
-	}else if (MATCH("video", "arcade")) {
-		pconfig->arcade = atoi(value);
-	} else if (MATCH("video", "arcade_keys")) {
-		pconfig->arcade_keys = atoi(value);
-
-	} else if (MATCH("video", "width")) {
-		pconfig->width = atoi(value);
-	} else if (MATCH("video", "height")) {
-		pconfig->height = atoi(value);
-	} else if (MATCH("keyboard", "key_left")) {
-		pconfig->key_left = atoi(value);
-	} else if (MATCH("keyboard", "key_up")) {
-		pconfig->key_up = atoi(value);
-	} else if (MATCH("keyboard", "key_right")) {
-		pconfig->key_right = atoi(value);
-	} else if (MATCH("keyboard", "key_down")) {
-		pconfig->key_down = atoi(value);
-	} else {
-		return 0; /* unknown section/name, error */
-	}
-	return 1;
-}
-#endif
-
-static int init_config()
-{
-#if !(TARGET_OS_IPHONE || __ANDROID__)
-	if (ini_parse("bin/config.ini", handler, &config) < 0) {
-		SDL_Log("Could not load 'bin/config.ini'\n");
-		return 1;
-	}
-#else
-
-#endif
-
-#if ARCADE_MODE
-		KEY_UP_2 = SDL_SCANCODE_UP;
-		KEY_UP_1 = SDL_SCANCODE_W;
-		KEY_LEFT_2 = SDL_SCANCODE_LEFT;
-		KEY_LEFT_1 = SDL_SCANCODE_A;
-		KEY_RIGHT_2 = SDL_SCANCODE_RIGHT;
-		KEY_RIGHT_1 = SDL_SCANCODE_D;
-		KEY_DOWN_2 = SDL_SCANCODE_DOWN;
-		KEY_DOWN_1 = SDL_SCANCODE_S;
-
-		KEY_RETURN_1 = SDL_SCANCODE_K;
-		KEY_RETURN_2 = SDL_SCANCODE_G;
-		KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
-#endif
-
-	return 0;
-}
 
 #if TARGET_OS_IPHONE
 static void main_pause()
@@ -233,20 +146,21 @@ static void setAspectRatio() {
 	SDL_ShowCursor(!config.fullscreen);
 
 	if (config.fullscreen) {
-		W = fullscreen_dimensions.w;
-		H = fullscreen_dimensions.h;
-		if (W < H) {
-			int t = H;
-			H = W;
-			W = t;
+		WINDOW_WIDTH = fullscreen_dimensions.w;
+		WINDOW_HEIGHT = fullscreen_dimensions.h;
+		if (WINDOW_WIDTH < WINDOW_HEIGHT) {
+			int t = WINDOW_HEIGHT;
+			WINDOW_HEIGHT = WINDOW_WIDTH;
+			WINDOW_WIDTH = t;
 		}
 	} else {
-		W = config.width;
-		H = config.height;
+		WINDOW_WIDTH = config.width;
+		WINDOW_HEIGHT = config.height;
 	}
 
-	HEIGHT = 1200; //TODO change this to reveal hard-coded coordinates/sizes
-	WIDTH = (1.0f * W / H) * HEIGHT;
+	//GAME_HEIGHT = 1200; //TODO change this to reveal hard-coded coordinates/sizes
+	ASPECT_RATIO = 1.0f * WINDOW_WIDTH / WINDOW_HEIGHT;
+	GAME_WIDTH = GAME_HEIGHT * ASPECT_RATIO;
 }
 
 static void display_init()
@@ -295,7 +209,7 @@ static void display_init()
 			SDL_GetPixelFormatName(mode.format));
 
 
-	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, W, H, flags);
+	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, flags);
 
 	if (!window) {
 		SDL_Log("ERROR - could not create window!\n");
@@ -334,15 +248,18 @@ static void initGL() {
 
 	glMatrixMode(GL_PROJECTION);
 	draw_load_identity();
-	GLfloat W_2 = WIDTH / 2;
-	GLfloat H_2 = HEIGHT / 2;
+	GLfloat W_2 = GAME_WIDTH / 2;
+	GLfloat H_2 = GAME_HEIGHT / 2;
 
+	//TODO change to something like (0,0,GW,GH)
 	glOrtho(-W_2, W_2, -H_2, H_2, 1, -1);
+	//glOrtho(0, GAME_WIDTH, 0, GAME_HEIGHT, 1, -1); //option 1
+	//glOrtho(0, GAME_WIDTH, GAME_HEIGHT, 0, 1, -1); //option 2 (will probably match normalized touch input)
 
 	glMatrixMode(GL_MODELVIEW);
 	draw_load_identity();
 
-	glViewport(0, 0, W, H);
+	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	glClearColor(0,0,0, 1);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -357,15 +274,15 @@ static void main_init() {
 	srand(time(0)); /* init pseudo-random generator */
 
 	//TODO Make sure faulty inits stops the program from proceeding
-	init_config();      /* load default and user-changed settings */
+	waffle_init();      /* prepare game resources and general methods*/
+
+	game_config();      /* load default and user-changed settings */
 
 	display_init();     /* sets attributes and creates windows and renderer*/
 	initGL();           /* setup a gl context */
 
-	waffle_init();      /* prepare game resources and general methods*/
 	texture_init();     /* preload textures */
 	draw_init();        /* initializes circular shapes and rainbow colors */
-	level_init();       /* load levels */
 	particles_init();   /* load and prepare all particle systems */
 	//font_init();      /* (currently not in use) */
 	statesystem_init(); /* init all states */
@@ -382,6 +299,9 @@ static void main_init() {
 #endif
 
 	lastTime = SDL_GetTicks();
+
+	// general fullscreen button
+	button_init(&btn_fullscreen,0,0,GAME_WIDTH,GAME_HEIGHT,0);
 }
 
 static void check_events()
@@ -392,21 +312,24 @@ static void check_events()
 
 	while (SDL_PollEvent(&event)) {
 		statesystem_push_event(&event);
+#if !GOT_TOUCH
 		SDL_Event sim_event;
-
+#endif
 		switch (event.type) {
+#if !GOT_TOUCH
 		case SDL_MOUSEBUTTONDOWN:
 			sim_event.type = SDL_FINGERDOWN;
-			sim_event.tfinger.x = (float) event.button.x / W;
-			sim_event.tfinger.y = (float) event.button.y / H;
+			sim_event.tfinger.x = (float) event.button.x / WINDOW_WIDTH;
+			sim_event.tfinger.y = (float) event.button.y / WINDOW_HEIGHT;
 			statesystem_push_event(&sim_event);
 			break;
 		case SDL_MOUSEBUTTONUP:
 			sim_event.type = SDL_FINGERUP;
-			sim_event.tfinger.x = (float) event.button.x / W;
-			sim_event.tfinger.y = 1-(float) event.button.y / H;
+			sim_event.tfinger.x = (float) event.button.x / WINDOW_WIDTH;
+			sim_event.tfinger.y = (float) event.button.y / WINDOW_HEIGHT;
 			statesystem_push_event(&sim_event);
 			break;
+#endif
 		}
 	}
 }
@@ -460,7 +383,7 @@ static void main_tick(void *data)
 		if (gl_error) SDL_Log("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error);
 
 		if (frames >= 1) {
-			sprintf(fps_buf, "%.2f FPS", fps);
+			sprintf(&fps_buf[0], "%.2f FPS", fps);
 			SDL_Log("%s frame: %d ms", fps_buf, SDL_GetTicks() - thisTime);
 			frames = 0;
 			fps = 0;
@@ -480,7 +403,7 @@ static void main_tick(void *data)
 			SDL_Log(SDL_GetError());
 			config.fullscreen ^= 1; // Re-toggle
 		} else {
-			glViewport(0, 0, W, H);
+			glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 			setAspectRatio();
 			SDL_Log("DEBUG: WINDOW FULLSCREEN CHANGED -> %d", config.fullscreen);
 		}
@@ -553,3 +476,13 @@ int main(int argc, char *args[]) {
 void main_stop() {
 	main_running = 0;
 }
+
+/*
+ * Converts normalized (e.g. touch input) coordinates to game window coordinates
+ */
+void normalized2game(float *x, float *y)
+{
+	*x = (*x - 0.5f) * GAME_WIDTH;
+	*y = (0.5f - *y) * GAME_HEIGHT;
+}
+

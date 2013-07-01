@@ -54,6 +54,7 @@ int space_rendering_map = 0;
 static int second_draw = 0;
 
 static button btn_pause;
+static int game_paused = 0;
 
 static float game_time;
 
@@ -95,6 +96,9 @@ enum game_state{
 	LEVEL_STATE_COUNT
 };
 
+joystick joy_left = JOYSTICK_DEFAULT;
+joystick joy_right = JOYSTICK_DEFAULT;
+
 char *game_state_names[] = {
 	"LEVEL_START",
 	"LEVEL_RUNNING",
@@ -120,7 +124,7 @@ static void update_all();
 
 static void render_gui();
 
-/* The state timer0 */
+/* The state timer */
 static float state_timer = 0;
 /**
  * Inner state functions
@@ -379,26 +383,26 @@ static void update_camera_zoom(int cam_mode)
 	case 1:
 	case 2: /* fanzy zoom camera */
 
-		scrlvl = 1.0f * HEIGHT/currentlvl->height;
+		scrlvl = 1.0f * GAME_HEIGHT/currentlvl->height;
 
 		zoomlvl = cam_mode == 1 ? 4 : 12;
 		if (py < 0) {
 			/* undefined zoom! Reset/fix player position? */
 		} else if ( py < 0.2) {
 			cam_zoom = 2 / zoomlvl + scrlvl;
-			cam_center_y = HEIGHT / (2*cam_zoom);
+			cam_center_y = GAME_HEIGHT / (2*cam_zoom);
 		} else if (py < 0.4) {
 			cam_zoom = (1 + cos(5*M_PI * (py + 1))) / zoomlvl + scrlvl;
-			cam_center_y = HEIGHT / (2*cam_zoom);
+			cam_center_y = GAME_HEIGHT / (2*cam_zoom);
 		} else if (py < 0.6) {
 			cam_zoom = scrlvl;
 			cam_center_y = currentlvl->height / (2);
 		} else if (py < 0.8) {
 			cam_zoom = (1 - cos(5*M_PI * (py - 0.4 + 1))) / zoomlvl + scrlvl;
-			cam_center_y = currentlvl->height - HEIGHT / (2*(cam_zoom));
+			cam_center_y = currentlvl->height - GAME_HEIGHT / (2*(cam_zoom));
 		} else if (py <= 1.0) {
 			cam_zoom = 2 / zoomlvl + scrlvl;
-			cam_center_y = currentlvl->height - HEIGHT / (2*cam_zoom);
+			cam_center_y = currentlvl->height - GAME_HEIGHT / (2*cam_zoom);
 		} else {
 			/* undefined zoom! Reset/fix player position? */
 		}
@@ -412,18 +416,18 @@ static void update_camera_zoom(int cam_mode)
 			cam_zoom = 1.3;
 		}
 		cam_center_y = player->data.body->p.y;
-		if(cam_center_y > currentlvl->height - HEIGHT/(2*cam_zoom)){
-			cam_center_y = currentlvl->height - HEIGHT/(2*cam_zoom);
-		}else if(cam_center_y <  HEIGHT/(2*cam_zoom)){
-			cam_center_y = HEIGHT/(2*cam_zoom);
+		if(cam_center_y > currentlvl->height - GAME_HEIGHT/(2*cam_zoom)){
+			cam_center_y = currentlvl->height - GAME_HEIGHT/(2*cam_zoom);
+		}else if(cam_center_y <  GAME_HEIGHT/(2*cam_zoom)){
+			cam_center_y = GAME_HEIGHT/(2*cam_zoom);
 		}
 		break;
 	case 5:
-		cam_zoom = 1.0f*HEIGHT/currentlvl->height;
+		cam_zoom = 1.0f*GAME_HEIGHT/currentlvl->height;
 		cam_center_y = 1.0f*currentlvl->height/2;
 		break;
 	case 6:
-		scrlvl = 1.0f * HEIGHT/currentlvl->height;
+		scrlvl = 1.0f * GAME_HEIGHT/currentlvl->height;
 		/* parameters to change */
 		zoomlvl = 4; /* amount of zoom less is more zoom */
 		float startlvl = 0.8;
@@ -434,10 +438,10 @@ static void update_camera_zoom(int cam_mode)
 			/* undefined zoom! Reset/fix player position? */
 		} else if ( py < endlvl) {
 			cam_zoom = 2 / zoomlvl + scrlvl;
-			cam_center_y = HEIGHT / (2*cam_zoom);
+			cam_center_y = GAME_HEIGHT / (2*cam_zoom);
 		} else if (py < startlvl) {
 			cam_zoom = (1 - cos( (1/freq)*M_PI*(py + (freq-endlvl) ))) / zoomlvl + scrlvl;
-			cam_center_y = HEIGHT / (2*cam_zoom);
+			cam_center_y = GAME_HEIGHT / (2*cam_zoom);
 		} else if (py < 1) {
 			cam_zoom = scrlvl;
 			cam_center_y = currentlvl->height / (2);
@@ -446,7 +450,7 @@ static void update_camera_zoom(int cam_mode)
 		}
 		break;
 	default:
-		cam_zoom = 1.0f*HEIGHT/currentlvl->height;
+		cam_zoom = 1.0f*GAME_HEIGHT/currentlvl->height;
 		cam_center_y = 1.0f*currentlvl->height/2;
 		break;
 	}
@@ -460,12 +464,12 @@ static void update_camera_position()
 	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
 	static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
 	static float cam_dx;
-	cam_dx = cam_dx * pos_delay + ((player->data.body->rot.x * pos_rel_x - pos_rel_offset_x) * WIDTH) * (1 - pos_delay) / cam_zoom;
+	cam_dx = cam_dx * pos_delay + ((player->data.body->rot.x * pos_rel_x - pos_rel_offset_x) * GAME_WIDTH) * (1 - pos_delay) / cam_zoom;
 
 	cam_center_x = player->data.body->p.x + cam_dx;
 
 	/* camera constraints */
-	camera_width = WIDTH / (2 * cam_zoom);
+	camera_width = GAME_WIDTH / (2 * cam_zoom);
 
 	cam_left_limit = currentlvl->left + camera_width;
 	cam_right_limit = currentlvl->right - camera_width;
@@ -513,21 +517,25 @@ void render_gui()
 
 #if GOT_TOUCH
 	draw_color4f(1,1,1,1);
-	float x0 = joy_left.pos_x * WIDTH - WIDTH/2;
-	float y0 = -joy_left.pos_y * HEIGHT + HEIGHT/2;
-	float x1 = x0 + joy_left.axis_x * WIDTH * joy_left.size;
-	float y1 = y0 + joy_left.axis_y * HEIGHT * joy_left.size;
-	draw_quad_line(x0,y0,x1,y1, 20);
+	float x0 = joy_left.pos_x * GAME_WIDTH - GAME_WIDTH/2;
+	float y0 = -joy_left.pos_y * GAME_HEIGHT + GAME_HEIGHT/2;
+	float x1 = x0 + joy_left.axis_x * GAME_WIDTH * joy_left.size;
+	float y1 = y0 + joy_left.axis_y * GAME_HEIGHT * joy_left.size;
+	if (x0 != x1 && y0 != y1)
+		draw_quad_line(x0,y0,x1,y1, 20);
 
-	x0 = joy_right.pos_x * WIDTH - WIDTH/2;
-	y0 = -joy_right.pos_y * HEIGHT + HEIGHT/2;
-	x1 = x0 + joy_right.axis_x * WIDTH * joy_right.size;
-	y1 = y0 + joy_right.axis_y * HEIGHT * joy_right.size;
-	draw_quad_line(x0,y0,x1,y1, 20);
+	x0 = joy_right.pos_x * GAME_WIDTH - GAME_WIDTH/2;
+	y0 = -joy_right.pos_y * GAME_HEIGHT + GAME_HEIGHT/2;
+	x1 = x0 + joy_right.axis_x * GAME_WIDTH * joy_right.size;
+	y1 = y0 + joy_right.axis_y * GAME_HEIGHT * joy_right.size;
+	if (x0 != x1 && y0 != y1)
+		draw_quad_line(x0,y0,x1,y1, 20);
 
 #endif
-	cpVect pause_pos = {WIDTH/2-70,HEIGHT/2-70};
-	draw_texture(TEX_BUTTON_PAUSE, &pause_pos, TEX_MAP_FULL, 80, 80, 0);
+
+	if (gamestate == LEVEL_RUNNING && !game_paused) {
+		button_render(&btn_pause);
+	}
 
 	/* draw GUI */
 	setTextAngle(0); // TODO don't use global variables for setting font properties
@@ -548,7 +556,7 @@ void render_gui()
 		score_adder = 1;
 	}
 	sprintf(score_temp,"%d",score_anim);
-	font_drawText(-WIDTH/2+20,HEIGHT/2 - 26,score_temp);
+	font_drawText(-GAME_WIDTH/2+20,GAME_HEIGHT/2 - 26,score_temp);
 
 	draw_color4f(1,0,0,1);
 	setTextSize(20);
@@ -557,7 +565,7 @@ void render_gui()
 			objects_count(ID_FACTORY)+
 			objects_count(ID_TURRET)+
 			objects_count(ID_TANK));
-	font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,goals_left);
+	font_drawText(-GAME_WIDTH/2+20,GAME_HEIGHT/2 - 100,goals_left);
 
 	draw_color4f(1,1,1,1);
 	setTextSize(20);
@@ -584,14 +592,14 @@ void render_gui()
 	setTextAlign(TEXT_CENTER);
 	//		sprintf(level_temp,"STATION: %d DECK: %d", currentlvl->station, currentlvl->deck);
 	sprintf(level_temp,"LEVEL %d", currentlvl->deck);
-	font_drawText(0, -HEIGHT/2+24, level_temp);
+	font_drawText(0, -GAME_HEIGHT/2+24, level_temp);
 
 
 
 	setTextAlign(TEXT_RIGHT);
 
 #if !ARCADE_MODE
-	font_drawText(WIDTH/2 - 15, HEIGHT/2 - 20, fps_buf);
+	font_drawText(GAME_WIDTH/2 - 15, GAME_HEIGHT/2 - 20, fps_buf);
 #endif
 
 	char time_temp[20];
@@ -620,7 +628,7 @@ void render_gui()
 		}
 		setTextAlign(TEXT_CENTER);
 		setTextSize(40 + extra_size);
-		font_drawText(0, HEIGHT/2 - 29 - extra_size*1.5, time_temp);
+		font_drawText(0, GAME_HEIGHT/2 - 29 - extra_size*1.5, time_temp);
 		break;
 	case LEVEL_CLEARED:
 		setTextSize(60);
@@ -650,10 +658,10 @@ void render_gui()
 			button_timer = 0;
 		}
 		if(button_down){
-			cpVect t = cpv(0,0-HEIGHT/4);
+			cpVect t = cpv(0,0-GAME_HEIGHT/4);
 			draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
 		}else{
-			cpVect t = cpv(0,-5.5-HEIGHT/4);
+			cpVect t = cpv(0,-5.5-GAME_HEIGHT/4);
 			draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
 		}
 #else
@@ -691,8 +699,8 @@ static void stars_init()
 	srand(122531);
 	int i;
 	for (i=0; i<star_count; i++) {
-		stars_x[i] = rand()%(WIDTH*2*2) - WIDTH*2; // make sure that radius is greater than WIDTH * sqrt(2)
-		stars_y[i] = rand()%(WIDTH*2*2) - WIDTH*2;
+		stars_x[i] = rand()%(GAME_WIDTH*2*2) - GAME_WIDTH*2; // make sure that radius is greater than WIDTH * sqrt(2)
+		stars_y[i] = rand()%(GAME_WIDTH*2*2) - GAME_WIDTH*2;
 		stars_size[i] = 2 + 5*(rand() % 1000) / 1000.0f;
 	}
 }
@@ -815,7 +823,22 @@ void space_init_level(int space_station, int deck)
 
 static void on_enter()
 {
+	game_paused = 0;
+}
 
+static void game_over()
+{
+	lvl_cleared=0;
+	statesystem_set_state(STATE_GAMEOVER);
+	gameover_setstate(enter_name);
+	//change_state(LEVEL_TRANSITION);
+}
+
+static void pause_game()
+{
+	menu_change_current_menu(MENU_INGAME);
+	statesystem_push_state(STATE_MENU);
+	game_paused = 1;
 }
 
 static void sdl_event(SDL_Event *event)
@@ -827,17 +850,13 @@ static void sdl_event(SDL_Event *event)
 
 		/* Opens the pause menu */
 		if (key == KEY_ESCAPE && gamestate == LEVEL_RUNNING) {
-			menu_change_current_menu(MENU_INGAME);
-			statesystem_push_state(STATE_MENU);
+			pause_game();
 		}
 
 		switch (gamestate) {
 		case LEVEL_PLAYER_DEAD:
 			if(key == KEY_RETURN_2 || key == KEY_RETURN_1){//state_timer > 3){
-				lvl_cleared=0;
-				statesystem_set_state(STATE_GAMEOVER);
-				gameover_setstate(enter_name);
-				//change_state(LEVEL_TRANSITION);
+				game_over();
 			}
 			break;
 		default:
@@ -845,20 +864,33 @@ static void sdl_event(SDL_Event *event)
 		}
 		break;
 		case SDL_FINGERDOWN:
-			button_push(&btn_pause);
-			break;
-		case SDL_FINGERUP:
+			SDL_Log("Finger #%ld down", event->tfinger.fingerId);
+			//todo move joystick into space.c
+			//todo check all buttons before eventually activating a joystick
 			if (gamestate == LEVEL_RUNNING) {
-				if (event->tfinger.x > 0.9 && event->tfinger.y > 0.9) {
-					//if (button_release(&btn_pause)) {
-					menu_change_current_menu(MENU_INGAME);
-					statesystem_push_state(STATE_MENU);
-					//}
+				if (button_finger_down(&btn_pause, &event->tfinger)) {
+
+				} else if (1) { //check which joystick region
+
 				}
 			} else if (gamestate == LEVEL_PLAYER_DEAD) {
-				lvl_cleared=0;
-				statesystem_set_state(STATE_GAMEOVER);
-				gameover_setstate(enter_name);
+				button_finger_down(&btn_fullscreen, &event->tfinger);
+			}
+			break;
+		case SDL_FINGERMOTION:
+			button_finger_move(&btn_pause, &event->tfinger);
+			break;
+		case SDL_FINGERUP:
+			SDL_Log("Finger #%ld up", event->tfinger.fingerId);
+
+			if (gamestate == LEVEL_RUNNING) {
+				if (button_finger_up(&btn_pause, &event->tfinger)) {
+					pause_game();
+				}
+			} else if (gamestate == LEVEL_PLAYER_DEAD) {
+				if (button_finger_up(&btn_fullscreen, &event->tfinger)) {
+					game_over();
+				}
 			}
 			break;
 	}
@@ -898,6 +930,8 @@ void space_init()
     collisioncallbacks_init();
 
     stars_init();
+
+    button_init(&btn_pause, GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80, TEX_BUTTON_PAUSE);
 }
 
 
