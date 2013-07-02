@@ -25,6 +25,8 @@ typedef struct {
 	int gun_level;
 	int score;
 	float rotation_speed;
+	float direction; /* in radians [0, 2*PI]*/
+	float direction_target; /* in radians [0, 2*PI]*/
 	float gun_timer;
 	float aim_angle;
 	float aim_speed;

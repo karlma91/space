@@ -109,10 +109,10 @@ static void sdl_event(SDL_Event *event)
 		}
 		break;
 		case SDL_FINGERDOWN:
-			button_finger_down(&btn_fullscreen, &event->tfinger);
+			button_finger_down(btn_fullscreen, &event->tfinger);
 			break;
 		case SDL_FINGERUP:
-			if (button_finger_up(&btn_fullscreen, &event->tfinger)) {
+			if (button_finger_up(btn_fullscreen, &event->tfinger)) {
 				switch(gameover_state) {
 				case enter_name:
 					if (++cursor >= MAX_NAME_LENGTH) {
@@ -158,7 +158,7 @@ void gameover_init()
 	highscorelist_create(list);
 	highscorelist_readfile(list,"highscores"); // NB! moved from bin/data/highscores
 
-	STATE_GAMEOVER = statesystem_add_state(0, on_enter,update,NULL,draw, sdl_event, on_leave, destroy);
+	STATE_GAMEOVER = statesystem_create_state(0, on_enter,update,NULL,draw, sdl_event, on_leave, destroy);
 
 }
 
@@ -293,24 +293,9 @@ static void destroy()
 	highscorelist_writefile(list);
 	highscorelist_destroy(list);
 	free(list);
+
+	statesystem_free(STATE_GAMEOVER);
 }
-
-char * covertToUpper(char *str)
-    {
-        int i = 0;
-        int len = 0;
-
-        len = strlen(str);
-
-        for(i = 0; str[i]; i++)
-        {
-           str[i] = toupper(str[i]);
-        }
-        //terminate string
-        str[i]= '\0';
-        return str;
-
-    }
 
 static void draw_highscore(int start_index)
 {

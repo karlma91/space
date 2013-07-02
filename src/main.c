@@ -288,8 +288,6 @@ static void main_init() {
 	statesystem_init(); /* init all states */
 	game_init();
 
-    statesystem_set_state(0);
-
 	// Handle iOS app-events (pause, low-memory, terminating, etc...) and SDL_QUIT
 	SDL_SetEventFilter(HandleAppEvents, NULL);
 
@@ -301,7 +299,7 @@ static void main_init() {
 	lastTime = SDL_GetTicks();
 
 	// general fullscreen button
-	button_init(&btn_fullscreen,0,0,GAME_WIDTH,GAME_HEIGHT,0);
+	btn_fullscreen = button_create(0,0,GAME_WIDTH,GAME_HEIGHT,0);
 }
 
 static void check_events()

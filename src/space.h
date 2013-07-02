@@ -24,7 +24,7 @@ extern cpSpace *space;
 
 extern level *currentlvl;
 
-extern joystick joy_left, joy_right;
+extern joystick *joy_left, *joy_right;
 
 extern int space_rendering_map;
 

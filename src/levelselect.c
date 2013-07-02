@@ -104,7 +104,7 @@ static void sdl_event(SDL_Event *event)
 
 void levelselect_init()
 {
-	STATE_LEVELSELECT = statesystem_add_state(0, on_enter, update, NULL, render, sdl_event, on_leave, destroy);
+	STATE_LEVELSELECT = statesystem_create_state(0, on_enter, update, NULL, render, sdl_event, on_leave, destroy);
 	level_get_ships(&ships, &decks);
 }
 
@@ -209,5 +209,5 @@ static void render_ship(struct level_ship *ship, int selected)
 
 static void destroy()
 {
-
+	statesystem_free(STATE_LEVELSELECT);
 }

@@ -90,4 +90,6 @@ void game_init()
     space_init();
     gameover_init();
     levelselect_init();
+
+    statesystem_set_state(STATE_MENU);
 }

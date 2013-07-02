@@ -14,9 +14,7 @@
 #include <stdio.h>
 #include "llist.h"
 
-//#define DEBUG
-//#define DEBUG_3
-//#define DEBUG_4
+/* Define LLIST_DEBUG 1 to debug llist */
 
 #define MAX_CONCURRENT_ITERATIONS 10
 
@@ -44,22 +42,24 @@ struct llist {
 
 
 /* private variables */
-static struct llist **all_lists;
-static int list_count = 0;
-
 static node *node_pool = NULL;
 static const node node_null = {0,0,0};
 
-#ifdef DEBUG
+#if LLIST_DEBUG
 static int stats_max_node_count = 0;
 static int stats_node_count = 0;
 #endif
 
 /* private function definitions */
-static int is_valid(int index) {
-	if ((index >= 0 && index < list_count) && (all_lists[index])) {
-		if (all_lists[index]->NULL_TEST) {
-			fprintf(stderr, "Error -> LList's NULL test failed for list#%d, got %p instead of %p!\n", index, all_lists[index]->NULL_TEST, NULL);
+static int is_valid(struct llist *list) {
+	if (list) {
+		if (list->id != list) {
+			fprintf(stderr, "Error -> LList's ID test failed for list [%p], got %p!\n", list, list->id);
+			exit(-1000);
+			return 0;
+		}
+		else if (list->NULL_TEST) {
+			fprintf(stderr, "Error -> LList's NULL test failed for list [%p], got %p instead of %p!\n", list, list->NULL_TEST, NULL);
 			exit(-1000);
 			return 0;
 		}
@@ -71,7 +71,7 @@ static int is_valid(int index) {
 static __inline__ node* new_node() {
 	node *node;
 
-#ifdef DEBUG
+#if LLIST_DEBUG
 	if (++stats_node_count > stats_max_node_count) {
 		stats_max_node_count = stats_node_count;
 		fprintf(stderr, "List -> expanding node capacity: %d\n", stats_max_node_count);
@@ -83,7 +83,7 @@ static __inline__ node* new_node() {
 		node_pool = node_pool->next;
 	} else {
 		node = malloc(sizeof(*node));
-#ifdef DEBUG
+#if LLIST_DEBUG
 		fprintf(stderr, "List -> node capacity expanded!\n");
 #endif
 	}
@@ -93,7 +93,7 @@ static __inline__ node* new_node() {
 }
 
 static void __inline__ free_node(node *node) {
-#ifdef DEBUG
+#if LLIST_DEBUG
 	--stats_node_count;
 #endif
 
@@ -111,16 +111,9 @@ static void __inline__ free_node(node *node) {
 
 LList llist_create()
 {
-	struct llist *list;
+	struct llist *list = malloc(sizeof(struct llist));
 
-	//TODO search for an empty llist position in array to support ridiculous number of calls to llist_create()
-	int i = list_count++;
-
-	all_lists = realloc(all_lists, sizeof(struct llist *[list_count]));
-	all_lists[i] = malloc(sizeof(struct llist));
-
-	list = all_lists[i];
-	list->id = i;
+	list->id = (LList)list;
 	list->head = NULL;
 	list->tail = NULL;
 	list->iteration_index = -1;
@@ -128,8 +121,8 @@ LList llist_create()
 	list->remove_callback = 0;
 	list->NULL_TEST = 0;
 
-#ifdef DEBUG
-	fprintf(stderr,"list#%02d: created with callback: %p\n", i, list->remove_callback);
+#if LLIST_DEBUG
+	fprintf(stderr,"list [%p]: created with callback: %p\n", list, list->remove_callback);
 #endif
 
 	return list->id;
@@ -137,13 +130,11 @@ LList llist_create()
 
 int llist_add(LList id, void *p)
 {
-	struct llist *list;
+	struct llist *list = (struct llist *)id;
 	node *node;
 
-	if ((p && is_valid(id)) == 0)
+	if (!p || !is_valid(list))
 		return 0;
-
-	list = all_lists[id];
 
 	node = new_node();
 
@@ -160,8 +151,8 @@ int llist_add(LList id, void *p)
 	list->tail = node;
 	list->size++;
 
-#ifdef DEBUG
-	fprintf(stderr,"list#%02d: added %p\n", id,p);
+#if LLIST_DEBUG
+	fprintf(stderr,"list [%p]: added %p\n", id,p);
 #endif
 
 	return 1;
@@ -169,20 +160,14 @@ int llist_add(LList id, void *p)
 
 int llist_remove(LList id, void *p)
 {
-#ifdef DEBUG_4
-	fprintf(stderr,"removing -> list#%02d: removal of %p step 0\n", id, p);
-#endif
-
-	struct llist *list;
+	struct llist *list = (struct llist *)id;
 	void *item;
 	node *n = NULL;
 
-	if (p && is_valid(id))
-		list = all_lists[id];
-	else {
-#ifdef DEBUG
+	if (!p || !is_valid(list)) {
+#if LLIST_DEBUG
 		if (p) {
-			fprintf(stderr,"Warning -> list#%02d: invalid list (remove)\n", id);
+			fprintf(stderr,"Warning -> list [%p]: invalid list (remove)\n", id);
 		}
 #endif
 		return 0;
@@ -196,35 +181,23 @@ int llist_remove(LList id, void *p)
 			if (list->iteration_stack[i] && list->iteration_stack[i]->item == p) {
 				n = list->iteration_stack[i];
 				list->iteration_stack[i] = n->next;
-#ifdef DEBUG
-	fprintf(stderr,"list#%02d: adjusting stack#%d -> next = %p\n", id, i, list->iteration_stack[i] ? list->iteration_stack[i]->item : NULL);
+#if LLIST_DEBUG
+	fprintf(stderr,"list [%p]: adjusting stack#%d -> next = %p\n", id, i, list->iteration_stack[i] ? list->iteration_stack[i]->item : NULL);
 #endif
 			}
 		}
 	}
-#ifdef DEBUG_4
-	fprintf(stderr,"removing -> list#%02d: removal of %p step 1\n", id, p);
-#endif
 	if (n == NULL) {
 		n = list->head;
 	}
 
 	while (n) {
-#ifdef DEBUG_4
-	fprintf(stderr,"removing -> list#%02d: removal of %p step 2 comparing with: %p\n", id, p, n->item);
-#endif
 		if (n->item == p) {
-#ifdef DEBUG_4
-	fprintf(stderr,"removing -> list#%02d: removal of %p step 3 pointer identified\n", id, p);
-#endif
 			if (n->prev) {
 				n->prev->next = n->next;
 			} else {
 				list->head = n->next;
 			}
-#ifdef DEBUG_4
-	fprintf(stderr,"removing -> list#%02d: removal of %p step 4 prev and head adjusted\n", id, p);
-#endif
 			if (n->next) {
 				n->next->prev = n->prev;
 			} else {
@@ -234,27 +207,18 @@ int llist_remove(LList id, void *p)
 					list->tail = list->head;
 				}
 			}
-#ifdef DEBUG_4
-	fprintf(stderr,"removing -> list#%02d: removal of %p step 5 next and tail adjusted\n", id, p);
-#endif
 
 			item = n->item;
 
 			n->item = NULL;
-#ifdef DEBUG_4
-	fprintf(stderr,"removing -> list#%02d: removal of %p step 5 free...\n", id, p);
-#endif
 			free_node(n);
 			list->size--;
-#ifdef DEBUG_4
-	fprintf(stderr,"removing -> list#%02d: removal of %p step 6 remove callback to func: %p\n", id, p, list->remove_callback);
-#endif
 			if (list->remove_callback != NULL) {
 				list->remove_callback(item);
 			}
 
-#ifdef DEBUG
-	fprintf(stderr,"list#%02d: removed %p\n", id, p);
+#if LLIST_DEBUG
+	fprintf(stderr,"list [%p]: removed %p\n", id, p);
 #endif
 
 			return 1;
@@ -262,8 +226,8 @@ int llist_remove(LList id, void *p)
 		n = n->next;
 	}
 
-#ifdef DEBUG
-	fprintf(stderr,"Warning -> list#%02d: element not found %p (remove)\n", id, p);
+#if LLIST_DEBUG
+	fprintf(stderr,"Warning -> list [%p]: element not found %p (remove)\n", id, p);
 #endif
 
 	return 0;
@@ -272,8 +236,10 @@ int llist_remove(LList id, void *p)
 
 int llist_size(LList id)
 {
-	if (is_valid(id)) {
-		return (all_lists[id])->size;
+	struct llist *list = (struct llist *) id;
+
+	if (is_valid(list)) {
+		return list->size;
 	} else {
 		return -1;
 	}
@@ -281,8 +247,10 @@ int llist_size(LList id)
 
 void* llist_first(LList id)
 {
-	if (is_valid(id) && all_lists[id]->head) {
-		return all_lists[id]->head->item;
+	struct llist *list = (struct llist *) id;
+
+	if (is_valid(list) && list->head) {
+		return list->head->item;
 	} else {
 		return NULL;
 	}
@@ -290,8 +258,10 @@ void* llist_first(LList id)
 
 void* llist_last(LList id)
 {
-	if (is_valid(id) && all_lists[id]->tail) {
-		return all_lists[id]->tail->item;
+	struct llist *list = (struct llist *) id;
+
+	if (is_valid(list) && list->tail) {
+		return list->tail->item;
 	} else {
 		return NULL;
 	}
@@ -300,9 +270,10 @@ void* llist_last(LList id)
 void* llist_at_index(LList id, int n)
 {
 	int i = 0;
+	struct llist *list = (struct llist *) id;
 
-	if (is_valid(id) && n >= 0 && n < all_lists[id]->size) {
-		node *node = all_lists[id]->head;
+	if (is_valid(list) && n >= 0 && n < list->size) {
+		node *node = list->head;
 
 		while (node) {
 			if (i == n) {
@@ -319,8 +290,10 @@ void* llist_at_index(LList id, int n)
 
 int llist_set_remove_callback(LList id, void (*remove_callback)(void *))
 {
-	if (is_valid(id)) {
-		all_lists[id]->remove_callback = remove_callback;
+	struct llist *list = (struct llist *) id;
+
+	if (is_valid(list)) {
+		list->remove_callback = remove_callback;
 		return 1;
 	}
 
@@ -329,10 +302,6 @@ int llist_set_remove_callback(LList id, void (*remove_callback)(void *))
 
 void llist_iterate_func(LList id, void (*func)(void *))
 {
-#ifdef DEBUG_3
-	fprintf(stderr,"list#%02d: iterate function %p\n", id, *func);
-#endif
-
 	if (is_valid(id) && func) {
 		node *n;
 
@@ -348,15 +317,12 @@ void llist_iterate_func(LList id, void (*func)(void *))
 
 int llist_begin(LList id)
 {
-	struct llist *list;
-	if (is_valid(id)) {
-		list = all_lists[id];
+	struct llist *list = (struct llist *) id;
+
+	if (is_valid(list)) {
 		if (list->iteration_index + 1 < MAX_CONCURRENT_ITERATIONS) {
 			list->iteration_index++;
 			list->iteration_stack[list->iteration_index] = list->head;
-#ifdef DEBUG_3
-	fprintf(stderr,"list#%02d: begin %d\n", id, list->iteration_index);
-#endif
 			return 1;
 		}
 	}
@@ -366,22 +332,17 @@ int llist_begin(LList id)
 
 int llist_hasnext(LList id)
 {
-#ifdef DEBUG_3
-	fprintf(stderr,"list#%02d: has next = %d\n", id, (is_valid(id) && (all_lists[id]->iteration_index != -1) &&
-			all_lists[id]->iteration_stack[all_lists[id]->iteration_index]));
-#endif
-	return (is_valid(id) && (all_lists[id]->iteration_index != -1) &&
-			all_lists[id]->iteration_stack[all_lists[id]->iteration_index]);
+	struct llist *list = (struct llist *) id;
+
+	return (is_valid(list) && (list->iteration_index != -1) && list->iteration_stack[list->iteration_index]);
 }
 
 void* llist_next(LList id)
 {
-	struct llist *list;
+	struct llist *list = (struct llist *) id;
 	node *node;
 
-	if (is_valid(id)) {
-		list = all_lists[id];
-
+	if (is_valid(list)) {
 		if (list->iteration_index == -1)
 			return NULL;
 
@@ -389,9 +350,6 @@ void* llist_next(LList id)
 
 		if (node) {
 			list->iteration_stack[list->iteration_index] = node->next;
-#ifdef DEBUG_3
-	fprintf(stderr,"list#%02d: next = %p\n", id, node->item);
-#endif
 			return node->item;
 		}
 	}
@@ -401,14 +359,11 @@ void* llist_next(LList id)
 
 int llist_end(LList id)
 {
-	struct llist *list;
-	if (is_valid(id)) {
-		list = all_lists[id];
+	struct llist *list = (struct llist *) id;
+
+	if (is_valid(list)) {
 		if (list->iteration_index > -1) {
 			list->iteration_stack[list->iteration_index] = NULL;
-#ifdef DEBUG_3
-	fprintf(stderr,"list#%02d: end %d\n", id, list->iteration_index);
-#endif
 			list->iteration_index--;
 			return 1;
 		}
@@ -420,49 +375,35 @@ int llist_end(LList id)
 
 void llist_clear(LList id)
 {
-#ifdef DEBUG
-	fprintf(stderr,"list#%02d: clear\n", id);
+#if LLIST_DEBUG
+	fprintf(stderr,"list [%p]: clear\n", id);
 #endif
 	while (llist_remove(id, llist_first(id)));
 }
 
 int llist_free(LList id)
 {
-#ifdef DEBUG
-	fprintf(stderr,"list#%02d: free\n", id);
+#if LLIST_DEBUG
+	fprintf(stderr,"list [%p]: free\n", id);
 #endif
+	struct llist *list = (struct llist *) id;
+
 	llist_clear(id);
 
-	if (is_valid(id)) {
-		free(all_lists[id]);
-		all_lists[id] = NULL;
+	if (!is_valid(list))
+		return 0;
 
-		return 1;
-	}
-
-	return 0;
-}
-
-void llist_freeall()
-{
-#ifdef DEBUG
-	fprintf(stderr,"list: free all\n");
-#endif
-	int i;
-	for (i = 0; i < list_count; i++) {
-		llist_free(i);
-	}
-
-	list_count = 0;
-	free(all_lists);
-
-	llist_free_nodes();
+	free(list);
+	return 1;
 }
 
 void llist_free_nodes() {
 	node *node = node_pool;
 	while (node_pool) {
 		node_pool = node->next;
+#if LLIST_DEBUG
+		--stats_max_node_count;
+#endif
 		free(node);
 	}
 }

@@ -10,7 +10,7 @@
 
 #include "SDL.h"
 
-typedef int STATE_ID;
+typedef void *STATE_ID;
 
 /**
  * standard functions
@@ -26,7 +26,7 @@ void statesystem_destroy();
 
 STATE_ID statesystem_get_render_state();
 
-STATE_ID statesystem_add_state(int inner_states,
+STATE_ID statesystem_create_state(int inner_states,
         void (*on_enter)(),
         void (*pre_update)(),
         void (*post_update)(),
@@ -44,5 +44,7 @@ void statesystem_pop_state();
 void statesystem_set_state(STATE_ID state);
 
 void statesystem_push_event(SDL_Event *event);
+
+void statesystem_free(STATE_ID state);
 
 #endif /* STATESYSTEM_H_ */

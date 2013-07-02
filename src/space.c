@@ -96,8 +96,8 @@ enum game_state{
 	LEVEL_STATE_COUNT
 };
 
-joystick joy_left = JOYSTICK_DEFAULT;
-joystick joy_right = JOYSTICK_DEFAULT;
+joystick *joy_left;
+joystick *joy_right;
 
 char *game_state_names[] = {
 	"LEVEL_START",
@@ -122,7 +122,7 @@ static void level_transition();
 static void change_state(int state);
 static void update_all();
 
-static void render_gui();
+static void draw_gui();
 
 /* The state timer */
 static float state_timer = 0;
@@ -505,11 +505,11 @@ static void SPACE_draw()
 
 	space_rendering_map = 0;
 	if(!second_draw){
-		render_gui();
+		draw_gui();
 	}
 }
 
-void render_gui()
+void draw_gui()
 {
 	/* reset transform matrix */
 	draw_load_identity();
@@ -517,24 +517,12 @@ void render_gui()
 
 #if GOT_TOUCH
 	draw_color4f(1,1,1,1);
-	float x0 = joy_left.pos_x * GAME_WIDTH - GAME_WIDTH/2;
-	float y0 = -joy_left.pos_y * GAME_HEIGHT + GAME_HEIGHT/2;
-	float x1 = x0 + joy_left.axis_x * GAME_WIDTH * joy_left.size;
-	float y1 = y0 + joy_left.axis_y * GAME_HEIGHT * joy_left.size;
-	if (x0 != x1 && y0 != y1)
-		draw_quad_line(x0,y0,x1,y1, 20);
-
-	x0 = joy_right.pos_x * GAME_WIDTH - GAME_WIDTH/2;
-	y0 = -joy_right.pos_y * GAME_HEIGHT + GAME_HEIGHT/2;
-	x1 = x0 + joy_right.axis_x * GAME_WIDTH * joy_right.size;
-	y1 = y0 + joy_right.axis_y * GAME_HEIGHT * joy_right.size;
-	if (x0 != x1 && y0 != y1)
-		draw_quad_line(x0,y0,x1,y1, 20);
-
+	joystick_render(joy_left);
+	joystick_render(joy_right);
 #endif
 
 	if (gamestate == LEVEL_RUNNING && !game_paused) {
-		button_render(&btn_pause);
+		button_render(btn_pause);
 	}
 
 	/* draw GUI */
@@ -742,6 +730,9 @@ void drawStars()
 
 void space_init_level(int space_station, int deck)
 {
+	joystick_release(joy_left);
+	joystick_release(joy_right);
+
 	static object_group_player *player;
 
 	if(player==NULL){
@@ -864,31 +855,35 @@ static void sdl_event(SDL_Event *event)
 		}
 		break;
 		case SDL_FINGERDOWN:
-			SDL_Log("Finger #%ld down", event->tfinger.fingerId);
 			//todo move joystick into space.c
 			//todo check all buttons before eventually activating a joystick
 			if (gamestate == LEVEL_RUNNING) {
-				if (button_finger_down(&btn_pause, &event->tfinger)) {
+				if (button_finger_down(btn_pause, &event->tfinger))
+					return;
+				if (joystick_finger_down(joy_left, &event->tfinger))
+					return;
+				if (joystick_finger_down(joy_right, &event->tfinger))
+					return;
 
-				} else if (1) { //check which joystick region
-
-				}
 			} else if (gamestate == LEVEL_PLAYER_DEAD) {
-				button_finger_down(&btn_fullscreen, &event->tfinger);
+				button_finger_down(btn_fullscreen, &event->tfinger);
 			}
 			break;
 		case SDL_FINGERMOTION:
-			button_finger_move(&btn_pause, &event->tfinger);
+			button_finger_move(btn_pause, &event->tfinger);
+			joystick_finger_move(joy_left, &event->tfinger);
+			joystick_finger_move(joy_right, &event->tfinger);
 			break;
 		case SDL_FINGERUP:
-			SDL_Log("Finger #%ld up", event->tfinger.fingerId);
-
 			if (gamestate == LEVEL_RUNNING) {
-				if (button_finger_up(&btn_pause, &event->tfinger)) {
+				if (button_finger_up(btn_pause, &event->tfinger)) {
 					pause_game();
 				}
+				joystick_finger_up(joy_left, &event->tfinger);
+				joystick_finger_up(joy_right, &event->tfinger);
+
 			} else if (gamestate == LEVEL_PLAYER_DEAD) {
-				if (button_finger_up(&btn_fullscreen, &event->tfinger)) {
+				if (button_finger_up(btn_fullscreen, &event->tfinger)) {
 					game_over();
 				}
 			}
@@ -901,15 +896,18 @@ static void on_leave()
 
 }
 
-static void SPACE_destroy()
+static void destroy()
 {
     objects_destroy();
     cpSpaceDestroy(space);
+	statesystem_free(STATE_MENU);
+	joystick_free(joy_left);
+	joystick_free(joy_right);
 }
 
 void space_init()
 {
-	STATE_SPACE = statesystem_add_state(LEVEL_STATE_COUNT,on_enter,pre_update,post_update,render,sdl_event,on_leave,SPACE_destroy);
+	STATE_SPACE = statesystem_create_state(LEVEL_STATE_COUNT,on_enter,pre_update,post_update,render,sdl_event,on_leave,destroy);
     statesystem_add_inner_state(STATE_SPACE,LEVEL_START,level_start,NULL);
     statesystem_add_inner_state(STATE_SPACE,LEVEL_RUNNING,level_running,NULL);
     statesystem_add_inner_state(STATE_SPACE,LEVEL_TIMESUP,level_timesup,NULL);
@@ -931,7 +929,9 @@ void space_init()
 
     stars_init();
 
-    button_init(&btn_pause, GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80, TEX_BUTTON_PAUSE);
+    btn_pause = button_create(GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80, TEX_BUTTON_PAUSE);
+    joy_left = joystick_create(0, 80, 10, -GAME_WIDTH/2, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
+    joy_right = joystick_create(0, 80, 10, 0, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
 }
 
 
@@ -952,6 +952,7 @@ int getPlayerScore()
 void input()
 {
 #if GOT_TOUCH
+	/*
 	int left = 0, right = 0;
 	SDL_TouchID touchID = SDL_GetTouchDevice(0); //constant
 	if (touchID) {
@@ -973,12 +974,13 @@ void input()
 		}
 
 		if (!left) {
-			joy_left.active = 0;
+			joy_left.pressed = 0;
 		}
 		if (!right) {
 			joystick_release(&joy_right);
 		}
 	}
+	*/
 #else
 	/* update joystick positions */
 	int axis_x = keys[KEY_RIGHT_1] - keys[KEY_LEFT_1];

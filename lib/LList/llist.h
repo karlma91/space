@@ -10,7 +10,7 @@
 #ifndef LLIST_H_
 #define LLIST_H_
 
-typedef int LList;
+typedef void* LList;
 
 LList llist_create(); /* lager en ny lenket liste og returnerer et id-nummer til denne */
 
@@ -35,7 +35,6 @@ int llist_end(LList list);     /* pop-er nåværende iterasjons-peker */
 void llist_clear(LList list);  /* fjerner alle pekere i listen */
 
 int llist_free(LList list);    /* frigjør listen fra minnet */
-void llist_freeall();          /* frigjør alle lister fra minnet */
 
 void llist_free_nodes();       /* frigj¿r alle ubrukte noder fra minnet */
 

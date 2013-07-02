@@ -126,13 +126,12 @@ static void init(object_data *pl)
 static void player_render(object_group_player *player)
 {
 	//float s = 0.001;
-	float dir = cpBodyGetAngle(player->data.body);
 
 	cpVect pos_body = player->data.body->p;
 	cpVect pos_gun = player->gunwheel->p;
 
-	draw_texture(player->param->tex_id, &(pos_gun), &(tex_map[0]), 100, 100, player->aim_angle * 180/M_PI);
-	draw_texture(player->param->tex_id, &(pos_body), &(tex_map[1]), 100, 100, dir*180/M_PI);
+	draw_texture(player->param->tex_id, &(pos_gun), tex_map[0], 100, 100, player->aim_angle * 180/M_PI);
+	draw_texture(player->param->tex_id, &(pos_body), tex_map[1], 100, 100, player->direction*180/M_PI);
 
 	hpbar_draw(&player->hp_bar);
 }
@@ -147,22 +146,25 @@ static void player_update(object_group_player *player)
 
 	player->gun_timer += dt;
 
-	cpBodySetForce(player->data.body, cpv(0,0));
+	cpBodySetForce(player->data.body, cpvzero); //TODO remove player force reset?
 	//update physics and player
 	if (player->hp_bar.value > 0) { //alive
-		//cpBodySetAngVel(player->data.body,cpBodyGetAngVel(player->data.body)*0.8);
+		player->direction = turn_toangle(player->direction_target, player->direction, 2 * M_PI * dt / 10000);
+
 		cpBodySetAngVel(player->data.body,0);
 		player->flame->p = player->data.body->p;
-		player->flame->angular_offset = cpvtoangle(player->data.body->v) * (180/M_PI)+90;
+		player->flame->angular_offset = player->direction * (180/M_PI)+90;
 
 		player->gunwheel->p = player->data.body->p;
 		player->gunwheel->rot = cpvforangle(player->aim_angle);
 		player->gunwheel->v = player->data.body->v;
 
-		if(player->disable == 0){
+		if (player->disable == 0){
 			player_controls(player);
 		}
 	} else {
+		float vel_angle = cpvtoangle(cpBodyGetVel(player->data.body));
+		player->direction = turn_toangle(vel_angle, player->direction, 2 * M_PI * dt / 10000);
 		player->aim_angle = cpvtoangle(player->gunwheel->rot);
 		player->flame->disable = 1;
 	}
@@ -188,36 +190,49 @@ static void player_controls(object_group_player *player)
 
 static void arcade_control(object_group_player *player)
 {
-	float player_angle = cpBodyGetAngle(player->data.body);
+	//float player_angle = cpBodyGetAngle(player->data.body);
 	float player_angle_target;
 	float dir_step;
 
-	cpFloat speed = 700;
+	//cpFloat speed = 700;
 	int instant = 1; //tmp instant direction
 
-	if (joy_left.amplitude) {
-		player_angle_target = joy_left.direction;
+	if (joy_left->amplitude) {
+		player_angle_target = joy_left->direction;
 
+		/*
 		if (!instant) {
 			dir_step = (player->rotation_speed * 2*M_PI)*dt; // 2.5 rps
 			player_angle = turn_toangle(player_angle,player_angle_target,dir_step);
 		} else {
 			player_angle = player_angle_target;
 		}
-		//TODO use impulses instead?
-		cpBodySetForce(player->data.body, cpvmult(cpvforangle(player_angle),speed*300)); //*600
+		*/
+
+		player->direction_target = joy_left->direction;
+		cpVect player_dir = cpv(joy_left->axis_x, joy_left->axis_y);
+
+		cpBodyApplyImpulse(player->data.body,cpvmult(player_dir, 100), cpvmult(player_dir, -100)); // applies impulse from rocket
+		//cpBodySetForce(player->data.body, cpvmult(player_dir, speed*30)); //*600
 
 		player->flame->disable = 0;
 	} else {
 		player->flame->disable = 1;
+		float vel_angle = cpvtoangle(cpBodyGetVel(player->data.body));
+		player->direction = turn_toangle(vel_angle, player->direction, 2 * M_PI * dt / 10000);
 	}
 
-	cpBodySetAngle(player->data.body, cpvtoangle(cpBodyGetVel(player->data.body)));
+
+	/*
+	cpVect vel = cpBodyGetVel(player->data.body);
+	if (cpvlengthsq(vel) > 1)
+		cpBodySetAngle(player->data.body, cpvtoangle(vel_angle));
+	 */
 
 	float aim_angle_target = 0;
 
-	if (joy_right.amplitude) {
-		aim_angle_target = joy_right.direction;
+	if (joy_right->amplitude) {
+		aim_angle_target = joy_right->direction;
 		if (!instant) {
 			dir_step = (player->aim_speed * 2*M_PI) * dt; // 0.5 rps
 			player->aim_angle = turn_toangle(player->aim_angle, aim_angle_target, dir_step);

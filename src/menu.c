@@ -84,10 +84,10 @@ static void sdl_event(SDL_Event *event)
 #endif
 		break;
 	case SDL_FINGERDOWN:
-		button_finger_down(&btn_fullscreen, &event->tfinger);
+		button_finger_down(btn_fullscreen, &event->tfinger);
 		break;
 	case SDL_FINGERUP:
-		if (button_finger_up(&btn_fullscreen, &event->tfinger)) {
+		if (button_finger_up(btn_fullscreen, &event->tfinger)) {
 			curMenu->func();
 		}
 		break;
@@ -208,6 +208,7 @@ static void draw()
 	setTextAlign(TEXT_CENTER);
 	setTextSize(40);
 
+	int i;
 	for (i = 0; i < curMenu->num_items; i++) {
 		draw_color((select_id == i) ? col_select : col_item);
 		font_drawText(0,100 - 60 * i, curMenu->texts[i]);
@@ -262,7 +263,7 @@ static void inner_ingame()
 
 static void destroy()
 {
-
+	statesystem_free(STATE_MENU);
 }
 
 void menu_init()
@@ -270,8 +271,8 @@ void menu_init()
 	curMenu = &mainMenuTest;
 
 #if ARCADE_MODE
-	STATE_MENU = statesystem_add_state(0, on_enter, arcade_update, NULL, arcade_draw, sdl_event, on_leave, destroy);
+	STATE_MENU = statesystem_create_state(0, on_enter, arcade_update, NULL, arcade_draw, sdl_event, on_leave, destroy);
 #else
-	STATE_MENU = statesystem_add_state(0, on_enter, NULL, NULL, draw, sdl_event, on_leave, destroy);
+	STATE_MENU = statesystem_create_state(0, on_enter, NULL, NULL, draw, sdl_event, on_leave, destroy);
 #endif
 }

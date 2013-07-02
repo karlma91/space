@@ -9,10 +9,32 @@
 #include "main.h"
 #include "draw.h"
 
-#define inside(button,px,py) ((px >= btn->r1x) && (px <= btn->r2x) && (py >= btn->r1y) && (py <= btn->r2y))
+//TODO support label/text on button and extendible texture button (like how bullets are drawn)
 
-void button_init(button *btn, float pos_x, float pos_y, float width, float height, int tex_id)
+#define inside(btn,px,py) ((px >= btn->p1x) && (px <= btn->p2x) && (py >= btn->p1y) && (py <= btn->p2y))
+
+struct button {
+	SDL_FingerID finger_id;
+
+	int pressed; /* whether if button is currently pressed down */
+
+	float pos_x; /* center x-coordinate of button */
+	float pos_y; /* center y-coordinate of button */
+
+	int tex_id; /* texture id */
+	float width; /* width of button and touch area */
+	float height; /* height og button and touch area */
+
+	float p1x;
+	float p1y;
+	float p2x;
+	float p2y;
+};
+
+button button_create(float pos_x, float pos_y, float width, float height, int tex_id)
 {
+	struct button *btn = malloc(sizeof(*btn));
+
 	btn->pos_x = pos_x;
 	btn->pos_y = pos_y;
 	btn->width = width;
@@ -20,29 +42,44 @@ void button_init(button *btn, float pos_x, float pos_y, float width, float heigh
 	btn->tex_id = tex_id;
 
 	float margin = (btn->width < btn->height ? btn->width : btn->height) / 2;
-	btn->r1x = btn->pos_x - (btn->width/2 + margin);
-	btn->r2x = btn->pos_x + (btn->width/2 + margin);
-	btn->r1y = btn->pos_y - (btn->height/2 + margin);
-	btn->r2y = btn->pos_y + (btn->height/2 + margin);
+	btn->p1x = btn->pos_x - (btn->width/2 + margin);
+	btn->p2x = btn->pos_x + (btn->width/2 + margin);
+	btn->p1y = btn->pos_y - (btn->height/2 + margin);
+	btn->p2y = btn->pos_y + (btn->height/2 + margin);
 
 	button_clear(btn);
+
+	return btn;
 }
 
-void button_render(button *btn)
+void button_free(button btn_id)
 {
+	free(btn_id);
+}
+
+void button_render(button btn_id)
+{
+	struct button *btn = (struct button *) btn_id;
+
 	float size = btn->pressed ? 1.5f : 1.0f; //tmp visual change, TODO support two-state button graphic (up and down)
 	cpVect btn_pos = {btn->pos_x,btn->pos_y};
 	draw_texture(TEX_BUTTON_PAUSE, &btn_pos, TEX_MAP_FULL, btn->width*size, btn->height*size, 0);
 }
 
-void button_clear(button *btn)
+void button_clear(button btn_id)
 {
+	struct button *btn = (struct button *) btn_id;
+
 	btn->finger_id = 0;
 	btn->pressed = 0;
 }
 
-int button_finger_down(button *btn, SDL_TouchFingerEvent *finger)
+int button_finger_down(button btn_id, SDL_TouchFingerEvent *finger)
 {
+	//TODO check if registered touch_id corresponds to current touch_id, to clear uncaught release
+
+	struct button *btn = (struct button *) btn_id;
+
 	float tx = finger->x, ty = finger->y;
 	normalized2game(&tx, &ty);
 
@@ -55,8 +92,10 @@ int button_finger_down(button *btn, SDL_TouchFingerEvent *finger)
 	return 0;
 }
 
-int button_finger_move(button *btn, SDL_TouchFingerEvent *finger)
+int button_finger_move(button btn_id, SDL_TouchFingerEvent *finger)
 {
+	struct button *btn = (struct button *) btn_id;
+
 	if (!btn->pressed || btn->finger_id != finger->fingerId)
 		return 0;
 
@@ -64,7 +103,7 @@ int button_finger_move(button *btn, SDL_TouchFingerEvent *finger)
 	normalized2game(&tx, &ty);
 
 	if (!inside(btn, tx,ty)) {
-		button_clear(btn);
+		button_clear(btn_id);
 		return 0;
 	}
 
@@ -72,12 +111,14 @@ int button_finger_move(button *btn, SDL_TouchFingerEvent *finger)
 }
 
 //TODO s¿rg for at pressed settes til 0 ved state change?
-int button_finger_up(button *btn, SDL_TouchFingerEvent *finger)
+int button_finger_up(button btn_id, SDL_TouchFingerEvent *finger)
 {
+	struct button *btn = (struct button *) btn_id;
+
 	if (!btn->pressed || btn->finger_id != finger->fingerId)
 		return 0;
 
-	button_clear(btn);
+	button_clear(btn_id);
 
 	float tx = finger->x, ty = finger->y;
 	normalized2game(&tx, &ty);
