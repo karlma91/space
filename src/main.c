@@ -24,6 +24,8 @@
 #include "font.h"
 #include "particles.h"
 
+#define GAME_VERSION "PRE-ALPHA 7.9" //TMP placement for this define
+
 #define FPS_LIMIT 1
 
 #if (GLES1)
@@ -386,6 +388,15 @@ static void main_tick(void *data)
 			frames = 0;
 			fps = 0;
 		}
+
+		draw_load_identity();
+		setTextAlign(TEXT_RIGHT);
+		setTextSize(20);
+		float box_width = strlen(GAME_VERSION)*20*1.5+10;
+		draw_color4f(0,0,0,1);
+		draw_box(GAME_WIDTH/2-box_width,-GAME_HEIGHT/2,box_width,40,0,0);
+		draw_color4f(0.7,0,0,1);
+		font_drawText(GAME_WIDTH/2-5,-GAME_HEIGHT/2+20,GAME_VERSION);
 
 		SDL_GL_SwapWindow(window);
 	}

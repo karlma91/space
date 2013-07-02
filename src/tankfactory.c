@@ -68,6 +68,8 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	/* make and connect new shape to body */
 	factory->shape = cpSpaceAddShape(space,cpBoxShapeNew(factory->data.body, size, size));
 	cpShapeSetFriction(factory->shape, 1);
+	cpShapeSetElasticity(factory->shape, 0.7f);
+
 
 	//cpShapeSetGroup(fac->shape, 10);
 

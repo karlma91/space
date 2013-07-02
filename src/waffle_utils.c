@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "waffle_utils.h"
 
-#define RESOURCE_VERSION 2 // changed: 30.06.13
+#define RESOURCE_VERSION 3 // changed: 02.07.13
 
 #if __ANDROID__
 

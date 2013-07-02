@@ -62,7 +62,6 @@ void joystick_touch(joystick *stick, float pos_x, float pos_y)
 
 void joystick_release(joystick *stick)
 {
-	stick->finger_id = 0;
 	stick->pressed = 0;
 
 	if (!stick->persistent) {
@@ -121,8 +120,11 @@ int joystick_finger_down(joystick *stick, SDL_TouchFingerEvent *finger)
 
 int joystick_finger_move(joystick *stick, SDL_TouchFingerEvent *finger)
 {
-	if (!stick->pressed || stick->finger_id != finger->fingerId)
+	if (stick->finger_id == finger->fingerId)
+		stick->pressed = 1;
+	else if (!stick->pressed || stick->finger_id != finger->fingerId)
 		return 0;
+
 
 	float tx = finger->x, ty = finger->y;
 	normalized2game(&tx, &ty);

@@ -84,9 +84,9 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 			add_sparks_at_contactpoint(arb);
 			cpVect force = cpArbiterTotalImpulse(arb);
 			float f = cpvlength(force);
-			//todo create a super fancy formula for determining physical damagae
-			if (f > 20)
-				player->components.hp_bar->value -= f * 0.01; // f * 0.05
+			//todo create a super fancy formula for determining physical damage
+			if (f > 10)
+				player->components.hp_bar->value -= f * 0.033; // <- changed player force to impulse f * 0.01 // f * 0.05
 		} else {
 			SDL_Log("Expected object type ID %d, but got %d!\n", ID_PLAYER, player->preset->ID);
 		}

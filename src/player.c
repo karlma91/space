@@ -62,7 +62,7 @@ object_param_player default_player = {
 
 object_group_player *object_create_player()
 {
-	cpFloat radius = 25;
+	cpFloat radius = 30;
 	cpFloat mass = 2;
 
 	object_group_player *player = (object_group_player *)objects_super_malloc(ID_PLAYER, sizeof(object_group_player));
@@ -130,8 +130,8 @@ static void player_render(object_group_player *player)
 	cpVect pos_body = player->data.body->p;
 	cpVect pos_gun = player->gunwheel->p;
 
-	draw_texture(player->param->tex_id, &(pos_gun), tex_map[0], 100, 100, player->aim_angle * 180/M_PI);
-	draw_texture(player->param->tex_id, &(pos_body), tex_map[1], 100, 100, player->direction*180/M_PI);
+	draw_texture(player->param->tex_id, &(pos_gun), tex_map[0], 120, 120, player->aim_angle * 180/M_PI);
+	draw_texture(player->param->tex_id, &(pos_body), tex_map[1], 120, 120, player->direction*180/M_PI);
 
 	hpbar_draw(&player->hp_bar);
 }

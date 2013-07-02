@@ -860,14 +860,15 @@ static void sdl_event(SDL_Event *event)
 			if (gamestate == LEVEL_RUNNING) {
 				if (button_finger_down(btn_pause, &event->tfinger))
 					return;
-				if (joystick_finger_down(joy_left, &event->tfinger))
-					return;
-				if (joystick_finger_down(joy_right, &event->tfinger))
-					return;
-
 			} else if (gamestate == LEVEL_PLAYER_DEAD) {
 				button_finger_down(btn_fullscreen, &event->tfinger);
 			}
+
+			if (joystick_finger_down(joy_left, &event->tfinger))
+				return;
+			if (joystick_finger_down(joy_right, &event->tfinger))
+				return;
+
 			break;
 		case SDL_FINGERMOTION:
 			button_finger_move(btn_pause, &event->tfinger);
@@ -879,14 +880,14 @@ static void sdl_event(SDL_Event *event)
 				if (button_finger_up(btn_pause, &event->tfinger)) {
 					pause_game();
 				}
-				joystick_finger_up(joy_left, &event->tfinger);
-				joystick_finger_up(joy_right, &event->tfinger);
 
 			} else if (gamestate == LEVEL_PLAYER_DEAD) {
 				if (button_finger_up(btn_fullscreen, &event->tfinger)) {
 					game_over();
 				}
 			}
+			joystick_finger_up(joy_left, &event->tfinger);
+			joystick_finger_up(joy_right, &event->tfinger);
 			break;
 	}
 }
