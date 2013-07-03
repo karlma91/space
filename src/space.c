@@ -945,18 +945,15 @@ int getPlayerScore()
 
 void input()
 {
-	if ((joy_left->finger_id == joy_right->finger_id) && joy_left->pressed && joy_right->pressed) {
-		fprintf(stderr, "DEBUG: warning left and right using same finger_id\n");
-	}
 #if !GOT_TOUCH
 	/* update joystick positions */
 	int axis_x = keys[KEY_RIGHT_1] - keys[KEY_LEFT_1];
 	int axis_y = keys[KEY_UP_1] - keys[KEY_DOWN_1];
-	joystick_axis(&joy_left, axis_x, axis_y);
+	joystick_axis(joy_left, axis_x, axis_y);
 
 	axis_x = keys[KEY_RIGHT_2] - keys[KEY_LEFT_2];
 	axis_y = keys[KEY_UP_2] - keys[KEY_DOWN_2];
-	joystick_axis(&joy_right, axis_x, axis_y);
+	joystick_axis(joy_right, axis_x, axis_y);
 
 	/*
 	 * Camera modes + F11 = timeout + F8 = reload particles (broken)
