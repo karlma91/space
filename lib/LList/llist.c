@@ -233,6 +233,21 @@ int llist_remove(LList id, void *p)
 	return 0;
 }
 
+int llist_contains(LList id, void *p)
+{
+	struct llist *list = (struct llist *) id;
+	node *n = NULL;
+
+	n = list->head;
+
+	while (n) {
+		if (p == n->item)
+			return 1;
+		n = n->next;
+	}
+
+	return 0;
+}
 
 int llist_size(LList id)
 {
@@ -305,17 +320,17 @@ void llist_iterate_func(LList id, void (*func)(void *))
 	if (is_valid(id) && func) {
 		node *n;
 
-		llist_begin(id);
+		llist_begin_loop(id);
 		while (llist_hasnext(id)) {
 			n = llist_next(id);
 			func(n);
 		}
-		llist_end(id);
+		llist_end_loop(id);
 	}
 }
 
 
-int llist_begin(LList id)
+int llist_begin_loop(LList id)
 {
 	struct llist *list = (struct llist *) id;
 
@@ -357,7 +372,7 @@ void* llist_next(LList id)
 	return NULL;
 }
 
-int llist_end(LList id)
+int llist_end_loop(LList id)
 {
 	struct llist *list = (struct llist *) id;
 

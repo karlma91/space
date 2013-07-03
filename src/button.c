@@ -29,9 +29,11 @@ struct button {
 	float p1y;
 	float p2x;
 	float p2y;
+
+	button_type type;
 };
 
-button button_create(float pos_x, float pos_y, float width, float height, int tex_id)
+button button_create(float pos_x, float pos_y, float width, float height, int tex_id, button_type type)
 {
 	struct button *btn = malloc(sizeof(*btn));
 
@@ -41,7 +43,7 @@ button button_create(float pos_x, float pos_y, float width, float height, int te
 	btn->height = height;
 	btn->tex_id = tex_id;
 
-	float margin = (btn->width < btn->height ? btn->width : btn->height) / 2;
+	float margin = (btn->width < btn->height ? btn->width : btn->height) / 10;
 	btn->p1x = btn->pos_x - (btn->width/2 + margin);
 	btn->p2x = btn->pos_x + (btn->width/2 + margin);
 	btn->p1y = btn->pos_y - (btn->height/2 + margin);
@@ -61,9 +63,23 @@ void button_render(button btn_id)
 {
 	struct button *btn = (struct button *) btn_id;
 
-	float size = btn->pressed ? 1.5f : 1.0f; //tmp visual change, TODO support two-state button graphic (up and down)
+	float size = 1.0f; //tmp visual change, TODO support two-state button graphic (up and down)
+	size = btn->type == (BTN_IMAGE_SIZED || BTN_IMAGE_SIZED_TEXT) && btn->pressed ? 1.5f : size;
+
 	cpVect btn_pos = {btn->pos_x,btn->pos_y};
-	draw_texture(TEX_BUTTON_PAUSE, &btn_pos, TEX_MAP_FULL, btn->width*size, btn->height*size, 0);
+	draw_texture(btn->tex_id, &btn_pos, TEX_MAP_FULL, btn->width*size, btn->height*size, 0);
+}
+
+void button_set_texture(button btn_id, int tex_id)
+{
+	struct button *btn = (struct button *) btn_id;
+	btn->tex_id = tex_id;
+}
+
+int button_isdown(button btn_id)
+{
+	struct button *btn = (struct button *) btn_id;
+	return btn->pressed;
 }
 
 void button_clear(button btn_id)

@@ -13,7 +13,7 @@
 #include "menu.h"
 #include "space.h"
 #include "levelselect.h"
-#include "statesystem.h"
+#include "state.h"
 
 /* Drawing */
 #include "draw.h"
@@ -22,14 +22,9 @@
 /* Game components */
 #include "highscorelist.h"
 
-STATE_ID STATE_GAMEOVER;
+STATE_ID state_gameover;
 
 /* static prototypes */
-static void on_enter();
-static void on_leave();
-static void update();
-static void draw();
-static void destroy();
 static void draw_highscore();
 
 #define MAX_NAME_LENGTH 3
@@ -99,7 +94,7 @@ static void sdl_event(SDL_Event *event)
 				return;
 #else
 				menu_change_current_menu(MENU_MAIN);
-				statesystem_set_state(STATE_MENU);
+				statesystem_set_state(state_menu);
 				win = 0;
 #endif
 			}
@@ -139,7 +134,7 @@ static void sdl_event(SDL_Event *event)
 						return;
 #else
 						menu_change_current_menu(MENU_MAIN);
-						statesystem_set_state(STATE_MENU);
+						statesystem_set_state(state_menu);
 						win = 0;
 #endif
 					}
@@ -158,8 +153,7 @@ void gameover_init()
 	highscorelist_create(list);
 	highscorelist_readfile(list,"highscores"); // NB! moved from bin/data/highscores
 
-	STATE_GAMEOVER = statesystem_create_state(0, on_enter,update,NULL,draw, sdl_event, on_leave, destroy);
-
+	statesystem_register(state_gameover,0);
 }
 
 
@@ -172,7 +166,7 @@ static void on_leave()
 
 }
 
-static void update() {
+static void pre_update() {
 	static float key_dt = 0;
 	static float key_ddt = 0.25;
 	static const float key_ddt_min = 0.12f;
@@ -293,8 +287,6 @@ static void destroy()
 	highscorelist_writefile(list);
 	highscorelist_destroy(list);
 	free(list);
-
-	statesystem_free(STATE_GAMEOVER);
 }
 
 static void draw_highscore(int start_index)
@@ -328,3 +320,5 @@ int gameover_setstate(enum gameover_state state)
 	gameover_state = state;
 	return 0;
 }
+
+static void post_update() {}

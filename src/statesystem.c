@@ -1,11 +1,15 @@
 #include "stdlib.h"
 #include "statesystem.h"
+#include "../lib/LList/llist.h"
 
 #define MAX_INNER_STATES 10
+
+LList states;
 
 typedef struct systemstate State;
 struct systemstate {
     State *prev;
+    State *next;
 
     STATE_ID id;
 
@@ -17,17 +21,7 @@ struct systemstate {
     void (*inner_update[MAX_INNER_STATES])();
     void (*inner_draw[MAX_INNER_STATES])();
 
-    void (*sdl_event)(SDL_Event *event);
-
-    void (*on_enter)(void);
-    void (*pre_update)(void);
-    void (*post_update)(void);
-    void (*draw)(void);
-    void (*on_leave)(void);
-    void (*destroy)(void);
-
-    State *next;
-
+    state_funcs call;
 };
 
 static STATE_ID state_beeing_rendered = NULL;
@@ -37,26 +31,10 @@ State *stack_tail = NULL;
 
 void statesystem_init() // no longer needed?
 {
-	/*
-    int i;
-    for(i = 0; i<state_count; i++){
-        states[i].prev = NULL;
-        states[i].next = NULL;
-        states[i].current_inner_state = 0;
-        states[i].time_alive = 0;
-        states[i].time_in_inner_state = 0;
-    }
-    */
+	states = llist_create();
 }
 
-STATE_ID statesystem_create_state(int inner_states,
-        void (*on_enter)(),
-        void (*pre_update)(),
-        void (*post_update)(),
-        void (*draw)(),
-        void (*sdl_event)(),
-        void (*on_leave)(),
-        void (*destroy)())
+STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
 {
 	State *state = malloc(sizeof(*state));
     state->id = state;
@@ -65,17 +43,22 @@ STATE_ID statesystem_create_state(int inner_states,
 	if (inner_states > 0) {
 		//state->inner_update = malloc(sizeof(state->inner_update)*inner_states);
 		//  state->inner_draw = malloc(sizeof(state->inner_draw)*inner_states);
+	} else if (inner_states > MAX_INNER_STATES) {
+		fprintf(stderr, "Number of inner states(%d) exceeded MAX_INNER_STATES (%d)\n", inner_states, MAX_INNER_STATES);
+		exit(-1);
 	}
-	state->on_enter = on_enter;
-    state->pre_update = pre_update;
-    state->post_update = post_update;
-    state->sdl_event = sdl_event;
-    state->draw = draw;
-    state->on_leave = on_leave;
-    state->destroy = destroy;
+	state->call.on_enter = funcs->on_enter;
+    state->call.pre_update = funcs->pre_update;
+    state->call.post_update = funcs->post_update;
+    state->call.draw = funcs->draw;
+    state->call.sdl_event = funcs->sdl_event;
+    state->call.on_leave = funcs->on_leave;
+    state->call.destroy = funcs->destroy;
 
     state->prev = NULL;
     state->next = NULL;
+
+    llist_add(states, (void*)state);
 
     return state->id;
 }
@@ -126,7 +109,7 @@ void statesystem_set_state(STATE_ID state_id)
 
 	state = (State *) state_id;
 
-    state->on_enter();
+    state->call.on_enter();
     state->time_alive = 0;
     stack_head = state;
     stack_tail = state;
@@ -134,8 +117,8 @@ void statesystem_set_state(STATE_ID state_id)
 
 void statesystem_update()
 {
-	if (stack_head->pre_update) {
-		stack_head->pre_update();
+	if (stack_head->call.pre_update) {
+		stack_head->call.pre_update();
 	}
 
 	if(stack_head->inner_states > 0 &&
@@ -143,8 +126,8 @@ void statesystem_update()
 		stack_head->inner_update[stack_head->current_inner_state]();
 	}
 
-    if( stack_head->post_update){
-        stack_head->post_update();
+    if( stack_head->call.post_update){
+        stack_head->call.post_update();
     }
 }
 
@@ -153,7 +136,7 @@ void statesystem_draw()
     State *stack_temp = stack_tail;
     while(stack_temp){
     	state_beeing_rendered = stack_temp->id;
-        stack_temp->draw();
+        stack_temp->call.draw();
         if(stack_temp->inner_states > 0 &&
                 stack_temp->inner_draw[stack_temp->current_inner_state]){
             stack_temp->inner_draw[stack_temp->current_inner_state]();
@@ -164,17 +147,23 @@ void statesystem_draw()
     state_beeing_rendered = NULL;
 }
 
-void statesystem_destroy() // no longer needed?
+void statesystem_destroy()
 {
+	llist_begin_loop(states);
+	while (llist_hasnext(states)) {
+		statesystem_free(llist_next(states));
+	}
+	llist_end_loop(states);
 
+	llist_free(states);
 }
 
 void statesystem_free(STATE_ID state_id)
 {
 	State *state = (State *) state_id;
 
-	if(state->destroy){
-		state->destroy();
+	if(state->call.destroy){
+		state->call.destroy();
 	}
 	if(state->inner_states > 0){
 		// free(state->inner_update);
@@ -184,8 +173,8 @@ void statesystem_free(STATE_ID state_id)
 
 void statesystem_push_event(SDL_Event *event)
 {
-	if (stack_head->sdl_event) {
-		stack_head->sdl_event(event);
+	if (stack_head->call.sdl_event) {
+		stack_head->call.sdl_event(event);
 	}
 }
 

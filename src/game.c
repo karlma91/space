@@ -3,6 +3,7 @@
 #include "menu.h"
 #include "space.h"
 #include "gameover.h"
+#include "mainmenu.h"
 #include "levelselect.h"
 
 #if !(TARGET_OS_IPHONE || __ANDROID__)
@@ -84,12 +85,14 @@ void game_config()
 
 void game_init()
 {
-	//TODO generalize particles.c
+	//TODO generalize particles.c and ?level.c
+	mainmenu_init();
 	level_init();
     menu_init();
     space_init();
     gameover_init();
     levelselect_init();
 
-    statesystem_set_state(STATE_MENU);
+    statesystem_set_state(state_menu);
+    //statesystem_set_state(state_mainmenu);
 }

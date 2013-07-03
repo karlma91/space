@@ -140,7 +140,7 @@ object_data *objects_nearest(cpVect pos, int obj_id)
 	cpFloat length;
 	LList list = lists[obj_id];
 
-	llist_begin(list);
+	llist_begin_loop(list);
 	while(llist_hasnext(list)) {
 		object_data *obj = (object_data *) llist_next(list);
 		cpVect v = obj->body->p;
@@ -151,7 +151,7 @@ object_data *objects_nearest(cpVect pos, int obj_id)
 			target = obj;
 		}
 	}
-	llist_end(list);
+	llist_end_loop(list);
 
 	return target;
 }
@@ -179,14 +179,14 @@ object_data *objects_by_id(int obj_id, int instance_id)
 	//TODO error check obj_id
 	LList list = lists[obj_id];
 
-	llist_begin(list);
+	llist_begin_loop(list);
 	while(llist_hasnext(list)) {
 		object_data *obj = (object_data *) llist_next(list);
 		if (obj->instance_id == instance_id) {
 			return obj;
 		}
 	}
-	llist_end(list);
+	llist_end_loop(list);
 
 	return NULL;
 }
@@ -216,7 +216,7 @@ void objects_nearest_x_two(object_data *object, int obj_id, object_data **left, 
 
 	int check_id = (obj_id == object->preset->ID);
 
-	llist_begin(list);
+	llist_begin_loop(list);
 	while(llist_hasnext(list)) {
 		object_data *obj = (object_data *) llist_next(list);
 		if (check_id && object->instance_id == obj->instance_id)
@@ -236,7 +236,7 @@ void objects_nearest_x_two(object_data *object, int obj_id, object_data **left, 
 			}
 		}
 	}
-	llist_end(list);
+	llist_end_loop(list);
 
 
 	if (min_length_left == INT_MIN) {

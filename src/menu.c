@@ -10,17 +10,17 @@
 #include "main.h"
 #include "space.h"
 #include "gameover.h"
-#include "levelselect.h"
-#include "statesystem.h"
-#include "draw.h"
+#include "state.h"
 
-STATE_ID STATE_MENU;
+STATE_ID state_menu;
 
 /* Drawing */
 #include "draw.h"
 #include "font.h"
 
-#define AUTO_ENTER 1
+#include "button.h"
+
+static button btn_start_tmp;
 
 #define MAX_MENU_ITEMS 5
 
@@ -31,8 +31,9 @@ struct menu {
 	int num_items;
 	int escape_item;
 	void (*func)();
-	char texts[MAX_MENU_ITEMS][15];
+	char texts[MAX_MENU_ITEMS][20];
 };
+
 
 static struct menu mainMenuTest = {
 		5,
@@ -84,10 +85,13 @@ static void sdl_event(SDL_Event *event)
 #endif
 		break;
 	case SDL_FINGERDOWN:
-		button_finger_down(btn_fullscreen, &event->tfinger);
+		button_finger_down(btn_start_tmp, &event->tfinger);
+		break;
+	case SDL_FINGERMOTION:
+		button_finger_move(btn_start_tmp, &event->tfinger);
 		break;
 	case SDL_FINGERUP:
-		if (button_finger_up(btn_fullscreen, &event->tfinger)) {
+		if (button_finger_up(btn_start_tmp, &event->tfinger)) {
 			curMenu->func();
 		}
 		break;
@@ -117,17 +121,17 @@ void menu_change_current_menu(int menu)
 }
 
 #if ARCADE_MODE
-static void arcade_update()
+static void pre_update()
 {
 	if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 		switch(current_menu){
 			case MENU_MAIN:
 				space_init_level(1,1);
-				statesystem_set_state(STATE_SPACE);
+				statesystem_set_state(state_space);
 				menu_change_current_menu(MENU_INGAME);
 				break;
 			case MENU_INGAME:
-				statesystem_set_state(STATE_SPACE);
+				statesystem_set_state(state_space);
 				break;
 			}
 		keys[KEY_RETURN_2] = 0;
@@ -136,13 +140,20 @@ static void arcade_update()
 
 	if (keys[KEY_ESCAPE]){
 		menu_change_current_menu(MENU_MAIN);
-		statesystem_set_state(STATE_MENU);
+		statesystem_set_state(state_menu);
 		keys[KEY_ESCAPE] = 0;
 	}
 }
 
-static void arcade_draw()
+static void post_update(){}
+
+static void draw()
 {
+	draw_load_identity();
+
+	draw_color4f(0,0,0,0.5f);
+	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
+
 	static float timer;
 	timer +=dt;
 
@@ -151,9 +162,20 @@ static void arcade_draw()
 	setTextAlign(TEXT_CENTER);
 	switch(current_menu){
 	case MENU_INGAME:
+		draw_color4f(1,1,1,1);
+		setTextSize(80);
 		setTextAlign(TEXT_CENTER);
-		setTextSize(40);
-		//font_drawText(0,0.5f*HEIGHT/2, "PAUSE");
+		font_drawText(0,0.6f*GAME_HEIGHT/2, "GAME PAUSED");
+#if IS_APP
+		draw_color4f(0.1,0.9,0.1,1);
+		//TMP button animation
+		if (button_isdown(btn_start_tmp)) {
+			button_set_texture(btn_start_tmp, TEX_BUTTON_DOWN);
+		} else {
+			button_set_texture(btn_start_tmp, TEX_BUTTON);
+		}
+		button_render(btn_start_tmp);
+#endif
 		break;
 	case MENU_MAIN:
 		drawStars();
@@ -172,6 +194,19 @@ static void arcade_draw()
 		setTextAlign(TEXT_CENTER);
 		setTextSize(40);
 
+
+		font_drawText(0,-0.5f*GAME_HEIGHT/2, "START SPILLET");
+
+		draw_color4f(0.1,0.9,0.1,1);
+#if IS_APP
+		//TMP button animation
+		if (button_isdown(btn_start_tmp)) {
+			button_set_texture(btn_start_tmp, TEX_BUTTON_DOWN);
+		} else {
+			button_set_texture(btn_start_tmp, TEX_BUTTON);
+		}
+		button_render(btn_start_tmp);
+#else
 		static float button_timer = 0;
 		static int button_down;
 		button_timer+=dt;
@@ -179,8 +214,6 @@ static void arcade_draw()
 			button_down = !button_down;
 			button_timer = 0;
 		}
-		font_drawText(0,-0.5f*GAME_HEIGHT/2, "START SPILLET");
-		draw_color4f(0.1,0.9,0.1,1);
 		if(button_down){
 			cpVect t = cpv(0,0);
 			draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
@@ -188,6 +221,7 @@ static void arcade_draw()
 			cpVect t = cpv(0,-5.5);
 			draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
 		}
+#endif
 		break;
 	}
 }
@@ -214,6 +248,9 @@ static void draw()
 		font_drawText(0,100 - 60 * i, curMenu->texts[i]);
 	}
 }
+
+static void pre_update() {}
+static void post_update() {}
 #endif
 
 static void inner_main()
@@ -221,15 +258,15 @@ static void inner_main()
 	switch (select_id) {
 	case 0: //START GAME
 		space_init_level(1,1);
-		statesystem_set_state(STATE_SPACE);
+		statesystem_set_state(state_space);
 		curMenu = &ingameMenu;
 		break;
 	case 1: //LEVEL SELECT
-	    statesystem_set_state(STATE_LEVELSELECT);
+	    statesystem_set_state(state_levelselect);
 		break;
 	case 2: //HIGHSCORE
 		gameover_setstate(show_highscore);
-		statesystem_set_state(STATE_GAMEOVER);
+		statesystem_set_state(state_gameover);
 		break;
 	case 3: //CREDITS
 		break;
@@ -245,16 +282,16 @@ static void inner_ingame()
 {
 	switch (select_id) {
 	case 0: //RESUME GAME
-		statesystem_set_state(STATE_SPACE);
+		statesystem_set_state(state_space);
 		break;
 	case 1: //RESTART GAME
-	    statesystem_set_state(STATE_SPACE);
+	    statesystem_set_state(state_space);
 	    menu_change_current_menu(MENU_INGAME);
 		space_init_level(1,1);
 		break;
 	case 2:
 		curMenu = &mainMenuTest;
-		statesystem_set_state(STATE_MENU);
+		statesystem_set_state(state_menu);
 		break;
 	default:
 		break;
@@ -263,16 +300,13 @@ static void inner_ingame()
 
 static void destroy()
 {
-	statesystem_free(STATE_MENU);
+
 }
 
 void menu_init()
 {
 	curMenu = &mainMenuTest;
+	statesystem_register(state_menu, 0);
 
-#if ARCADE_MODE
-	STATE_MENU = statesystem_create_state(0, on_enter, arcade_update, NULL, arcade_draw, sdl_event, on_leave, destroy);
-#else
-	STATE_MENU = statesystem_create_state(0, on_enter, NULL, NULL, draw, sdl_event, on_leave, destroy);
-#endif
+	btn_start_tmp = button_create(0,0,300,300,TEX_BUTTON,BTN_SPRITE);
 }

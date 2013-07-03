@@ -10,9 +10,8 @@
 #include "game.h"
 /* Game state */
 #include "main.h"
-#include "menu.h"
 #include "space.h"
-#include "statesystem.h"
+#include "state.h"
 
 /* Drawing */
 #include "draw.h"
@@ -21,16 +20,9 @@
 
 #include "waffle_utils.h"
 
-STATE_ID STATE_LEVELSELECT;
+STATE_ID state_levelselect;
 
 #define deck_height 800
-
-/* static prototypes */
-static void update();
-static void render();
-static void destroy();
-static void on_enter();
-static void on_leave();
 
 static void render_ship(struct level_ship *ship, int selected);
 
@@ -75,7 +67,7 @@ static void sdl_event(SDL_Event *event)
 				zoomed_temp_y = (1.0f * GAME_HEIGHT) / (camera_zoom * 2);
 
 			} else if (key == KEY_ESCAPE) {
-				statesystem_set_state(STATE_MENU);
+				statesystem_set_state(state_menu);
 
 			}
 		} else {
@@ -88,7 +80,7 @@ static void sdl_event(SDL_Event *event)
 				level_select = (level_select >= ships[sel].count) ? 0 : level_select;
 
 			} else if (key == KEY_RETURN_2 || key == KEY_RETURN_1) {
-				statesystem_set_state(STATE_SPACE);
+				statesystem_set_state(state_space);
 				/* load correct level */
 				space_init_level(sel + 1, level_select + 1);
 
@@ -104,7 +96,7 @@ static void sdl_event(SDL_Event *event)
 
 void levelselect_init()
 {
-	STATE_LEVELSELECT = statesystem_create_state(0, on_enter, update, NULL, render, sdl_event, on_leave, destroy);
+	statesystem_register(state_levelselect, 0);
 	level_get_ships(&ships, &decks);
 }
 
@@ -118,7 +110,7 @@ static void on_leave()
 }
 
 
-static void update()
+static void pre_update()
 {
 	int i;
 	for(i = 0; i < decks; i++){
@@ -141,7 +133,9 @@ static void update()
 
 }
 
-static void render()
+static void post_update() {}
+
+static void draw()
 {
 #if GLES1
 
@@ -209,5 +203,4 @@ static void render_ship(struct level_ship *ship, int selected)
 
 static void destroy()
 {
-	statesystem_free(STATE_LEVELSELECT);
 }

@@ -1,5 +1,5 @@
-#ifndef MAINMENU_H_
-#define MAINMENU_H_
+#ifndef MENU_H_
+#define MENU_H_
 
 #include "main.h"
 #include "statesystem.h"
@@ -9,9 +9,7 @@ enum MINU_INNER_STATES {
 	MENU_INGAME
 };
 
-extern STATE_ID STATE_MENU;
-
 void menu_init();
 void menu_change_current_menu(int);
 
-#endif /* MAINMENU_H_ */
+#endif /* MENU_H_ */

@@ -2,9 +2,6 @@
 #define GAMEOVER_H_
 
 #include "main.h"
-#include "statesystem.h"
-
-extern STATE_ID STATE_GAMEOVER;
 
 //TODO: change to more specific names referring to gameover
 enum gameover_state {

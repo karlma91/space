@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include "SDL.h"
+#include "button.h"
+#include "../lib/LList/llist.h"
 
 #if __IPHONEOS__
 #define IS_APP 1
@@ -45,8 +47,9 @@ struct state_ {
 	state *parentState;
 };
 
+extern LList active_fingers;
 
-#define  GAME_HEIGHT 1200
+#define GAME_HEIGHT 1200
 extern int GAME_WIDTH; // expected minimum width = 4:3 -> 1600
 extern float ASPECT_RATIO; // 2:1 <-> 8:5 <-> 4:3
 
@@ -60,7 +63,6 @@ extern char fps_buf[];
 /* current state in use */
 extern state *currentState;
 
-#include "button.h"
 extern button btn_fullscreen;
 
 extern void main_stop();

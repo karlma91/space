@@ -66,6 +66,8 @@ button btn_fullscreen;
 
 static int main_running = 1;
 
+LList active_fingers;
+
 configuration config = {
 		.fullscreen = 1,
 		.width = 1920,
@@ -301,7 +303,8 @@ static void main_init() {
 	lastTime = SDL_GetTicks();
 
 	// general fullscreen button
-	btn_fullscreen = button_create(0,0,GAME_WIDTH,GAME_HEIGHT,0);
+	btn_fullscreen = button_create(0,0,GAME_WIDTH,GAME_HEIGHT,0,BTN_HIDDEN);
+	active_fingers = llist_create();
 }
 
 static void check_events()
@@ -316,6 +319,9 @@ static void check_events()
 		SDL_Event sim_event;
 #endif
 		switch (event.type) {
+		case SDL_FINGERUP:
+			llist_remove(active_fingers, (void *) event.tfinger.fingerId);
+			break;
 #if !GOT_TOUCH
 		case SDL_MOUSEBUTTONDOWN:
 			sim_event.type = SDL_FINGERDOWN;

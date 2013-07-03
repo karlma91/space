@@ -17,7 +17,6 @@
 #include "font.h"
 #include "particles.h"
 
-#include "objects.h"
 /* Game components */
 #include "objects.h"
 #include "tank.h"
@@ -30,11 +29,11 @@
 
 static void init(object_data *);
 
-static void player_render(object_group_player *);
-static void player_update(object_group_player *);
-static void player_destroy(object_group_player *);
+static void render(object_group_player *);
+static void update(object_group_player *);
+static void destroy(object_group_player *);
 
-static void player_controls(object_group_player *);
+static void controls(object_group_player *);
 
 static void arcade_control(object_group_player *); //2
 static void action_shoot(object_group_player *);
@@ -42,9 +41,9 @@ static void action_shoot(object_group_player *);
 object_group_preset object_type_player = {
 	ID_PLAYER,
 	init,
-	player_update,
-	player_render,
-	player_destroy
+	update,
+	render,
+	destroy
 };
 
 //static float timer = 0;
@@ -60,12 +59,14 @@ object_param_player default_player = {
 		.gun_cooldown = 0.125f
 };
 
+#define IMPULSE_FORCE 100
+
 object_group_player *object_create_player()
 {
 	cpFloat radius = 30;
 	cpFloat mass = 2;
 
-	object_group_player *player = (object_group_player *)objects_super_malloc(ID_PLAYER, sizeof(object_group_player));
+	object_group_player *player = (object_group_player *)objects_super_malloc(ID_PLAYER, sizeof(*player));
 
 
 	player->data.preset = &object_type_player;
@@ -123,7 +124,7 @@ static void init(object_data *pl)
 	player->gun_timer = 0;
 }
 
-static void player_render(object_group_player *player)
+static void render(object_group_player *player)
 {
 	//float s = 0.001;
 
@@ -137,7 +138,7 @@ static void player_render(object_group_player *player)
 }
 
 #include <time.h>
-static void player_update(object_group_player *player)
+static void update(object_group_player *player)
 {
 #if !ARCADE_MODE
 	if (keys[SDL_SCANCODE_I]) //CHEAT
@@ -146,7 +147,6 @@ static void player_update(object_group_player *player)
 
 	player->gun_timer += dt;
 
-	cpBodySetForce(player->data.body, cpvzero); //TODO remove player force reset?
 	//update physics and player
 	if (player->hp_bar.value > 0) { //alive
 		player->direction = turn_toangle(player->direction_target, player->direction, 2 * M_PI * dt / 10000);
@@ -160,7 +160,7 @@ static void player_update(object_group_player *player)
 		player->gunwheel->v = player->data.body->v;
 
 		if (player->disable == 0){
-			player_controls(player);
+			controls(player);
 		}
 	} else {
 		float vel_angle = cpvtoangle(cpBodyGetVel(player->data.body));
@@ -171,24 +171,7 @@ static void player_update(object_group_player *player)
 
 }
 
-static void player_controls(object_group_player *player)
-{
-	arcade_control(player);
-
-	/* DEBUG KEYS */
-#if !ARCADE_MODE
-		if (keys[SDL_SCANCODE_E]){
-			player->data.body->p.x=0;
-			player->data.body->p.y=500;
-		}
-
-		if (keys[SDL_SCANCODE_H]) {
-			cpBodySetVelLimit(player->data.body,5000);
-		}
-#endif
-}
-
-static void arcade_control(object_group_player *player)
+static void controls(object_group_player *player)
 {
 	//float player_angle = cpBodyGetAngle(player->data.body);
 	float player_angle_target;
@@ -212,7 +195,7 @@ static void arcade_control(object_group_player *player)
 		player->direction_target = joy_left->direction;
 		cpVect player_dir = cpv(joy_left->axis_x, joy_left->axis_y);
 
-		cpBodyApplyImpulse(player->data.body,cpvmult(player_dir, 100), cpvmult(player_dir, -100)); // applies impulse from rocket
+		cpBodyApplyImpulse(player->data.body,cpvmult(player_dir, IMPULSE_FORCE), cpvmult(player_dir, -100)); // applies impulse from rocket
 		//cpBodySetForce(player->data.body, cpvmult(player_dir, speed*30)); //*600
 
 		player->flame->disable = 0;
@@ -241,8 +224,19 @@ static void arcade_control(object_group_player *player)
 		}
 		action_shoot(player);
 	}
-}
 
+	/* DEBUG KEYS */
+#if !ARCADE_MODE
+		if (keys[SDL_SCANCODE_E]){
+			player->data.body->p.x=0;
+			player->data.body->p.y=500;
+		}
+
+		if (keys[SDL_SCANCODE_H]) {
+			cpBodySetVelLimit(player->data.body,5000);
+		}
+#endif
+}
 
 
 static void action_shoot(object_group_player *player)
@@ -259,7 +253,7 @@ static void action_shoot(object_group_player *player)
 }
 
 
-static void player_destroy(object_group_player *player)
+static void destroy(object_group_player *player)
 {
 	//free(player); // does not work since player is currently static inside space.c
 }
