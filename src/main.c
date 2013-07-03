@@ -24,7 +24,7 @@
 #include "font.h"
 #include "particles.h"
 
-#define GAME_VERSION "PRE-ALPHA 7.9" //TMP placement for this define
+#define GAME_VERSION "PRE-ALPHA 8.0" //TMP placement for this define
 
 #define FPS_LIMIT 1
 
