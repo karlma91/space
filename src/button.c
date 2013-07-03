@@ -42,6 +42,7 @@ button button_create(float pos_x, float pos_y, float width, float height, int te
 	btn->width = width;
 	btn->height = height;
 	btn->tex_id = tex_id;
+	btn->type = type;
 
 	float margin = (btn->width < btn->height ? btn->width : btn->height) / 10;
 	btn->p1x = btn->pos_x - (btn->width/2 + margin);
@@ -64,7 +65,7 @@ void button_render(button btn_id)
 	struct button *btn = (struct button *) btn_id;
 
 	float size = 1.0f; //tmp visual change, TODO support two-state button graphic (up and down)
-	size = btn->type == (BTN_IMAGE_SIZED || BTN_IMAGE_SIZED_TEXT) && btn->pressed ? 1.5f : size;
+	size = (btn->type == BTN_IMAGE_SIZED || btn->type == BTN_IMAGE_SIZED_TEXT) && btn->pressed ? 1.5f : size;
 
 	cpVect btn_pos = {btn->pos_x,btn->pos_y};
 	draw_texture(btn->tex_id, &btn_pos, TEX_MAP_FULL, btn->width*size, btn->height*size, 0);
