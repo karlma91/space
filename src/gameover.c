@@ -174,6 +174,7 @@ static void pre_update() {
 	switch(gameover_state) {
 	case GAMEOVER_WIN:
 		win = 1;
+		gameover_state = enter_name;
 		/* no break */
 	case enter_name:
 		if (keys[KEY_DOWN_2] || keys[KEY_DOWN_1]) {
