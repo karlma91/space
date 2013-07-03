@@ -3,6 +3,7 @@
 
 #include "SDL_log.h"
 #include "SDL_system.h"
+#include "stdio.h"
 
 #if TARGET_OS_IPHONE
 

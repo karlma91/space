@@ -50,7 +50,10 @@ void draw_scale(GLfloat x, GLfloat y, GLfloat z);
 void draw_push_matrix();
 void draw_pop_matrix();
 void draw_load_identity();
-
+void draw_draw_arrays(GLenum mode, GLint first, GLsizei count);
+void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
+void draw_tex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
+void draw_get_current_color(float *c);
 
 Color draw_col_rainbow(int hue);
 Color draw_col_grad(int hue);

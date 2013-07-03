@@ -3,6 +3,7 @@
 #include "stack.h"
 #include "waffle_utils.h"
 #include "spaceengine.h"
+#include "matrix2d.h"
 
 GLfloat triangle_quad[8] = {-0.5, -0.5,
 						 0.5,  -0.5,
@@ -110,13 +111,13 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 
 	glEnable(GL_TEXTURE_2D);
 
-	glPushMatrix();
+	draw_push_matrix();
 	draw_push_blend();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	glTranslatef(x0, y0, 0.0f);
-	glRotatef(atan2f(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
+	draw_translate(x0, y0, 0.0f);
+	draw_rotate(atan2f(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
 	GLfloat length = sqrtf((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
-	glScalef(1,w,1);
+	draw_scale(1,w,1);
 
 	w /=2; // tmp-fix
 
@@ -138,39 +139,39 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 			1, 0,
 			1,  1};
 
-	glVertexPointer(2, GL_FLOAT, 0, line_mesh);
-	glTexCoordPointer( 2, GL_FLOAT, 0, line_texture );
+	draw_vertex_pointer(2, GL_FLOAT, 0, line_mesh);
+	draw_tex_pointer( 2, GL_FLOAT, 0, line_texture );
 
 	texture_bind(TEX_GLOW);
-	glDrawArrays(GL_TRIANGLE_STRIP,0, 8);
+	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 8);
 
 	draw_color4f(1,1,1,1);
 	texture_bind(TEX_DOT);
-	glDrawArrays(GL_TRIANGLE_STRIP,0, 8);
+	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 8);
 
 	draw_pop_blend();
-	glPopMatrix();
+	draw_pop_matrix();
 	glDisable(GL_TEXTURE_2D);
 
 }
 
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
-	glPushMatrix();
-	glTranslatef(x0, y0, 0.0f);
-	glRotatef(atan2f(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
+    draw_push_matrix();
+    draw_translate(x0, y0, 0.0f);
+	draw_rotate(atan2f(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
 	GLfloat length = sqrtf((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
-	glScalef(1,w,1);
+	draw_scale(1,w,1);
 	w /= 2;
 	GLfloat line[8] = { -w, -0.5,
 			-w,  0.5,
 			length + w, -0.5,
 			length + w,  0.5};
 
-	glVertexPointer(2, GL_FLOAT, 0, line);
-	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
+	draw_vertex_pointer(2, GL_FLOAT, 0, line);
+	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 4);
 
-	glPopMatrix();
+	draw_pop_matrix();
 }
 
 void draw_line_strip(const GLfloat *strip, int l, float w)
@@ -227,104 +228,21 @@ void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 
 void draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered)
 {
-	glPushMatrix();
-	glTranslatef(x,y,0);
-	glRotatef(angle,0,0,1);
-	glScalef(w,h,1);
-	glVertexPointer(2, GL_FLOAT, 0, centered ? triangle_quad : corner_quad);
-	glDrawArrays(GL_TRIANGLE_STRIP,0, 4);
-	glPopMatrix();
+    draw_push_matrix();
+    draw_translate(x,y,0);
+	draw_rotate(angle,0,0,1);
+	draw_scale(w,h,1);
+	draw_vertex_pointer(2, GL_FLOAT, 0, centered ? triangle_quad : corner_quad);
+	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 4);
+	draw_pop_matrix();
 }
 
 
-void draw_simple_circle(GLfloat x, GLfloat y, GLfloat radius,GLfloat rot)
-{
-#if GLES1
-
-
-#else
-	int i;
-	glPushMatrix();
-	glTranslatef(x,y,0);
-	glRotatef(rot,0,0,1);
-	glBegin(GL_TRIANGLE_FAN);
-	glVertex2f(0,0);
-	for(i = 0;i<128; i+=2){
-		glVertex2f(unit_circle[i]*radius, unit_circle[i+1]*radius);
-	}
-	glEnd();
-	draw_color4f(1,1,1,1);
-	draw_box(0, 0, radius, 5, 0, 1);
-	glPopMatrix();
-#endif
-}
-
-void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor)
-{
-#if GLES1
-
-
-#else
-#if CP_USE_DOUBLES
-	glVertexPointer(2, GL_DOUBLE, 0, verts);
-#else
-	glVertexPointer(2, GL_FLOAT, 0, verts);
-#endif
-
-	if(fillColor.a > 0){
-		draw_color(fillColor);
-		glDrawArrays(GL_TRIANGLE_FAN, 0, count);
-	}
-
-	if(lineColor.a > 0){
-		draw_color(lineColor);
-		glDrawArrays(GL_LINE_LOOP, 0, count);
-	}
-#endif
-}
-
-void draw_segment(cpVect a, cpVect b, cpFloat w, Color lineColor)
-{
-#if GLES1
-
-
-#else
-	draw_color(lineColor);
-	glBegin(GL_QUADS);
-	glVertex2f(a.x, a.y - w);
-	glVertex2f(a.x, a.y + w);
-	glVertex2f(b.x, b.y + w);
-	glVertex2f(b.x, b.y - w);
-	glEnd();
-	//draw_line(a.x, a.y, b.x, b.y, 10);
-#endif
-}
-
-void draw_ballshape(cpShape *shape)
-{
-	cpCircleShape *circle = (cpCircleShape *)shape;
-	cpBody *body = shape->body;
-	//cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
-	draw_simple_circle(circle->tc.x, circle->tc.y, circle->r, cpBodyGetAngle(body)*(180/M_PI)); //40 = 4 * radius
-}
 void draw_velocity_line(cpShape *shape)
 {
 	cpCircleShape *circle = (cpCircleShape *)shape;
 	cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
 	draw_line(circle->tc.x, circle->tc.y, circle->tc.x - vel.x/64, circle->tc.y - vel.y/64, 32); //40 = 4 * radius
-}
-
-void draw_boxshape(cpShape *shape, Color a, Color b)
-{
-	glLineWidth(2);
-	cpPolyShape *poly = (cpPolyShape *)shape;
-	draw_polygon(poly->numVerts, poly->tVerts,a,b);
-}
-
-void draw_segmentshape(cpShape *shape)
-{
-	cpSegmentShape *seg = (cpSegmentShape *)shape;
-	draw_segment(seg->ta, seg->tb, seg->r, RGBAColor(0.80f, 0.107f, 0.05f,1.0f));
 }
 
 Color draw_col_rainbow(int hue)
@@ -338,6 +256,11 @@ Color draw_col_grad(int hue)
 	static int a = 0;
 	hue = (((hue < 0 ? -hue : hue)) % (1536/8) + ++a/16) % 1536;
 	return rainbow_col[hue];
+}
+
+void draw_get_current_color(float *c)
+{
+    glGetFloatv(GL_CURRENT_COLOR, c);
 }
 
 //TODO: color customization
@@ -406,54 +329,79 @@ void draw_current_texture(cpVect *pos, const float *tex_map, float width, float 
 
 void draw_current_texture_all(cpVect *pos, const float *tex_map, float width, float height, float angle, GLfloat *mesh)
 {
-	glPushMatrix();
-	glTranslatef(pos->x, pos->y, 0.0f);
-	glRotatef(angle,0,0,1);
-	glScalef(width,height,1);
+    draw_push_matrix();
+    draw_translate(pos->x, pos->y, 0.0f);
+	draw_rotate(angle,0,0,1);
+	draw_scale(width,height,1);
 
 	draw_current_texture_basic(tex_map, mesh, 4);
 
-	glPopMatrix();
+	draw_pop_matrix();
 }
 
 void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei count)
 {
-	glVertexPointer(2, GL_FLOAT, 0, mesh);
-	glTexCoordPointer(2, GL_FLOAT, 0, tex_map);
+    draw_vertex_pointer(2, GL_FLOAT, 0, mesh);
+    draw_tex_pointer(2, GL_FLOAT, 0, tex_map);
 
 	glEnable(GL_TEXTURE_2D);
-	glDrawArrays(GL_TRIANGLE_STRIP,0, count);
+	draw_draw_arrays(GL_TRIANGLE_STRIP,0, count);
 	glDisable(GL_TEXTURE_2D);
+}
+
+void draw_draw_arrays(GLenum mode, GLint first, GLsizei count)
+{
+    float *vertex = matrix2d_get_current_vertex_pointer();
+    float *tex = matrix2d_get_current_tex_pointer();
+
+    matrix2d_multiply_current(count);
+
+    vertex = matrix2d_get_vertex_pointer();
+
+    glVertexPointer(2, GL_FLOAT, 0, vertex);
+    glTexCoordPointer(2, GL_FLOAT, 0, tex);
+    glDrawArrays(GL_TRIANGLE_STRIP, first, count);
+}
+
+void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
+{
+    matrix2d_vertex_pointer((float*)pointer);
+}
+
+void draw_tex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
+{
+    matrix2d_tex_pointer((float*)pointer);
 }
 
 void draw_translate(GLfloat x, GLfloat y, GLfloat z)
 {
-	glTranslatef(x,y,z);
+    matrix2d_translate(x,y);
 }
 
 void draw_rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 {
-	glRotatef(angle,x,y,z);
+    matrix2d_rotate(angle*(M_PI/180));
 }
 
 void draw_scale(GLfloat x, GLfloat y, GLfloat z)
 {
-	glScalef(x,y,z);
+    matrix2d_scale(x,y);
 }
 
 void draw_push_matrix()
 {
-	glPushMatrix();
+    matrix2d_pushmatrix();
 }
 
 void draw_pop_matrix()
 {
-	glPopMatrix();
+    matrix2d_popmatrix();
 }
 
 void draw_load_identity()
 {
-	glLoadIdentity();
+    glLoadIdentity();
+    matrix2d_loadindentity();
 }
 
 // todo combine different gl pointers into an interleaved array
@@ -462,14 +410,14 @@ float *draw_append_quad(float *data, float *mesh)
 	// {A, B, C, D} -> {A, B, C, B, C, D}
 	*data++ = mesh[0]; //A.x
 	*data++ = mesh[1]; //A.y
+	*data++ = mesh[0]; //A.x
+	*data++ = mesh[1]; //A.y
 	*data++ = mesh[2]; //B.x
 	*data++ = mesh[3]; //B.y
 	*data++ = mesh[4]; //C.x
 	*data++ = mesh[5]; //C.y
-	*data++ = mesh[4]; //C.x
-	*data++ = mesh[5]; //C.y
-	*data++ = mesh[2]; //B.x
-	*data++ = mesh[3]; //B.y
+	*data++ = mesh[6]; //D.x
+	*data++ = mesh[7]; //D.y
 	*data++ = mesh[6]; //D.x
 	*data++ = mesh[7]; //D.y
 
@@ -478,9 +426,9 @@ float *draw_append_quad(float *data, float *mesh)
 
 void draw_flush(float *vertex, float *uv, int size)
 {
-	glVertexPointer(2, GL_FLOAT, 0, vertex);
-	glTexCoordPointer(2, GL_FLOAT, 0, uv);
+    draw_vertex_pointer(2, GL_FLOAT, 0, vertex);
+    draw_tex_pointer(2, GL_FLOAT, 0, uv);
 
-	glDrawArrays(GL_TRIANGLES, 0, size / 2);
+    draw_draw_arrays(GL_TRIANGLES, 0, size / 2);
 }
 

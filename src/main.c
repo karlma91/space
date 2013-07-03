@@ -285,6 +285,8 @@ static void main_init() {
 	display_init();     /* sets attributes and creates windows and renderer*/
 	initGL();           /* setup a gl context */
 
+	cpInitChipmunk();
+
 	texture_init();     /* preload textures */
 	draw_init();        /* initializes circular shapes and rainbow colors */
 	particles_init();   /* load and prepare all particle systems */
