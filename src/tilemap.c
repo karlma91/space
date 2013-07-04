@@ -121,31 +121,16 @@ void tilemap_render(tilemap *map)
 
 				GLfloat vertex_quad[8] = {p1.x, p1.y, p2.x,  p2.y, p3.x,  p3.y, p4.x,  p4.y};
 
-				vertex_pointer = draw_append_quad(vertex_pointer, &vertex_quad[0]);
-				uv_pointer = draw_append_quad(uv_pointer, &sub_map[0]);
-
-				int size = (vertex_pointer - &vertex_buffer[0]);
-				if (size >= TILEMAP_ARRAY_BUFFER_SIZE - 12) {
-					++flush_count;
-					draw_flush(vertex_buffer, uv_buffer, size);
-					vertex_pointer = &vertex_buffer[0];
-					uv_pointer = &uv_buffer[0];
-				}
+				draw_vertex_pointer(2, GL_FLOAT, 0,vertex_quad);
+				draw_tex_pointer(2,GL_FLOAT,0,sub_map);
+				draw_append_quad();
 				++tile_count;
 			}
 		}
 	}
-	// flush buffers
-	int size = (vertex_pointer - &vertex_buffer[0]);
-	if (size > 0) {
-		draw_flush(vertex_buffer, uv_buffer, size);
-		++flush_count;
-	}
 
-	if (flush_count > flush_count_max) {
-		flush_count_max = flush_count;
-		SDL_Log("max tilemap flush count: %d",flush_count);
-	}
+	draw_flush();
+
 	if (tile_count > tile_count_max) {
 		tile_count_max = tile_count;
 		SDL_Log("max tile count rendered: %d",tile_count);

@@ -8,21 +8,43 @@ float *cur = stack[0];
 
 float *vertex_pointer;
 float *tex_pointer;
+float *color_pointer;
 
 float vertex[30000];
 float tex[30000];
 float color[30000];
 
-int current;
+float * vertex_append = vertex;
+float * tex_append = tex;
+float * color_append = color;
+
+
+int current_matrix;
 
 int blend_function[2];
 int prev_blend_function[2];
 
 static void multiply_current(float *f);
+static float *matrix2d_append_quad(float *data, float *mesh);
+static void append_quad_color();
+static float * matrix2d_multiply_to_quad(float *data, float *mesh, int count);
 
 int * matrix2d_get_blend_func()
 {
     return blend_function;
+}
+
+/*
+ * Texture
+ */
+float * matrix2d_get_tex_data()
+{
+    return tex;
+}
+
+float * matrix2d_get_tex_pointer()
+{
+    return tex_pointer;
 }
 
 void matrix2d_tex_pointer(float *f)
@@ -30,14 +52,17 @@ void matrix2d_tex_pointer(float *f)
     tex_pointer = f;
 }
 
-float * matrix2d_get_tex_pointer()
+/*
+ * Vertex
+ */
+float *matrix2d_get_vertex_data()
 {
-    return tex;
+    return vertex;
 }
 
-float * matrix2d_get_current_tex_pointer()
+float * matrix2d_get_vertex_pointer()
 {
-    return tex_pointer;
+    return vertex_pointer;
 }
 
 void matrix2d_vertex_pointer(float *f)
@@ -45,26 +70,96 @@ void matrix2d_vertex_pointer(float *f)
     vertex_pointer = f;
 }
 
-float *matrix2d_get_vertex_pointer()
-{
-    return vertex;
-}
-
-float *matrix2d_get_color_pointer()
+/*
+ * Color
+ */
+float *matrix2d_get_color_data()
 {
     return color;
 }
 
-float * matrix2d_get_current_vertex_pointer()
+float * matrix2d_get_color_pointer()
 {
-    return vertex_pointer;
+    return color_pointer;
 }
+
+void matrix2d_color_pointer(float *f)
+{
+	color_pointer = f;
+}
+
+int matrix2d_get_count()
+{
+	return (vertex_append - vertex);
+}
+
+static void append_quad_color()
+{
+	float c[4];
+	draw_get_current_color(c);
+	int i,j;
+	for(i=0; i<6; i++){
+		for(j=0; j<4;j++){
+			*color_append++ = c[j];
+		}
+	}
+}
+
+
+void matrix2d_append_strip(int first, int count)
+{
+
+}
+
+void matrix2d_append_quad_simple()
+{
+	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer, 4);
+}
+
+void matrix2d_append_quad_tex()
+{
+	tex_append = matrix2d_append_quad(tex_append, tex_pointer);
+	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer,4);
+}
+
+void matrix2d_append_quad_color()
+{
+	append_quad_color();
+	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer,4);
+}
+void matrix2d_append_quad_tex_color()
+{
+	append_quad_color();
+	tex_append = matrix2d_append_quad(tex_append, tex_pointer);
+	vertex_append = matrix2d_multiply_to_quad(vertex_append,vertex_pointer, 4);
+}
+
+static float *matrix2d_append_quad(float *data, float *mesh)
+{
+	// {A, B, C, D} -> {A, B, C, B, C, D}
+	*data++ = mesh[0]; //A.x
+	*data++ = mesh[1]; //A.y
+	*data++ = mesh[0]; //A.x
+	*data++ = mesh[1]; //A.y
+	*data++ = mesh[2]; //B.x
+	*data++ = mesh[3]; //B.y
+	*data++ = mesh[4]; //C.x
+	*data++ = mesh[5]; //C.y
+	*data++ = mesh[6]; //D.x
+	*data++ = mesh[7]; //D.y
+	*data++ = mesh[6]; //D.x
+	*data++ = mesh[7]; //D.y
+
+	return data;
+}
+
 
 void matrix2d_reset()
 {
-
+	vertex_append = vertex;
+	tex_append = tex;
+	color_append = color;
 }
-
 
 void matrix2d_translate(float x, float y)
 {
@@ -96,19 +191,19 @@ void matrix2d_scale(float x, float y)
 
 void matrix2d_pushmatrix()
 {
-    current += 1;
+    current_matrix += 1;
     int i;
     for (i=0; i<6; i++){
-        stack[current][i] = stack[current-1][i];
+        stack[current_matrix][i] = stack[current_matrix-1][i];
     }
-    cur = stack[current];
+    cur = stack[current_matrix];
 }
 
 void matrix2d_popmatrix()
 {
-    if(current > 0){
-        current -= 1;
-        cur = stack[current];
+    if(current_matrix > 0){
+        current_matrix -= 1;
+        cur = stack[current_matrix];
     }
 }
 
@@ -147,6 +242,27 @@ void matrix2d_multiply(float *vertices, int count)
         matrix2d_multiply_point(&vertices[i]);
     }
 }
+static float * matrix2d_multiply_to_quad(float *data, float *mesh, int count)
+{
+
+	float x = mesh[0];
+	float y = mesh[1];
+	*data++ = cur[0]*x + cur[1]*y + cur[2];
+	*data++ = cur[3]*x + cur[4]*y + cur[5];
+    int i;
+    for(i=0; i<count*2; i+=2){
+    	 x = mesh[i];
+    	 y = mesh[i+1];
+    	*data++ = cur[0]*x + cur[1]*y + cur[2];
+    	*data++ = cur[3]*x + cur[4]*y + cur[5];
+    }
+    x = mesh[count*2-2];
+    y = mesh[count*2-1];
+    *data++ = cur[0]*x + cur[1]*y + cur[2];
+    *data++ = cur[3]*x + cur[4]*y + cur[5];
+    return data;
+}
+
 
 void matrix2d_multiply_point(float *point)
 {

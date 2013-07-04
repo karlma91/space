@@ -169,7 +169,7 @@ void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 			length + w,  0.5};
 
 	draw_vertex_pointer(2, GL_FLOAT, 0, line);
-	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 4);
+	draw_append_quad_simple();
 
 	draw_pop_matrix();
 }
@@ -234,6 +234,16 @@ void draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int cente
 	draw_scale(w,h,1);
 	draw_vertex_pointer(2, GL_FLOAT, 0, centered ? triangle_quad : corner_quad);
 	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 4);
+	draw_pop_matrix();
+}
+void draw_box_append(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered)
+{
+    draw_push_matrix();
+    draw_translate(x,y,0);
+	draw_rotate(angle,0,0,1);
+	draw_scale(w,h,1);
+	draw_vertex_pointer(2, GL_FLOAT, 0, centered ? triangle_quad : corner_quad);
+	draw_append_quad_simple();
 	draw_pop_matrix();
 }
 
@@ -326,6 +336,17 @@ void draw_current_texture(cpVect *pos, const float *tex_map, float width, float 
 {
 	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
 }
+void draw_current_texture_append(cpVect *pos, const float *tex_map, float width, float height, float angle)
+{
+	draw_push_matrix();
+	draw_translate(pos->x, pos->y, 0.0f);
+	draw_rotate(angle,0,0,1);
+	draw_scale(width,height,1);
+	draw_vertex_pointer(2, GL_FLOAT, 0, triangle_quad);
+	draw_tex_pointer(2, GL_FLOAT, 0, tex_map);
+	draw_append_color_tex_quad();
+	draw_pop_matrix();
+}
 
 void draw_current_texture_all(cpVect *pos, const float *tex_map, float width, float height, float angle, GLfloat *mesh)
 {
@@ -351,12 +372,12 @@ void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei cou
 
 void draw_draw_arrays(GLenum mode, GLint first, GLsizei count)
 {
-    float *vertex = matrix2d_get_current_vertex_pointer();
-    float *tex = matrix2d_get_current_tex_pointer();
+    float *vertex = matrix2d_get_vertex_pointer();
+    float *tex = matrix2d_get_tex_pointer();
 
     matrix2d_multiply_current(count);
 
-    vertex = matrix2d_get_vertex_pointer();
+    vertex = matrix2d_get_vertex_data();
 
     glVertexPointer(2, GL_FLOAT, 0, vertex);
     glTexCoordPointer(2, GL_FLOAT, 0, tex);
@@ -405,30 +426,54 @@ void draw_load_identity()
 }
 
 // todo combine different gl pointers into an interleaved array
-float *draw_append_quad(float *data, float *mesh)
+void draw_append_quad_simple()
 {
-	// {A, B, C, D} -> {A, B, C, B, C, D}
-	*data++ = mesh[0]; //A.x
-	*data++ = mesh[1]; //A.y
-	*data++ = mesh[0]; //A.x
-	*data++ = mesh[1]; //A.y
-	*data++ = mesh[2]; //B.x
-	*data++ = mesh[3]; //B.y
-	*data++ = mesh[4]; //C.x
-	*data++ = mesh[5]; //C.y
-	*data++ = mesh[6]; //D.x
-	*data++ = mesh[7]; //D.y
-	*data++ = mesh[6]; //D.x
-	*data++ = mesh[7]; //D.y
-
-	return data;
+	matrix2d_append_quad_simple();
+}
+void draw_append_quad()
+{
+	matrix2d_append_quad_tex();
+}
+void draw_append_color_quad()
+{
+	matrix2d_append_quad_color();
+}
+void draw_append_color_tex_quad()
+{
+	matrix2d_append_quad_tex_color();
 }
 
-void draw_flush(float *vertex, float *uv, int size)
+void draw_flush_color()
 {
-    draw_vertex_pointer(2, GL_FLOAT, 0, vertex);
-    draw_tex_pointer(2, GL_FLOAT, 0, uv);
-
-    draw_draw_arrays(GL_TRIANGLES, 0, size / 2);
+	int size = matrix2d_get_count();
+	//fprintf(stderr,"COLOR_FLUSH: %d\n",size/2);
+	glEnableClientState(GL_COLOR_ARRAY);
+	float *color = matrix2d_get_color_data();
+	glColorPointer(4, GL_FLOAT, 0, color);
+	draw_flush();
+	glDisableClientState(GL_COLOR_ARRAY);
 }
+void draw_flush()
+{
+	glEnable(GL_TEXTURE_2D);
+	float *vertex = matrix2d_get_vertex_data();
+	float *tex = matrix2d_get_tex_data();
+	int size = matrix2d_get_count();
+
+	glVertexPointer(2, GL_FLOAT, 0, vertex);
+	glTexCoordPointer(2, GL_FLOAT, 0, tex);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2);
+	matrix2d_reset();
+	glDisable(GL_TEXTURE_2D);
+}
+void draw_flush_simple()
+{
+	float *vertex = matrix2d_get_vertex_data();
+	int size = matrix2d_get_count();
+
+	glVertexPointer(2, GL_FLOAT, 0, vertex);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2);
+	matrix2d_reset();
+}
+
 

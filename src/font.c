@@ -142,6 +142,7 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 		i++;
 		draw_translate((CHAR_WIDTH + CHAR_SPACING), 0, 0);
 	}
+	draw_flush_simple();
 
 	if (font_text_align == TEXT_LEFT)
 		draw_pop_matrix();

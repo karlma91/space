@@ -718,8 +718,9 @@ void drawStars()
 		float size = stars_size[i];
 		float star_x = (stars_x[i]);
 		float star_y = (stars_y[i]);
-		draw_box(star_x,star_y,size,size,0,1);
+		draw_box_append(star_x,star_y,size,size,0,1);
 	}
+	draw_flush_simple();
 	draw_pop_matrix();
 }
 
