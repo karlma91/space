@@ -81,7 +81,15 @@ void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei cou
 void draw_current_texture(cpVect *pos, const float *tex_map, float width, float height, float angle);
 void draw_current_texture_all(cpVect *pos, const float *tex_map, float width, float height, float angle, GLfloat *mesh);
 
-float *draw_append_quad(float *data, float *mesh);
-void draw_flush(float *vertex, float *uv, int size);
+void draw_current_texture_append(cpVect *pos, const float *tex_map, float width, float height, float angle);
+void draw_box_append(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered);
+
+void draw_append_quad();
+void draw_append_quad_simple();
+void draw_append_color_quad();
+void draw_append_color_tex_quad();
+void draw_flush();
+void draw_flush_color();
+void draw_flush_simple();
 
 #endif /* DRAW_H_ */

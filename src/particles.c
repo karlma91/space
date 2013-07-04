@@ -536,6 +536,9 @@ static void draw_all_particles(emitter *em)
 
 		p = p->next;
 	}
+	if(em->draw_particle == default_particle_draw){
+		draw_flush_color();
+	}
 	draw_pop_blend();
 
 }
@@ -554,7 +557,7 @@ static void default_particle_draw(emitter *em, particle *p)
 #endif
 		p->angle += p->rot_speed*dt;
 	}
-	draw_current_texture(&pos,TEX_MAP_FULL,p->size,p->size,p->angle + angle);
+	draw_current_texture_append(&pos,TEX_MAP_FULL,p->size,p->size,p->angle + angle);
 }
 
 
