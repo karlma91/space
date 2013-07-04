@@ -396,7 +396,7 @@ void llist_clear(LList id)
 	while (llist_remove(id, llist_first(id)));
 }
 
-int llist_free(LList id)
+int llist_destroy(LList id)
 {
 #if LLIST_DEBUG
 	fprintf(stderr,"list [%p]: free\n", id);

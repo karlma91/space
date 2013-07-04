@@ -36,7 +36,7 @@ int llist_end_loop(LList list);     /* pop-er nåværende iterasjons-peker */
 
 void llist_clear(LList list);  /* fjerner alle pekere i listen */
 
-int llist_free(LList list);    /* frigjør listen fra minnet */
+int llist_destroy(LList list);    /* frigjør listen fra minnet */
 
 void llist_free_nodes();       /* frigj¿r alle ubrukte noder fra minnet */
 

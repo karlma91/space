@@ -126,7 +126,7 @@ void objects_destroy()
 {
 	int obj_id;
 	for (obj_id = 0; obj_id < ID_COUNT; obj_id++) {
-		llist_free(lists[obj_id]);
+		llist_destroy(lists[obj_id]);
 		instance_counter[obj_id] = 0;
 	}
 }

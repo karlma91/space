@@ -156,7 +156,7 @@ void statesystem_destroy()
 	}
 	llist_end_loop(states);
 
-	llist_free(states);
+	llist_destroy(states);
 }
 
 void statesystem_free(STATE_ID state_id)
