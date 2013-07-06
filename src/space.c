@@ -349,22 +349,6 @@ static void update_objects(object_data *obj)
 static void draw()
 {
 	SPACE_draw();
-	if(cam_center_x < cam_left_limit){
-		second_draw = 1;
-		cam_center_x += currentlvl->right + abs(currentlvl->left) ;
-		cam_left = cam_center_x - camera_width;
-		cam_right = cam_center_x + camera_width;
-		SPACE_draw();
-	}else if(cam_center_x > cam_right_limit){
-		second_draw = 1;
-		cam_center_x -= currentlvl->right + abs(currentlvl->left);
-		cam_left = cam_center_x - camera_width;
-		cam_right = cam_center_x + camera_width;
-		SPACE_draw();
-	}
-	second_draw = 0;
-
-
 }
 
 static void update_camera_zoom(int cam_mode)
@@ -477,9 +461,7 @@ static void SPACE_draw()
 {
 	space_rendering_map = 1;
 	/* draw background */
-	if(!second_draw){
-		drawStars();
-	}
+	drawStars();
 
 	/* translate view */
 	draw_load_identity();
@@ -487,9 +469,7 @@ static void SPACE_draw()
 	draw_translate(-cam_center_x, -cam_center_y, 0.0f);
 
 	/* draw tilemap */
-	if(!second_draw){
-		tilemap_render(currentlvl->tiles);
-	}
+	tilemap_render(currentlvl->tiles);
 
 	setTextAngle(0);
 	/* draw all objects */
@@ -660,8 +640,37 @@ void draw_gui()
 
 static void render_objects(object_data *obj)
 {
-	if(obj->body->p.x > cam_left - 200 && obj->body->p.x < cam_right + 200){
+	if((obj->body->p.x > cam_left - 200 && obj->body->p.x < cam_right + 200)) {
 		obj->preset->render(obj);
+		return;
+	}
+
+	if(cam_center_x < cam_left_limit){
+		float old_cam_x = cam_center_x;
+		float new_cam_center_x = cam_center_x + currentlvl->right + abs(currentlvl->left);
+		float new_cam_left = new_cam_center_x - camera_width;
+		float new_cam_right = new_cam_center_x + camera_width;
+		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){
+			cam_center_x = new_cam_center_x;
+			draw_push_matrix();
+			draw_translate(-(currentlvl->right + abs(currentlvl->left)),0,0);
+			obj->preset->render(obj);
+			draw_pop_matrix();
+			cam_center_x = old_cam_x;
+		}
+	}else if(cam_center_x > cam_right_limit){
+		float old_cam_x = cam_center_x;
+		float new_cam_center_x = cam_center_x - (currentlvl->right + abs(currentlvl->left));
+		float new_cam_left = new_cam_center_x - camera_width;
+		float new_cam_right = new_cam_center_x + camera_width;
+		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){
+			cam_center_x = new_cam_center_x;
+			draw_push_matrix();
+			draw_translate((currentlvl->right + abs(currentlvl->left)),0,0);
+			obj->preset->render(obj);
+			draw_pop_matrix();
+			cam_center_x = old_cam_x;
+		}
 	}
 }
 

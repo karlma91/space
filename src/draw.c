@@ -151,6 +151,13 @@ void draw_line(int tex_id, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float
 
 }
 
+void draw_glow_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
+{
+	draw_line(TEX_GLOW,  x0,  y0,  x1,  y1,  w);
+	draw_color4f(1,1,1,1);
+	draw_line(TEX_GLOW_DOT,  x0,  y0,  x1,  y1,  w);
+}
+
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
     draw_push_matrix();
@@ -339,6 +346,7 @@ void draw_current_texture_append(cpVect *pos, const float *tex_map, float width,
 void draw_current_texture_all(cpVect *pos, const float *tex_map, float width, float height, float angle, GLfloat *mesh)
 {
     draw_push_matrix();
+
     draw_translate(pos->x, pos->y, 0.0f);
 	draw_rotate(angle,0,0,1);
 	draw_scale(width,height,1);

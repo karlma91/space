@@ -14,6 +14,9 @@
 
 #define MAX_IMAGE_BUFFER 524288 /* ( 0.5 MiB) NB! make sure it is enough RAM to hold buffer */
 
+int TEX_GLOW_DOT;
+int TEX_GLOW;
+
 /**
  * texture values (GLOBAL)
  */
@@ -125,6 +128,8 @@ static int texture_from_name(char *file)
 int texture_init()
 {
 
+	TEX_GLOW_DOT = texture_load("dot.png");
+	TEX_GLOW = texture_load("glow.png");
 
 	return 0;
 }

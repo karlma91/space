@@ -111,7 +111,7 @@ static void render(object_data *obj)
 		se_rect2arch(&pos_from);
 		se_rect2arch(&pos_to);
 #endif
-		draw_line(sprite_get_texture(&(temp->data.spr)),pos_from.x, pos_from.y, pos_to.x, pos_to.y, 64); //40 = 4 * radius
+		draw_glow_line(pos_from.x, pos_from.y, pos_to.x, pos_to.y, 64); //40 = 4 * radius
 	}
 }
 

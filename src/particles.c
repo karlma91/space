@@ -315,7 +315,7 @@ static void draw_particle_as_spark(emitter *em, particle *p)
 #if EXPERIMENTAL_GRAPHICS
 	se_rect2arch(&pos);
 #endif
-	draw_line(em->texture_id, pos.x,pos.y,pos.x + p->v.x*p->size,pos.y+ p->v.y*p->size, p->size);
+	draw_glow_line(pos.x,pos.y,pos.x + p->v.x*p->size,pos.y+ p->v.y*p->size, p->size);
 }
 
 /**
