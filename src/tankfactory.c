@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "game.h"
 /* Game state */
 #include "space.h"
 
@@ -46,6 +47,12 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 
 	factory->cur = 0;
 	factory->rot = 0;
+
+	factory->data.spr.id = SPRITE_TANKFACTORY_BLUE;
+	factory->data.spr.width = 400;
+	factory->data.spr.height = 400;
+	factory->data.spr.animation_speed = 4;
+
 
 	static int randomness= 0;
 	randomness += 123;
@@ -92,6 +99,7 @@ static void init(object_group_factory *factory) {
 
 static void update(object_group_factory *factory) {
 	factory->timer += dt;
+	sprite_update(&(factory->data.spr));
 	if (factory->timer > factory->param->spawn_delay
 			&& factory->cur < factory->param->max_tanks ) {
 
@@ -123,7 +131,8 @@ static void render(object_group_factory *factory) {
 
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	float tmp_texmap[8] = {0,1, 1,1, 0,0, 1,0};
-	draw_texture(factory->param->tex_id, &(draw_pos), &tmp_texmap[0], 400, 400, 0);
+	//draw_texture(factory->param->tex_id, &(draw_pos), &tmp_texmap[0], 400, 400, 0);
+	sprite_render(&(factory->data.spr), &(draw_pos), 0);
 
 	hpbar_draw(&factory->hp_bar);
 	draw_bar(factory->data.body->p.x+160,factory->data.body->p.y-150,40,150,factory->timer / factory->param->spawn_delay,0);

@@ -1,1 +1,2 @@
-tank_factory factory_blue.png 0 0 0.25 0.5 8
+tank_factory_blue factory_blue.png 0 0 0.25 0.5 8
+tank_factory_red factory_red.png 0 0 0.25 0.5 8

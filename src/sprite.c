@@ -56,7 +56,7 @@ void sprite_init()
 			SDL_Log("SPRITE: file format error. Expected 7 arguments got: %d\n",ret);
 			exit(5);
 		}
-		SDL_Log("SPRITE: %s %s %f %f %f %d", name, file_name, u, v, width, height, subimages);
+		SDL_Log("SPRITE: %s %s %f %f %f %f %d", name, file_name, u, v, width, height, subimages);
 		sprite_data *data = (sprite_data*)malloc(sizeof(sprite_data));
 		strcpy(data->name, name);
 		data->height = height;
@@ -111,10 +111,9 @@ void sprite_render(sprite *spr, cpVect *pos, float angle)
 	int index = floor(spr->sub_index);
 
 	int sprites_x = 1/data->width;
-	int sprites_y = 1/data->height;
 
 	int index_x = index % sprites_x;
-	int index_y = index / sprites_y;
+	int index_y = index / sprites_x;
 
 	float tx_1 = data->u + index_x * data->width;
 	float tx_2 = data->u + (index_x + 1) * data->width;

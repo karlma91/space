@@ -9,6 +9,7 @@
 #define GAME_H_
 
 #include "statesystem.h"
+#include "sprite.h"
 
 extern STATE_ID state_mainmenu;
 extern STATE_ID state_menu;
@@ -37,5 +38,9 @@ extern unsigned int KEY_ESCAPE;
 void game_config();
 void game_init();
 void game_destroy();
+
+
+extern SPRITE_ID SPRITE_TANKFACTORY_BLUE;
+extern SPRITE_ID SPRITE_TANKFACTORY_RED;
 
 #endif /* GAME_H_ */

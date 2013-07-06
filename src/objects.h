@@ -3,6 +3,7 @@
 
 #include "chipmunk.h"
 #include "hpbar.h"
+#include "sprite.h"
 
 /* ID number of each object group*/
 enum OBJECT_ID {
@@ -46,6 +47,7 @@ struct _object_data {
 	int disabled;
 	int destroyed;
 	cpBody *body;
+	sprite spr;
 	object_component_pointers components;
 };
 

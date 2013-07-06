@@ -62,8 +62,6 @@ object_param_player default_player = {
 
 #define IMPULSE_FORCE 100
 
-static sprite sp;
-
 object_group_player *object_create_player()
 {
 	cpFloat radius = 30;
@@ -71,13 +69,6 @@ object_group_player *object_create_player()
 
 	object_group_player *player = (object_group_player *)objects_super_malloc(ID_PLAYER, sizeof(*player));
 
-	sp.height = 100;
-	sp.width = 100;
-	sp.animation_speed = 1;
-	sp.id = sprite_link("tank_factory");
-	if(sp.id == NULL){
-		SDL_Log("ERROR LOADING SPRITE TANK_FACTORY");
-	}
 
 	player->data.preset = &object_type_player;
 	player->data.alive = 1;
@@ -145,7 +136,6 @@ static void render(object_group_player *player)
 	draw_texture(player->param->tex_id, &(pos_body), tex_map[1], 120, 120, player->direction*180/M_PI);
 
 	hpbar_draw(&player->hp_bar);
-	sprite_render(&sp, &pos_body, 45);
 }
 
 #include <time.h>
@@ -156,7 +146,6 @@ static void update(object_group_player *player)
 		player->hp_bar.value = 1000000;
 #endif
 
-	sprite_update(&sp);
 	player->gun_timer += dt;
 
 	//update physics and player

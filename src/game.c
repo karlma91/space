@@ -24,6 +24,13 @@ unsigned int KEY_RETURN_1 = SDL_SCANCODE_SPACE;
 unsigned int KEY_RETURN_2 = SDL_SCANCODE_RETURN;
 unsigned int KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
 
+
+//extern SPRITE_ID start
+SPRITE_ID SPRITE_TANKFACTORY_BLUE;
+SPRITE_ID SPRITE_TANKFACTORY_RED;
+//extern SPRITE_ID end
+
+
 #if !(TARGET_OS_IPHONE || __ANDROID__)
 static int handler(void* config, const char* section, const char* name,
 		const char* value) {
@@ -83,9 +90,16 @@ void game_config()
 #endif
 }
 
+void game_sprites()
+{
+	SPRITE_TANKFACTORY_BLUE = sprite_link("tank_factory_blue");
+	SPRITE_TANKFACTORY_RED = sprite_link("tank_factory_red");
+}
+
 void game_init()
 {
 	//TODO generalize particles.c and ?level.c
+	game_sprites();
 	mainmenu_init();
 	level_init();
     menu_init();
