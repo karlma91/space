@@ -186,7 +186,6 @@ int level_init()
 			paramsize = sizeof(object_param_tank);
 			ret = sscanf(&buffer[offset], "%f %d %s%n\n", &tank.max_hp, &tank.score, &fname[0], &offset_add);
 			offset += offset_add;
-			tank.tex_id = texture_load(fname);
 			break;
 		case ID_TURRET:
 			expected = 6;

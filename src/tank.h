@@ -10,7 +10,6 @@ extern object_group_preset type_tank;
 struct _object_param_tank {
 	float max_hp;
 	int score;
-	int tex_id;
 };
 
 typedef struct {
@@ -29,6 +28,8 @@ typedef struct {
 	cpBody *wheel1;
 	cpBody *wheel2;
 	int state;
+	sprite wheel_sprite;
+	sprite turret_sprite;
 	/* tmp debug variables */
 	cpFloat debug_left_dist;
 	cpFloat debug_right_dist;

@@ -642,10 +642,10 @@ void draw_gui()
 		}
 		if(button_down){
 			cpVect t = cpv(0,0-GAME_HEIGHT/4);
-			draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
+			//draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
 		}else{
 			cpVect t = cpv(0,-5.5-GAME_HEIGHT/4);
-			draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
+			//draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
 		}
 #else
 		font_drawText(0, 0, "GAME OVER-PRESS ENTER");
@@ -924,7 +924,7 @@ void space_init()
 
     stars_init();
 
-    btn_pause = button_create(GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80, TEX_BUTTON_PAUSE, BTN_IMAGE_SIZED);
+    btn_pause = button_create(GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80, SPRITE_BUTTON, BTN_IMAGE_SIZED);
     joy_left = joystick_create(0, 80, 10, -GAME_WIDTH/2, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
     joy_right = joystick_create(0, 80, 10, 0, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
 }

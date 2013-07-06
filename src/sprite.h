@@ -61,11 +61,14 @@ SPRITE_ID sprite_load(const char *sprite); /* for loading av sprite data */
 /*
  * allokerer og returnerer en ny enhet av sprite. Kalleren er selv ansvarlig for å frigjøre sprite (eller evt. kall sprite_free)
  */
-sprite *sprite_create(SPRITE_ID id);// ,posisjon, etc..);
 
 SPRITE_ID sprite_link(const char *name);
+void sprite_get_current_image(sprite *spr, float *sub_map);
+int sprite_get_texture(sprite *spr);
+void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed);
 
-void sprite_set_length(sprite spr, float speed);
+void sprite_set_length(sprite *spr, float length);
+void sprite_set_index(sprite *spr, int index);
 
 void sprite_update(sprite *spr);
 void sprite_render(sprite *spr, cpVect *pos, float angle);

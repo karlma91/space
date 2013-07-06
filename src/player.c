@@ -47,16 +47,8 @@ object_group_preset object_type_player = {
 	destroy
 };
 
-//static float timer = 0;
-
-static const float tex_map[2][8] = {
-		{0,1, 0.5,1, 0,0, 0.5,0},
-		{0.5,1, 1,1, 0.5,0, 1,0}
-};
-
 object_param_player default_player = {
 		.max_hp = 200,
-		.tex_id = -1,
 		.gun_cooldown = 0.125f
 };
 
@@ -69,12 +61,13 @@ object_group_player *object_create_player()
 
 	object_group_player *player = (object_group_player *)objects_super_malloc(ID_PLAYER, sizeof(*player));
 
+	sprite_create(&(player->gun), SPRITE_PLAYER_GUN, 120, 120, 0);
+	sprite_create(&(player->data.spr), SPRITE_PLAYER, 120, 120, 0);
 
 	player->data.preset = &object_type_player;
 	player->data.alive = 1;
 
 	player->param = &default_player;
-	player->param->tex_id = TEX_PLAYER;
 
 	player->data.components.hp_bar = &player->hp_bar;
 	player->data.components.body_count = 0;
@@ -132,9 +125,8 @@ static void render(object_group_player *player)
 	cpVect pos_body = player->data.body->p;
 	cpVect pos_gun = player->gunwheel->p;
 
-	draw_texture(player->param->tex_id, &(pos_gun), tex_map[0], 120, 120, player->aim_angle * 180/M_PI);
-	draw_texture(player->param->tex_id, &(pos_body), tex_map[1], 120, 120, player->direction*180/M_PI);
-
+	sprite_render(&(player->gun), &(pos_gun), player->aim_angle * 180/M_PI);
+	sprite_render(&(player->data.spr), &(pos_body), player->direction * 180/M_PI);
 	hpbar_draw(&player->hp_bar);
 }
 

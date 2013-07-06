@@ -2,6 +2,7 @@
 #include "bullet.h"
 #include "objects.h"
 #include "spaceengine.h"
+#include "game.h"
 
 static void init(object_data *obj);
 static void update(struct bullet *);
@@ -33,6 +34,8 @@ object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int 
 		temp->data.alive = 1;
 		temp->data.components.damage = &(temp->damage);
 		temp->data.components.body_count = 0;
+
+		sprite_create(&(temp->data.spr), SPRITE_GLOW_DOT, 30, 30, 0);
 
 		cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
 
@@ -108,7 +111,7 @@ static void render(object_data *obj)
 		se_rect2arch(&pos_from);
 		se_rect2arch(&pos_to);
 #endif
-		draw_line(pos_from.x, pos_from.y, pos_to.x, pos_to.y, 64); //40 = 4 * radius
+		draw_line(sprite_get_texture(&(temp->data.spr)),pos_from.x, pos_from.y, pos_to.x, pos_to.y, 64); //40 = 4 * radius
 	}
 }
 

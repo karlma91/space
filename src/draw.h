@@ -18,6 +18,7 @@
 
 #include "chipmunk.h"
 #include "texture.h"
+#include "sprite.h"
 
 //fra chipmunkDemo.h
 typedef struct Color {
@@ -59,7 +60,7 @@ Color draw_col_rainbow(int hue);
 Color draw_col_grad(int hue);
 void draw_color4f(float r, float g, float b, float a);
 void draw_color(Color color);
-void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
+void draw_line(int tex_id, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_line_strip(const GLfloat *strip, int l, float w);
 int draw_init();
 void draw_destroy();

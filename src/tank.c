@@ -57,6 +57,10 @@ object_group_tank *object_create_tank(float xpos, object_group_factory *factory,
 	tank->data.alive = 1;
 	tank->param = param;
 
+	sprite_create(&(tank->wheel_sprite), SPRITE_TANK_WHEEL, 120, 120, 0);
+	sprite_create(&(tank->data.spr), SPRITE_TANK_BODY, 200, 100, 0);
+	sprite_create(&(tank->turret_sprite), SPRITE_TANK_TURRET, 150, 150, 0);
+
 	tank->max_distance = 800;
 
 	tank->timer = 0;
@@ -264,15 +268,14 @@ static void render(object_group_tank *tank)
 
 	hpbar_draw(&tank->hp_bar);
 
-	int texture = tank->param->tex_id;
 
 	draw_color4f(1,1,1,1);
 
 	cpVect pos_w1 = tank->wheel1->p;
-	draw_texture(texture, &pos_w1, tex_map[1],100, 100, rot);
+	sprite_render(&(tank->wheel_sprite), &pos_w1, rot);
 
 	cpVect pos_w2 = tank->wheel2->p;
-	draw_texture(texture, &pos_w2, tex_map[1],100, 100, rot);
+	sprite_render(&(tank->wheel_sprite), &pos_w2, rot);
 
 	if (tank->param->max_hp >= 100) {//TODO add color into param
 		draw_color4f(1,0.2,0,1);
@@ -280,8 +283,8 @@ static void render(object_group_tank *tank)
 
 	cpVect pos = tank->data.body->p;
 
-	draw_texture(texture, &pos, tex_map[0],200, 100, dir*180/M_PI);
-	draw_texture(texture, &pos, tex_map[2],150, 150, barrel_angle);
+	sprite_render(&(tank->data.spr), &pos, dir*180/M_PI);
+	sprite_render(&(tank->turret_sprite), &pos, barrel_angle);
 }
 
 

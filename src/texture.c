@@ -124,18 +124,7 @@ static int texture_from_name(char *file)
 #include "SDL_endian.h"
 int texture_init()
 {
-	TEX_CLOUD = texture_load("cloud.png");
-	TEX_CLOUD_ULQ = texture_load("cloud_ultralow.png");
-	TEX_CLOUD_LQ = texture_load("cloud_low.png");
-	TEX_WHEEL   = texture_load("wheel.png");
-	TEX_DOT     = texture_load("dot.png");
-	TEX_GLOW    = texture_load("glow.png");
-	TEX_GLOWDOT = texture_load("glowdot.png");
-	TEX_PLAYER = texture_load("player.png");
-	TEX_PARTICLE = texture_load("particle.png");
-	TEX_BUTTON = texture_load("button.png");
-	TEX_BUTTON_DOWN = texture_load("button_down.png");
-	TEX_BUTTON_PAUSE = texture_load("button_pause.png");
+
 
 	return 0;
 }

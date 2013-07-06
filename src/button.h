@@ -9,6 +9,7 @@
 #define BUTTON_H_
 
 #include "SDL.h"
+#include "sprite.h"
 
 typedef void *button;
 
@@ -21,7 +22,7 @@ typedef enum {
 } button_type;
 
 //TODO add timeout for move and up?
-button button_create(float pos_x, float pos_y, float width, float height, int tex_id, button_type type);
+button button_create(float pos_x, float pos_y, float width, float height, SPRITE_ID sprid, button_type type);
 void button_free(button btn);
 
 void button_render(button btn);

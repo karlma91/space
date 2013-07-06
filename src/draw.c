@@ -106,7 +106,7 @@ void draw_pop_blend()
 	glBlendFunc(src, dst);
 }
 
-void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
+void draw_line(int tex_id, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
 
 	glEnable(GL_TEXTURE_2D);
@@ -142,11 +142,7 @@ void draw_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 	draw_vertex_pointer(2, GL_FLOAT, 0, line_mesh);
 	draw_tex_pointer( 2, GL_FLOAT, 0, line_texture );
 
-	texture_bind(TEX_GLOW);
-	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 8);
-
-	draw_color4f(1,1,1,1);
-	texture_bind(TEX_DOT);
+	texture_bind(tex_id);
 	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 8);
 
 	draw_pop_blend();
@@ -245,14 +241,6 @@ void draw_box_append(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,in
 	draw_vertex_pointer(2, GL_FLOAT, 0, centered ? triangle_quad : corner_quad);
 	draw_append_quad_simple();
 	draw_pop_matrix();
-}
-
-
-void draw_velocity_line(cpShape *shape)
-{
-	cpCircleShape *circle = (cpCircleShape *)shape;
-	cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
-	draw_line(circle->tc.x, circle->tc.y, circle->tc.x - vel.x/64, circle->tc.y - vel.y/64, 32); //40 = 4 * radius
 }
 
 Color draw_col_rainbow(int hue)

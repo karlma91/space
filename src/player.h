@@ -33,6 +33,8 @@ typedef struct {
 	emitter *flame;
 	cpBody *gunwheel;
 
+	sprite gun;
+
 	/* parameters */
 	object_param_player *param;
 } object_group_player;

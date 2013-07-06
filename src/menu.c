@@ -198,30 +198,8 @@ static void draw()
 		font_drawText(0,-0.5f*GAME_HEIGHT/2, "START SPILLET");
 
 		draw_color4f(0.1,0.9,0.1,1);
-#if IS_APP
-		//TMP button animation
-		if (button_isdown(btn_start_tmp)) {
-			button_set_texture(btn_start_tmp, TEX_BUTTON_DOWN);
-		} else {
-			button_set_texture(btn_start_tmp, TEX_BUTTON);
-		}
 		button_render(btn_start_tmp);
-#else
-		static float button_timer = 0;
-		static int button_down;
-		button_timer+=dt;
-		if(button_timer > 0.5){
-			button_down = !button_down;
-			button_timer = 0;
-		}
-		if(button_down){
-			cpVect t = cpv(0,0);
-			draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
-		}else{
-			cpVect t = cpv(0,-5.5);
-			draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
-		}
-#endif
+
 		break;
 	}
 }
@@ -308,5 +286,5 @@ void menu_init()
 	curMenu = &mainMenuTest;
 	statesystem_register(state_menu, 0);
 
-	btn_start_tmp = button_create(0,0,300,300,TEX_BUTTON,BTN_SPRITE);
+	btn_start_tmp = button_create(0, 0, 300, 300, SPRITE_BUTTON, BTN_SPRITE);
 }

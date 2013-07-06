@@ -50,8 +50,11 @@ void sprite_init()
 
 	int ret = 0;
 	while(counter <= filesize){
-		ret = sscanf(buffer, "%s %s %f %f %f %f %d %n\n", name, file_name, &u, &v, &width, &height, &subimages, &count);
+		ret = sscanf(&buffer[counter], "%s %s %f %f %f %f %d%n\n", name, file_name, &u, &v, &width, &height, &subimages, &count);
 		counter += count;
+		if(ret==-1){
+			break;
+		}
 		if(ret != 7){
 			SDL_Log("SPRITE: file format error. Expected 7 arguments got: %d\n",ret);
 			exit(5);
@@ -78,6 +81,7 @@ SPRITE_ID sprite_link(const char *name)
 			return (SPRITE_ID)spr;
 		}
 	}
+	SDL_Log("SPRITE: %s does not exist",name);
 	llist_end_loop(constant_sprites);
 	return NULL;
 }
@@ -89,10 +93,12 @@ void sprite_destroy()
 }
 
 
-sprite *sprite_create(SPRITE_ID id)// ,posisjon, etc..)
+void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed)
 {
-
-	return NULL;
+	spr->id = id;
+	spr->width = width;
+	spr->height=height;
+	spr->animation_speed = speed;
 }
 
 
@@ -105,7 +111,7 @@ void sprite_update(sprite *spr)
 	}
 }
 
-void sprite_render(sprite *spr, cpVect *pos, float angle)
+void sprite_get_current_image(sprite *spr, float *sub_map)
 {
 	sprite_data *data = (sprite_data*)spr->id;
 	int index = floor(spr->sub_index);
@@ -120,11 +126,40 @@ void sprite_render(sprite *spr, cpVect *pos, float angle)
 	float ty_2 = data->v + (index_y * data->height);
 	float ty_1 = data->v + (index_y + 1) * data->height;
 
-	float sub_map[8] = {
-			tx_1, ty_1,
-			tx_2, ty_1,
-			tx_1, ty_2,
-			tx_2, ty_2,
-	};
+	sub_map[0] = tx_1;
+	sub_map[1] = ty_1;
+	sub_map[2] = tx_2;
+	sub_map[3] = ty_1;
+	sub_map[4] = tx_1;
+	sub_map[5] = ty_2;
+	sub_map[6] = tx_2;
+	sub_map[7] = ty_2;
+}
+
+void sprite_set_length(sprite *spr, float length)
+{
+	spr->animation_speed = ((sprite_data*)spr->id)->subimages/length;
+}
+
+int sprite_get_texture(sprite *spr)
+{
+	return ((sprite_data*)spr->id)->tex_id;
+}
+
+void sprite_set_sprite_id(sprite *spr, SPRITE_ID id)
+{
+	spr->id = id;
+}
+
+void sprite_set_index(sprite *spr, int index)
+{
+	spr->sub_index = index;
+}
+
+void sprite_render(sprite *spr, cpVect *pos, float angle)
+{
+	sprite_data *data = (sprite_data*)spr->id;
+	float sub_map[8];
+	sprite_get_current_image(spr, sub_map);
 	draw_texture(data->tex_id, pos, sub_map, spr->width, spr->height, angle);
 }

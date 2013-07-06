@@ -148,7 +148,7 @@ static void draw()
 		int i;
 		for(i = 0; i < decks; i++){
 			if(i<decks-1){
-				draw_line(ships[i].x,ships[i].y,ships[i+1].x,ships[i+1].y, 512);
+				//draw_line(ships[i].x,ships[i].y,ships[i+1].x,ships[i+1].y, 512);
 			}
 			render_ship(&ships[i], sel == i);
 		}

@@ -9,6 +9,10 @@
 #include "main.h"
 #include "draw.h"
 
+
+static int BUTTON_UP = 0;
+static int BUTTON_DOWN = 1;
+
 //TODO support label/text on button and extendible texture button (like how bullets are drawn)
 
 #define inside(btn,px,py) ((px >= btn->p1x) && (px <= btn->p2x) && (py >= btn->p1y) && (py <= btn->p2y))
@@ -21,7 +25,7 @@ struct button {
 	float pos_x; /* center x-coordinate of button */
 	float pos_y; /* center y-coordinate of button */
 
-	int tex_id; /* texture id */
+	sprite spr;
 	float width; /* width of button and touch area */
 	float height; /* height og button and touch area */
 
@@ -33,7 +37,7 @@ struct button {
 	button_type type;
 };
 
-button button_create(float pos_x, float pos_y, float width, float height, int tex_id, button_type type)
+button button_create(float pos_x, float pos_y, float width, float height, SPRITE_ID sprid, button_type type)
 {
 	struct button *btn = malloc(sizeof(*btn));
 
@@ -41,7 +45,7 @@ button button_create(float pos_x, float pos_y, float width, float height, int te
 	btn->pos_y = pos_y;
 	btn->width = width;
 	btn->height = height;
-	btn->tex_id = tex_id;
+	sprite_create(&(btn->spr), sprid, width, height, 0);
 	btn->type = type;
 
 	float margin = (btn->width < btn->height ? btn->width : btn->height) / 10;
@@ -68,13 +72,21 @@ void button_render(button btn_id)
 	size = (btn->type == BTN_IMAGE_SIZED || btn->type == BTN_IMAGE_SIZED_TEXT) && btn->pressed ? 1.5f : size;
 
 	cpVect btn_pos = {btn->pos_x,btn->pos_y};
-	draw_texture(btn->tex_id, &btn_pos, TEX_MAP_FULL, btn->width*size, btn->height*size, 0);
+	//draw_texture(btn->tex_id, &btn_pos, TEX_MAP_FULL, btn->width*size, btn->height*size, 0);
+
+	if (button_isdown(btn)) {
+		button_set_texture(btn, BUTTON_DOWN);
+	} else {
+		button_set_texture(btn, BUTTON_UP);
+	}
+
+	sprite_render(&(btn->spr), &btn_pos, 0);
 }
 
 void button_set_texture(button btn_id, int tex_id)
 {
 	struct button *btn = (struct button *) btn_id;
-	btn->tex_id = tex_id;
+	sprite_set_index(&(btn->spr), tex_id);
 }
 
 int button_isdown(button btn_id)
