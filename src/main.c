@@ -287,7 +287,9 @@ static void main_init() {
 
 	cpInitChipmunk();
 
+
 	texture_init();     /* preload textures */
+	sprite_init();
 	draw_init();        /* initializes circular shapes and rainbow colors */
 	particles_init();   /* load and prepare all particle systems */
 	//font_init();      /* (currently not in use) */

@@ -60,11 +60,6 @@ void tilemap_render(tilemap *map)
 	map_height +=4;
 
 	// prepare vertex and uv buffers
-	float *vertex_pointer = &vertex_buffer[0];
-	float *uv_pointer = &uv_buffer[0];
-
-	int flush_count = 0; //stats
-	static int flush_count_max = 0;
 
 	cpVect data2;
 	se_rect2arch_column(j_start*map->tile_width - (map->width*map->tile_width)/2, &data2);

@@ -29,12 +29,18 @@
 #ifndef SPRITE_H_
 #define SPRITE_H_
 
+#include "chipmunk.h"
+
 typedef void * SPRITE_ID; /* Peker til konstant sprite data*/
 
 /* public instance sprite */
 typedef struct {
 	SPRITE_ID id;
 	//TODO legge til alle variabler som trengs og lagres individuelt for hver kopi av sprite
+	float animation_speed;
+	float sub_index;
+	float width;
+	float height;
 } sprite;
 
 void sprite_init();
@@ -57,9 +63,11 @@ SPRITE_ID sprite_load(const char *sprite); /* for loading av sprite data */
  */
 sprite *sprite_create(SPRITE_ID id);// ,posisjon, etc..);
 
-void sprite_set_speed(sprite spr, float speed);
+SPRITE_ID sprite_link(const char *name);
 
-void sprite_update(sprite spr);
-void sprite_render(sprite spr);
+void sprite_set_length(sprite spr, float speed);
+
+void sprite_update(sprite *spr);
+void sprite_render(sprite *spr, cpVect *pos, float angle);
 
 #endif /* SPRITE_H_ */
