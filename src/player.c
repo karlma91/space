@@ -8,6 +8,7 @@
 
 #include "game.h"
 #include "sprite.h"
+#include "sound.h"
 
 /* Game state */
 #include "space.h"
@@ -142,7 +143,7 @@ static void update(object_group_player *player)
 
 	//update physics and player
 	if (player->hp_bar.value > 0) { //alive
-		player->direction = turn_toangle(player->direction_target, player->direction, 2 * M_PI * dt / 10000);
+		player->direction = turn_toangle(player->direction_target, player->direction, 2 * M_PI * dt / 1000);
 
 		cpBodySetAngVel(player->data.body,0);
 		player->flame->p = player->data.body->p;
@@ -157,7 +158,7 @@ static void update(object_group_player *player)
 		}
 	} else {
 		float vel_angle = cpvtoangle(cpBodyGetVel(player->data.body));
-		player->direction = turn_toangle(vel_angle, player->direction, 2 * M_PI * dt / 10000);
+		player->direction = turn_toangle(vel_angle, player->direction, 2 * M_PI * dt / 1000);
 		player->aim_angle = cpvtoangle(player->gunwheel->rot);
 		player->flame->disable = 1;
 	}
@@ -236,6 +237,8 @@ static void action_shoot(object_group_player *player)
 {
 	if (player->gun_timer >= player->param->gun_cooldown) {
 		int i;
+
+		sound_play();
 
 		for(i=0; i < player->gun_level;i++){
 			object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);

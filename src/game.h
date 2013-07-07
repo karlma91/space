@@ -18,7 +18,7 @@ extern STATE_ID state_gameover;
 extern STATE_ID state_levelselect;
 
 
-#ifndef ARCADE_MODE // definer evt. ARCADE_MODE under symbols i project settings for Œ overstyre
+#ifndef ARCADE_MODE // definer evt. ARCADE_MODE under symbols i project settings for ï¿½ overstyre
 #define ARCADE_MODE 1
 #endif
 
@@ -40,12 +40,11 @@ void game_init();
 void game_destroy();
 
 
-extern SPRITE_ID SPRITE_TANKFACTORY_BLUE;
-extern SPRITE_ID SPRITE_TANKFACTORY_RED;
 extern SPRITE_ID SPRITE_PLAYER;
 extern SPRITE_ID SPRITE_PLAYER_GUN;
 extern SPRITE_ID SPRITE_GLOW_DOT;
 extern SPRITE_ID SPRITE_BUTTON;
+extern SPRITE_ID SPRITE_BUTTON_PAUSE;
 extern SPRITE_ID SPRITE_TANK_BODY;
 extern SPRITE_ID SPRITE_TANK_WHEEL;
 extern SPRITE_ID SPRITE_TANK_TURRET;

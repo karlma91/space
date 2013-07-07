@@ -173,6 +173,7 @@ static void update(object_group_tank *tank)
 	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX) && se_distance_to_player(tank->data.body->p.x)<tank->max_distance){
 		cpVect shoot_angle = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
 		object_create_bullet(tank->data.body->p,shoot_angle ,tank->data.body->v,ID_BULLET_ENEMY);
+		sound_play();
 		tank->timer = 0;
 	}
 

@@ -610,6 +610,7 @@ void draw_gui()
 		setTextAlign(TEXT_CENTER);
 
 #if ARCADE_MODE
+		setTextSize(80);
 		font_drawText(0, 0, "GAME OVER");
 		draw_color4f(0.1,0.9,0.1,1);
 
@@ -933,7 +934,7 @@ void space_init()
 
     stars_init();
 
-    btn_pause = button_create(GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80, SPRITE_BUTTON, BTN_IMAGE_SIZED);
+    btn_pause = button_create(GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80, SPRITE_BUTTON_PAUSE, BTN_IMAGE_SIZED);
     joy_left = joystick_create(0, 80, 10, -GAME_WIDTH/2, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
     joy_right = joystick_create(0, 80, 10, 0, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
 }

@@ -158,7 +158,6 @@ static void draw()
 	timer +=dt;
 
 	setTextAngle(0);
-	setTextSize(80);
 	setTextAlign(TEXT_CENTER);
 	switch(current_menu){
 	case MENU_INGAME:
@@ -168,19 +167,14 @@ static void draw()
 		font_drawText(0,0.6f*GAME_HEIGHT/2, "GAME PAUSED");
 #if IS_APP
 		draw_color4f(0.1,0.9,0.1,1);
-		//TMP button animation
-		if (button_isdown(btn_start_tmp)) {
-			button_set_texture(btn_start_tmp, TEX_BUTTON_DOWN);
-		} else {
-			button_set_texture(btn_start_tmp, TEX_BUTTON);
-		}
 		button_render(btn_start_tmp);
 #endif
 		break;
 	case MENU_MAIN:
+		setTextSize(120);
 		drawStars();
 		draw_color(draw_col_rainbow((int)(timer*1000)));
-		font_drawText(0,0.8f*GAME_HEIGHT/2, "SPACE");
+		font_drawText(0,0.7f*GAME_HEIGHT/2, "SPACE");
 
 		draw_color4f(1,1,1,1);
 
@@ -286,5 +280,5 @@ void menu_init()
 	curMenu = &mainMenuTest;
 	statesystem_register(state_menu, 0);
 
-	btn_start_tmp = button_create(0, 0, 300, 300, SPRITE_BUTTON, BTN_SPRITE);
+	btn_start_tmp = button_create(0, 0, 192*2, 128*2, SPRITE_BUTTON, BTN_SPRITE);
 }

@@ -17,7 +17,7 @@ struct _object_param_factory {
 	int type;
 	object_param_tank *t_param;
 	object_param_rocket *r_param;
-	int tex_id;
+	SPRITE_ID sprite_id;
 };
 
 typedef struct {

@@ -10,9 +10,9 @@ float *vertex_pointer;
 float *tex_pointer;
 float *color_pointer;
 
-float vertex[30000];
-float tex[30000];
-float color[30000];
+float vertex[300000];
+float tex[300000];
+float color[300000];
 
 float * vertex_append = vertex;
 float * tex_append = tex;

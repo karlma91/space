@@ -6,3 +6,6 @@ glow_dot glowdot.png 0 0 1 1 1
 tank_body tank_00.png 0 0 1 0.5 1
 tank_wheel tank_00.png 0 0.5 0.5 0.5 1
 tank_turret tank_00.png 0.5 0.5 0.5 0.5 1
+button_pause button_pause.png 0 0 1 1 1
+button button.png 0 0 0.5 1 2
+ramp ramp.png 0 0 1 1 1

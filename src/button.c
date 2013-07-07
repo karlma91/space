@@ -68,19 +68,27 @@ void button_render(button btn_id)
 {
 	struct button *btn = (struct button *) btn_id;
 
-	float size = 1.0f; //tmp visual change, TODO support two-state button graphic (up and down)
-	size = (btn->type == BTN_IMAGE_SIZED || btn->type == BTN_IMAGE_SIZED_TEXT) && btn->pressed ? 1.5f : size;
-
 	cpVect btn_pos = {btn->pos_x,btn->pos_y};
 	//draw_texture(btn->tex_id, &btn_pos, TEX_MAP_FULL, btn->width*size, btn->height*size, 0);
 
-	if (button_isdown(btn)) {
-		button_set_texture(btn, BUTTON_DOWN);
-	} else {
-		button_set_texture(btn, BUTTON_UP);
+	if (btn->type == BTN_SPRITE) {
+		if (btn->pressed) {
+			button_set_texture(btn, BUTTON_DOWN);
+		} else {
+			button_set_texture(btn, BUTTON_UP);
+		}
 	}
-
-	sprite_render(&(btn->spr), &btn_pos, 0);
+	if (((btn->type == BTN_IMAGE_SIZED) || (btn->type == BTN_IMAGE_SIZED_TEXT)) && btn->pressed) {
+		float width = btn->spr.width;
+		float height = btn->spr.height;
+		btn->spr.width *=1.5;
+		btn->spr.height *=1.5;
+		sprite_render(&(btn->spr), &btn_pos, 0);
+		btn->spr.width = width;
+		btn->spr.height = height;
+	} else {
+		sprite_render(&(btn->spr), &btn_pos, 0);
+	}
 }
 
 void button_set_texture(button btn_id, int tex_id)
@@ -139,7 +147,7 @@ int button_finger_move(button btn_id, SDL_TouchFingerEvent *finger)
 	return 1;
 }
 
-//TODO s¿rg for at pressed settes til 0 ved state change?
+//TODO sï¿½rg for at pressed settes til 0 ved state change?
 int button_finger_up(button btn_id, SDL_TouchFingerEvent *finger)
 {
 	struct button *btn = (struct button *) btn_id;

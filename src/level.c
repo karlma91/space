@@ -207,6 +207,8 @@ int level_init()
 			ret = sscanf(&buffer[offset], "%d %f %f %d %s %s %s%n\n", &factory.max_tanks, &factory.max_hp, &factory.spawn_delay, &factory.score, object_buf, buf, &fname[0], &offset_add);
 			offset += offset_add;
 
+			factory.sprite_id = sprite_link(fname);
+
 			int sub_id = -1;
 			/* find tank subtype */
 			if(strcmp(object_buf,"TANK") == 0){
@@ -227,7 +229,6 @@ int level_init()
 			}else{
 				factory.t_param = &(((object_param_tank *)params[ID_TANK])[sub_id]);
 			}
-			factory.tex_id = texture_load(fname);
 			break;
 		case ID_BULLET_PLAYER:
 			/* currently unsupported */

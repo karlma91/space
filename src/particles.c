@@ -11,7 +11,7 @@
 #include "spaceengine.h"
 
 #define PARTICLE_READ_BUFFER_SIZE 4096
-#define MAX_PARTICLES 10000
+#define MAX_PARTICLES 100000
 
 /**
  * parse functions
@@ -77,7 +77,12 @@ static particle *(available_particle_stack[MAX_PARTICLES]);
 void particles_init()
 {
 	int i;
+#define PARTICLE_STRESS 1
+#if PARTICLE_STRESS
+	read_emitter_from_file(EMITTER_FLAME,"flame_stress.xml");
+#else
 	read_emitter_from_file(EMITTER_FLAME,"flame_3.xml");
+#endif
 	read_emitter_from_file(EMITTER_ROCKET_FLAME,"rocket_flame.xml");
 	read_emitter_from_file(EMITTER_EXPLOSION,"explosion_ground.xml");
 	read_emitter_from_file(EMITTER_SPARKS,"sparks.xml");
@@ -138,14 +143,15 @@ void particles_draw()
 	}
 }
 
+//TODO remove this method?
 void particles_reload_particles()
 {
 	//TODO remove redundant code!
-	read_emitter_from_file(EMITTER_FLAME,"particles/flame_3.xml");
-	read_emitter_from_file(EMITTER_EXPLOSION,"particles/explosion_ground.xml");
-	read_emitter_from_file(EMITTER_SPARKS,"particles/sparks.xml");
-	read_emitter_from_file(EMITTER_SMOKE,"particles/smoke.xml");
-	read_emitter_from_file(EMITTER_SCORE,"particles/score.xml");
+	read_emitter_from_file(EMITTER_FLAME,"flame_stress.xml"); //TMP particle stress test //flame_3.xml");
+	read_emitter_from_file(EMITTER_EXPLOSION,"explosion_ground.xml");
+	read_emitter_from_file(EMITTER_SPARKS,"sparks.xml");
+	read_emitter_from_file(EMITTER_SMOKE,"smoke.xml");
+	read_emitter_from_file(EMITTER_SCORE,"score.xml");
 
 	emitter **prev = &(emitters_in_use_list);
 	emitter *e = emitters_in_use_list;
@@ -448,6 +454,10 @@ static void particle_update_pos(particle *p)
 {
 	p->p = cpvadd(p->p, cpvmult(p->v, mdt));
 	p->time_alive += mdt;
+
+	/* make sure particle is wrapped around level */
+	float width = currentlvl->width,  dx = cam_center_x - p->p.x, absdx = fabsf(dx);
+	if (absdx > width - GAME_WIDTH) p->p.x += (dx / absdx) * width;
 }
 
 /**
@@ -547,6 +557,7 @@ static void default_particle_draw(emitter *em, particle *p)
 {
 	float angle = 0;
 	cpVect pos = p->p;
+
 #if EXPERIMENTAL_GRAPHICS
 	angle = se_rect2arch(&pos) * 180 / M_PI;
 #endif

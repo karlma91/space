@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <emitter imageName="cloud_low.png" name="Default" renderType="inherit" useAdditive="false" useOriented="true">
-<spawnInterval enabled="true" max="80.0" min="50.0"/>
-<spawnCount enabled="true" max="1.0" min="1.0"/>
-<initialLife enabled="true" max="1500.0" min="1000.0"/>
+<spawnInterval enabled="true" max="60.0" min="40.0"/>
+<spawnCount enabled="true" max="2.0" min="1.0"/>
+<initialLife enabled="true" max="3300.0" min="1500.0"/>
 <initialSize enabled="true" max="150.0" min="100.0"/>
 <initialRotation enabled="true" max="0.0" min="180.0"/>
 <rotationSpeed enabled="true" max="0.0" min="10.0"/>

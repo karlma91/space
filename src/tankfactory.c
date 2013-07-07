@@ -48,12 +48,6 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	factory->cur = 0;
 	factory->rot = 0;
 
-	factory->data.spr.id = SPRITE_TANKFACTORY_BLUE;
-	factory->data.spr.width = 400;
-	factory->data.spr.height = 400;
-	factory->data.spr.animation_speed = 4;
-
-
 	static int randomness= 0;
 	randomness += 123;
 	randomness *= randomness;
@@ -63,8 +57,13 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 
 	cpFloat size = 375;
 
+	sprite_create(&factory->data.spr, factory->param->sprite_id, 400, 400, 30);
+
 	if (factory->param->type == ID_TANK) {
 		factory->smoke = particles_get_emitter(EMITTER_SMOKE);
+		factory->data.spr.sub_index = rand() & 0x7;
+	} else {
+
 	}
 
 	/* make and add new body */

@@ -78,6 +78,7 @@ SPRITE_ID sprite_link(const char *name)
 	while(llist_hasnext(constant_sprites)){
 		sprite_data *spr = llist_next(constant_sprites);
 		if(strcmp(spr->name, name) == 0){
+			llist_end_loop(constant_sprites); // <- missing end loop!
 			return (SPRITE_ID)spr;
 		}
 	}
@@ -104,10 +105,20 @@ void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed
 
 void sprite_update(sprite *spr)
 {
+	if (!spr) return;
+
 	sprite_data *data = (sprite_data*)spr->id;
 	spr->sub_index += spr->animation_speed*dt;
-	if(spr->sub_index >= data->subimages){
+	if (spr->sub_index >= data->subimages){
 		spr->sub_index -= data->subimages;
+		if (spr->sub_index >= data->subimages){
+			spr->sub_index = 0;
+		}
+	} else if (spr->sub_index < 0){
+		spr->sub_index -= data->subimages;
+		if (spr->sub_index < 0){
+			spr->sub_index = 0;
+		}
 	}
 }
 
@@ -116,6 +127,8 @@ void sprite_get_current_image(sprite *spr, float *sub_map)
 	sprite_data *data = (sprite_data*)spr->id;
 	int index = floor(spr->sub_index);
 
+	//TODO NULL checks
+ 	
 	int sprites_x = 1/data->width;
 
 	int index_x = index % sprites_x;
@@ -158,6 +171,8 @@ void sprite_set_index(sprite *spr, int index)
 
 void sprite_render(sprite *spr, cpVect *pos, float angle)
 {
+	if (!spr) return;
+
 	sprite_data *data = (sprite_data*)spr->id;
 	float sub_map[8];
 	sprite_get_current_image(spr, sub_map);

@@ -40,7 +40,7 @@ object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int 
 		cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
 
 		temp->data.body = cpSpaceAddBody(space, cpBodyNew(1, moment));
-		cpBodySetPos(temp->data.body, cpvadd(pos, cpvmult(dir,60)));
+		cpBodySetPos(temp->data.body, cpvadd(pos, cpvmult(dir,30)));
 		cpBodySetUserData(temp->data.body, (object_data*)temp);
 		cpBodySetVel(temp->data.body,cpvadd(cpvmult(dir,1500),intit_vel)); //3000
 		temp->data.body->velocity_func = bulletVelocityFunc;

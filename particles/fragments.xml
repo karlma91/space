@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<emitter imageName="fragment.png" name="Default" renderType="inherit" useAdditive="false" useOriented="false">
+<emitter imageName="fragment_low.png" name="Default" renderType="inherit" useAdditive="false" useOriented="false">
 <spawnInterval enabled="true" max="1.0" min="1.0"/>
-<spawnCount enabled="true" max="10" min="5"/>
+<spawnCount enabled="true" max="20" min="10"/>
 <initialLife enabled="true" max="800" min="500"/>
-<initialSize enabled="true" max="80" min="10"/>
-<xOffset enabled="true" max="40.0" min="0.0"/>
-<yOffset enabled="true" max="40.0" min="0.0"/>
-<initialDistance enabled="true" max="30.0" min="0.0"/>
-<speed enabled="true" max="250" min="10"/>
+<initialSize enabled="true" max="150" min="40"/>
+<xOffset enabled="true" max="100.0" min="0.0"/>
+<yOffset enabled="true" max="100.0" min="0.0"/>
+<initialDistance enabled="true" max="100.0" min="0.0"/>
+<speed enabled="true" max="500" min="10"/>
 <length enabled="false" max="1000.0" min="1000.0"/>
 <emitCount enabled="true" max="10" min="10"/>
 <spread type="random" value="170"/>
 <angularOffset type="simple" value="0.0"/>
 <growthFactor type="simple" value="-16.0"/>
-<gravityFactor type="simple" value="7"/>
+<gravityFactor type="simple" value="17"/>
 <windFactor type="simple" value="0.0"/>
 <startAlpha type="simple" value="255.0"/>
 <endAlpha type="simple" value="0.0"/>
@@ -35,6 +35,6 @@
 </scaleY>
 <color>
 <step b="1.0" g="1.0" r="1.0" offset="0.0" />
-<step b="0.0" g="0.0" r="0.0" offset="1.0" />
+<step b="4.0" g="4.0" r="4.0" offset="1.0" />
 </color>
 </emitter>

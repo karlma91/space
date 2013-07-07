@@ -26,8 +26,6 @@ unsigned int KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
 
 
 //extern SPRITE_ID start
-SPRITE_ID SPRITE_TANKFACTORY_BLUE;
-SPRITE_ID SPRITE_TANKFACTORY_RED;
 SPRITE_ID SPRITE_PLAYER;
 SPRITE_ID SPRITE_PLAYER_GUN;
 SPRITE_ID SPRITE_GLOW_DOT;
@@ -35,6 +33,7 @@ SPRITE_ID SPRITE_BUTTON;
 SPRITE_ID SPRITE_TANK_BODY;
 SPRITE_ID SPRITE_TANK_WHEEL;
 SPRITE_ID SPRITE_TANK_TURRET;
+SPRITE_ID SPRITE_BUTTON_PAUSE;
 //extern SPRITE_ID end
 
 
@@ -99,12 +98,11 @@ void game_config()
 
 void game_sprites()
 {
-	SPRITE_TANKFACTORY_BLUE =	sprite_link("tank_factory_blue");
-	SPRITE_TANKFACTORY_RED = 	sprite_link("tank_factory_red");
 	SPRITE_PLAYER = 			sprite_link("player");
 	SPRITE_PLAYER_GUN =			sprite_link("player_gun");
 	SPRITE_GLOW_DOT =			sprite_link("glow_dot");
-	SPRITE_BUTTON  =			sprite_link("glow_dot");
+	SPRITE_BUTTON  =			sprite_link("button");
+	SPRITE_BUTTON_PAUSE  =		sprite_link("button_pause");
 	SPRITE_TANK_BODY=			sprite_link("tank_body");
 	SPRITE_TANK_WHEEL=			sprite_link("tank_wheel");
 	SPRITE_TANK_TURRET=			sprite_link("tank_turret");

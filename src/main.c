@@ -13,6 +13,7 @@
 /* SDL and OpenGL */
 #include "SDL.h"
 #include "SDL_main.h"
+#include "SDL_mixer.h"
 
 /* Chipmunk physics library */
 #include "chipmunk.h"
@@ -23,6 +24,7 @@
 #include "draw.h"	//opengl included in draw.h
 #include "font.h"
 #include "particles.h"
+#include "sound.h"
 
 #define GAME_VERSION "PRE-ALPHA 8.0" //TMP placement for this define
 
@@ -170,7 +172,7 @@ static void setAspectRatio() {
 static void display_init()
 {
 	SDL_Log("DEBUG - SDL_init\n");
-	if (SDL_Init(SDL_INIT_VIDEO)) {
+	if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
 		SDL_Log("ERROR: SDL_INIT_VIDEO: %s", SDL_GetError());
 		exit(-1);
 	}
@@ -287,7 +289,7 @@ static void main_init() {
 
 	cpInitChipmunk();
 
-
+	sound_init();
 	texture_init();     /* preload textures */
 	sprite_init();
 	draw_init();        /* initializes circular shapes and rainbow colors */
@@ -466,6 +468,7 @@ static int main_destroy() {
 	/* destroy states */
 	statesystem_destroy();
 
+	sound_destroy();
 	draw_destroy();
 	font_destroy();
 
@@ -479,7 +482,6 @@ static int main_destroy() {
 	// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
 	//SDL_GL_MakeCurrent(NULL, NULL);
 	SDL_GL_DeleteContext(glcontext);
-	SDL_VideoQuit();
 	SDL_Quit();
 
 	exit(0);

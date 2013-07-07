@@ -103,6 +103,8 @@ void joystick_render(joystick *stick)
 	float y1 = y0 + stick->axis_y * stick->radius;
 	//if (x0 != x1 && y0 != y1)
 		draw_quad_line(x0,y0,x1,y1, 20);
+
+	draw_flush_simple();
 }
 
 int joystick_finger_down(joystick *stick, SDL_TouchFingerEvent *finger)
