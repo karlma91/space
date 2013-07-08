@@ -57,6 +57,9 @@ extern float ASPECT_RATIO; // 2:1 <-> 8:5 <-> 4:3
 extern float dt;
 extern int mdt;
 
+extern int WINDOW_WIDTH;
+extern int WINDOW_HEIGHT;
+
 extern unsigned char *keys;
 
 extern char fps_buf[];

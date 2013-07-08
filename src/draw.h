@@ -12,9 +12,13 @@
 #define GLES1 0
 #endif
 
+
+
 #if GLES1
 #include "SDL_opengles.h"
 #else
+#define GLEW_STATIC
+#include "GL/glew.h"
 #include "SDL_opengl.h"
 #endif
 

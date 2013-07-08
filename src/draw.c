@@ -21,6 +21,7 @@ GLuint light_buffer, light_texture;
 Color rainbow_col[1536];
 
 static GLfloat unit_circle[128];
+static void draw_render_light_map();
 
 #define DEBUG SDL_Log( "line: %d\n", __LINE__);
 
@@ -29,16 +30,33 @@ GLfloat color_stack[10];
 
 int draw_init(){
 
-	//glGenFramebuffersARB(1, &light_buffer);
-/*
-	glBindFramebufferEXT(GL_FRAMEBUFFER, light_buffer);
+		glGenTextures(1, &light_texture);
+		glBindTexture(GL_TEXTURE_2D, light_texture);
 
-	glGenTextures(1, &light_texture);
-	glBindTexture(GL_TEXTURE_2D, light_texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,  GAME_WIDTH, GAME_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, light_texture, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glBindFramebufferEXT(GL_FRAMEBUFFER, 0);*/
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+		glGenFramebuffersEXT(1,&light_buffer);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, light_buffer);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, light_texture, 0);
+		//NULL means reserve texture memory, but texels are undefined
+
+		GLenum status;
+		status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+		switch(status)
+		{
+		case GL_FRAMEBUFFER_COMPLETE_EXT:
+			SDL_Log("FBO_COMPLETE");
+			break;
+		default:
+			SDL_Log("FBO_ERROR");
+		}
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+
+
 
 	int i=0,j=0;
 	for(i = 0; i < 128; i += 2) {
@@ -77,31 +95,54 @@ int draw_init(){
 
 void draw_light_map()
 {
-	/*glBindFramebufferEXT(GL_FRAMEBUFFER, light_buffer);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, light_buffer);
+	glClearColor(0.1,0.1,0.1,0.1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	draw_push_matrix();
-	draw_load_identity();
-	cpVect z = cpv(0,0);
-	draw_texture(TEX_GLOW,&z,triangle_quad,800,800,0);
-	draw_pop_matrix();
-	glBindFramebufferEXT(GL_FRAMEBUFFER, 0);
-	draw_render_light_map();*/
+	glClearColor(0,0,0,0);
+
+	//glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+	//glBlendFunc(GL_ONE,GL_ONE_MINUS_SRC_COLOR);
+	glLoadIdentity();
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, TEX_LIGHT);
+	glColor3f(1,1,1);
+	int w = 512;
+	int h = 512;
+	GLfloat temp[8] = {-w, -h,
+			w,  -h,
+			-w, h,
+			w,  h};
+	glVertexPointer(2, GL_FLOAT, 0, temp);
+	glTexCoordPointer(2, GL_FLOAT, 0, TEX_MAP_FULL);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	glDisable(GL_TEXTURE_2D);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	draw_render_light_map();
 }
 
-void draw_render_light_map()
+static void draw_render_light_map()
 {
+	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	draw_push_blend();
-	glViewport(0,0,GAME_WIDTH,GAME_HEIGHT);
 	glLoadIdentity();
 	glColor3f(1,1,1);
 	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_DST_COLOR,GL_SRC_COLOR);
+	//glBlendFunc(GL_ONE,GL_ZERO);
 	glBindTexture(GL_TEXTURE_2D, light_texture);
-	draw_push_matrix();
-	draw_load_identity();
-	cpVect z = cpv(0,0);
-	draw_texture(TEX_GLOW,&z,triangle_quad,GAME_WIDTH,GAME_HEIGHT,0);
-	draw_pop_matrix();
+	int w = GAME_WIDTH;
+	int h = GAME_HEIGHT;
+	GLfloat temp[8] = {-w, -h,
+			w,  -h,
+			-w, h,
+			w,  h};
+	glVertexPointer(2, GL_FLOAT, 0, temp);
+	glTexCoordPointer(2, GL_FLOAT, 0, TEX_MAP_FULL);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDisable(GL_TEXTURE_2D);
 	draw_pop_blend();
 }
 

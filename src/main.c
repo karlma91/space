@@ -15,6 +15,8 @@
 #include "SDL_main.h"
 #include "SDL_mixer.h"
 
+
+
 /* Chipmunk physics library */
 #include "chipmunk.h"
 
@@ -171,6 +173,7 @@ static void setAspectRatio() {
 
 static void display_init()
 {
+
 	SDL_Log("DEBUG - SDL_init\n");
 	if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
 		SDL_Log("ERROR: SDL_INIT_VIDEO: %s", SDL_GetError());
@@ -227,6 +230,8 @@ static void display_init()
 }
 
 static void initGL() {
+
+
 
 	// Create an OpenGL context associated with the window.
 	glcontext = SDL_GL_CreateContext(window);
@@ -286,6 +291,19 @@ static void main_init() {
 
 	display_init();     /* sets attributes and creates windows and renderer*/
 	initGL();           /* setup a gl context */
+
+	GLenum glewError = glewInit();
+	if( glewError != GLEW_OK )
+	{
+		SDL_Log( "Error initializing GLEW! %s\n", glewGetErrorString( glewError ) );
+		exit(-1);
+	}
+	if (glewGetExtension("GL_EXT_framebuffer_object"))
+	{
+		SDL_Log( "Have extension" );
+	}else{
+		SDL_Log( "Error no extension");
+	}
 
 	cpInitChipmunk();
 
