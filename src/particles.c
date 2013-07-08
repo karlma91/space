@@ -491,6 +491,7 @@ static void add_particle(emitter *em)
 	/* set time to live */
 	p->max_time = range_get_random(em->init_life);
 	p->time_alive = 0;
+	sprite_create(&p->spr, em->sprite_id,p->size, p->size, 0);
 }
 
 
@@ -505,7 +506,6 @@ static float range_get_random(range r)
 static void draw_all_particles(emitter *em)
 {
 	draw_push_blend();
-	texture_bind(em->texture_id);
 	if(em->additive){
 	    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	}
@@ -564,11 +564,11 @@ static void default_particle_draw(emitter *em, particle *p)
 
 	if(em->rotation){
 #if !EXPERIMENTAL_GRAPHICS
-		draw_rotate(p->angle, 0, 0, 1);  //TODO move gl code // unsupported by EXPERIMENTAL_GRAPHICS
+		//draw_rotate(p->angle, 0, 0, 1);  //TODO move gl code // unsupported by EXPERIMENTAL_GRAPHICS
 #endif
 		p->angle += p->rot_speed*dt;
 	}
-	draw_current_texture_append(&pos,TEX_MAP_FULL,p->size,p->size,p->angle + angle);
+	sprite_render(&p->spr, &p->p, p->angle + angle);
 }
 
 
@@ -630,10 +630,10 @@ static int read_emitter_from_file (int type,char *filename)
 				parse_bool(node,"additive",&(emi->additive));
 			}else if(TESTNAME("emitter")){
 				char *(spint[1]);
-				parse_string(node,"imageName",spint);
+				parse_string(node,"spriteName",spint);
 				//SDL_Log( "HELLO TEXTURE: %s\n", *spint);
 				if(*spint != NULL){
-					emi->texture_id = texture_load(*spint);
+					emi->sprite_id = sprite_link(*spint);
 				}
 				parse_bool(node,"useAdditive",&(emi->additive));
 				parse_bool(node,"useOriented",&(emi->rotation));

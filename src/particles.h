@@ -2,6 +2,7 @@
 #define PARTICLES_H_
 
 #include "chipmunk.h"
+#include "sprite.h"
 
 
 /**
@@ -41,6 +42,8 @@ struct particle {
 	float rot_speed;
 	float size;
 
+	sprite spr;
+
 	float time_alive;
 	float max_time;
 
@@ -51,8 +54,7 @@ struct emitter {
 
 	int type;
 
-	/** texture id */
-	int texture_id;
+	SPRITE_ID sprite_id;
 
 	/** particle draw functions **/
 	void (*draw_particle)(emitter *em, particle *p);

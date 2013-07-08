@@ -648,7 +648,7 @@ static void render_objects(object_data *obj)
 
 	if(cam_center_x < cam_left_limit){
 		float old_cam_x = cam_center_x;
-		float new_cam_center_x = cam_center_x + currentlvl->right + abs(currentlvl->left);
+		float new_cam_center_x = cam_center_x + currentlvl->width;
 		float new_cam_left = new_cam_center_x - camera_width;
 		float new_cam_right = new_cam_center_x + camera_width;
 		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){

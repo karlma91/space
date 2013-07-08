@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<emitter imageName="cloud_low.png" name="Default" renderType="inherit"
+<emitter spriteName="cloud" name="Default" renderType="inherit"
 	useAdditive="true" useOriented="false">
 	<spawnInterval enabled="true" max="1" min="1" ></spawnInterval>
 	<spawnCount enabled="true" max="50" min="5" />

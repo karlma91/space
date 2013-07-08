@@ -3,6 +3,10 @@ tank_factory_red factory_red.png 0 0 0.25 0.5 8
 player player.png 0.5 0 0.5 1 1
 player_gun player.png 0 0 0.5 1 1
 glow_dot glowdot.png 0 0 1 1 1
+dot dot.png 0 0 1 1 1
+particle particle.png 0 0 1 1 1
+cloud cloud_low.png 0 0 1 1 1
+fragment fragment_low.png 0 0 1 1 1
 tank_body tank_00.png 0 0 1 0.5 1
 tank_wheel tank_00.png 0 0.5 0.5 0.5 1
 tank_turret tank_00.png 0.5 0.5 0.5 0.5 1

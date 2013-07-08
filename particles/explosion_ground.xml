@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<emitter imageName="dot.png" name="Default" renderType="inherit" useAdditive="true" useOriented="false">
+<emitter spriteName="dot" name="Default" renderType="inherit" useAdditive="true" useOriented="false">
 <spawnInterval enabled="true" max="10.0" min="1.0"/>
 <spawnCount enabled="true" max="100" min="50"/>
 <initialLife enabled="true" max="200" min="50"/>
