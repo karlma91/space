@@ -189,7 +189,7 @@ static void display_init()
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0); //AA not supported on Android test device
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GLES1 ? 1 : 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
@@ -247,7 +247,7 @@ static void initGL() {
 	SDL_Log("GL_VENDOR: %s\n", glGetString(GL_VENDOR));
 	SDL_Log("GL_RENDERER: %s\n", glGetString(GL_RENDERER));
 	SDL_Log("GL_VERSION: %s\n", glGetString(GL_VERSION));
-	////SDL_Log("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
+	SDL_Log("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);

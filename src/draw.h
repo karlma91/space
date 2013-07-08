@@ -8,6 +8,8 @@
 
 #if __IPHONEOS__ || __ANDROID__
 #define GLES1 1
+#else
+#define GLES1 0
 #endif
 
 #if GLES1
@@ -39,6 +41,8 @@ static inline Color LAColor(float l, float a)
 
 GLfloat triangle_quad[8];
 GLfloat corner_quad[8];
+
+void draw_light_map();
 
 void draw_push_color();
 void draw_pop_color();

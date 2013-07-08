@@ -349,6 +349,8 @@ static void update_objects(object_data *obj)
 static void draw()
 {
 	SPACE_draw();
+	draw_light_map();
+
 }
 
 static void update_camera_zoom(int cam_mode)

@@ -1,4 +1,5 @@
 #include "draw.h"
+#include "main.h"
 #include "texture.h"
 #include "stack.h"
 #include "waffle_utils.h"
@@ -15,6 +16,8 @@ GLfloat corner_quad[8] = {0, 0,
 							  0, 1,
 							  1,  1};
 
+GLuint light_buffer, light_texture;
+
 Color rainbow_col[1536];
 
 static GLfloat unit_circle[128];
@@ -25,6 +28,17 @@ GLfloat color_stack[10];
 
 
 int draw_init(){
+
+	//glGenFramebuffersARB(1, &light_buffer);
+/*
+	glBindFramebufferEXT(GL_FRAMEBUFFER, light_buffer);
+
+	glGenTextures(1, &light_texture);
+	glBindTexture(GL_TEXTURE_2D, light_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,  GAME_WIDTH, GAME_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, light_texture, 0);
+
+	glBindFramebufferEXT(GL_FRAMEBUFFER, 0);*/
 
 	int i=0,j=0;
 	for(i = 0; i < 128; i += 2) {
@@ -59,6 +73,36 @@ int draw_init(){
 	for(i=0; i <= 255; i++, c++)
 		c->r = 1, c->g = min_col, c->b = 1 - i/255.0f, c->a = 1;
 	return 0;
+}
+
+void draw_light_map()
+{
+	/*glBindFramebufferEXT(GL_FRAMEBUFFER, light_buffer);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	draw_push_matrix();
+	draw_load_identity();
+	cpVect z = cpv(0,0);
+	draw_texture(TEX_GLOW,&z,triangle_quad,800,800,0);
+	draw_pop_matrix();
+	glBindFramebufferEXT(GL_FRAMEBUFFER, 0);
+	draw_render_light_map();*/
+}
+
+void draw_render_light_map()
+{
+	draw_push_blend();
+	glViewport(0,0,GAME_WIDTH,GAME_HEIGHT);
+	glLoadIdentity();
+	glColor3f(1,1,1);
+	glEnable(GL_TEXTURE_2D);
+	glBlendFunc(GL_DST_COLOR,GL_SRC_COLOR);
+	glBindTexture(GL_TEXTURE_2D, light_texture);
+	draw_push_matrix();
+	draw_load_identity();
+	cpVect z = cpv(0,0);
+	draw_texture(TEX_GLOW,&z,triangle_quad,GAME_WIDTH,GAME_HEIGHT,0);
+	draw_pop_matrix();
+	draw_pop_blend();
 }
 
 void draw_color(Color color)
