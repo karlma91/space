@@ -59,8 +59,6 @@ static cpFloat phys_step = 1/60.0f;
 /* extern */
 cpSpace *space;
 
-
-
 /* camera settings */
 static float cam_left_limit;
 static float cam_right_limit;
@@ -69,6 +67,7 @@ static float cam_right_limit;
 level *currentlvl;
 
 camera space_cam;
+/* extern camera */
 camera *current_camera = &space_cam;
 
 static void input();
@@ -340,108 +339,15 @@ static void draw()
 static void update_camera_zoom(int mode)
 {
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
-
-	/* dynamic camera zoom */
-	float py = player->data.body->p.y / currentlvl->height;
-	float scrlvl, zoomlvl;
-	switch (current_camera->mode) {
-	case 1:
-	case 2: /* fanzy zoom camera */
-
-		scrlvl = 1.0f * GAME_HEIGHT/currentlvl->height;
-
-		zoomlvl = current_camera->mode == 1 ? 4 : 12;
-		if (py < 0) {
-			/* undefined zoom! Reset/fix player position? */
-		} else if ( py < 0.2) {
-		    current_camera->zoom = 2 / zoomlvl + scrlvl;
-		    current_camera->y = GAME_HEIGHT / (2*current_camera->zoom);
-		} else if (py < 0.4) {
-		    current_camera->zoom = (1 + cos(5*M_PI * (py + 1))) / zoomlvl + scrlvl;
-		    current_camera->y = GAME_HEIGHT / (2*current_camera->zoom);
-		} else if (py < 0.6) {
-		    current_camera->zoom = scrlvl;
-		    current_camera->y = currentlvl->height / (2);
-		} else if (py < 0.8) {
-		    current_camera->zoom = (1 - cos(5*M_PI * (py - 0.4 + 1))) / zoomlvl + scrlvl;
-		    current_camera->y = currentlvl->height - GAME_HEIGHT / (2*(current_camera->zoom));
-		} else if (py <= 1.0) {
-		    current_camera->zoom = 2 / zoomlvl + scrlvl;
-		    current_camera->y = currentlvl->height - GAME_HEIGHT / (2*current_camera->zoom);
-		} else {
-			/* undefined zoom! Reset/fix player position? */
-		}
-		break;
-
-	case 3:
-	case 4:/* simple zoomed camera */
-		if(current_camera->mode == 3){
-		    current_camera->zoom = 2;
-		}else{
-		    current_camera->zoom = 1.3;
-		}
-		current_camera->y = player->data.body->p.y;
-		if(current_camera->y > currentlvl->height - GAME_HEIGHT/(2*current_camera->zoom)){
-		    current_camera->y = currentlvl->height - GAME_HEIGHT/(2*current_camera->zoom);
-		}else if(current_camera->y <  GAME_HEIGHT/(2*current_camera->zoom)){
-		    current_camera->y = GAME_HEIGHT/(2*current_camera->zoom);
-		}
-		break;
-	case 5:
-	    current_camera->zoom = 1.0f*GAME_HEIGHT/currentlvl->height;
-	    current_camera->y = 1.0f*currentlvl->height/2;
-		break;
-	case 6:
-		scrlvl = 1.0f * GAME_HEIGHT/currentlvl->height;
-		/* parameters to change */
-		zoomlvl = 4; /* amount of zoom less is more zoom */
-		float startlvl = 0.8;
-		float endlvl = 0.2;
-
-		float freq = startlvl-endlvl;
-		if (py < 0) {
-			/* undefined zoom! Reset/fix player position? */
-		} else if ( py < endlvl) {
-		    current_camera->zoom = 2 / zoomlvl + scrlvl;
-		    current_camera->y = GAME_HEIGHT / (2*current_camera->zoom);
-		} else if (py < startlvl) {
-		    current_camera->zoom = (1 - cos( (1/freq)*M_PI*(py + (freq-endlvl) ))) / zoomlvl + scrlvl;
-		    current_camera->y = GAME_HEIGHT / (2*current_camera->zoom);
-		} else if (py < 1) {
-		    current_camera->zoom = scrlvl;
-		    current_camera->y = currentlvl->height / (2);
-		}else{
-			/* undefined zoom! Reset/fix player position? */
-		}
-		break;
-	default:
-	    current_camera->zoom = 1.0f*GAME_HEIGHT/currentlvl->height;
-		current_camera->y = 1.0f*currentlvl->height/2;
-		break;
-	}
+	camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
 }
 
 static void update_camera_position()
 {
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
-	/* dynamic camera pos */
-	static const float pos_delay = 0.99f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
-	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
-	static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
-	static float cam_dx;
-	cam_dx = cam_dx * pos_delay + ((player->data.body->rot.x * pos_rel_x - pos_rel_offset_x) * GAME_WIDTH) * (1 - pos_delay) / current_camera->zoom;
-
-	current_camera->x = player->data.body->p.x + cam_dx;
-
-	/* camera constraints */
-	current_camera->width = GAME_WIDTH / (2 * current_camera->zoom);
-
-	//TODO: move to level init?
-	cam_left_limit = currentlvl->left + current_camera->width;
-	cam_right_limit = currentlvl->right - current_camera->width;
-
-	current_camera->left = current_camera->x - current_camera->width;
-	current_camera->right = current_camera->x + current_camera->width;
+	camera_update(current_camera, player->data.body->p,  player->data.body->rot);
+    cam_left_limit = currentlvl->left + current_camera->width;
+    cam_right_limit = currentlvl->right - current_camera->width;
 }
 
 static void SPACE_draw()
