@@ -13,6 +13,7 @@ extern float cam_center_x;
 extern float cam_center_y;
 extern float cam_zoom;
 
+extern int cam_width;
 extern int cam_left;
 extern int cam_right;
 

@@ -20,4 +20,6 @@ float se_rect2arch(cpVect *pos);
 void se_rect2arch_column(float x, cpVect *polar);
 void se_rect2arch_from_data(cpVect *pos, cpVect *polar);
 
+int se_inside_view(cpVect *pos, float margin);
+
 #endif /* SPACEENGINE_H_ */

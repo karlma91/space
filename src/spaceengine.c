@@ -179,5 +179,15 @@ void se_rect2arch_from_data(cpVect *pos, cpVect *polar)
 }
 
 
+//TODO check bounding box vs camera view
+//TODO move inside a camera class
+int se_inside_view(cpVect *pos, float margin)
+{
+	int dx = cam_center_x - (int) pos->x;
+	int lvl_width = currentlvl->width;
+	int cam_distance = (dx < -lvl_width/2) ? abs(dx + lvl_width) : (dx > lvl_width/2) ? dx - lvl_width : abs(dx);
+
+	return cam_distance <= cam_width + margin;
+}
 
 

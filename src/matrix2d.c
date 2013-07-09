@@ -2,9 +2,20 @@
 #include "matrix2d.h"
 #include <stdio.h>
 #include "draw.h"
-float stack[50][6];
 
-float *cur = stack[0];
+typedef struct {
+	union {
+		float f[6];
+		struct {
+			float x1, y1, z1;
+			float x2, y2, z2;
+		};
+	};
+} matrix;
+
+static matrix stack[50];
+
+matrix *cur = &stack[0];
 
 float *vertex_pointer;
 float *tex_pointer;
@@ -163,67 +174,66 @@ void matrix2d_reset()
 
 void matrix2d_translate(float x, float y)
 {
-    cur[2] = cur[0]*x + cur[1]*y + cur[2];
-    cur[5] = cur[3]*x + cur[4]*y + cur[5];
+    cur->z1 += cur->x1*x + cur->y1*y;
+    cur->z2 += cur->x2*x + cur->y2*y;
 }
 
 void matrix2d_rotate(float a)
 {
-    float c = cosf(a);
-    float s = sinf(a);
+	float x,y,c,s;
+	c = cosf(a);
+    s = sinf(a);
 
-    float c0 = cur[0];
-    cur[0] = c0*c + cur[1]*s;
-    cur[1] = -c0*s + cur[1]*c;
+    x = cur->x1;
+    y = cur->y1;
+    cur->x1 = x*c + y*s;
+    cur->y1 = y*c - x*s;
 
-    float c3 = cur[3];
-    cur[3] = c3*c + cur[4]*s;
-    cur[4] = -c3*s + cur[4]*c;
+    x = cur->x2;
+    y = cur->y2;
+    cur->x2 = x*c + y*s;
+    cur->y2 = y*c - x*s;
 }
 
 void matrix2d_scale(float x, float y)
 {
-    cur[0] = cur[0]*x;
-    cur[1] = cur[1]*y;
-    cur[3] = cur[3]*x;
-    cur[4] = cur[4]*y;
+    cur->x1 *= x;
+    cur->y1 *= y;
+    cur->x2 *= x;
+    cur->y2 *= y;
 }
 
 void matrix2d_pushmatrix()
 {
-    current_matrix += 1;
-    int i;
-    for (i=0; i<6; i++){
-        stack[current_matrix][i] = stack[current_matrix-1][i];
-    }
-    cur = stack[current_matrix];
+	++current_matrix;
+	matrix *m = cur+1;
+
+	m->x1 = cur->x1; m->y1 = cur->y1; m->z1 = cur->z1;
+	m->x2 = cur->x2; m->y2 = cur->y2; m->z2 = cur->z2;
+
+	cur = m;
 }
 
 void matrix2d_popmatrix()
 {
-    if(current_matrix > 0){
-        current_matrix -= 1;
-        cur = stack[current_matrix];
+    if (current_matrix > 0) {
+    	--current_matrix;
+        --cur;
+    } else {
+    	SDL_Log("ERROR: matrix2d_popmatrix -> tried to pop without push!");
     }
 }
 
 void matrix2d_loadindentity()
 {
-    cur[0] = 1;
-    cur[1] = 0;
-    cur[2] = 0;
-
-    cur[3] = 0;
-    cur[4] = 1;
-    cur[5] = 0;
+    cur->x1 = 1; cur->y1 = 0; cur->z1 = 0;
+    cur->x2 = 0; cur->y2 = 1; cur->z2 = 0;
 }
 
 void matrix2d_setmatrix(float *m)
 {
-    int i;
-    for (i=0; i<6; i++){
-        cur[i] = m[i];
-    }
+    cur->x1 = m[0]; cur->y1 = m[1]; cur->z1 = m[2];
+    cur->x2 = m[3]; cur->y2 = m[4]; cur->z2 = m[5];
 }
 
 void matrix2d_multiply_current(int count)
@@ -247,19 +257,19 @@ static float * matrix2d_multiply_to_quad(float *data, float *mesh, int count)
 
 	float x = mesh[0];
 	float y = mesh[1];
-	*data++ = cur[0]*x + cur[1]*y + cur[2];
-	*data++ = cur[3]*x + cur[4]*y + cur[5];
+	*data++ = cur->x1*x + cur->y1*y + cur->z1;
+	*data++ = cur->x2*x + cur->y2*y + cur->z2;
     int i;
     for(i=0; i<count*2; i+=2){
     	 x = mesh[i];
     	 y = mesh[i+1];
-    	*data++ = cur[0]*x + cur[1]*y + cur[2];
-    	*data++ = cur[3]*x + cur[4]*y + cur[5];
+    	*data++ = cur->x1*x + cur->y1*y + cur->z1;
+    	*data++ = cur->x2*x + cur->y2*y + cur->z2;
     }
     x = mesh[count*2-2];
     y = mesh[count*2-1];
-    *data++ = cur[0]*x + cur[1]*y + cur[2];
-    *data++ = cur[3]*x + cur[4]*y + cur[5];
+    *data++ = cur->x1*x + cur->y1*y + cur->z1;
+    *data++ = cur->x2*x + cur->y2*y + cur->z2;
     return data;
 }
 
@@ -268,27 +278,27 @@ void matrix2d_multiply_point(float *point)
 {
     float x = point[0];
     float y = point[1];
-    point[0] = cur[0]*x + cur[1]*y + cur[2];
-    point[1] = cur[3]*x + cur[4]*y + cur[5];
+    point[0] = cur->x1*x + cur->y1*y + cur->z1;
+    point[1] = cur->x2*x + cur->y2*y + cur->z2;
 }
 
 void matrix2d_print()
 {
-    fprintf(stderr, "[ %f , %f , %f ]\n",cur[0],cur[1],cur[2]);
-    fprintf(stderr, "[ %f , %f , %f ]\n",cur[3],cur[4],cur[5]);
+    fprintf(stderr, "[ %f , %f , %f ]\n",cur->x1,cur->y1,cur->z1);
+    fprintf(stderr, "[ %f , %f , %f ]\n",cur->x2,cur->y2,cur->z2);
 }
 
 static void multiply_current(float *f)
 {
-    float c0 = cur[0];
-    float c1 = cur[1];
-    cur[0] = c0*f[0] + c1*f[3];
-    cur[1] = c0*f[1] + c1*f[4];
-    cur[2] = c0*f[2] + c1*f[5] + cur[2];
+    float c0 = cur->x1;
+    float c1 = cur->y1;
+    cur->x1 = c0*f[0] + c1*f[3];
+    cur->y1 = c0*f[1] + c1*f[4];
+    cur->z1 += c0*f[2] + c1*f[5];
 
-    float c3 = cur[3];
-    float c4 = cur[4];
-    cur[3] = c3*f[0] + c4*f[3];
-    cur[4] = c3*f[1] + c4*f[4];
-    cur[5] = c3*f[2] + c4*f[5] + cur[5];
+    float c3 = cur->x2;
+    float c4 = cur->y2;
+    cur->x2 = c3*f[0] + c4*f[3];
+    cur->y2 = c3*f[1] + c4*f[4];
+    cur->z2 += c3*f[2] + c4*f[5];
 }
