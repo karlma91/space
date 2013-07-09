@@ -5,6 +5,7 @@
 #include "SDL.h"
 #include "button.h"
 #include "../lib/LList/llist.h"
+#include "camera.h"
 
 #if __IPHONEOS__
 #define IS_APP 1
@@ -67,6 +68,9 @@ extern char fps_buf[];
 extern state *currentState;
 
 extern button btn_fullscreen;
+
+extern camera default_camera;
+extern camera *current_camera;
 
 extern void main_stop();
 

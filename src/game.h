@@ -49,7 +49,7 @@ extern Mix_Music *MUSIC_LEVEL;
 extern Mix_Music *MUSIC_GAMEOVER;
 
 #ifndef ARCADE_MODE // definer evt. ARCADE_MODE under symbols i project settings for � overstyre
-#define ARCADE_MODE 1
+#define ARCADE_MODE 0
 #endif
 
 extern unsigned int KEY_UP_1;

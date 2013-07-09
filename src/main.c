@@ -52,8 +52,10 @@ static float frames;
 char fps_buf[15];
 int GAME_WIDTH;
 float ASPECT_RATIO;
-
 int WINDOW_WIDTH, WINDOW_HEIGHT;
+
+camera default_camera;
+camera *current_camera = &default_camera;
 
 float dt = 0;
 int mdt = 0;
@@ -328,7 +330,7 @@ static void main_init() {
 	lastTime = SDL_GetTicks();
 
 	// general fullscreen button
-	btn_fullscreen = button_create(0,0,GAME_WIDTH,GAME_HEIGHT,0,BTN_HIDDEN);
+	btn_fullscreen = button_create(0,0,"",0,0,GAME_WIDTH,GAME_HEIGHT);
 	active_fingers = llist_create();
 }
 

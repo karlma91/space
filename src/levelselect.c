@@ -80,9 +80,8 @@ static void sdl_event(SDL_Event *event)
 				level_select = (level_select >= ships[sel].count) ? 0 : level_select;
 
 			} else if (key == KEY_RETURN_2 || key == KEY_RETURN_1) {
-				statesystem_set_state(state_space);
-				/* load correct level */
-				space_init_level(sel + 1, level_select + 1);
+				space_start_demo();
+				space_init_level(sel + 1, level_select + 1); /* load correct level */
 
 			} else if (key == KEY_ESCAPE || key == SDL_SCANCODE_BACKSPACE) {
 				overview = 1;

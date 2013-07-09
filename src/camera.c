@@ -2,7 +2,6 @@
 #include "camera.h"
 #include "main.h"
 
-
 void camera_update(camera *cam, cpVect pos, cpVect rot)
 {
     /* dynamic camera pos */

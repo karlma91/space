@@ -9,14 +9,11 @@
 
 void space_init();
 
-/* camera */
-extern camera *current_camera;
-
 /* chipmunk physics space */
 extern cpSpace *space;
 
+extern int multiplayer;
 extern level *currentlvl;
-
 extern joystick *joy_left, *joy_right;
 
 extern int space_rendering_map;
@@ -28,5 +25,8 @@ float extern getGameTime();
 extern int getPlayerScore();
 
 extern void drawStars();
+
+void space_start_demo();
+void space_start_multiplayer();
 
 #endif /* SPACE_H_ */
