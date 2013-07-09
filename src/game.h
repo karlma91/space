@@ -11,6 +11,7 @@
 #include "statesystem.h"
 #include "sprite.h"
 #include "particles.h"
+#include "customparticles.h"
 
 extern STATE_ID state_mainmenu;
 extern STATE_ID state_menu;
