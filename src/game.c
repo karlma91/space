@@ -46,6 +46,16 @@ int EMITTER_FRAGMENTS;
 int EMITTER_COUNT;
 //extern particles end
 
+/* GLOBAL SOUND CHUNKS */
+Mix_Chunk *SND_LASER_1;
+Mix_Chunk *SND_LASER_2;
+Mix_Chunk *SND_EXPLOSION;
+
+/* GLOBAL MUSIC TRACKS */
+Mix_Music *MUSIC_MENU;
+Mix_Music *MUSIC_LEVEL;
+Mix_Music *MUSIC_GAMEOVER;
+
 
 #if !(TARGET_OS_IPHONE || __ANDROID__)
 static int handler(void* config, const char* section, const char* name,
@@ -134,10 +144,22 @@ void game_particles()
     EMITTER_FRAGMENTS =     read_emitter_from_file("fragments.xml");
 }
 
+void game_audio()
+{
+	SND_LASER_1 = sound_load_chunk("laser_01.ogg");
+	SND_LASER_2 = sound_load_chunk("laser_02.ogg");
+	SND_EXPLOSION = sound_load_chunk("explosion.ogg");
+
+	MUSIC_MENU = sound_load_music("Broken_Logic.ogg");
+	MUSIC_LEVEL = sound_load_music("Blocked Bus.ogg");
+	MUSIC_GAMEOVER = sound_load_music("Idling.ogg");
+}
+
 void game_init()
 {
 	//TODO generalize particles.c and ?level.c
 	game_sprites();
+	game_audio();
 	game_particles();
 	mainmenu_init();
 	level_init();

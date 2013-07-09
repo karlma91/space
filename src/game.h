@@ -10,6 +10,7 @@
 
 #include "statesystem.h"
 #include "sprite.h"
+#include "sound.h"
 #include "particles.h"
 #include "customparticles.h"
 
@@ -37,6 +38,15 @@ extern int EMITTER_SCORE;
 extern int EMITTER_FRAGMENTS;
 extern int EMITTER_COUNT;
 
+/* GLOBAL SOUND CHUNKS */
+extern Mix_Chunk *SND_LASER_1;
+extern Mix_Chunk *SND_LASER_2;
+extern Mix_Chunk *SND_EXPLOSION;
+
+/* GLOBAL MUSIC TRACKS */
+extern Mix_Music *MUSIC_MENU;
+extern Mix_Music *MUSIC_LEVEL;
+extern Mix_Music *MUSIC_GAMEOVER;
 
 #ifndef ARCADE_MODE // definer evt. ARCADE_MODE under symbols i project settings for � overstyre
 #define ARCADE_MODE 1

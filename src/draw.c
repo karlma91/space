@@ -7,14 +7,14 @@
 #include "matrix2d.h"
 
 GLfloat triangle_quad[8] = {-0.5, -0.5,
-						 0.5,  -0.5,
-						  -0.5, 0.5,
-						  0.5,  0.5};
+		0.5,  -0.5,
+		-0.5, 0.5,
+		0.5,  0.5};
 
 GLfloat corner_quad[8] = {0, 0,
-							 1,  0,
-							  0, 1,
-							  1,  1};
+		1,  0,
+		0, 1,
+		1,  1};
 
 GLuint light_buffer, light_texture;
 
@@ -27,35 +27,49 @@ static void draw_render_light_map();
 
 GLfloat color_stack[10];
 
+#if (__MACOSX__ | __WIN32__)
+#define glGenFramebuffersOES glGenFramebuffersEXT
+#define glBindFramebufferOES glBindFramebufferEXT
+#define GL_FRAMEBUFFER_OES GL_FRAMEBUFFER_EXT
+#define glFramebufferTexture2DOES glFramebufferTexture2DEXT
+#define GL_COLOR_ATTACHMENT0_OES GL_COLOR_ATTACHMENT0_EXT
+#define GL_FRAMEBUFFER_COMPLETE_OES GL_FRAMEBUFFER_COMPLETE_EXT
+#define glCheckFramebufferStatusOES glCheckFramebufferStatusEXT
+#define GL_RENDERBUFFER_OES GL_RENDERBUFFER_EXT
+#define GL_DEPTH_COMPONENT24_OES GL_DEPTH_COMPONENT24
+#define GL_DEPTH_ATTACHMENT_OES GL_DEPTH_ATTACHMENT_EXT
+#define glGenRenderbuffersOES glGenRenderbuffersEXT
+#define glBindRenderbufferOES glBindRenderbufferEXT
+#define glRenderbufferStorageOES glRenderbufferStorageEXT
+#define glFramebufferRenderbufferOES glFramebufferRenderbufferEXT
+#endif
 
 int draw_init(){
 
-		glGenTextures(1, &light_texture);
-		glBindTexture(GL_TEXTURE_2D, light_texture);
+#if LIGHT_SYSTEM
+	glGenTextures(1, &light_texture);
+	glBindTexture(GL_TEXTURE_2D, light_texture);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-		glGenFramebuffersEXT(1, &light_buffer);
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, light_buffer);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, light_texture, 0);
-		//NULL means reserve texture memory, but texels are undefined
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		GLenum status;
-		status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-		switch(status)
-		{
-		case GL_FRAMEBUFFER_COMPLETE_EXT:
-			SDL_Log("FBO_COMPLETE");
-			break;
-		default:
-			SDL_Log("FBO_ERROR");
-		}
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+#if (__MACOSX__ | __IPHONEOS__)
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+#else
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+#endif
+
+	glGenFramebuffersOES(1,&light_buffer);
+	glBindFramebufferOES(GL_FRAMEBUFFER_OES, light_buffer);
+
+	glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, light_texture, 0);
+#endif
 
 
 	int i=0,j=0;
@@ -96,7 +110,7 @@ int draw_init(){
 void draw_light_map()
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, light_buffer);
+	glBindFramebufferOES(GL_FRAMEBUFFER_OES, light_buffer);
 	glClearColor(0.1,0.1,0.1,0.1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0,0,0,0);
@@ -106,7 +120,7 @@ void draw_light_map()
 	glLoadIdentity();
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, TEX_LIGHT);
-	glColor3f(1,1,1);
+	glColor4f(1,1,1,1);
 	int w = WINDOW_WIDTH;
 	int h = WINDOW_HEIGHT;
 	GLfloat temp[8] = {-w, -h,
@@ -118,7 +132,7 @@ void draw_light_map()
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	glDisable(GL_TEXTURE_2D);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
 	draw_render_light_map();
 }
 
@@ -127,7 +141,7 @@ static void draw_render_light_map()
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	draw_push_blend();
 	glLoadIdentity();
-	glColor3f(1,1,1);
+	glColor4f(1,1,1,1);
 	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_DST_COLOR,GL_SRC_COLOR);
 	//glBlendFunc(GL_ONE,GL_ZERO);
