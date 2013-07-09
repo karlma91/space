@@ -454,10 +454,6 @@ static void particle_update_pos(particle *p)
 {
 	p->p = cpvadd(p->p, cpvmult(p->v, mdt));
 	p->time_alive += mdt;
-
-	/* make sure particle is wrapped around level */
-	float width = currentlvl->width,  dx = cam_center_x - p->p.x, absdx = fabsf(dx);
-	if (absdx > width - GAME_WIDTH) p->p.x += (dx / absdx) * width;
 }
 
 /**
@@ -540,9 +536,12 @@ static void draw_all_particles(emitter *em)
 		}
 		draw_color4f(c.r,c.g,c.b,alpha);
 
-		/** call the draw function **/
-		em->draw_particle(em,p);
+		/* make sure particle is wrapped around level */
+		float width = currentlvl->width, dx = cam_center_x - p->p.x;//, absdx = fabsf(dx);
+		p->p.x += (dx > 0 ? (dx > width - GAME_WIDTH ? width : 0) : (dx < GAME_WIDTH - width ? -width : 0));
 
+		if (se_inside_view(&p->p, p->size))
+			em->draw_particle(em,p);
 
 		p = p->next;
 	}

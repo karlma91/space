@@ -101,6 +101,7 @@ static void sdl_event(SDL_Event *event)
 static void on_enter()
 {
 	select_id = 0;
+	sound_music(MUSIC_MENU);
 }
 static void on_leave()
 {

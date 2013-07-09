@@ -7,14 +7,14 @@
 #include "matrix2d.h"
 
 GLfloat triangle_quad[8] = {-0.5, -0.5,
-						 0.5,  -0.5,
-						  -0.5, 0.5,
-						  0.5,  0.5};
+		0.5,  -0.5,
+		-0.5, 0.5,
+		0.5,  0.5};
 
 GLfloat corner_quad[8] = {0, 0,
-							 1,  0,
-							  0, 1,
-							  1,  1};
+		1,  0,
+		0, 1,
+		1,  1};
 
 GLuint light_buffer, light_texture;
 
@@ -27,36 +27,69 @@ static void draw_render_light_map();
 
 GLfloat color_stack[10];
 
+#if __MACOSX__
+#define glGenFramebuffersOES glGenFramebuffersEXT
+#define glBindFramebufferOES glBindFramebufferEXT
+#define GL_FRAMEBUFFER_OES GL_FRAMEBUFFER_EXT
+#define glFramebufferTexture2DOES glFramebufferTexture2DEXT
+#define GL_COLOR_ATTACHMENT0_OES GL_COLOR_ATTACHMENT0_EXT
+#define GL_FRAMEBUFFER_COMPLETE_OES GL_FRAMEBUFFER_COMPLETE_EXT
+#define glCheckFramebufferStatusOES glCheckFramebufferStatusEXT
+#define GL_RENDERBUFFER_OES GL_RENDERBUFFER_EXT
+#define GL_DEPTH_COMPONENT24_OES GL_DEPTH_COMPONENT24
+#define GL_DEPTH_ATTACHMENT_OES GL_DEPTH_ATTACHMENT_EXT
+#define glGenRenderbuffersOES glGenRenderbuffersEXT
+#define glBindRenderbufferOES glBindRenderbufferEXT
+#define glRenderbufferStorageOES glRenderbufferStorageEXT
+#define glFramebufferRenderbufferOES glFramebufferRenderbufferEXT
+#endif
 
 int draw_init(){
 
-		glGenTextures(1, &light_texture);
-		glBindTexture(GL_TEXTURE_2D, light_texture);
+#if LIGHT_SYSTEM
+	glGenTextures(1, &light_texture);
+	glBindTexture(GL_TEXTURE_2D, light_texture);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-		glGenFramebuffersEXT(1,&light_buffer);
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, light_buffer);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, light_texture, 0);
-		//NULL means reserve texture memory, but texels are undefined
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		GLenum status;
-		status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-		switch(status)
-		{
-		case GL_FRAMEBUFFER_COMPLETE_EXT:
-			SDL_Log("FBO_COMPLETE");
-			break;
-		default:
-			SDL_Log("FBO_ERROR");
-		}
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+#if (__MACOSX__ | __IPHONEOS__)
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+#else
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+#endif
 
+	glGenFramebuffersOES(1,&light_buffer);
+	glBindFramebufferOES(GL_FRAMEBUFFER_OES, light_buffer);
+
+	glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, light_texture, 0);
+
+	GLuint depth_rb = 8;
+	glGenRenderbuffersOES(1, &depth_rb);
+	glBindRenderbufferOES(GL_RENDERBUFFER_OES, depth_rb);
+	glRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH_COMPONENT24_OES, 256, 256);
+	glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depth_rb);
+
+	//NULL means reserve texture memory, but texels are undefined
+
+	GLenum status;
+	status = glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
+	switch(status)
+	{
+	case GL_FRAMEBUFFER_COMPLETE_OES:
+		SDL_Log("FBO_COMPLETE");
+		break;
+	default:
+		SDL_Log("FBO_ERROR");
+	}
+	glBindFramebufferOES(GL_FRAMEBUFFER_OES,0);
+#endif
 
 	int i=0,j=0;
 	for(i = 0; i < 128; i += 2) {
@@ -96,7 +129,7 @@ int draw_init(){
 void draw_light_map()
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, light_buffer);
+	glBindFramebufferOES(GL_FRAMEBUFFER_OES, light_buffer);
 	glClearColor(0.1,0.1,0.1,0.1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0,0,0,0);
@@ -107,7 +140,7 @@ void draw_light_map()
 	glLoadIdentity();
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, TEX_LIGHT);
-	glColor3f(1,1,1);
+	glColor4f(1,1,1,1);
 	int w = 512;
 	int h = 512;
 	GLfloat temp[8] = {-w, -h,
@@ -119,7 +152,7 @@ void draw_light_map()
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	glDisable(GL_TEXTURE_2D);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
 	draw_render_light_map();
 }
 
@@ -128,7 +161,7 @@ static void draw_render_light_map()
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	draw_push_blend();
 	glLoadIdentity();
-	glColor3f(1,1,1);
+	glColor4f(1,1,1,1);
 	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_DST_COLOR,GL_SRC_COLOR);
 	//glBlendFunc(GL_ONE,GL_ZERO);
@@ -245,8 +278,8 @@ void draw_glow_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 
 void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
-    draw_push_matrix();
-    draw_translate(x0, y0, 0.0f);
+	draw_push_matrix();
+	draw_translate(x0, y0, 0.0f);
 	draw_rotate(atan2f(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
 	GLfloat length = sqrtf((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
 	draw_scale(1,w,1);
@@ -316,8 +349,8 @@ void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 
 void draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered)
 {
-    draw_push_matrix();
-    draw_translate(x,y,0);
+	draw_push_matrix();
+	draw_translate(x,y,0);
 	draw_rotate(angle,0,0,1);
 	draw_scale(w,h,1);
 	draw_vertex_pointer(2, GL_FLOAT, 0, centered ? triangle_quad : corner_quad);
@@ -326,8 +359,8 @@ void draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int cente
 }
 void draw_box_append(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered)
 {
-    draw_push_matrix();
-    draw_translate(x,y,0);
+	draw_push_matrix();
+	draw_translate(x,y,0);
 	draw_rotate(angle,0,0,1);
 	draw_scale(w,h,1);
 	draw_vertex_pointer(2, GL_FLOAT, 0, centered ? triangle_quad : corner_quad);
@@ -350,7 +383,7 @@ Color draw_col_grad(int hue)
 
 void draw_get_current_color(float *c)
 {
-    glGetFloatv(GL_CURRENT_COLOR, c);
+	glGetFloatv(GL_CURRENT_COLOR, c);
 }
 
 //TODO: color customization
@@ -430,9 +463,9 @@ void draw_current_texture_append(cpVect *pos, const float *tex_map, float width,
 
 void draw_current_texture_all(cpVect *pos, const float *tex_map, float width, float height, float angle, GLfloat *mesh)
 {
-    draw_push_matrix();
+	draw_push_matrix();
 
-    draw_translate(pos->x, pos->y, 0.0f);
+	draw_translate(pos->x, pos->y, 0.0f);
 	draw_rotate(angle,0,0,1);
 	draw_scale(width,height,1);
 
@@ -443,8 +476,8 @@ void draw_current_texture_all(cpVect *pos, const float *tex_map, float width, fl
 
 void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei count)
 {
-    draw_vertex_pointer(2, GL_FLOAT, 0, mesh);
-    draw_tex_pointer(2, GL_FLOAT, 0, tex_map);
+	draw_vertex_pointer(2, GL_FLOAT, 0, mesh);
+	draw_tex_pointer(2, GL_FLOAT, 0, tex_map);
 
 	glEnable(GL_TEXTURE_2D);
 	draw_draw_arrays(GL_TRIANGLE_STRIP,0, count);
@@ -453,57 +486,57 @@ void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei cou
 
 void draw_draw_arrays(GLenum mode, GLint first, GLsizei count)
 {
-    float *vertex = matrix2d_get_vertex_pointer();
-    float *tex = matrix2d_get_tex_pointer();
+	float *vertex = matrix2d_get_vertex_pointer();
+	float *tex = matrix2d_get_tex_pointer();
 
-    matrix2d_multiply_current(count);
+	matrix2d_multiply_current(count);
 
-    vertex = matrix2d_get_vertex_data();
+	vertex = matrix2d_get_vertex_data();
 
-    glVertexPointer(2, GL_FLOAT, 0, vertex);
-    glTexCoordPointer(2, GL_FLOAT, 0, tex);
-    glDrawArrays(GL_TRIANGLE_STRIP, first, count);
+	glVertexPointer(2, GL_FLOAT, 0, vertex);
+	glTexCoordPointer(2, GL_FLOAT, 0, tex);
+	glDrawArrays(GL_TRIANGLE_STRIP, first, count);
 }
 
 void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
 {
-    matrix2d_vertex_pointer((float*)pointer);
+	matrix2d_vertex_pointer((float*)pointer);
 }
 
 void draw_tex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
 {
-    matrix2d_tex_pointer((float*)pointer);
+	matrix2d_tex_pointer((float*)pointer);
 }
 
 void draw_translate(GLfloat x, GLfloat y, GLfloat z)
 {
-    matrix2d_translate(x,y);
+	matrix2d_translate(x,y);
 }
 
 void draw_rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 {
-    matrix2d_rotate(angle*(M_PI/180));
+	matrix2d_rotate(angle*(M_PI/180));
 }
 
 void draw_scale(GLfloat x, GLfloat y, GLfloat z)
 {
-    matrix2d_scale(x,y);
+	matrix2d_scale(x,y);
 }
 
 void draw_push_matrix()
 {
-    matrix2d_pushmatrix();
+	matrix2d_pushmatrix();
 }
 
 void draw_pop_matrix()
 {
-    matrix2d_popmatrix();
+	matrix2d_popmatrix();
 }
 
 void draw_load_identity()
 {
-    glLoadIdentity();
-    matrix2d_loadindentity();
+	glLoadIdentity();
+	matrix2d_loadindentity();
 }
 
 // todo combine different gl pointers into an interleaved array

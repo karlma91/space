@@ -10,6 +10,7 @@
 
 #include "statesystem.h"
 #include "sprite.h"
+#include "sound.h"
 
 extern STATE_ID state_mainmenu;
 extern STATE_ID state_menu;
@@ -39,7 +40,7 @@ void game_config();
 void game_init();
 void game_destroy();
 
-
+/* GLOBAL SPRITE ID */
 extern SPRITE_ID SPRITE_PLAYER;
 extern SPRITE_ID SPRITE_PLAYER_GUN;
 extern SPRITE_ID SPRITE_GLOW_DOT;
@@ -49,5 +50,14 @@ extern SPRITE_ID SPRITE_TANK_BODY;
 extern SPRITE_ID SPRITE_TANK_WHEEL;
 extern SPRITE_ID SPRITE_TANK_TURRET;
 
+/* GLOBAL SOUND CHUNKS */
+extern Mix_Chunk *SND_LASER_1;
+extern Mix_Chunk *SND_LASER_2;
+extern Mix_Chunk *SND_EXPLOSION;
+
+/* GLOBAL MUSIC TRACKS */
+extern Mix_Music *MUSIC_MENU;
+extern Mix_Music *MUSIC_LEVEL;
+extern Mix_Music *MUSIC_GAMEOVER;
 
 #endif /* GAME_H_ */

@@ -53,7 +53,9 @@ object_param_player default_player = {
 		.gun_cooldown = 0.125f
 };
 
-#define IMPULSE_FORCE 100
+#define IMPULSE_FORCE 50
+
+//TODO decompose force vectors working on player, to make joystick angle correspond with player velocity angle
 
 object_group_player *object_create_player()
 {
@@ -134,10 +136,8 @@ static void render(object_group_player *player)
 #include <time.h>
 static void update(object_group_player *player)
 {
-#if !ARCADE_MODE
 	if (keys[SDL_SCANCODE_I]) //CHEAT
 		player->hp_bar.value = 1000000;
-#endif
 
 	player->gun_timer += dt;
 
@@ -157,8 +157,8 @@ static void update(object_group_player *player)
 			controls(player);
 		}
 	} else {
-		float vel_angle = cpvtoangle(cpBodyGetVel(player->data.body));
-		player->direction = turn_toangle(vel_angle, player->direction, 2 * M_PI * dt / 1000);
+		float body_angle = cpvtoangle(player->data.body->rot);
+		player->direction = turn_toangle(body_angle, player->direction, 2 * M_PI * dt / 1000);
 		player->aim_angle = cpvtoangle(player->gunwheel->rot);
 		player->flame->disable = 1;
 	}
@@ -238,7 +238,7 @@ static void action_shoot(object_group_player *player)
 	if (player->gun_timer >= player->param->gun_cooldown) {
 		int i;
 
-		sound_play();
+		sound_play(SND_LASER_1);
 
 		for(i=0; i < player->gun_level;i++){
 			object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);

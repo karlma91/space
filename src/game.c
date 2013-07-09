@@ -36,6 +36,16 @@ SPRITE_ID SPRITE_TANK_TURRET;
 SPRITE_ID SPRITE_BUTTON_PAUSE;
 //extern SPRITE_ID end
 
+/* GLOBAL SOUND CHUNKS */
+Mix_Chunk *SND_LASER_1;
+Mix_Chunk *SND_LASER_2;
+Mix_Chunk *SND_EXPLOSION;
+
+/* GLOBAL MUSIC TRACKS */
+Mix_Music *MUSIC_MENU;
+Mix_Music *MUSIC_LEVEL;
+Mix_Music *MUSIC_GAMEOVER;
+
 
 #if !(TARGET_OS_IPHONE || __ANDROID__)
 static int handler(void* config, const char* section, const char* name,
@@ -81,18 +91,18 @@ void game_config()
 #endif
 
 #if ARCADE_MODE
-		KEY_UP_2 = SDL_SCANCODE_UP;
-		KEY_UP_1 = SDL_SCANCODE_W;
-		KEY_LEFT_2 = SDL_SCANCODE_LEFT;
-		KEY_LEFT_1 = SDL_SCANCODE_A;
-		KEY_RIGHT_2 = SDL_SCANCODE_RIGHT;
-		KEY_RIGHT_1 = SDL_SCANCODE_D;
-		KEY_DOWN_2 = SDL_SCANCODE_DOWN;
-		KEY_DOWN_1 = SDL_SCANCODE_S;
+	KEY_UP_2 = SDL_SCANCODE_UP;
+	KEY_UP_1 = SDL_SCANCODE_W;
+	KEY_LEFT_2 = SDL_SCANCODE_LEFT;
+	KEY_LEFT_1 = SDL_SCANCODE_A;
+	KEY_RIGHT_2 = SDL_SCANCODE_RIGHT;
+	KEY_RIGHT_1 = SDL_SCANCODE_D;
+	KEY_DOWN_2 = SDL_SCANCODE_DOWN;
+	KEY_DOWN_1 = SDL_SCANCODE_S;
 
-		KEY_RETURN_1 = SDL_SCANCODE_K;
-		KEY_RETURN_2 = SDL_SCANCODE_G;
-		KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
+	KEY_RETURN_1 = SDL_SCANCODE_K;
+	KEY_RETURN_2 = SDL_SCANCODE_G;
+	KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
 #endif
 }
 
@@ -108,17 +118,29 @@ void game_sprites()
 	SPRITE_TANK_TURRET=			sprite_link("tank_turret");
 }
 
+void game_audio()
+{
+	SND_LASER_1 = sound_load_chunk("laser_01.ogg");
+	SND_LASER_2 = sound_load_chunk("laser_02.ogg");
+	SND_EXPLOSION = sound_load_chunk("explosion.ogg");
+
+	MUSIC_MENU = sound_load_music("Broken_Logic.ogg");
+	MUSIC_LEVEL = sound_load_music("Blocked Bus.ogg");
+	MUSIC_GAMEOVER = sound_load_music("Idling.ogg");
+}
+
 void game_init()
 {
 	//TODO generalize particles.c and ?level.c
 	game_sprites();
+	game_audio();
 	mainmenu_init();
 	level_init();
-    menu_init();
-    space_init();
-    gameover_init();
-    levelselect_init();
+	menu_init();
+	space_init();
+	gameover_init();
+	levelselect_init();
 
-    statesystem_set_state(state_menu);
-    //statesystem_set_state(state_mainmenu);
+	statesystem_set_state(state_menu);
+	//statesystem_set_state(state_mainmenu);
 }

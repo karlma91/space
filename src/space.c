@@ -28,6 +28,7 @@
 #include "tank.h"
 #include "button.h"
 
+#include "spaceengine.h"
 #include "waffle_utils.h"
 
 static float accumulator = 0;
@@ -63,10 +64,10 @@ float cam_center_x = 0;
 float cam_center_y = 0;
 float cam_zoom = 1;
 
+int cam_width;
 int cam_left;
 int cam_right;
 
-static float camera_width;
 static float cam_left_limit;
 static float cam_right_limit;
 
@@ -239,15 +240,12 @@ static void pre_update()
 	/* runs the current state */
 	state_timer+=dt; /* updates the timer */
 	//state_functions[gamestate]();
-
-
 }
 
 static void post_update()
 {
-    /* Updating camera zoom an position */
-        update_camera_zoom(cam_mode);
-        update_camera_position();
+	update_camera_zoom(cam_mode);
+	update_camera_position();
 }
 
 static void empty(){
@@ -262,21 +260,11 @@ static void update_all()
 	/* chipmunk timestep counter */
 	accumulator += dt;
 
-	/*
-	 * Calls update_opbject for all objects in objects
-	 */
 	objects_iterate(update_objects);
-	objects_iterate(empty);
 
-	/*
-	 * update the particle engine
-	 */
 	particles_update(dt);
 
-
-	/*
-	 * update all chipmunk objects 60 times per second
-	 */
+	/* update all chipmunk objects 60 times per second */
 	while(accumulator >= phys_step)
 	{
 		cpSpaceStep(space, phys_step);
@@ -349,8 +337,9 @@ static void update_objects(object_data *obj)
 static void draw()
 {
 	SPACE_draw();
+#if LIGHT_SYSTEM
 	draw_light_map();
-
+#endif
 }
 
 static void update_camera_zoom(int cam_mode)
@@ -450,13 +439,13 @@ static void update_camera_position()
 	cam_center_x = player->data.body->p.x + cam_dx;
 
 	/* camera constraints */
-	camera_width = GAME_WIDTH / (2 * cam_zoom);
+	cam_width = GAME_WIDTH / (2 * cam_zoom);
 
-	cam_left_limit = currentlvl->left + camera_width;
-	cam_right_limit = currentlvl->right - camera_width;
+	cam_left_limit = currentlvl->left + cam_width;
+	cam_right_limit = currentlvl->right - cam_width;
 
-	cam_left = cam_center_x - camera_width;
-	cam_right = cam_center_x + camera_width;
+	cam_left = cam_center_x - cam_width;
+	cam_right = cam_center_x + cam_width;
 }
 
 static void SPACE_draw()
@@ -643,7 +632,7 @@ void draw_gui()
 
 static void render_objects(object_data *obj)
 {
-	if((obj->body->p.x > cam_left - 200 && obj->body->p.x < cam_right + 200)) {
+	if((obj->body->p.x > cam_left - 200) && (obj->body->p.x < cam_right + 200)) {
 		obj->preset->render(obj);
 		return;
 	}
@@ -651,8 +640,8 @@ static void render_objects(object_data *obj)
 	if(cam_center_x < cam_left_limit){
 		float old_cam_x = cam_center_x;
 		float new_cam_center_x = cam_center_x + currentlvl->width;
-		float new_cam_left = new_cam_center_x - camera_width;
-		float new_cam_right = new_cam_center_x + camera_width;
+		float new_cam_left = new_cam_center_x - cam_width;
+		float new_cam_right = new_cam_center_x + cam_width;
 		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){
 			cam_center_x = new_cam_center_x;
 			draw_push_matrix();
@@ -663,9 +652,9 @@ static void render_objects(object_data *obj)
 		}
 	}else if(cam_center_x > cam_right_limit){
 		float old_cam_x = cam_center_x;
-		float new_cam_center_x = cam_center_x - (currentlvl->right + abs(currentlvl->left));
-		float new_cam_left = new_cam_center_x - camera_width;
-		float new_cam_right = new_cam_center_x + camera_width;
+		float new_cam_center_x = cam_center_x - currentlvl->width;
+		float new_cam_left = new_cam_center_x - cam_width;
+		float new_cam_right = new_cam_center_x + cam_width;
 		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){
 			cam_center_x = new_cam_center_x;
 			draw_push_matrix();
@@ -823,6 +812,7 @@ void space_init_level(int space_station, int deck)
 static void on_enter()
 {
 	game_paused = 0;
+	sound_music(MUSIC_LEVEL);
 }
 
 static void game_over()

@@ -5,6 +5,7 @@
 
 #define LOAD_TEXTURES 1 //FOR DEBUG PURPOSES
 #define EXPERIMENTAL_GRAPHICS 1
+#define LIGHT_SYSTEM 0
 
 #if __IPHONEOS__ || __ANDROID__
 #define GLES1 1
@@ -17,8 +18,12 @@
 #if GLES1
 #include "SDL_opengles.h"
 #else
+
+#if __WIN32__
 #define GLEW_STATIC
 #include "GL/glew.h"
+#endif
+
 #include "SDL_opengl.h"
 #endif
 

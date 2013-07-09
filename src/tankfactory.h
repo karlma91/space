@@ -15,8 +15,10 @@ struct _object_param_factory {
 	float spawn_delay;
 	int score;
 	int type;
-	object_param_tank *t_param;
-	object_param_rocket *r_param;
+	union {
+		object_param_tank *t_param;
+		object_param_rocket *r_param;
+	};
 	SPRITE_ID sprite_id;
 };
 

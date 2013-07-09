@@ -151,7 +151,7 @@ void gameover_init()
 {
 	list = malloc(sizeof(scorelist));
 	highscorelist_create(list);
-	highscorelist_readfile(list,"highscores"); // NB! moved from bin/data/highscores
+	highscorelist_readfile(list,"highscores2"); // NB! moved from bin/data/highscores
 
 	statesystem_register(state_gameover,0);
 }
@@ -159,7 +159,7 @@ void gameover_init()
 
 static void on_enter()
 {
-
+	sound_music(MUSIC_GAMEOVER);
 }
 static void on_leave()
 {

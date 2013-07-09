@@ -28,7 +28,7 @@
 #include "particles.h"
 #include "sound.h"
 
-#define GAME_VERSION "PRE-ALPHA 8.0" //TMP placement for this define
+#define GAME_VERSION "PRE-ALPHA 8.5" //TMP placement for this define
 
 #define FPS_LIMIT 1
 
@@ -166,7 +166,6 @@ static void setAspectRatio() {
 		WINDOW_HEIGHT = config.height;
 	}
 
-	//GAME_HEIGHT = 1200; //TODO change this to reveal hard-coded coordinates/sizes
 	ASPECT_RATIO = 1.0f * WINDOW_WIDTH / WINDOW_HEIGHT;
 	GAME_WIDTH = GAME_HEIGHT * ASPECT_RATIO;
 }
@@ -292,6 +291,7 @@ static void main_init() {
 	display_init();     /* sets attributes and creates windows and renderer*/
 	initGL();           /* setup a gl context */
 
+#if __WIN32__
 	GLenum glewError = glewInit();
 	if( glewError != GLEW_OK )
 	{
@@ -304,6 +304,7 @@ static void main_init() {
 	}else{
 		SDL_Log( "Error no extension");
 	}
+#endif
 
 	cpInitChipmunk();
 
@@ -342,7 +343,27 @@ static void check_events()
 #if !GOT_TOUCH
 		SDL_Event sim_event;
 #endif
+		static int render_outside = 1; // for debug purposes
 		switch (event.type) {
+		case SDL_KEYDOWN:
+			switch (event.key.keysym.scancode) {
+			case SDL_SCANCODE_T:
+				render_outside ^=0x5;
+
+				glMatrixMode(GL_PROJECTION);
+				draw_load_identity();
+				GLfloat W_2 = GAME_WIDTH / 2 * render_outside;
+				GLfloat H_2 = GAME_HEIGHT / 2 * render_outside;
+				glOrtho(-W_2, W_2, -H_2, H_2, 1, -1);
+				glMatrixMode(GL_MODELVIEW);
+				break;
+			case SDL_SCANCODE_R:
+				glClear(GL_COLOR_BUFFER_BIT);
+				break;
+			default:
+				break;
+			}
+			break;
 		case SDL_FINGERUP:
 			llist_remove(active_fingers, (void *) event.tfinger.fingerId);
 			break;
@@ -401,7 +422,8 @@ static void main_tick(void *data)
 	fps++;
 
 	draw_load_identity();
-	glClear(GL_COLOR_BUFFER_BIT);
+	draw_color4f(0,0,0,1);
+	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
 
 	if (!paused) {
 		check_events();
@@ -435,6 +457,9 @@ static void main_tick(void *data)
 	if (keys[SDL_SCANCODE_F12]) {
 		main_stop();
 	}
+	if (keys[SDL_SCANCODE_R]) {
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
 
 	if (keys[SDL_SCANCODE_F] && keys[SDL_SCANCODE_LCTRL]) {
 		config.fullscreen ^= 1; // Toggle fullscreen
@@ -444,6 +469,14 @@ static void main_tick(void *data)
 		} else {
 			glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 			setAspectRatio();
+
+			glMatrixMode(GL_PROJECTION);
+			draw_load_identity();
+			GLfloat W_2 = GAME_WIDTH / 2;
+			GLfloat H_2 = GAME_HEIGHT / 2;
+			glOrtho(-W_2, W_2, -H_2, H_2, 1, -1);
+			glMatrixMode(GL_MODELVIEW);
+
 			SDL_Log("DEBUG: WINDOW FULLSCREEN CHANGED -> %d", config.fullscreen);
 		}
 		keys[SDL_SCANCODE_F] = 0;
