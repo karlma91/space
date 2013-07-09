@@ -93,8 +93,9 @@ static void sdl_event(SDL_Event *event)
 				main_stop();
 				return;
 #else
-				menu_change_current_menu(MENU_MAIN);
-				statesystem_set_state(state_menu);
+				//menu_change_current_menu(MENU_MAIN);
+				//statesystem_set_state(state_menu);
+				statesystem_set_state(state_mainmenu);
 				win = 0;
 #endif
 			}
@@ -133,8 +134,9 @@ static void sdl_event(SDL_Event *event)
 						main_stop();
 						return;
 #else
-						menu_change_current_menu(MENU_MAIN);
-						statesystem_set_state(state_menu);
+						//menu_change_current_menu(MENU_MAIN);
+						//statesystem_set_state(state_menu);
+						statesystem_set_state(state_mainmenu);
 						win = 0;
 #endif
 					}
@@ -314,6 +316,11 @@ static void draw_highscore(int start_index)
 		}
 		font_drawText(-10*45*1.5f, 300 - i*50*1.5f, temp);
 	}
+}
+
+void gameover_showhighscores() {
+	gameover_setstate(show_highscore);
+	statesystem_set_state(state_gameover);
 }
 
 int gameover_setstate(enum gameover_state state)

@@ -127,9 +127,7 @@ static void pre_update()
 	if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 		switch(current_menu){
 			case MENU_MAIN:
-				space_init_level(1,1);
-				statesystem_set_state(state_space);
-				menu_change_current_menu(MENU_INGAME);
+				space_start_demo();
 				break;
 			case MENU_INGAME:
 				statesystem_set_state(state_space);
@@ -230,16 +228,13 @@ static void inner_main()
 {
 	switch (select_id) {
 	case 0: //START GAME
-		space_init_level(1,1);
-		statesystem_set_state(state_space);
-		curMenu = &ingameMenu;
+		space_start_demo();
 		break;
 	case 1: //LEVEL SELECT
 	    statesystem_set_state(state_levelselect);
 		break;
 	case 2: //HIGHSCORE
-		gameover_setstate(show_highscore);
-		statesystem_set_state(state_gameover);
+		gameover_showhighscores();
 		break;
 	case 3: //CREDITS
 		break;
@@ -258,9 +253,7 @@ static void inner_ingame()
 		statesystem_set_state(state_space);
 		break;
 	case 1: //RESTART GAME
-	    statesystem_set_state(state_space);
-	    menu_change_current_menu(MENU_INGAME);
-		space_init_level(1,1);
+		space_start_demo();
 		break;
 	case 2:
 		curMenu = &mainMenuTest;
@@ -281,5 +274,5 @@ void menu_init()
 	curMenu = &mainMenuTest;
 	statesystem_register(state_menu, 0);
 
-	btn_start_tmp = button_create(0, 0, 192*2, 128*2, SPRITE_BUTTON, BTN_SPRITE);
+	btn_start_tmp = button_create(SPRITE_BUTTON, 0, "TXT", 0, 0, 192*2, 128*2);
 }

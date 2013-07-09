@@ -68,9 +68,7 @@ static float cam_right_limit;
 /* level data */
 level *currentlvl;
 
-camera space_cam;
-/* extern camera */
-camera *current_camera = &space_cam;
+static camera space_cam;
 
 static void input();
 
@@ -99,6 +97,9 @@ char *game_state_names[] = {
 	"LEVEL_CLEARED",
 	"LEVEL_TRANSITION"
 };
+
+
+int multiplayer;
 
 /*
  * the current state of the game
@@ -523,7 +524,6 @@ void draw_gui()
 		draw_color4f(1,0,0,1);
 		setTextAlign(TEXT_CENTER);
 
-#if ARCADE_MODE
 		setTextSize(80);
 		font_drawText(0, 0, "GAME OVER");
 		draw_color4f(0.1,0.9,0.1,1);
@@ -542,9 +542,6 @@ void draw_gui()
 			cpVect t = cpv(0,-5.5-GAME_HEIGHT/4);
 			//draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
 		}
-#else
-		font_drawText(0, 0, "GAME OVER-PRESS ENTER");
-#endif
 		setTextSize(120);
 		break;
 	case LEVEL_STATE_COUNT:
@@ -849,7 +846,7 @@ void space_init()
 
     stars_init();
 
-    btn_pause = button_create(GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80, SPRITE_BUTTON_PAUSE, BTN_IMAGE_SIZED);
+    btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80);
     joy_left = joystick_create(0, 80, 10, -GAME_WIDTH/2, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
     joy_right = joystick_create(0, 80, 10, 0, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
 }
@@ -912,4 +909,24 @@ void input()
 	}
 #endif
 #endif
+}
+
+void space_start_demo() {
+	//TODO set and reset all per-game variables
+	multiplayer = 0;
+
+	current_camera = &space_cam;
+
+	space_init_level(1,1);
+	statesystem_set_state(state_space);
+	menu_change_current_menu(MENU_INGAME);
+}
+
+void space_start_multiplayer() {
+	//TODO set and reset all per-game variables
+	multiplayer = 1;
+
+	space_init_level(1,1);
+	statesystem_set_state(state_space);
+	menu_change_current_menu(MENU_INGAME);
 }

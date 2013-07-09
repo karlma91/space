@@ -128,7 +128,7 @@ void sprite_get_current_image(sprite *spr, float *sub_map)
 	int index = floor(spr->sub_index);
 
 	//TODO NULL checks
- 	
+
 	int sprites_x = 1/data->width;
 
 	int index_x = index % sprites_x;
@@ -166,7 +166,8 @@ void sprite_set_sprite_id(sprite *spr, SPRITE_ID id)
 
 void sprite_set_index(sprite *spr, int index)
 {
-	spr->sub_index = index;
+	if (spr->id)
+		spr->sub_index = index >= ((sprite_data *)spr->id)->subimages ? 0 : index < 0 ? 0 : index;
 }
 
 void sprite_render(sprite *spr, cpVect *pos, float angle)

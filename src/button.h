@@ -13,26 +13,21 @@
 
 typedef void *button;
 
-typedef enum {
-	BTN_IMAGE_SIZED,
-	BTN_SPRITE,
-	BTN_IMAGE_SIZED_TEXT,
-	BTN_SPRITE_TEXT,
-	BTN_HIDDEN
-} button_type;
-
 //TODO add timeout for move and up?
-button button_create(float pos_x, float pos_y, float width, float height, SPRITE_ID sprid, button_type type);
+button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, float pos_y, float width, float height);
 void button_free(button btn);
+
+void button_set_callback(button btn_id, void (*callback)(void));
 
 void button_render(button btn);
 void button_clear(button btn);
 
-void button_set_texture(button btn_id, int tex_id);
 int button_isdown(button btn_id);
 
 int button_finger_down(button btn, SDL_TouchFingerEvent *finger);
 int button_finger_move(button btn, SDL_TouchFingerEvent *finger);
 int button_finger_up(button btn, SDL_TouchFingerEvent *finger);
+
+void button_click(button btn);
 
 #endif /* BUTTON_H_ */

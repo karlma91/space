@@ -168,6 +168,6 @@ void game_init()
     gameover_init();
     levelselect_init();
 
-    statesystem_set_state(state_menu);
-    //statesystem_set_state(state_mainmenu);
+    //statesystem_set_state(state_menu);
+    statesystem_set_state(state_mainmenu);
 }
