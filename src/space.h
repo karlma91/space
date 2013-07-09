@@ -5,17 +5,12 @@
 #include "main.h"
 #include "level.h"
 #include "joystick.h"
+#include "camera.h"
 
 void space_init();
 
 /* camera */
-extern float cam_center_x;
-extern float cam_center_y;
-extern float cam_zoom;
-
-extern int cam_width;
-extern int cam_left;
-extern int cam_right;
+extern camera *current_camera;
 
 /* chipmunk physics space */
 extern cpSpace *space;

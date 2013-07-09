@@ -138,9 +138,9 @@ float se_rect2arch(cpVect *pos)
 		return 0;
 
 	float inner_radius = currentlvl->inner_radius;
-	float theta = -currentlvl->theta_max * (cam_center_x - pos->x) / ((cam_right - cam_left)/2);
+	float theta = -currentlvl->theta_max * (current_camera->x - pos->x) / ((current_camera->right - current_camera->left)/2);
 
-	float o_x = cam_center_x;
+	float o_x = current_camera->x;
 	float o_y = currentlvl->height + inner_radius;
 
 	float ry = currentlvl->height - pos->y;
@@ -157,7 +157,7 @@ float se_rect2arch(cpVect *pos)
 void se_rect2arch_column(float x, cpVect *polar)
 {
 #if EXPERIMENTAL_GRAPHICS
-	float theta = -currentlvl->theta_max *(cam_center_x - x) / ((cam_right - cam_left)/2);
+	float theta = -currentlvl->theta_max *(current_camera->x - x) / ((current_camera->right - current_camera->left)/2);
 
     polar->x = sinf(theta);
     polar->y = cosf(theta);
@@ -168,7 +168,7 @@ void se_rect2arch_from_data(cpVect *pos, cpVect *polar)
 {
 #if EXPERIMENTAL_GRAPHICS
 	float inner_radius = currentlvl->inner_radius;
-    float o_x = cam_center_x;
+    float o_x = current_camera->x;
     float o_y = currentlvl->height + inner_radius;
 
     float ry = currentlvl->height - pos->y;
@@ -183,11 +183,11 @@ void se_rect2arch_from_data(cpVect *pos, cpVect *polar)
 //TODO move inside a camera class
 int se_inside_view(cpVect *pos, float margin)
 {
-	int dx = cam_center_x - (int) pos->x;
+	int dx = current_camera->x - (int) pos->x;
 	int lvl_width = currentlvl->width;
 	int cam_distance = (dx < -lvl_width/2) ? abs(dx + lvl_width) : (dx > lvl_width/2) ? dx - lvl_width : abs(dx);
 
-	return cam_distance <= cam_width + margin;
+	return cam_distance <= current_camera->width + margin;
 }
 
 

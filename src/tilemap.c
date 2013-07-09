@@ -38,8 +38,8 @@ void tilemap_render(tilemap *map)
 
 	//TODO: check if cam_left and cam_right is correct
 	int j_start, j_end;
-	j_start = (cam_left - map->tile_width) / map->tile_width + map->width / 2 - 2; //OLD: 0
-	j_end = (cam_right + map->tile_width) / map->tile_width + map->width / 2 + 2; //OLD: map->width
+	j_start = (current_camera->left - map->tile_width) / map->tile_width + map->width / 2 - 2; //OLD: 0
+	j_end = (current_camera->right + map->tile_width) / map->tile_width + map->width / 2 + 2; //OLD: map->width
 
 	//DEBUG
 	static int DEBUG_TILEMAP = 0;

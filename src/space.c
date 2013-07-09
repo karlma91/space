@@ -42,7 +42,7 @@ STATE_ID state_space;
 static void SPACE_draw();
 static void update_objects(object_data *obj);
 static void render_objects(object_data *obj);
-static void update_camera_zoom(int cam_mode);
+static void update_camera_zoom(int mode);
 static void update_camera_position();
 
 int space_rendering_map = 0;
@@ -59,22 +59,17 @@ static cpFloat phys_step = 1/60.0f;
 /* extern */
 cpSpace *space;
 
+
+
 /* camera settings */
-float cam_center_x = 0;
-float cam_center_y = 0;
-float cam_zoom = 1;
-
-int cam_width;
-int cam_left;
-int cam_right;
-
 static float cam_left_limit;
 static float cam_right_limit;
 
-static int cam_mode = 5;
-
 /* level data */
 level *currentlvl;
+
+camera space_cam;
+camera *current_camera = &space_cam;
 
 static void input();
 
@@ -244,7 +239,7 @@ static void pre_update()
 
 static void post_update()
 {
-	update_camera_zoom(cam_mode);
+	update_camera_zoom(current_camera->mode);
 	update_camera_position();
 }
 
@@ -342,37 +337,37 @@ static void draw()
 #endif
 }
 
-static void update_camera_zoom(int cam_mode)
+static void update_camera_zoom(int mode)
 {
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 
 	/* dynamic camera zoom */
 	float py = player->data.body->p.y / currentlvl->height;
 	float scrlvl, zoomlvl;
-	switch (cam_mode) {
+	switch (current_camera->mode) {
 	case 1:
 	case 2: /* fanzy zoom camera */
 
 		scrlvl = 1.0f * GAME_HEIGHT/currentlvl->height;
 
-		zoomlvl = cam_mode == 1 ? 4 : 12;
+		zoomlvl = current_camera->mode == 1 ? 4 : 12;
 		if (py < 0) {
 			/* undefined zoom! Reset/fix player position? */
 		} else if ( py < 0.2) {
-			cam_zoom = 2 / zoomlvl + scrlvl;
-			cam_center_y = GAME_HEIGHT / (2*cam_zoom);
+		    current_camera->zoom = 2 / zoomlvl + scrlvl;
+		    current_camera->y = GAME_HEIGHT / (2*current_camera->zoom);
 		} else if (py < 0.4) {
-			cam_zoom = (1 + cos(5*M_PI * (py + 1))) / zoomlvl + scrlvl;
-			cam_center_y = GAME_HEIGHT / (2*cam_zoom);
+		    current_camera->zoom = (1 + cos(5*M_PI * (py + 1))) / zoomlvl + scrlvl;
+		    current_camera->y = GAME_HEIGHT / (2*current_camera->zoom);
 		} else if (py < 0.6) {
-			cam_zoom = scrlvl;
-			cam_center_y = currentlvl->height / (2);
+		    current_camera->zoom = scrlvl;
+		    current_camera->y = currentlvl->height / (2);
 		} else if (py < 0.8) {
-			cam_zoom = (1 - cos(5*M_PI * (py - 0.4 + 1))) / zoomlvl + scrlvl;
-			cam_center_y = currentlvl->height - GAME_HEIGHT / (2*(cam_zoom));
+		    current_camera->zoom = (1 - cos(5*M_PI * (py - 0.4 + 1))) / zoomlvl + scrlvl;
+		    current_camera->y = currentlvl->height - GAME_HEIGHT / (2*(current_camera->zoom));
 		} else if (py <= 1.0) {
-			cam_zoom = 2 / zoomlvl + scrlvl;
-			cam_center_y = currentlvl->height - GAME_HEIGHT / (2*cam_zoom);
+		    current_camera->zoom = 2 / zoomlvl + scrlvl;
+		    current_camera->y = currentlvl->height - GAME_HEIGHT / (2*current_camera->zoom);
 		} else {
 			/* undefined zoom! Reset/fix player position? */
 		}
@@ -380,21 +375,21 @@ static void update_camera_zoom(int cam_mode)
 
 	case 3:
 	case 4:/* simple zoomed camera */
-		if(cam_mode == 3){
-			cam_zoom = 2;
+		if(current_camera->mode == 3){
+		    current_camera->zoom = 2;
 		}else{
-			cam_zoom = 1.3;
+		    current_camera->zoom = 1.3;
 		}
-		cam_center_y = player->data.body->p.y;
-		if(cam_center_y > currentlvl->height - GAME_HEIGHT/(2*cam_zoom)){
-			cam_center_y = currentlvl->height - GAME_HEIGHT/(2*cam_zoom);
-		}else if(cam_center_y <  GAME_HEIGHT/(2*cam_zoom)){
-			cam_center_y = GAME_HEIGHT/(2*cam_zoom);
+		current_camera->y = player->data.body->p.y;
+		if(current_camera->y > currentlvl->height - GAME_HEIGHT/(2*current_camera->zoom)){
+		    current_camera->y = currentlvl->height - GAME_HEIGHT/(2*current_camera->zoom);
+		}else if(current_camera->y <  GAME_HEIGHT/(2*current_camera->zoom)){
+		    current_camera->y = GAME_HEIGHT/(2*current_camera->zoom);
 		}
 		break;
 	case 5:
-		cam_zoom = 1.0f*GAME_HEIGHT/currentlvl->height;
-		cam_center_y = 1.0f*currentlvl->height/2;
+	    current_camera->zoom = 1.0f*GAME_HEIGHT/currentlvl->height;
+	    current_camera->y = 1.0f*currentlvl->height/2;
 		break;
 	case 6:
 		scrlvl = 1.0f * GAME_HEIGHT/currentlvl->height;
@@ -407,21 +402,21 @@ static void update_camera_zoom(int cam_mode)
 		if (py < 0) {
 			/* undefined zoom! Reset/fix player position? */
 		} else if ( py < endlvl) {
-			cam_zoom = 2 / zoomlvl + scrlvl;
-			cam_center_y = GAME_HEIGHT / (2*cam_zoom);
+		    current_camera->zoom = 2 / zoomlvl + scrlvl;
+		    current_camera->y = GAME_HEIGHT / (2*current_camera->zoom);
 		} else if (py < startlvl) {
-			cam_zoom = (1 - cos( (1/freq)*M_PI*(py + (freq-endlvl) ))) / zoomlvl + scrlvl;
-			cam_center_y = GAME_HEIGHT / (2*cam_zoom);
+		    current_camera->zoom = (1 - cos( (1/freq)*M_PI*(py + (freq-endlvl) ))) / zoomlvl + scrlvl;
+		    current_camera->y = GAME_HEIGHT / (2*current_camera->zoom);
 		} else if (py < 1) {
-			cam_zoom = scrlvl;
-			cam_center_y = currentlvl->height / (2);
+		    current_camera->zoom = scrlvl;
+		    current_camera->y = currentlvl->height / (2);
 		}else{
 			/* undefined zoom! Reset/fix player position? */
 		}
 		break;
 	default:
-		cam_zoom = 1.0f*GAME_HEIGHT/currentlvl->height;
-		cam_center_y = 1.0f*currentlvl->height/2;
+	    current_camera->zoom = 1.0f*GAME_HEIGHT/currentlvl->height;
+		current_camera->y = 1.0f*currentlvl->height/2;
 		break;
 	}
 }
@@ -434,18 +429,19 @@ static void update_camera_position()
 	static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
 	static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
 	static float cam_dx;
-	cam_dx = cam_dx * pos_delay + ((player->data.body->rot.x * pos_rel_x - pos_rel_offset_x) * GAME_WIDTH) * (1 - pos_delay) / cam_zoom;
+	cam_dx = cam_dx * pos_delay + ((player->data.body->rot.x * pos_rel_x - pos_rel_offset_x) * GAME_WIDTH) * (1 - pos_delay) / current_camera->zoom;
 
-	cam_center_x = player->data.body->p.x + cam_dx;
+	current_camera->x = player->data.body->p.x + cam_dx;
 
 	/* camera constraints */
-	cam_width = GAME_WIDTH / (2 * cam_zoom);
+	current_camera->width = GAME_WIDTH / (2 * current_camera->zoom);
 
-	cam_left_limit = currentlvl->left + cam_width;
-	cam_right_limit = currentlvl->right - cam_width;
+	//TODO: move to level init?
+	cam_left_limit = currentlvl->left + current_camera->width;
+	cam_right_limit = currentlvl->right - current_camera->width;
 
-	cam_left = cam_center_x - cam_width;
-	cam_right = cam_center_x + cam_width;
+	current_camera->left = current_camera->x - current_camera->width;
+	current_camera->right = current_camera->x + current_camera->width;
 }
 
 static void SPACE_draw()
@@ -456,8 +452,8 @@ static void SPACE_draw()
 
 	/* translate view */
 	draw_load_identity();
-	draw_scale(cam_zoom,cam_zoom,1);
-	draw_translate(-cam_center_x, -cam_center_y, 0.0f);
+	draw_scale(current_camera->zoom,current_camera->zoom,1);
+	draw_translate(-current_camera->x, -current_camera->y, 0.0f);
 
 	/* draw tilemap */
 	tilemap_render(currentlvl->tiles);
@@ -632,36 +628,36 @@ void draw_gui()
 
 static void render_objects(object_data *obj)
 {
-	if((obj->body->p.x > cam_left - 200) && (obj->body->p.x < cam_right + 200)) {
+	if((obj->body->p.x > current_camera->left - 200) && (obj->body->p.x < current_camera->right + 200)) {
 		obj->preset->render(obj);
 		return;
 	}
 
-	if(cam_center_x < cam_left_limit){
-		float old_cam_x = cam_center_x;
-		float new_cam_center_x = cam_center_x + currentlvl->width;
-		float new_cam_left = new_cam_center_x - cam_width;
-		float new_cam_right = new_cam_center_x + cam_width;
+	if(current_camera->x < cam_left_limit){
+		float old_cam_x = current_camera->x;
+		float new_cam_center_x = current_camera->x + currentlvl->width;
+		float new_cam_left = new_cam_center_x - current_camera->width;
+		float new_cam_right = new_cam_center_x + current_camera->width;
 		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){
-			cam_center_x = new_cam_center_x;
+		    current_camera->x = new_cam_center_x;
 			draw_push_matrix();
 			draw_translate(-(currentlvl->right + abs(currentlvl->left)),0,0);
 			obj->preset->render(obj);
 			draw_pop_matrix();
-			cam_center_x = old_cam_x;
+			current_camera->x = old_cam_x;
 		}
-	}else if(cam_center_x > cam_right_limit){
-		float old_cam_x = cam_center_x;
-		float new_cam_center_x = cam_center_x - currentlvl->width;
-		float new_cam_left = new_cam_center_x - cam_width;
-		float new_cam_right = new_cam_center_x + cam_width;
+	}else if(current_camera->x > cam_right_limit){
+		float old_cam_x = current_camera->x;
+		float new_cam_center_x = current_camera->x - currentlvl->width;
+		float new_cam_left = new_cam_center_x - current_camera->width;
+		float new_cam_right = new_cam_center_x + current_camera->width;
 		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){
-			cam_center_x = new_cam_center_x;
+		    current_camera->x = new_cam_center_x;
 			draw_push_matrix();
 			draw_translate((currentlvl->right + abs(currentlvl->left)),0,0);
 			obj->preset->render(obj);
 			draw_pop_matrix();
-			cam_center_x = old_cam_x;
+			current_camera->x = old_cam_x;
 		}
 	}
 }
@@ -701,13 +697,13 @@ void drawStars()
 
 	draw_push_matrix();
 
-	draw_scale(0.5f * cam_zoom,0.5f * cam_zoom, 1);
+	draw_scale(0.5f * current_camera->zoom,0.5f * current_camera->zoom, 1);
 
 	static float spaceship_angle;
 	spaceship_angle += 0.01f * 360*dt;
 	float cam_angle;
 	if (currentlvl)
-		cam_angle = (cam_center_x - currentlvl->left)  / (currentlvl->right - currentlvl->left) * 360 + spaceship_angle;
+		cam_angle = (current_camera->x - currentlvl->left)  / (currentlvl->right - currentlvl->left) * 360 + spaceship_angle;
 	else
 		cam_angle = spaceship_angle;
 
@@ -962,17 +958,17 @@ void input()
 	 * Camera modes + F11 = timeout + F8 = reload particles (broken)
 	 */
 	if (keys[SDL_SCANCODE_F1]) {
-		cam_mode = 1;
+		current_camera->mode = 1;
 	} else if (keys[SDL_SCANCODE_F2]) {
-		cam_mode = 2;
+		current_camera->mode = 2;
 	} else if (keys[SDL_SCANCODE_F3]) {
-		cam_mode = 3;
+		current_camera->mode = 3;
 	} else if (keys[SDL_SCANCODE_F4]) {
-		cam_mode = 4;
+		current_camera->mode = 4;
 	} else if (keys[SDL_SCANCODE_F5]) {
-		cam_mode = 5;
+		current_camera->mode = 5;
 	} else if (keys[SDL_SCANCODE_F6]) {
-		cam_mode = 6;
+		current_camera->mode = 6;
 	} else if (keys[SDL_SCANCODE_F11]) {
 		game_time = currentlvl->timelimit;
 		return;

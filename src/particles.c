@@ -440,7 +440,7 @@ static void draw_all_particles(emitter *em)
 		draw_color4f(c.r,c.g,c.b,alpha);
 
 		/* make sure particle is wrapped around level */
-		float width = currentlvl->width, dx = cam_center_x - p->p.x;//, absdx = fabsf(dx);
+		float width = currentlvl->width, dx = current_camera->x - p->p.x;//, absdx = fabsf(dx);
 		p->p.x += (dx > 0 ? (dx > width - GAME_WIDTH ? width : 0) : (dx < GAME_WIDTH - width ? -width : 0));
 
 		if (se_inside_view(&p->p, p->size))
