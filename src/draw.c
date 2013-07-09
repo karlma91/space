@@ -39,7 +39,7 @@ int draw_init(){
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-		glGenFramebuffersEXT(1,&light_buffer);
+		glGenFramebuffersEXT(1, &light_buffer);
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, light_buffer);
 		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, light_texture, 0);
 		//NULL means reserve texture memory, but texels are undefined
@@ -101,15 +101,14 @@ void draw_light_map()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0,0,0,0);
 
-	//glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	//glBlendFunc(GL_ONE,GL_ONE_MINUS_SRC_COLOR);
 	glLoadIdentity();
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, TEX_LIGHT);
 	glColor3f(1,1,1);
-	int w = 512;
-	int h = 512;
+	int w = WINDOW_WIDTH;
+	int h = WINDOW_HEIGHT;
 	GLfloat temp[8] = {-w, -h,
 			w,  -h,
 			-w, h,
@@ -133,8 +132,8 @@ static void draw_render_light_map()
 	glBlendFunc(GL_DST_COLOR,GL_SRC_COLOR);
 	//glBlendFunc(GL_ONE,GL_ZERO);
 	glBindTexture(GL_TEXTURE_2D, light_texture);
-	int w = GAME_WIDTH;
-	int h = GAME_HEIGHT;
+	int w = 256;
+	int h = 256;
 	GLfloat temp[8] = {-w, -h,
 			w,  -h,
 			-w, h,

@@ -131,7 +131,7 @@ int texture_init()
 
 	TEX_GLOW_DOT = texture_load("dot.png");
 	TEX_GLOW = texture_load("glow.png");
-	TEX_LIGHT = texture_load("light_white2.png");
+	TEX_LIGHT = texture_load("light2.png");
 
 	return 0;
 }

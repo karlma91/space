@@ -2,6 +2,7 @@
 #include "objects.h"
 #include "spaceengine.h"
 #include "particles.h"
+#include "game.h"
 #include "space.h"
 #include <stdio.h>
 

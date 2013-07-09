@@ -5,26 +5,10 @@
 #include "sprite.h"
 
 
-/**
- * all the types of emitters
- */
-enum emitter_types{
-		EMITTER_FLAME,
-		EMITTER_ROCKET_FLAME,
-		EMITTER_EXPLOSION,
-		EMITTER_SPARKS,
-		EMITTER_SMOKE,
-		EMITTER_SCORE,
-		EMITTER_FRAGMENTS,
-		EMITTER_COUNT
-};
-
-
-
-typedef struct color {
+typedef struct particle_color {
 	float r,g,b;
 	float offset;
-} color;
+} p_color;
 
 typedef struct range {
 	float min,max;
@@ -108,7 +92,7 @@ struct emitter {
 	float startalpha;
 	float endalpha; /* alpha start and end value */
 
-	color colors[10]; /* a list of colors that the particles get the color from */
+	p_color colors[10]; /* a list of colors that the particles get the color from */
 	int color_counter;
 
 	/** data to use in a custom draw function */
@@ -118,14 +102,14 @@ struct emitter {
 };
 
 
-
+int read_emitter_from_file (char *filename);
 void particles_init();
 void particles_destroy();
 void particles_draw();
 void particles_update();
 void particles_release_emitter(emitter* e);
 
-emitter *particles_add_score_popup(cpVect p, int score);
+emitter *particles_add_score_popup(cpVect p,int score);
 emitter *particles_add_sparks(cpVect p, float angle, float force);
 
 void particles_clear();

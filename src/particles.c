@@ -6,6 +6,7 @@
 #include "font.h"
 #include "mxml.h"
 #include "xmlh.h"
+#include "game.h"
 
 #include "waffle_utils.h"
 #include "spaceengine.h"
@@ -16,7 +17,7 @@
 /**
  * parse functions
  */
-static int read_emitter_from_file (int type, char *filename);
+int read_emitter_from_file (char *filename);
 static int parse_range(mxml_node_t *node, range *r);
 static int parse_color_step(mxml_node_t *node, emitter *e);
 
@@ -52,10 +53,14 @@ static void set_particle_available(particle *p);
 /*
  * variables
  */
+static int current_emitter = -1;
 static int max_emitters;
 
 static emitter *main_emitter_pool;
-static emitter emitter_templates[EMITTER_COUNT];
+
+//TODO: make emitter_templates dynamic size
+static emitter emitter_templates[40];
+
 static emitter *emitters_in_use_list;
 static emitter *(*available_emitter_stack);
 static int available_emitter_counter;
@@ -77,19 +82,6 @@ static particle *(available_particle_stack[MAX_PARTICLES]);
 void particles_init()
 {
 	int i;
-#define PARTICLE_STRESS 1
-#if PARTICLE_STRESS
-	read_emitter_from_file(EMITTER_FLAME,"flame_stress.xml");
-#else
-	read_emitter_from_file(EMITTER_FLAME,"flame_3.xml");
-#endif
-	read_emitter_from_file(EMITTER_ROCKET_FLAME,"rocket_flame.xml");
-	read_emitter_from_file(EMITTER_EXPLOSION,"explosion_ground.xml");
-	read_emitter_from_file(EMITTER_SPARKS,"sparks.xml");
-	read_emitter_from_file(EMITTER_SMOKE,"smoke.xml");
-	read_emitter_from_file(EMITTER_SCORE,"score.xml");
-	read_emitter_from_file(EMITTER_FRAGMENTS,"fragments.xml");
-
 	/* sets in use list empty */
 	emitters_in_use_list = NULL;
 
@@ -138,31 +130,6 @@ void particles_draw()
 	emitter *e = emitters_in_use_list;
 	while(e){
 		draw_all_particles(e);
-		prev = &(e->next);
-		e = e->next;
-	}
-}
-
-//TODO remove this method?
-void particles_reload_particles()
-{
-	//TODO remove redundant code!
-	read_emitter_from_file(EMITTER_FLAME,"flame_stress.xml"); //TMP particle stress test //flame_3.xml");
-	read_emitter_from_file(EMITTER_EXPLOSION,"explosion_ground.xml");
-	read_emitter_from_file(EMITTER_SPARKS,"sparks.xml");
-	read_emitter_from_file(EMITTER_SMOKE,"smoke.xml");
-	read_emitter_from_file(EMITTER_SCORE,"score.xml");
-
-	emitter **prev = &(emitters_in_use_list);
-	emitter *e = emitters_in_use_list;
-	while(e){
-		particle *head = e->head;
-		emitter *next = e->next;
-		int rdy = e->waiting_to_die;
-		*e = (emitter_templates[e->type]);
-		e->head = head;
-		e->next = next;
-		e->waiting_to_die = rdy;
 		prev = &(e->next);
 		e = e->next;
 	}
@@ -517,7 +484,7 @@ static void draw_all_particles(emitter *em)
 		offset = offset>1 ? 1 : offset;
 		float inv = 1-offset;
 
-		color a,b,c;
+		p_color a,b,c;
 		float coloffset;
 		float colinv;
 		int i;
@@ -587,10 +554,11 @@ static void default_particle_draw(emitter *em, particle *p)
 /**
  * reads from a xml file made with pedegree slick2d particle editor
  */
-static int read_emitter_from_file (int type,char *filename)
+int read_emitter_from_file (char *filename)
 {
-	emitter *emi = &(emitter_templates[type]);
-	emi->type = type;
+	current_emitter += 1;
+	emitter *emi = &(emitter_templates[current_emitter]);
+	emi->type = current_emitter;
 	emi->color_counter = 0;
 	emi->alive = 1;
 	emi->disable = 0;
@@ -691,7 +659,7 @@ static int read_emitter_from_file (int type,char *filename)
 	}
 
 	mxmlDelete(tree);
-	return 0;
+	return current_emitter;
 }
 
 

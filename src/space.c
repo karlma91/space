@@ -986,9 +986,6 @@ void input()
 	} else if (keys[SDL_SCANCODE_F11]) {
 		game_time = currentlvl->timelimit;
 		return;
-	} else if (keys[SDL_SCANCODE_F8]) {
-		particles_reload_particles();
-		keys[SDL_SCANCODE_F8] = 0;
 	}
 
 	/* DEBUG KEYS*/

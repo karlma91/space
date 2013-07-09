@@ -35,6 +35,16 @@ SPRITE_ID SPRITE_TANK_WHEEL;
 SPRITE_ID SPRITE_TANK_TURRET;
 SPRITE_ID SPRITE_BUTTON_PAUSE;
 //extern SPRITE_ID end
+//extern particles
+int EMITTER_FLAME;
+int EMITTER_ROCKET_FLAME;
+int EMITTER_EXPLOSION;
+int EMITTER_SPARKS;
+int EMITTER_SMOKE;
+int EMITTER_SCORE;
+int EMITTER_FRAGMENTS;
+int EMITTER_COUNT;
+//extern particles end
 
 
 #if !(TARGET_OS_IPHONE || __ANDROID__)
@@ -102,16 +112,33 @@ void game_sprites()
 	SPRITE_PLAYER_GUN =			sprite_link("player_gun");
 	SPRITE_GLOW_DOT =			sprite_link("glow_dot");
 	SPRITE_BUTTON  =			sprite_link("button");
-	SPRITE_BUTTON_PAUSE  =		sprite_link("button_pause");
-	SPRITE_TANK_BODY=			sprite_link("tank_body");
-	SPRITE_TANK_WHEEL=			sprite_link("tank_wheel");
-	SPRITE_TANK_TURRET=			sprite_link("tank_turret");
+	SPRITE_BUTTON_PAUSE =		sprite_link("button_pause");
+	SPRITE_TANK_BODY =			sprite_link("tank_body");
+	SPRITE_TANK_WHEEL =			sprite_link("tank_wheel");
+	SPRITE_TANK_TURRET =		sprite_link("tank_turret");
+}
+
+void game_particles()
+{
+#define PARTICLE_STRESS 1
+#if PARTICLE_STRESS
+    EMITTER_FLAME =         read_emitter_from_file("flame_stress.xml");
+#else
+    EMITTER_FLAME =         read_emitter_from_file("flame_3.xml");
+#endif
+    EMITTER_ROCKET_FLAME =  read_emitter_from_file("rocket_flame.xml");
+    EMITTER_EXPLOSION =     read_emitter_from_file("explosion_ground.xml");
+    EMITTER_SPARKS =        read_emitter_from_file("sparks.xml");
+    EMITTER_SMOKE =         read_emitter_from_file("smoke.xml");
+    EMITTER_SCORE =         read_emitter_from_file("score.xml");
+    EMITTER_FRAGMENTS =     read_emitter_from_file("fragments.xml");
 }
 
 void game_init()
 {
 	//TODO generalize particles.c and ?level.c
 	game_sprites();
+	game_particles();
 	mainmenu_init();
 	level_init();
     menu_init();

@@ -24,7 +24,7 @@ cpShape *se_add_box_shape(cpBody *body, cpFloat width, cpFloat height, cpFloat f
 
 void se_add_score_and_popup(cpVect p, int score)
 {
-	particles_add_score_popup(p, score);
+    particles_add_score_popup(p, score);
 	((object_group_player *) objects_first(ID_PLAYER))->score += score;
 }
 

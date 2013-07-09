@@ -13,7 +13,7 @@
 
 /* Drawing */
 #include "draw.h"
-#include "particles.h"
+#include "game.h"
 #include "font.h"
 
 #include "objects.h"
