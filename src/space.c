@@ -33,6 +33,8 @@
 
 static float accumulator = 0;
 
+//TODO: remove in final game
+
 STATE_ID state_space;
 
 /**
@@ -338,14 +340,33 @@ static void draw()
 
 static void update_camera_zoom(int mode)
 {
+
+
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
+
 	camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
 }
 
 static void update_camera_position()
 {
-	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
-	camera_update(current_camera, player->data.body->p,  player->data.body->rot);
+
+    static int follow_player = 1;
+    if(keys[SDL_SCANCODE_F]){
+        keys[SDL_SCANCODE_F] = 0;
+        follow_player = !follow_player;
+    }
+
+    object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
+    object_group_tank *tank = ((object_group_tank*)objects_first(ID_TANK));
+
+    if(tank != NULL && !follow_player){
+        cpVect vel = tank->data.body->v;
+        vel = cpvnormalize(vel);
+        camera_update(current_camera, tank->data.body->p, cpv(0,1));
+    }else{
+        camera_update(current_camera, player->data.body->p,  player->data.body->rot);
+    }
+
     cam_left_limit = currentlvl->left + current_camera->width;
     cam_right_limit = currentlvl->right - current_camera->width;
 }
@@ -879,6 +900,7 @@ void input()
 		game_time = currentlvl->timelimit;
 		return;
 	}
+
 
 	/* DEBUG KEYS*/
 
