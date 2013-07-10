@@ -104,6 +104,7 @@ void draw_append_quad_simple();
 void draw_append_color_quad();
 void draw_append_color_tex_quad();
 void draw_flush();
+void draw_flush_and_multiply();
 void draw_flush_color();
 void draw_flush_simple();
 

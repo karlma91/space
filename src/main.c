@@ -313,6 +313,7 @@ static void main_init() {
 	sound_init();
 	texture_init();     /* preload textures */
 	sprite_init();
+    bmfont_init();
 	draw_init();        /* initializes circular shapes and rainbow colors */
 	particles_init();   /* load and prepare all particle systems */
 	//font_init();      /* (currently not in use) */
@@ -437,7 +438,7 @@ static void main_tick(void *data)
 		if (gl_error) SDL_Log("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error);
 
 		if (frames >= 1) {
-			sprintf(&fps_buf[0], "%.2f FPS", fps);
+			sprintf(&fps_buf[0], "%.2f FPS ", fps);
 			SDL_Log("%s frame: %d ms", fps_buf, SDL_GetTicks() - thisTime);
 			frames = 0;
 			fps = 0;

@@ -51,6 +51,11 @@ static void draw() {
 
 	int i;
 
+	draw_color4f(1,1,1,1);
+	bmfont_render(FONT_NORMAL,TEXT_CENTER, 0, 0.6f*GAME_HEIGHT/2,"Grumpy wizards make toxic brew for the evil Queen and Jack\n%d",123456789);
+	bmfont_render(FONT_NORMAL,TEXT_CENTER, 0, 0.5f*GAME_HEIGHT/2,"!\"#$%&\'()*+,-./:;<=>?@[\\]^_{|}~");
+	bmfont_render(FONT_BIG,TEXT_CENTER, 0, 0.3f*GAME_HEIGHT/2,"Grumpy wizards make toxic brew for the evil Queen and Jack\n%d",123456789);
+	bmfont_render(FONT_BIG,TEXT_CENTER, 0, 0.4f*GAME_HEIGHT/2,"!\"#$%&\'()*+,-./:;<=>?@[\\]^_{|}~");
 	draw_color4f(1,0,0,1);
 	draw_box(0,0,100,100,0,1);
 

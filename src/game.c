@@ -45,6 +45,9 @@ int EMITTER_SCORE;
 int EMITTER_FRAGMENTS;
 int EMITTER_COUNT;
 //extern particles end
+//extern fonts
+bm_font * FONT_NORMAL;
+bm_font * FONT_BIG;
 
 /* GLOBAL SOUND CHUNKS */
 Mix_Chunk *SND_LASER_1;
@@ -144,6 +147,12 @@ void game_particles()
     EMITTER_FRAGMENTS =     read_emitter_from_file("fragments.xml");
 }
 
+void game_font()
+{
+   FONT_NORMAL = bmfont_read_font("Arial.fnt");
+   FONT_BIG = bmfont_read_font("bigariel.fnt");
+}
+
 void game_audio()
 {
 	SND_LASER_1 = sound_load_chunk("laser_01.ogg");
@@ -161,6 +170,7 @@ void game_init()
 	game_sprites();
 	game_audio();
 	game_particles();
+	game_font();
 	mainmenu_init();
 	level_init();
     menu_init();

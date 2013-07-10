@@ -58,4 +58,10 @@ extern int waffle_read_file(char *filename, char *buffer, int len);
  */
 extern FILE *waffle_internal_fopen(const char *filename, const char *opentype);
 
+/*
+ * return number of chars until next '\n'
+ */
+int waffle_next_line(char *file);
+
+
 #endif //WAFFLE_UTILS_H_

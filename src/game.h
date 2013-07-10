@@ -13,6 +13,7 @@
 #include "sound.h"
 #include "particles.h"
 #include "customparticles.h"
+#include "bmfont.h"
 
 extern STATE_ID state_mainmenu;
 extern STATE_ID state_menu;
@@ -37,6 +38,9 @@ extern int EMITTER_SMOKE;
 extern int EMITTER_SCORE;
 extern int EMITTER_FRAGMENTS;
 extern int EMITTER_COUNT;
+
+extern bm_font * FONT_NORMAL;
+extern bm_font * FONT_BIG;
 
 /* GLOBAL SOUND CHUNKS */
 extern Mix_Chunk *SND_LASER_1;

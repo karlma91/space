@@ -560,6 +560,22 @@ void draw_flush()
 	matrix2d_reset();
 	glDisable(GL_TEXTURE_2D);
 }
+
+void draw_flush_and_multiply()
+{
+    glEnable(GL_TEXTURE_2D);
+    float *vertex = matrix2d_get_vertex_data();
+    float *tex = matrix2d_get_tex_data();
+    int size = matrix2d_get_count();
+
+    matrix2d_multiply(vertex,size);
+
+    glVertexPointer(2, GL_FLOAT, 0, vertex);
+    glTexCoordPointer(2, GL_FLOAT, 0, tex);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2);
+    matrix2d_reset();
+    glDisable(GL_TEXTURE_2D);
+}
 void draw_flush_simple()
 {
 	float *vertex = matrix2d_get_vertex_data();

@@ -140,6 +140,17 @@ int waffle_read_file(char *filename, char *buffer, int len)
 	}
 }
 
+int waffle_next_line(char *file)
+{
+    int i = 0;
+    while(file[i] != '\n'){
+        if(file[i] == '\0')
+            return -1;
+        i++;
+    }
+    return i;
+}
+
 FILE *waffle_internal_fopen(const char *filename, const char *opentype)
 {
 	char *folder = "";
