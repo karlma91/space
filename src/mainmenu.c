@@ -56,11 +56,9 @@ static void draw() {
 	bmfont_render(FONT_NORMAL,TEXT_CENTER, 0, 0.5f*GAME_HEIGHT/2,"!\"#$%&\'()*+,-./:;<=>?@[\\]^_{|}~");
 	bmfont_render(FONT_BIG,TEXT_CENTER, 0, 0.3f*GAME_HEIGHT/2,"Grumpy wizards make toxic brew for the evil Queen and Jack\n%d",123456789);
 	bmfont_render(FONT_BIG,TEXT_CENTER, 0, 0.4f*GAME_HEIGHT/2,"!\"#$%&\'()*+,-./:;<=>?@[\\]^_{|}~");
-	draw_color4f(1,0,0,1);
-	draw_box(0,0,100,100,0,1);
 
-	draw_color4f(0,0.2,0.9,1);
 	for (i = 0; i < BUTTON_COUNT; i++) {
+		draw_color4f(0,0.2,0.9,1);
 		button_render(buttons[i]);
 	}
 }
@@ -109,7 +107,7 @@ void mainmenu_init() {
 
 	int i;
 	for (i = 0; i < BUTTON_COUNT; i++) {
-		buttons[i] = button_create(SPRITE_BUTTON, 1, txt_buttons[i], 0, -i*140, 350, 100);
+		buttons[i] = button_create(SPRITE_BUTTON, 1, txt_buttons[i], 0, -i*160, 500, 140);
 		button_set_callback(buttons[i], call_buttons[i]);
 	}
 }

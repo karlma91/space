@@ -90,20 +90,21 @@ void button_render(button btn_id)
 	if (btn->spr.id) {
 		if (btn->stretch) {
 			//draw_glow_line(btn->p1x,btn->p1y,btn->p2x,btn->p2y,btn->height);
-		    float btnh = btn->height/2 + 10;
-			draw_sprite_line(&(btn->spr),btn->p1x, btn->p1y + btnh, btn->p2x, btn->p2y - btnh, btn->height);
+			draw_sprite_line(&(btn->spr),btn->pos_x - btn->width/2, btn->pos_y, btn->pos_x + btn->width/2, btn->pos_y, btn->height);
 		} else {
 			sprite_render(&(btn->spr), &btn_pos, 0);
 		}
 	}
 
 	if (btn->label) {
-		//TODO create font struct
+		//TODO create font struct with color + size + alignment + angle
 		setTextAlign(TEXT_CENTER);
 		setTextAngle(0);
 
-		setTextSize(btn->height / 3);
-		font_drawText(btn->pos_x, btn->pos_y, btn->label);
+		draw_color4f(1,1,1,1);
+
+		setTextSize(btn->height / 4);
+		font_drawText(btn->pos_x, btn->pos_y + 12, btn->label);
 	}
 }
 
