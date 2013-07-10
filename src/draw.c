@@ -248,6 +248,57 @@ void draw_line(int tex_id, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float
 	glDisable(GL_TEXTURE_2D);
 
 }
+void draw_sprite_line(sprite *spr, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
+{
+
+    glEnable(GL_TEXTURE_2D);
+
+    draw_push_matrix();
+    draw_translate(x0, y0, 0.0f);
+    draw_rotate(atan2f(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
+    GLfloat length = sqrtf((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
+    draw_scale(1,w,1);
+
+    w /=2; // tmp-fix
+
+
+    GLfloat line_mesh[16] = {-w, -0.5,
+            -w,  0.5,
+            0, -0.5,
+            0,  0.5,
+            length, -0.5,
+            length,  0.5,
+            length+w, -0.5,
+            length+w,  0.5};
+
+    GLfloat tex_map[8];
+    sprite_get_current_image(spr,tex_map);
+
+    float tx_1 = tex_map[0];
+    float tx_2 = tex_map[2];
+    float tx_h = tx_1 + (tx_2-tx_1)/2;
+    float ty_1 = tex_map[1];
+    float ty_2 = tex_map[5];
+
+    GLfloat line_texture[16] = {tx_1, ty_1,
+            tx_1,  ty_2,
+            tx_h, ty_1,
+            tx_h,  ty_2,
+            tx_h, ty_1,
+            tx_h,  ty_2,
+            tx_2, ty_1,
+            tx_2,  ty_2};
+
+    draw_vertex_pointer(2, GL_FLOAT, 0, line_mesh);
+    draw_tex_pointer( 2, GL_FLOAT, 0, line_texture );
+
+    texture_bind(sprite_get_texture(spr));
+    draw_draw_arrays(GL_TRIANGLE_STRIP,0, 8);
+
+    draw_pop_matrix();
+    glDisable(GL_TEXTURE_2D);
+
+}
 
 void draw_glow_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {

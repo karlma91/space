@@ -99,6 +99,9 @@ void draw_current_texture_all(cpVect *pos, const float *tex_map, float width, fl
 void draw_current_texture_append(cpVect *pos, const float *tex_map, float width, float height, float angle);
 void draw_box_append(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered);
 
+void draw_sprite_line(sprite *spr, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
+
+
 void draw_append_quad();
 void draw_append_quad_simple();
 void draw_append_color_quad();

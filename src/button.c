@@ -89,7 +89,9 @@ void button_render(button btn_id)
 
 	if (btn->spr.id) {
 		if (btn->stretch) {
-			draw_glow_line(btn->p1x,btn->p1y,btn->p2x,btn->p2y,btn->height);
+			//draw_glow_line(btn->p1x,btn->p1y,btn->p2x,btn->p2y,btn->height);
+		    float btnh = btn->height/2 + 10;
+			draw_sprite_line(&(btn->spr),btn->p1x, btn->p1y + btnh, btn->p2x, btn->p2y - btnh, btn->height);
 		} else {
 			sprite_render(&(btn->spr), &btn_pos, 0);
 		}

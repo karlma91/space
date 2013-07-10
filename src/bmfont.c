@@ -41,11 +41,11 @@ bm_font * bmfont_read_font(char *filename)
         tree = mxmlLoadString(NULL, buffer, MXML_OPAQUE_CALLBACK);
     }else {
         SDL_Log("Could Not Open the File Provided");
-        return 1;
+        exit(1);
     }
         if(tree == NULL){
             SDL_Log("BMFONT: file %s is empty \n", fileread);
-            return 1;
+            exit(1);
         }
         for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
                 node != NULL;
