@@ -776,8 +776,7 @@ static void game_over()
 
 static void pause_game()
 {
-	menu_change_current_menu(MENU_INGAME);
-	statesystem_push_state(state_menu);
+	statesystem_push_state(state_pause);
 	game_paused = 1;
 }
 
@@ -950,7 +949,6 @@ void space_start_demo() {
 
 	space_init_level(1,1);
 	statesystem_set_state(state_space);
-	menu_change_current_menu(MENU_INGAME);
 }
 
 void space_start_multiplayer() {
@@ -959,5 +957,4 @@ void space_start_multiplayer() {
 
 	space_init_level(1,1);
 	statesystem_set_state(state_space);
-	menu_change_current_menu(MENU_INGAME);
 }

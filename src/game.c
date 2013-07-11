@@ -1,12 +1,17 @@
 #include "game.h"
 #include "main.h"
 #include "menu.h"
+#include "settings.h"
 #include "space.h"
 #include "gameover.h"
 #include "mainmenu.h"
 #include "stations.h"
 #include "levelselect.h"
 #include "levelscreen.h"
+#include "pause.h"
+#include "upgrades.h"
+#include "leveldone.h"
+
 
 #if !(TARGET_OS_IPHONE || __ANDROID__)
 #include "ini.h"
@@ -173,10 +178,16 @@ void game_init()
 	game_audio();
 	game_particles();
 	game_font();
+
+	/* init all states */
 	mainmenu_init();
 	level_init();
     menu_init();
+    settings_init();
     space_init();
+    pause_init();
+    leveldone_init();
+    upgrades_init();
     gameover_init();
     levelselect_init();
     stations_init();
