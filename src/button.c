@@ -5,6 +5,7 @@
  *      Author: Mathias
  */
 
+#include "string.h"
 #include "button.h"
 #include "main.h"
 #include "draw.h"
@@ -22,7 +23,7 @@ struct button {
 	SDL_FingerID finger_id;
 
 	sprite spr;
-	char *label;
+	char label[50];
 	int stretch;
 
 	int pressed; /* whether if button is currently pressed down */
@@ -54,7 +55,7 @@ button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, flo
 	btn->height = height;
 
 	btn->stretch = stretch;
-	btn->label = text;
+	strcpy(btn->label, text);
 
 	btn->callback = NULL;
 	btn->data = NULL;

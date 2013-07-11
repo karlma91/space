@@ -108,7 +108,6 @@ static void on_leave()
 
 }
 
-
 static void pre_update()
 {
 	int i;

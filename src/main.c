@@ -176,7 +176,6 @@ static void setAspectRatio() {
 
 static void display_init()
 {
-
 	SDL_Log("DEBUG - SDL_init\n");
 	if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
 		SDL_Log("ERROR: SDL_INIT_VIDEO: %s", SDL_GetError());

@@ -4,6 +4,7 @@
 #include "space.h"
 #include "gameover.h"
 #include "mainmenu.h"
+#include "stations.h"
 #include "levelselect.h"
 
 #if !(TARGET_OS_IPHONE || __ANDROID__)
@@ -177,7 +178,8 @@ void game_init()
     space_init();
     gameover_init();
     levelselect_init();
+    stations_init();
 
     //statesystem_set_state(state_menu);
-    statesystem_set_state(state_mainmenu);
+    statesystem_set_state(state_stations);
 }

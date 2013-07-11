@@ -3,7 +3,12 @@
 
 #include "chipmunk.h"
 
-typedef struct _camera {
+typedef struct {
+
+	float port_x;
+	float port_y;
+	float port_width;
+	float port_height;
 
     int mode;
     float left;
@@ -18,6 +23,7 @@ typedef struct _camera {
 } camera;
 
 
+void camera_init(camera *cam, float port_x, float port_y, float port_w, float port_h);
 void camera_update(camera *cam, cpVect pos, cpVect rot);
 void camera_update_zoom(camera *cam, cpVect pos, float level_height);
 void camera_move(camera * cam, float x, float y);
