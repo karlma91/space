@@ -15,11 +15,15 @@
 #include "customparticles.h"
 #include "bmfont.h"
 
-extern STATE_ID state_mainmenu;
-extern STATE_ID state_menu;
+extern STATE_ID state_menu; /* deprecated state! */
+extern STATE_ID state_gameover; /* deprecated state! */
+extern STATE_ID state_levelselect; /* deprecated state! */
+extern STATE_ID state_mainmenu; /* deprecated state! */
+extern STATE_ID state_settings;
 extern STATE_ID state_space;
-extern STATE_ID state_gameover;
-extern STATE_ID state_levelselect;
+extern STATE_ID state_pause;
+extern STATE_ID state_upgrades;
+extern STATE_ID state_leveldone;
 extern STATE_ID state_stations;
 
 extern SPRITE_ID SPRITE_PLAYER;
