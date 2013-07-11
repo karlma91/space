@@ -15,8 +15,8 @@
 
 STATE_ID state_levelscreen;
 
-
-static button levels[10];
+#define MAX_LEVELS 10
+static button btn_levels[MAX_LEVELS];
 
 static int level_count = 0;
 static level_ship *current_ship;
@@ -41,38 +41,9 @@ static void post_update()
 static void draw()
 {
 	bmfont_render(FONT_BIG,0, 0, 0.7f*GAME_HEIGHT/2,"SPACE");
-	int i;
-	for (i = 0; i < level_count; i++) {
-		draw_color4f(0,0.2,0.9,1);
-		button_render(levels[i]);
-	}
 }
 
 static void sdl_event(SDL_Event *event) {
-	int i;
-	switch (event->type) {
-	case SDL_FINGERDOWN:
-		for (i = 0; i < level_count; i++) {
-			if (button_finger_down(levels[i], &event->tfinger)) {
-				break;
-			}
-		}
-		break;
-	case SDL_FINGERMOTION:
-		for (i = 0; i < level_count; i++) {
-			button_finger_move(levels[i], &event->tfinger);
-		}
-		break;
-	case SDL_FINGERUP:
-		for (i = 0; i < level_count; i++) {
-			if (button_finger_up(levels[i], &event->tfinger)) {
-				//TODO add callback function for buttons
-				//button_call(buttons[i]);
-				break;
-			}
-		}
-		break;
-	}
 }
 
 static void on_leave()
@@ -87,6 +58,15 @@ void levelscreen_change_to(level_ship * ship)
 {
 	current_ship = ship;
 	level_count = ship->count;
+
+	int i;
+	for (i = 0; i < level_count; i++) {
+		button_set_visibility(btn_levels[i], 1);
+	}
+	for (;i < MAX_LEVELS; i++) {
+		button_set_visibility(btn_levels[i], 0);
+	}
+
 	statesystem_push_state(state_levelscreen);
 }
 
@@ -99,13 +79,21 @@ static void button_callback(void *data)
 void levelscreen_init()
 {
 	statesystem_register(state_levelscreen,0);
+
+	Color col_back = {0,0.2,0.9,1};
+	Color col_text = {1,1,1,1};
+
 	int i;
-	for (i = 0; i < 10; i++) {
-		char stri[10];
+	for (i = 0; i < MAX_LEVELS; i++) {
+		char stri[MAX_LEVELS];
 		sprintf(stri, "%d", i+1);
-		levels[i] = button_create(SPRITE_BUTTON, 1, stri, -GAME_WIDTH/3 + i*160, 200, 60, 140);
-		button_set_data(levels[i], i+1);
-		button_set_callback(levels[i], button_callback);
+		btn_levels[i] = button_create(SPRITE_BUTTON, 1, stri, -GAME_WIDTH/3 + i*160, 200, 60, 140);
+
+		button_set_data(btn_levels[i], i+1);
+		button_set_callback(btn_levels[i], button_callback);
+		button_set_backcolor(btn_levels[i], col_back);
+		button_set_frontcolor(btn_levels[i], col_text);
+		statesystem_register_touchable(state_levelscreen, btn_levels[i]);
 	}
 }
 

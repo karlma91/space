@@ -193,14 +193,15 @@ static void level_cleared()
 }
 static void level_transition()
 {
+#if ARCADE_MODE
 	//if(state_timer > 1){
 		//space_init_level(1,1);
 		if (lvl_cleared==1) {
+			statesystem_set_state(state_leveldone);
 			//TODO remove tmp next level
 			int next_lvl = currentlvl->deck + 1;
 			if (next_lvl > level_get_level_count(currentlvl->station)) {
 				gameover_setstate(GAMEOVER_WIN);
-			    statesystem_set_state(state_gameover);
 			} else {
 				space_init_level(1,next_lvl); //TODO TMP
 			}
@@ -211,6 +212,9 @@ static void level_transition()
 		/* update objects to move shapes to same position as body */
 		change_state(LEVEL_START);
 	//}
+#else
+	statesystem_push_state(state_leveldone);
+#endif
 }
 
 /**
@@ -769,9 +773,7 @@ static void on_enter()
 static void game_over()
 {
 	lvl_cleared=0;
-	statesystem_set_state(state_gameover);
-	gameover_setstate(enter_name);
-	//change_state(LEVEL_TRANSITION);
+	statesystem_push_state(state_leveldone);
 }
 
 static void pause_game()

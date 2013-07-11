@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include "statesystem.h"
 #include "../lib/LList/llist.h"
+#include "touch.h"
 
 #define MAX_INNER_STATES 10
 
@@ -18,6 +19,8 @@ struct systemstate {
     int current_inner_state;
     float time_alive;
     float time_in_inner_state;
+
+    LList touch_objects;
 
     void (*inner_update[MAX_INNER_STATES])();
     void (*inner_draw[MAX_INNER_STATES])();
@@ -55,6 +58,8 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
     state->call.sdl_event = funcs->sdl_event;
     state->call.on_leave = funcs->on_leave;
     state->call.destroy = funcs->destroy;
+
+    state->touch_objects = llist_create();
 
     state->prev = NULL;
     state->next = NULL;
@@ -122,6 +127,14 @@ void statesystem_update()
 		stack_head->call.pre_update();
 	}
 
+	LList list = stack_head->touch_objects;
+	llist_begin_loop(list);
+	while(llist_hasnext(list)) {
+		void *touchy = llist_next(list);
+		((touch_calls *) (*(void **)touchy))->update(touchy);
+	}
+	llist_end_loop(list);
+
 	if(stack_head->inner_states > 0 &&
 			stack_head->inner_update[stack_head->current_inner_state]){
 		stack_head->inner_update[stack_head->current_inner_state]();
@@ -134,17 +147,29 @@ void statesystem_update()
 
 void statesystem_draw()
 {
-    State *stack_temp = stack_tail;
-    while(stack_temp){
-    	state_beeing_rendered = stack_temp->id;
-        stack_temp->call.draw();
-        if(stack_temp->inner_states > 0 &&
-                stack_temp->inner_draw[stack_temp->current_inner_state]){
-            stack_temp->inner_draw[stack_temp->current_inner_state]();
-        }
-        stack_temp = stack_temp->next;
+    State *state = stack_tail;
+    while(state){
+    	state_beeing_rendered = state->id;
+    	state->call.draw();
+    	if(state->inner_states > 0 &&
+    			state->inner_draw[state->current_inner_state]){
+    		state->inner_draw[state->current_inner_state]();
+    	}
+
+    	LList list = state->touch_objects;
+    	llist_begin_loop(list);
+    	while(llist_hasnext(list)) {
+    		void *touchy = llist_next(list);
+    		if (button_is_visible(touchy)) {
+    			((touch_calls *) (*(void **)touchy))->render(touchy);
+    		}
+    	}
+    	llist_end_loop(list);
+
+    	state = state->next;
 
     }
+
     state_beeing_rendered = NULL;
 }
 
@@ -170,6 +195,8 @@ void statesystem_free(STATE_ID state_id)
 		// free(state->inner_update);
 		//  free(state->inner_draw);
 	}
+
+	llist_destroy(state->touch_objects);
 }
 
 void statesystem_push_event(SDL_Event *event)
@@ -177,9 +204,50 @@ void statesystem_push_event(SDL_Event *event)
 	if (stack_head->call.sdl_event) {
 		stack_head->call.sdl_event(event);
 	}
+
+	LList list = stack_head->touch_objects;
+	llist_begin_loop(list);
+	switch(event->type) {
+	case SDL_FINGERDOWN:
+		while(llist_hasnext(list)) {
+			void *touchy = llist_next(list);
+			if (button_is_enabled(touchy)) {
+				if (((touch_calls *) (*(void **)touchy))->touch_down(touchy, &event->tfinger))
+					break;
+			}
+		}
+		break;
+	case SDL_FINGERMOTION:
+		while(llist_hasnext(list)) {
+			void *touchy = llist_next(list);
+			if (button_is_enabled(touchy)) {
+				if (((touch_calls *) (*(void **)touchy))->touch_motion(touchy, &event->tfinger))
+					break;
+			}
+		}
+		break;
+	case SDL_FINGERUP:
+		while(llist_hasnext(list)) {
+			void *touchy = llist_next(list);
+			if (button_is_enabled(touchy)) {
+				if (((touch_calls *) (*(void **)touchy))->touch_up(touchy, &event->tfinger))
+					break;
+			}
+		}
+		break;
+	}
+	llist_end_loop(list);
 }
 
 STATE_ID statesystem_get_render_state()
 {
 	return state_beeing_rendered;
+}
+
+
+void statesystem_register_touchable(STATE_ID state_id, void *touchable)
+{
+	State *state = (State *) state_id;
+
+	llist_add(state->touch_objects, touchable);
 }

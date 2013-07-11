@@ -19,7 +19,7 @@ STATE_ID state_stations;
 
 char *txt_buttons[30];
 
-static button *buttons;
+static button *btn_stations;
 
 static button home_button;
 
@@ -46,39 +46,10 @@ static void post_update()
 static void draw()
 {
 	bmfont_render(FONT_BIG,0, 0, 0.7f*GAME_HEIGHT/2,"SPACE");
-	int i;
-	for (i = 0; i < station_count; i++) {
-		draw_color4f(0,0.2,0.9,1);
-		button_render(buttons[i]);
-	}
 }
 
 
 static void sdl_event(SDL_Event *event) {
-	int i;
-	switch (event->type) {
-	case SDL_FINGERDOWN:
-		for (i = 0; i < station_count; i++) {
-			if (button_finger_down(buttons[i], &event->tfinger)) {
-				break;
-			}
-		}
-		break;
-	case SDL_FINGERMOTION:
-		for (i = 0; i < station_count; i++) {
-			button_finger_move(buttons[i], &event->tfinger);
-		}
-		break;
-	case SDL_FINGERUP:
-		for (i = 0; i < station_count; i++) {
-			if (button_finger_up(buttons[i], &event->tfinger)) {
-				//TODO add callback function for buttons
-				//button_call(buttons[i]);
-				break;
-			}
-		}
-		break;
-	}
 }
 
 
@@ -102,15 +73,21 @@ void stations_init()
 
 	level_get_ships(&stations, &station_count);
 
-	buttons = calloc(station_count, sizeof(button));
+	btn_stations = calloc(station_count, sizeof(button));
+
+	Color col_back = {0,0.2,0.9,1};
+	Color col_text = {1,1,1,1};
 
 	int i;
 	for (i = 0; i < station_count; i++) {
 		char stri[10];
-		sprintf(stri, "TEKST %d", i+1);
-		buttons[i] = button_create(SPRITE_BUTTON, 1, stri, 0, -i*160, 140, 140);
-		button_set_data(buttons[i], &stations[i]);
-		button_set_callback(buttons[i], button_callback);
+		sprintf(stri, "SHIP %d", i+1);
+		btn_stations[i] = button_create(SPRITE_BUTTON, 1, stri, 0, -i*160, 140, 140);
+		button_set_data(btn_stations[i], &stations[i]);
+		button_set_callback(btn_stations[i], button_callback);
+		button_set_backcolor(btn_stations[i], col_back);
+		button_set_frontcolor(btn_stations[i], col_text);
+		statesystem_register_touchable(state_stations, btn_stations[i]);
 	}
 
 }

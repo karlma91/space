@@ -11,6 +11,8 @@
 #include "draw.h"
 #include "font.h"
 
+#define THIS_IS_A_TOUCH_OBJECT 1
+#include "touch.h"
 
 static int BUTTON_UP = 0;
 static int BUTTON_DOWN = 1;
@@ -20,6 +22,8 @@ static int BUTTON_DOWN = 1;
 #define inside(btn,px,py) ((px >= btn->p1x) && (px <= btn->p2x) && (py >= btn->p1y) && (py <= btn->p2y))
 
 struct button {
+	const touch_calls *calls;
+
 	SDL_FingerID finger_id;
 
 	sprite spr;
@@ -42,12 +46,20 @@ struct button {
 	float p2x;
 	float p2y;
 
+	int enabled;
+	int visible;
+
+	Color backcol;
+	Color frontcol;
+
 	void *data;
 };
 
 button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, float pos_y, float width, float height)
 {
 	struct button *btn = malloc(sizeof(*btn));
+
+	REGISTER_CALLS(btn);
 
 	btn->pos_x = pos_x;
 	btn->pos_y = pos_y;
@@ -59,6 +71,9 @@ button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, flo
 
 	btn->callback = NULL;
 	btn->data = NULL;
+
+	btn->visible = 1;
+	btn->enabled = 1;
 
 	sprite_create(&(btn->spr), spr_id, width, height, 0);
 
@@ -85,6 +100,48 @@ void button_set_data(button btn_id, void *data)
 	btn->data = data;
 }
 
+
+void button_set_backcolor(button btn_id, Color col)
+{
+	struct button *btn = (struct button *) btn_id;
+	btn->backcol.a = col.a;
+	btn->backcol.r = col.r;
+	btn->backcol.g = col.g;
+	btn->backcol.b = col.b;
+}
+
+void button_set_frontcolor(button btn_id, Color col)
+{
+	struct button *btn = (struct button *) btn_id;
+	btn->frontcol.a = col.a;
+	btn->frontcol.r = col.r;
+	btn->frontcol.g = col.g;
+	btn->frontcol.b = col.b;
+}
+
+void button_set_visibility(button btn_id, int visible)
+{
+	struct button *btn = (struct button *) btn_id;
+	btn->visible = visible;
+}
+
+void button_set_enabled(button btn_id, int enabled)
+{
+	struct button *btn = (struct button *) btn_id;
+	btn->enabled = enabled;
+}
+
+int button_is_visible(button btn_id)
+{
+	return ((struct button *) btn_id)->visible;
+}
+
+int button_is_enabled(button btn_id)
+{
+	return ((struct button *) btn_id)->enabled;
+}
+
+
 void button_free(button btn_id)
 {
 	free(btn_id);
@@ -92,30 +149,7 @@ void button_free(button btn_id)
 
 void button_render(button btn_id)
 {
-	struct button *btn = (struct button *) btn_id;
 
-	cpVect btn_pos = {btn->pos_x,btn->pos_y};
-
-
-	if (btn->spr.id) {
-		if (btn->stretch) {
-			//draw_glow_line(btn->p1x,btn->p1y,btn->p2x,btn->p2y,btn->height);
-			draw_sprite_line(&(btn->spr),btn->pos_x - btn->width/2, btn->pos_y, btn->pos_x + btn->width/2, btn->pos_y, btn->height);
-		} else {
-			sprite_render(&(btn->spr), &btn_pos, 0);
-		}
-	}
-
-	if (btn->label) {
-		//TODO create font struct with color + size + alignment + angle
-		setTextAlign(TEXT_CENTER);
-		setTextAngle(0);
-
-		draw_color4f(1,1,1,1);
-
-		setTextSize(btn->height / 4);
-		font_drawText(btn->pos_x, btn->pos_y + 12, btn->label);
-	}
 }
 
 int button_isdown(button btn_id)
@@ -135,8 +169,65 @@ void button_clear(button btn_id)
 
 int button_finger_down(button btn_id, SDL_TouchFingerEvent *finger)
 {
-	//TODO check if registered touch_id corresponds to current touch_id, to clear uncaught release
 
+}
+
+int button_finger_move(button btn_id, SDL_TouchFingerEvent *finger)
+{
+
+}
+
+//TODO s�rg for at pressed settes til 0 ved state change?
+int button_finger_up(button btn_id, SDL_TouchFingerEvent *finger)
+{
+
+}
+
+void button_click(button btn_id)
+{
+	struct button *btn = (struct button *) btn_id;
+	if (btn->callback) {
+		btn->callback(btn->data);
+	}
+}
+
+/* UNUSED METHOD */
+static void update(button btn_id)
+{
+}
+
+static void render(button btn_id)
+{
+	struct button *btn = (struct button *) btn_id;
+
+	cpVect btn_pos = {btn->pos_x,btn->pos_y};
+
+
+	if (btn->spr.id) {
+		draw_color(btn->backcol);
+		if (btn->stretch) {
+			//draw_glow_line(btn->p1x,btn->p1y,btn->p2x,btn->p2y,btn->height);
+			draw_sprite_line(&(btn->spr),btn->pos_x - btn->width/2, btn->pos_y, btn->pos_x + btn->width/2, btn->pos_y, btn->height);
+		} else {
+			sprite_render(&(btn->spr), &btn_pos, 0);
+		}
+	}
+
+	if (btn->label) {
+		//TODO create font struct with color + size + alignment + angle
+		setTextAlign(TEXT_CENTER);
+		setTextAngle(0);
+
+		draw_color(btn->frontcol);
+
+		setTextSize(btn->height / 4);
+		font_drawText(btn->pos_x, btn->pos_y + 12, btn->label);
+	}
+}
+
+static int touch_down(button btn_id, SDL_TouchFingerEvent *finger)
+{
+	//TODO check if registered touch_id corresponds to current touch_id, to clear uncaught release
 	struct button *btn = (struct button *) btn_id;
 
 	float tx = finger->x, ty = finger->y;
@@ -152,7 +243,7 @@ int button_finger_down(button btn_id, SDL_TouchFingerEvent *finger)
 	return 0;
 }
 
-int button_finger_move(button btn_id, SDL_TouchFingerEvent *finger)
+static int touch_motion(button btn_id, SDL_TouchFingerEvent *finger)
 {
 	struct button *btn = (struct button *) btn_id;
 
@@ -170,8 +261,7 @@ int button_finger_move(button btn_id, SDL_TouchFingerEvent *finger)
 	return 1;
 }
 
-//TODO s�rg for at pressed settes til 0 ved state change?
-int button_finger_up(button btn_id, SDL_TouchFingerEvent *finger)
+static int touch_up(button btn_id, SDL_TouchFingerEvent *finger)
 {
 	struct button *btn = (struct button *) btn_id;
 
@@ -192,10 +282,3 @@ int button_finger_up(button btn_id, SDL_TouchFingerEvent *finger)
 	return 0;
 }
 
-void button_click(button btn_id)
-{
-	struct button *btn = (struct button *) btn_id;
-	if (btn->callback) {
-		btn->callback(btn->data);
-	}
-}

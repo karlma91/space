@@ -18,6 +18,8 @@
 #endif
 
 //TODO move game specific code from main.c into this file
+
+/* Default keybindings for desktop version */
 unsigned int KEY_UP_1 = SDL_SCANCODE_W;
 unsigned int KEY_UP_2 = SDL_SCANCODE_UP;
 unsigned int KEY_LEFT_1 = SDL_SCANCODE_A;
@@ -32,7 +34,7 @@ unsigned int KEY_RETURN_2 = SDL_SCANCODE_RETURN;
 unsigned int KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
 
 
-//extern SPRITE_ID start
+/* global sprite definitions */
 SPRITE_ID SPRITE_PLAYER;
 SPRITE_ID SPRITE_PLAYER_GUN;
 SPRITE_ID SPRITE_GLOW_DOT;
@@ -41,8 +43,9 @@ SPRITE_ID SPRITE_TANK_BODY;
 SPRITE_ID SPRITE_TANK_WHEEL;
 SPRITE_ID SPRITE_TANK_TURRET;
 SPRITE_ID SPRITE_BUTTON_PAUSE;
-//extern SPRITE_ID end
-//extern particles
+/* end of global sprite definitions*/
+
+/* global emitter */
 int EMITTER_FLAME;
 int EMITTER_ROCKET_FLAME;
 int EMITTER_EXPLOSION;
@@ -51,7 +54,8 @@ int EMITTER_SMOKE;
 int EMITTER_SCORE;
 int EMITTER_FRAGMENTS;
 int EMITTER_COUNT;
-//extern particles end
+/* extern particles end */
+
 //extern fonts
 bm_font * FONT_NORMAL;
 bm_font * FONT_BIG;

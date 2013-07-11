@@ -15,16 +15,13 @@
 
 STATE_ID state_mainmenu;
 
-static enum {
-	PLAY_DEMO, MULTIPLAYER, SETTINGS, HIGHSCORES, //TMP
-	BUTTON_COUNT
-} mainmenu;
+#define BUTTON_COUNT 4
 
 char txt_buttons[BUTTON_COUNT][30] = {"PLAY DEMO", "2-PLAYER", "SETTINGS", "HIGHSCORES"};
 
 void (*call_buttons[BUTTON_COUNT])(void) = {space_start_demo, space_start_multiplayer, NULL, gameover_showhighscores};
 
-button buttons[BUTTON_COUNT];
+button btn_options[BUTTON_COUNT];
 
 /* * * * * * * * * *
  * state functions *
@@ -59,35 +56,11 @@ static void draw() {
 
 	for (i = 0; i < BUTTON_COUNT; i++) {
 		draw_color4f(0,0.2,0.9,1);
-		button_render(buttons[i]);
+		button_render(btn_options[i]);
 	}
 }
 
 static void sdl_event(SDL_Event *event) {
-	int i;
-	switch (event->type) {
-	case SDL_FINGERDOWN:
-		for (i = 0; i < BUTTON_COUNT; i++) {
-			if (button_finger_down(buttons[i], &event->tfinger)) {
-				break;
-			}
-		}
-		break;
-	case SDL_FINGERMOTION:
-		for (i = 0; i < BUTTON_COUNT; i++) {
-			button_finger_move(buttons[i], &event->tfinger);
-		}
-		break;
-	case SDL_FINGERUP:
-		for (i = 0; i < BUTTON_COUNT; i++) {
-			if (button_finger_up(buttons[i], &event->tfinger)) {
-				//TODO add callback function for buttons
-				//button_call(buttons[i]);
-				break;
-			}
-		}
-		break;
-	}
 }
 
 static void on_leave() {
@@ -105,8 +78,9 @@ void mainmenu_init() {
 
 	int i;
 	for (i = 0; i < BUTTON_COUNT; i++) {
-		buttons[i] = button_create(SPRITE_BUTTON, 1, txt_buttons[i], 0, -i*160, 500, 140);
-		button_set_callback(buttons[i], call_buttons[i]);
+		btn_options[i] = button_create(SPRITE_BUTTON, 1, txt_buttons[i], 0, -i*160, 500, 140);
+		button_set_callback(btn_options[i], call_buttons[i]);
+		statesystem_register_touchable(state_mainmenu, btn_options[i]);
 	}
 }
 
