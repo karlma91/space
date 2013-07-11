@@ -48,6 +48,8 @@ struct state_ {
 	state *parentState;
 };
 
+extern SDL_Joystick *accelerometer;
+
 extern LList active_fingers;
 
 #define GAME_HEIGHT 1200

@@ -57,6 +57,8 @@ int WINDOW_WIDTH, WINDOW_HEIGHT;
 camera default_camera;
 camera *current_camera = &default_camera;
 
+SDL_Joystick *accelerometer;
+
 float dt = 0;
 int mdt = 0;
 unsigned char *keys;
@@ -292,6 +294,11 @@ static void main_init() {
 
 	display_init();     /* sets attributes and creates windows and renderer*/
 	initGL();           /* setup a gl context */
+
+    accelerometer = SDL_JoystickOpen(0);
+    if (accelerometer == NULL) {
+        SDL_Log("Could not open joystick (accelerometer)");
+    }
 
 #if __WIN32__
 	GLenum glewError = glewInit();

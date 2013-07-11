@@ -360,12 +360,43 @@ static void update_camera_position()
     object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
     object_group_tank *tank = ((object_group_tank*)objects_first(ID_TANK));
 
+
+
     if(tank != NULL && !follow_player){
         cpVect vel = tank->data.body->v;
         vel = cpvnormalize(vel);
         camera_update(current_camera, tank->data.body->p, cpv(0,1));
     }else{
-        camera_update(current_camera, player->data.body->p,  player->data.body->rot);
+    	cpVect c_pos = player->data.body->p;
+    	cpVect c_rot = player->data.body->rot;
+
+    	if (accelerometer) {
+#define SINT16_MAX ((float)(0x7FFF))
+    	    /* get joystick (accelerometer) axis values and normalize them */
+    	    float ax = (float) SDL_JoystickGetAxis(accelerometer, 0) / SINT16_MAX * 5;
+    	    float ay = -(float) SDL_JoystickGetAxis(accelerometer, 1) / SINT16_MAX * 5;
+    	    float az = (float) SDL_JoystickGetAxis(accelerometer, 2) / SINT16_MAX * 5;
+
+    	    static int teller = 0;
+    	    if (++teller > 30) {
+    	    SDL_Log("\t%f\t%f\t%f",ax,ay,az);
+    	    teller = 0;
+    	    }
+
+    	    float roll = atan2(ax, ay) * 180.0f / M_PI;
+    	    //float pitch = atan2(ax, hypotf(ay, az)) * 1.0f / M_PI;
+
+
+			if (ay > 1) ay = 1;
+			if (ay < -1) ay = -1;
+
+    	    static float last = 0;
+    	    last = last*0.7 + ay*0.3;
+
+    		c_pos.x += last * 300;
+    	}
+
+    	camera_update(current_camera, c_pos, c_rot);
     }
 
     cam_left_limit = currentlvl->left + current_camera->width;

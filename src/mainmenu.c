@@ -75,9 +75,7 @@ static void sdl_event(SDL_Event *event) {
 		break;
 	case SDL_FINGERMOTION:
 		for (i = 0; i < BUTTON_COUNT; i++) {
-			if (button_finger_move(buttons[i], &event->tfinger)) {
-				break;
-			}
+			button_finger_move(buttons[i], &event->tfinger);
 		}
 		break;
 	case SDL_FINGERUP:
