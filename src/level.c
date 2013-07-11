@@ -118,6 +118,7 @@ int level_init()
 		worlds[i].count = count;
 		worlds[i].radius = radius;
 		worlds[i].rotation_speed = spd;
+		worlds[i].id = i + 1;
 	}
 
 	if (i != station_count || i <= 0) {

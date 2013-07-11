@@ -5,6 +5,7 @@
 #include "objects.h"
 
 typedef struct level_ship {
+	int id;
 	float x;
 	float y;
 	int count;

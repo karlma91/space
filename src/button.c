@@ -81,7 +81,7 @@ void button_set_callback(button btn_id, void (*callback)(void *))
 
 void button_set_data(button btn_id, void *data)
 {
-	struct button *btn = malloc(sizeof(*btn));
+	struct button *btn = (struct button *) btn_id;
 	btn->data = data;
 }
 

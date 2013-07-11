@@ -21,6 +21,7 @@ extern STATE_ID state_space;
 extern STATE_ID state_gameover;
 extern STATE_ID state_levelselect;
 extern STATE_ID state_stations;
+extern STATE_ID state_levelscreen;
 
 extern SPRITE_ID SPRITE_PLAYER;
 extern SPRITE_ID SPRITE_PLAYER_GUN;

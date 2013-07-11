@@ -6,6 +6,7 @@
 #include "mainmenu.h"
 #include "stations.h"
 #include "levelselect.h"
+#include "levelscreen.h"
 
 #if !(TARGET_OS_IPHONE || __ANDROID__)
 #include "ini.h"
@@ -179,6 +180,7 @@ void game_init()
     gameover_init();
     levelselect_init();
     stations_init();
+    levelscreen_init();
 
     //statesystem_set_state(state_menu);
     statesystem_set_state(state_stations);

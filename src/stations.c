@@ -7,6 +7,7 @@
 
 #include "stdio.h"
 #include "stations.h"
+#include "levelscreen.h"
 
 #include "main.h"
 #include "game.h"
@@ -18,10 +19,12 @@ STATE_ID state_stations;
 
 char *txt_buttons[30];
 
-button *buttons;
+static button *buttons;
 
-struct level_ship *stations;
-static int station_count;
+static button home_button;
+
+static level_ship *stations;
+static int station_count = 2;
 
 /* * * * * * * * * *
  * state functions *
@@ -81,8 +84,7 @@ static void sdl_event(SDL_Event *event) {
 
 static void button_callback(void *data)
 {
-	space_start_demo();
-	space_init_level(1, 1); /* load correct level */
+	levelscreen_change_to(data);
 }
 
 static void on_leave()
@@ -110,5 +112,6 @@ void stations_init()
 		button_set_data(buttons[i], &stations[i]);
 		button_set_callback(buttons[i], button_callback);
 	}
+
 }
 
