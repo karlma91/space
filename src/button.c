@@ -33,13 +33,15 @@ struct button {
 	float width; /* width of button and touch area */
 	float height; /* height og button and touch area */
 
-	void (*callback)(void);
+	void (*callback)(void *);
 
 	/* pre-calculated touch region */
 	float p1x;
 	float p1y;
 	float p2x;
 	float p2y;
+
+	void *data;
 };
 
 button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, float pos_y, float width, float height)
@@ -55,6 +57,7 @@ button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, flo
 	btn->label = text;
 
 	btn->callback = NULL;
+	btn->data = NULL;
 
 	sprite_create(&(btn->spr), spr_id, width, height, 0);
 
@@ -69,10 +72,16 @@ button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, flo
 	return btn;
 }
 
-void button_set_callback(button btn_id, void (*callback)(void))
+void button_set_callback(button btn_id, void (*callback)(void *))
 {
 	struct button *btn = (struct button *) btn_id;
 	btn->callback = callback;
+}
+
+void button_set_data(button btn_id, void *data)
+{
+	struct button *btn = malloc(sizeof(*btn));
+	btn->data = data;
 }
 
 void button_free(button btn_id)
@@ -186,6 +195,6 @@ void button_click(button btn_id)
 {
 	struct button *btn = (struct button *) btn_id;
 	if (btn->callback) {
-		btn->callback();
+		btn->callback(btn->data);
 	}
 }
