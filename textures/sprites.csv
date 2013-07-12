@@ -13,3 +13,4 @@ tank_turret tank_00.png 0.5 0.5 0.5 0.5 1
 button_pause button_pause.png 0 0 1 1 1
 button button.png 0 0 0.5 1 2
 ramp ramp.png 0 0 1 1 1
+station_01 station_01.png 0 0 0.125 0.125 50

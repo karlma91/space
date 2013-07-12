@@ -37,7 +37,7 @@ typedef void * SPRITE_ID; /* Peker til konstant sprite data*/
 typedef struct {
 	SPRITE_ID id;
 	//TODO legge til alle variabler som trengs og lagres individuelt for hver kopi av sprite
-	float animation_speed;
+	float animation_speed; /* fps */
 	float sub_index;
 	float width;
 	float height;
@@ -72,5 +72,6 @@ void sprite_set_index(sprite *spr, int index);
 
 void sprite_update(sprite *spr);
 void sprite_render(sprite *spr, cpVect *pos, float angle);
+void sprite_render_scaled(sprite *spr, cpVect *pos, float angle, float size);
 
 #endif /* SPRITE_H_ */

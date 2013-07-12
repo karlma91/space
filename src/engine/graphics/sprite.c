@@ -172,10 +172,16 @@ void sprite_set_index(sprite *spr, int index)
 
 void sprite_render(sprite *spr, cpVect *pos, float angle)
 {
+	sprite_render_scaled(spr, pos, angle, 1);
+}
+
+void sprite_render_scaled(sprite *spr, cpVect *pos, float angle, float size)
+{
 	if (!spr) return;
 
 	sprite_data *data = (sprite_data*)spr->id;
 	float sub_map[8];
 	sprite_get_current_image(spr, sub_map);
-	draw_texture(data->tex_id, pos, sub_map, spr->width, spr->height, angle);
+	draw_texture(data->tex_id, pos, sub_map, spr->width*size, spr->height*size, angle);
 }
+

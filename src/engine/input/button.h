@@ -27,6 +27,9 @@ void button_set_frontcolor(button btn_id, Color col);
 void button_set_visibility(button btn_id, int visible);
 void button_set_enabled(button btn_id, int enabled);
 
+void button_set_animated(button btn_id, int animated, float fps);
+void button_set_enlargement(button btn_id, float size);
+
 int button_is_visible(button btn_id);
 int button_is_enabled(button btn_id);
 

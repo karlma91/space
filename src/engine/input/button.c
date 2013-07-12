@@ -47,6 +47,8 @@ struct button {
 
 	int enabled;
 	int visible;
+	int animated;
+	float down_size, current_size;
 
 	Color backcol;
 	Color frontcol;
@@ -83,6 +85,9 @@ button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, flo
 
 	btn->visible = 1;
 	btn->enabled = 1;
+	btn->animated = 0;
+	btn->down_size = 1;
+	btn->current_size = btn->down_size;
 
 	sprite_create(&(btn->spr), spr_id, width, height, 0);
 
@@ -140,6 +145,18 @@ void button_set_enabled(button btn_id, int enabled)
 	btn->enabled = enabled;
 }
 
+void button_set_animated(button btn_id, int animated, float fps) {
+	struct button *btn = (struct button *) btn_id;
+	btn->animated = animated;
+	btn->spr.animation_speed = fps;
+}
+
+void button_set_enlargement(button btn_id, float size)
+{
+	struct button *btn = (struct button *) btn_id;
+	btn->down_size = size;
+}
+
 int button_is_visible(button btn_id)
 {
 	return ((struct button *) btn_id)->visible;
@@ -173,7 +190,7 @@ void button_clear(button btn_id)
 
 	btn->finger_id = 0;
 	btn->pressed = 0;
-	sprite_set_index(&(btn->spr), BUTTON_UP);
+	if (!btn->animated) sprite_set_index(&(btn->spr), BUTTON_UP);
 }
 
 void button_click(button btn_id)
@@ -184,9 +201,18 @@ void button_click(button btn_id)
 	}
 }
 
-/* UNUSED METHOD */
 static void update(button btn_id)
 {
+	struct button *btn = (struct button *) btn_id;
+	if (btn->animated) {
+		sprite_update(&btn->spr);
+	}
+
+	float size = btn->pressed ? btn->down_size : 1;
+	float current_size = btn->current_size;
+	if (current_size != size) {
+		btn->current_size = current_size * 0.7 + 0.3 * size;
+	}
 }
 
 static void render(button btn_id)
@@ -195,14 +221,18 @@ static void render(button btn_id)
 
 	cpVect btn_pos = {btn->pos_x,btn->pos_y};
 
+	float scale = btn->current_size;
 
-	if (btn->spr.id) {
+	if (btn->animated) {
+		draw_color(btn->backcol);
+		sprite_render_scaled(&(btn->spr), &btn_pos, 0, scale);
+	} else if (btn->spr.id) {
 		draw_color(btn->backcol);
 		if (btn->stretch) {
 			//draw_glow_line(btn->p1x,btn->p1y,btn->p2x,btn->p2y,btn->height);
 			draw_sprite_line(&(btn->spr),btn->pos_x - btn->width/2, btn->pos_y, btn->pos_x + btn->width/2, btn->pos_y, btn->height);
 		} else {
-			sprite_render(&(btn->spr), &btn_pos, 0);
+			sprite_render_scaled(&(btn->spr), &btn_pos, 0, scale);
 		}
 	}
 
@@ -213,8 +243,8 @@ static void render(button btn_id)
 
 		draw_color(btn->frontcol);
 
-		setTextSize(btn->height / 4);
-		font_drawText(btn->pos_x, btn->pos_y + 12, btn->label);
+		setTextSize(btn->height / 4 * scale);
+		font_drawText(btn->pos_x, btn->pos_y + 12 * scale, btn->label);
 	}
 }
 
@@ -229,7 +259,7 @@ static int touch_down(button btn_id, SDL_TouchFingerEvent *finger)
 	if (inside(btn, tx, ty)) {
 		btn->finger_id = finger->fingerId;
 		btn->pressed = 1;
-		sprite_set_index(&(btn->spr), BUTTON_DOWN);
+		if (!btn->animated) sprite_set_index(&(btn->spr), BUTTON_DOWN);
 		return 1;
 	}
 
@@ -267,7 +297,7 @@ static int touch_up(button btn_id, SDL_TouchFingerEvent *finger)
 	normalized2game(&tx, &ty);
 
 	if (inside(btn, tx,ty)) {
-		sprite_set_index(&(btn->spr), BUTTON_UP);
+		if (!btn->animated) sprite_set_index(&(btn->spr), BUTTON_UP);
 		button_click(btn_id);
 		return 1;
 	}

@@ -50,6 +50,7 @@ SPRITE_ID SPRITE_TANK_BODY;
 SPRITE_ID SPRITE_TANK_WHEEL;
 SPRITE_ID SPRITE_TANK_TURRET;
 SPRITE_ID SPRITE_BUTTON_PAUSE;
+SPRITE_ID SPRITE_STATION_01;
 /* end of global sprite definitions*/
 
 /* global emitter */
@@ -147,6 +148,8 @@ void game_sprites()
 	SPRITE_TANK_BODY =			sprite_link("tank_body");
 	SPRITE_TANK_WHEEL =			sprite_link("tank_wheel");
 	SPRITE_TANK_TURRET =		sprite_link("tank_turret");
+	SPRITE_STATION_01 =	    	sprite_link("station_01");
+
 }
 
 void game_particles()

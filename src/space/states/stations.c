@@ -74,18 +74,20 @@ void stations_init()
 
 	btn_stations = calloc(station_count, sizeof(button));
 
-	Color col_back = {0,0.2,0.9,1};
+	Color col_back = {0.9,0.9,1,1};
 	Color col_text = {1,1,1,1};
 
 	int i;
 	for (i = 0; i < station_count; i++) {
 		char stri[10];
-		sprintf(stri, "SHIP %d", i+1);
-		btn_stations[i] = button_create(SPRITE_BUTTON, 1, stri, 0, -i*160, 140, 140);
+		sprintf(stri, "%d", i+1);
+		btn_stations[i] = button_create(SPRITE_STATION_01, 0, stri, 0, -i*160, 140, 140);
 		button_set_data(btn_stations[i], &stations[i]);
 		button_set_callback(btn_stations[i], button_callback);
 		button_set_backcolor(btn_stations[i], col_back);
 		button_set_frontcolor(btn_stations[i], col_text);
+		button_set_animated(btn_stations[i], 1, 15);
+		button_set_enlargement(btn_stations[i], 1.5);
 		statesystem_register_touchable(state_stations, btn_stations[i]);
 	}
 
