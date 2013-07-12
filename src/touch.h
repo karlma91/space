@@ -24,6 +24,9 @@ typedef struct {
 	int (*touch_up) (void *, SDL_TouchFingerEvent *finger);
 } touch_calls;
 
+//TODO create general struct for all touchable objects
+//typedef struct...
+
 #if THIS_IS_A_TOUCH_OBJECT
 static void update(void *);
 static void render(void *);

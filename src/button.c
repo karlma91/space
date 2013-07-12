@@ -66,6 +66,16 @@ button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, flo
 	btn->width = width;
 	btn->height = height;
 
+	btn->backcol.a=1;
+	btn->backcol.r=1;
+	btn->backcol.g=1;
+	btn->backcol.b=1;
+
+	btn->frontcol.a=1;
+	btn->frontcol.r=1;
+	btn->frontcol.g=1;
+	btn->frontcol.b=1;
+
 	btn->stretch = stretch;
 	strcpy(btn->label, text);
 
