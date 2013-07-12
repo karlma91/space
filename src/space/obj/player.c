@@ -175,8 +175,8 @@ static void controls(object_group_player *player)
 	//cpFloat speed = 700;
 	int instant = 1; //tmp instant direction
 
-	if (joy_left->amplitude) {
-		player_angle_target = joy_left->direction;
+	if (joy_p1_left->amplitude) {
+		player_angle_target = joy_p1_left->direction;
 
 		/*
 		if (!instant) {
@@ -187,8 +187,8 @@ static void controls(object_group_player *player)
 		}
 		*/
 
-		player->direction_target = joy_left->direction;
-		cpVect player_dir = cpv(joy_left->axis_x, joy_left->axis_y);
+		player->direction_target = joy_p1_left->direction;
+		cpVect player_dir = cpv(joy_p1_left->axis_x, joy_p1_left->axis_y);
 
 		cpBodyApplyImpulse(player->data.body,cpvmult(player_dir, IMPULSE_FORCE), cpvmult(player_dir, -100)); // applies impulse from rocket
 		//cpBodySetForce(player->data.body, cpvmult(player_dir, speed*30)); //*600
@@ -209,8 +209,8 @@ static void controls(object_group_player *player)
 
 	float aim_angle_target = 0;
 
-	if (joy_right->amplitude) {
-		aim_angle_target = joy_right->direction;
+	if (joy_p1_right->amplitude) {
+		aim_angle_target = joy_p1_right->direction;
 		if (!instant) {
 			dir_step = (player->aim_speed * 2*M_PI) * dt; // 0.5 rps
 			player->aim_angle = turn_toangle(player->aim_angle, aim_angle_target, dir_step);

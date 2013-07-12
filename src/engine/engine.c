@@ -382,15 +382,40 @@ static void check_events()
 #if !GOT_TOUCH
 		case SDL_MOUSEBUTTONDOWN:
 			sim_event.type = SDL_FINGERDOWN;
-			sim_event.tfinger.x = (float) event.button.x / WINDOW_WIDTH;
-			sim_event.tfinger.y = (float) event.button.y / WINDOW_HEIGHT;
+			float x = event.button.x;
+			float y = event.button.y;
+			sim_event.tfinger.x = x / WINDOW_WIDTH;
+			sim_event.tfinger.y = y / WINDOW_HEIGHT;
 			statesystem_push_event(&sim_event);
+			static float last_x, last_y;
+			static int pressed;
+			pressed = 1;
+			last_x = x;
+			last_y = y;
+			break;
+		case SDL_MOUSEMOTION:
+			if (pressed) {
+			sim_event.type = SDL_FINGERMOTION;
+			float x = event.button.x;
+			float y = event.button.y;
+
+			sim_event.tfinger.x = x / WINDOW_WIDTH;
+			sim_event.tfinger.y = y / WINDOW_HEIGHT;
+
+			sim_event.tfinger.dx = (event.button.x - last_x) / WINDOW_WIDTH;
+			sim_event.tfinger.dy = (event.button.y - last_y) / WINDOW_HEIGHT;
+			last_x = x;
+			last_y = y;
+
+			statesystem_push_event(&sim_event);
+			}
 			break;
 		case SDL_MOUSEBUTTONUP:
 			sim_event.type = SDL_FINGERUP;
 			sim_event.tfinger.x = (float) event.button.x / WINDOW_WIDTH;
 			sim_event.tfinger.y = (float) event.button.y / WINDOW_HEIGHT;
 			statesystem_push_event(&sim_event);
+			pressed = 0;
 			break;
 #endif
 		}

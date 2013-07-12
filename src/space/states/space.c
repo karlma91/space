@@ -88,8 +88,8 @@ enum game_state{
 	LEVEL_STATE_COUNT
 };
 
-joystick *joy_left;
-joystick *joy_right;
+joystick *joy_p1_left, *joy_p1_right;
+joystick *joy_p2_left, *joy_p2_right;
 
 char *game_state_names[] = {
 	"LEVEL_START",
@@ -444,8 +444,8 @@ void draw_gui()
 
 #if GOT_TOUCH
 	draw_color4f(1,1,1,1);
-	joystick_render(joy_left);
-	joystick_render(joy_right);
+	joystick_render(joy_p1_left);
+	joystick_render(joy_p1_right);
 #endif
 
 	if (gamestate == LEVEL_RUNNING && !game_paused) {
@@ -684,8 +684,8 @@ void drawStars()
 
 void space_init_level(int space_station, int deck)
 {
-	joystick_release(joy_left);
-	joystick_release(joy_right);
+	joystick_release(joy_p1_left);
+	joystick_release(joy_p1_right);
 
 	static object_group_player *player;
 
@@ -851,8 +851,8 @@ static void destroy()
 {
     objects_destroy();
     cpSpaceDestroy(space);
-	joystick_free(joy_left);
-	joystick_free(joy_right);
+	joystick_free(joy_p1_left);
+	joystick_free(joy_p1_right);
 }
 
 void space_init()
@@ -881,8 +881,8 @@ void space_init()
     stars_init();
 
     btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80);
-    joy_left = joystick_create(0, 80, 10, -GAME_WIDTH/2, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
-    joy_right = joystick_create(0, 80, 10, 0, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
+    joy_p1_left = joystick_create(0, 80, 10, -GAME_WIDTH/2, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
+    joy_p1_right = joystick_create(0, 80, 10, 0, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
 }
 
 
@@ -906,11 +906,11 @@ void input()
 	/* update joystick positions */
 	int axis_x = keys[KEY_RIGHT_1] - keys[KEY_LEFT_1];
 	int axis_y = keys[KEY_UP_1] - keys[KEY_DOWN_1];
-	joystick_axis(joy_left, axis_x, axis_y);
+	joystick_axis(joy_p1_left, axis_x, axis_y);
 
 	axis_x = keys[KEY_RIGHT_2] - keys[KEY_LEFT_2];
 	axis_y = keys[KEY_UP_2] - keys[KEY_DOWN_2];
-	joystick_axis(joy_right, axis_x, axis_y);
+	joystick_axis(joy_p1_right, axis_x, axis_y);
 
 	/*
 	 * Camera modes + F11 = timeout + F8 = reload particles (broken)
@@ -960,5 +960,15 @@ void space_start_multiplayer() {
 	multiplayer = 1;
 
 	space_init_level(1,1);
+	statesystem_set_state(state_space);
+}
+
+void space_restart_level()
+{
+	statesystem_set_state(state_space);
+}
+
+void space_next_level()
+{
 	statesystem_set_state(state_space);
 }

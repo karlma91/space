@@ -2,11 +2,13 @@
 #include "states/space.h"
 #include "obj/objects.h"
 #include "obj/player.h"
+#include "game.h"
 
 #include "../engine/engine.h"
 #include "../engine/io/waffle_utils.h"
 #include "../engine/graphics/camera.h"
 #include "../engine/graphics/particles.h"
+#include "../engine/state/statesystem.h"
 
 static void add_shape(cpShape *shape, cpFloat friction, cpFloat elasticity);
 
@@ -136,7 +138,7 @@ void se_constrain_from_space(cpBody *body, cpConstraint *constraint, void *data)
 float se_rect2arch(cpVect *pos)
 {
 #if EXPERIMENTAL_GRAPHICS
-	if (!space_rendering_map)
+	if (!space_rendering_map || (statesystem_get_render_state() != state_space))
 		return 0;
 
 	float inner_radius = currentlvl->inner_radius;

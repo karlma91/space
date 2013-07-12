@@ -48,8 +48,8 @@ static inline Color LAColor(float l, float a)
 	return color;
 }
 
-GLfloat triangle_quad[8];
-GLfloat corner_quad[8];
+extern GLfloat triangle_quad[8];
+extern GLfloat corner_quad[8];
 
 void draw_light_map();
 

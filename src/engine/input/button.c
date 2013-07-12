@@ -62,8 +62,6 @@ button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, flo
 
 	REGISTER_CALLS(btn);
 
-	btn->pos_x = pos_x;
-	btn->pos_y = pos_y;
 	btn->width = width;
 	btn->height = height;
 
@@ -91,15 +89,24 @@ button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, flo
 
 	sprite_create(&(btn->spr), spr_id, width, height, 0);
 
-	float touch_margin = (btn->width < btn->height ? btn->width : btn->height) / 10;
-	btn->p1x = btn->pos_x - (btn->width/2 + touch_margin);
-	btn->p2x = btn->pos_x + (btn->width/2 + touch_margin);
-	btn->p1y = btn->pos_y - (btn->height/2 + touch_margin);
-	btn->p2y = btn->pos_y + (btn->height/2 + touch_margin);
+	button_set_position(btn, pos_x, pos_y);
 
 	button_clear(btn);
 
 	return btn;
+}
+
+void button_set_position(button btn_id, float x, float y)
+{
+	struct button *btn = (struct button *) btn_id;
+	btn->pos_x = x;
+	btn->pos_y = y;
+
+	float touch_margin = (btn->width < btn->height ? btn->width : btn->height) / 10;
+	btn->p1x = x - (btn->width/2 + touch_margin);
+	btn->p2x = x + (btn->width/2 + touch_margin);
+	btn->p1y = y - (btn->height/2 + touch_margin);
+	btn->p2y = y + (btn->height/2 + touch_margin);
 }
 
 void button_set_callback(button btn_id, void (*callback)(void *))
@@ -203,7 +210,12 @@ void button_click(button btn_id)
 
 static void update(button btn_id)
 {
+}
+
+static void render(button btn_id)
+{
 	struct button *btn = (struct button *) btn_id;
+
 	if (btn->animated) {
 		sprite_update(&btn->spr);
 	}
@@ -213,11 +225,6 @@ static void update(button btn_id)
 	if (current_size != size) {
 		btn->current_size = current_size * 0.7 + 0.3 * size;
 	}
-}
-
-static void render(button btn_id)
-{
-	struct button *btn = (struct button *) btn_id;
 
 	cpVect btn_pos = {btn->pos_x,btn->pos_y};
 

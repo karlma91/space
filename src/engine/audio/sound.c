@@ -96,6 +96,8 @@ Mix_Chunk *sound_load_chunk(const char *name)
 		a->is_track = 0;
 		a->sound = chunk;
 
+		Mix_VolumeChunk(chunk, SDL_MIX_MAXVOLUME/8);
+
 		llist_add(tracks, a);
 	} else {
 		SDL_Log("ERROR: Could not load soundchunk '%s'", name);

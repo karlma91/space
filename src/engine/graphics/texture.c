@@ -83,7 +83,7 @@ int texture_load(char *file)
 		strcpy(names[tex_counter],file);
 		textures = realloc(textures,sizeof(int[(tex_counter + 1)]));
 
-		SDL_ConvertSurfaceFormat(img,SDL_PIXELFORMAT_RGBA8888,0);
+		img = SDL_ConvertSurfaceFormat(img,SDL_PIXELFORMAT_ARGB8888,0);
 
 		/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
 		glGenTextures(1, &tex_id);
@@ -97,7 +97,7 @@ int texture_load(char *file)
 
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
+		
 #if (__MACOSX__ | __IPHONEOS__)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
 #else

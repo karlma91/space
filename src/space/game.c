@@ -193,17 +193,17 @@ void game_init()
 	game_particles();
 	game_font();
 
-	/* init all states */
+	/* init all states (warning: make sure that no init method depends on uninitialized state_id!) */
 	level_init();
     menu_init();
     space_init();
     pause_init();
     settings_init();
-    leveldone_init();
     upgrades_init();
     stations_init();
     gameover_init();
     levelscreen_init();
+    leveldone_init();
 
     //statesystem_set_state(state_menu);
     statesystem_set_state(state_stations);

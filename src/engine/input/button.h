@@ -19,6 +19,7 @@ typedef void *button;
 button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, float pos_y, float width, float height);
 void button_free(button btn);
 
+void button_set_position(button btn_id, float x, float y);
 void button_set_callback(button btn_id, void (*callback)(void *));
 void button_set_data(button btn_id, void *data);
 

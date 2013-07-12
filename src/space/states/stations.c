@@ -25,6 +25,12 @@ static button home_button;
 static level_ship *stations;
 static int station_count = 2;
 
+
+static float x_offset = 0;
+
+static int tex_stars;
+
+
 /* * * * * * * * * *
  * state functions *
  * * * * * * * * * */
@@ -44,11 +50,34 @@ static void post_update()
 
 static void draw()
 {
+	draw_color4f(1,1,1,1);
+
+	float x1 = - (x_offset / 2) / GAME_WIDTH;
+	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT;
+	float map[8] = {x1, 1,
+					x2, 1,
+					x1, 0,
+					x2, 0};
+
+	draw_texture(tex_stars,&cpvzero,map,GAME_WIDTH, GAME_HEIGHT,0);
+
 	bmfont_render(FONT_BIG,0, 0, 0.7f*GAME_HEIGHT/2,"SPACE");
 }
 
 
 static void sdl_event(SDL_Event *event) {
+	int i;
+	switch (event->type) {
+	case SDL_FINGERMOTION:
+		if (!llist_contains(active_fingers,event->tfinger.fingerId)) {
+			x_offset += event->tfinger.dx*GAME_WIDTH;
+			for (i = 0; i < station_count; i++) {
+				button_set_position(btn_stations[i], -(station_count - 1) / 2.0 * 600 + 600 * i + x_offset, 0);
+			}
+		}
+		break;
+	}
+
 }
 
 
@@ -91,5 +120,6 @@ void stations_init()
 		statesystem_register_touchable(state_stations, btn_stations[i]);
 	}
 
+	tex_stars = texture_load("stars.png");
 }
 

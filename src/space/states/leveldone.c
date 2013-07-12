@@ -16,12 +16,13 @@
 
 #include "../../engine/input/button.h"
 
+#include "space.h"
+
 STATE_ID state_leveldone;
 
 static button btn_space;
 static button btn_retry;
 static button btn_next;
-
 
 /* * * * * * * * * *
  * state functions *
@@ -69,16 +70,6 @@ static void destroy()
 }
 
 
-static void retry(void)
-{
-
-}
-
-static void next(void)
-{
-
-}
-
 void leveldone_init()
 {
 	statesystem_register(state_leveldone,0);
@@ -90,8 +81,8 @@ void leveldone_init()
 	button_set_data(btn_space, state_stations);
 
 	button_set_callback(btn_space, statesystem_set_state);
-	button_set_callback(btn_retry, retry);
-	button_set_callback(btn_next, next);
+	button_set_callback(btn_retry, space_restart_level);
+	button_set_callback(btn_next, space_next_level);
 
 	statesystem_register_touchable(state_leveldone, btn_space);
 	statesystem_register_touchable(state_leveldone, btn_retry);

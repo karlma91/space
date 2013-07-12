@@ -13,7 +13,8 @@ extern cpSpace *space;
 
 extern int multiplayer;
 extern level *currentlvl;
-extern joystick *joy_left, *joy_right;
+extern joystick *joy_p1_left, *joy_p1_right;
+extern joystick *joy_p2_left, *joy_p2_right;
 
 extern int space_rendering_map;
 
@@ -27,5 +28,8 @@ extern void drawStars();
 
 void space_start_demo();
 void space_start_multiplayer();
+
+void space_restart_level();
+void space_next_level();
 
 #endif /* SPACE_H_ */
