@@ -232,9 +232,6 @@ static void display_init()
 }
 
 static void initGL() {
-
-
-
 	// Create an OpenGL context associated with the window.
 	glcontext = SDL_GL_CreateContext(window);
 
@@ -255,6 +252,12 @@ static void initGL() {
 	SDL_Log("GL_RENDERER: %s\n", glGetString(GL_RENDERER));
 	SDL_Log("GL_VERSION: %s\n", glGetString(GL_VERSION));
 	SDL_Log("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
+
+
+	int max_size;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
+
+	SDL_Log("Max texture size = %d", max_size);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);

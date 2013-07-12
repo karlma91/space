@@ -6,6 +6,7 @@
 #include "../io/waffle_utils.h"
 #include "../engine.h"
 #include "../../space/spaceengine.h" //TODO remove dependency
+#include "../../space/states/space.h" //TODO remove dependency
 
 #define PARTICLE_READ_BUFFER_SIZE 4096
 #define MAX_PARTICLES 100000
@@ -436,9 +437,9 @@ static void draw_all_particles(emitter *em)
 		draw_color4f(c.r,c.g,c.b,alpha);
 
 		/* make sure particle is wrapped around level */
-		//TODO FIXME
-		//float width = currentlvl->width, dx = current_camera->x - p->p.x;//, absdx = fabsf(dx);
-		//p->p.x += (dx > 0 ? (dx > width - GAME_WIDTH ? width : 0) : (dx < GAME_WIDTH - width ? -width : 0));
+		//TODO FIXME lage en generell room width + height
+		float width = currentlvl->width, dx = current_camera->x - p->p.x;//, absdx = fabsf(dx);
+		p->p.x += (dx > 0 ? (dx > width - GAME_WIDTH ? width : 0) : (dx < GAME_WIDTH - width ? -width : 0));
 
 		if (se_inside_view(&p->p, p->size))
 			em->draw_particle(em,p);
