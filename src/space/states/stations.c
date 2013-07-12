@@ -81,7 +81,7 @@ void stations_init()
 	for (i = 0; i < station_count; i++) {
 		char stri[10];
 		sprintf(stri, "%d", i+1);
-		btn_stations[i] = button_create(SPRITE_STATION_01, 0, stri, 0, -i*160, 140, 140);
+		btn_stations[i] = button_create(SPRITE_STATION_01, 0, stri, -(station_count - 1) / 2.0 * 600 + 600 * i, 0, 320, 320);
 		button_set_data(btn_stations[i], &stations[i]);
 		button_set_callback(btn_stations[i], button_callback);
 		button_set_backcolor(btn_stations[i], col_back);
