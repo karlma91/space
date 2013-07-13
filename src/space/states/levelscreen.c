@@ -95,12 +95,12 @@ static void destroy()
 
 static void set_selected_level(int level)
 {
-	if (selected_level > 0 && selected_level <= level_count) {
+	if (selected_level > 0 && selected_level <= MAX_LEVELS) {
 		button_set_frontcolor(btn_levels[selected_level-1], col_default);
 	}
-	button_set_frontcolor(btn_levels[level-1], col_selected);
-
 	selected_level = level;
+	button_set_frontcolor(btn_levels[selected_level-1], col_selected);
+
 	sprintf(&title[0], "LEVEL %d", level);
 	//TODO update star score info + best time
 	stars_unlocked = 3 - ((level & 3) ^ 0x1);//TMP TODO store stars unlocked in level/station struct
@@ -110,6 +110,7 @@ void levelscreen_change_to(level_ship * ship)
 {
 	current_ship = ship;
 	level_count = ship->count;
+
 	set_selected_level(1); //TODO select last unlocked level
 
 	float margin = 30;
@@ -119,9 +120,11 @@ void levelscreen_change_to(level_ship * ship)
 		float x = box.x - box.w/2 + (box.w-margin*2) * (i+0.5) / level_count;
 		button_set_position(btn_levels[i], x, y);
 		button_set_visibility(btn_levels[i], 1);
+		button_set_enabled(btn_levels[i], 1);
 	}
 	for (;i < MAX_LEVELS; i++) {
 		button_set_visibility(btn_levels[i], 0);
+		button_set_enabled(btn_levels[i], 0);
 	}
 
 	statesystem_push_state(state_levelscreen);
