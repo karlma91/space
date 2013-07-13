@@ -16,12 +16,11 @@
 typedef void *button;
 
 //TODO add timeout for move and up?
-button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, float pos_y, float width, float height);
+button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_x, float pos_y, float width, float height);
 void button_free(button btn);
 
 void button_set_position(button btn_id, float x, float y);
-void button_set_callback(button btn_id, void (*callback)(void *));
-void button_set_data(button btn_id, void *data);
+void button_set_callback(button btn_id, void (*callback)(void *), void *data);
 
 void button_set_backcolor(button btn_id, Color col);
 void button_set_frontcolor(button btn_id, Color col);

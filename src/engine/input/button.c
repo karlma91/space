@@ -58,7 +58,7 @@ struct button {
 	void *data;
 };
 
-button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, float pos_y, float width, float height)
+button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_x, float pos_y, float width, float height)
 {
 	struct button *btn = malloc(sizeof(*btn));
 
@@ -78,7 +78,11 @@ button button_create(SPRITE_ID spr_id, int stretch, char *text, float pos_x, flo
 	btn->frontcol.b=1;
 
 	btn->stretch = stretch;
-	strcpy(btn->label, text);
+	if (text) {
+		strcpy(btn->label, text);
+	} else {
+		btn->label[0] = 0;
+	}
 
 	btn->callback = NULL;
 	btn->data = NULL;
@@ -111,15 +115,10 @@ void button_set_position(button btn_id, float x, float y)
 	btn->p2y = y + (btn->height/2 + touch_margin);
 }
 
-void button_set_callback(button btn_id, void (*callback)(void *))
+void button_set_callback(button btn_id, void (*callback)(void *), void *data)
 {
 	struct button *btn = (struct button *) btn_id;
 	btn->callback = callback;
-}
-
-void button_set_data(button btn_id, void *data)
-{
-	struct button *btn = (struct button *) btn_id;
 	btn->data = data;
 }
 

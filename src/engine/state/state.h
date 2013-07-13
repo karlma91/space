@@ -34,5 +34,7 @@ static state_funcs state_functions = {
 		destroy,
 };
 
+static STATE_ID this;
+
 /* Macro for registration of state */
-#define statesystem_register(STATE_NAME, INNER_STATES) STATE_NAME = statesystem_create_state(INNER_STATES, &state_functions)
+#define statesystem_register(STATE_NAME, INNER_STATES) STATE_NAME = statesystem_create_state(INNER_STATES, &state_functions); this = STATE_NAME;

@@ -32,6 +32,8 @@ static float scroll_vs = 0;
 static float x_offset = 0;
 static float y_offset = 0;
 
+static float scale = 1;
+
 static int tex_title;
 static int tex_stars;
 
@@ -81,12 +83,13 @@ static void draw()
 	for (i = 0; i < station_count; i++) {
 		button_set_position(btn_stations[i], -(station_count - 1) / 2.0 * 650 + 1000 * i + x_offset, y_offset+(i-0.5)*270);
 		button_render(btn_stations[i]);
+		//TODO tegne minste antall stjerner av levlene i romstasjonen under den?
+		//TODO skrive antall levler klart?
 	}
 
 	cpVect pos = {0,0.7f*GAME_HEIGHT/2};
 	draw_texture(tex_title, &pos, TEX_MAP_FULL, 1200, 300, 0);
 }
-
 
 static void sdl_event(SDL_Event *event) {
 	switch (event->type) {
@@ -141,8 +144,7 @@ void stations_init()
 		sprintf(stri, "%d", i+1);
 		float size = i ? -10 : 30;
 		btn_stations[i] = button_create(SPRITE_STATION_01, 0, "", -(station_count - 1) / 2.0 * 650 + 650 * i, -i*70, 320 + size, 320 + size);
-		button_set_data(btn_stations[i], &stations[i]);
-		button_set_callback(btn_stations[i], button_callback);
+		button_set_callback(btn_stations[i], button_callback, &stations[i]);
 		button_set_backcolor(btn_stations[i], col_back);
 		button_set_frontcolor(btn_stations[i], col_text);
 		button_set_animated(btn_stations[i], 1, (i ? 18 : 15));

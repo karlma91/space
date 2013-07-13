@@ -21,6 +21,15 @@
 
 #define SLEEP_TIME 1
 
+/* General data structures */
+typedef struct {
+	float x, y;
+} vect;
+
+typedef struct {
+	float x, y, w, h;
+} rect;
+
 /* config struct */
 typedef struct
 {

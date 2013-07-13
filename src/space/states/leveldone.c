@@ -89,11 +89,9 @@ void leveldone_init()
 	btn_retry = button_create(SPRITE_BUTTON, 1, "RETRY", 0, -320, 200, 150);
 	btn_next = button_create(SPRITE_BUTTON, 1, "NEXT", 380, -320, 200, 150);
 
-	button_set_data(btn_space, state_stations);
-
-	button_set_callback(btn_space, statesystem_set_state);
-	button_set_callback(btn_retry, space_restart_level);
-	button_set_callback(btn_next, space_next_level);
+	button_set_callback(btn_space, statesystem_set_state, state_stations);
+	button_set_callback(btn_retry, space_restart_level, 0);
+	button_set_callback(btn_next, space_next_level, 0);
 
 	statesystem_register_touchable(state_leveldone, btn_space);
 	statesystem_register_touchable(state_leveldone, btn_retry);

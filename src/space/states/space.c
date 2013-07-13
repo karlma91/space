@@ -347,8 +347,6 @@ static void draw()
 
 static void update_camera_zoom(int mode)
 {
-
-
 	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
 
 	camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
@@ -804,30 +802,18 @@ static void sdl_event(SDL_Event *event)
 			break;
 		}
 		break;
-		case SDL_FINGERDOWN:/*
-			if (gamestate == LEVEL_RUNNING) {
-				if (button_finger_down(btn_pause, &event->tfinger))
-					return;
-			} else if (gamestate == LEVEL_PLAYER_DEAD) {
-				button_finger_down(btn_fullscreen, &event->tfinger);
-			}
-*/
+		case SDL_FINGERDOWN:
 			if (joystick_finger_down(joy_p1_left, &event->tfinger))
 				return;
 			if (joystick_finger_down(joy_p1_right, &event->tfinger))
 				return;
 			break;
 		case SDL_FINGERMOTION:
-			//if (button_finger_move(btn_pause, &event->tfinger)) return;
 			if (joystick_finger_move(joy_p1_left, &event->tfinger)) return;
 			if (joystick_finger_move(joy_p1_right, &event->tfinger)) return;
 			break;
 		case SDL_FINGERUP:
 			if (gamestate == LEVEL_RUNNING) {
-				/*if (button_finger_up(btn_pause, &event->tfinger)) {
-					pause_game();
-				}*/
-
 			} else if (gamestate == LEVEL_PLAYER_DEAD) {
 				//if (button_finger_up(btn_fullscreen, &event->tfinger)) {
 					game_over();
@@ -878,6 +864,11 @@ void space_init()
     stars_init();
 
     btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80);
+    button_set_callback(btn_pause, pause_game, 0);
+    button_set_enlargement(btn_pause, 2.0f);
+    button_set_visibility(btn_pause,0);
+    statesystem_register_touchable(this, btn_pause);
+
     joy_p1_left = joystick_create(0, 80, 10, -GAME_WIDTH/2, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
     joy_p1_right = joystick_create(0, 80, 10, 0, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
 }

@@ -382,8 +382,10 @@ static void check_events()
 #if !GOT_TOUCH
 		case SDL_MOUSEBUTTONDOWN:
 			sim_event.type = SDL_FINGERDOWN;
+			sim_event.tfinger.fingerId = event.button.button;
 			float x = event.button.x;
 			float y = event.button.y;
+
 			sim_event.tfinger.x = x / WINDOW_WIDTH;
 			sim_event.tfinger.y = y / WINDOW_HEIGHT;
 			statesystem_push_event(&sim_event);
@@ -396,6 +398,7 @@ static void check_events()
 		case SDL_MOUSEMOTION:
 			if (pressed) {
 			sim_event.type = SDL_FINGERMOTION;
+			sim_event.tfinger.fingerId = event.button.button;
 			float x = event.button.x;
 			float y = event.button.y;
 
@@ -412,10 +415,12 @@ static void check_events()
 			break;
 		case SDL_MOUSEBUTTONUP:
 			sim_event.type = SDL_FINGERUP;
+			sim_event.tfinger.fingerId = event.button.button;
 			sim_event.tfinger.x = (float) event.button.x / WINDOW_WIDTH;
 			sim_event.tfinger.y = (float) event.button.y / WINDOW_HEIGHT;
 			statesystem_push_event(&sim_event);
 			pressed = 0;
+			llist_remove(active_fingers, (void *) sim_event.tfinger.fingerId);
 			break;
 #endif
 		}
