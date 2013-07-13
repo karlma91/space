@@ -155,7 +155,7 @@ void game_sprites()
 
 void game_particles()
 {
-#define PARTICLE_STRESS 1
+#define PARTICLE_STRESS 0
 #if PARTICLE_STRESS
     EMITTER_FLAME =         read_emitter_from_file("flame_stress.xml");
 #else
@@ -194,19 +194,19 @@ void game_init()
 	game_particles();
 	game_font();
 
-	/* init all states (warning: make sure that no init method depends on uninitialized state_id!) */
 	level_init();
+
+	/* init all states (warning: make sure that no init method depends on uninitialized state_id!) */
+    stations_init();
     menu_init();
     space_init();
     pause_init();
     settings_init();
     upgrades_init();
-    stations_init();
     gameover_init();
     levelscreen_init();
     leveldone_init();
 
-    //statesystem_set_state(state_menu);
     statesystem_set_state(state_stations);
 }
 

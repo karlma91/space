@@ -58,11 +58,6 @@ static void draw()
 	setTextSize(40);
 	font_drawText(0,300,"LEVEL CLEARED");
 
-	button_render(btn_space);
-	button_render(btn_retry);
-	button_render(btn_next);
-
-
 	sprite_render(&spr_star, &star_1, 0);
 	sprite_render(&spr_star, &star_2, 0);
 	sprite_render(&spr_star, &star_3, 0);
@@ -93,9 +88,9 @@ void leveldone_init()
 	button_set_callback(btn_retry, space_restart_level, 0);
 	button_set_callback(btn_next, space_next_level, 0);
 
-	statesystem_register_touchable(state_leveldone, btn_space);
-	statesystem_register_touchable(state_leveldone, btn_retry);
-	statesystem_register_touchable(state_leveldone, btn_next);
+	statesystem_register_touchable(this, btn_space);
+	statesystem_register_touchable(this, btn_retry);
+	statesystem_register_touchable(this, btn_next);
 
 	sprite_create(&spr_star,SPRITE_STAR,250,250,0);
 }
