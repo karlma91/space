@@ -51,8 +51,6 @@ static void update_camera_position();
 
 int space_rendering_map = 0;
 
-static int second_draw = 0;
-
 static button btn_pause;
 static int game_paused = 0;
 
@@ -114,7 +112,7 @@ static void level_timesup();
 static void level_player_dead();
 static void level_cleared();
 static void level_transition();
-static void change_state(int state);
+static void change_state(enum game_state state);
 static void update_all();
 
 static void draw_gui();
@@ -222,11 +220,14 @@ static void level_transition()
 /**
  * Resets timer and changes state
  */
-static void change_state(int state)
+static void change_state(enum game_state state)
 {
 	state_timer = 0;
 	statesystem_set_inner_state(state_space,state);
 	gamestate = state;
+
+	button_set_enabled(btn_pause, (state == LEVEL_RUNNING));
+	button_set_visibility(btn_pause, (state == LEVEL_RUNNING));
 
 #if !ARCADE_MODE
 	SDL_Log("DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);
@@ -429,9 +430,7 @@ static void SPACE_draw()
 	particles_draw(dt);
 
 	space_rendering_map = 0;
-	if(!second_draw){
-		draw_gui();
-	}
+	draw_gui();
 }
 
 void draw_gui()
@@ -445,10 +444,6 @@ void draw_gui()
 	joystick_render(joy_p1_left);
 	joystick_render(joy_p1_right);
 #endif
-
-	if (gamestate == LEVEL_RUNNING && !game_paused) {
-		button_render(btn_pause);
-	}
 
 	/* draw GUI */
 	setTextAngle(0); // TODO don't use global variables for setting font properties
@@ -850,8 +845,10 @@ void space_init()
 
 	objects_init();
 
-	state_timer = 10;
-	change_state(LEVEL_START);
+    btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80);
+    button_set_callback(btn_pause, pause_game, 0);
+    button_set_enlargement(btn_pause, 2.0f);
+    statesystem_register_touchable(this, btn_pause);
 
 	cpVect gravity = cpv(0, -600);
 	space = cpSpaceNew();
@@ -863,14 +860,11 @@ void space_init()
 
     stars_init();
 
-    btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80);
-    button_set_callback(btn_pause, pause_game, 0);
-    button_set_enlargement(btn_pause, 2.0f);
-    button_set_visibility(btn_pause,0);
-    statesystem_register_touchable(this, btn_pause);
-
     joy_p1_left = joystick_create(0, 80, 10, -GAME_WIDTH/2, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
     joy_p1_right = joystick_create(0, 80, 10, 0, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
+
+    state_timer = 10;
+	change_state(LEVEL_START);
 }
 
 
