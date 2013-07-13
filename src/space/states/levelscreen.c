@@ -38,13 +38,10 @@ static float h = 150;
 static char title[40];
 
 static sprite spr_star;
-
 static cpVect star_pos[3] = {{-350,0}, {0,0}, {350,0}};
-static cpVect star_1 = {-350,0};
-static cpVect star_2 = {0,0};
-static cpVect star_3 = {350,0};
-
 static int stars_unlocked = 0;
+
+static float alpha = 0;
 
 /* * * * * * * * * *
  * state functions *
@@ -52,6 +49,7 @@ static int stars_unlocked = 0;
 
 static void on_enter()
 {
+	alpha = 0;
 }
 
 static void pre_update()
@@ -65,6 +63,16 @@ static void post_update()
 static void draw()
 {
 	int i;
+
+	if (alpha < 0.25) {
+		alpha += 1 * dt;
+		if (alpha > 0.25) {
+			alpha = 0.25;
+		}
+	}
+
+	draw_color4f(0,0,0,alpha);
+	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
 
 	draw_color4f(0.1,0.2,0.4,0.6);
 	draw_box(box.x,box.y,box.w,box.h,0,1);

@@ -20,7 +20,7 @@ char *txt_buttons[30];
 
 static button *btn_stations;
 
-static button home_button;
+static button btn_home;
 
 static level_ship *stations;
 static int station_count = 2;
@@ -126,6 +126,10 @@ static void destroy()
 {
 }
 
+static void open_upgrades()
+{
+	statesystem_push_state(state_upgrades);
+}
 
 void stations_init()
 {
@@ -137,6 +141,11 @@ void stations_init()
 
 	Color col_back = {0.9,0.9,1,1};
 	Color col_text = {1,1,1,1};
+
+	btn_home = button_create(SPRITE_PLAYER, 0, "", 0, 0, 250, 250);
+	button_set_callback(btn_home, open_upgrades, 0);
+	button_set_enlargement(btn_home, 2);
+	statesystem_register_touchable(this, btn_home);
 
 	int i;
 	for (i = 0; i < station_count; i++) {

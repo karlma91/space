@@ -92,6 +92,8 @@ void statesystem_push_state(STATE_ID state_id)
     stack_head->next = state;
     stack_head->next->prev = stack_head;
     stack_head = stack_head->next;
+
+    stack_head->call.on_enter();
 }
 
 void statesystem_pop_state()
