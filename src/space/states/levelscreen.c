@@ -40,7 +40,6 @@ static void post_update()
 
 static void draw()
 {
-	bmfont_render(FONT_BIG,0, 0, 0.7f*GAME_HEIGHT/2,"SPACE");
 }
 
 static void sdl_event(SDL_Event *event) {
@@ -87,10 +86,11 @@ void levelscreen_init()
 	for (i = 0; i < MAX_LEVELS; i++) {
 		char stri[MAX_LEVELS];
 		sprintf(stri, "%d", i+1);
-		btn_levels[i] = button_create(SPRITE_BUTTON, 1, stri, -GAME_WIDTH/3 + i*160, 200, 60, 140);
+		btn_levels[i] = button_create(NULL, 0, stri, -GAME_WIDTH/3 + i*160, 200, 140, 140);
 
 		button_set_data(btn_levels[i], i+1);
 		button_set_callback(btn_levels[i], button_callback);
+		button_set_enlargement(btn_levels[i], 2);
 		button_set_backcolor(btn_levels[i], col_back);
 		button_set_frontcolor(btn_levels[i], col_text);
 		statesystem_register_touchable(state_levelscreen, btn_levels[i]);

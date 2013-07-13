@@ -694,14 +694,12 @@ void space_init_level(int space_station, int deck)
 	} else {
 		player->disable = 1;
 		player->hp_bar.value = player->param->max_hp;
-		if (space_station == 1 && deck == 1) { // reset player score if level 1 is initializing
-			player->data.preset->init((object_data*) player);
-		}else{
-			player->aim_speed += 0.3;
-			player->rotation_speed += 0.3;
-			if(deck == 6){
-				player->gun_level = 3;
-			}
+
+		player->data.preset->init((object_data*) player);
+		player->aim_speed += 0.3*deck;
+		player->rotation_speed += 0.3*deck;
+		if(deck >= 6){
+			player->gun_level = 3;
 		}
 	}
 
@@ -813,17 +811,16 @@ static void sdl_event(SDL_Event *event)
 			} else if (gamestate == LEVEL_PLAYER_DEAD) {
 				button_finger_down(btn_fullscreen, &event->tfinger);
 			}
-
-			if (joystick_finger_down(joy_left, &event->tfinger))
-				return;
-			if (joystick_finger_down(joy_right, &event->tfinger))
-				return;
 */
+			if (joystick_finger_down(joy_p1_left, &event->tfinger))
+				return;
+			if (joystick_finger_down(joy_p1_right, &event->tfinger))
+				return;
 			break;
 		case SDL_FINGERMOTION:
 			//if (button_finger_move(btn_pause, &event->tfinger)) return;
-			//if (joystick_finger_move(joy_left, &event->tfinger)) return;
-			//if (joystick_finger_move(joy_right, &event->tfinger)) return;
+			if (joystick_finger_move(joy_p1_left, &event->tfinger)) return;
+			if (joystick_finger_move(joy_p1_right, &event->tfinger)) return;
 			break;
 		case SDL_FINGERUP:
 			if (gamestate == LEVEL_RUNNING) {
@@ -832,12 +829,12 @@ static void sdl_event(SDL_Event *event)
 				}*/
 
 			} else if (gamestate == LEVEL_PLAYER_DEAD) {
-				/*if (button_finger_up(btn_fullscreen, &event->tfinger)) {
+				//if (button_finger_up(btn_fullscreen, &event->tfinger)) {
 					game_over();
-				}*/
+				//}
 			}
-			//joystick_finger_up(joy_left, &event->tfinger);
-			//joystick_finger_up(joy_right, &event->tfinger);
+			joystick_finger_up(joy_p1_left, &event->tfinger);
+			joystick_finger_up(joy_p1_right, &event->tfinger);
 			break;
 	}
 }
@@ -966,9 +963,21 @@ void space_start_multiplayer() {
 void space_restart_level()
 {
 	statesystem_set_state(state_space);
+	space_init_level(currentlvl->station, currentlvl->deck);
 }
 
 void space_next_level()
 {
-	statesystem_set_state(state_space);
+	int station = currentlvl->station;
+	int deck = currentlvl->deck + 1;
+
+	if (deck <= level_get_level_count(station)) {
+		statesystem_set_state(state_space);
+		space_init_level(station, deck);
+	} else {
+		//TODO decide what happens when last level on current station is cleared
+		statesystem_set_state(state_stations);
+	}
+
+
 }

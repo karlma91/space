@@ -9,6 +9,8 @@
 
 #include "button.h"
 #include "../graphics/font.h"
+#include "../data/llist.h"
+#include "../engine.h"
 
 #define THIS_IS_A_TOUCH_OBJECT 1
 #include "touch.h"
@@ -154,6 +156,7 @@ void button_set_enabled(button btn_id, int enabled)
 
 void button_set_animated(button btn_id, int animated, float fps) {
 	struct button *btn = (struct button *) btn_id;
+	btn->spr.sub_index += 50.0f * rand() / RAND_MAX; //TODO hardkodet!
 	btn->animated = animated;
 	btn->spr.animation_speed = fps;
 }
@@ -182,7 +185,7 @@ void button_free(button btn_id)
 
 void button_render(button btn_id)
 {
-
+	render(btn_id);
 }
 
 int button_isdown(button btn_id)
@@ -267,6 +270,7 @@ static int touch_down(button btn_id, SDL_TouchFingerEvent *finger)
 		btn->finger_id = finger->fingerId;
 		btn->pressed = 1;
 		if (!btn->animated) sprite_set_index(&(btn->spr), BUTTON_DOWN);
+		llist_add(active_fingers, (void *)finger->fingerId);
 		return 1;
 	}
 
