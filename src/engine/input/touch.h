@@ -12,7 +12,7 @@
 #ifndef TOUCH_H_
 #define TOUCH_H_
 
-#include "SDL_touch.h"
+#include "SDL_events.h"
 
 typedef struct {
 	void (*update) (void *);
@@ -25,7 +25,16 @@ typedef struct {
 } touch_calls;
 
 //TODO create general struct for all touchable objects
-//typedef struct...
+typedef struct {
+	const touch_calls *calls;
+
+	/* touch region */
+	float p1x, p1y;
+	float p2x, p2y;
+
+	int enabled;
+	int visible;
+} touchable;
 
 #if THIS_IS_A_TOUCH_OBJECT
 static void update(void *);

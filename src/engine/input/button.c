@@ -18,11 +18,10 @@
 static int BUTTON_UP = 0;
 static int BUTTON_DOWN = 1;
 
-//TODO support label/text on button and extendible texture button (like how bullets are drawn)
-
 #define inside(btn,px,py) ((px >= btn->p1x) && (px <= btn->p2x) && (py >= btn->p1y) && (py <= btn->p2y))
 
 struct button {
+	// touchable touch;
 	const touch_calls *calls;
 
 	SDL_FingerID finger_id;
@@ -31,7 +30,7 @@ struct button {
 	char label[50];
 	int stretch;
 
-	int pressed; /* whether if button is currently pressed down */
+	int pressed; /* whether if button is currently pressed down or not */
 
 	float pos_x; /* center x-coordinate of button */
 	float pos_y; /* center y-coordinate of button */
