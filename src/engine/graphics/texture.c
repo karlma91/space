@@ -98,7 +98,7 @@ int texture_load(const char *file)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		if (strcmp(file,"stars.png") && strcmp(file,"stars.jpg") == 0) { //TODO remove tmp code
+		if ((strcmp(file,"stars.png") && strcmp(file,"stars.jpg") && strcmp(file,"stars_2.png")) == 0) { //TODO remove tmp code
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		} else {
