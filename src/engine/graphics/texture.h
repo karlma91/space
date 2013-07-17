@@ -4,7 +4,7 @@
 #include "draw.h"
 
 extern GLuint *textures;
-extern int texture_load(char *file);
+extern int texture_load(const char *file);
 
 extern int texture_init();
 

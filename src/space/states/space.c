@@ -226,8 +226,8 @@ static void change_state(enum game_state state)
 	statesystem_set_inner_state(state_space,state);
 	gamestate = state;
 
-	button_set_enabled(btn_pause, (state == LEVEL_RUNNING));
-	button_set_visibility(btn_pause, (state == LEVEL_RUNNING));
+	btn_pause->enabled = (state == LEVEL_RUNNING);
+	btn_pause->visible = btn_pause->enabled;
 
 #if !ARCADE_MODE
 	SDL_Log("DEBUG: entering state[%d]: %s\n",state,game_state_names[state]);

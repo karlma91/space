@@ -41,7 +41,7 @@ static int texture_from_name(char *file);
 static GLenum GL_ENUM_TYPE = GL_UNSIGNED_BYTE;
 
 
-int texture_load(char *file)
+int texture_load(const char *file)
 {
 #if !LOAD_TEXTURES
 	return 0;
@@ -57,8 +57,11 @@ int texture_load(char *file)
 	sprintf(filepath,"textures/%s", file);
 
 	/* append texture resolution suffix */
-	filepath[strlen(filepath) - 4] = 0; // ignore .png suffix
-	strcat(filepath,TEXTURE_RESOLUTION ".png");
+	char *file_suffix = &file[strlen(file) - 4];
+
+	filepath[strlen(filepath) - 4] = 0; // ignore file suffix
+	strcat(filepath, TEXTURE_RESOLUTION);
+	strcat(filepath, file_suffix);
 
 	SDL_RWops *rw;
 
@@ -95,7 +98,7 @@ int texture_load(char *file)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		if (strcmp(file,"stars.png") == 0) { //TODO remove tmp code
+		if (strcmp(file,"stars.png") && strcmp(file,"stars.jpg") == 0) { //TODO remove tmp code
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		} else {

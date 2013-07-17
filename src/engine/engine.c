@@ -284,9 +284,7 @@ static void initGL() {
 	glDisable(GL_DEPTH_TEST);
 
 	glEnable(GL_SCISSOR_TEST);
-
-	draw_load_identity();
-	glScissor(100, 100, WINDOW_WIDTH-200,WINDOW_HEIGHT-200); //scissor test
+	glScissor(0,0, WINDOW_WIDTH,WINDOW_HEIGHT); //scissor test
 
 	SDL_Log("DEBUG - initGL done!\n");
 }

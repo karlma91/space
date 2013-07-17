@@ -4,25 +4,24 @@
  *  Created on: 30. juni 2013
  *      Author: Mathias
  */
+#include "button.h"
 
 #include <string.h>
 
-#include "button.h"
+#include "../engine.h"
 #include "../graphics/font.h"
 #include "../data/llist.h"
-#include "../engine.h"
 
 #define THIS_IS_A_TOUCH_OBJECT 1
 #include "touch.h"
 
+
 static int BUTTON_UP = 0;
 static int BUTTON_DOWN = 1;
 
-#define inside(btn,px,py) ((px >= btn->p1x) && (px <= btn->p2x) && (py >= btn->p1y) && (py <= btn->p2y))
 
 struct button {
-	// touchable touch;
-	const touch_calls *calls;
+	touchable touch_data;
 
 	SDL_FingerID finger_id;
 
@@ -32,22 +31,8 @@ struct button {
 
 	int pressed; /* whether if button is currently pressed down or not */
 
-	float pos_x; /* center x-coordinate of button */
-	float pos_y; /* center y-coordinate of button */
-
-	float width; /* width of button and touch area */
-	float height; /* height og button and touch area */
-
 	void (*callback)(void *);
 
-	/* pre-calculated touch region */
-	float p1x;
-	float p1y;
-	float p2x;
-	float p2y;
-
-	int enabled;
-	int visible;
 	int animated;
 	float down_size, current_size;
 
@@ -63,8 +48,8 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 
 	REGISTER_CALLS(btn);
 
-	btn->width = width;
-	btn->height = height;
+	btn->touch_data.get.width = width;
+	btn->touch_data.get.height = height;
 
 	btn->backcol.a=1;
 	btn->backcol.r=1;
@@ -86,33 +71,28 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 	btn->callback = NULL;
 	btn->data = NULL;
 
-	btn->visible = 1;
-	btn->enabled = 1;
+	btn->touch_data.visible = 1;
+	btn->touch_data.enabled = 1;
 	btn->animated = 0;
 	btn->down_size = 1;
 	btn->current_size = btn->down_size;
 
 	sprite_create(&(btn->spr), spr_id, width, height, 0);
 
-	button_set_position(btn, pos_x, pos_y);
+	touch_place((touchable *) btn, pos_x, pos_y);
 
-	button_clear(btn);
+	button_clear((button) btn);
 
-	return btn;
+	return (button) btn;
 }
 
+/*
 void button_set_position(button btn_id, float x, float y)
 {
-	struct button *btn = (struct button *) btn_id;
-	btn->pos_x = x;
-	btn->pos_y = y;
 
 	float touch_margin = (btn->width < btn->height ? btn->width : btn->height) / 10;
-	btn->p1x = x - (btn->width/2 + touch_margin);
-	btn->p2x = x + (btn->width/2 + touch_margin);
-	btn->p1y = y - (btn->height/2 + touch_margin);
-	btn->p2y = y + (btn->height/2 + touch_margin);
 }
+*/
 
 void button_set_callback(button btn_id, void (*callback)(void *), void *data)
 {
@@ -140,18 +120,6 @@ void button_set_frontcolor(button btn_id, Color col)
 	btn->frontcol.b = col.b;
 }
 
-void button_set_visibility(button btn_id, int visible)
-{
-	struct button *btn = (struct button *) btn_id;
-	btn->visible = visible;
-}
-
-void button_set_enabled(button btn_id, int enabled)
-{
-	struct button *btn = (struct button *) btn_id;
-	btn->enabled = enabled;
-}
-
 void button_set_animated(button btn_id, int animated, float fps) {
 	struct button *btn = (struct button *) btn_id;
 	btn->spr.sub_index += 50.0f * rand() / RAND_MAX; //TODO hardkodet!
@@ -167,23 +135,18 @@ void button_set_enlargement(button btn_id, float size)
 
 int button_is_visible(button btn_id)
 {
-	return ((struct button *) btn_id)->visible;
+	return ((struct button *) btn_id)->touch_data.visible;
 }
 
 int button_is_enabled(button btn_id)
 {
-	return ((struct button *) btn_id)->enabled;
+	return ((struct button *) btn_id)->touch_data.enabled;
 }
 
 
 void button_free(button btn_id)
 {
 	free(btn_id);
-}
-
-void button_render(button btn_id)
-{
-	render(btn_id);
 }
 
 int button_isdown(button btn_id)
@@ -227,7 +190,13 @@ static void render(button btn_id)
 		btn->current_size = current_size * 0.7 + 0.3 * size;
 	}
 
-	cpVect btn_pos = {btn->pos_x,btn->pos_y};
+	float x = btn->touch_data.get.x;
+	float y = btn->touch_data.get.y;
+
+	float width = btn->touch_data.get.width;
+	float height = btn->touch_data.get.height;
+
+	cpVect btn_pos = {x,y};
 
 	float scale = btn->current_size;
 
@@ -238,7 +207,7 @@ static void render(button btn_id)
 		draw_color(btn->backcol);
 		if (btn->stretch) {
 			//draw_glow_line(btn->p1x,btn->p1y,btn->p2x,btn->p2y,btn->height);
-			draw_sprite_line(&(btn->spr),btn->pos_x - btn->width/2, btn->pos_y, btn->pos_x + btn->width/2, btn->pos_y, btn->height);
+			draw_sprite_line(&(btn->spr),x - width/2, y, x + width/2, y, height);
 		} else {
 			sprite_render_scaled(&(btn->spr), &btn_pos, 0, scale);
 		}
@@ -251,8 +220,8 @@ static void render(button btn_id)
 
 		draw_color(btn->frontcol);
 
-		setTextSize(btn->height / 4 * scale);
-		font_drawText(btn->pos_x, btn->pos_y + 12 * scale, btn->label);
+		setTextSize(height / 4 * scale);
+		font_drawText(x, y + 12 * scale, btn->label);
 	}
 }
 
@@ -264,7 +233,7 @@ static int touch_down(button btn_id, SDL_TouchFingerEvent *finger)
 	float tx = finger->x, ty = finger->y;
 	normalized2game(&tx, &ty);
 
-	if (inside(btn, tx, ty)) {
+	if (INSIDE(btn, tx, ty)) {
 		btn->finger_id = finger->fingerId;
 		btn->pressed = 1;
 		if (!btn->animated) sprite_set_index(&(btn->spr), BUTTON_DOWN);
@@ -285,7 +254,7 @@ static int touch_motion(button btn_id, SDL_TouchFingerEvent *finger)
 	float tx = finger->x, ty = finger->y;
 	normalized2game(&tx, &ty);
 
-	if (!inside(btn, tx,ty)) {
+	if (!INSIDE(btn, tx,ty)) {
 		button_clear(btn_id);
 		return 0;
 	}
@@ -305,7 +274,7 @@ static int touch_up(button btn_id, SDL_TouchFingerEvent *finger)
 	float tx = finger->x, ty = finger->y;
 	normalized2game(&tx, &ty);
 
-	if (inside(btn, tx,ty)) {
+	if (INSIDE(btn, tx,ty)) {
 		if (!btn->animated) sprite_set_index(&(btn->spr), BUTTON_UP);
 		button_click(btn_id);
 		return 1;

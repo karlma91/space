@@ -126,13 +126,13 @@ void levelscreen_change_to(level_ship * ship)
 	int i;
 	for (i = 0; i < level_count; i++) {
 		float x = box.x - box.w/2 + (box.w-margin*2) * (i+0.5) / level_count;
-		button_set_position(btn_levels[i], x, y);
-		button_set_visibility(btn_levels[i], 1);
-		button_set_enabled(btn_levels[i], 1);
+		btn_levels[i]->visible = 1;
+		btn_levels[i]->enabled = 1;
+		touch_place(btn_levels[i], x, y);
 	}
 	for (;i < MAX_LEVELS; i++) {
-		button_set_visibility(btn_levels[i], 0);
-		button_set_enabled(btn_levels[i], 0);
+		btn_levels[i]->visible = 0;
+		btn_levels[i]->enabled = 0;
 	}
 
 	statesystem_push_state(state_levelscreen);

@@ -161,9 +161,9 @@ void statesystem_draw()
     	LList list = state->touch_objects;
     	llist_begin_loop(list);
     	while(llist_hasnext(list)) {
-    		void *touchy = llist_next(list);
-    		if (button_is_visible(touchy)) {
-    			((touch_calls *) (*(void **)touchy))->render(touchy);
+			touchable *touchy = llist_next(list);
+			if (touchy->visible) {
+    			touchy->calls->render(touchy);
     		}
     	}
     	llist_end_loop(list);
@@ -212,27 +212,27 @@ void statesystem_push_event(SDL_Event *event)
 	switch(event->type) {
 	case SDL_FINGERDOWN:
 		while(llist_hasnext(list)) {
-			void *touchy = llist_next(list);
-			if (button_is_enabled(touchy)) {
-				if (((touch_calls *) (*(void **)touchy))->touch_down(touchy, &event->tfinger))
+			touchable *touchy = llist_next(list);
+			if (touchy->enabled) {
+				if (touchy->calls->touch_down(touchy, &event->tfinger))
 					break;
 			}
 		}
 		break;
 	case SDL_FINGERMOTION:
 		while(llist_hasnext(list)) {
-			void *touchy = llist_next(list);
-			if (button_is_enabled(touchy)) {
-				if (((touch_calls *) (*(void **)touchy))->touch_motion(touchy, &event->tfinger))
+			touchable *touchy = llist_next(list);
+			if (touchy->enabled) {
+				if (touchy->calls->touch_motion(touchy, &event->tfinger))
 					break;
 			}
 		}
 		break;
 	case SDL_FINGERUP:
 		while(llist_hasnext(list)) {
-			void *touchy = llist_next(list);
-			if (button_is_enabled(touchy)) {
-				if (((touch_calls *) (*(void **)touchy))->touch_up(touchy, &event->tfinger))
+			touchable *touchy = llist_next(list);
+			if (touchy->enabled) {
+				if (touchy->calls->touch_up(touchy, &event->tfinger))
 					break;
 			}
 		}

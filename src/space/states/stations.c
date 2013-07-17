@@ -13,6 +13,7 @@
 #include "../../engine/engine.h"
 #include "../../engine/state/state.h"
 #include "../../engine/input/button.h"
+#include "../../engine/input/scroll.h"
 
 STATE_ID state_stations;
 
@@ -25,14 +26,7 @@ static button btn_home;
 static level_ship *stations;
 static int station_count = 2;
 
-#define SCROLL_FRICTION 0.9f
-static int scrolling = 0;
-static float scroll_hs = 0;
-static float scroll_vs = 0;
-static float x_offset = 0;
-static float y_offset = 0;
-
-static float scale = 1;
+static scroll_p scroller;
 
 static int tex_title;
 static int tex_stars;
@@ -54,23 +48,20 @@ static void post_update()
 {
 }
 
+static void sdl_event(SDL_Event *event)
+{
+}
+
 static void draw()
 {
 	draw_color4f(1,1,1,1);
 
-	if (!scrolling) {
-		x_offset += scroll_hs;
-		y_offset += scroll_vs;
-	} else {
-		scroll_hs *= SCROLL_FRICTION; // more friction
-		scroll_vs *= SCROLL_FRICTION; // more friction
-	}
-	scroll_hs *= SCROLL_FRICTION;
-	scroll_vs *= SCROLL_FRICTION;
+	float xoffset = scroll_get_xoffset(scroller);
+	float yoffset = scroll_get_yoffset(scroller);
 
-	float x1 = - (x_offset / 2) / GAME_WIDTH;
+	float x1 = - (xoffset / 2) / GAME_WIDTH;
 	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT;
-	float y1 = (y_offset / 2) / GAME_HEIGHT;
+	float y1 = (yoffset / 2) / GAME_HEIGHT;
 	float y2 = y1 + 1;
 	float map[8] = {x1, y2,
 					x2, y2,
@@ -78,40 +69,17 @@ static void draw()
 					x2, y1};
 
 	draw_texture(tex_stars,&cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
-
 	int i;
 	for (i = 0; i < station_count; i++) {
-		button_set_position(btn_stations[i], -(station_count - 1) / 2.0 * 650 + 1000 * i + x_offset, y_offset+(i-0.5)*270);
-		button_render(btn_stations[i]);
+		touch_place(btn_stations[i], -(station_count - 1) / 2.0 * 650 + 1000 * i + xoffset, yoffset+(i-0.5)*270);
+		btn_stations[i]->calls->render(btn_stations[i]);
 		//TODO tegne minste antall stjerner av levlene i romstasjonen under den?
 		//TODO skrive antall levler klart?
 	}
 
-	cpVect pos = {0,0.7f*GAME_HEIGHT/2};
-	draw_texture(tex_title, &pos, TEX_MAP_FULL, 1200, 300, 0);
+	//cpVect pos = {0,0.7f*GAME_HEIGHT/2};
+	//draw_texture(tex_title, &pos, TEX_MAP_FULL, 1200, 300, 0);
 }
-
-static void sdl_event(SDL_Event *event) {
-	switch (event->type) {
-	case SDL_FINGERMOTION:
-		if (!llist_contains(active_fingers,event->tfinger.fingerId)) {
-			scrolling = 1;
-			float dx = event->tfinger.dx*GAME_WIDTH;
-			float dy = -event->tfinger.dy*GAME_HEIGHT;
-			x_offset += dx;
-			y_offset += dy;
-
-			scroll_hs = scroll_hs*0.5 + 0.5*dx;
-			scroll_vs = scroll_vs*0.5 + 0.5*dy;
-		}
-		break;
-	case SDL_FINGERUP:
-			scrolling = 0;
-		break;
-	}
-
-}
-
 
 static void button_callback(void *data)
 {
@@ -139,8 +107,8 @@ void stations_init()
 
 	btn_stations = calloc(station_count, sizeof(button));
 
-	Color col_back = {0.9,0.9,1,1};
-	Color col_text = {1,1,1,1};
+	Color col_back = {0.2,0.9,0.3,1};
+	//Color col_text = {1,1,1,1};
 
 	btn_home = button_create(SPRITE_PLAYER, 0, "", 0, 0, 250, 250);
 	button_set_callback(btn_home, open_upgrades, 0);
@@ -155,14 +123,16 @@ void stations_init()
 		btn_stations[i] = button_create(SPRITE_STATION_01, 0, "", -(station_count - 1) / 2.0 * 650 + 650 * i, -i*70, 320 + size, 320 + size);
 		button_set_callback(btn_stations[i], button_callback, &stations[i]);
 		button_set_backcolor(btn_stations[i], col_back);
-		button_set_frontcolor(btn_stations[i], col_text);
 		button_set_animated(btn_stations[i], 1, (i ? 18 : 15));
 		button_set_enlargement(btn_stations[i], 1.5);
-		button_set_visibility(btn_stations[i],0);
+		btn_stations[i]->visible = 0;
 		statesystem_register_touchable(state_stations, btn_stations[i]);
 	}
 
+	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.99, 100);
+	statesystem_register_touchable(state_stations, scroller);
+
 	tex_title = texture_load("space_title.png");
-	tex_stars = texture_load("stars.png");
+	tex_stars = texture_load("stars.jpg");
 }
 

@@ -163,10 +163,6 @@ static void draw()
 		setTextSize(80);
 		setTextAlign(TEXT_CENTER);
 		font_drawText(0,0.6f*GAME_HEIGHT/2, "GAME PAUSED");
-#if IS_APP
-		draw_color4f(0.1,0.9,0.1,1);
-		button_render(btn_start_tmp);
-#endif
 		break;
 	case MENU_MAIN:
 		setTextSize(120);
@@ -190,7 +186,7 @@ static void draw()
 		font_drawText(0,-0.5f*GAME_HEIGHT/2, "START SPILLET");
 
 		draw_color4f(0.1,0.9,0.1,1);
-		button_render(btn_start_tmp);
+		btn_start_tmp->calls->render(btn_start_tmp);
 
 		break;
 	}
