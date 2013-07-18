@@ -155,7 +155,7 @@ static int HandleAppEvents(void *userdata, SDL_Event *event)
 }
 
 static void setAspectRatio() {
-	SDL_ShowCursor(!config.fullscreen);
+	//SDL_ShowCursor(!config.fullscreen);
 
 	if (config.fullscreen) {
 		WINDOW_WIDTH = fullscreen_dimensions.w;

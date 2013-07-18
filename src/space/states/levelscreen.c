@@ -30,7 +30,7 @@ static int selected_level = 0;
 static int level_count = 0;
 static level_ship *current_ship;
 
-static rect box = {0,-100,1000,700};
+static rect box = {0,0,1000,800};
 
 static float w = 150;
 static float h = 150;
@@ -38,7 +38,7 @@ static float h = 150;
 static char title[40];
 
 static sprite spr_star;
-static cpVect star_pos[3] = {{-350,0}, {0,0}, {350,0}};
+static cpVect star_pos[3] = {{-350,100}, {0,100}, {350,100}};
 static int stars_unlocked = 0;
 
 static float alpha = 0;
@@ -64,10 +64,10 @@ static void draw()
 {
 	int i;
 
-	if (alpha < 0.25) {
+	if (alpha < 0.4) {
 		alpha += 1 * dt;
-		if (alpha > 0.25) {
-			alpha = 0.25;
+		if (alpha > 0.4) {
+			alpha = 0.4;
 		}
 	}
 

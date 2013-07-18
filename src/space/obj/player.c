@@ -30,6 +30,9 @@
 #include "chipmunk.h"
 #include "../spaceengine.h"
 
+int player_assisted_steering = 0;
+int player_cheat_invulnerable = 0;
+
 static void init(object_data *);
 
 static void render(object_group_player *);
@@ -137,8 +140,8 @@ static void render(object_group_player *player)
 #include <time.h>
 static void update(object_group_player *player)
 {
-	if (keys[SDL_SCANCODE_I]) //CHEAT
-		player->hp_bar.value = 1000000;
+	if (player_cheat_invulnerable)
+		player->hp_bar.value = 100;
 
 	player->gun_timer += dt;
 

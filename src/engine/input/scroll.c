@@ -52,6 +52,9 @@ static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
 {
 	scroll_p_priv * scr = (scroll_p_priv *) scr_id;
 
+	scr->hs = 0;
+	scr->vs = 0;
+
 	return 0;
 }
 

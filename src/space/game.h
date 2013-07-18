@@ -14,6 +14,7 @@
 #include "../engine/graphics/particles.h"
 #include "../engine/graphics/customparticles.h"
 #include "../engine/graphics/bmfont.h"
+#include "../engine/input/button.h"
 
 extern STATE_ID state_menu; /* deprecated state! */
 extern STATE_ID state_gameover; /* deprecated state! */
@@ -35,6 +36,7 @@ extern SPRITE_ID SPRITE_TANK_WHEEL;
 extern SPRITE_ID SPRITE_TANK_TURRET;
 extern SPRITE_ID SPRITE_STATION_01;
 extern SPRITE_ID SPRITE_STAR;
+extern SPRITE_ID SPRITE_GEAR;
 
 extern int EMITTER_FLAME;
 extern int EMITTER_ROCKET_FLAME;
@@ -57,6 +59,9 @@ extern Mix_Chunk *SND_EXPLOSION;
 extern Mix_Music *MUSIC_MENU;
 extern Mix_Music *MUSIC_LEVEL;
 extern Mix_Music *MUSIC_GAMEOVER;
+
+/* GLOBAL TOUCHABLES */
+extern button btn_settings;
 
 #ifndef ARCADE_MODE // definer evt. ARCADE_MODE under symbols i project settings for � overstyre
 #define ARCADE_MODE 0

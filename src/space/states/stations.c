@@ -20,7 +20,6 @@ STATE_ID state_stations;
 char *txt_buttons[30];
 
 static button *btn_stations;
-
 static button btn_home;
 
 static level_ship *stations;
@@ -61,9 +60,9 @@ static void draw()
 	float yoffset = scroll_get_yoffset(scroller);
 
 	{
-	float x1 = - (xoffset / 5) / GAME_WIDTH;
+	float x1 = - (xoffset / 7) / GAME_WIDTH;
 	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT;
-	float y1 = (yoffset / 5) / GAME_HEIGHT;
+	float y1 = (yoffset / 7) / GAME_HEIGHT;
 	float y2 = y1 + 1;
 	float map[8] = {x1, y2,
 					x2, y2,
@@ -73,19 +72,8 @@ static void draw()
 	}
 	{
 	float x1 = - (xoffset / 4) / GAME_WIDTH;
-	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT * 3;
-	float y1 = (yoffset / 4) / GAME_HEIGHT;
-	float y2 = y1 + 1.0 * 3;
-	float map[8] = {x1, y2,
-					x2, y2,
-					x1, y1,
-					x2, y1};
-	draw_texture(tex_stars_2,&cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
-	}
-	{
-	float x1 = - (xoffset / 3.6) / GAME_WIDTH;
 	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT * 2;
-	float y1 = (yoffset / 3.6) / GAME_HEIGHT;
+	float y1 = (yoffset / 4) / GAME_HEIGHT;
 	float y2 = y1 + 1.0 * 2;
 	float map[8] = {x1, y2,
 					x2, y2,
@@ -94,10 +82,21 @@ static void draw()
 	draw_texture(tex_stars_2,&cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
 	}
 	{
+	float x1 = - (xoffset / 3.6) / GAME_WIDTH;
+	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT *1;
+	float y1 = (yoffset / 3.6) / GAME_HEIGHT;
+	float y2 = y1 + 1.0 * 1;
+	float map[8] = {x1, y2,
+					x2, y2,
+					x1, y1,
+					x2, y1};
+	draw_texture(tex_stars_2,&cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
+	}
+	{
 	float x1 = - (xoffset / 3.2) / GAME_WIDTH;
-	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT;
+	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT * 0.5;
 	float y1 = (yoffset / 3.2) / GAME_HEIGHT;
-	float y2 = y1 + 1;
+	float y2 = y1 + 1 * 0.5;
 	float map[8] = {x1, y2,
 					x2, y2,
 					x1, y1,
@@ -143,7 +142,7 @@ void stations_init()
 
 	btn_stations = calloc(station_count, sizeof(button));
 
-	Color col_back = {0.2,0.7,1,1};
+	Color col_back = {1,1,1,1};
 	//Color col_text = {1,1,1,1};
 
 	btn_home = button_create(SPRITE_PLAYER, 0, "", 0, 0, 250, 250);
@@ -155,18 +154,18 @@ void stations_init()
 	for (i = 0; i < station_count; i++) {
 		char stri[10];
 		sprintf(stri, "%d", i+1);
-		float size = i ? -10 : 30;
-		btn_stations[i] = button_create(SPRITE_STATION_01, 0, "", -(station_count - 1) / 2.0 * 650 + 650 * i, -i*70, 320 + size, 320 + size);
+		float size = 350 + (i ? -50 : 50);
+		btn_stations[i] = button_create(SPRITE_STATION_01, 0, "", -1,-1, size, size);
 		button_set_callback(btn_stations[i], button_callback, &stations[i]);
 		button_set_backcolor(btn_stations[i], col_back);
 		button_set_animated(btn_stations[i], 1, (i ? 18 : 15));
 		button_set_enlargement(btn_stations[i], 1.5);
 		btn_stations[i]->visible = 0;
-		statesystem_register_touchable(state_stations, btn_stations[i]);
+		statesystem_register_touchable(this, btn_stations[i]);
 	}
 
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 4000); // max 4 000 gu / sec
-	statesystem_register_touchable(state_stations, scroller);
+	statesystem_register_touchable(this, scroller);
 
 	tex_title = texture_load("space_title.png");
 	tex_stars = texture_load("stars.jpg");

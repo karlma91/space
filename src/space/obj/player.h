@@ -43,4 +43,7 @@ extern object_group_preset object_type_player;
 
 extern object_group_player *object_create_player();
 
+extern int player_assisted_steering;
+extern int player_cheat_invulnerable;
+
 #endif /* PLAYER_H_ */

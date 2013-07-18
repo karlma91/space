@@ -52,6 +52,7 @@ SPRITE_ID SPRITE_TANK_TURRET;
 SPRITE_ID SPRITE_BUTTON_PAUSE;
 SPRITE_ID SPRITE_STATION_01;
 SPRITE_ID SPRITE_STAR;
+SPRITE_ID SPRITE_GEAR;
 /* end of global sprite definitions*/
 
 /* global emitter */
@@ -78,6 +79,9 @@ Mix_Chunk *SND_EXPLOSION;
 Mix_Music *MUSIC_MENU;
 Mix_Music *MUSIC_LEVEL;
 Mix_Music *MUSIC_GAMEOVER;
+
+/* GLOBAL TOUCHABLES */
+button btn_settings;
 
 
 #if !(TARGET_OS_IPHONE || __ANDROID__)
@@ -151,6 +155,7 @@ void game_sprites()
 	SPRITE_TANK_TURRET =		sprite_link("tank_turret");
 	SPRITE_STATION_01 =	    	sprite_link("station_01");
 	SPRITE_STAR =	        	sprite_link("star");
+	SPRITE_GEAR =	        	sprite_link("gear");
 }
 
 void game_particles()
@@ -186,6 +191,18 @@ void game_audio()
 	MUSIC_GAMEOVER = sound_load_music("Idling.ogg");
 }
 
+/* all global touchables goes in here */
+void game_touchables()
+{
+	btn_settings = button_create(SPRITE_GEAR, 0, "", GAME_WIDTH/2 - 100, GAME_HEIGHT/2 - 100, 125, 125);
+	button_set_callback(btn_settings, statesystem_push_state, state_settings);
+	button_set_enlargement(btn_settings, 1.5);
+
+	statesystem_register_touchable(state_stations, btn_settings);
+	statesystem_register_touchable(state_pause, btn_settings);
+	statesystem_register_touchable(state_leveldone, btn_settings);
+}
+
 void game_init()
 {
 	//TODO generalize particles.c and ?level.c
@@ -197,17 +214,21 @@ void game_init()
 	level_init();
 
 	/* init all states (warning: make sure that no init method depends on uninitialized state_id!) */
+    settings_init();
     stations_init();
     menu_init();
     space_init();
     pause_init();
-    settings_init();
     upgrades_init();
     gameover_init();
     levelscreen_init();
     leveldone_init();
 
+    game_touchables();
+
     statesystem_set_state(state_stations);
+
+	sound_music(MUSIC_LEVEL);
 }
 
 

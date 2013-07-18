@@ -17,6 +17,10 @@
 #define SOUND_PATH "sound/"
 #endif
 
+#define SOUND_DEFAULT_VOLUME (SDL_MIX_MAXVOLUME/8)
+#define SOUND_DEFAULT_MUSIC_VOLUME (SDL_MIX_MAXVOLUME/2)
+#define NUM_CHANNELS 32
+
 typedef struct {
 	char name[100];
 	int is_track;
@@ -59,7 +63,9 @@ void sound_init()
 		exit(-1);
 	}
 
-	Mix_VolumeMusic(SDL_MIX_MAXVOLUME);
+	Mix_VolumeMusic(SOUND_DEFAULT_MUSIC_VOLUME);
+
+	Mix_AllocateChannels(NUM_CHANNELS);
 }
 
 Mix_Music *sound_load_music(const char *name)
@@ -96,7 +102,7 @@ Mix_Chunk *sound_load_chunk(const char *name)
 		a->is_track = 0;
 		a->sound = chunk;
 
-		Mix_VolumeChunk(chunk, SDL_MIX_MAXVOLUME/8);
+		Mix_VolumeChunk(chunk, SOUND_DEFAULT_VOLUME);
 
 		llist_add(tracks, a);
 	} else {
@@ -113,12 +119,12 @@ void sound_play(Mix_Chunk *chunk)
 }
 
 void sound_music(Mix_Music *music)
-{/*
+{
 	Mix_PlayMusic(music, 1);
 
 	if (Mix_PlayingMusic() == -1) {
 		SDL_Log("ERROR: Music failed to played!");
-	}*/
+	}
 }
 
 void sound_destroy()
@@ -128,3 +134,28 @@ void sound_destroy()
 
 	Mix_Quit();
 }
+
+
+void sound_mute()
+{
+	Mix_HaltChannel(-1);
+	Mix_Volume(-1, 0);
+}
+
+void sound_unmute()
+{
+	Mix_Volume(-1, SDL_MIX_MAXVOLUME);
+}
+
+void sound_music_mute()
+{
+	Mix_VolumeMusic(0);
+	Mix_PauseMusic();
+}
+
+void sound_music_unmute()
+{
+	Mix_VolumeMusic(SOUND_DEFAULT_MUSIC_VOLUME);
+	Mix_ResumeMusic();
+}
+

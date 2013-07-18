@@ -760,7 +760,6 @@ void space_init_level(int space_station, int deck)
 static void on_enter()
 {
 	game_paused = 0;
-	sound_music(MUSIC_LEVEL);
 }
 
 static void game_over()
@@ -845,7 +844,7 @@ void space_init()
 
 	objects_init();
 
-    btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-70, GAME_HEIGHT/2-70, 80, 80);
+    btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-85, GAME_HEIGHT/2-77, 80, 80);
     button_set_callback(btn_pause, pause_game, 0);
     button_set_enlargement(btn_pause, 2.0f);
     statesystem_register_touchable(this, btn_pause);
