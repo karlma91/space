@@ -191,16 +191,19 @@ void game_audio()
 	MUSIC_GAMEOVER = sound_load_music("Idling.ogg");
 }
 
-/* all global touchables goes in here */
+
+/* general button callbacks */
+static void open_settings()
+{
+	statesystem_push_state(state_settings);
+}
+
+/* all global touchables goes in here. NB! Cannot contain direct reference to any state-id as they are uninitialized! */
 void game_touchables()
 {
 	btn_settings = button_create(SPRITE_GEAR, 0, "", GAME_WIDTH/2 - 100, GAME_HEIGHT/2 - 100, 125, 125);
-	button_set_callback(btn_settings, statesystem_push_state, state_settings);
+	button_set_callback(btn_settings, open_settings, 0);
 	button_set_enlargement(btn_settings, 1.5);
-
-	statesystem_register_touchable(state_stations, btn_settings);
-	statesystem_register_touchable(state_pause, btn_settings);
-	statesystem_register_touchable(state_leveldone, btn_settings);
 }
 
 void game_init()
@@ -213,6 +216,8 @@ void game_init()
 
 	level_init();
 
+    game_touchables();
+
 	/* init all states (warning: make sure that no init method depends on uninitialized state_id!) */
     settings_init();
     stations_init();
@@ -223,8 +228,6 @@ void game_init()
     gameover_init();
     levelscreen_init();
     leveldone_init();
-
-    game_touchables();
 
     statesystem_set_state(state_stations);
 

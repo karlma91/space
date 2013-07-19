@@ -164,6 +164,8 @@ void stations_init()
 		statesystem_register_touchable(this, btn_stations[i]);
 	}
 
+	statesystem_register_touchable(this, btn_settings);
+
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 4000); // max 4 000 gu / sec
 	statesystem_register_touchable(this, scroller);
 

@@ -20,6 +20,8 @@
 
 STATE_ID state_settings;
 
+#define SCROLL_WIDTH 1200
+
 typedef enum {
 	OPT_SOUND,
 	OPT_MUSIC,
@@ -75,17 +77,19 @@ static void draw()
 
 	draw_color4f(0,0,0,0.5f);
 	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
+	draw_color4f(0.1,0.1,0.3,1);
+	draw_box(0,0,SCROLL_WIDTH,GAME_HEIGHT,0,1);
 
 
 	draw_color4f(1,1,1,1);
 
-	setTextSize(50);
+	setTextSize(70);
 	setTextAlign(TEXT_CENTER);
-	font_drawText(0, GAME_HEIGHT/2 - 50 + yoffset, "SETTINGS");
+	font_drawText(0, GAME_HEIGHT/2 - 80 + yoffset, "SETTINGS");
 
 	int i;
 	for (i = 0; i < OPTION_COUNT; i++) {
-		touch_place(btn_options[i], 0, -i * 200 + yoffset);
+		touch_place(btn_options[i], 0, -i * 160 + GAME_HEIGHT/5 + yoffset);
 	}
 }
 
@@ -165,15 +169,9 @@ void settings_init()
 {
 	statesystem_register(state_settings,0);
 
-	//TODO create back icon and remove text
-	btn_back = button_create(SPRITE_BUTTON, 1, "BACK", -GAME_WIDTH/2 + 150, -GAME_HEIGHT/2 + 100, 250, 100);
-	button_set_callback(btn_back, statesystem_pop_state, 0);
-	//TODO uncomment after adding back icon -> // button_set_enlargement(btn_back, 1.5);
-	statesystem_register_touchable(this, btn_back);
-
 	int i;
 	for (i = 0; i < OPTION_COUNT; i++) {
-		btn_options[i] = button_create(SPRITE_BUTTON, 1, str_options[i], -1,-1, 1000, 150);
+		btn_options[i] = button_create(SPRITE_BUTTON, 1, str_options[i], -1,-1, 800, 115);
 		button_set_callback(btn_options[i], option_click, NULL + i);
 		statesystem_register_touchable(this, btn_options[i]);
 	}
@@ -189,7 +187,11 @@ void settings_init()
 	btn_options[OPT_UNLOCK]->enabled = 0;
 	btn_options[OPT_DELETE]->enabled = 0;
 
-	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.9, 1200); // max 4 000 gu / sec
+	scroller = scroll_create(0,0,SCROLL_WIDTH,GAME_HEIGHT, 0.95, GAME_HEIGHT); // max 4 000 gu / sec
 	statesystem_register_touchable(this, scroller);
+
+	btn_back = button_create(NULL, 0, "", 0,0,GAME_WIDTH,GAME_HEIGHT);
+	button_set_callback(btn_back, statesystem_pop_state, 0);
+	statesystem_register_touchable(this, btn_back);
 }
 

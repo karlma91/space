@@ -171,6 +171,8 @@ void levelscreen_init()
 		statesystem_register_touchable(state_levelscreen, btn);
 	}
 
+	statesystem_register_touchable(this, btn_settings);
+
 	btn_disable = button_create(NULL, 0, "", box.x, box.y, box.w, box.h);
 	statesystem_register_touchable(this, btn_disable);
 

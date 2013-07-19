@@ -79,5 +79,6 @@ void pause_init()
 	statesystem_register_touchable(this, btn_space);
 	statesystem_register_touchable(this, btn_retry);
 	statesystem_register_touchable(this, btn_resume);
+	statesystem_register_touchable(this, btn_settings);
 }
 

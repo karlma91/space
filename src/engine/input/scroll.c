@@ -21,17 +21,19 @@ typedef struct {
 
 	float max_speed;
 
+	SDL_FingerID finger_1, finger_2;
+
 	float hs;
 	float vs;
 
 	float x_offset;
 	float y_offset;
 
-} scroll_p_priv;
+} scroll_priv;
 
 static void update(touchable * scr_id)
 {
-	scroll_p_priv * scr = (scroll_p_priv *) scr_id;
+	scroll_priv * scr = (scroll_priv *) scr_id;
 
 	if (!scr->scrolling) {
 		scr->x_offset += scr->hs;
@@ -50,56 +52,82 @@ static void render(touchable * scr_id)
 
 static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
 {
-	scroll_p_priv * scr = (scroll_p_priv *) scr_id;
+	scroll_priv * scr = (scroll_priv *) scr_id;
 
-	scr->hs = 0;
-	scr->vs = 0;
+	float tx = finger->x, ty = finger->y;
+	normalized2game(&tx, &ty);
+
+	//TODO support dual-touch
+	if (INSIDE(scr, tx, ty)) {
+		scr->finger_1 = finger->fingerId;
+
+		scr->hs = 0;
+		scr->vs = 0;
+
+		llist_add(active_fingers, (void *)finger->fingerId);
+
+		scr->scrolling = 1;
+		return 1;
+	}
 
 	return 0;
 }
 
 static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 {
-	scroll_p_priv * scr = (scroll_p_priv *) scr_id;
+	scroll_priv * scr = (scroll_priv *) scr_id;
 
-
-	//TODO register finger to scroller
+	/* add finger to this scroll if not active*/
 	if (!llist_contains(active_fingers, finger->fingerId)) {
-		scr->scrolling = 1;
+		scr->finger_1 = finger->fingerId;
 
-		//TODO get actual width and height (TODO ta hensyn til kameraviews)
-		float dx = finger->dx * scr_id->get.width;
-		float dy = -finger->dy * scr_id->get.height;
+		scr->hs = 0;
+		scr->vs = 0;
 
-		scr->x_offset += dx;
-		scr->y_offset += dy;
-
-		/* limit speed */
-
-		scr->hs = scr->hs*0.5 + 0.5*dx;
-		scr->vs = scr->vs*0.5 + 0.5*dy;
-
-		float speed = hypotf(scr->hs, scr->vs);
-		if (speed > scr->max_speed*dt) {
-			float k = (scr->max_speed*dt) / speed;
-			scr->hs *= k;
-			scr->vs *= k;
-		}
+		llist_add(active_fingers, (void *)finger->fingerId);
+	} else if (scr->finger_1 != finger->fingerId) {
+		return 0;
 	}
-	return 0;
+
+	scr->scrolling = 1;
+
+	//TODO get actual width and height (TODO ta hensyn til kameraviews)
+	float dx = finger->dx * scr_id->get.width;
+	float dy = -finger->dy * scr_id->get.height;
+
+	scr->x_offset += dx;
+	scr->y_offset += dy;
+
+	scr->hs = scr->hs * 0.5 + 0.5 * dx;
+	scr->vs = scr->vs * 0.5 + 0.5 * dy;
+
+	/* limit speed */
+	float speed = hypotf(scr->hs, scr->vs);
+	if (speed > scr->max_speed * dt) {
+		float k = (scr->max_speed * dt) / speed;
+		scr->hs = scr->hs*(k * 0.7 + 0.3);
+		scr->vs = scr->vs*(k * 0.7 + 0.3);
+	}
+
+	return 1;
 }
 
 static int touch_up(touchable * scr_id, SDL_TouchFingerEvent * finger)
 {
-	scroll_p_priv * scr = (scroll_p_priv *) scr_id;
-	scr->scrolling = 0;
+	scroll_priv * scr = (scroll_priv *) scr_id;
+
+	if (scr->finger_1 == finger->fingerId) {
+		scroll_priv * scr = (scroll_priv *) scr_id;
+		scr->scrolling = 0;
+		scr->finger_1 = NULL;
+	}
 	return 0;
 }
 
 
 scroll_p scroll_create(float pos_x, float pos_y, float width, float height, float friction, float max_speed)
 {
-	scroll_p_priv *scr = malloc(sizeof(*scr));
+	scroll_priv *scr = malloc(sizeof(*scr));
 	scroll_p scr_id = (scroll_p) scr;
 	REGISTER_CALLS(scr);
 
@@ -121,12 +149,12 @@ scroll_p scroll_create(float pos_x, float pos_y, float width, float height, floa
 
 float scroll_get_xoffset(scroll_p scr_id)
 {
-	scroll_p_priv * scr = (scroll_p_priv *) scr_id;
+	scroll_priv * scr = (scroll_priv *) scr_id;
 	return scr->x_offset;
 }
 
 float scroll_get_yoffset(scroll_p scr_id)
 {
-	scroll_p_priv * scr = (scroll_p_priv *) scr_id;
+	scroll_priv * scr = (scroll_priv *) scr_id;
 	return scr->y_offset;
 }

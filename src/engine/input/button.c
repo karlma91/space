@@ -133,17 +133,6 @@ void button_set_enlargement(button btn_id, float size)
 	btn->down_size = size;
 }
 
-int button_is_visible(button btn_id)
-{
-	return ((struct button *) btn_id)->touch_data.visible;
-}
-
-int button_is_enabled(button btn_id)
-{
-	return ((struct button *) btn_id)->touch_data.enabled;
-}
-
-
 void button_free(button btn_id)
 {
 	free(btn_id);
@@ -255,6 +244,7 @@ static int touch_motion(button btn_id, SDL_TouchFingerEvent *finger)
 	normalized2game(&tx, &ty);
 
 	if (!INSIDE(btn, tx,ty)) {
+		llist_remove(active_fingers, (void *) btn->finger_id); // make finger available to other touchables
 		button_clear(btn_id);
 		return 0;
 	}
