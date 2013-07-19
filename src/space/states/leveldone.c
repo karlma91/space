@@ -48,10 +48,8 @@ static void post_update()
 
 static void draw()
 {
-	draw_color4f(1,1,1,1);
-	draw_box(0,0,1220,920,0,1);
-	draw_color4f(0,0,0,1);
-	draw_box(0,0,1200,900,0,1);
+	draw_color4f(0,0,0,0.5);
+	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
 
 	draw_color4f(1,1,1,1);
 	setTextAlign(TEXT_CENTER);
@@ -80,13 +78,17 @@ void leveldone_init()
 {
 	statesystem_register(state_leveldone,0);
 
-	btn_space = button_create(SPRITE_BUTTON, 1, "SPACE", -380, -320, 200, 150);
-	btn_retry = button_create(SPRITE_BUTTON, 1, "RETRY", 0, -320, 200, 150);
-	btn_next = button_create(SPRITE_BUTTON, 1, "NEXT", 380, -320, 200, 150);
+	btn_space = button_create(SPRITE_HOME, 0, "", -GAME_WIDTH/2 + 500, -GAME_HEIGHT/2 + 200, 250, 250);
+	btn_retry = button_create(SPRITE_RETRY, 0, "", 0, -GAME_HEIGHT/2 + 200, 250, 250);
+	btn_next = button_create(SPRITE_NEXT, 0, "", GAME_WIDTH / 2 - 500, -GAME_HEIGHT/2 + 200, 250, 250);
 
 	button_set_callback(btn_space, statesystem_set_state, state_stations);
 	button_set_callback(btn_retry, space_restart_level, 0);
 	button_set_callback(btn_next, space_next_level, 0);
+
+	button_set_enlargement(btn_space, 1.5);
+	button_set_enlargement(btn_retry, 1.5);
+	button_set_enlargement(btn_next, 1.5);
 
 	statesystem_register_touchable(this, btn_space);
 	statesystem_register_touchable(this, btn_retry);

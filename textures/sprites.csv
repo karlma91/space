@@ -16,3 +16,6 @@ ramp ramp.png 0 0 1 1 1
 station_01 station_01.png 0 0 0.125 0.16667 48
 star star.png 0 0 1 1 1
 gear gear.png 0 0 1 1 1
+retry retry.png 0 0 1 1 1
+home home.png 0 0 1 1 1
+next next.png 0 0 1 1 1
