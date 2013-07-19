@@ -187,8 +187,8 @@ void settings_init()
 	btn_options[OPT_UNLOCK]->enabled = 0;
 	btn_options[OPT_DELETE]->enabled = 0;
 
-	scroller = scroll_create(0,0,SCROLL_WIDTH,GAME_HEIGHT, 0.95, GAME_HEIGHT); // max 4 000 gu / sec
-	statesystem_register_touchable(this, scroller);
+	scroller = scroll_create(0,0,SCROLL_WIDTH,GAME_HEIGHT, 0.95, GAME_HEIGHT);
+	statesystem_register_touchable(state_settings, scroller);
 
 	btn_back = button_create(NULL, 0, "", 0,0,GAME_WIDTH,GAME_HEIGHT);
 	button_set_callback(btn_back, statesystem_pop_state, 0);

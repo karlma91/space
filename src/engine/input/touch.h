@@ -20,6 +20,13 @@ struct touch_calls;
 typedef struct {
 	const struct touch_calls *calls;
 
+	enum {
+		CTRL_UNDEFINED,
+		CTRL_JOYSTICK,
+		CTRL_BUTTON,
+		CTRL_SCROLL
+	} type;
+
 	int enabled;
 	int visible;
 
@@ -75,6 +82,8 @@ static const touch_calls calls = {update,render,touch_down,touch_motion,touch_up
 			fprintf(stderr,"ERROR: touch listener registration failed\n"); \
 			exit(-1);\
 		} \
+		((touchable *)t)->visible=1; \
+		((touchable *)t)->enabled=1; \
 		((touchable *)t)->get.margin=0;
 
 #define INSIDE( t, x, y) touch_is_inside((touchable *) t, x, y)

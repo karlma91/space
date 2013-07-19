@@ -15,6 +15,7 @@
 #include "llist.h"
 
 /* Define LLIST_DEBUG 1 to debug llist */
+#define LLIST_DEBUG 0
 
 #define MAX_CONCURRENT_ITERATIONS 10
 

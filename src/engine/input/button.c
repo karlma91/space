@@ -48,6 +48,8 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 
 	REGISTER_CALLS(btn);
 
+	btn->touch_data.type = CTRL_BUTTON;
+
 	btn->touch_data.get.width = width;
 	btn->touch_data.get.height = height;
 
@@ -71,8 +73,6 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 	btn->callback = NULL;
 	btn->data = NULL;
 
-	btn->touch_data.visible = 1;
-	btn->touch_data.enabled = 1;
 	btn->animated = 0;
 	btn->down_size = 1;
 	btn->current_size = btn->down_size;
@@ -85,14 +85,6 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 
 	return (button) btn;
 }
-
-/*
-void button_set_position(button btn_id, float x, float y)
-{
-
-	float touch_margin = (btn->width < btn->height ? btn->width : btn->height) / 10;
-}
-*/
 
 void button_set_callback(button btn_id, void (*callback)(void *), void *data)
 {

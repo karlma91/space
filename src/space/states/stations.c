@@ -166,7 +166,7 @@ void stations_init()
 
 	statesystem_register_touchable(this, btn_settings);
 
-	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 4000); // max 4 000 gu / sec
+	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000); // max 4 000 gu / sec
 	statesystem_register_touchable(this, scroller);
 
 	tex_title = texture_load("space_title.png");
