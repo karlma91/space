@@ -13,6 +13,7 @@
 #include "SDL.h"
 #include "SDL_main.h"
 
+#define SOUND_DISABLED 1
 #if !SOUND_DISABLED
 #include "SDL_mixer.h"
 #endif

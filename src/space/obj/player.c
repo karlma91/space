@@ -172,15 +172,12 @@ static void update(object_group_player *player)
 static void controls(object_group_player *player)
 {
 	//float player_angle = cpBodyGetAngle(player->data.body);
-	float player_angle_target;
 	float dir_step;
 
 	//cpFloat speed = 700;
 	int instant = 1; //tmp instant direction
 
 	if (joy_p1_left->amplitude) {
-		player_angle_target = joy_p1_left->direction;
-
 		/*
 		if (!instant) {
 			dir_step = (player->rotation_speed * 2*M_PI)*dt; // 2.5 rps
@@ -191,9 +188,20 @@ static void controls(object_group_player *player)
 		*/
 
 		player->direction_target = joy_p1_left->direction;
-		cpVect player_dir = cpv(joy_p1_left->axis_x, joy_p1_left->axis_y);
 
-		cpBodyApplyImpulse(player->data.body,cpvmult(player_dir, IMPULSE_FORCE), cpvmult(player_dir, -100)); // applies impulse from rocket
+		cpVect F =  cpvmult(cpSpaceGetGravity(space),cpBodyGetMass(player->data.body)*dt);
+		cpVect player_dir = cpv(joy_p1_left->axis_x, joy_p1_left->axis_y);
+		cpVect j = cpvmult(player_dir, IMPULSE_FORCE);
+
+		j.x -= F.x;
+		j.y -= F.y;
+
+		float length = cpvlength(j);
+		if (length > IMPULSE_FORCE) {
+			cpvmult(j, IMPULSE_FORCE / length);
+		}
+
+		cpBodyApplyImpulse(player->data.body, j, cpvmult(player_dir, -100)); // applies impulse from rocket
 		//cpBodySetForce(player->data.body, cpvmult(player_dir, speed*30)); //*600
 
 		player->flame->disable = 0;

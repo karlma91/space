@@ -5,7 +5,7 @@
  *      Author: Mathias
  */
 
-//#include "leveldone.h"
+#include "leveldone.h"
 
 #include "../game.h"
 #include "../../engine/engine.h"
@@ -21,6 +21,9 @@
 STATE_ID state_leveldone;
 
 sprite spr_star;
+
+int level_star_count = 0;
+int level_score = 0;
 
 static button btn_space;
 static button btn_retry;
@@ -48,16 +51,29 @@ static void post_update()
 
 static void draw()
 {
-	draw_color4f(0,0,0,0.5);
+	draw_color4f(0,0,0,0.8);
 	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
 
 	draw_color4f(1,1,1,1);
 	setTextAlign(TEXT_CENTER);
-	setTextSize(40);
-	font_drawText(0,300,"LEVEL CLEARED");
+	setTextSize(70);
+	font_drawText(0,350, level_star_count ? "LEVEL CLEARED" : "LEVEL FAILED");
 
+	draw_color4f(1,1,1,1);
+	setTextAlign(TEXT_CENTER);
+	setTextSize(60);
+
+	char level_score_buf[50];
+	sprintf(&level_score_buf[0],"SCORE: %d",level_score);
+
+	font_drawText(0,-100, level_score_buf);
+
+	draw_color4f(1,1,1,1);
+	if (level_star_count == 0) draw_color4f(0.3,0.3,0.3,1);
 	sprite_render(&spr_star, &star_1, 0);
+	if (level_star_count == 1) draw_color4f(0.3,0.3,0.3,1);
 	sprite_render(&spr_star, &star_2, 0);
+	if (level_star_count == 2) draw_color4f(0.3,0.3,0.3,1);
 	sprite_render(&spr_star, &star_3, 0);
 }
 
@@ -98,3 +114,9 @@ void leveldone_init()
 	sprite_create(&spr_star,SPRITE_STAR,250,250,0);
 }
 
+//TODO create mission objects
+void leveldone_status(int stars, int score)
+{
+	level_star_count = stars;
+	level_score = score;
+}

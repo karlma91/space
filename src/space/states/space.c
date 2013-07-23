@@ -12,6 +12,7 @@
 /* Game state */
 #include "arcade/menu.h"
 #include "arcade/gameover.h"
+#include "leveldone.h"
 
 /* Drawing */
 #include "../../engine/graphics/draw.h"
@@ -167,15 +168,17 @@ static void level_timesup()
 int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead()
 {
+	object_group_player *player = (object_group_player *)objects_first(ID_PLAYER);
+	leveldone_status(0, player->score);
 	update_all();
 }
 static void level_cleared()
 {
+	object_group_player *player = (object_group_player *)objects_first(ID_PLAYER);
 	//TODO: add a 3 seconds animation of remaining time being added to score
 	int time_remaining = (currentlvl->timelimit - game_time + 0.5f);
 
 	if (time_remaining > 0) {
-		object_group_player *player = (object_group_player *)objects_first(ID_PLAYER);
 		int score_bonus = time_remaining * 75; // tidligere 25!
 		score_bonus += (player->hp_bar.value / player->hp_bar.max_hp) * 100 * 35; // adds score bonus for remaining hp
 
@@ -186,8 +189,12 @@ static void level_cleared()
 
 	update_all();
 
-	if(state_timer > 2){
+	if (state_timer > 2) {
 		lvl_cleared=1;
+
+		//TODO set star rating based on missions
+		leveldone_status(1 + player->score / (4000.0 + 1000 * currentlvl->deck), player->score);
+
 		change_state(LEVEL_TRANSITION);
 	}
 }
@@ -375,9 +382,10 @@ static void update_camera_position()
     	cpVect c_pos = player->data.body->p;
     	cpVect c_rot = player->data.body->rot;
 
+    	/*
     	if (accelerometer) {
 #define SINT16_MAX ((float)(0x7FFF))
-    	    /* get joystick (accelerometer) axis values and normalize them */
+    	    // get joystick (accelerometer) axis values and normalize them
     	    float ax = (float) SDL_JoystickGetAxis(accelerometer, 0) / SINT16_MAX * 5;
     	    float ay = -(float) SDL_JoystickGetAxis(accelerometer, 1) / SINT16_MAX * 5;
     	    float az = (float) SDL_JoystickGetAxis(accelerometer, 2) / SINT16_MAX * 5;
@@ -400,6 +408,7 @@ static void update_camera_position()
 
     		c_pos.x += last * 300;
     	}
+    	*/
 
     	camera_update(current_camera, c_pos, c_rot);
     }
@@ -502,8 +511,6 @@ void draw_gui()
 	sprintf(level_temp,"LEVEL %d", currentlvl->deck);
 	font_drawText(0, -GAME_HEIGHT/2+24, level_temp);
 
-
-
 	setTextAlign(TEXT_RIGHT);
 
 #if !ARCADE_MODE
@@ -554,10 +561,10 @@ void draw_gui()
 		draw_color4f(1,0,0,1);
 		setTextAlign(TEXT_CENTER);
 
+#if ARCADE_MODE
 		setTextSize(80);
 		font_drawText(0, 0, "GAME OVER");
 		draw_color4f(0.1,0.9,0.1,1);
-
 		static float button_timer = 0;
 		static int button_down;
 		button_timer+=dt;
@@ -565,6 +572,7 @@ void draw_gui()
 			button_down = !button_down;
 			button_timer = 0;
 		}
+		//TODO draw button texture for arcade mode
 		if(button_down){
 			cpVect t = cpv(0,0-GAME_HEIGHT/4);
 			//draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
@@ -572,6 +580,7 @@ void draw_gui()
 			cpVect t = cpv(0,-5.5-GAME_HEIGHT/4);
 			//draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
 		}
+#endif
 		setTextSize(120);
 		break;
 	case LEVEL_STATE_COUNT:

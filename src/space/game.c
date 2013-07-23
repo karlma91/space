@@ -3,6 +3,7 @@
 
 #include "states/space.h"
 //#include "states/stations.h"
+#include "states/leveldone.h"
 #include "states/levelscreen.h"
 //#include "states/pause.h"
 //#include "states/upgrades.h"
@@ -11,14 +12,12 @@
 
 extern void pause_init();
 extern void settings_init();
-extern void leveldone_init();
 extern void upgrades_init();
 extern void stations_init();
 
 
 #include "states/arcade/menu.h"
 #include "states/arcade/gameover.h"
-
 
 #if !(TARGET_OS_IPHONE || __ANDROID__)
 #include "ini.h"
