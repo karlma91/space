@@ -8,7 +8,13 @@
 #ifndef SOUND_H_
 #define SOUND_H_
 
+
+#if SOUND_DISABLED
+typedef void *Mix_Music;
+typedef void *Mix_Chunk;
+#else
 #include "SDL_mixer.h"
+#endif
 
 void sound_init();
 

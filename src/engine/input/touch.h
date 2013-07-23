@@ -79,7 +79,7 @@ static const touch_calls calls = {update,render,touch_down,touch_motion,touch_up
 #define REGISTER_CALLS( t ) \
 		((touchable *)t)->calls = &calls; \
 		if (t->touch_data.calls != &calls) { \
-			fprintf(stderr,"ERROR: touch listener registration failed\n"); \
+			SDL_Log("ERROR: touch listener registration failed"); \
 			exit(-1);\
 		} \
 		((touchable *)t)->visible=1; \

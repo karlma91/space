@@ -4,8 +4,21 @@
  *  Created on: 6. juli 2013
  *      Author: Mathias
  */
-
+#include <stdlib.h>
 #include "sound.h"
+
+#if SOUND_DISABLED
+void sound_init() {}
+Mix_Music *sound_load_music(const char *name) {return NULL;}
+Mix_Chunk *sound_load_chunk(const char *name) {return NULL;}
+void sound_play(Mix_Chunk *chunk) {}
+void sound_music(Mix_Music *music) {}
+void sound_destroy() {}
+void sound_mute() {}
+void sound_unmute() {}
+void sound_music_mute() {}
+void sound_music_unmute() {}
+#else
 
 #include "SDL_log.h"
 #include "String.h"
@@ -158,4 +171,4 @@ void sound_music_unmute()
 	Mix_VolumeMusic(SOUND_DEFAULT_MUSIC_VOLUME);
 	Mix_ResumeMusic();
 }
-
+#endif

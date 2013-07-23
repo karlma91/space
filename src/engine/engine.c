@@ -12,7 +12,10 @@
 /* SDL */
 #include "SDL.h"
 #include "SDL_main.h"
+
+#if !SOUND_DISABLED
 #include "SDL_mixer.h"
+#endif
 
 /* Chipmunk physics library */
 #include "chipmunk.h"
