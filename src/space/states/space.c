@@ -156,7 +156,7 @@ static void level_player_dead()
 	update_all();
 
 	static int tmp_atom = 0;
-	if (state_timer > 2 && !tmp_atom) {
+	if (state_timer > 1 && !tmp_atom) {
 		tmp_atom = 1;
 		lvl_cleared=0;
 		leveldone_status(0, player->score, game_time);
@@ -172,7 +172,7 @@ static void level_cleared()
 	update_all();
 
 	static int tmp_atom = 0;
-	if (state_timer > 2 && !tmp_atom) {
+	if (state_timer > 1 && !tmp_atom) {
 		tmp_atom = 1;
 		int time_remaining = (currentlvl->timelimit - game_time + 0.5f);
 		int score_bonus = time_remaining * 75; // tidligere 25!

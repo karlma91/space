@@ -26,6 +26,7 @@ sprite spr_star;
 static int level_star_count = 0;
 static int level_score = 0;
 static float level_time = 0;
+char level_time_buf[50];
 
 static button btn_space;
 static button btn_retry;
@@ -65,10 +66,10 @@ static void draw()
 	setTextAlign(TEXT_CENTER);
 	setTextSize(60);
 
-	char level_score_buf[50];
-	sprintf(&level_score_buf[0],"SCORE: %d",level_score);
-
-	font_drawText(0,-100, level_score_buf);
+	//sprintf(&level_score_buf[0],"SCORE: %d",level_score);
+	if (level_star_count) {
+		font_drawText(0,-100, level_time_buf);
+	}
 
 	draw_color4f(1,1,1,1);
 	if (level_star_count == 0) draw_color4f(0.3,0.3,0.3,1);
@@ -122,6 +123,8 @@ void leveldone_status(int stars, int score, float time)
 	level_star_count = stars;
 	level_score = score;
 	level_time = (int)(time*1000);
+
+	font_time2str(&level_time_buf[0], time);
 
 	scorelist level_scores;
 	level_scores.elements = 0;
