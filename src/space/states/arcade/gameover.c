@@ -51,6 +51,7 @@ static int score_page = 0;
 
 static void sdl_event(SDL_Event *event)
 {
+#if ARCADE_MODE
 	SDL_Scancode key;
 	switch (event->type) {
 	case SDL_KEYDOWN:
@@ -106,13 +107,16 @@ static void sdl_event(SDL_Event *event)
 		}
 		break;
 	}
+#endif
 }
 
 void gameover_init()
 {
+#if ARCADE_MODE
 	list = malloc(sizeof(scorelist));
 	highscorelist_create(list);
 	highscorelist_readfile(list,"highscores2"); // NB! moved from bin/data/highscores
+#endif
 
 	statesystem_register(state_gameover,0);
 }
@@ -128,6 +132,8 @@ static void on_leave()
 }
 
 static void pre_update() {
+
+#if ARCADE_MODE
 	static float key_dt = 0;
 	static float key_ddt = 0.25;
 	static const float key_ddt_min = 0.12f;
@@ -172,11 +178,13 @@ static void pre_update() {
 
 		break;
 	}
+#endif
 }
 
 Color color;
 static void draw()
 {
+#if ARCADE_MODE
 	static float timer;
 	timer +=dt;
 
@@ -242,17 +250,21 @@ static void draw()
 		}
 		break;
 	}
+#endif
 }
 
 static void destroy()
 {
+#if ARCADE_MODE
 	highscorelist_writefile(list);
 	highscorelist_destroy(list);
 	free(list);
+#endif
 }
 
 static void draw_highscore(int start_index)
 {
+#if ARCADE_MODE
 	scoreelement score = {"---",0,0,0};
 	char temp[100];
 	int i;
@@ -275,6 +287,7 @@ static void draw_highscore(int start_index)
 		}
 		font_drawText(-10*45*1.5f, 300 - i*50*1.5f, temp);
 	}
+#endif
 }
 
 void gameover_showhighscores() {

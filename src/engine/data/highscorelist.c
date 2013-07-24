@@ -11,8 +11,8 @@
 
 static FILE * file;
 
-static scoreelement score_def = {"---",0,1352918808,NULL};
-static int read_addscore(scorelist *list, char *name, int score,long time,int from_file);
+static scoreelement score_def = {"---",0,0,1352918808,NULL};
+static int read_addscore(scorelist *list, char *name, int score,int time_used, long time,int from_file);
 /**
  * inits a list struct
  */
@@ -26,14 +26,15 @@ void highscorelist_create(scorelist *list)
  * adds a score to the list
  * returns position, or -1 if error
  */
-int highscorelist_addscore(scorelist *list, char *name, int score)
+int highscorelist_addscore(scorelist *list, char *name, int score, int time_used)
 {
 	long t = 0;
 	time(&t);
-	return read_addscore(list, name,score,t,0);
+	return read_addscore(list,name,score,time_used,t,0);
 }
 
-static int read_addscore(scorelist *list, char *name, int score,long time,int from_file)
+//FIXME hva er poenget med highscorelist_addscore, nŒr den omtrent bare kaller read_addscore?
+static int read_addscore(scorelist *list, char *name, int score, int time_used, long time,int from_file)
 {
 	//SDL_Log( "%s %d %d %d\n",name,score,time,from_file);
 	if(strlen(name)>4 || strlen(name)<3){
@@ -50,6 +51,7 @@ static int read_addscore(scorelist *list, char *name, int score,long time,int fr
 		strcpy(element->name, name);
 		element->score = score;
 		element->time = time;
+		element->time_used = time_used;
 		element->next = NULL;
 		int position = 1;
 		while(*cur != NULL){
@@ -80,6 +82,7 @@ int highscorelist_getscore(scorelist *list, int position, scoreelement *score)
 			strcpy(score->name, cur->name);
 			score->score = cur->score;
 			score->time = cur->time;
+			score->time_used = cur->time_used;
 			return 0;
 		}
 		cur = cur->next;
@@ -88,6 +91,7 @@ int highscorelist_getscore(scorelist *list, int position, scoreelement *score)
 	strcpy(score->name, score_def.name);
 	score->score = score_def.score;
 	score->time = score_def.time;
+	score->time_used = score_def.time_used;
 	return -1;
 }
 
@@ -115,7 +119,7 @@ void highscorelist_destroy(scorelist *list)
 int highscorelist_readfile(scorelist *list, const char *filename)
 {
 	//TODO read file from internal storage
-	file = waffle_internal_fopen(filename,"r");
+	file = waffle_internal_fopen(WAFFLE_LIBRARY, filename,"r");
 	strcpy(list->filename, filename);
 
 	if (file == NULL) {
@@ -127,11 +131,13 @@ int highscorelist_readfile(scorelist *list, const char *filename)
 	int score = 0;
 	int time = 0;
 	int ret = 0;
+	int time_used = 0;
+
 	while(1==1){
-		ret = fscanf(file,"%s %d %d\n",name,&score,&time);
+		ret = fscanf(file,"%s %d %d %d\n",name,&score,&time_used,&time);
 		if (ret != EOF) {
-			if (ret == 3) {
-				read_addscore(list,name,score,time,1);
+			if (ret == 4) {
+				read_addscore(list,name,score,time_used,time,1);
 			} else {
 				SDL_Log("error reading highscore file\n");
 				break;
@@ -150,18 +156,18 @@ int highscorelist_readfile(scorelist *list, const char *filename)
 int highscorelist_writefile(scorelist *list)
 {
 	//TODO write file to internal storage
-	file = waffle_internal_fopen(list->filename,"w");
+	file = waffle_internal_fopen(WAFFLE_LIBRARY, list->filename,"w");
 	if (file == NULL) {
 		SDL_Log( "Could not write to %s\n",list->filename);
 		return 1;
 	}
 
-	scoreelement temp = {"    ",0,0,0};
+	scoreelement temp = {"    ",0,0,0,0};
 
 	int i;
 	for(i=0; i<list->elements; i++){
 		highscorelist_getscore(list,i+1,&temp);
-		fprintf(file,"%s %d %d\n",temp.name,temp.score,temp.time);
+		fprintf(file,"%s %d %d %d\n",temp.name,temp.score,temp.time_used,temp.time);
 	}
 	fclose(file);
 	return 0;

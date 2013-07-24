@@ -234,7 +234,11 @@ void game_init()
     levelscreen_init();
     leveldone_init();
 
+#if ARCADE_MODE
+    statesystem_set_state(state_menu);
+#else
     statesystem_set_state(state_stations);
+#endif
 
 	sound_music(MUSIC_LEVEL);
 }

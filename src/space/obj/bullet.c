@@ -58,7 +58,7 @@ object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int 
 		if(type == ID_BULLET_PLAYER){
 			temp->data.preset = &type_bullet_player;
 			cpShapeSetLayers(temp->shape,LAYER_PLAYER_BULLET);
-			temp->damage = 20;
+			temp->damage = 32;
 			if (keys[SDL_SCANCODE_RSHIFT])
 				temp->damage = 200000;
 		}else{

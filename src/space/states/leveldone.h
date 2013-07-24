@@ -10,6 +10,6 @@
 
 extern void leveldone_init();
 
-void leveldone_status(int stars, int score);
+void leveldone_status(int stars, int score, float seconds);
 
 #endif /* LEVELDONE_H_ */

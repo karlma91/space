@@ -151,17 +151,30 @@ int waffle_next_line(char *file)
     return i;
 }
 
-FILE *waffle_internal_fopen(const char *filename, const char *opentype)
-{
-	char *folder = "";
-	char path[200] = "";
+//TODO make sure folders exists
 #if __ANDROID__
-	folder = &INTERNAL_PATH[0];
+const static char *waffle_dirs[4] = {
+	INTERNAL_PATH,INTERNAL_PATH,INTERNAL_PATH,INTERNAL_PATH
+};
 #elif TARGET_OS_IPHONE
-	folder = "../Documents/";
+const static char *waffle_dirs[4] = {
+	"../Documents/","../Library/Preferences/","../Library/","../tmp/"
+};
 #else // win, linux, mac
-	folder = "bin/data/"; //tmp code to not change highscore path
+const static char *waffle_dirs[4] = {
+	"bin/user_files/", "bin/user_data/settings/", "bin/user_data/","bin/tmp/"
+};
 #endif
+
+FILE *waffle_internal_fopen(enum WAFFLE_DIR dir_type,const char *filename, const char *opentype)
+{
+	if (dir_type < 0 || dir_type > 3) {
+		SDL_Log("ERROR: Invalid directory type: %d", dir_type);
+		exit(-1);
+	}
+
+	const char *folder = waffle_dirs[dir_type];
+	char path[200] = "";
 	strcpy(&path[0], folder);
 	strcat(&path[0], filename);
 	return fopen(path, opentype);

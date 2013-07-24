@@ -54,7 +54,7 @@ object_group_preset object_type_player = {
 
 object_param_player default_player = {
 		.max_hp = 200,
-		.gun_cooldown = 0.125f
+		.gun_cooldown = 0.2f
 };
 
 #define IMPULSE_FORCE 60
@@ -86,7 +86,7 @@ object_group_player *object_create_player()
 	/* make and add new body */
 	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
 	cpBodySetPos(player->data.body, cpv(0,990));
-	cpBodySetVelLimit(player->data.body,550); //700
+	cpBodySetVelLimit(player->data.body,450); //700
 
 	/* make and connect new shape to body */
 	player->shape = se_add_circle_shape(player->data.body,radius,0.8,0.9);
@@ -189,17 +189,22 @@ static void controls(object_group_player *player)
 
 		player->direction_target = joy_p1_left->direction;
 
-		cpVect F =  cpvmult(cpSpaceGetGravity(space),cpBodyGetMass(player->data.body)*dt);
 		cpVect player_dir = cpv(joy_p1_left->axis_x, joy_p1_left->axis_y);
 		cpVect j = cpvmult(player_dir, IMPULSE_FORCE);
 
-		j.x -= F.x;
-		j.y -= F.y;
+		if (player_assisted_steering) {
+			cpVect F = cpvmult(cpSpaceGetGravity(space),cpBodyGetMass(player->data.body)*dt);
+			j.x -= F.x;
+			j.y -= F.y;
 
-		float length = cpvlength(j);
-		if (length > IMPULSE_FORCE) {
-			cpvmult(j, IMPULSE_FORCE / length);
+			float length = cpvlength(j);
+			float max_length = IMPULSE_FORCE * joy_p1_left->amplitude;
+			if (length > max_length) {
+				cpvmult(j, max_length / length);
+			}
 		}
+
+		player->direction_target = cpvtoangle(j);
 
 		cpBodyApplyImpulse(player->data.body, j, cpvmult(player_dir, -100)); // applies impulse from rocket
 		//cpBodySetForce(player->data.body, cpvmult(player_dir, speed*30)); //*600

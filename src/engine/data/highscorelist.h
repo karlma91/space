@@ -6,6 +6,7 @@ typedef struct score scoreelement;
 struct score{
 	char name[5];
 	int score;
+	int time_used;
 	int time;
 	scoreelement *next;
 };
@@ -17,7 +18,7 @@ typedef struct highscorelist{
 }scorelist;
 
 void highscorelist_create(scorelist *list);
-int highscorelist_addscore(scorelist *list, char *name, int score);
+int highscorelist_addscore(scorelist *list, char *name, int score, int time_used);
 int highscorelist_getscore(scorelist *list, int position, scoreelement *score);
 int highscorelist_readfile(scorelist *list, const char *file);
 int highscorelist_writefile(scorelist *list);

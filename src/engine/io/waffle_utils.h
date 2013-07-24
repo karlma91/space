@@ -22,6 +22,13 @@
 
 #endif
 
+enum WAFFLE_DIR {
+	WAFFLE_DOCUMENTS,
+	WAFFLE_PREFERENCES,
+	WAFFLE_LIBRARY,
+	WAFFLE_TMP
+};
+
 extern void waffle_init();
 extern void waffle_destroy();
 
@@ -54,7 +61,7 @@ extern int waffle_read_file(char *filename, char *buffer, int len);
  *
  * Use this method to return a IO-stream to filename on the device internal storage
  */
-extern FILE *waffle_internal_fopen(const char *filename, const char *opentype);
+extern FILE *waffle_internal_fopen(enum WAFFLE_DIR dir_type, const char *filename, const char *opentype);
 
 /*
  * return number of chars until next '\n'

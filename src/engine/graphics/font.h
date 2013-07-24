@@ -28,6 +28,7 @@ extern float font_text_size, font_text_angle;
 void font_drawText(float x, float y, char* text);
 void font_init();
 void font_destroy();
+void font_time2str(char *str, float seconds);
 
 void init_text(char c);
 

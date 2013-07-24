@@ -15,6 +15,7 @@
 #include "../../engine/graphics/font.h"
 
 #include "../../engine/input/button.h"
+#include "../../engine/data/highscorelist.h"
 
 #include "space.h"
 
@@ -22,8 +23,9 @@ STATE_ID state_leveldone;
 
 sprite spr_star;
 
-int level_star_count = 0;
-int level_score = 0;
+static int level_star_count = 0;
+static int level_score = 0;
+static float level_time = 0;
 
 static button btn_space;
 static button btn_retry;
@@ -115,8 +117,20 @@ void leveldone_init()
 }
 
 //TODO create mission objects
-void leveldone_status(int stars, int score)
+void leveldone_status(int stars, int score, float time)
 {
 	level_star_count = stars;
 	level_score = score;
+	level_time = (int)(time*1000);
+
+	scorelist level_scores;
+	level_scores.elements = 0;
+	level_scores.filename[0] = '0';
+	level_scores.head = NULL;
+
+	char level_score_file[50];
+	sprintf(&level_score_file[0], "lvl_%02d_%02d.score", currentlvl->station, currentlvl->deck);
+	highscorelist_readfile(&level_scores,level_score_file);
+	highscorelist_addscore(&level_scores, "LVL", level_score, level_time);
+	highscorelist_writefile(&level_scores);
 }

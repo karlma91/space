@@ -151,6 +151,17 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 	draw_pop_blend();
 }
 
+void font_time2str(char *str, float seconds)
+{
+	int min, sec, msec;
+
+	min = (int)seconds / 60;
+	sec = (int)seconds % 60;
+	msec = (int)(seconds * 1000) % 1000;
+
+	sprintf(str,"%01d:%02d.%03d",min,sec,msec);
+}
+
 void init_text(char c)
 {
 	if (c >= '0' && c <= '9') {

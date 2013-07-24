@@ -79,7 +79,6 @@ static void input();
 enum game_state{
 	LEVEL_START,
 	LEVEL_RUNNING,
-	LEVEL_TIMESUP,
 	LEVEL_PLAYER_DEAD,
 	LEVEL_CLEARED,
 	LEVEL_TRANSITION,
@@ -93,7 +92,6 @@ joystick *joy_p2_left, *joy_p2_right;
 char *game_state_names[] = {
 	"LEVEL_START",
 	"LEVEL_RUNNING",
-	"LEVEL_TIMESUP",
 	"LEVEL_PLAYER_DEAD",
 	"LEVEL_CLEARED",
 	"LEVEL_TRANSITION"
@@ -109,7 +107,6 @@ enum game_state gamestate = LEVEL_START;
 
 static void level_start();
 static void level_running();
-static void level_timesup();
 static void level_player_dead();
 static void level_cleared();
 static void level_transition();
@@ -150,52 +147,47 @@ static void level_running()
 	if ((objects_count(ID_FACTORY) + objects_count(ID_TANK) + objects_count(ID_TURRET)) == 0) {
 		change_state(LEVEL_CLEARED);
 	}
+}
 
-	if (game_time >= currentlvl->timelimit) {
-		change_state(LEVEL_TIMESUP);
-	}
-}
-static void level_timesup()
-{
-	update_all();
-	object_group_player *player = (object_group_player*)objects_first(ID_PLAYER);
-	player->hp_bar.value = 0;
-	player->disable = 1;
-	if (state_timer > 3) {
-		change_state(LEVEL_PLAYER_DEAD);
-	}
-}
 int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead()
 {
 	object_group_player *player = (object_group_player *)objects_first(ID_PLAYER);
-	leveldone_status(0, player->score);
 	update_all();
+
+	static int tmp_atom = 0;
+	if (state_timer > 2 && !tmp_atom) {
+		tmp_atom = 1;
+		lvl_cleared=0;
+		leveldone_status(0, player->score, game_time);
+		statesystem_push_state(state_leveldone);
+	} else {
+		tmp_atom = 0;
+	}
 }
 static void level_cleared()
 {
 	object_group_player *player = (object_group_player *)objects_first(ID_PLAYER);
 	//TODO: add a 3 seconds animation of remaining time being added to score
-	int time_remaining = (currentlvl->timelimit - game_time + 0.5f);
+	update_all();
 
-	if (time_remaining > 0) {
+	static int tmp_atom = 0;
+	if (state_timer > 2 && !tmp_atom) {
+		tmp_atom = 1;
+		int time_remaining = (currentlvl->timelimit - game_time + 0.5f);
 		int score_bonus = time_remaining * 75; // tidligere 25!
 		score_bonus += (player->hp_bar.value / player->hp_bar.max_hp) * 100 * 35; // adds score bonus for remaining hp
 
 		player->score += score_bonus; //Time bonus (75 * sec left)
-		particles_add_score_popup(player->data.body->p, score_bonus);
-		game_time = currentlvl->timelimit;
-	}
 
-	update_all();
-
-	if (state_timer > 2) {
 		lvl_cleared=1;
 
 		//TODO set star rating based on missions
-		leveldone_status(1 + player->score / (4000.0 + 1000 * currentlvl->deck), player->score);
+		leveldone_status(1 + player->score / (4000.0 + 1000 * currentlvl->deck), player->score, game_time);
 
-		change_state(LEVEL_TRANSITION);
+		statesystem_push_state(state_leveldone);
+	} else {
+		tmp_atom = 0;
 	}
 }
 static void level_transition()
@@ -219,8 +211,6 @@ static void level_transition()
 		/* update objects to move shapes to same position as body */
 		change_state(LEVEL_START);
 	//}
-#else
-	statesystem_push_state(state_leveldone);
 #endif
 }
 
@@ -473,6 +463,9 @@ void draw_gui()
 		score_adder = 1;
 	}
 	sprintf(score_temp,"%d",score_anim);
+	draw_color4f(0,0,0,1);
+	font_drawText(-GAME_WIDTH/2+20+4,GAME_HEIGHT/2 - 26-4,score_temp);
+	draw_color4f(1,1,1,1);
 	font_drawText(-GAME_WIDTH/2+20,GAME_HEIGHT/2 - 26,score_temp);
 
 	draw_color4f(1,0,0,1);
@@ -518,37 +511,26 @@ void draw_gui()
 #endif
 
 	char time_temp[20];
+	font_time2str(time_temp, game_time);
+
+	setTextSize(40);
+	setTextAlign(TEXT_CENTER);
+
+	draw_color4f(0,0,0,1);
+	font_drawText(4, GAME_HEIGHT/2 - 29 - 4, time_temp);
+	draw_color4f(1,1,1,1);
+	font_drawText(0, GAME_HEIGHT/2 - 29, time_temp);
+
 	switch(gamestate) {
 	case LEVEL_START:
 		setTextSize(60);
 		draw_color4f(1,1,1,1);
 		setTextAlign(TEXT_CENTER);
 		font_drawText(0, 0, "GET READY!");
-		break;
-	case LEVEL_RUNNING: case LEVEL_TIMESUP:
-		draw_color4f(1,1,1,1);
-		int time_remaining, min, sec;
-		time_remaining = (currentlvl->timelimit - game_time + 0.5f);
-		//if (time_remaining < 0) time_remaining = 0;
-		min = time_remaining / 60;
-		sec = time_remaining % 60;
-		sprintf(time_temp,"%01d:%02d",min,sec);
-		int extra_size = (time_remaining < 10 ? 10 - time_remaining : 0) * 30;
-		if (time_remaining < 10) {
-			if (time_remaining % 2 == 0) {
-				draw_color4f(1,0,0,1);
-			} else {
-				draw_color4f(1.0,1.0,1.0,1);
-			}
-		}
-		setTextAlign(TEXT_CENTER);
-		setTextSize(40 + extra_size);
-		font_drawText(0, GAME_HEIGHT/2 - 29 - extra_size*1.5, time_temp);
+		/* no break */
+	case LEVEL_RUNNING:
 		break;
 	case LEVEL_CLEARED:
-		setTextSize(60);
-		setTextAlign(TEXT_CENTER);
-		font_drawText(0, 0, "LEVEL CLEARED!");
 		break;
 	case LEVEL_TRANSITION:
 		setTextSize(60);
@@ -819,7 +801,7 @@ static void sdl_event(SDL_Event *event)
 			if (gamestate == LEVEL_RUNNING) {
 			} else if (gamestate == LEVEL_PLAYER_DEAD) {
 				//if (button_finger_up(btn_fullscreen, &event->tfinger)) {
-					game_over();
+				//	game_over();
 				//}
 			}
 			joystick_finger_up(joy_p1_left, &event->tfinger);
@@ -846,7 +828,6 @@ void space_init()
 	statesystem_register(state_space,LEVEL_STATE_COUNT);
     statesystem_add_inner_state(state_space,LEVEL_START,level_start,NULL);
     statesystem_add_inner_state(state_space,LEVEL_RUNNING,level_running,NULL);
-    statesystem_add_inner_state(state_space,LEVEL_TIMESUP,level_timesup,NULL);
     statesystem_add_inner_state(state_space,LEVEL_PLAYER_DEAD,level_player_dead,NULL);
     statesystem_add_inner_state(state_space,LEVEL_CLEARED,level_cleared,NULL);
     statesystem_add_inner_state(state_space,LEVEL_TRANSITION,level_transition,NULL);
