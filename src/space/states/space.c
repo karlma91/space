@@ -725,12 +725,12 @@ void space_init_level(int space_station, int deck)
 	currentlvl->floor = offset;
 	currentlvl->ceiling = currentlvl->height - offset/2;
 	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left-100,0), cpv(currentlvl->right+100,0), offset)); // ground level at 0
-	cpShapeSetFriction(floor, 1);
+	cpShapeSetFriction(floor, 0.9f);
 	cpShapeSetCollisionType(floor, ID_GROUND);
 	cpShapeSetElasticity(floor, 0.7f);
 
 	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left-100,currentlvl->height), cpv(currentlvl->right+100,currentlvl->height), offset));
-	cpShapeSetFriction(ceiling, 1);
+	cpShapeSetFriction(ceiling, 0.9f);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
 	cpShapeSetElasticity(ceiling, 0.7f);
 

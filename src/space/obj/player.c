@@ -57,7 +57,7 @@ object_param_player default_player = {
 		.gun_cooldown = 0.2f
 };
 
-#define IMPULSE_FORCE 60
+#define IMPULSE_FORCE 160 //prev value: 60
 
 //TODO decompose force vectors working on player, to make joystick angle correspond with player velocity angle
 
