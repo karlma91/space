@@ -28,7 +28,6 @@ static char buffer[FILE_BUFFER_SIZE];
 
 void sprite_init()
 {
-
 	SDL_Log("SPRITE INTIT:");
 	constant_sprites = llist_create();
 	llist_set_remove_callback(constant_sprites,free);
@@ -45,7 +44,6 @@ void sprite_init()
 		SDL_Log("Could not load SPRITE data!");
 		exit(1);
 	}
-
 
 
 	int ret = 0;
@@ -100,6 +98,7 @@ void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed
 	spr->width = width;
 	spr->height=height;
 	spr->animation_speed = speed;
+	spr->sub_index = 0;
 }
 
 
@@ -168,6 +167,13 @@ void sprite_set_index(sprite *spr, int index)
 {
 	if (spr->id)
 		spr->sub_index = index >= ((sprite_data *)spr->id)->subimages ? 0 : index < 0 ? 0 : index;
+}
+
+void sprite_set_index_normalized(sprite *spr, float p)
+{
+	if (spr->id) {
+		spr->sub_index = (p > 1 ? 1 : (p < 0 ? 0 : p)) * (((sprite_data *)spr->id)->subimages-1);
+	}
 }
 
 void sprite_render(sprite *spr, cpVect *pos, float angle)

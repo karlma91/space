@@ -823,8 +823,8 @@ void space_init()
 
     stars_init();
 
-    joy_p1_left = joystick_create(0, 80, 10, -GAME_WIDTH/2, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
-    joy_p1_right = joystick_create(0, 80, 10, 0, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
+    joy_p1_left = joystick_create(0, 120, 2, -GAME_WIDTH/2 + 170, - GAME_HEIGHT/2 + 150, 340, 300, SPRITE_JOYSTICK);
+    joy_p1_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, - GAME_HEIGHT/2 + 150, 340, 300, SPRITE_JOYSTICK);
 
     statesystem_register_touchable(this, joy_p1_left);
     statesystem_register_touchable(this, joy_p1_right);

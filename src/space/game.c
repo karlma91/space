@@ -55,6 +55,7 @@ SPRITE_ID SPRITE_GEAR;
 SPRITE_ID SPRITE_RETRY;
 SPRITE_ID SPRITE_NEXT;
 SPRITE_ID SPRITE_HOME;
+SPRITE_ID SPRITE_JOYSTICK;
 /* end of global sprite definitions*/
 
 /* global emitter */
@@ -161,6 +162,7 @@ void game_sprites()
 	SPRITE_HOME  	    = sprite_link("home");
 	SPRITE_RETRY  	    = sprite_link("retry");
 	SPRITE_NEXT  	    = sprite_link("next");
+	SPRITE_JOYSTICK     = sprite_link("joystick");
 }
 
 void game_particles()

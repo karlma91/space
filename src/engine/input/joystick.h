@@ -10,6 +10,7 @@
 
 #include "SDL.h"
 #include "touch.h"
+#include "../graphics/sprite.h"
 
 typedef struct {
 	touchable touch_data;
@@ -31,15 +32,19 @@ typedef struct {
 
 	float min_range; /* minimum distance from center of joystick before responding */
 
+	sprite spr;
+
 	int persistent;
 } joystick;
 
-joystick *joystick_create(int persistent, float radius, float min_radius, float region_x, float region_y, float region_width, float region_height);
+joystick *joystick_create(int persistent, float radius, float min_radius, float center_x, float center_y, float width, float height, SPRITE_ID spr_id);
 void joystick_free(joystick *stick);
 
 void joystick_axis(joystick *stick, float x, float y);
 
 void joystick_touch(joystick *stick, float x, float y);
 void joystick_release(joystick *stick);
+
+void joystick_place(joystick *stick, float x, float y);
 
 #endif /* JOYSTICK_H_ */

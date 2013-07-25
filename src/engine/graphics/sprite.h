@@ -69,6 +69,7 @@ void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed
 
 void sprite_set_length(sprite *spr, float length);
 void sprite_set_index(sprite *spr, int index);
+void sprite_set_index_normalized(sprite *spr, float p);
 
 void sprite_update(sprite *spr);
 void sprite_render(sprite *spr, cpVect *pos, float angle);

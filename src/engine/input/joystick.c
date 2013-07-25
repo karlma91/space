@@ -15,10 +15,9 @@
 #define THIS_IS_A_TOUCH_OBJECT 1
 #include "touch.h"
 
-void joystick_place(joystick *stick, float x, float y);
 //FIXME one controller cancels the other
 
-joystick *joystick_create(int persistent, float radius, float min_radius, float region_x, float region_y, float width, float height)
+joystick *joystick_create(int persistent, float radius, float min_radius, float center_x, float center_y, float width, float height, SPRITE_ID spr_id)
 {
 	joystick *stick = malloc(sizeof(*stick));
 
@@ -33,10 +32,14 @@ joystick *joystick_create(int persistent, float radius, float min_radius, float 
 	stick->radius = radius;
 	stick->min_range = min_radius;
 
-	touch_place((touchable *) stick, region_x + width/2, region_y + height/2);
+	touch_place((touchable *) stick, center_x, center_y);
 
 	joystick_axis(stick,0,0);
 	joystick_release(stick);
+
+	joystick_place(stick, center_x, center_y);
+
+	sprite_create(&(stick->spr), spr_id, radius*2, radius*2, 0);
 
 	return stick;
 }
@@ -113,15 +116,14 @@ static void render(touchable * stick_id)
 {
 	joystick *stick = (joystick *) stick_id;
 
-	draw_color4f(1,1,1,1);
-	float x0 = stick->pos_x;
-	float y0 = stick->pos_y;
-	float x1 = x0 + stick->axis_x * stick->radius;
-	float y1 = y0 + stick->axis_y * stick->radius;
-	//if (x0 != x1 && y0 != y1)
-		draw_quad_line(x0,y0,x1,y1, 20);
+	cpVect btn_pos = {stick->pos_x,stick->pos_y};
 
-	draw_flush_simple();
+	draw_color4f(1,1,1,1);
+
+	sprite_set_index_normalized(&(stick->spr), stick->amplitude);
+	sprite_render(&(stick->spr), &btn_pos, stick->direction * 180 / M_PI - 90);
+
+	//draw_flush_simple();
 }
 
 static int touch_down(touchable * stick_id, SDL_TouchFingerEvent *finger)
