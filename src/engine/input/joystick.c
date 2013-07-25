@@ -12,22 +12,28 @@
 #include "../data/llist.h"
 #include "../engine.h"
 
+#define THIS_IS_A_TOUCH_OBJECT 1
+#include "touch.h"
+
+void joystick_place(joystick *stick, float x, float y);
 //FIXME one controller cancels the other
 
-#define inside(stick,px,py) ((px >= stick->region_x1) && (px <= stick->region_x2) && (py >= stick->region_y1) && (py <= stick->region_y2))
-
-joystick *joystick_create(int persistent, float radius, float min_radius, float region_x, float region_y, float region_width, float region_height)
+joystick *joystick_create(int persistent, float radius, float min_radius, float region_x, float region_y, float width, float height)
 {
 	joystick *stick = malloc(sizeof(*stick));
+
+	REGISTER_CALLS(stick);
+
+	stick->touch_data.type = CTRL_JOYSTICK;
+
+	stick->touch_data.get.width = width;
+	stick->touch_data.get.height = height;
 
 	stick->persistent = persistent;
 	stick->radius = radius;
 	stick->min_range = min_radius;
 
-	stick->region_x1 = region_x;
-	stick->region_x2 = region_x + region_width;
-	stick->region_y1 = region_y;
-	stick->region_y2 = region_y + region_height;
+	touch_place((touchable *) stick, region_x + width/2, region_y + height/2);
 
 	joystick_axis(stick,0,0);
 	joystick_release(stick);
@@ -78,10 +84,10 @@ void joystick_release(joystick *stick)
 
 void joystick_place(joystick *stick, float pos_x, float pos_y)
 {
-	float min_x = stick->region_x1 + stick->radius;
-	float max_x = stick->region_x2 - stick->radius;
-	float min_y = stick->region_y1 + stick->radius;
-	float max_y = stick->region_y2 - stick->radius;
+	float min_x = stick->touch_data.get.t1x + stick->radius;
+	float max_x = stick->touch_data.get.t2x - stick->radius;
+	float min_y = stick->touch_data.get.t1y + stick->radius;
+	float max_y = stick->touch_data.get.t2y - stick->radius;
 
 	stick->pos_x = pos_x > max_x ? max_x : pos_x < min_x ? min_x : pos_x;
 	stick->pos_y = pos_y > max_y ? max_y : pos_y < min_y ? min_y : pos_y;
@@ -97,8 +103,17 @@ void joystick_axis(joystick *stick, float x, float y)
 	stick->amplitude = hypotf(y,x);
 }
 
-void joystick_render(joystick *stick)
+static void update(touchable * stick_id)
 {
+	joystick *stick = (joystick *) stick_id;
+
+}
+
+static void render(touchable * stick_id)
+{
+	joystick *stick = (joystick *) stick_id;
+
+	draw_color4f(1,1,1,1);
 	float x0 = stick->pos_x;
 	float y0 = stick->pos_y;
 	float x1 = x0 + stick->axis_x * stick->radius;
@@ -109,8 +124,10 @@ void joystick_render(joystick *stick)
 	draw_flush_simple();
 }
 
-int joystick_finger_down(joystick *stick, SDL_TouchFingerEvent *finger)
+static int touch_down(touchable * stick_id, SDL_TouchFingerEvent *finger)
 {
+	joystick *stick = (joystick *) stick_id;
+
 	if (llist_contains(active_fingers, (void *)finger->fingerId)) {
 		return 0; // fingerId already registered by another object
 	}
@@ -119,7 +136,7 @@ int joystick_finger_down(joystick *stick, SDL_TouchFingerEvent *finger)
 	normalized2game(&tx, &ty);
 
 	//TODO decide whether to allow new finger to ++capture++ active finger or not
-	if (inside(stick, tx, ty)) {
+	if (touch_is_inside(stick_id, tx, ty)) {
 		stick->pressed = 1;
 		llist_remove(active_fingers, (void *)stick->finger_id);
 		stick->finger_id = finger->fingerId;
@@ -134,8 +151,10 @@ int joystick_finger_down(joystick *stick, SDL_TouchFingerEvent *finger)
 	return 0;
 }
 
-int joystick_finger_move(joystick *stick, SDL_TouchFingerEvent *finger)
+static int touch_motion(touchable * stick_id, SDL_TouchFingerEvent *finger)
 {
+	joystick *stick = (joystick *) stick_id;
+
 	float tx = finger->x, ty = finger->y;
 	normalized2game(&tx, &ty);
 
@@ -143,7 +162,7 @@ int joystick_finger_move(joystick *stick, SDL_TouchFingerEvent *finger)
 		if (llist_contains(active_fingers, (void *)finger->fingerId)) {
 			return 0;
 		} else { // fingerId available
-			if (inside(stick, tx, ty)) {
+			if (touch_is_inside(stick_id, tx, ty)) {
 				stick->pressed = 1;
 				llist_remove(active_fingers, (void *)stick->finger_id);
 				stick->finger_id = finger->fingerId;
@@ -157,7 +176,7 @@ int joystick_finger_move(joystick *stick, SDL_TouchFingerEvent *finger)
 	}
 
 	//TODO decide whether if movement outside region should release joystick or ++not++
-	if (!inside(stick, tx,ty)) {
+	if (!touch_is_inside(stick_id, tx,ty)) {
 		//joystick_release(stick);
 		//return 0;
 	}
@@ -167,8 +186,10 @@ int joystick_finger_move(joystick *stick, SDL_TouchFingerEvent *finger)
 	return 1;
 }
 
-int joystick_finger_up(joystick *stick, SDL_TouchFingerEvent *finger)
+static int touch_up(touchable * stick_id, SDL_TouchFingerEvent *finger)
 {
+	joystick *stick = (joystick *) stick_id;
+
 	if (!stick->pressed || stick->finger_id != finger->fingerId)
 		return 0;
 

@@ -57,26 +57,30 @@ static void draw()
 	draw_color4f(0,0,0,0.8);
 	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
 
-	draw_color4f(1,1,1,1);
-	setTextAlign(TEXT_CENTER);
-	setTextSize(70);
-	font_drawText(0,350, level_star_count ? "LEVEL CLEARED" : "LEVEL FAILED");
-
-	draw_color4f(1,1,1,1);
-	setTextAlign(TEXT_CENTER);
-	setTextSize(60);
-
-	//sprintf(&level_score_buf[0],"SCORE: %d",level_score);
+	//TODO finn ut om spiller d¿de eller ikke, istedenfor Œ bruke level_star_count
 	if (level_star_count) {
+		draw_color4f(1,1,1,1);
+		setTextAlign(TEXT_CENTER);
+		setTextSize(60);
 		font_drawText(0,-100, level_time_buf);
+
+		draw_color4f(1,1,1,1);
+		setTextAlign(TEXT_CENTER);
+		setTextSize(70);
+		font_drawText(0,350, "LEVEL CLEARED");
+	} else {
+		draw_color4f(1,0,0,1);
+		setTextAlign(TEXT_CENTER);
+		setTextSize(70);
+		font_drawText(0,350, "LEVEL FAILED");
 	}
 
 	draw_color4f(1,1,1,1);
-	if (level_star_count == 0) draw_color4f(0.3,0.3,0.3,1);
+	if (level_star_count == 0) draw_color4f(0.2,0.2,0.2,1);
 	sprite_render(&spr_star, &star_1, 0);
-	if (level_star_count == 1) draw_color4f(0.3,0.3,0.3,1);
+	if (level_star_count == 1) draw_color4f(0.2,0.2,0.2,1);
 	sprite_render(&spr_star, &star_2, 0);
-	if (level_star_count == 2) draw_color4f(0.3,0.3,0.3,1);
+	if (level_star_count == 2) draw_color4f(0.2,0.2,0.2,1);
 	sprite_render(&spr_star, &star_3, 0);
 }
 

@@ -438,12 +438,6 @@ void draw_gui()
 	draw_load_identity();
 	draw_color4f(1,1,1,1);
 
-#if GOT_TOUCH
-	draw_color4f(1,1,1,1);
-	joystick_render(joy_p1_left);
-	joystick_render(joy_p1_right);
-#endif
-
 	/* draw GUI */
 	setTextAngle(0); // TODO don't use global variables for setting font properties
 	setTextAlign(TEXT_LEFT);
@@ -787,26 +781,6 @@ static void sdl_event(SDL_Event *event)
 			break;
 		}
 		break;
-		case SDL_FINGERDOWN:
-			if (joystick_finger_down(joy_p1_left, &event->tfinger))
-				return;
-			if (joystick_finger_down(joy_p1_right, &event->tfinger))
-				return;
-			break;
-		case SDL_FINGERMOTION:
-			if (joystick_finger_move(joy_p1_left, &event->tfinger)) return;
-			if (joystick_finger_move(joy_p1_right, &event->tfinger)) return;
-			break;
-		case SDL_FINGERUP:
-			if (gamestate == LEVEL_RUNNING) {
-			} else if (gamestate == LEVEL_PLAYER_DEAD) {
-				//if (button_finger_up(btn_fullscreen, &event->tfinger)) {
-				//	game_over();
-				//}
-			}
-			joystick_finger_up(joy_p1_left, &event->tfinger);
-			joystick_finger_up(joy_p1_right, &event->tfinger);
-			break;
 	}
 }
 
@@ -851,6 +825,9 @@ void space_init()
 
     joy_p1_left = joystick_create(0, 80, 10, -GAME_WIDTH/2, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
     joy_p1_right = joystick_create(0, 80, 10, 0, -GAME_HEIGHT/2, GAME_WIDTH/2, GAME_HEIGHT);
+
+    statesystem_register_touchable(this, joy_p1_left);
+    statesystem_register_touchable(this, joy_p1_right);
 
     state_timer = 10;
 	change_state(LEVEL_START);
