@@ -13,6 +13,7 @@
 #include "arcade/menu.h"
 #include "arcade/gameover.h"
 #include "leveldone.h"
+#include "../upgrades.h"
 
 /* Drawing */
 #include "../../engine/graphics/draw.h"
@@ -671,11 +672,11 @@ void space_init_level(int space_station, int deck)
 		player = (object_group_player*)object_create_player();
 	} else {
 		player->disable = 1;
-		player->hp_bar.value = player->param->max_hp;
+		//player->hp_bar.value = player->param->max_hp;
 
 		player->data.preset->init((object_data*) player);
-		player->aim_speed += 0.3*deck;
-		player->rotation_speed += 0.3*deck;
+		//player->aim_speed += 0.3*deck;
+		//player->rotation_speed += 0.3*deck;
 		if(deck >= 6){
 			player->gun_level = 3;
 		}
@@ -686,6 +687,15 @@ void space_init_level(int space_station, int deck)
 	objects_clear();
 
 	objects_add((object_data*)player);
+
+	/* set player specs based on selected upgrades */
+	player->force = engines[engine_index].force;
+	cpBodySetVelLimit(player->data.body, engines[engine_index].max_speed);
+	cpBodySetMass(player->data.body, upg_total_mass);
+	player->param->gun_cooldown = 1 / weapons[weapon_index].lvls[weapons[weapon_index].level].firerate;
+	player->bullet_dmg = weapons[weapon_index].lvls[weapons[weapon_index].level].damage;
+	player->hp_bar.max_hp = armors[armor_index].max_hp;
+	player->hp_bar.value = player->hp_bar.max_hp;
 
 	if (currentlvl != NULL) {
 		level_unload(currentlvl);
@@ -706,7 +716,6 @@ void space_init_level(int space_station, int deck)
 	player->data.body->p.x = currentlvl->left + offset + 50;
 	player->data.body->p.y = currentlvl->height - offset - 50;
 	cpBodySetAngle(player->data.body,3*(M_PI/2));
-	player->hp_bar.value = player->param->max_hp;
 	player->data.body->v.x = 0;
 	player->data.body->v.y = -10;
 

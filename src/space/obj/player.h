@@ -30,6 +30,10 @@ typedef struct {
 	float gun_timer;
 	float aim_angle;
 	float aim_speed;
+
+	float force;
+	float bullet_dmg;
+
 	emitter *flame;
 	cpBody *gunwheel;
 

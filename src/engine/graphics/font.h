@@ -25,6 +25,7 @@ extern float font_text_size, font_text_angle;
 #endif
 
 // prototypes
+void font_draw_int(float x, float y, int value);
 void font_drawText(float x, float y, char* text);
 void font_init();
 void font_destroy();

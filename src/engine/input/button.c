@@ -19,6 +19,7 @@
 static int BUTTON_UP = 0;
 static int BUTTON_DOWN = 1;
 
+//TODO be able to manually set text size for text buttons
 
 struct button {
 	touchable touch_data;
@@ -123,6 +124,12 @@ void button_set_enlargement(button btn_id, float size)
 {
 	struct button *btn = (struct button *) btn_id;
 	btn->down_size = size;
+}
+
+void button_set_sprite(button btn_id, SPRITE_ID spr_id)
+{
+	struct button *btn = (struct button *) btn_id;
+	btn->spr.id = spr_id;
 }
 
 void button_free(button btn_id)

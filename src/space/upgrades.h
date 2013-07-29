@@ -1,0 +1,84 @@
+/*
+ * upgrades.h
+ *
+ *  Created on: 28. juli 2013
+ *      Author: Mathias
+ */
+
+#ifndef UPGRADES_H_
+#define UPGRADES_H_
+
+#include "../engine/graphics/sprite.h"
+#include "obj/objects.h"
+
+typedef enum {
+	PROJECT_LASER,
+	PROJECT_MULTI_LASER, /* shoots in multiple directions at the same time */
+	PROJECT_BULLET, /* e.g. machine gun type of weapon (but more affected by gravity?) */
+	PROJECT_MULTI_BULLET,
+	PROJECT_ROCKET,  /* e.g. enemey-seeking missiles, unguided rockets */
+	PROJECT_EXPLOSIVE
+} PROJECTILE_TYPE;
+
+#define MAX_WEAPON_LEVEL 3
+#define WEAPON_UPGRADES 2
+#define ARMOR_UPGRADES 2
+#define ENGINE_UPGRADES 2
+
+typedef struct {
+	char name[50];
+	PROJECTILE_TYPE p_type; // bruke p_type for å bestemme hvilket objekt som skal opprettes
+	int level; /* weapon level[0-2], each lvl contributes to minor enhancements */
+
+	//float bullets_per_shot //TODO gjøre slik at enkelte våpene kan skyte flere skudd samtidig (kan evt. bare bestemmes ut i fra skytemetoden)
+	struct {
+		float damage;   /* amount of dmg each bullet deals */
+		float firerate; /* shots per second */
+		float mass;
+		float range;
+		//float magazine_size;   /* number of shots per round */
+		//float magazine_reload; /* reload/cooldown time in seconds */
+
+		float price; // lvls[0].price == price of weapon. lvls[1].price == upgrade price lvl 1 -> lvl 2, etc...
+
+		//SPRITE_ID spr_id; //TODO have an individual sprite for each weapon level?
+	} lvls[MAX_WEAPON_LEVEL];
+
+	SPRITE_ID *spr_id;
+
+	//FIXME umulig å opprette et vilkårlig objekt?
+	//TODO add pointer to type of object to create or just pointer to shoot method?
+	enum OBJECT_ID obj_id; //TODO remove?
+
+} upg_weapon;
+
+typedef struct {
+	char name[50];
+	float max_hp;
+	float mass;
+
+	float shield;
+	float shield_regen;
+
+	float price;
+
+	SPRITE_ID *spr_id;
+} upg_armor;
+
+typedef struct {
+	char name[50];
+	float force;
+	float max_speed;
+
+	float price;
+
+	int *particle_type; //or rather store particle file name?
+
+	SPRITE_ID *spr_id;
+} upg_engine;
+
+extern upg_weapon weapons[WEAPON_UPGRADES];
+extern upg_armor armors[ARMOR_UPGRADES];
+extern upg_engine engines[ENGINE_UPGRADES];
+
+#endif /* UPGRADES_H_ */

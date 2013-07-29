@@ -57,9 +57,7 @@ object_param_player default_player = {
 		.gun_cooldown = 0.2f
 };
 
-#define IMPULSE_FORCE 160 //prev value: 60
-
-//TODO decompose force vectors working on player, to make joystick angle correspond with player velocity angle
+//#define IMPULSE_FORCE 160 //prev value: 60
 
 object_group_player *object_create_player()
 {
@@ -97,7 +95,7 @@ object_group_player *object_create_player()
 	cpBodySetUserData(player->data.body, (void*)player);
 	objects_add((object_data*)player);
 
-	hpbar_init(&(player->hp_bar), player->param->max_hp, 120, 25, -59, 50, &(player->data.body->p));
+	hpbar_init(&(player->hp_bar), 100, 120, 25, -59, 50, &(player->data.body->p));
 
 	cpShapeSetGroup(player->shape, 341); // use a group to keep the car parts from colliding
 
@@ -190,7 +188,7 @@ static void controls(object_group_player *player)
 		player->direction_target = joy_p1_left->direction;
 
 		cpVect player_dir = cpv(joy_p1_left->axis_x, joy_p1_left->axis_y);
-		cpVect j = cpvmult(player_dir, IMPULSE_FORCE);
+		cpVect j = cpvmult(player_dir, player->force);
 
 		if (player_assisted_steering) {
 			cpVect F = cpvmult(cpSpaceGetGravity(space),cpBodyGetMass(player->data.body)*dt);
@@ -198,7 +196,7 @@ static void controls(object_group_player *player)
 			j.y -= F.y;
 
 			float length = cpvlength(j);
-			float max_length = IMPULSE_FORCE * joy_p1_left->amplitude;
+			float max_length = player->force * joy_p1_left->amplitude;
 			if (length > max_length) {
 				cpvmult(j, max_length / length);
 			}
@@ -249,7 +247,7 @@ static void controls(object_group_player *player)
 #endif
 }
 
-
+//TODO lage en generell skyte-struct
 static void action_shoot(object_group_player *player)
 {
 	if (player->gun_timer >= player->param->gun_cooldown) {
@@ -258,7 +256,8 @@ static void action_shoot(object_group_player *player)
 		sound_play(SND_LASER_1);
 
 		for(i=0; i < player->gun_level;i++){
-			object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
+			struct bullet *b = object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
+			b->damage = player->bullet_dmg;
 		}
 
 		player->gun_timer = 0;

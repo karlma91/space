@@ -37,7 +37,7 @@ static char (*names)[51];
  */
 static int tex_counter = -1;
 
-static int texture_from_name(char *file);
+static int texture_from_name(const char *file);
 static GLenum GL_ENUM_TYPE = GL_UNSIGNED_BYTE;
 
 
@@ -115,16 +115,16 @@ int texture_load(const char *file)
 
 		textures[tex_counter] = tex_id;
 
-		SDL_Log("DEBUG: Texture loaded: %s\n", file);
+		//SDL_Log("DEBUG: Texture loaded: %s\n", file);
 		return tex_counter;
 
 	} else {
-		SDL_Log("DEBUG: Unable to load texture: %s\n IMG_ERROR: %s\n", filepath, IMG_GetError());
-		return -1;
+		SDL_Log("ERROR: Unable to load texture: %s\n IMG_ERROR: %s\n", filepath, IMG_GetError());
+		return 0;
 	}
 }
 
-static int texture_from_name(char *file)
+static int texture_from_name(const char *file)
 {
 	int i;
 	for(i=0;i<=tex_counter; i++){
@@ -138,10 +138,11 @@ static int texture_from_name(char *file)
 #include "SDL_endian.h"
 int texture_init()
 {
+	texture_load("error.png"); /* image to be shown for images which fails to load */
 
 	TEX_GLOW_DOT = texture_load("dot.png"); //TODO move these definitions out of engine
 	TEX_GLOW = texture_load("glow.png");
-	TEX_LIGHT = texture_load("light2.png");
+	//TEX_LIGHT = texture_load("light2.png");
 
 	return 0;
 }

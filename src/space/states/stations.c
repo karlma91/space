@@ -131,7 +131,7 @@ static void destroy()
 
 static void open_upgrades()
 {
-	statesystem_push_state(state_upgrades);
+	statesystem_push_state(state_store);
 }
 
 void stations_init()

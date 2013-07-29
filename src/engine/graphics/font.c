@@ -103,6 +103,13 @@ static void drawSymbol(char c)
 	}
 }
 
+void font_draw_int(float x, float y, int value)
+{
+	char text[12];
+	sprintf(&text[0], "%d", value);
+	font_drawText(x, y, text);
+}
+
 void font_drawText(GLfloat x, GLfloat y, char* text)
 {
 

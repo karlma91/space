@@ -21,7 +21,7 @@ extern STATE_ID state_gameover; /* deprecated state! */
 extern STATE_ID state_settings;
 extern STATE_ID state_space;
 extern STATE_ID state_pause;
-extern STATE_ID state_upgrades;
+extern STATE_ID state_store;
 extern STATE_ID state_leveldone;
 extern STATE_ID state_stations;
 extern STATE_ID state_levelscreen;
@@ -84,9 +84,14 @@ extern unsigned int KEY_RETURN_1;
 extern unsigned int KEY_RETURN_2;
 extern unsigned int KEY_ESCAPE;
 
+extern int weapon_index;
+extern int armor_index;
+extern int engine_index;
+
 void game_config();
 void game_init();
 void game_destroy();
 
+extern float upg_total_mass;
 
 #endif /* GAME_H_ */
