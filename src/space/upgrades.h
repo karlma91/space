@@ -39,7 +39,7 @@ typedef struct {
 		//float magazine_size;   /* number of shots per round */
 		//float magazine_reload; /* reload/cooldown time in seconds */
 
-		float price; // lvls[0].price == price of weapon. lvls[1].price == upgrade price lvl 1 -> lvl 2, etc...
+		int price; // lvls[0].price == price of weapon. lvls[1].price == upgrade price lvl 1 -> lvl 2, etc...
 
 		//SPRITE_ID spr_id; //TODO have an individual sprite for each weapon level?
 	} lvls[MAX_WEAPON_LEVEL];
@@ -60,7 +60,7 @@ typedef struct {
 	float shield;
 	float shield_regen;
 
-	float price;
+	int price;
 
 	SPRITE_ID *spr_id;
 } upg_armor;
@@ -70,7 +70,7 @@ typedef struct {
 	float force;
 	float max_speed;
 
-	float price;
+	int price;
 
 	int *particle_type; //or rather store particle file name?
 

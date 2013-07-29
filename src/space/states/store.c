@@ -116,14 +116,17 @@ static void draw()
 	setTextAlign(TEXT_CENTER);
 
 	setTextSize(20);
-	y = btn_next[UPGRADE_WEAPON]->get.y + y_offset;
-	font_drawText(x_upg,y,weapons[weapon_selected].name);
+	y = btn_next[UPGRADE_WEAPON]->get.y;
+	font_drawText(x_upg,y + y_offset,weapons[weapon_selected].name);
+	font_draw_int(x_upg,y - y_offset,weapons[weapon_selected].lvls[weapons[weapon_selected].level].price);
 
-	y = btn_next[UPGRADE_ARMOR]->get.y + y_offset;
-	font_drawText(x_upg,y,armors[armor_selected].name);
+	y = btn_next[UPGRADE_ARMOR]->get.y;
+	font_drawText(x_upg,y + y_offset,armors[armor_selected].name);
+	font_draw_int(x_upg,y - y_offset,armors[armor_selected].price);
 
-	y = btn_next[UPGRADE_ENGINE]->get.y + y_offset;
-	font_drawText(x_upg,y,engines[engine_selected].name);
+	y = btn_next[UPGRADE_ENGINE]->get.y;
+	font_drawText(x_upg,y + y_offset,engines[engine_selected].name);
+	font_draw_int(x_upg,y - y_offset,engines[engine_selected].price);
 
 	setTextSize(50);
 	font_drawText(0, box.y+box.h / 2 - 60, "STORE");
