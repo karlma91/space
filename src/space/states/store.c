@@ -76,8 +76,8 @@ static void draw_testarea()
 	draw_box(350,180,550,550,0,1);
 
 
-	/*TODO gj¿re om test area til en egen state? som viser player som kj¿rer og skyter
-	 * mens man er i store state, og gj¿re slik at man kan gŒ inn i test state for Œ pr¿ve
+	/*TODO gjï¿½re om test area til en egen state? som viser player som kjï¿½rer og skyter
+	 * mens man er i store state, og gjï¿½re slik at man kan gï¿½ inn i test state for ï¿½ prï¿½ve
 	 * skipet.
 	 */
 
@@ -265,11 +265,11 @@ void upgrades_init()
 	button_set_enlargement(btn_space, 1.5);
 	statesystem_register_touchable(this, btn_space);
 
-
-
 	//TODO load balance and bought items/upgrades
 	for (i = 0; i < WEAPON_UPGRADES; i++) {
 		weapons[i].level = 0; //TMP inntil loading er laget
 	}
+
+	update_upgrades();
 }
 
