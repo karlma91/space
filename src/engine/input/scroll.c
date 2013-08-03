@@ -127,7 +127,7 @@ static int touch_up(touchable * scr_id, SDL_TouchFingerEvent * finger)
 
 scroll_p scroll_create(float pos_x, float pos_y, float width, float height, float friction, float max_speed)
 {
-	scroll_priv *scr = malloc(sizeof(*scr));
+	scroll_priv *scr = calloc(1, sizeof *scr);
 
 	REGISTER_CALLS(scr);
 

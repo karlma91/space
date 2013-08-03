@@ -19,6 +19,14 @@ GLfloat corner_quad[8] = {0, 0,
 		0, 1,
 		1,  1};
 
+
+/* COLOR DEFINITIONS */
+const Color COL_WHITE = {1,1,1,1};
+const Color COL_BLACK = {0,0,0,1};
+const Color COL_RED   = {1,0,0,1};
+const Color COL_GREEN = {0,1,0,1};
+const Color COL_BLUE  = {0,0,1,1};
+
 GLuint light_buffer, light_texture;
 
 Color rainbow_col[1536];

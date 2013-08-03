@@ -53,14 +53,11 @@ object_data *objects_super_malloc(enum OBJECT_ID id, size_t size)
 #ifdef DEBUG_MEMORY
 		SDL_Log( "Info: Allocating new object id %d of size %u\n", id, size);
 #endif
-		obj = malloc(size);
+		obj = calloc(1, size);
 	} else {
 		llist_remove(list, (void *)obj);
+		memset(obj,0,size);
 	}
-
-	//TODO clear and initialize general object_data memory
-	//...
-	memset(obj,0,size); //temporary solution
 
 	return obj;
 }

@@ -36,38 +36,33 @@ int highscorelist_addscore(scorelist *list, char *name, int score, int time_used
 //FIXME hva er poenget med highscorelist_addscore, nŒr den omtrent bare kaller read_addscore?
 static int read_addscore(scorelist *list, char *name, int score, int time_used, long time,int from_file)
 {
-	//SDL_Log( "%s %d %d %d\n",name,score,time,from_file);
-	if(strlen(name)>4 || strlen(name)<3){
-			//SDL_Log("%s to long or short name",name);
-			return -1;
-		}
-		if(score < 0){
-			//SDL_Log("negative score %d\n",score);
-			return -1;
-		}
-		scoreelement **cur = &(list->head);
+	if(score < 0){
+		SDL_Log("negative score %d\n",score);
+		return -1;
+	}
+	scoreelement **cur = &(list->head);
 
-		scoreelement *element = malloc(sizeof(scoreelement));
-		strcpy(element->name, name);
-		element->score = score;
-		element->time = time;
-		element->time_used = time_used;
-		element->next = NULL;
-		int position = 1;
-		while(*cur != NULL){
-			position++;
-			if((*cur)->score <= element->score - from_file){
-				element->next = *cur;
-				*cur = element;
-				list->elements++;
-				return position - 1;
-			}
-			cur = &((*cur)->next);
-		}
+	scoreelement *element = calloc(1, sizeof *element);
+	strcpy(element->name, name);
+	element->score = score;
+	element->time = time;
+	element->time_used = time_used;
 
-		(*cur) = element;
-		list->elements++;
-		return position;
+	int position = 1;
+	while(*cur != NULL){
+		position++;
+		if((*cur)->score <= element->score - from_file){
+			element->next = *cur;
+			*cur = element;
+			list->elements++;
+			return position - 1;
+		}
+		cur = &((*cur)->next);
+	}
+
+	(*cur) = element;
+	list->elements++;
+	return position;
 }
 
 /**

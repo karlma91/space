@@ -90,14 +90,12 @@ void particles_init()
 	}
 
 	max_emitters = 50;
-	main_emitter_pool = (emitter *) malloc(sizeof(emitter) * max_emitters);
-	available_emitter_stack = (emitter**) malloc(sizeof(emitter *) * max_emitters);
+	main_emitter_pool = (emitter *) calloc(max_emitters, sizeof *main_emitter_pool);
+	available_emitter_stack = (emitter**) calloc(max_emitters, sizeof *available_emitter_stack);
 
 	available_emitter_counter = -1;
 	/* sets all emitters available */
 	for(i=0; i<max_emitters; i++){
-		available_emitter_stack[i] = NULL;
-		main_emitter_pool[i].next = NULL;
 		set_emitter_available(&(main_emitter_pool[i]));
 	}
 }

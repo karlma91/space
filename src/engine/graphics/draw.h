@@ -36,6 +36,13 @@ typedef struct Color {
 	float r, g, b, a;
 } Color;
 
+/* COLOR DECLARATIONS */
+extern const Color COL_WHITE;
+extern const Color COL_BLACK;
+extern const Color COL_RED;
+extern const Color COL_GREEN;
+extern const Color COL_BLUE;
+
 static inline Color RGBAColor(float r, float g, float b, float a)
 {
 	Color color = {r, g, b, a};

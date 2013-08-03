@@ -45,7 +45,7 @@ struct button {
 
 button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_x, float pos_y, float width, float height)
 {
-	struct button *btn = malloc(sizeof(*btn));
+	struct button *btn = calloc(1, sizeof *btn);
 
 	REGISTER_CALLS(btn);
 
@@ -54,15 +54,8 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 	btn->touch_data.get.width = width;
 	btn->touch_data.get.height = height;
 
-	btn->backcol.a=1;
-	btn->backcol.r=1;
-	btn->backcol.g=1;
-	btn->backcol.b=1;
-
-	btn->frontcol.a=1;
-	btn->frontcol.r=1;
-	btn->frontcol.g=1;
-	btn->frontcol.b=1;
+	btn->backcol = COL_WHITE;
+	btn->frontcol = COL_WHITE;
 
 	btn->stretch = stretch;
 	if (text) {
@@ -71,9 +64,6 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 		btn->label[0] = 0;
 	}
 
-	btn->callback = NULL;
-	btn->data = NULL;
-
 	btn->animated = 0;
 	btn->down_size = 1;
 	btn->current_size = btn->down_size;
@@ -81,7 +71,6 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 	sprite_create(&(btn->spr), spr_id, width, height, 0);
 
 	touch_place((touchable *) btn, pos_x, pos_y);
-
 	button_clear((button) btn);
 
 	return (button) btn;

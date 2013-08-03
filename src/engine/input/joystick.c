@@ -19,7 +19,7 @@
 
 joystick *joystick_create(int persistent, float radius, float min_radius, float center_x, float center_y, float width, float height, SPRITE_ID spr_id)
 {
-	joystick *stick = malloc(sizeof(*stick));
+	joystick *stick = calloc(1, sizeof *stick);
 
 	REGISTER_CALLS(stick);
 

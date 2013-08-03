@@ -37,14 +37,12 @@ void sprite_init()
 	float u,v,width,height;
 	int subimages, counter=0, count=0;
 
-
 	/* read space station data */
 	int filesize = waffle_read_file("textures/sprites.csv", &buffer[0], FILE_BUFFER_SIZE);
 	if (!filesize) {
 		SDL_Log("Could not load SPRITE data!");
 		exit(1);
 	}
-
 
 	int ret = 0;
 	while(counter <= filesize){
@@ -58,7 +56,7 @@ void sprite_init()
 			exit(5);
 		}
 		SDL_Log("SPRITE: %s %s %f %f %f %f %d", name, file_name, u, v, width, height, subimages);
-		sprite_data *data = (sprite_data*)malloc(sizeof(sprite_data));
+		sprite_data *data = calloc(1,sizeof *data);
 		strcpy(data->name, name);
 		data->height = height;
 		data->width = width;

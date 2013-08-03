@@ -5,6 +5,7 @@
 #include "../data/llist.h"
 #include "../input/touch.h"
 
+#include "SDL_Log.h"
 #define MAX_INNER_STATES 10
 
 LList states;
@@ -41,26 +42,19 @@ void statesystem_init() // no longer needed?
 
 STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
 {
-	State *state = malloc(sizeof(*state));
+	State *state = calloc(1, sizeof *state);
+
     state->id = state;
 
+    state->touch_objects = llist_create();
     state->inner_states = inner_states;
-	if (inner_states > 0) {
-		//state->inner_update = malloc(sizeof(state->inner_update)*inner_states);
-		//  state->inner_draw = malloc(sizeof(state->inner_draw)*inner_states);
-	} else if (inner_states > MAX_INNER_STATES) {
-		fprintf(stderr, "Number of inner states(%d) exceeded MAX_INNER_STATES (%d)\n", inner_states, MAX_INNER_STATES);
+	if (inner_states > MAX_INNER_STATES) {
+		SDL_Log("Number of inner states(%d) exceeded MAX_INNER_STATES (%d)\n", inner_states, MAX_INNER_STATES);
 		exit(-1);
 	}
 
-	memcpy(&state->call, funcs, sizeof *funcs);
-
-    state->touch_objects = llist_create();
-
-    state->prev = NULL;
-    state->next = NULL;
-
     llist_add(states, (void*)state);
+    state->call = *funcs;
 
     return state->id;
 }

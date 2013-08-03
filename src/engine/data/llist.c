@@ -44,7 +44,7 @@ struct llist {
 
 /* private variables */
 static node *node_pool = NULL;
-static const node node_null = {0,0,0};
+static const node NODE_NULL = {0,0,0};
 
 #if LLIST_DEBUG
 static int stats_max_node_count = 0;
@@ -82,14 +82,14 @@ static __inline__ node* new_node() {
 	if (node_pool) {
 		node = node_pool;
 		node_pool = node_pool->next;
+		*node = NODE_NULL;
 	} else {
-		node = malloc(sizeof(*node));
+		node = calloc(1, sizeof *node);
 #if LLIST_DEBUG
 		fprintf(stderr, "List -> node capacity expanded!\n");
 #endif
 	}
 
-	*node = node_null;
 	return node;
 }
 
@@ -98,7 +98,7 @@ static void __inline__ free_node(node *node) {
 	--stats_node_count;
 #endif
 
-	*node = node_null;
+	*node = NODE_NULL;
 
 	if (node_pool) {
 		node->next = node_pool;
@@ -112,15 +112,10 @@ static void __inline__ free_node(node *node) {
 
 LList llist_create()
 {
-	struct llist *list = malloc(sizeof(struct llist));
+	struct llist *list = calloc(1, sizeof *list);
 
 	list->id = (LList)list;
-	list->head = NULL;
-	list->tail = NULL;
 	list->iteration_index = -1;
-	list->size = 0;
-	list->remove_callback = 0;
-	list->NULL_TEST = 0;
 
 #if LLIST_DEBUG
 	fprintf(stderr,"list [%p]: created with callback: %p\n", list, list->remove_callback);

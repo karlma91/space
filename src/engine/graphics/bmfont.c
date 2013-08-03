@@ -30,7 +30,7 @@ bm_font * bmfont_read_font(char *filename)
     char fileread[50];
     sprintf(fileread,"bmfont/%s",filename);
 
-    bm_font *f = (bm_font*)malloc(sizeof(bm_font));
+    bm_font *f = (bm_font*)calloc(1,sizeof *f);
     f->scale = 1;
 
     int filesize = waffle_read_file(fileread, &buffer[0], FILE_BUFFER_SIZE);

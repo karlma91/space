@@ -293,7 +293,7 @@ level *level_load(int space_station, int deck)
 	char levelpath[32];
 	sprintf(levelpath, "level/%02d_%02d.lvl", space_station, deck);
 
-	level *lvl = malloc(sizeof(*lvl));
+	level *lvl = calloc(1, sizeof *lvl);
 	currentlvl = lvl;
 
 	/* open and read level data */
@@ -311,7 +311,7 @@ level *level_load(int space_station, int deck)
 	offset += offset_add;
 
 	int retExp = 0;
-	lvl->tiles = malloc(sizeof(tilemap));
+	lvl->tiles = calloc(1, sizeof tilemap);
 	ret = tilemap_create(lvl->tiles,tilemap_name);
 	if (ret != retExp) {
 		SDL_Log("Error while parsing level header. Could not load tilemap %s.\n", tilemap_name);
