@@ -121,6 +121,10 @@ static void button_callback(void *data)
 	levelscreen_change_to(data);
 }
 
+static void on_pause()
+{
+}
+
 static void on_leave()
 {
 }

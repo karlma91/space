@@ -777,7 +777,8 @@ static void sdl_event(SDL_Event *event)
 
 		/* Opens the pause menu */
 		if (key == KEY_ESCAPE && gamestate == LEVEL_RUNNING) {
-			pause_game();
+			statesystem_pause();
+			//pause_game();
 		}
 
 		switch (gamestate) {
@@ -791,6 +792,11 @@ static void sdl_event(SDL_Event *event)
 		}
 		break;
 	}
+}
+
+static void on_pause()
+{
+	pause_game();
 }
 
 static void on_leave()

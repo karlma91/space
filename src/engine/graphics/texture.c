@@ -106,11 +106,7 @@ int texture_load(const char *file)
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		}
 
-#if (__MACOSX__ | __IPHONEOS__)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
-#else
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_ENUM_TYPE, img->pixels);
-#endif
 		SDL_FreeSurface(img);
 
 		textures[tex_counter] = tex_id;

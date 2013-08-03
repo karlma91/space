@@ -123,10 +123,12 @@ void sprite_update(sprite *spr)
 
 void sprite_get_current_image(sprite *spr, float *sub_map)
 {
+	if (!spr) {
+		return;
+	}
+
 	sprite_data *data = (sprite_data*)spr->id;
 	int index = floor(spr->sub_index);
-
-	//TODO NULL checks
 
 	int sprites_x = 1/data->width;
 

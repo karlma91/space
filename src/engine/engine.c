@@ -74,7 +74,6 @@ static SDL_Window *window;
 static SDL_Rect fullscreen_dimensions;
 
 #include "input/button.h"
-button btn_fullscreen;
 
 static int main_running = 1;
 
@@ -88,19 +87,16 @@ configuration config = {
 
 static int main_destroy();
 
-#if TARGET_OS_IPHONE
 static void main_pause()
 {
-	//TODO implement and call statesystem pause
+	statesystem_pause();
 	paused = 1;
 }
 
 static void main_unpause()
 {
-	//TODO implement and call statesystem unpause
 	paused = 0;
 }
-#endif
 
 static int HandleAppEvents(void *userdata, SDL_Event *event)
 {
@@ -346,8 +342,6 @@ static void main_init() {
 
 	lastTime = SDL_GetTicks();
 
-	// general fullscreen button
-	btn_fullscreen = button_create(0,0,"",0,0,GAME_WIDTH,GAME_HEIGHT);
 	active_fingers = llist_create();
 }
 

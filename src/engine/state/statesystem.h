@@ -18,6 +18,7 @@ typedef struct {
     void (*post_update)(void);
     void (*draw)(void);
     void (*sdl_event)(SDL_Event *event);
+    void (*on_pause)(void);
     void (*on_leave)(void);
     void (*destroy)(void);
 } state_funcs;
@@ -29,6 +30,7 @@ typedef struct {
 void statesystem_init();
 void statesystem_update();
 void statesystem_draw();
+void statesystem_pause();
 void statesystem_destroy();
 
 /**

@@ -103,9 +103,13 @@ static void on_enter()
 	select_id = 0;
 	sound_music(MUSIC_MENU);
 }
+
+static void on_pause()
+{
+}
+
 static void on_leave()
 {
-
 }
 
 void menu_change_current_menu(int menu)

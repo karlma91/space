@@ -21,6 +21,7 @@ static void pre_update();
 static void post_update();
 static void draw();
 static void sdl_event(SDL_Event *event);
+static void on_pause();
 static void on_leave();
 static void destroy();
 
@@ -30,6 +31,7 @@ static state_funcs state_functions = {
 		post_update,
 		draw,
 		sdl_event,
+		on_pause,
 		on_leave,
 		destroy,
 };

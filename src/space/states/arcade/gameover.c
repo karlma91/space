@@ -126,9 +126,13 @@ static void on_enter()
 {
 	sound_music(MUSIC_GAMEOVER);
 }
+
+static void on_pause()
+{
+}
+
 static void on_leave()
 {
-
 }
 
 static void pre_update() {

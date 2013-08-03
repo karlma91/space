@@ -93,6 +93,10 @@ static void draw()
 static void sdl_event(SDL_Event *event) {
 }
 
+static void on_pause()
+{
+}
+
 static void on_leave()
 {
 }

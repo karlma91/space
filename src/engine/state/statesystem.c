@@ -1,5 +1,6 @@
 #include "stdlib.h"
 #include "stdio.h"
+#include "string.h"
 #include "statesystem.h"
 #include "../data/llist.h"
 #include "../input/touch.h"
@@ -51,13 +52,8 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
 		fprintf(stderr, "Number of inner states(%d) exceeded MAX_INNER_STATES (%d)\n", inner_states, MAX_INNER_STATES);
 		exit(-1);
 	}
-	state->call.on_enter = funcs->on_enter;
-    state->call.pre_update = funcs->pre_update;
-    state->call.post_update = funcs->post_update;
-    state->call.draw = funcs->draw;
-    state->call.sdl_event = funcs->sdl_event;
-    state->call.on_leave = funcs->on_leave;
-    state->call.destroy = funcs->destroy;
+
+	memcpy(&state->call, funcs, sizeof *funcs);
 
     state->touch_objects = llist_create();
 
@@ -173,6 +169,13 @@ void statesystem_draw()
     }
 
     state_beeing_rendered = NULL;
+}
+
+void statesystem_pause()
+{
+	if (stack_head->call.on_pause) {
+		stack_head->call.on_pause();
+	}
 }
 
 void statesystem_destroy()
