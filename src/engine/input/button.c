@@ -9,8 +9,8 @@
 #include <string.h>
 
 #include "../engine.h"
-#include "../graphics/font.h"
 #include "../data/llist.h"
+#include "../graphics/draw.h"
 
 #define THIS_IS_A_TOUCH_OBJECT 1
 #include "touch.h"

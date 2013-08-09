@@ -30,6 +30,8 @@
 #include "chipmunk.h"
 #include "texture.h"
 #include "sprite.h"
+#include "font.h"
+#include "bmfont.h"
 
 //fra chipmunkDemo.h
 typedef struct Color {

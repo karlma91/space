@@ -61,7 +61,7 @@ typedef struct _object_param_turret object_param_turret;
 typedef struct _object_param_factory object_param_factory;
 
 
-/* layers for objects */
+/* COLLISION LAYERS */
 extern int LAYER_PLAYER;
 extern int LAYER_TANK;
 extern int LAYER_WHEEL;

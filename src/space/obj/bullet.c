@@ -6,7 +6,7 @@
 #include "../spaceengine.h"
 #include "../states/space.h"
 #include "../../engine/engine.h"
-#include "../../engine/graphics/sprite.h"
+
 
 static void init(object_data *obj);
 static void update(struct bullet *);

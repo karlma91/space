@@ -18,7 +18,7 @@
 
 /* Drawing */
 #include "../../../engine/graphics/draw.h"
-#include "../../../engine/graphics/font.h"
+
 
 /* Game components */
 #include "../../../engine/data/highscorelist.h"

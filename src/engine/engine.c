@@ -25,8 +25,6 @@
 
 /* drawing code */
 #include "graphics/draw.h"	//opengl included in draw.h
-#include "graphics/font.h"
-#include "graphics/bmfont.h"
 #include "graphics/particles.h"
 #include "audio/sound.h"
 

@@ -10,11 +10,13 @@
 
 #include "../engine/state/statesystem.h"
 #include "../engine/audio/sound.h"
-#include "../engine/graphics/sprite.h"
+
 #include "../engine/graphics/particles.h"
 #include "../engine/graphics/customparticles.h"
-#include "../engine/graphics/bmfont.h"
+
 #include "../engine/input/button.h"
+
+#include "obj/object_types.h"
 
 extern STATE_ID state_menu; /* deprecated state! */
 extern STATE_ID state_gameover; /* deprecated state! */

@@ -17,7 +17,7 @@
 
 /* Drawing */
 #include "../../engine/graphics/draw.h"
-#include "../../engine/graphics/font.h"
+
 #include "../../engine/graphics/particles.h"
 #include "../tilemap.h"
 
@@ -32,7 +32,6 @@
 #include "../obj/objects.h"
 #include "../obj/player.h"
 #include "../obj/tankfactory.h"
-#include "../obj/robotarm.h"
 #include "../obj/tank.h"
 
 static float accumulator = 0;

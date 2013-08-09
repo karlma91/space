@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "bmfont.h"
 #include "draw.h"
 
 #include "mxml.h"

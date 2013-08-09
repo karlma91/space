@@ -92,7 +92,6 @@ static void add_shape(cpShape *shape, cpFloat friction, cpFloat elasticity)
 }
 
 //TODO add preferred angle to handle situations with two possible solutions
-//TODO move this method to objects.c?
 float turn_toangle(float from_angle, float to_angle, float step_size)
 {
 	from_angle += from_angle >= (2*M_PI) ? -(2*M_PI) : from_angle < 0 ? (2*M_PI) : 0;

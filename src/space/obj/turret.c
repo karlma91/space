@@ -20,8 +20,8 @@
 
 /* Drawing */
 #include "../../engine/graphics/draw.h"
-#include "../../engine/graphics/font.h"
-#include "../../engine/graphics/sprite.h"
+
+
 #include "../../engine/graphics/particles.h"
 
 #include "chipmunk.h"

@@ -8,7 +8,7 @@
 #ifndef UPGRADES_H_
 #define UPGRADES_H_
 
-#include "../engine/graphics/sprite.h"
+
 #include "obj/objects.h"
 
 typedef enum {

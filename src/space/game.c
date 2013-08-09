@@ -215,12 +215,13 @@ void game_touchables()
 
 void game_init()
 {
-	//TODO generalize particles.c and ?level.c
+	//TODO generalize particles.c and sprites.c, (and level.c?)
 	game_sprites();
 	game_audio();
 	game_particles();
 	game_font();
 
+	object_types_init();
 	level_init();
 
     game_touchables();

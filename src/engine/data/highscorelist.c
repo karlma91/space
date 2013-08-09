@@ -113,7 +113,6 @@ void highscorelist_destroy(scorelist *list)
  */
 int highscorelist_readfile(scorelist *list, const char *filename)
 {
-	//TODO read file from internal storage
 	file = waffle_internal_fopen(WAFFLE_LIBRARY, filename,"r");
 	strcpy(list->filename, filename);
 

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "level.h"
 #include "obj/objects.h"
 #include "obj/tank.h"
@@ -9,6 +10,8 @@
 #include "obj/tankfactory.h"
 #include "obj/player.h"
 #include "obj/bullet.h"
+
+#include "tilemap.h"
 
 #include "../engine/engine.h"
 #include "../engine/io/waffle_utils.h"
@@ -311,7 +314,7 @@ level *level_load(int space_station, int deck)
 	offset += offset_add;
 
 	int retExp = 0;
-	lvl->tiles = calloc(1, sizeof tilemap);
+	lvl->tiles = calloc(1, sizeof *lvl->tiles);
 	ret = tilemap_create(lvl->tiles,tilemap_name);
 	if (ret != retExp) {
 		SDL_Log("Error while parsing level header. Could not load tilemap %s.\n", tilemap_name);

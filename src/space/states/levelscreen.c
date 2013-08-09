@@ -12,7 +12,7 @@
 #include "../game.h"
 #include "../../engine/engine.h"
 #include "../../engine/state/state.h"
-#include "../../engine/graphics/font.h"
+
 #include "../../engine/graphics/draw.h"
 
 STATE_ID state_levelscreen;

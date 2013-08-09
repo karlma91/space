@@ -1,6 +1,3 @@
-/* header */
-#include "font.h"
-
 /* standard c-libraries */
 #include <stdio.h>
 #include <math.h>
