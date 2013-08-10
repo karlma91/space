@@ -12,19 +12,20 @@
 
 void object_types_init();
 
-typedef struct {
-	instance ins;
+/* object declarations */
+OBJ_STRUCT
+	/* parameters */
+	int a;
+	int b;
 
-	/* OBJECT DATA */
-	struct {
-		int a;
-		int b;
-	} var;
-
-	/* PARAMETER DATA */
-	void *arg;
+	float x, y;
 } obj_template;
 
-/* */
+
+int test() {
+	obj_template tmp;
+
+	return 0;
+}
 
 #endif /* OBJECT_TYPES_H_ */

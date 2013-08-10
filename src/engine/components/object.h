@@ -5,6 +5,7 @@
 #define GENERAL_OBJECT_FUNCS 1
 
 //#define INSTANCE_DATA_SIZE 1024;
+#define OBJ_STRUCT typedef struct {instance ins;
 
 void object_init();
 void object_destroy();
@@ -13,7 +14,6 @@ typedef struct _instance instance;
 
 typedef struct {
 	const int ID;
-	//const int DATA_SIZE;
 
 	const struct {
 		void (*on_create)(instance *obj);
@@ -29,6 +29,13 @@ struct _instance {
 	struct {
 
 	} components;
+
+	int alive;
+	int instance_id;
+	int disabled;
+	int destroyed;
+	cpBody *body;
+	sprite spr;
 
 	//char instance_data[INSTANCE_DATA_SIZE]; ?
 }; /* per-instance variables */
