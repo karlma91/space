@@ -12,6 +12,9 @@
 
 void object_types_init();
 
+/* object indexes */
+extern int OBJ_TEMPLATE;
+
 /* object declarations */
 OBJ_STRUCT
 	/* parameters */
@@ -21,11 +24,5 @@ OBJ_STRUCT
 	float x, y;
 } obj_template;
 
-
-int test() {
-	obj_template tmp;
-
-	return 0;
-}
 
 #endif /* OBJECT_TYPES_H_ */
