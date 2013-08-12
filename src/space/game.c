@@ -221,7 +221,7 @@ void game_init()
 	game_particles();
 	game_font();
 
-	object_types_init();
+	//object_types_init();
 	level_init();
 
     game_touchables();

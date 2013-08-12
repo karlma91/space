@@ -4,21 +4,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <float.h>
 
 #include "../io/waffle_utils.h"
 
-
 int object_count = 0;
 object_info *objs = NULL;
-
 
 static void destroy_func(instance* obj)
 {
 	obj->obj_id->call.on_destroy(obj);
 }
 
-int object_priv_register(object_id *obj)
+int object_register(object *obj)
 {
 	int id = object_count++;
 
@@ -38,7 +36,7 @@ int object_priv_register(object_id *obj)
 	return id;
 }
 
-//TODO pointer to object_id rather than obj_id
+//TODO pointer to object rather than obj_id
 //TODO read about macro with use of ## and #
 instance *instance_create(int obj_id, float x, float y, float hs, float vs)
 {

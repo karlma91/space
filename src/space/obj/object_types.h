@@ -12,11 +12,11 @@
 
 void object_types_init();
 
-/* object indexes */
-extern int OBJ_TEMPLATE;
+/* declaration of all object_id structs */
+OBJECT_DECLARE(template);
 
 /* object declarations */
-OBJ_STRUCT
+OBJ_STRUCT_START
 	/* parameters */
 	int a;
 	int b;

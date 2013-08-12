@@ -1,30 +1,26 @@
 
 #include "object_types.h"
+#include <stdio.h>
 
-#define OBJ_TYPE_NAME obj_template
+#define OBJ_NAME template
 #include "../../engine/components/object.h"
 
-int add_obj_template()
-{
-	return REGISTER_OBJ();
-}
 
-
-static void on_create(instance *self)
+static void on_create(OBJ_TYPE *self)
 {
 	fprintf(stderr, "one instance of obj_template added!\n");
 }
 
-static void on_update(instance *self)
+static void on_update(OBJ_TYPE *self)
 {
 	instance_remove(self);
 }
 
-static void on_render(instance *self)
+static void on_render(OBJ_TYPE *self)
 {
 }
 
-static void on_destroy(instance *self)
+static void on_destroy(OBJ_TYPE *self)
 {
 	fprintf(stderr, "one instance of obj_template removed!\n");
 }
