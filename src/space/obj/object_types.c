@@ -7,9 +7,6 @@ void object_types_init()
 {
 	OBJECT_REGISTER(template);
 
-
 	//TMP TEST
-	instance_create(obj_id_template.ID, 0,0, 4,0);
-
-	fprintf(stderr, "DONE REGISTRATING OBJECTS\n");
+	instance_create(obj_id_template, 0,0, 4,0);
 }

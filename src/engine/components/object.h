@@ -8,6 +8,7 @@
 #ifndef GENERAL_OBJECT_FUNCS
 #define GENERAL_OBJECT_FUNCS 1
 
+#define OBJ_MAGIC_COOKIE 0xB305D7A2
 
 #define OBJ_TYPE_3( type ) \
 	obj_ ## type
@@ -29,6 +30,7 @@ void object_destroy();
 typedef struct instance instance;
 typedef struct object object;
 
+//TODO split active instances from list of objects?
 typedef struct { //TODO move: WARNING: exposed internal data structure
 	object *obj;
 	int count;
@@ -37,8 +39,9 @@ typedef struct { //TODO move: WARNING: exposed internal data structure
 } object_info;
 
 struct object {
+	const int OBJ_IDENTIFIER;
 	const int ID;
-	const size_t size;
+	const size_t SIZE;
 	const object_info *info;
 
 	const struct {
@@ -50,7 +53,8 @@ struct object {
 }; /* per-object type variables */
 
 struct instance {
-	object *obj_id;
+	const int INS_IDENTIFIER;
+	const object *TYPE;
 
 	int active_components;
 	struct {
@@ -67,31 +71,30 @@ struct instance {
 }; /* per-instance variables */
 
 
-instance *instance_create(int obj_id, float x, float y, float hs, float vs);
+instance *instance_create(object *type, float x, float y, float hs, float vs);
 //object_create(obj_id id, cpVect pos, cpVect speed, argument struct *?);
 
-extern instance *instance_super_malloc(int obj_id, size_t); /* allocates and initializes a new object of size_t */
-extern void object_super_free(instance *);
-
+extern instance *instance_super_malloc(object *type); /* allocates and initializes a new instance of specified type*/
+extern void instance_super_free(instance *);
 
 extern void instance_add(instance *);
 extern void instance_iterate(void (*f)(instance *));
-extern void instance_iterate_type(void (*f)(instance *), int ID);
+extern void instance_iterate_type(void (*f)(instance *), object *type);
 extern void instance_remove(instance *);
 
-extern void instance_nearest_x_two(instance *object, int obj_id, instance **left, instance **right, cpFloat *left_distance, cpFloat *right_distance);
-extern instance *instance_nearest(cpVect pos, int obj_id);
-extern instance *instance_first(int obj_id);
-extern instance *instance_n(int obj_id, int n);
-extern instance *instance_last(int obj_id);
-extern instance *instance_by_id(int obj_id, int instance_id);
+extern void instance_nearest_x_two(instance *ins, object type, instance **left, instance **right, cpFloat *left_distance, cpFloat *right_distance);
+extern instance *instance_nearest(cpVect pos, object *type);
+extern instance *instance_first(object *type);
+extern instance *instance_n(object *type, int n);
+extern instance *instance_last(object *type);
+extern instance *instance_by_id(object *type, int instance_id);
 
-extern int instance_count(int obj_id);
+extern int instance_count(object *type);
 
 int object_register(object *obj);
 
-#define OBJECT_REGISTER(name) object_register (&OBJ_ID_2(name))
-#define OBJECT_DECLARE(name) extern object OBJ_ID_2(name)
+#define OBJECT_REGISTER(name) object_register (OBJ_ID_2(name))
+#define OBJECT_DECLARE(name) extern object *OBJ_ID_2(name)
 
 #endif /* GENERAL_OBJECT_FUNCS */
 
@@ -108,9 +111,10 @@ static void on_update(OBJ_TYPE *obj);
 static void on_render(OBJ_TYPE *obj);
 static void on_destroy(OBJ_TYPE *obj);
 
-object OBJ_ID = {
+static object this = {
+	.OBJ_IDENTIFIER = OBJ_MAGIC_COOKIE,
 	.ID = -1,
-	.size = sizeof(OBJ_TYPE),
+	.SIZE = sizeof(OBJ_TYPE),
 	.call = {
 		on_create,
 		on_update,
@@ -118,6 +122,7 @@ object OBJ_ID = {
 		on_destroy
 	}
 };
+object *OBJ_ID = &this;
 
 #endif /* PER_OBJECT_CODEBLOCK */
 #endif /* OBJ_TYPE_NAME */

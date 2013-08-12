@@ -8,12 +8,14 @@
 
 #include "../io/waffle_utils.h"
 
+#define INS_MAGIC_COOKIE 0xA2F4C681
+
 int object_count = 0;
 object_info *objs = NULL;
 
 static void destroy_func(instance* obj)
 {
-	obj->obj_id->call.on_destroy(obj);
+	obj->TYPE->call.on_destroy(obj);
 }
 
 int object_register(object *obj)
@@ -36,15 +38,13 @@ int object_register(object *obj)
 	return id;
 }
 
-//TODO pointer to object rather than obj_id
-//TODO read about macro with use of ## and #
-instance *instance_create(int obj_id, float x, float y, float hs, float vs)
+instance *instance_create(object *type, float x, float y, float hs, float vs)
 {
-	instance *ins = instance_super_malloc(obj_id, objs[obj_id].obj->size);
+	instance *ins = instance_super_malloc(type);
 	instance_add(ins);
-	objs[obj_id].obj->call.on_create(ins);
+	type->call.on_create(ins);
 
-	//TMP test
+	//TODO REMOVE TMP test
 	instance_remove(ins);
 
 	return ins;
@@ -55,59 +55,64 @@ instance *instance_create(int obj_id, float x, float y, float hs, float vs)
 #define INT_MIN -2147483648
 #endif
 
-
-/*
-static LList lists[ID_COUNT];
-static LList lists_pool[ID_COUNT];
-static int instance_counter[ID_COUNT];
-*/
-
-
-
 void object_init() {
 
 }
 
-instance *instance_super_malloc(int obj_id, size_t size)
+instance *instance_super_malloc(object *type)
 {
-	LList list = objs[obj_id].pool;
-	instance *obj = llist_first(list);
+	LList list = objs[type->ID].pool;
+	instance *ins = llist_first(list);
 
-	if (obj == NULL) {
+	int size = type->SIZE;
+
+	if (ins == NULL) {
 #ifdef DEBUG_MEMORY
 		SDL_Log( "Info: Allocating new object id %d of size %u\n", id, size);
 #endif
-		obj = calloc(1, size);
+		ins = calloc(1, size);
 	} else {
-		llist_remove(list, (void *)obj);
-		memset(obj,0,size);
+		llist_remove(list, (void *)ins);
+		memset(ins,0,size);
 	}
 
-	obj->obj_id = objs[obj_id].obj;
+	/* set read-only instance data */
+	*((object **)&ins->TYPE) = type;
+	*((int *)&ins->INS_IDENTIFIER) = INS_MAGIC_COOKIE;
 
-	return obj;
+	return ins;
 }
 
-void object_super_free(instance *obj)
+#define  err_ins(x) \
+	(x == NULL || *((int *) x) != INS_MAGIC_COOKIE)
+#define  err_obj(x) \
+	(x == NULL || *((int *) x) != OBJ_MAGIC_COOKIE)
+
+void instance_super_free(instance *ins)
 {
-	int obj_id = obj->obj_id->ID;
+	if (err_ins(ins)) {
+		SDL_Log("ERROR: Invalid instance %p", ins);
+		exit(-1);
+	}
+
+	int obj_id = ins->TYPE->ID;
 	LList list = objs[obj_id].pool;
-	llist_add(list, (void *)obj);
+	llist_add(list, (void *)ins);
 #ifdef DEBUG_MEMORY
-	SDL_Log( "Info: object id %d has now %d unused allocations\n", obj_id, llist_size(active));
+	SDL_Log( "Info: object id %d has now %d unused allocations\n", TYPE, llist_size(active));
 #endif
 }
 
 
 /* add object into its corresponding list */
-void instance_add(instance* obj)
+void instance_add(instance* ins)
 {
-	int obj_id = obj->obj_id->ID;
+	int obj_id = ins->TYPE->ID;
 	LList active = objs[obj_id].active;
 
-	if (llist_add(active, obj)) {
+	if (llist_add(active, ins)) {
 		int count = objs[obj_id].count++;
-		obj->instance_id = count;
+		ins->instance_id = count;
 	}
 }
 
@@ -124,16 +129,13 @@ void instance_iterate(void (*f)(instance *))
 }
 
 /* iterate through one type of object */
-void instance_iterate_type(void (*f)(instance *), int obj_id) {
-	object_info *obj = objs + obj_id;
-
-	/* simple error check of obj_id */
-	if (obj_id >= 0 && obj_id < object_count) {
-		llist_iterate_func(obj->active, (void (*)(void *))f);
-	} else {
-		SDL_Log("ERROR: in list_iterate_type: Invalid obj_id %d\n", obj_id);
+void instance_iterate_type(void (*f)(instance *), object *type) {
+	if (err_obj(type)) {
+		SDL_Log("ERROR: in list_iterate_type: Invalid object type %p\n", type);
 		exit(-1);
-		return;
+	} else {
+		object_info *obj = objs + type->ID;
+		llist_iterate_func(obj->active, (void (*)(void *))f);
 	}
 }
 
@@ -159,18 +161,20 @@ void object_destroy()
 		llist_destroy(obj->active);
 		obj->count = 0;
 	}
+
+	//TODO remove all object definitions
 }
 
 
-
-instance *instance_nearest(cpVect pos, int obj_id)
+//TODO swap arguments?
+instance *instance_nearest(cpVect pos, object *type)
 {
 	//TODO error check obj_id
 
 	instance *target = NULL;
 	float min_length = FLT_MAX;
 	float length;
-	LList list = objs[obj_id].active;
+	LList list = objs[type->ID].active;
 
 	llist_begin_loop(list);
 	while(llist_hasnext(list)) {
@@ -191,28 +195,28 @@ instance *instance_nearest(cpVect pos, int obj_id)
 	return target;
 }
 
-instance *instance_first(int obj_id)
+instance *instance_first(object *type)
 {
 	//TODO error check obj_id
-	return (instance *) llist_first(objs[obj_id].active);
+	return (instance *) llist_first(objs[type->ID].active);
 }
 
-instance *instance_n(int obj_id, int n)
+instance *instance_n(object *type, int n)
 {
 	//TODO error check obj_id
-	return (instance *) llist_at_index(objs[obj_id].active, n);
+	return (instance *) llist_at_index(objs[type->ID].active, n);
 }
 
-instance *instance_last(int obj_id)
+instance *instance_last(object *type)
 {
 	//TODO error check obj_id
-	return (instance *) llist_last(objs[obj_id].active);
+	return (instance *) llist_last(objs[type->ID].active);
 }
 
-instance *instance_by_id(int obj_id, int instance_id)
+instance *instance_by_id(object *type, int instance_id)
 {
 	//TODO error check obj_id
-	LList list = objs[obj_id].active;
+	LList list = objs[type->ID].active;
 
 	llist_begin_loop(list);
 	while(llist_hasnext(list)) {
@@ -226,16 +230,16 @@ instance *instance_by_id(int obj_id, int instance_id)
 	return NULL;
 }
 
-int instance_count(int obj_id)
+int instance_count(object *type)
 {
 	//TODO error check obj_id
-	return llist_size(objs[obj_id].active);
+	return llist_size(objs[type->ID].active);
 }
 
 void instance_remove(instance *obj)
 {
 	//TODO restructure removal method completely
-	llist_remove(objs[obj->obj_id->ID].active, obj);
+	llist_remove(objs[obj->TYPE->ID].active, obj);
 }
 
 
