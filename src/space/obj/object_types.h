@@ -9,6 +9,8 @@
 #define OBJECT_TYPES_H_
 
 #include "../../engine/components/object.h"
+#include "../../engine/graphics/particles.h"
+#include "../../engine/graphics/draw.h"
 
 void object_types_init();
 
@@ -89,7 +91,7 @@ OBJ_START(tank)
 	float rot_speed;
 	float max_distance;
 	hpbar hp_bar;
-	object_group_factory *factory;
+	obj_factory *factory;
 	int factory_id;
 	cpBody *wheel1;
 	cpBody *wheel2;
@@ -106,11 +108,8 @@ PARAM_START(factory)
 	float max_hp;
 	float spawn_delay;
 	int score;
-	int type;
-	union {
-		object_param_tank *t_param;
-		object_param_rocket *r_param;
-	};
+	object *type;
+	void *param;
 	SPRITE_ID sprite_id;
 PARAM_END
 OBJ_START(factory)
@@ -152,7 +151,7 @@ PARAM_START(rocket)
 PARAM_END
 OBJ_START(rocket)
 	cpShape *shape;
-	object_group_factory *factory;
+	obj_factory *factory;
 	int factory_id;
 	float timer;
 	float angle;

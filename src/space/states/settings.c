@@ -15,9 +15,6 @@
 #include "../../engine/audio/sound.h"
 #include "../../engine/graphics/draw.h"
 
-#include "../obj/player.h"
-
-
 STATE_ID state_settings;
 
 #define SCROLL_WIDTH 1200

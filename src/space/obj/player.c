@@ -3,6 +3,10 @@
 #include <time.h>
 #include <assert.h>
 
+#include "object_types.h"
+#define OBJ_NAME player
+#include "../../engine/components/object.h"
+
 #include "../game.h"
 #include "../../engine/engine.h"
 #include "../../engine/state/statesystem.h"
@@ -26,24 +30,10 @@
 int player_assisted_steering = 0;
 int player_cheat_invulnerable = 0;
 
-static void init(instance *);
+static void controls(obj_player *);
 
-static void render(object_group_player *);
-static void update(object_group_player *);
-static void destroy(object_group_player *);
-
-static void controls(object_group_player *);
-
-static void arcade_control(object_group_player *); //2
-static void action_shoot(object_group_player *);
-
-object_group_preset object_type_player = {
-	ID_PLAYER,
-	init,
-	update,
-	render,
-	destroy
-};
+static void arcade_control(obj_player *); //2
+static void action_shoot(obj_player *);
 
 object_param_player default_player = {
 		.max_hp = 200,
@@ -52,12 +42,21 @@ object_param_player default_player = {
 
 //#define IMPULSE_FORCE 160 //prev value: 60
 
-object_group_player *object_create_player()
+static void init(OBJ_TYPE *OBJ_NAME)
+{
+	player->gun_level = 1;
+	player->lives = 3;
+	player->score = 0;
+	player->rotation_speed = 2.5;
+	player->aim_angle = 0;
+	player->aim_speed = 0.5;
+	player->gun_timer = 0;
+}
+
+static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	cpFloat radius = 30;
 	cpFloat mass = 2;
-
-	object_group_player *player = (object_group_player *)objects_super_malloc(ID_PLAYER, sizeof(*player));
 
 	sprite_create(&(player->gun), SPRITE_PLAYER_GUN, 120, 120, 0);
 	sprite_create(&(player->data.spr), SPRITE_PLAYER, 120, 120, 0);
@@ -104,19 +103,7 @@ object_group_player *object_create_player()
 	return player;
 }
 
-static void init(instance *pl)
-{
-	object_group_player *player = (object_group_player*) pl;
-	player->gun_level = 1;
-	player->lives = 3;
-	player->score = 0;
-	player->rotation_speed = 2.5;
-	player->aim_angle = 0;
-	player->aim_speed = 0.5;
-	player->gun_timer = 0;
-}
-
-static void render(object_group_player *player)
+static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	//float s = 0.001;
 
@@ -129,7 +116,7 @@ static void render(object_group_player *player)
 }
 
 #include <time.h>
-static void update(object_group_player *player)
+static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	if (player_cheat_invulnerable)
 		player->hp_bar.value = 100;
@@ -160,7 +147,7 @@ static void update(object_group_player *player)
 
 }
 
-static void controls(object_group_player *player)
+static void controls(obj_player *player)
 {
 	//float player_angle = cpBodyGetAngle(player->data.body);
 	float dir_step;
@@ -241,7 +228,7 @@ static void controls(object_group_player *player)
 }
 
 //TODO lage en generell skyte-struct
-static void action_shoot(object_group_player *player)
+static void action_shoot(obj_player *player)
 {
 	if (player->gun_timer >= player->param->gun_cooldown) {
 		int i;
@@ -258,7 +245,7 @@ static void action_shoot(object_group_player *player)
 }
 
 
-static void destroy(object_group_player *player)
+static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	//free(player); // does not work since player is currently static inside space.c
 }

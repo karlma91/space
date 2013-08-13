@@ -26,10 +26,6 @@
 
 #include "objects.h"
 
-/* Game components */
-#include "player.h"
-#include "bullet.h"
-
 /* static prototypes */
 static void init(instance *fac);
 static void update(instance *fac);
@@ -37,7 +33,7 @@ static void render(instance *fac);
 static void destroy(instance *obj);
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 
-object_group_preset type_robotarm= {
+obj_preset type_robotarm= {
 	ID_ROBOTARM,
 	init,
 	update,
@@ -99,7 +95,7 @@ static void update(instance *obj)
 	temp = ((struct robotarm*)obj);
 	temp->timer +=dt;
 
-	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
+	obj_player *player = ((obj_player*)instance_first(ID_PLAYER));
 
 	float targetx = player->data.body->p.x;
 	float targety = player->data.body->p.y;

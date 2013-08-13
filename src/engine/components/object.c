@@ -11,7 +11,7 @@
 #define INS_MAGIC_COOKIE 0xA2F4C681
 
 int object_count = 0;
-object_info *objs = NULL;
+object_info *objects_meta = NULL;
 
 static void destroy_func(instance* obj)
 {
@@ -25,28 +25,44 @@ int object_register(object *obj)
 	/* set read-only object info*/
 	*(int *)(&obj->ID) = id;
 
-	objs = realloc(objs, object_count * obj->ID);
+	objects_meta = realloc(objects_meta, object_count * obj->ID);
 
-	obj->info = objs + id;
-	objs[id].obj = obj;
-	objs[id].count = 0;
-	objs[id].active = llist_create();
-	objs[id].pool = llist_create();
+	obj->info = objects_meta + id;
+	objects_meta[id].obj = obj;
+	objects_meta[id].count = 0;
+	objects_meta[id].active = llist_create();
+	objects_meta[id].pool = llist_create();
 
-	llist_set_remove_callback(objs[id].active, (void (*) (void *))destroy_func);
+	llist_set_remove_callback(objects_meta[id].active, (void (*) (void *))destroy_func);
 
 	return id;
+}
+
+object *object_by_name(const char *obj_name)
+{
+	int obj_id;
+	object_info *obj_meta = objects_meta;
+
+	for (obj_id = 0; obj_id < object_count; obj_id++) {
+		if (strcasecmp(obj_name, obj_meta->obj->NAME) == 0) {
+			return obj_meta->obj;
+		}
+		++obj_meta;
+	}
+
+	return NULL;
 }
 
 instance *instance_create(object *type, const void *param, float x, float y, float hs, float vs)
 {
 	instance *ins = instance_super_malloc(type);
-	instance_add(ins);
-	type->call.on_create(ins);
 
 	if (param) {
 		instance_set_param(ins, param);
 	}
+
+	instance_add(ins);
+	type->call.on_create(ins);
 
 	return ins;
 }
@@ -62,7 +78,7 @@ void object_init() {
 
 instance *instance_super_malloc(object *type)
 {
-	LList list = objs[type->ID].pool;
+	LList list = objects_meta[type->ID].pool;
 	instance *ins = llist_first(list);
 
 	int size = type->SIZE;
@@ -97,7 +113,7 @@ void instance_super_free(instance *ins)
 	}
 
 	int obj_id = ins->TYPE->ID;
-	LList list = objs[obj_id].pool;
+	LList list = objects_meta[obj_id].pool;
 	llist_add(list, (void *)ins);
 #ifdef DEBUG_MEMORY
 	SDL_Log( "Info: object id %d has now %d unused allocations\n", TYPE, llist_size(active));
@@ -132,10 +148,10 @@ int instance_set_param(instance *ins, const void *param)
 void instance_add(instance* ins)
 {
 	int obj_id = ins->TYPE->ID;
-	LList active = objs[obj_id].active;
+	LList active = objects_meta[obj_id].active;
 
 	if (llist_add(active, ins)) {
-		int count = objs[obj_id].count++;
+		int count = objects_meta[obj_id].count++;
 		ins->instance_id = count;
 	}
 }
@@ -144,7 +160,7 @@ void instance_add(instance* ins)
 void instance_iterate(void (*f)(instance *))
 {
 	int obj_id;
-	object_info *obj = objs;
+	object_info *obj = objects_meta;
 
 	for (obj_id = 0; obj_id < object_count; obj_id++) {
 		llist_iterate_func(obj->active, (void (*)(void *))f);
@@ -158,7 +174,7 @@ void instance_iterate_type(void (*f)(instance *), object *type) {
 		SDL_Log("ERROR: in list_iterate_type: Invalid object type %p\n", type);
 		exit(-1);
 	} else {
-		object_info *obj = objs + type->ID;
+		object_info *obj = objects_meta + type->ID;
 		llist_iterate_func(obj->active, (void (*)(void *))f);
 	}
 }
@@ -167,7 +183,7 @@ void instance_iterate_type(void (*f)(instance *), object *type) {
 void object_clear()
 {
 	int obj_id;
-	object_info *obj = objs;
+	object_info *obj = objects_meta;
 
 	for (obj_id = 0; obj_id < object_count; ++obj_id, ++obj) {
 		llist_clear(obj->active);
@@ -179,7 +195,7 @@ void object_clear()
 void object_destroy()
 {
 	int obj_id;
-	object_info *obj = objs;
+	object_info *obj = objects_meta;
 
 	for (obj_id = 0; obj_id < object_count; ++obj_id, ++obj) {
 		llist_destroy(obj->active);
@@ -198,7 +214,7 @@ instance *instance_nearest(cpVect pos, object *type)
 	instance *target = NULL;
 	float min_length = FLT_MAX;
 	float length;
-	LList list = objs[type->ID].active;
+	LList list = objects_meta[type->ID].active;
 
 	llist_begin_loop(list);
 	while(llist_hasnext(list)) {
@@ -222,25 +238,25 @@ instance *instance_nearest(cpVect pos, object *type)
 instance *instance_first(object *type)
 {
 	//TODO error check obj_id
-	return (instance *) llist_first(objs[type->ID].active);
+	return (instance *) llist_first(objects_meta[type->ID].active);
 }
 
 instance *instance_n(object *type, int n)
 {
 	//TODO error check obj_id
-	return (instance *) llist_at_index(objs[type->ID].active, n);
+	return (instance *) llist_at_index(objects_meta[type->ID].active, n);
 }
 
 instance *instance_last(object *type)
 {
 	//TODO error check obj_id
-	return (instance *) llist_last(objs[type->ID].active);
+	return (instance *) llist_last(objects_meta[type->ID].active);
 }
 
 instance *instance_by_id(object *type, int instance_id)
 {
 	//TODO error check obj_id
-	LList list = objs[type->ID].active;
+	LList list = objects_meta[type->ID].active;
 
 	llist_begin_loop(list);
 	while(llist_hasnext(list)) {
@@ -257,13 +273,13 @@ instance *instance_by_id(object *type, int instance_id)
 int instance_count(object *type)
 {
 	//TODO error check obj_id
-	return llist_size(objs[type->ID].active);
+	return llist_size(objects_meta[type->ID].active);
 }
 
 void instance_remove(instance *obj)
 {
 	//TODO restructure removal method completely
-	llist_remove(objs[obj->TYPE->ID].active, obj);
+	llist_remove(objects_meta[obj->TYPE->ID].active, obj);
 }
 
 

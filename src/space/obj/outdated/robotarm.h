@@ -5,7 +5,7 @@
 
 #include "objects.h"
 
-extern object_group_preset type_robotarm;
+extern obj_preset type_robotarm;
 
 struct robotarm;
 struct robotarm_param;

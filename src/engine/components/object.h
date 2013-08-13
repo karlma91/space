@@ -37,6 +37,7 @@ struct object {
 	const object_info *info;
 
 	const struct {
+		void (*init)(instance *obj);
 		void (*on_create)(instance *obj);
 		void (*on_update)(instance *obj);
 		void (*on_render)(instance *obj);
@@ -83,6 +84,7 @@ instance *instance_by_id(object *type, int instance_id);
 
 int instance_count(object *type);
 int object_register(object *obj);
+object *object_by_name(const char *obj_name);
 
 
 #define OBJ_TYPE_3( name ) obj_ ## name
@@ -123,6 +125,7 @@ int object_register(object *obj);
 #define OBJ_PARAM_TYPE OBJ_PARAM_2(OBJ_NAME)
 #define OBJ_ID OBJ_ID_2(OBJ_NAME)
 
+static void init(OBJ_TYPE *obj);
 static void on_create(OBJ_TYPE *obj);
 static void on_update(OBJ_TYPE *obj);
 static void on_render(OBJ_TYPE *obj);
@@ -135,6 +138,7 @@ static object this = {
 	.SIZE = sizeof(OBJ_TYPE),
 	.P_SIZE = sizeof(OBJ_PARAM_TYPE),
 	.call = {
+		(void (*)(instance *)) init,
 		(void (*)(instance *)) on_create,
 		(void (*)(instance *)) on_update,
 		(void (*)(instance *)) on_render,

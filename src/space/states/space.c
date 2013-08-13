@@ -30,9 +30,6 @@
 
 /* Game components */
 #include "../obj/objects.h"
-#include "../obj/player.h"
-#include "../obj/tankfactory.h"
-#include "../obj/tank.h"
 
 static float accumulator = 0;
 
@@ -128,7 +125,7 @@ static void level_start()
 {
 	game_time = 0;
 	if(state_timer > 1.5){
-		object_group_player *player = (object_group_player*)objects_first(ID_PLAYER);
+		obj_player *player = (obj_player*)instance_first(ID_PLAYER);
 		player->disable = 0;
 		change_state(LEVEL_RUNNING);
 	}
@@ -141,7 +138,7 @@ static void level_running()
 	input();
 
 	update_all();
-	object_group_player *player = (object_group_player*)objects_first(ID_PLAYER);
+	obj_player *player = (obj_player*)instance_first(ID_PLAYER);
 	if(player->hp_bar.value <= 0){
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
@@ -155,7 +152,7 @@ static void level_running()
 int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead()
 {
-	object_group_player *player = (object_group_player *)objects_first(ID_PLAYER);
+	obj_player *player = (obj_player *)instance_first(ID_PLAYER);
 	update_all();
 
 	static int tmp_atom = 0;
@@ -170,7 +167,7 @@ static void level_player_dead()
 }
 static void level_cleared()
 {
-	object_group_player *player = (object_group_player *)objects_first(ID_PLAYER);
+	obj_player *player = (obj_player *)instance_first(ID_PLAYER);
 	//TODO: add a 3 seconds animation of remaining time being added to score
 	update_all();
 
@@ -351,7 +348,7 @@ static void draw()
 
 static void update_camera_zoom(int mode)
 {
-	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
+	obj_player *player = ((obj_player*)instance_first(ID_PLAYER));
 
 	camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
 }
@@ -365,8 +362,8 @@ static void update_camera_position()
         follow_player = !follow_player;
     }
 
-    object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
-    object_group_tank *tank = ((object_group_tank*)objects_first(ID_TANK));
+    obj_player *player = ((obj_player*)instance_first(ID_PLAYER));
+    obj_tank *tank = ((obj_tank*)instance_first(ID_TANK));
 
 
 
@@ -450,7 +447,7 @@ void draw_gui()
 	setTextAlign(TEXT_LEFT);
 	setTextSize(35);
 
-	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
+	obj_player *player = ((obj_player*)instance_first(ID_PLAYER));
 
 	/* simple score animation */
 	char score_temp[20];
@@ -673,10 +670,10 @@ void space_init_level(int space_station, int deck)
 	joystick_release(joy_p1_left);
 	joystick_release(joy_p1_right);
 
-	static object_group_player *player;
+	static obj_player *player;
 
 	if(player==NULL){
-		player = (object_group_player*)object_create_player();
+		player = (obj_player*)object_create_player();
 	} else {
 		player->disable = 1;
 		//player->hp_bar.value = player->param->max_hp;
@@ -813,7 +810,6 @@ static void on_leave()
 
 static void destroy()
 {
-    objects_destroy();
     cpSpaceDestroy(space);
 	joystick_free(joy_p1_left);
 	joystick_free(joy_p1_right);
@@ -827,8 +823,6 @@ void space_init()
     statesystem_add_inner_state(state_space,LEVEL_PLAYER_DEAD,level_player_dead,NULL);
     statesystem_add_inner_state(state_space,LEVEL_CLEARED,level_cleared,NULL);
     statesystem_add_inner_state(state_space,LEVEL_TRANSITION,level_transition,NULL);
-
-	objects_init();
 
     btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-85, GAME_HEIGHT/2-77, 80, 80);
     button_set_callback(btn_pause, pause_game, 0);
@@ -863,7 +857,7 @@ float getGameTime()
 
 int getPlayerScore()
 {
-	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
+	obj_player *player = ((obj_player*)instance_first(obj_id_player));
 	if (player != NULL)
 		return player->score;
 	else

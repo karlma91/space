@@ -41,6 +41,4 @@ extern void level_get_ships(level_ship **,int *);
 extern int level_get_station_count();
 extern int level_get_level_count(int station);
 
-extern char *(group_names[ID_COUNT]);
-
 #endif /* LEVEL_H_ */

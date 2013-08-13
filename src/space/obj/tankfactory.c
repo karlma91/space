@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "object_types.h"
+#define OBJ_NAME factory
+#include "../../engine/components/object.h"
 
 #include "../game.h"
 #include "../../engine/engine.h"
@@ -21,28 +24,14 @@
 #include "chipmunk.h"
 #include "../spaceengine.h"
 
-/* Game components */
-#include "player.h"
-#include "tank.h"
-#include "rocket.h"
-#include "bullet.h"
+static void remove_factory_from_tank(obj_tank *);
 
-static void init(object_group_factory *);
-static void update(object_group_factory *);
-static void render(object_group_factory *);
-static void destroy(object_group_factory *);
-static void remove_factory_from_tank(object_group_tank *);
+static void init(OBJ_TYPE *OBJ_NAME)
+{
+}
 
-object_group_preset type_tank_factory =
-	{ ID_FACTORY,
-			init,
-			update,
-			render,
-			destroy
-	};
-
-object_group_factory *object_create_factory(int x_pos, object_param_factory *param) {
-	object_group_factory *factory = (object_group_factory *)objects_super_malloc(ID_FACTORY, sizeof(*factory));
+static void on_create(OBJ_TYPE *OBJ_NAME)
+{
 	factory->data.alive = 1;
 	factory->data.preset = &type_tank_factory;
 	factory->data.components.hp_bar = &(factory->hp_bar);
@@ -94,14 +83,11 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	hpbar_init(&factory->hp_bar, param->max_hp, 200, 35, -50, 180,
 			&(factory->data.body->p));
 
-	return (object_group_factory*) factory;
+	return (obj_factory*) factory;
 }
 
-static void init(object_group_factory *factory) {
-
-}
-
-static void update(object_group_factory *factory) {
+static void on_update(OBJ_TYPE *OBJ_NAME)
+{
 	factory->timer += dt;
 	sprite_update(&(factory->data.spr));
 	if (factory->timer > factory->param->spawn_delay
@@ -125,7 +111,8 @@ static void update(object_group_factory *factory) {
 	}
 }
 
-static void render(object_group_factory *factory) {
+static void on_render(OBJ_TYPE *OBJ_NAME)
+{
 	draw_color4f(1,1,1,1);
 
 	//draw_boxshape(factory->shape,RGBAColor(0.2,0.9,0.1,1),RGBAColor(0.6,0.9,0.4,1));
@@ -143,18 +130,19 @@ static void render(object_group_factory *factory) {
 }
 
 //FIXME Somewhat slow temporary fix, as objects_iterate_type does not support extra arguments!
-static void remove_factory_from_tank(object_group_tank *tank) {
+static void remove_factory_from_tank(obj_tank *tank) {
 	if (tank->factory) {
 		tank->factory = objects_by_id(ID_FACTORY,tank->factory_id);
 	}
 }
-static void remove_factory_from_rocket(object_group_rocket *rocket) {
+static void remove_factory_from_rocket(obj_rocket *rocket) {
 	if (rocket->factory) {
 		rocket->factory = objects_by_id(ID_FACTORY,rocket->factory_id);
 	}
 }
 
-static void destroy(object_group_factory *factory) {
+static void on_destroy(OBJ_TYPE *OBJ_NAME)
+{
 	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);
 	particles_release_emitter(factory->smoke);
 

@@ -5,6 +5,9 @@
 
 
 
+static void init(OBJ_TYPE *OBJ_NAME)
+{
+}
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {

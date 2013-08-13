@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "object_types.h"
+#define OBJ_NAME tank
+#include "../../engine/components/object.h"
+
 #include "../game.h"
 #include "../../engine/engine.h"
 #include "../../engine/state/statesystem.h"
@@ -18,37 +22,26 @@
 
 /* Game components */
 #include "objects.h"
-#include "player.h"
-#include "bullet.h"
 
 #include "chipmunk.h"
 #include "../spaceengine.h"
 
 
 /* static prototypes */
-static void init(object_group_tank *);
-static void update(object_group_tank *);
-static void render(object_group_tank *);
-static void destroy(object_group_tank *);
-static cpBody *addChassis(cpSpace *space, object_group_tank *tank, cpVect pos, cpVect boxOffset);
+static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset);
 static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset);
-
-object_group_preset type_tank= {
-	ID_TANK,
-	init,
-	update,
-	render,
-	destroy
-};
 
 static const float tex_map[3][8] = {
 		{0,0.5, 1,0.5, 0,0, 1,0}, {0,1, 0.5,1, 0,0.5, 0.5,0.5}, {0.5,1, 1,1, 0.5,0.5, 1,0.5}
 };
 
-object_group_tank *object_create_tank(float xpos, object_group_factory *factory, object_param_tank *param)
+static void init(OBJ_TYPE *OBJ_NAME)
+{
+}
+
+static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	//TODO use pointer value as group id
-	object_group_tank *tank = (object_group_tank *)objects_super_malloc(ID_TANK, sizeof(*tank));
 	tank->data.preset = &type_tank;
 	tank->data.components.hp_bar = &(tank->hp_bar);
 	tank->data.components.score = &(param->score);
@@ -111,18 +104,13 @@ object_group_tank *object_create_tank(float xpos, object_group_factory *factory,
 	return tank;
 }
 
-
-static void init(object_group_tank *tank)
-{
-}
-
-static void set_wheel_velocity(object_group_tank *tank, float velocity)
+static void set_wheel_velocity(obj_tank *tank, float velocity)
 {
 	cpBodySetAngVel(tank->wheel1,velocity);
 	cpBodySetAngVel(tank->wheel2,velocity);
 }
 
-static void update(object_group_tank *tank)
+static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 
 #if !ARCADE_MODE
@@ -134,7 +122,7 @@ static void update(object_group_tank *tank)
 
 	tank->timer +=dt;
 	/* gets the player from the list */
-	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
+	obj_player *player = ((obj_player*)instance_first(ID_PLAYER));
 
 	cpVect pl = player->data.body->p;
 	cpVect rc = tank->data.body->p;
@@ -179,7 +167,7 @@ static void update(object_group_tank *tank)
 
 	instance *left, *right;
 	cpFloat left_dist, right_dist;
-	objects_nearest_x_two((instance *)tank, ID_TANK, &left, &right, &left_dist, &right_dist);
+	instance_nearest_x_two((instance *)tank, ID_TANK, &left, &right, &left_dist, &right_dist);
 
 	int left_clear = (left_dist > 250);
 	int right_clear = (right_dist > 250);
@@ -241,7 +229,7 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset)
 /**
  * make a chassies
  */
-static cpBody *addChassis(cpSpace *space, object_group_tank *tank, cpVect pos, cpVect boxOffset)
+static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset)
 {
 	cpFloat mass = 2.0f;
 	cpFloat width = 80;
@@ -259,7 +247,7 @@ static cpBody *addChassis(cpSpace *space, object_group_tank *tank, cpVect pos, c
 	return body;
 }
 
-static void render(object_group_tank *tank)
+static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 
 	GLfloat dir = cpBodyGetAngle(tank->data.body);
@@ -288,7 +276,7 @@ static void render(object_group_tank *tank)
 }
 
 
-static void destroy(object_group_tank *tank)
+static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(EMITTER_FRAGMENTS, tank->data.body->p);
 

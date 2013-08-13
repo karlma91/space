@@ -1,23 +1,24 @@
 /* header */
 #include "objects.h"
 
+#include "object_types.h"
+#define OBJ_NAME bullet
+#include "../../engine/components/object.h"
+
 #include "../game.h"
 #include "../spaceengine.h"
 #include "../states/space.h"
 #include "../../engine/engine.h"
 
 
-static void init(instance *obj);
-static void update(struct bullet *);
-static void render(instance *obj);
-static void destroy(struct bullet *);
-
 static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 
-//TODO standardize bullet
-instance *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int type)
+static void init(OBJ_TYPE *OBJ_NAME)
 {
-	struct bullet *temp = (struct bullet *)objects_super_malloc(type, sizeof(struct bullet));
+}
+
+static void on_create(OBJ_TYPE *OBJ_NAME)
+{
 		temp->data.alive = 1;
 		temp->data.components.damage = &(temp->damage);
 		temp->data.components.body_count = 0;
@@ -56,12 +57,7 @@ instance *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int typ
 		return (instance*)temp;
 }
 
-static void init(instance *obj)
-{
-
-}
-
-static void update(struct bullet *bullet)
+static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	if (bullet->energy < 0) {
 		bullet->data.alive = 0;
@@ -70,7 +66,7 @@ static void update(struct bullet *bullet)
 	}
 }
 
-static void render(instance *obj)
+static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 
 	struct bullet *temp = (struct bullet*)obj;
@@ -113,7 +109,7 @@ static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cp
 	cpBodyUpdateVelocity(body, g, damping, dt);
 }
 
-static void destroy(struct bullet *bullet)
+static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	cpSpaceRemoveShape(space, bullet->shape);
 	cpSpaceRemoveBody(space, bullet->data.body);

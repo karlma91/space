@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "object_types.h"
+#define OBJ_NAME turret
+#include "../../engine/components/object.h"
+
 /* Chipmunk physics library */
 #include "chipmunk.h"
 
@@ -24,34 +28,22 @@
 #include "chipmunk.h"
 #include "../spaceengine.h"
 
-/* Game components */
-#include "player.h"
-#include "bullet.h"
-
 /* static prototypes */
-static void init(object_group_turret *);
-static void update(object_group_turret *);
-static void render(object_group_turret *);
-static void destroy(object_group_turret *);
 static void velfunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
-
-object_group_preset type_turret= {
-	ID_TURRET,
-	init,
-	update,
-	render,
-	destroy
-};
 
 static const float tex_map[2][8] = {
 		{0,1, 0.5,1, 0,0, 0.5,0},
 		{0.5,1, 1,1, 0.5,0, 1,0}
 };
 
-object_group_turret *object_create_turret(float xpos, object_param_turret *param)
+
+static void init(OBJ_TYPE *OBJ_NAME)
+{
+}
+
+static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	//TODO use pointer value as group id
-	object_group_turret *turret = (object_group_turret *)objects_super_malloc(ID_TURRET, sizeof(*turret));
 	turret->data.preset = &type_turret;
 	turret->data.components.hp_bar = &(turret->hp_bar);
 	turret->data.components.score = &(param->score);
@@ -91,14 +83,10 @@ object_group_turret *object_create_turret(float xpos, object_param_turret *param
 }
 
 
-static void init(object_group_turret *turret)
-{
-}
-
-static void update(object_group_turret *turret)
+static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	/* gets the player from the list */
-	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
+	obj_player *player = ((obj_player*)instance_first(ID_PLAYER));
 
 	cpVect pl = player->data.body->p;
 	cpVect rc = turret->data.body->p;
@@ -132,7 +120,7 @@ static void update(object_group_turret *turret)
 
 }
 
-static void render(object_group_turret *turret)
+static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 
 	draw_color4f(1,1,1,1);
@@ -161,7 +149,7 @@ static void shape_from_space(cpBody *body, cpShape *shape, void *data)
     cpShapeFree(shape);
 }
 
-static void destroy(object_group_turret *turret)
+static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	cpBodyEachShape(turret->data.body,shape_from_space,NULL);
 

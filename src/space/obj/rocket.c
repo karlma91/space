@@ -5,6 +5,10 @@
 /* Chipmunk physics library */
 #include "chipmunk.h"
 
+#include "object_types.h"
+#define OBJ_NAME rocket
+#include "../../engine/components/object.h"
+
 #include "../game.h"
 #include "../../engine/engine.h"
 #include "../../engine/state/statesystem.h"
@@ -21,31 +25,18 @@
 
 /* Game components */
 #include "objects.h"
-#include "player.h"
 
 #include "../spaceengine.h"
 
-
-/* static prototypes */
-static void init(object_group_rocket *);
-static void update(object_group_rocket *);
-static void render(object_group_rocket *);
-static void destroy(object_group_rocket *);
-
-object_group_preset type_rocket= {
-	ID_ROCKET,
-	init,
-	update,
-	render,
-	destroy
-};
-
 float damage = 50;
 
-object_group_rocket *object_create_rocket(float xpos, object_group_factory *factory, object_param_rocket *param)
+static void init(OBJ_TYPE *OBJ_NAME)
+{
+}
+
+static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	//TODO use pointer value as group id
-	object_group_rocket *rocket = (object_group_rocket *)objects_super_malloc(ID_ROCKET,sizeof(*rocket));
 	rocket->data.preset = &type_rocket;
 	rocket->data.components.hp_bar = &(rocket->hp_bar);
 	rocket->data.components.score = &(param->score);
@@ -91,11 +82,11 @@ object_group_rocket *object_create_rocket(float xpos, object_group_factory *fact
 }
 
 
-static void init(object_group_rocket *tank)
+static void init(obj_rocket *tank)
 {
 }
 
-static void update(object_group_rocket *rocket)
+static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	rocket->timer +=dt;
 
@@ -106,7 +97,7 @@ static void update(object_group_rocket *rocket)
 	}
 
 	/* gets the player from the list */
-	object_group_player *player = ((object_group_player*)objects_first(ID_PLAYER));
+	obj_player *player = ((obj_player*)instance_first(ID_PLAYER));
 
 	cpVect pl = player->data.body->p;
 	cpVect rc = rocket->data.body->p;
@@ -142,7 +133,7 @@ static void update(object_group_rocket *rocket)
 	rocket->angle = turn_toangle(rocket->angle, target_angle,1 * (2*M_PI* dt));
 }
 
-static void render(object_group_rocket *rocket)
+static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	draw_color4f(1,1,1,1);
 
@@ -160,7 +151,7 @@ static void shape_from_space(cpBody *body, cpShape *shape, void *data)
     cpShapeFree(shape);
 }
 
-static void destroy(object_group_rocket *rocket)
+static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	cpBodyEachShape(rocket->data.body,shape_from_space,NULL);
 
