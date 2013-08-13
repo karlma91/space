@@ -28,12 +28,12 @@ cpShape *se_add_box_shape(cpBody *body, cpFloat width, cpFloat height, cpFloat f
 void se_add_score_and_popup(cpVect p, int score)
 {
     particles_add_score_popup(p, score);
-	((obj_player *) instance_first(ID_PLAYER))->score += score;
+	((obj_player *) instance_first(obj_id_player))->score += score;
 }
 
 float se_distance_to_player(float x)
 {
-	obj_player *player = ((obj_player *) instance_first(ID_PLAYER));
+	obj_player *player = ((obj_player *) instance_first(obj_id_player));
 
 	float dx = player->data.body->p.x - x;
 	int lvl_width = currentlvl->width;

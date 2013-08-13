@@ -27,10 +27,10 @@ typedef enum {
 
 typedef struct {
 	char name[50];
-	PROJECTILE_TYPE p_type; // bruke p_type for Œ bestemme hvilket objekt som skal opprettes
+	PROJECTILE_TYPE p_type; // bruke p_type for ï¿½ bestemme hvilket objekt som skal opprettes
 	int level; /* weapon level[0-2], each lvl contributes to minor enhancements */
 
-	//float bullets_per_shot //TODO gj¿re slik at enkelte vŒpene kan skyte flere skudd samtidig (kan evt. bare bestemmes ut i fra skytemetoden)
+	//float bullets_per_shot //TODO gjï¿½re slik at enkelte vï¿½pene kan skyte flere skudd samtidig (kan evt. bare bestemmes ut i fra skytemetoden)
 	struct {
 		float damage;   /* amount of dmg each bullet deals */
 		float firerate; /* shots per second */
@@ -46,10 +46,7 @@ typedef struct {
 
 	SPRITE_ID *spr_id;
 
-	//FIXME umulig Œ opprette et vilkŒrlig objekt?
-	//TODO add pointer to type of object to create or just pointer to shoot method?
-	enum OBJECT_ID obj_id; //TODO remove?
-
+	object_id *obj_type;
 } upg_weapon;
 
 typedef struct {

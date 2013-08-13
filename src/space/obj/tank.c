@@ -157,7 +157,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	instance *left, *right;
 	cpFloat left_dist, right_dist;
-	objects_nearest_x_two((instance *)tank, obj_id_player, &left, &right, &left_dist, &right_dist);
+	instance_nearest_x_two((instance *)tank, obj_id_player, &left, &right, &left_dist, &right_dist);
 
 	int left_clear = (left_dist > 250);
 	int right_clear = (right_dist > 250);

@@ -9385,8 +9385,8 @@ GLAPI void APIENTRY glSetFenceAPPLE (GLuint fence);
 GLAPI GLboolean APIENTRY glIsFenceAPPLE (GLuint fence);
 GLAPI GLboolean APIENTRY glTestFenceAPPLE (GLuint fence);
 GLAPI void APIENTRY glFinishFenceAPPLE (GLuint fence);
-GLAPI GLboolean APIENTRY glTestObjectAPPLE (GLenum object, GLuint name);
-GLAPI void APIENTRY glFinishObjectAPPLE (GLenum object, GLint name);
+GLAPI GLboolean APIENTRY glTestObjectAPPLE (GLenum object_id, GLuint name);
+GLAPI void APIENTRY glFinishObjectAPPLE (GLenum object_id, GLint name);
 #endif /* GL_GLEXT_PROTOTYPES */
 typedef void (APIENTRYP PFNGLGENFENCESAPPLEPROC) (GLsizei n, GLuint *fences);
 typedef void (APIENTRYP PFNGLDELETEFENCESAPPLEPROC) (GLsizei n, const GLuint *fences);
@@ -9394,8 +9394,8 @@ typedef void (APIENTRYP PFNGLSETFENCEAPPLEPROC) (GLuint fence);
 typedef GLboolean (APIENTRYP PFNGLISFENCEAPPLEPROC) (GLuint fence);
 typedef GLboolean (APIENTRYP PFNGLTESTFENCEAPPLEPROC) (GLuint fence);
 typedef void (APIENTRYP PFNGLFINISHFENCEAPPLEPROC) (GLuint fence);
-typedef GLboolean (APIENTRYP PFNGLTESTOBJECTAPPLEPROC) (GLenum object, GLuint name);
-typedef void (APIENTRYP PFNGLFINISHOBJECTAPPLEPROC) (GLenum object, GLint name);
+typedef GLboolean (APIENTRYP PFNGLTESTOBJECTAPPLEPROC) (GLenum object_id, GLuint name);
+typedef void (APIENTRYP PFNGLFINISHOBJECTAPPLEPROC) (GLenum object_id, GLint name);
 #endif
 
 #ifndef GL_APPLE_vertex_array_object

@@ -33,7 +33,7 @@
 
 static float accumulator = 0;
 
-//TODO: remove in final game
+//TODO: remove in final game <-- ?
 
 STATE_ID state_space;
 
@@ -46,9 +46,6 @@ static void update_instances(instance *);
 static void render_instances(instance *);
 static void update_camera_zoom(int mode);
 static void update_camera_position();
-
-static void update_objects(instance *obj);
-static void render_objects(instance *obj);
 
 int space_rendering_map = 0;
 
@@ -97,7 +94,6 @@ char *game_state_names[] = {
 	"LEVEL_TRANSITION"
 };
 
-
 int multiplayer;
 
 /*
@@ -125,7 +121,7 @@ static void level_start()
 {
 	game_time = 0;
 	if(state_timer > 1.5){
-		obj_player *player = (obj_player*)instance_first(ID_PLAYER);
+		obj_player *player = (obj_player*)instance_first(obj_id_player);
 		player->disable = 0;
 		change_state(LEVEL_RUNNING);
 	}
@@ -138,13 +134,13 @@ static void level_running()
 	input();
 
 	update_all();
-	obj_player *player = (obj_player*)instance_first(ID_PLAYER);
+	obj_player *player = (obj_player*)instance_first(obj_id_player);
 	if(player->hp_bar.value <= 0){
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
 
-	if ((objects_count(ID_FACTORY) + objects_count(ID_TANK) + objects_count(ID_TURRET)) == 0) {
+	if ((instance_count(obj_id_factory) + instance_count(obj_id_tank) + instance_count(obj_id_turret)) == 0) {
 		change_state(LEVEL_CLEARED);
 	}
 }
@@ -152,7 +148,7 @@ static void level_running()
 int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead()
 {
-	obj_player *player = (obj_player *)instance_first(ID_PLAYER);
+	obj_player *player = (obj_player *)instance_first(obj_id_player);
 	update_all();
 
 	static int tmp_atom = 0;
@@ -167,7 +163,7 @@ static void level_player_dead()
 }
 static void level_cleared()
 {
-	obj_player *player = (obj_player *)instance_first(ID_PLAYER);
+	obj_player *player = (obj_player *)instance_first(obj_id_player);
 	//TODO: add a 3 seconds animation of remaining time being added to score
 	update_all();
 
@@ -258,9 +254,7 @@ static void update_all()
 	/* chipmunk timestep counter */
 	accumulator += dt;
 
-	objects_iterate(update_objects);
 	instance_iterate(update_instances);
-
 	particles_update(dt);
 
 	/* update all chipmunk objects 60 times per second */
@@ -271,19 +265,7 @@ static void update_all()
 	}
 }
 
-static void update_instances(instance *ins)
-{
-	instance_update(ins);
-}
-
-static void render_instances(instance *ins)
-{
-	instance_render(ins);
-}
-
-
-#warning update_objects: deprecated method!
-static void update_objects(instance *obj)
+static void update_instances(instance *obj)
 {
 	int moved_left = 0;
 	int moved_right = 0;
@@ -332,11 +314,48 @@ static void update_objects(instance *obj)
 			}
 		}
 
-		obj->TYPE->update(obj);
+		instance_update(obj);
 	}else{
-		objects_remove(obj);
+		instance_remove(obj);
 	}
 }
+
+static void render_instances(instance *obj)
+{
+	if((obj->body->p.x > current_camera->left - 200) && (obj->body->p.x < current_camera->right + 200)) {
+		instance_render(obj);
+		return;
+	}
+
+	if(current_camera->x < cam_left_limit){
+		float old_cam_x = current_camera->x;
+		float new_cam_center_x = current_camera->x + currentlvl->width;
+		float new_cam_left = new_cam_center_x - current_camera->width;
+		float new_cam_right = new_cam_center_x + current_camera->width;
+		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){
+		    current_camera->x = new_cam_center_x;
+			draw_push_matrix();
+			draw_translate(-(currentlvl->right + abs(currentlvl->left)),0,0);
+			instance_render(obj);
+			draw_pop_matrix();
+			current_camera->x = old_cam_x;
+		}
+	}else if(current_camera->x > cam_right_limit){
+		float old_cam_x = current_camera->x;
+		float new_cam_center_x = current_camera->x - currentlvl->width;
+		float new_cam_left = new_cam_center_x - current_camera->width;
+		float new_cam_right = new_cam_center_x + current_camera->width;
+		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){
+		    current_camera->x = new_cam_center_x;
+			draw_push_matrix();
+			draw_translate((currentlvl->right + abs(currentlvl->left)),0,0);
+			instance_render(obj);
+			draw_pop_matrix();
+			current_camera->x = old_cam_x;
+		}
+	}
+}
+
 
 static void draw()
 {
@@ -348,7 +367,7 @@ static void draw()
 
 static void update_camera_zoom(int mode)
 {
-	obj_player *player = ((obj_player*)instance_first(ID_PLAYER));
+	obj_player *player = ((obj_player*)instance_first(obj_id_player));
 
 	camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
 }
@@ -362,8 +381,8 @@ static void update_camera_position()
         follow_player = !follow_player;
     }
 
-    obj_player *player = ((obj_player*)instance_first(ID_PLAYER));
-    obj_tank *tank = ((obj_tank*)instance_first(ID_TANK));
+    obj_player *player = ((obj_player*)instance_first(obj_id_player));
+    obj_tank *tank = ((obj_tank*)instance_first(obj_id_tank));
 
 
 
@@ -426,7 +445,6 @@ static void SPACE_draw()
 
 	setTextAngle(0);
 	/* draw all objects */
-	objects_iterate(render_objects);
 	instance_iterate(render_instances);
 
 	/* draw particle effects */
@@ -447,7 +465,7 @@ void draw_gui()
 	setTextAlign(TEXT_LEFT);
 	setTextSize(35);
 
-	obj_player *player = ((obj_player*)instance_first(ID_PLAYER));
+	obj_player *player = ((obj_player*)instance_first(obj_id_player));
 
 	/* simple score animation */
 	char score_temp[20];
@@ -470,9 +488,9 @@ void draw_gui()
 	setTextSize(20);
 	char goals_left[100];
 	sprintf(goals_left, "OBJEKTER: %d",
-			objects_count(ID_FACTORY)+
-			objects_count(ID_TURRET)+
-			objects_count(ID_TANK));
+			instance_count(obj_id_factory)+
+			instance_count(obj_id_turret)+
+			instance_count(obj_id_tank));
 	font_drawText(-GAME_WIDTH/2+20,GAME_HEIGHT/2 - 100,goals_left);
 
 	draw_color4f(1,1,1,1);
@@ -569,43 +587,6 @@ void draw_gui()
 	}
 }
 
-#warning deprecated method render_objects!
-static void render_objects(instance *obj)
-{
-	if((obj->body->p.x > current_camera->left - 200) && (obj->body->p.x < current_camera->right + 200)) {
-		obj->TYPE->render(obj);
-		return;
-	}
-
-	if(current_camera->x < cam_left_limit){
-		float old_cam_x = current_camera->x;
-		float new_cam_center_x = current_camera->x + currentlvl->width;
-		float new_cam_left = new_cam_center_x - current_camera->width;
-		float new_cam_right = new_cam_center_x + current_camera->width;
-		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){
-		    current_camera->x = new_cam_center_x;
-			draw_push_matrix();
-			draw_translate(-(currentlvl->right + abs(currentlvl->left)),0,0);
-			obj->TYPE->render(obj);
-			draw_pop_matrix();
-			current_camera->x = old_cam_x;
-		}
-	}else if(current_camera->x > cam_right_limit){
-		float old_cam_x = current_camera->x;
-		float new_cam_center_x = current_camera->x - currentlvl->width;
-		float new_cam_left = new_cam_center_x - current_camera->width;
-		float new_cam_right = new_cam_center_x + current_camera->width;
-		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){
-		    current_camera->x = new_cam_center_x;
-			draw_push_matrix();
-			draw_translate((currentlvl->right + abs(currentlvl->left)),0,0);
-			obj->TYPE->render(obj);
-			draw_pop_matrix();
-			current_camera->x = old_cam_x;
-		}
-	}
-}
-
 
 #if GLES1
 #define star_count 100
@@ -673,12 +654,16 @@ void space_init_level(int space_station, int deck)
 	static obj_player *player;
 
 	if(player==NULL){
-		player = (obj_player*)object_create_player();
+		obj_param_player default_player = {
+				.max_hp = 200,
+				.gun_cooldown = 0.2f
+		};
+		player = (obj_player *)instance_create(obj_id_player, &default_player, 0,0,0,0);
 	} else {
 		player->disable = 1;
 		//player->hp_bar.value = player->param->max_hp;
 
-		player->data.preset->init((instance*) player);
+		player->data.TYPE->call.init((instance*) player);
 		//player->aim_speed += 0.3*deck;
 		//player->rotation_speed += 0.3*deck;
 		if(deck >= 6){
@@ -687,16 +672,14 @@ void space_init_level(int space_station, int deck)
 	}
 
 	//TODO manage persistent objects(like player) in a better way, instead of removing and then re-adding
-
-	objects_clear();
-
-	objects_add((instance*)player);
+	instance_clear();
+	instance_add((instance*)player);
 
 	/* set player specs based on selected upgrades */
 	player->force = engines[engine_index].force;
 	cpBodySetVelLimit(player->data.body, engines[engine_index].max_speed);
 	cpBodySetMass(player->data.body, upg_total_mass);
-	player->param->gun_cooldown = 1 / weapons[weapon_index].lvls[weapons[weapon_index].level].firerate;
+	player->param.gun_cooldown = 1 / weapons[weapon_index].lvls[weapons[weapon_index].level].firerate;
 	player->bullet_dmg = weapons[weapon_index].lvls[weapons[weapon_index].level].damage;
 	player->hp_bar.max_hp = armors[armor_index].max_hp;
 	player->hp_bar.value = player->hp_bar.max_hp;

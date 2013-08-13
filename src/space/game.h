@@ -101,4 +101,6 @@ void game_destroy();
 
 extern float upg_total_mass;
 
+#define ID_GROUND 0xABA198 //TMP define with random number
+
 #endif /* GAME_H_ */

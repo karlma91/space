@@ -20,7 +20,7 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 			{24, 6.3, 2.0, 650, 4500}
 		},
 		.spr_id = &SPRITE_PLAYER_GUN,
-		.obj_id = ID_BULLET_PLAYER
+		.obj_type = NULL
 	}, {
 		.name = "MACHINE GUN",
 		.p_type = PROJECT_BULLET,
@@ -32,7 +32,7 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 			{4.7, 25.0, 2.6, 570, 5950}
 		},
 		.spr_id = &SPRITE_PLAYER_GUN,
-		.obj_id = ID_BULLET_PLAYER
+		.obj_type = NULL
 	}
 };
 

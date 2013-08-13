@@ -108,7 +108,7 @@ PARAM_START(factory)
 	float max_hp;
 	float spawn_delay;
 	int score;
-	object *type;
+	object_id *type;
 	void *param;
 	SPRITE_ID sprite_id;
 PARAM_END

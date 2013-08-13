@@ -25,6 +25,6 @@ extern int LAYER_TANK_FACTORY;
 extern int LAYER_PLAYER_BULLET;
 extern int LAYER_ENEMY_BULLET;
 
-extern void instance_nearest_x_two(instance *ins, int obj_id, instance **left, instance **right, cpFloat *instance, cpFloat *right_distance);
+extern void instance_nearest_x_two(instance *ins, object_id *obj_id, instance **left, instance **right, cpFloat *instance, cpFloat *right_distance);
 
 #endif /* OBJECTS_H_ */

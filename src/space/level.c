@@ -52,7 +52,7 @@ int get_group_index(const char* group_name) {
 */
 
 /** return sub_name's index in params, or -1 if not found  */
-int get_sub_index(const object *obj_id, const char* sub_name) {
+int get_sub_index(const object_id *obj_id, const char* sub_name) {
 	int sub_id;
 	int group_id = obj_id->ID;
 
@@ -141,7 +141,7 @@ int level_init()
 		SDL_Log("DEBUG: %5.1f %% - Parsing %s %s - characters left: %d\n", FILE_PERCENT, group, subtype, filesize - offset); //DEBUG
 
 		/* find object type id */
-		object *obj_id =  object_by_name(group);
+		object_id *obj_id =  object_by_name(group);
 		if (obj_id == NULL) {
 			SDL_Log("Unrecognized object group: '%s'\n", group);
 			exit(4);
@@ -323,7 +323,7 @@ level *level_load(int space_station, int deck)
 			return NULL;
 		}
 
-		object *obj_id = object_by_name(group);
+		object_id *obj_id = object_by_name(group);
 		int sub_id = get_sub_index(obj_id, subtype);
 		SDL_Log("Adding object: %s_%s x=%d\n", group, subtype, x);
 

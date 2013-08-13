@@ -21,7 +21,7 @@ int LAYER_ENEMY_BULLET    =                                 1<<5;
 #define INT_MIN -2147483648
 #endif
 
-void instance_nearest_x_two(instance *object, int obj_id, instance **left, instance **right, cpFloat *left_distance, cpFloat *right_distance)
+void instance_nearest_x_two(instance *object, object_id *obj_id, instance **left, instance **right, cpFloat *left_distance, cpFloat *right_distance)
 {
 	LList list = object->TYPE->info->active;
 
@@ -29,7 +29,7 @@ void instance_nearest_x_two(instance *object, int obj_id, instance **left, insta
 	cpFloat min_length_right = INT_MAX;
 	cpFloat length;
 
-	int check_id = (obj_id == object->TYPE->ID);
+	int check_id = (obj_id == object->TYPE);
 
 	llist_begin_loop(list);
 	while(llist_hasnext(list)) {

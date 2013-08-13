@@ -7,7 +7,7 @@
 #include "../engine/audio/sound.h"
 #include "../engine/graphics/particles.h"
 #include "spaceengine.h"
- 
+
 #include "game.h"
 
 
@@ -21,19 +21,19 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 void collisioncallbacks_init()
 {
-	cpSpaceAddCollisionHandler(space, ID_TANK, ID_BULLET_PLAYER, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, ID_ROCKET, ID_BULLET_PLAYER, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, ID_FACTORY, ID_BULLET_PLAYER, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, obj_id_tank->ID, obj_id_bullet->ID, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, obj_id_rocket->ID, obj_id_bullet->ID, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, obj_id_factory->ID, obj_id_bullet->ID, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
 
-	cpSpaceAddCollisionHandler(space, ID_BULLET_PLAYER, ID_GROUND, NULL, NULL, callback_bullet_ground, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, ID_BULLET_ENEMY, ID_GROUND, NULL, NULL, callback_bullet_ground, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, obj_id_bullet->ID, ID_GROUND, NULL, NULL, callback_bullet_ground, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, obj_id_bullet->ID, ID_GROUND, NULL, NULL, callback_bullet_ground, NULL, NULL);
 
-	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_BULLET_ENEMY, collision_object_bullet, NULL, NULL, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_GROUND, NULL, NULL, collision_player_object, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_FACTORY, NULL, NULL, collision_player_object, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, obj_id_player->ID, obj_id_bullet->ID, collision_object_bullet, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, obj_id_player->ID, ID_GROUND, NULL, NULL, collision_player_object, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, obj_id_player->ID, obj_id_factory->ID, NULL, NULL, collision_player_object, NULL, NULL);
 
-	cpSpaceAddCollisionHandler(space, ID_ROCKET, ID_GROUND, NULL, NULL, callback_rocket_ground, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, ID_PLAYER, ID_ROCKET, collision_object_bullet, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, obj_id_rocket->ID, ID_GROUND, NULL, NULL, callback_rocket_ground, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, obj_id_player->ID, obj_id_rocket->ID, collision_object_bullet, NULL, NULL, NULL, NULL);
 
 }
 
@@ -92,7 +92,7 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 	instance *player = ((instance *)(a->body->data));
 
 	if (player)  {
-		if (player->TYPE->ID == ID_PLAYER) {
+		if (player->TYPE->ID == obj_id_player->ID) {
 			add_sparks_at_contactpoint(arb);
 			cpVect force = cpArbiterTotalImpulse(arb);
 			float f = cpvlength(force);
@@ -100,7 +100,7 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 			if (f > 10)
 				player->components.hp_bar->value -= f * 0.017; // <- changed player force to impulse f * 0.01 // f * 0.05 // 0.033
 		} else {
-			SDL_Log("Expected object type ID %d, but got %d!\n", ID_PLAYER, player->TYPE->ID);
+			SDL_Log("Expected object type ID %d, but got %d!\n", obj_id_player->ID, player->TYPE->ID);
 		}
 	} else {
 		SDL_Log("Expected object from collision between player and ground, but got NULL\n");

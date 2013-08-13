@@ -10,19 +10,18 @@
 
 #define OBJ_MAGIC_COOKIE 0xB305D7A2
 
-#define ID_COUNT 7 //TMP define in port progress
+#define ID_COUNT 20 //FIXME TMP define in port progress
 
 
 void object_init();
-void object_clear();
 void object_destroy();
 
 typedef struct instance instance;
-typedef struct object object;
+typedef struct object object_id;
 
 //TODO split active instances from list of objects?
 typedef struct { //TODO move: WARNING: exposed internal data structure
-	object *obj;
+	object_id *obj;
 	int count;
 	LList active;
 	LList pool;
@@ -49,7 +48,7 @@ struct object {
 
 struct instance {
 	const int INS_IDENTIFIER;
-	const object *TYPE;
+	const object_id *TYPE;
 
 	int active_components;
 
@@ -74,28 +73,29 @@ struct instance {
 
 }; /* per-instance variables */
 
-instance *instance_create(object *type, const void *param, float x, float y, float hs, float vs);
-instance *instance_super_malloc(object *type); //TODO hide from user?
+instance *instance_create(object_id *type, const void *param, float x, float y, float hs, float vs);
+instance *instance_super_malloc(object_id *type); //TODO hide from user?
 void instance_super_free(instance *);
 
 void instance_add(instance *);
 void instance_iterate(void (*f)(instance *));
-void instance_iterate_type(void (*f)(instance *), object *type);
+void instance_iterate_type(void (*f)(instance *), object_id *type);
 void instance_remove(instance *);
 int instance_set_param(instance *, const void *param);
+void instance_clear();
 
-instance *instance_nearest(cpVect pos, object *type);
-instance *instance_first(object *type);
-instance *instance_n(object *type, int n);
-instance *instance_last(object *type);
-instance *instance_by_id(object *type, int instance_id);
+instance *instance_nearest(cpVect pos, object_id *type);
+instance *instance_first(object_id *type);
+instance *instance_n(object_id *type, int n);
+instance *instance_last(object_id *type);
+instance *instance_by_id(object_id *type, int instance_id);
 
 #define instance_update(ins) ins->TYPE->call.on_update(ins)
 #define instance_render(ins) ins->TYPE->call.on_render(ins)
 
-int instance_count(object *type);
-int object_register(object *obj);
-object *object_by_name(const char *obj_name);
+int instance_count(object_id *type);
+int object_register(object_id *obj);
+object_id *object_by_name(const char *obj_name);
 
 
 #define OBJ_TYPE_3( name ) obj_ ## name
@@ -110,7 +110,7 @@ object *object_by_name(const char *obj_name);
 
 #define OBJECT_REGISTER(name) object_register (OBJ_ID_2(name))
 #define OBJECT_DECLARE(name) \
-	extern object *OBJ_ID_2(name); \
+	extern object_id *OBJ_ID_2(name); \
 	typedef struct OBJ_TYPE_2(name) OBJ_TYPE_2(name); \
 	typedef struct OBJ_PARAM_2(name) OBJ_PARAM_2(name)
 
@@ -142,7 +142,7 @@ static void on_update(OBJ_TYPE *obj);
 static void on_render(OBJ_TYPE *obj);
 static void on_destroy(OBJ_TYPE *obj);
 
-static object this = {
+static object_id this = {
 	.OBJ_IDENTIFIER = OBJ_MAGIC_COOKIE,
 	.ID = -1,
 	.NAME = STRINGIFY(OBJ_NAME),
@@ -156,7 +156,7 @@ static object this = {
 		(void (*)(instance *)) on_destroy
 	}
 };
-object *OBJ_ID = &this;
+object_id *OBJ_ID = &this;
 
 #endif /* PER_OBJECT_CODEBLOCK */
 #endif /* OBJ_TYPE_NAME */

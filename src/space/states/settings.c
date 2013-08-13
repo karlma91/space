@@ -173,7 +173,7 @@ void settings_init()
 	int i;
 	for (i = 0; i < OPTION_COUNT; i++) {
 		btn_options[i] = button_create(SPRITE_BUTTON, 1, str_options[i], -1,-1, 800, 115);
-		button_set_callback(btn_options[i], option_click, NULL + i);
+		button_set_callback(btn_options[i], (void (*)(void *))option_click, NULL + i);
 		statesystem_register_touchable(this, btn_options[i]);
 	}
 

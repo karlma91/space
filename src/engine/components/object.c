@@ -18,7 +18,7 @@ static void destroy_func(instance* obj)
 	obj->TYPE->call.on_destroy(obj);
 }
 
-int object_register(object *obj)
+int object_register(object_id *obj)
 {
 	int id = object_count++;
 
@@ -38,7 +38,7 @@ int object_register(object *obj)
 	return id;
 }
 
-object *object_by_name(const char *obj_name)
+object_id *object_by_name(const char *obj_name)
 {
 	int obj_id;
 	object_info *obj_meta = objects_meta;
@@ -53,7 +53,7 @@ object *object_by_name(const char *obj_name)
 	return NULL;
 }
 
-instance *instance_create(object *type, const void *param, float x, float y, float hs, float vs)
+instance *instance_create(object_id *type, const void *param, float x, float y, float hs, float vs)
 {
 	instance *ins = instance_super_malloc(type);
 
@@ -90,7 +90,7 @@ void object_init() {
 
 }
 
-instance *instance_super_malloc(object *type)
+instance *instance_super_malloc(object_id *type)
 {
 	LList list = objects_meta[type->ID].pool;
 	instance *ins = llist_first(list);
@@ -108,7 +108,7 @@ instance *instance_super_malloc(object *type)
 	}
 
 	/* set read-only instance data */
-	*((object **)&ins->TYPE) = type;
+	*((object_id **)&ins->TYPE) = type;
 	*((int *)&ins->INS_IDENTIFIER) = INS_MAGIC_COOKIE;
 
 	return ins;
@@ -183,7 +183,7 @@ void instance_iterate(void (*f)(instance *))
 }
 
 /* iterate through one type of object */
-void instance_iterate_type(void (*f)(instance *), object *type) {
+void instance_iterate_type(void (*f)(instance *), object_id *type) {
 	if (err_obj(type)) {
 		SDL_Log("ERROR: in list_iterate_type: Invalid object type %p\n", type);
 		exit(-1);
@@ -194,7 +194,7 @@ void instance_iterate_type(void (*f)(instance *), object *type) {
 }
 
 /* removes all nodes from all lists */
-void object_clear()
+void instance_clear()
 {
 	int obj_id;
 	object_info *obj = objects_meta;
@@ -221,7 +221,7 @@ void object_destroy()
 
 
 //TODO swap arguments?
-instance *instance_nearest(cpVect pos, object *type)
+instance *instance_nearest(cpVect pos, object_id *type)
 {
 	//TODO error check obj_id
 
@@ -249,25 +249,25 @@ instance *instance_nearest(cpVect pos, object *type)
 	return target;
 }
 
-instance *instance_first(object *type)
+instance *instance_first(object_id *type)
 {
 	//TODO error check obj_id
 	return (instance *) llist_first(objects_meta[type->ID].active);
 }
 
-instance *instance_n(object *type, int n)
+instance *instance_n(object_id *type, int n)
 {
 	//TODO error check obj_id
 	return (instance *) llist_at_index(objects_meta[type->ID].active, n);
 }
 
-instance *instance_last(object *type)
+instance *instance_last(object_id *type)
 {
 	//TODO error check obj_id
 	return (instance *) llist_last(objects_meta[type->ID].active);
 }
 
-instance *instance_by_id(object *type, int instance_id)
+instance *instance_by_id(object_id *type, int instance_id)
 {
 	//TODO error check obj_id
 	LList list = objects_meta[type->ID].active;
@@ -284,7 +284,7 @@ instance *instance_by_id(object *type, int instance_id)
 	return NULL;
 }
 
-int instance_count(object *type)
+int instance_count(object_id *type)
 {
 	//TODO error check obj_id
 	return llist_size(objects_meta[type->ID].active);

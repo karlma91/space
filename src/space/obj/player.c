@@ -33,11 +33,6 @@ int player_cheat_invulnerable = 0;
 static void controls(obj_player *);
 static void action_shoot(obj_player *);
 
-obj_param_player default_player = {
-		.max_hp = 200,
-		.gun_cooldown = 0.2f
-};
-
 //#define IMPULSE_FORCE 160 //prev value: 60
 
 static void init(OBJ_TYPE *OBJ_NAME)
