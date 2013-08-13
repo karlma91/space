@@ -24,8 +24,6 @@ extern void stations_init();
 #include "ini.h"
 #endif
 
-//TODO move game specific code from main.c into this file
-
 /* Default keybindings for desktop version */
 unsigned int KEY_UP_1 = SDL_SCANCODE_W;
 unsigned int KEY_UP_2 = SDL_SCANCODE_UP;
@@ -39,7 +37,6 @@ unsigned int KEY_DOWN_2 = SDL_SCANCODE_DOWN;
 unsigned int KEY_RETURN_1 = SDL_SCANCODE_SPACE;
 unsigned int KEY_RETURN_2 = SDL_SCANCODE_RETURN;
 unsigned int KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
-
 
 /* global sprite definitions */
 SPRITE_ID SPRITE_PLAYER;

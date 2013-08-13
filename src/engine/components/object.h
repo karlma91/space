@@ -10,6 +10,9 @@
 
 #define OBJ_MAGIC_COOKIE 0xB305D7A2
 
+#define ID_COUNT 7 //TMP define in port progress
+
+
 void object_init();
 void object_clear();
 void object_destroy();
@@ -69,7 +72,6 @@ void instance_iterate_type(void (*f)(instance *), object *type);
 void instance_remove(instance *);
 int instance_set_param(instance *, const void *param);
 
-void instance_nearest_x_two(instance *ins, object type, instance **left, instance **right, cpFloat *left_distance, cpFloat *right_distance);
 instance *instance_nearest(cpVect pos, object *type);
 instance *instance_first(object *type);
 instance *instance_n(object *type, int n);
@@ -86,7 +88,7 @@ int object_register(object *obj);
 #define OBJ_TYPE_3( name ) obj_ ## name
 #define OBJ_TYPE_2( name ) OBJ_TYPE_3( name )
 
-#define OBJ_PARAM_3( name ) object_p_ ## name
+#define OBJ_PARAM_3( name ) obj_param_ ## name
 #define OBJ_PARAM_2( name ) OBJ_PARAM_3( name )
 
 #define OBJ_ID_3( name ) obj_id_ ## name
@@ -133,10 +135,10 @@ static object this = {
 	.SIZE = sizeof(OBJ_TYPE),
 	.P_SIZE = sizeof(OBJ_PARAM_TYPE),
 	.call = {
-		(void (*)(void *)) on_create,
-		on_update,
-		on_render,
-		on_destroy
+		(void (*)(instance *)) on_create,
+		(void (*)(instance *)) on_update,
+		(void (*)(instance *)) on_render,
+		(void (*)(instance *)) on_destroy
 	}
 };
 object *OBJ_ID = &this;

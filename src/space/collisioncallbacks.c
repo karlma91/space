@@ -41,8 +41,8 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 {
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
-	object_data *object = (object_data *)(a->body->data);
-	object_data *bullet = (object_data*)(b->body->data);
+	instance *object = (instance *)(a->body->data);
+	instance *bullet = (instance*)(b->body->data);
 
 	bullet->alive = 0;
 
@@ -68,8 +68,8 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
-	object_data *object = (object_data *)(a->body->data);
-	object_data *bullet = (object_data*)(b->body->data);
+	instance *object = (instance *)(a->body->data);
+	instance *bullet = (instance*)(b->body->data);
 
 	bullet->alive = 0;
 
@@ -89,10 +89,10 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 {
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
-	object_data *player = ((object_data *)(a->body->data));
+	instance *player = ((instance *)(a->body->data));
 
 	if (player)  {
-		if (player->preset->ID == ID_PLAYER) {
+		if (player->TYPE->ID == ID_PLAYER) {
 			add_sparks_at_contactpoint(arb);
 			cpVect force = cpArbiterTotalImpulse(arb);
 			float f = cpvlength(force);
@@ -100,7 +100,7 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 			if (f > 10)
 				player->components.hp_bar->value -= f * 0.017; // <- changed player force to impulse f * 0.01 // f * 0.05 // 0.033
 		} else {
-			SDL_Log("Expected object type ID %d, but got %d!\n", ID_PLAYER, player->preset->ID);
+			SDL_Log("Expected object type ID %d, but got %d!\n", ID_PLAYER, player->TYPE->ID);
 		}
 	} else {
 		SDL_Log("Expected object from collision between player and ground, but got NULL\n");
@@ -111,7 +111,7 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 static void callback_bullet_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
-	object_data *object = ((object_data *)(a->body->data));
+	instance *object = ((instance *)(a->body->data));
 	add_sparks_at_contactpoint(arb);
 	sound_play(SND_LASER_1);
 	object->alive = 0;
@@ -120,7 +120,7 @@ static void callback_bullet_ground(cpArbiter *arb, cpSpace *space, void *unused)
 static void callback_rocket_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
-	object_data *object = ((object_data *)(a->body->data));
+	instance *object = ((instance *)(a->body->data));
 	se_add_explotion_at_contact_point(arb);
 	object->alive = 0;
 }

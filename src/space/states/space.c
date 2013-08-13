@@ -50,8 +50,8 @@ static void render_instances(instance *);
 static void update_camera_zoom(int mode);
 static void update_camera_position();
 
-static void update_objects(object_data *obj);
-static void render_objects(object_data *obj);
+static void update_objects(instance *obj);
+static void render_objects(instance *obj);
 
 int space_rendering_map = 0;
 
@@ -286,7 +286,7 @@ static void render_instances(instance *ins)
 
 
 #warning update_objects: deprecated method!
-static void update_objects(object_data *obj)
+static void update_objects(instance *obj)
 {
 	int moved_left = 0;
 	int moved_right = 0;
@@ -335,7 +335,7 @@ static void update_objects(object_data *obj)
 			}
 		}
 
-		obj->preset->update(obj);
+		obj->TYPE->update(obj);
 	}else{
 		objects_remove(obj);
 	}
@@ -573,10 +573,10 @@ void draw_gui()
 }
 
 #warning deprecated method render_objects!
-static void render_objects(object_data *obj)
+static void render_objects(instance *obj)
 {
 	if((obj->body->p.x > current_camera->left - 200) && (obj->body->p.x < current_camera->right + 200)) {
-		obj->preset->render(obj);
+		obj->TYPE->render(obj);
 		return;
 	}
 
@@ -589,7 +589,7 @@ static void render_objects(object_data *obj)
 		    current_camera->x = new_cam_center_x;
 			draw_push_matrix();
 			draw_translate(-(currentlvl->right + abs(currentlvl->left)),0,0);
-			obj->preset->render(obj);
+			obj->TYPE->render(obj);
 			draw_pop_matrix();
 			current_camera->x = old_cam_x;
 		}
@@ -602,7 +602,7 @@ static void render_objects(object_data *obj)
 		    current_camera->x = new_cam_center_x;
 			draw_push_matrix();
 			draw_translate((currentlvl->right + abs(currentlvl->left)),0,0);
-			obj->preset->render(obj);
+			obj->TYPE->render(obj);
 			draw_pop_matrix();
 			current_camera->x = old_cam_x;
 		}
@@ -681,7 +681,7 @@ void space_init_level(int space_station, int deck)
 		player->disable = 1;
 		//player->hp_bar.value = player->param->max_hp;
 
-		player->data.preset->init((object_data*) player);
+		player->data.preset->init((instance*) player);
 		//player->aim_speed += 0.3*deck;
 		//player->rotation_speed += 0.3*deck;
 		if(deck >= 6){
@@ -693,7 +693,7 @@ void space_init_level(int space_station, int deck)
 
 	objects_clear();
 
-	objects_add((object_data*)player);
+	objects_add((instance*)player);
 
 	/* set player specs based on selected upgrades */
 	player->force = engines[engine_index].force;

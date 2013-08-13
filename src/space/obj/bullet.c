@@ -1,5 +1,4 @@
 /* header */
-#include "bullet.h"
 #include "objects.h"
 
 #include "../game.h"
@@ -8,31 +7,15 @@
 #include "../../engine/engine.h"
 
 
-static void init(object_data *obj);
+static void init(instance *obj);
 static void update(struct bullet *);
-static void render(object_data *obj);
+static void render(instance *obj);
 static void destroy(struct bullet *);
 
 static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 
-object_group_preset type_bullet_player= {
-	ID_BULLET_PLAYER,
-	init,
-	update,
-	render,
-	destroy
-};
-object_group_preset type_bullet_enemy= {
-	ID_BULLET_ENEMY,
-	init,
-	update,
-	render,
-	destroy
-};
-
-
 //TODO standardize bullet
-object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int type)
+instance *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int type)
 {
 	struct bullet *temp = (struct bullet *)objects_super_malloc(type, sizeof(struct bullet));
 		temp->data.alive = 1;
@@ -45,7 +28,7 @@ object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int 
 
 		temp->data.body = cpSpaceAddBody(space, cpBodyNew(1, moment));
 		cpBodySetPos(temp->data.body, cpvadd(pos, cpvmult(dir,30)));
-		cpBodySetUserData(temp->data.body, (object_data*)temp);
+		cpBodySetUserData(temp->data.body, (instance*)temp);
 		cpBodySetVel(temp->data.body,cpvadd(cpvmult(dir,1500),intit_vel)); //3000
 		temp->data.body->velocity_func = bulletVelocityFunc;
 
@@ -69,11 +52,11 @@ object_data *object_create_bullet(cpVect pos, cpVect dir, cpVect intit_vel, int 
 
 		temp->energy = 750; // number of msec energy
 
-		objects_add((object_data*)temp);
-		return (object_data*)temp;
+		objects_add((instance*)temp);
+		return (instance*)temp;
 }
 
-static void init(object_data *obj)
+static void init(instance *obj)
 {
 
 }
@@ -87,7 +70,7 @@ static void update(struct bullet *bullet)
 	}
 }
 
-static void render(object_data *obj)
+static void render(instance *obj)
 {
 
 	struct bullet *temp = (struct bullet*)obj;
@@ -136,6 +119,6 @@ static void destroy(struct bullet *bullet)
 	cpSpaceRemoveBody(space, bullet->data.body);
 	cpShapeFree(bullet->shape);
 	cpBodyFree(bullet->data.body);
-	objects_super_free((object_data *)bullet);
+	objects_super_free((instance *)bullet);
 	bullet = NULL;
 }

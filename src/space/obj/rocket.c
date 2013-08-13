@@ -1,6 +1,3 @@
-/* header */
-#include "rocket.h"
-
 /* standard c-libraries */
 #include <stdio.h>
 #include <math.h>
@@ -86,7 +83,7 @@ object_group_rocket *object_create_rocket(float xpos, object_group_factory *fact
 	cpShapeSetCollisionType(rocket->shape, ID_ROCKET);
 
 	cpBodySetUserData(rocket->data.body, rocket);
-	objects_add((object_data *)rocket);
+	objects_add((instance *)rocket);
 
 	hpbar_init(&rocket->hp_bar, param->max_hp, 80, 16, -40, 60, &(rocket->data.body->p));
 
@@ -175,5 +172,5 @@ static void destroy(object_group_rocket *rocket)
 		rocket->factory->cur--;
 	}
 
-	objects_super_free((object_data *)rocket);
+	objects_super_free((instance *)rocket);
 }

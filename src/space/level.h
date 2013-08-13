@@ -3,6 +3,7 @@
 
 #include "tilemap.h"
 #include "obj/objects.h"
+#include "../engine/components/object.h"
 
 typedef struct level_ship {
 	int id;

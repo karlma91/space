@@ -10,11 +10,11 @@ extern object_group_preset type_robotarm;
 struct robotarm;
 struct robotarm_param;
 
-extern object_data *robotarm_init(float xpos, struct robotarm_param *param);
+extern instance *robotarm_init(float xpos, struct robotarm_param *param);
 
 struct robotarm {
 	/*standard*/
-	object_data obj;
+	instance obj;
 
 	/*tank*/
 	cpShape *shape;

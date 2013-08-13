@@ -31,10 +31,10 @@
 #include "bullet.h"
 
 /* static prototypes */
-static void init(object_data *fac);
-static void update(object_data *fac);
-static void render(object_data *fac);
-static void destroy(object_data *obj);
+static void init(instance *fac);
+static void update(instance *fac);
+static void render(instance *fac);
+static void destroy(instance *obj);
 static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused);
 
 object_group_preset type_robotarm= {
@@ -48,11 +48,11 @@ object_group_preset type_robotarm= {
 
 static struct robotarm *temp;
 
-object_data *robotarm_init(float xpos,struct robotarm_param *pram)
+instance *robotarm_init(float xpos,struct robotarm_param *pram)
 {
 	struct robotarm *ra = malloc(sizeof(struct robotarm));
-	((object_data *) ra)->preset = &type_robotarm;
-	((object_data *) ra)->alive = 1;
+	((instance *) ra)->TYPE = &type_robotarm;
+	((instance *) ra)->alive = 1;
 	ra->param = pram;
 	ra->hp = ra->param->max_hp;
 	ra->timer = 0;
@@ -73,28 +73,28 @@ object_data *robotarm_init(float xpos,struct robotarm_param *pram)
 
 	cpFloat size = 50;
 	/* make and add new body */
-	((object_data *) ra)->body = cpSpaceAddBody(space, cpBodyNew(20, cpMomentForBox(20.0f, size, size)));
-	cpBodySetPos(((object_data *) ra)->body, cpv(xpos,size+10));
-	cpBodySetVelLimit(((object_data *) ra)->body,180);
+	((instance *) ra)->body = cpSpaceAddBody(space, cpBodyNew(20, cpMomentForBox(20.0f, size, size)));
+	cpBodySetPos(((instance *) ra)->body, cpv(xpos,size+10));
+	cpBodySetVelLimit(((instance *) ra)->body,180);
 	/* make and connect new shape to body */
-	ra->shape = cpSpaceAddShape(space, cpBoxShapeNew(((object_data *) ra)->body, size, size));
+	ra->shape = cpSpaceAddShape(space, cpBoxShapeNew(((instance *) ra)->body, size, size));
 	cpShapeSetFriction(ra->shape, 0.01);
 	cpShapeSetLayers(ra->shape,1<<20);
 	cpShapeSetCollisionType(ra->shape, ID_ROBOTARM);
 	cpSpaceAddCollisionHandler(space, ID_ROBOTARM, ID_BULLET_PLAYER, collision_player_bullet, NULL, NULL, NULL, NULL);
 
-	cpBodySetUserData(((object_data *) ra)->body, (object_data*)ra);
-	objects_add((object_data*)ra);
-	return (object_data*)ra;
+	cpBodySetUserData(((instance *) ra)->body, (instance*)ra);
+	objects_add((instance*)ra);
+	return (instance*)ra;
 }
 
 
-static void init(object_data *fac)
+static void init(instance *fac)
 {
 	temp = ((struct robotarm*)fac);
 }
 
-static void update(object_data *obj)
+static void update(instance *obj)
 {
 	temp = ((struct robotarm*)obj);
 	temp->timer +=dt;
@@ -120,7 +120,7 @@ static void update(object_data *obj)
 
 }
 
-static void render(object_data *obj)
+static void render(instance *obj)
 {
 	temp = ((struct robotarm*)obj);
 	draw_color4f(1,0,0,1);
@@ -157,7 +157,7 @@ static int collision_player_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 }
 
 
-static void destroy(object_data *obj)
+static void destroy(instance *obj)
 {
 	temp = ((struct robotarm*)obj);
 	free(temp->x);

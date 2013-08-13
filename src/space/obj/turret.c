@@ -1,6 +1,3 @@
-/* header */
-#include "turret.h"
-
 /* standard c-libraries */
 #include <stdio.h>
 #include <math.h>
@@ -86,7 +83,7 @@ object_group_turret *object_create_turret(float xpos, object_param_turret *param
 
 
 	cpBodySetUserData(turret->data.body, turret);
-	objects_add((object_data *)turret);
+	objects_add((instance *)turret);
 
 	hpbar_init(&turret->hp_bar,param->max_hp,80,16,-40,60,&(turret->data.body->p));
 
@@ -171,5 +168,5 @@ static void destroy(object_group_turret *turret)
 	cpSpaceRemoveBody(space, turret->data.body);
 	cpBodyFree(turret->data.body);
 
-	objects_super_free((object_data *)turret);
+	objects_super_free((instance *)turret);
 }

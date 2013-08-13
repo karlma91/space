@@ -1,6 +1,3 @@
-/* header */
-#include "tankfactory.h"
-
 /* standard c-libraries */
 #include <stdio.h>
 #include <math.h>
@@ -92,7 +89,7 @@ object_group_factory *object_create_factory(int x_pos, object_param_factory *par
 	cpShapeSetCollisionType(factory->shape, ID_FACTORY);
 
 	cpBodySetUserData(factory->data.body, factory);
-	objects_add((object_data *) factory);
+	objects_add((instance *) factory);
 
 	hpbar_init(&factory->hp_bar, param->max_hp, 200, 35, -50, 180,
 			&(factory->data.body->p));
@@ -167,5 +164,5 @@ static void destroy(object_group_factory *factory) {
 	cpBodyFree(factory->data.body);
 	objects_iterate_type(remove_factory_from_tank, ID_TANK);
 	objects_iterate_type(remove_factory_from_rocket, ID_ROCKET);
-	objects_super_free((object_data *)factory);
+	objects_super_free((instance *)factory);
 }

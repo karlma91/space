@@ -73,6 +73,11 @@ extern button btn_settings;
 #define ARCADE_MODE 0
 #endif
 
+/* global settings */
+extern int player_assisted_steering;
+extern int player_cheat_invulnerable;
+
+
 extern unsigned int KEY_UP_1;
 extern unsigned int KEY_UP_2;
 extern unsigned int KEY_LEFT_1;

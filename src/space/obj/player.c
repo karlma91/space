@@ -1,6 +1,3 @@
-/* header */
-#include "player.h"
-
 /* standard c-libraries */
 #include <stdio.h>
 #include <time.h>
@@ -22,8 +19,6 @@
 
 /* Game components */
 #include "objects.h"
-#include "tank.h"
-#include "bullet.h"
 
 #include "chipmunk.h"
 #include "../spaceengine.h"
@@ -31,7 +26,7 @@
 int player_assisted_steering = 0;
 int player_cheat_invulnerable = 0;
 
-static void init(object_data *);
+static void init(instance *);
 
 static void render(object_group_player *);
 static void update(object_group_player *);
@@ -77,7 +72,7 @@ object_group_player *object_create_player()
 
 	player->flame = particles_get_emitter(EMITTER_FLAME);
 	player->disable=0;
-	init((object_data*)player);
+	init((instance*)player);
 
 	/* make and add new body */
 	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
@@ -91,7 +86,7 @@ object_group_player *object_create_player()
 	cpShapeSetCollisionType(player->shape, ID_PLAYER);
 
 	cpBodySetUserData(player->data.body, (void*)player);
-	objects_add((object_data*)player);
+	objects_add((instance*)player);
 
 	hpbar_init(&(player->hp_bar), 100, 120, 25, -59, 50, &(player->data.body->p));
 
@@ -109,7 +104,7 @@ object_group_player *object_create_player()
 	return player;
 }
 
-static void init(object_data *pl)
+static void init(instance *pl)
 {
 	object_group_player *player = (object_group_player*) pl;
 	player->gun_level = 1;

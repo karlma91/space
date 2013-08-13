@@ -1,6 +1,3 @@
-/* header */
-#include "tank.h"
-
 /* standard c-libraries */
 #include <stdio.h>
 #include <math.h>
@@ -107,7 +104,7 @@ object_group_tank *object_create_tank(float xpos, object_group_factory *factory,
 	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
 
 	cpBodySetUserData(tank->data.body, tank);
-	objects_add((object_data *)tank);
+	objects_add((instance *)tank);
 
 	hpbar_init(&tank->hp_bar,param->max_hp,80,16,-40,60,&(tank->data.body->p));
 
@@ -180,9 +177,9 @@ static void update(object_group_tank *tank)
 	}
 
 
-	object_data *left, *right;
+	instance *left, *right;
 	cpFloat left_dist, right_dist;
-	objects_nearest_x_two((object_data *)tank, ID_TANK, &left, &right, &left_dist, &right_dist);
+	objects_nearest_x_two((instance *)tank, ID_TANK, &left, &right, &left_dist, &right_dist);
 
 	int left_clear = (left_dist > 250);
 	int right_clear = (right_dist > 250);
@@ -312,5 +309,5 @@ static void destroy(object_group_tank *tank)
 		tank->factory->cur--;
 	}
 
-	objects_super_free((object_data *)tank);
+	objects_super_free((instance *)tank);
 }
