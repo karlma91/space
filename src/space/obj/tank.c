@@ -31,9 +31,11 @@
 static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset);
 static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset);
 
+/*
 static const float tex_map[3][8] = {
 		{0,0.5, 1,0.5, 0,0, 1,0}, {0,1, 0.5,1, 0,0.5, 0.5,0.5}, {0.5,1, 1,1, 0.5,0.5, 1,0.5}
 };
+*/
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
@@ -41,13 +43,9 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	//TODO use pointer value as group id
-	tank->data.preset = &type_tank;
 	tank->data.components.hp_bar = &(tank->hp_bar);
-	tank->data.components.score = &(param->score);
+	tank->data.components.score = &(tank->param.score);
 	tank->data.components.body_count = 2;
-	tank->data.alive = 1;
-	tank->param = param;
 
 	sprite_create(&(tank->wheel_sprite), SPRITE_TANK_WHEEL, 120, 120, 0);
 	sprite_create(&(tank->data.spr), SPRITE_TANK_BODY, 200, 100, 0);
@@ -55,34 +53,28 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	tank->max_distance = 800;
 
-	tank->timer = 0;
-	tank->factory = factory;
-	tank->data.destroyed = 0;
-
 	cpFloat start_height = 30; // default start height (if spawned without factory)
 
-	if (factory){
-		tank->factory_id = factory->data.instance_id;
-		start_height = factory->data.body->p.y - 100;
+	if (tank->factory){
+		tank->factory_id = tank->factory->data.instance_id;
+		start_height = tank->factory->data.body->p.y - 100;
 	}
 
 	tank->rot_speed = M_PI/2;
-	tank->barrel_angle = 0;
-
-
-	float wheel_offset = 40;
 
 	// Make a car with some nice soft suspension
+	float wheel_offset = 40;
 	cpVect boxOffset = cpv(0, 0);
-	cpVect posA = cpv(xpos-wheel_offset, start_height-25);
-	cpVect posB = cpv(xpos+wheel_offset, start_height-25);
+	cpVect posA = cpv(tank->data.x - wheel_offset, start_height - 25);
+	cpVect posB = cpv(tank->data.x + wheel_offset, start_height - 25);
 
-	tank->data.body = addChassis(space, tank, cpv(xpos, start_height+10), boxOffset);
+	tank->data.body = addChassis(space, tank,
+			cpv(tank->data.x, start_height + 10), boxOffset);
 
 	tank->debug_left_dist = -1;
 	tank->debug_right_dist = -1;
 
-	cpShapeSetCollisionType(tank->shape, ID_TANK);
+	cpShapeSetCollisionType(tank->shape, this.ID);
 
 	tank->wheel1 = addWheel(space, posA, boxOffset);
 	tank->wheel2 = addWheel(space, posB, boxOffset);
@@ -97,11 +89,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
 
 	cpBodySetUserData(tank->data.body, tank);
-	objects_add((instance *)tank);
 
-	hpbar_init(&tank->hp_bar,param->max_hp,80,16,-40,60,&(tank->data.body->p));
-
-	return tank;
+	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,-40,60,&(tank->data.body->p));
 }
 
 static void set_wheel_velocity(obj_tank *tank, float velocity)
@@ -122,7 +111,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	tank->timer +=dt;
 	/* gets the player from the list */
-	obj_player *player = ((obj_player*)instance_first(ID_PLAYER));
+	obj_player *player = ((obj_player*)instance_first(obj_id_player));
 
 	cpVect pl = player->data.body->p;
 	cpVect rc = tank->data.body->p;
@@ -158,8 +147,9 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	}
 
 	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX) && se_distance_to_player(tank->data.body->p.x)<tank->max_distance){
-		cpVect shoot_angle = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
-		object_create_bullet(tank->data.body->p,shoot_angle ,tank->data.body->v,ID_BULLET_ENEMY);
+		//cpVect shoot_angle = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
+		instance_create(obj_id_bullet, NULL, 0,0,0,0);
+		//object_create_bullet(tank->data.body->p,shoot_angle ,tank->data.body->v,obj_id_bullet);
 		sound_play(SND_LASER_2);
 		tank->timer = 0;
 	}
@@ -167,7 +157,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	instance *left, *right;
 	cpFloat left_dist, right_dist;
-	instance_nearest_x_two((instance *)tank, ID_TANK, &left, &right, &left_dist, &right_dist);
+	objects_nearest_x_two((instance *)tank, obj_id_player, &left, &right, &left_dist, &right_dist);
 
 	int left_clear = (left_dist > 250);
 	int right_clear = (right_dist > 250);
@@ -207,21 +197,20 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 /*
  * make a wheel
  */
-static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset)
-{
+static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset) {
 	cpFloat radius = 15.0f;
 	cpFloat mass = 1.0f;
-	cpBody *body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
+	cpBody *body = cpSpaceAddBody(space,
+			cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(body, cpvadd(pos, boxOffset));
-	cpBodySetAngVelLimit(body,200);
+	cpBodySetAngVelLimit(body, 200);
 
-	cpShape *shape = se_add_circle_shape(body,radius,0.7,0.0);
+	cpShape *shape = se_add_circle_shape(body, radius, 0.7, 0.0);
 
 	cpShapeSetGroup(shape, 1); // use a group to keep the car parts from colliding
-
-	cpSpaceAddCollisionHandler(space, ID_TANK, ID_ABSTRACT_WHEEL, NULL, NULL, NULL, NULL, NULL);
-
-	cpShapeSetLayers(shape,LAYER_WHEEL);
+	cpSpaceAddCollisionHandler(space, this.ID, 0x7B080B, NULL, NULL,
+			NULL, NULL, NULL ); //0x7B080B == a hard-coded random number
+	cpShapeSetLayers(shape, LAYER_WHEEL);
 
 	return body;
 }
@@ -256,7 +245,6 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 	hpbar_draw(&tank->hp_bar);
 
-
 	draw_color4f(1,1,1,1);
 
 	cpVect pos_w1 = tank->wheel1->p;
@@ -265,7 +253,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	cpVect pos_w2 = tank->wheel2->p;
 	sprite_render(&(tank->wheel_sprite), &pos_w2, rot);
 
-	if (tank->param->max_hp >= 100) {//TODO add color into param
+	if (tank->param.max_hp >= 100) {//TODO add color into param
 		draw_color4f(1,0.2,0,1);
 	}
 
@@ -297,5 +285,5 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 		tank->factory->cur--;
 	}
 
-	objects_super_free((instance *)tank);
+	instance_super_free((instance *)tank);
 }

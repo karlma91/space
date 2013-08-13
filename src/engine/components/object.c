@@ -62,6 +62,10 @@ instance *instance_create(object *type, const void *param, float x, float y, flo
 	ins->hs = hs;
 	ins->vs = vs;
 
+	//TODO remove x,y,hs,vs in ins.
+	//TODO init body
+	//TODO set body pos and vel
+
 	/* sets default values */
 	ins->alive = 1;
 	ins->active_components = type->components_mask;

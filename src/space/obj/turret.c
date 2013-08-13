@@ -43,13 +43,10 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	//TODO use pointer value as group id
-	turret->data.preset = &type_turret;
 	turret->data.components.hp_bar = &(turret->hp_bar);
-	turret->data.components.score = &(param->score);
+	turret->data.components.score = &(turret->param.score);
 	turret->data.components.body_count = 0;
 	turret->data.alive = 1;
-	turret->param = param;
 	turret->timer = 0;
 	turret->rate = 0.060;
 	turret->bullets = 0;
@@ -59,34 +56,27 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpFloat size = 100;
 	turret->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
-	cpBodySetPos(turret->data.body, cpv(xpos,currentlvl->height - size/2));
+	cpBodySetPos(turret->data.body, cpv(turret->data.x,currentlvl->height - size/2));
 
 	turret->data.body->velocity_func = velfunc;
 
 	/* make and connect new shape to body */
 	turret->shape = cpSpaceAddShape(space,cpBoxShapeNew(turret->data.body, size, size));
-	cpShapeSetFriction(turret->shape, 1);
 
 	//cpShapeSetGroup(fac->shape, 10);
-
+	cpShapeSetFriction(turret->shape, 1);
 	cpShapeSetLayers(turret->shape, LAYER_TANK_FACTORY);
-
-	cpShapeSetCollisionType(turret->shape, ID_FACTORY);
-
-
+	cpShapeSetCollisionType(turret->shape, obj_id_factory->ID);
 	cpBodySetUserData(turret->data.body, turret);
-	objects_add((instance *)turret);
 
-	hpbar_init(&turret->hp_bar,param->max_hp,80,16,-40,60,&(turret->data.body->p));
-
-	return turret;
+	hpbar_init(&turret->hp_bar,turret->param.max_hp,80,16,-40,60,&(turret->data.body->p));
 }
 
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
 {
-	/* gets the player from the list */
-	obj_player *player = ((obj_player*)instance_first(ID_PLAYER));
+	/* get target: first player instance added */
+	obj_player *player = ((obj_player*)instance_first(obj_id_player));
 
 	cpVect pl = player->data.body->p;
 	cpVect rc = turret->data.body->p;
@@ -99,17 +89,25 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	}else if(best_angle>2*M_PI){
 		best_angle -= 2*M_PI;
 	}
-	turret->barrel_angle=turn_toangle(turret->barrel_angle, best_angle, turret->param->rot_speed * dt);
+	turret->barrel_angle = turn_toangle(turret->barrel_angle, best_angle, turret->param.rot_speed * dt);
 
-	if(turret->timer > turret->param->shoot_interval){
+	if(turret->timer > turret->param.shoot_interval){
 		turret->shooting = 1;
 		turret->timer = 0;
 	}
 	if(turret->shooting && turret->timer > turret->rate && se_distance_to_player(turret->data.body->p.x) < turret->max_distance){
 		turret->bullets += 1;
-		cpVect shoot_angle = cpvforangle(turret->barrel_angle + cpBodyGetAngle(turret->data.body));
-		object_create_bullet(turret->data.body->p,shoot_angle ,turret->data.body->v,ID_BULLET_ENEMY);
-		if(turret->bullets > turret->param->burst_number){
+
+		instance_create(obj_id_bullet, NULL, 0,0,0,0);
+
+		//TODO add the following data as params to bullet
+		//turret->data.body->p
+		//shoot_angle
+		//cpVect shoot_angle = cpvforangle(turret->barrel_angle + cpBodyGetAngle(turret->data.body));
+		//turret->data.body->v
+		//ID_BULLET_ENEMY)
+
+		if(turret->bullets > turret->param.burst_number){
 			turret->bullets = 0;
 			turret->shooting = 0;
 		}
@@ -122,15 +120,12 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-
-	draw_color4f(1,1,1,1);
-
+	int texture = turret->param.tex_id;
 	GLfloat dir = cpBodyGetAngle(turret->data.body);
 
-	int texture = turret->param->tex_id;
-
-	draw_texture(texture, &(turret->data.body->p), &tex_map[0],100, 100, dir*(180/M_PI));
-	draw_texture(texture, &(turret->data.body->p), &tex_map[1],100, 100, turret->barrel_angle*(180/M_PI));
+	draw_color4f(1,1,1,1);
+	draw_texture(texture, &(turret->data.body->p), &tex_map[0][0],100, 100, dir*(180/M_PI));
+	draw_texture(texture, &(turret->data.body->p), &tex_map[1][0],100, 100, turret->barrel_angle*(180/M_PI));
 
 	hpbar_draw(&turret->hp_bar);
 }
@@ -156,5 +151,5 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	cpSpaceRemoveBody(space, turret->data.body);
 	cpBodyFree(turret->data.body);
 
-	objects_super_free((instance *)turret);
+	instance_super_free((instance *)turret);
 }

@@ -31,11 +31,9 @@ int player_assisted_steering = 0;
 int player_cheat_invulnerable = 0;
 
 static void controls(obj_player *);
-
-static void arcade_control(obj_player *); //2
 static void action_shoot(obj_player *);
 
-object_param_player default_player = {
+obj_param_player default_player = {
 		.max_hp = 200,
 		.gun_cooldown = 0.2f
 };
@@ -61,17 +59,12 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&(player->gun), SPRITE_PLAYER_GUN, 120, 120, 0);
 	sprite_create(&(player->data.spr), SPRITE_PLAYER, 120, 120, 0);
 
-	player->data.preset = &object_type_player;
-	player->data.alive = 1;
-
-	player->param = &default_player;
-
 	player->data.components.hp_bar = &player->hp_bar;
 	player->data.components.body_count = 0;
 
 	player->flame = particles_get_emitter(EMITTER_FLAME);
 	player->disable=0;
-	init((instance*)player);
+	init(player);
 
 	/* make and add new body */
 	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
@@ -82,10 +75,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->shape = se_add_circle_shape(player->data.body,radius,0.8,0.9);
 
 	cpShapeSetLayers(player->shape, LAYER_PLAYER);
-	cpShapeSetCollisionType(player->shape, ID_PLAYER);
+	cpShapeSetCollisionType(player->shape, this.ID);
 
 	cpBodySetUserData(player->data.body, (void*)player);
-	objects_add((instance*)player);
 
 	hpbar_init(&(player->hp_bar), 100, 120, 25, -59, 50, &(player->data.body->p));
 
@@ -99,8 +91,6 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	cpShapeSetGroup(shape, 341); // use a group to keep the car parts from colliding
 	cpShapeSetLayers(shape,LAYER_PLAYER_BULLET);
-
-	return player;
 }
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
@@ -230,13 +220,14 @@ static void controls(obj_player *player)
 //TODO lage en generell skyte-struct
 static void action_shoot(obj_player *player)
 {
-	if (player->gun_timer >= player->param->gun_cooldown) {
+	if (player->gun_timer >= player->param.gun_cooldown) {
 		int i;
 
 		sound_play(SND_LASER_1);
 
 		for(i=0; i < player->gun_level;i++){
-			struct bullet *b = object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
+			//obj_bullet *b = object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
+			obj_bullet *b = (obj_bullet *)instance_create(obj_id_bullet, NULL, 0,0,0,0);
 			b->damage = player->bullet_dmg;
 		}
 

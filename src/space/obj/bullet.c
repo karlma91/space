@@ -19,42 +19,37 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-		temp->data.alive = 1;
-		temp->data.components.damage = &(temp->damage);
-		temp->data.components.body_count = 0;
+	bullet->data.alive = 1;
+	bullet->data.components.damage = &(bullet->damage);
+	bullet->data.components.body_count = 0;
 
-		sprite_create(&(temp->data.spr), SPRITE_GLOW_DOT, 30, 30, 0);
+	sprite_create(&(bullet->data.spr), SPRITE_GLOW_DOT, 30, 30, 0);
 
-		cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
+	cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
 
-		temp->data.body = cpSpaceAddBody(space, cpBodyNew(1, moment));
-		cpBodySetPos(temp->data.body, cpvadd(pos, cpvmult(dir,30)));
-		cpBodySetUserData(temp->data.body, (instance*)temp);
-		cpBodySetVel(temp->data.body,cpvadd(cpvmult(dir,1500),intit_vel)); //3000
-		temp->data.body->velocity_func = bulletVelocityFunc;
+	bullet->data.body = cpSpaceAddBody(space, cpBodyNew(1, moment));
+	//cpBodySetPos(bullet->data.body, cpvadd(pos, cpvmult(dir,30))); //FIXME
+	cpBodySetUserData(bullet->data.body, (instance*) bullet);
+	//cpBodySetVel(bullet->data.body,cpvadd(cpvmult(dir,1500),intit_vel)); //3000 //FIXME
+	bullet->data.body->velocity_func = bulletVelocityFunc;
 
-		temp->shape =se_add_circle_shape(temp->data.body,15,1,0);
+	bullet->shape = se_add_circle_shape(bullet->data.body, 15, 1, 0);
 
-		// Sets bullets collision type
-		cpShapeSetCollisionType(temp->shape, type);
-		cpShapeSetGroup(temp->shape,10);
+	// Sets bullets collision type
+	cpShapeSetCollisionType(bullet->shape, this.ID);
+	cpShapeSetGroup(bullet->shape, 10);
 
-		if(type == ID_BULLET_PLAYER){
-			temp->data.preset = &type_bullet_player;
-			cpShapeSetLayers(temp->shape,LAYER_PLAYER_BULLET);
-			temp->damage = 32;
-			if (keys[SDL_SCANCODE_RSHIFT])
-				temp->damage = 200000;
-		}else{
-			temp->data.preset = &type_bullet_enemy;
-			cpShapeSetLayers(temp->shape,LAYER_ENEMY_BULLET);
-			temp->damage = 10;
-		}
+	if (bullet->param.friendly) {
+		cpShapeSetLayers(bullet->shape, LAYER_PLAYER_BULLET);
+		bullet->damage = 32;
+		if (keys[SDL_SCANCODE_RSHIFT])
+			bullet->damage = 200000;
+	} else {
+		cpShapeSetLayers(bullet->shape, LAYER_ENEMY_BULLET);
+		bullet->damage = 10;
+	}
 
-		temp->energy = 750; // number of msec energy
-
-		objects_add((instance*)temp);
-		return (instance*)temp;
+	bullet->energy = 750; // number of msec energy
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
@@ -68,34 +63,29 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
+	float alpha = bullet->energy < 500 ? bullet->energy / 500 : 1;
 
-	struct bullet *temp = (struct bullet*)obj;
-
-	float alpha = temp->energy < 500 ? temp->energy / 500 : 1 ;
-
-	if(temp->data.preset->ID == ID_BULLET_PLAYER){
-		draw_color4f(0.3,0.3,0.9,alpha);
-	}else{
-		draw_color4f(0.9,0.3,0.3,alpha);
+	if (bullet->param.friendly) {
+		draw_color4f(0.3, 0.3, 0.9, alpha);
+	} else {
+		draw_color4f(0.9, 0.3, 0.3, alpha);
 	}
 
-	{
-		cpShape *shape = temp->shape;
+	cpShape *shape = bullet->shape;
 
-		cpCircleShape *circle = (cpCircleShape *)shape;
-		cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
+	cpCircleShape *circle = (cpCircleShape *) shape;
+	cpVect vel = cpBodyGetVel(cpShapeGetBody(shape));
 
-		cpVect pos_from = circle->tc;
-		cpVect pos_to = circle->tc;
-		pos_to.x -= vel.x/128;
-		pos_to.y -= vel.y/128;
+	cpVect pos_from = circle->tc;
+	cpVect pos_to = circle->tc;
+	pos_to.x -= vel.x / 128;
+	pos_to.y -= vel.y / 128;
 
 #if EXPERIMENTAL_GRAPHICS
-		se_rect2arch(&pos_from);
-		se_rect2arch(&pos_to);
+	se_rect2arch(&pos_from);
+	se_rect2arch(&pos_to);
 #endif
-		draw_glow_line(pos_from.x, pos_from.y, pos_to.x, pos_to.y, 64); //40 = 4 * radius
-	}
+	draw_glow_line(pos_from.x, pos_from.y, pos_to.x, pos_to.y, 64); //40 = 4 * radius
 }
 
 
@@ -115,6 +105,5 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	cpSpaceRemoveBody(space, bullet->data.body);
 	cpShapeFree(bullet->shape);
 	cpBodyFree(bullet->data.body);
-	objects_super_free((instance *)bullet);
-	bullet = NULL;
+	instance_super_free((instance *)bullet);
 }

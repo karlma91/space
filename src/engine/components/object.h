@@ -115,7 +115,7 @@ object *object_by_name(const char *obj_name);
 	typedef struct OBJ_PARAM_2(name) OBJ_PARAM_2(name)
 
 
-#define OBJ_START(name) struct OBJ_TYPE_2(name) {instance ins; struct OBJ_PARAM_2(name) param;
+#define OBJ_START(name) struct OBJ_TYPE_2(name) {instance data; struct OBJ_PARAM_2(name) param;
 #define OBJ_END };
 
 #define PARAM_START(name) struct OBJ_PARAM_2(name) {
