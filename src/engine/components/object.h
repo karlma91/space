@@ -36,6 +36,8 @@ struct object {
 	const size_t P_SIZE;
 	const object_info *info;
 
+	const int components_mask;
+
 	const struct {
 		void (*init)(instance *obj);
 		void (*on_create)(instance *obj);
@@ -50,14 +52,23 @@ struct instance {
 	const object *TYPE;
 
 	int active_components;
+
+	//TODO create a components system?
 	struct {
-		hpbar hp;
+		hpbar *hp_bar;
+		int *score;
+		float *damage;
+		int body_count;
+		cpBody *(bodies[5]);
 	} components;
 
 	int alive;
 	int instance_id;
 	int disabled;
 	int destroyed;
+
+	float x,y,hs,vs;
+
 	cpBody *body;
 	sprite spr;
 

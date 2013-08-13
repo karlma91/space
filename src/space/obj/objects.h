@@ -7,6 +7,7 @@
 
 #include "../../engine/components/object.h"
 
+/*
 typedef struct { //TODO update for object system V3
 	hpbar *hp_bar;
 	int *score;
@@ -14,6 +15,7 @@ typedef struct { //TODO update for object system V3
 	int body_count;
 	cpBody *(bodies[5]);
 } object_component_pointers;
+*/
 
 /* COLLISION LAYERS */
 extern int LAYER_PLAYER;

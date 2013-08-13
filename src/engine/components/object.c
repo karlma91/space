@@ -57,11 +57,21 @@ instance *instance_create(object *type, const void *param, float x, float y, flo
 {
 	instance *ins = instance_super_malloc(type);
 
+	ins->x = x;
+	ins->y = y;
+	ins->hs = hs;
+	ins->vs = vs;
+
+	/* sets default values */
+	ins->alive = 1;
+	ins->active_components = type->components_mask;
+
 	if (param) {
 		instance_set_param(ins, param);
 	}
 
 	instance_add(ins);
+
 	type->call.on_create(ins);
 
 	return ins;
