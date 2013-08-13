@@ -5,6 +5,7 @@
 //#include "states/stations.h"
 #include "states/leveldone.h"
 #include "states/levelscreen.h"
+#include "obj/object_types.h"
 //#include "states/pause.h"
 //#include "states/upgrades.h"
 //#include "states/leveldone.h"
@@ -221,7 +222,7 @@ void game_init()
 	game_particles();
 	game_font();
 
-	//object_types_init();
+	object_types_init();
 	level_init();
 
     game_touchables();

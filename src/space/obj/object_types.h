@@ -12,17 +12,13 @@
 
 void object_types_init();
 
-/* declaration of all object_id structs */
+/* OBJECT DECLARATION */
 OBJECT_DECLARE(template);
 
-/* object declarations */
-OBJ_STRUCT_START
-	/* parameters */
-	int a;
-	int b;
 
-	float x, y;
-} obj_template;
+/* OBJECT DEFINITIONS */
+PARAM_START(template) int a; int b; PARAM_END
+OBJ_START(template) float x, y; OBJ_END
 
 
 #endif /* OBJECT_TYPES_H_ */

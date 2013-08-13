@@ -45,10 +45,13 @@ STATE_ID state_space;
  */
 
 static void SPACE_draw();
-static void update_objects(object_data *obj);
-static void render_objects(object_data *obj);
+static void update_instances(instance *);
+static void render_instances(instance *);
 static void update_camera_zoom(int mode);
 static void update_camera_position();
+
+static void update_objects(object_data *obj);
+static void render_objects(object_data *obj);
 
 int space_rendering_map = 0;
 
@@ -249,9 +252,6 @@ static void post_update()
 	update_camera_position();
 }
 
-static void empty(){
-
-}
 
 /**
  * Updates all the objects in objects and in chipmunk
@@ -262,6 +262,7 @@ static void update_all()
 	accumulator += dt;
 
 	objects_iterate(update_objects);
+	instance_iterate(update_instances);
 
 	particles_update(dt);
 
@@ -273,10 +274,18 @@ static void update_all()
 	}
 }
 
+static void update_instances(instance *ins)
+{
+	instance_update(ins);
+}
 
-/**
- * Used by object_iterate to update all objects
- */
+static void render_instances(instance *ins)
+{
+	instance_render(ins);
+}
+
+
+#warning update_objects: deprecated method!
 static void update_objects(object_data *obj)
 {
 	int moved_left = 0;
@@ -332,9 +341,6 @@ static void update_objects(object_data *obj)
 	}
 }
 
-/**
- * draws everything twice to make infinite loop world
- */
 static void draw()
 {
 	SPACE_draw();
@@ -424,6 +430,7 @@ static void SPACE_draw()
 	setTextAngle(0);
 	/* draw all objects */
 	objects_iterate(render_objects);
+	instance_iterate(render_instances);
 
 	/* draw particle effects */
 	particles_draw(dt);
@@ -565,6 +572,7 @@ void draw_gui()
 	}
 }
 
+#warning deprecated method render_objects!
 static void render_objects(object_data *obj)
 {
 	if((obj->body->p.x > current_camera->left - 200) && (obj->body->p.x < current_camera->right + 200)) {

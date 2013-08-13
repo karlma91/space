@@ -4,7 +4,6 @@
 #include "statesystem.h"
 #include "../data/llist.h"
 #include "../input/touch.h"
-#include "../components/object.h"
 
 #include "SDL_Log.h"
 #define MAX_INNER_STATES 10

@@ -38,14 +38,15 @@ int object_register(object *obj)
 	return id;
 }
 
-instance *instance_create(object *type, float x, float y, float hs, float vs)
+instance *instance_create(object *type, const void *param, float x, float y, float hs, float vs)
 {
 	instance *ins = instance_super_malloc(type);
 	instance_add(ins);
 	type->call.on_create(ins);
 
-	//TODO REMOVE TMP test
-	instance_remove(ins);
+	if (param) {
+		instance_set_param(ins, param);
+	}
 
 	return ins;
 }
@@ -103,6 +104,29 @@ void instance_super_free(instance *ins)
 #endif
 }
 
+struct instance_dummy {
+	instance ins;
+	struct {
+
+	} params;
+};
+
+int instance_set_param(instance *ins, const void *param)
+{
+	if (err_ins(ins)) {
+		SDL_Log("ERROR: instance_copy, instance not recognized!");
+		return 1;
+	} else if (!param) {
+		SDL_Log("ERROR: instance_copy, param == NULL");
+		return 1;
+	}
+
+	//int offset = sizeof *to;
+	size_t size = ins->TYPE->P_SIZE;
+	memcpy(&((struct instance_dummy *)ins)->params, param, size);
+
+	return 0;
+}
 
 /* add object into its corresponding list */
 void instance_add(instance* ins)

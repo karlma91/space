@@ -10,19 +10,6 @@
 
 #define OBJ_MAGIC_COOKIE 0xB305D7A2
 
-#define OBJ_TYPE_3( type ) \
-	obj_ ## type
-#define OBJ_TYPE_2( name ) \
-	OBJ_TYPE_3( name )
-
-#define OBJ_ID_3( id ) \
-	obj_id_ ## id
-#define OBJ_ID_2( name ) \
-	OBJ_ID_3( name )
-
-//#define INSTANCE_DATA_SIZE 1024;
-#define OBJ_STRUCT_START typedef struct {instance ins;
-
 void object_init();
 void object_clear();
 void object_destroy();
@@ -41,7 +28,9 @@ typedef struct { //TODO move: WARNING: exposed internal data structure
 struct object {
 	const int OBJ_IDENTIFIER;
 	const int ID;
+	const char *NAME;
 	const size_t SIZE;
+	const size_t P_SIZE;
 	const object_info *info;
 
 	const struct {
@@ -70,31 +59,53 @@ struct instance {
 
 }; /* per-instance variables */
 
+instance *instance_create(object *type, const void *param, float x, float y, float hs, float vs);
+instance *instance_super_malloc(object *type); //TODO hide from user?
+void instance_super_free(instance *);
 
-instance *instance_create(object *type, float x, float y, float hs, float vs);
-//object_create(obj_id id, cpVect pos, cpVect speed, argument struct *?);
+void instance_add(instance *);
+void instance_iterate(void (*f)(instance *));
+void instance_iterate_type(void (*f)(instance *), object *type);
+void instance_remove(instance *);
+int instance_set_param(instance *, const void *param);
 
-extern instance *instance_super_malloc(object *type); /* allocates and initializes a new instance of specified type*/
-extern void instance_super_free(instance *);
+void instance_nearest_x_two(instance *ins, object type, instance **left, instance **right, cpFloat *left_distance, cpFloat *right_distance);
+instance *instance_nearest(cpVect pos, object *type);
+instance *instance_first(object *type);
+instance *instance_n(object *type, int n);
+instance *instance_last(object *type);
+instance *instance_by_id(object *type, int instance_id);
 
-extern void instance_add(instance *);
-extern void instance_iterate(void (*f)(instance *));
-extern void instance_iterate_type(void (*f)(instance *), object *type);
-extern void instance_remove(instance *);
+#define instance_update(ins) ins->TYPE->call.on_update(ins)
+#define instance_render(ins) ins->TYPE->call.on_render(ins)
 
-extern void instance_nearest_x_two(instance *ins, object type, instance **left, instance **right, cpFloat *left_distance, cpFloat *right_distance);
-extern instance *instance_nearest(cpVect pos, object *type);
-extern instance *instance_first(object *type);
-extern instance *instance_n(object *type, int n);
-extern instance *instance_last(object *type);
-extern instance *instance_by_id(object *type, int instance_id);
-
-extern int instance_count(object *type);
-
+int instance_count(object *type);
 int object_register(object *obj);
 
+
+#define OBJ_TYPE_3( name ) obj_ ## name
+#define OBJ_TYPE_2( name ) OBJ_TYPE_3( name )
+
+#define OBJ_PARAM_3( name ) object_p_ ## name
+#define OBJ_PARAM_2( name ) OBJ_PARAM_3( name )
+
+#define OBJ_ID_3( name ) obj_id_ ## name
+#define OBJ_ID_2( name ) OBJ_ID_3( name )
+
+
 #define OBJECT_REGISTER(name) object_register (OBJ_ID_2(name))
-#define OBJECT_DECLARE(name) extern object *OBJ_ID_2(name)
+#define OBJECT_DECLARE(name) \
+	extern object *OBJ_ID_2(name); \
+	typedef struct OBJ_TYPE_2(name) OBJ_TYPE_2(name); \
+	typedef struct OBJ_PARAM_2(name) OBJ_PARAM_2(name)
+
+
+#define OBJ_START(name) struct OBJ_TYPE_2(name) {instance ins; struct OBJ_PARAM_2(name) param;
+#define OBJ_END };
+
+#define PARAM_START(name) struct OBJ_PARAM_2(name) {
+#define PARAM_END };
+#define PARAM_EMPTY(name) PARAM_START(name) PARAM_END
 
 #endif /* GENERAL_OBJECT_FUNCS */
 
@@ -103,7 +114,11 @@ int object_register(object *obj);
 #ifndef PER_OBJECT_CODEBLOCK
 #define PER_OBJECT_CODEBLOCK 1
 
+#define STRINGIFY_2(str) #str
+#define STRINGIFY(str) STRINGIFY_2(str)
+
 #define OBJ_TYPE OBJ_TYPE_2(OBJ_NAME)
+#define OBJ_PARAM_TYPE OBJ_PARAM_2(OBJ_NAME)
 #define OBJ_ID OBJ_ID_2(OBJ_NAME)
 
 static void on_create(OBJ_TYPE *obj);
@@ -114,9 +129,11 @@ static void on_destroy(OBJ_TYPE *obj);
 static object this = {
 	.OBJ_IDENTIFIER = OBJ_MAGIC_COOKIE,
 	.ID = -1,
+	.NAME = STRINGIFY(OBJ_NAME),
 	.SIZE = sizeof(OBJ_TYPE),
+	.P_SIZE = sizeof(OBJ_PARAM_TYPE),
 	.call = {
-		on_create,
+		(void (*)(void *)) on_create,
 		on_update,
 		on_render,
 		on_destroy
