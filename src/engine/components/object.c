@@ -25,7 +25,7 @@ int object_register(object_id *obj)
 	/* set read-only object info*/
 	*(int *)(&obj->ID) = id;
 
-	objects_meta = realloc(objects_meta, object_count * obj->ID);
+	objects_meta = realloc(objects_meta, object_count * sizeof(object_info));
 
 	obj->info = objects_meta + id;
 	objects_meta[id].obj = obj;

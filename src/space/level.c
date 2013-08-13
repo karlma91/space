@@ -21,7 +21,7 @@ static level_ship *worlds;
 
 static int (count[ID_COUNT]);
 static char (*(names[ID_COUNT]))[21];
-static void **(params[ID_COUNT]);
+static char *(params[ID_COUNT]);
 
 static int i;
 
@@ -38,18 +38,6 @@ static char buffer[FILE_BUFFER_SIZE];
 static int offset = 0;
 static int offset_add = 0;
 static int filesize = 0;
-
-/*
-int get_group_index(const char* group_name) {
-	int group_id;
-	for (group_id = 0; group_id < ID_COUNT; group_id++) {
-		if (strcasecmp(group_name, group_names[group_id]) == 0) {
-			return group_id;
-		}
-	}
-	return -1;
-}
-*/
 
 /** return sub_name's index in params, or -1 if not found  */
 int get_sub_index(const object_id *obj_id, const char* sub_name) {
@@ -165,53 +153,56 @@ int level_init()
 		strcpy(names[group_id][count[group_id]-1], subtype);
 
 		int expected = 0;
-		int paramsize = 0;
 		int obj_index = count[group_id] - 1;
 
 		/* add new sub object definition */
-		obj_param_tank tank;
-		obj_param_rocket rocket;
-		obj_param_turret turret;
-		obj_param_factory factory;
+		union {
+			obj_param_tank tank;
+			obj_param_rocket rocket;
+			obj_param_turret turret;
+			obj_param_factory factory;
+		} arg;
 
-		paramsize = obj_id->P_SIZE;
+		const int paramsize = obj_id->P_SIZE;
 
 		if (obj_id == obj_id_tank) {
 			expected = 3;
-			ret = sscanf(&buffer[offset], "%f %d %s%n\n", &tank.max_hp, &tank.score, &fname[0], &offset_add);
+			ret = sscanf(&buffer[offset], "%f %d %s%n\n", &arg.tank.max_hp, &arg.tank.score, &fname[0], &offset_add);
 			offset += offset_add;
 		} else if (obj_id == obj_id_turret) {
 			expected = 6;
-			ret = sscanf(&buffer[offset], "%f %d %f %f %d %s%n\n", &turret.max_hp, &turret.score, &turret.rot_speed, &turret.shoot_interval,&turret.burst_number, &fname[0], &offset_add);
+			ret = sscanf(&buffer[offset], "%f %d %f %f %d %s%n\n", &arg.turret.max_hp, &arg.turret.score, &arg.turret.rot_speed, &arg.turret.shoot_interval,&arg.turret.burst_number, &fname[0], &offset_add);
 			offset += offset_add;
-			turret.tex_id = texture_load(fname);
+			arg.turret.tex_id = texture_load(fname);
 		} else if (obj_id == obj_id_rocket) {
 			expected = 4;
-			ret = sscanf(&buffer[offset], "%f %d %s %f%n\n", &rocket.max_hp, &rocket.score, &fname[0], &rocket.force, &offset_add);
+			ret = sscanf(&buffer[offset], "%f %d %s %f%n\n", &arg.rocket.max_hp, &arg.rocket.score, &fname[0], &arg.rocket.force, &offset_add);
 			offset += offset_add;
-			rocket.tex_id = texture_load(fname);
+			arg.rocket.tex_id = texture_load(fname);
 		} else if (obj_id == obj_id_factory) {
 			expected = 7;
-			ret = sscanf(&buffer[offset], "%d %f %f %d %s %s %s%n\n", &factory.max_tanks, &factory.max_hp, &factory.spawn_delay, &factory.score, object_buf, buf, &fname[0], &offset_add);
+			ret = sscanf(&buffer[offset], "%d %f %f %d %s %s %s%n\n", &arg.factory.max_tanks, &arg.factory.max_hp, &arg.factory.spawn_delay, &arg.factory.score, object_buf, buf, &fname[0], &offset_add);
 			offset += offset_add;
 
-			factory.sprite_id = sprite_link(fname);
+			arg.factory.sprite_id = sprite_link(fname);
 
 			int sub_id = -1;
-			/* find tank subtype */
-			if(strcmp(object_buf,"TANK") == 0){
-				sub_id = get_sub_index(obj_id_tank,buf);
-				factory.type = obj_id_tank;
-			}else{
-				sub_id = get_sub_index(obj_id_rocket,buf);
-				factory.type = obj_id_rocket;
-			}
-			if (sub_id == -1) {
-				SDL_Log("ERROR while reading tank factory data, TANK %s not defined before\n", buf);
+			/* find arg.tank subtype */
+			object_id * arg_obj = object_by_name(object_buf);
+			if (arg_obj){
+				sub_id = get_sub_index(arg_obj,buf);
+				arg.factory.type = arg_obj;
+			} else {
+				SDL_Log("ERROR while reading factory data, object '%s' not defined\n", object_buf);
 				exit(7);
 			}
 
-			factory.param = &params[factory.type->ID][sub_id];
+			if (sub_id == -1) {
+				SDL_Log("ERROR while reading factory data, TANK %s not defined before\n", buf);
+				exit(7);
+			}
+
+			arg.factory.param = params[arg.factory.type->ID] + arg.factory.type->P_SIZE * sub_id;
 		}
 
 		/* check if all expected parameters were defined */
@@ -224,15 +215,8 @@ int level_init()
 		params[group_id] = realloc(params[group_id], paramsize * count[group_id]);
 
 		/* store new param into current array */
-		if (obj_id == obj_id_tank) {
-			((obj_param_tank *)params[group_id])[obj_index] = tank; break;
-		} else if (obj_id == obj_id_turret) {
-			((obj_param_turret *)params[group_id])[obj_index] = turret; break;
-		} else if (obj_id == obj_id_rocket) {
-			((obj_param_rocket *)params[group_id])[obj_index] = rocket; break;
-		} else if (obj_id == obj_id_factory) {
-			((obj_param_factory *)params[group_id])[obj_index] = factory; break;
-		}
+		char *to = params[group_id] + paramsize * obj_index;
+		memcpy(to, &arg, paramsize);
 	}
 
 	SDL_Log("DEBUG: Finished parsing Game Object Definitions");
@@ -327,7 +311,8 @@ level *level_load(int space_station, int deck)
 		int sub_id = get_sub_index(obj_id, subtype);
 		SDL_Log("Adding object: %s_%s x=%d\n", group, subtype, x);
 
-		instance_create(obj_id, &params[obj_id->ID][sub_id],x,0,0,0);
+		void* args = params[obj_id->ID] + obj_id->P_SIZE * sub_id;
+		instance_create(obj_id, args,x,0,0,0);
 	}
 
 	SDL_Log("DEBUG: Finished adding objects to level");
