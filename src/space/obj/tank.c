@@ -147,8 +147,10 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	}
 
 	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX) && se_distance_to_player(tank->data.body->p.x)<tank->max_distance){
-		//cpVect shoot_angle = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
-		instance_create(obj_id_bullet, NULL, 0,0,0,0);
+		cpVect shoot_vel = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
+		shoot_vel = cpvmult(shoot_vel,700);
+
+		instance_create(obj_id_bullet, NULL, tank->data.body->p.x, tank->data.body->p.y, shoot_vel.x, shoot_vel.y);
 		//object_create_bullet(tank->data.body->p,shoot_angle ,tank->data.body->v,obj_id_bullet);
 		sound_play(SND_LASER_2);
 		tank->timer = 0;
