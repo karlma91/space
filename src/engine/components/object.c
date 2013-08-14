@@ -10,6 +10,14 @@
 
 #define INS_MAGIC_COOKIE 0xA2F4C681
 
+//TODO split active instances from list of objects?
+typedef struct { //TODO move: WARNING: exposed internal data structure
+	object_id *obj;
+	int count;
+	LList active;
+	LList pool;
+} object_info;
+
 int object_count = 0;
 object_info *objects_meta = NULL;
 
@@ -27,7 +35,6 @@ int object_register(object_id *obj)
 
 	objects_meta = realloc(objects_meta, object_count * sizeof(object_info));
 
-	obj->info = objects_meta + id;
 	objects_meta[id].obj = obj;
 	objects_meta[id].count = 0;
 	objects_meta[id].active = llist_create();
@@ -51,6 +58,11 @@ object_id *object_by_name(const char *obj_name)
 	}
 
 	return NULL;
+}
+
+LList object_get_instances(const object_id *type)
+{
+	return objects_meta[type->ID].active;
 }
 
 instance *instance_create(object_id *type, const void *param, float x, float y, float hs, float vs)

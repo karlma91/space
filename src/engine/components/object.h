@@ -19,21 +19,12 @@ void object_destroy();
 typedef struct instance instance;
 typedef struct object object_id;
 
-//TODO split active instances from list of objects?
-typedef struct { //TODO move: WARNING: exposed internal data structure
-	object_id *obj;
-	int count;
-	LList active;
-	LList pool;
-} object_info;
-
 struct object {
 	const int OBJ_IDENTIFIER;
 	const int ID;
 	const char *NAME;
 	const size_t SIZE;
 	const size_t P_SIZE;
-	const object_info *info;
 
 	const int components_mask;
 
@@ -96,7 +87,7 @@ instance *instance_by_id(object_id *type, int instance_id);
 int instance_count(object_id *type);
 int object_register(object_id *obj);
 object_id *object_by_name(const char *obj_name);
-
+LList object_get_instances(const object_id *type);
 
 #define OBJ_TYPE_3( name ) obj_ ## name
 #define OBJ_TYPE_2( name ) OBJ_TYPE_3( name )

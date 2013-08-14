@@ -4,6 +4,7 @@
  *  Created on: 11. juli 2013
  *      Author: Mathias
  */
+#include <stdio.h>
 
 #include "leveldone.h"
 
