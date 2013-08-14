@@ -10,6 +10,14 @@
 
 #define INS_MAGIC_COOKIE 0xA2F4C681
 
+//TODO split active instances from list of objects?
+typedef struct { //TODO move: WARNING: exposed internal data structure
+	object_id *obj;
+	int count;
+	LList active;
+	LList pool;
+} object_info;
+
 int object_count = 0;
 object_info *objects_meta = NULL;
 
