@@ -25,6 +25,7 @@ OBJECT_DECLARE(tank);
 OBJECT_DECLARE(factory);
 OBJECT_DECLARE(turret);
 OBJECT_DECLARE(rocket);
+OBJECT_DECLARE(robotarm);
 
 /*
  * OBJECT DEFINITIONS
@@ -159,6 +160,21 @@ OBJ_START(rocket)
 	float rot_speed;
 	hpbar hp_bar;
 	emitter *flame;
+OBJ_END
+
+PARAM_START(robotarm)
+	float max_hp;
+PARAM_END
+OBJ_START(robotarm)
+	cpShape *shape;
+	float timer;
+	float hp;
+	int segments;
+	float seg_length;
+	float *x;
+	float *y;
+	float *angle;
+	hpbar hp_bar;
 OBJ_END
 
 #endif /* OBJECT_TYPES_H_ */
