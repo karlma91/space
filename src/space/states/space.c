@@ -670,10 +670,10 @@ void space_init_level(int space_station, int deck)
 			player->gun_level = 3;
 		}
 	}
-
 	//TODO manage persistent objects(like player) in a better way, instead of removing and then re-adding
 	instance_clear();
 	instance_add((instance*)player);
+	instance_create(obj_id_robotarm, NULL, 0,0,0,0);
 
 	/* set player specs based on selected upgrades */
 	player->force = engines[engine_index].force;

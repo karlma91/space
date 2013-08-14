@@ -27,7 +27,7 @@ int object_register(object_id *obj)
 
 	objects_meta = realloc(objects_meta, object_count * sizeof(object_info));
 
-	obj->info = objects_meta + id;
+	obj->info = &objects_meta[id];
 	objects_meta[id].obj = obj;
 	objects_meta[id].count = 0;
 	objects_meta[id].active = llist_create();

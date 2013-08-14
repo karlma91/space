@@ -13,4 +13,5 @@ void object_types_init()
 	OBJECT_REGISTER(tank);
 	OBJECT_REGISTER(turret);
 	OBJECT_REGISTER(rocket);
+	OBJECT_REGISTER(robotarm);
 }
