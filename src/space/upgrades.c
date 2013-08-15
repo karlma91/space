@@ -37,7 +37,7 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 };
 
 upg_armor armors[ARMOR_UPGRADES] = {
-	{.name = "ELEMENTARY ARMOR", .max_hp = 200, .mass = 1, .shield = 0, .shield_regen = 0, .price = 0, .spr_id = &SPRITE_PLAYER},
+	{.name = "BASIC ARMOR", .max_hp = 200, .mass = 1, .shield = 0, .shield_regen = 0, .price = 0, .spr_id = &SPRITE_PLAYER},
 	{.name = "ELEPHANT ARMOR", .max_hp = 750, .mass = 3, .shield = 0, .shield_regen = 0, .price = 13200, .spr_id = &SPRITE_PLAYER}
 };
 

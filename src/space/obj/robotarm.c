@@ -26,8 +26,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	robotarm->hp = robotarm->param.max_hp;
 	robotarm->timer = 0;
 
-	robotarm->segments = 8;
-	robotarm->seg_length = 140;
+	robotarm->segments = 16;
+	robotarm->seg_length = 70;
 
 	robotarm->x = malloc(sizeof(int)*robotarm->segments);
 	robotarm->y = malloc(sizeof(int)*robotarm->segments);
@@ -102,7 +102,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		v2.y = robotarm->y[i+1];
 		se_rect2arch(&v1);
 		se_rect2arch(&v2);
-		draw_glow_line(v1.x,v1.y,v2.x,v2.y, 20);
+		draw_glow_line(v1.x,v1.y,v2.x,v2.y, 50);
 	}
 }
 
