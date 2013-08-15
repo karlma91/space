@@ -822,8 +822,10 @@ void space_init()
 
     stars_init();
 
-    joy_p1_left = joystick_create(0, 120, 2, -GAME_WIDTH/2 + 170, - GAME_HEIGHT/2 + 150, 340, 300, SPRITE_JOYSTICK);
-    joy_p1_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, - GAME_HEIGHT/2 + 150, 340, 300, SPRITE_JOYSTICK);
+    float h = GAME_HEIGHT*0.8;
+
+    joy_p1_left = joystick_create(0, 120, 2, -GAME_WIDTH/2 + 170, -0.1*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p1_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, -0.1*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
 
     statesystem_register_touchable(this, joy_p1_left);
     statesystem_register_touchable(this, joy_p1_right);
@@ -851,13 +853,17 @@ void input()
 {
 #if !GOT_TOUCH
 	/* update joystick positions */
-	int axis_x = keys[KEY_RIGHT_1] - keys[KEY_LEFT_1];
-	int axis_y = keys[KEY_UP_1] - keys[KEY_DOWN_1];
-	joystick_axis(joy_p1_left, axis_x, axis_y);
+	if (!joy_p1_left->pressed) {
+		int axis_x = keys[KEY_RIGHT_1] - keys[KEY_LEFT_1];
+		int axis_y = keys[KEY_UP_1] - keys[KEY_DOWN_1];
+		joystick_axis(joy_p1_left, axis_x, axis_y);
+	}
 
-	axis_x = keys[KEY_RIGHT_2] - keys[KEY_LEFT_2];
-	axis_y = keys[KEY_UP_2] - keys[KEY_DOWN_2];
-	joystick_axis(joy_p1_right, axis_x, axis_y);
+	if (!joy_p1_right->pressed) {
+		int axis_x = keys[KEY_RIGHT_2] - keys[KEY_LEFT_2];
+		int axis_y = keys[KEY_UP_2] - keys[KEY_DOWN_2];
+		joystick_axis(joy_p1_right, axis_x, axis_y);
+	}
 
 	/*
 	 * Camera modes + F11 = timeout + F8 = reload particles (broken)

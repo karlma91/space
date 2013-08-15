@@ -17,7 +17,7 @@
 
 //FIXME one controller cancels the other
 
-joystick *joystick_create(int persistent, float radius, float min_radius, float center_x, float center_y, float width, float height, SPRITE_ID spr_id)
+joystick *joystick_create(int persistent, float radius, float min_radius, float center_x, float center_y, float width, float height, SPRITE_ID spr_back, SPRITE_ID spr_front)
 {
 	joystick *stick = calloc(1, sizeof *stick);
 
@@ -37,9 +37,12 @@ joystick *joystick_create(int persistent, float radius, float min_radius, float 
 	joystick_axis(stick,0,0);
 	joystick_release(stick);
 
-	joystick_place(stick, center_x, center_y);
+	joystick_place(stick, center_x, center_y - height/2.1 + radius);
+	stick->draw_x = stick->pos_x;
+	stick->draw_y = stick->pos_y;
 
-	sprite_create(&(stick->spr), spr_id, radius*2, radius*2, 0);
+	sprite_create(&(stick->spr_back), spr_back, radius*2, radius*2, 0);
+	sprite_create(&(stick->spr_front), spr_front, radius, radius*2, 0);
 
 	return stick;
 }
@@ -106,22 +109,38 @@ void joystick_axis(joystick *stick, float x, float y)
 	stick->amplitude = hypotf(y,x);
 }
 
+#define STCK_FRCT 0.7
+#define PULL_FRCT 0.9
 static void update(touchable * stick_id)
 {
 	joystick *stick = (joystick *) stick_id;
 
+	float x = stick->draw_axx * STCK_FRCT + stick->axis_x * (1-STCK_FRCT);
+	stick->draw_axx = x;
+
+	float y = stick->draw_axy * STCK_FRCT + stick->axis_y * (1-STCK_FRCT);
+	stick->draw_axy = y;
+
+	float dir = (x || y) ? atan2f(y,x) : 0;
+	stick->draw_dir = dir < 0 ? dir + 2*M_PI : dir;
+	stick->draw_amp = hypotf(y,x);
+
+	stick->draw_x = stick->draw_x * PULL_FRCT + stick->pos_x * (1-PULL_FRCT);
+	stick->draw_y = stick->draw_y * PULL_FRCT + stick->pos_y * (1-PULL_FRCT);
 }
 
 static void render(touchable * stick_id)
 {
 	joystick *stick = (joystick *) stick_id;
 
-	cpVect btn_pos = {stick->pos_x,stick->pos_y};
+	cpVect btn_pos = {stick->draw_x,stick->draw_y};
 
 	draw_color4f(1,1,1,1);
 
-	sprite_set_index_normalized(&(stick->spr), stick->amplitude);
-	sprite_render(&(stick->spr), &btn_pos, stick->direction * 180 / M_PI - 90);
+	sprite_render(&(stick->spr_back), &btn_pos, 0);
+
+	sprite_set_index_normalized(&(stick->spr_front), stick->draw_amp);
+	sprite_render(&(stick->spr_front), &btn_pos, stick->draw_dir * 180 / M_PI - 90);
 
 	//draw_flush_simple();
 }

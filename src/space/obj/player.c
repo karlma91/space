@@ -224,10 +224,12 @@ static void action_shoot(obj_player *player)
 		for(i=0; i < player->gun_level;i++){
 			//obj_bullet *b = object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
 			cpVect shoot_vel = cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i)));
-			shoot_vel = cpvmult(shoot_vel, 300);
+			shoot_vel = cpvmult(shoot_vel, 1400);
+			shoot_vel = cpvadd(shoot_vel, player->data.body->v);
+			cpVect shoot_pos = player->data.body->p;
 
 			obj_param_bullet friendly_bullet = {.friendly = 1};
-			obj_bullet *b = (obj_bullet *) instance_create(obj_id_bullet, &friendly_bullet, player->data.body->p.x, player->data.body->p.y, shoot_vel.x, shoot_vel.y);
+			obj_bullet *b = (obj_bullet *) instance_create(obj_id_bullet, &friendly_bullet, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
 
 			b->damage = player->bullet_dmg;
 		}

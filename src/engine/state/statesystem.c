@@ -238,6 +238,33 @@ void statesystem_push_event(SDL_Event *event)
 	llist_end_loop(list);
 }
 
+void statesystem_call_update(STATE_ID state_id)
+{
+	State *state = (State *) state_id;
+		if (state->call.pre_update) {
+			state->call.pre_update();
+	}
+
+	/*
+	LList list = state->touch_objects;
+	llist_begin_loop(list);
+	while (llist_hasnext(list)) {
+		void *touchy = llist_next(list);
+		((touch_calls *) (*(void **) touchy))->update(touchy);
+	}
+	llist_end_loop(list);
+
+	if (state->inner_states > 0
+			&& state->inner_update[state->current_inner_state]) {
+		state->inner_update[state->current_inner_state]();
+	}
+	*/
+
+	if (state->call.post_update) {
+		state->call.post_update();
+	}
+}
+
 STATE_ID statesystem_get_render_state()
 {
 	return state_beeing_rendered;

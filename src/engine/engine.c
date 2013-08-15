@@ -30,7 +30,7 @@
 
 #include "../space/game.h" //TODO remove dependency
 
-#define GAME_VERSION "PRE-ALPHA 8.7" //TMP placement for this define
+#define GAME_VERSION "PRE-ALPHA 8.8" //TMP placement for this define
 
 #define FPS_LIMIT 1
 

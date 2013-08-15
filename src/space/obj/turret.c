@@ -98,7 +98,11 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	if(turret->shooting && turret->timer > turret->rate && se_distance_to_player(turret->data.body->p.x) < turret->max_distance){
 		turret->bullets += 1;
 
-		instance_create(obj_id_bullet, NULL, 0,0,0,0);
+		cpVect shoot_pos = turret->data.body->p;
+		cpVect shoot_vel = cpvforangle(turret->barrel_angle);
+		shoot_vel = cpvmult(shoot_vel, 1350);
+
+		instance_create(obj_id_bullet, NULL, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
 
 		//TODO add the following data as params to bullet
 		//turret->data.body->p

@@ -48,6 +48,7 @@ void statesystem_push_state(STATE_ID state);
 void statesystem_pop_state();
 void statesystem_set_state(STATE_ID state);
 
+void statesystem_call_update(STATE_ID state_id);
 void statesystem_push_event(SDL_Event *event);
 
 void statesystem_register_touchable(STATE_ID state, void *touchable);

@@ -53,7 +53,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	tank->max_distance = 800;
 
-	cpFloat start_height = 30; // default start height (if spawned without factory)
+	cpFloat start_height = 80; // default start height (if spawned without factory)
 
 	if (tank->factory){
 		tank->factory_id = tank->factory->data.instance_id;
@@ -148,7 +148,8 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX) && se_distance_to_player(tank->data.body->p.x)<tank->max_distance){
 		cpVect shoot_vel = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
-		shoot_vel = cpvmult(shoot_vel,700);
+		shoot_vel = cpvmult(shoot_vel,1400);
+		shoot_vel = cpvadd(shoot_vel, player->data.body->v);
 
 		instance_create(obj_id_bullet, NULL, tank->data.body->p.x, tank->data.body->p.y, shoot_vel.x, shoot_vel.y);
 		//object_create_bullet(tank->data.body->p,shoot_angle ,tank->data.body->v,obj_id_bullet);

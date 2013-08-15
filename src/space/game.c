@@ -54,6 +54,7 @@ SPRITE_ID SPRITE_RETRY;
 SPRITE_ID SPRITE_NEXT;
 SPRITE_ID SPRITE_HOME;
 SPRITE_ID SPRITE_JOYSTICK;
+SPRITE_ID SPRITE_JOYSTICK_BACK;
 /* end of global sprite definitions*/
 
 /* global emitter */
@@ -146,21 +147,22 @@ void game_config()
 
 void game_sprites()
 {
-	SPRITE_PLAYER   	= sprite_link("player");
-	SPRITE_PLAYER_GUN  	= sprite_link("player_gun");
-	SPRITE_GLOW_DOT  	= sprite_link("glow_dot");
-	SPRITE_BUTTON   	= sprite_link("button");
-	SPRITE_BUTTON_PAUSE = sprite_link("button_pause");
-	SPRITE_TANK_BODY  	= sprite_link("tank_body");
-	SPRITE_TANK_WHEEL  	= sprite_link("tank_wheel");
-	SPRITE_TANK_TURRET  = sprite_link("tank_turret");
-	SPRITE_STATION_01  	= sprite_link("station_01");
-	SPRITE_STAR  	    = sprite_link("star");
-	SPRITE_GEAR  	    = sprite_link("gear");
-	SPRITE_HOME  	    = sprite_link("home");
-	SPRITE_RETRY  	    = sprite_link("retry");
-	SPRITE_NEXT  	    = sprite_link("next");
-	SPRITE_JOYSTICK     = sprite_link("joystick");
+	SPRITE_PLAYER   	 = sprite_link("player");
+	SPRITE_PLAYER_GUN  	 = sprite_link("player_gun");
+	SPRITE_GLOW_DOT  	 = sprite_link("glow_dot");
+	SPRITE_BUTTON   	 = sprite_link("button");
+	SPRITE_BUTTON_PAUSE  = sprite_link("button_pause");
+	SPRITE_TANK_BODY  	 = sprite_link("tank_body");
+	SPRITE_TANK_WHEEL  	 = sprite_link("tank_wheel");
+	SPRITE_TANK_TURRET   = sprite_link("tank_turret");
+	SPRITE_STATION_01  	 = sprite_link("station_01");
+	SPRITE_STAR  	     = sprite_link("star");
+	SPRITE_GEAR  	     = sprite_link("gear");
+	SPRITE_HOME  	     = sprite_link("home");
+	SPRITE_RETRY  	     = sprite_link("retry");
+	SPRITE_NEXT  	     = sprite_link("next");
+	SPRITE_JOYSTICK      = sprite_link("joystick");
+	SPRITE_JOYSTICK_BACK = sprite_link("joystick_back");
 }
 
 void game_particles()

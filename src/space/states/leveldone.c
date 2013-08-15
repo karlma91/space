@@ -47,6 +47,7 @@ static void on_enter()
 
 static void pre_update()
 {
+	statesystem_call_update(state_space);
 }
 
 static void post_update()
@@ -58,7 +59,7 @@ static void draw()
 	draw_color4f(0,0,0,0.8);
 	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
 
-	//TODO finn ut om spiller d¿de eller ikke, istedenfor Œ bruke level_star_count
+	//TODO finn ut om spiller dï¿½de eller ikke, istedenfor ï¿½ bruke level_star_count
 	if (level_star_count) {
 		draw_color4f(1,1,1,1);
 		setTextAlign(TEXT_CENTER);
