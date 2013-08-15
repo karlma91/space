@@ -47,6 +47,9 @@ static void render_instances(instance *);
 static void update_camera_zoom(int mode);
 static void update_camera_position();
 
+static void sticks_init();
+static void sticks_hide();
+
 int space_rendering_map = 0;
 
 static button btn_pause;
@@ -117,12 +120,33 @@ static float state_timer = 0;
  * Inner state functions
  */
 
+#define QUICK_ENTER 0
+
 static void level_start()
 {
 	game_time = 0;
-	if(state_timer > 1.5){
+#if QUICK_ENTER
+	state_timer = 1.6;
+#endif
+
+	int start;
+	int p1_ready = joy_p1_left->pressed && joy_p1_right->pressed;
+	int p2l = joy_p2_left->pressed;
+	int p2r = joy_p2_right->pressed;
+
+	if (p1_ready && p2l && p2r) {
+		multiplayer = 1;
+		start = 1;
+	} else {
+		multiplayer = 0;
+	}
+
+	start = (p1_ready && (!(p2l || p2r))) || (!GOT_TOUCH && (state_timer > 1.5));
+
+	if (start) {
 		obj_player *player = (obj_player*)instance_first(obj_id_player);
 		player->disable = 0;
+		sticks_init();
 		change_state(LEVEL_RUNNING);
 	}
 }
@@ -155,6 +179,8 @@ static void level_player_dead()
 	if (state_timer > 1 && !tmp_atom) {
 		tmp_atom = 1;
 		lvl_cleared=0;
+		sticks_hide();
+
 		leveldone_status(0, player->score, game_time);
 		statesystem_push_state(state_leveldone);
 	} else {
@@ -177,6 +203,7 @@ static void level_cleared()
 		player->score += score_bonus; //Time bonus (75 * sec left)
 
 		lvl_cleared=1;
+		sticks_hide();
 
 		//TODO set star rating based on missions
 		leveldone_status(1 + player->score / (4000.0 + 1000 * currentlvl->deck), player->score, game_time);
@@ -467,82 +494,104 @@ void draw_gui()
 
 	obj_player *player = ((obj_player*)instance_first(obj_id_player));
 
-	/* simple score animation */
-	char score_temp[20];
-	static int score_anim = 0;
-	static int score_adder = 1;
-	if (score_anim + score_adder < player->score) {
-		score_anim += score_adder;
-		score_adder += 11;
-	} else {
-		score_anim = player->score;
-		score_adder = 1;
-	}
-	sprintf(score_temp,"%d",score_anim);
-	draw_color4f(0,0,0,1);
-	font_drawText(-GAME_WIDTH/2+20+4,GAME_HEIGHT/2 - 26-4,score_temp);
-	draw_color4f(1,1,1,1);
-	font_drawText(-GAME_WIDTH/2+20,GAME_HEIGHT/2 - 26,score_temp);
+	if (gamestate != LEVEL_START) {
+		/* simple score animation */
+		char score_temp[20];
+		static int score_anim = 0;
+		static int score_adder = 1;
+		if (score_anim + score_adder < player->score) {
+			score_anim += score_adder;
+			score_adder += 11;
+		} else {
+			score_anim = player->score;
+			score_adder = 1;
+		}
+		sprintf(score_temp,"%d",score_anim);
+		draw_color4f(0,0,0,1);
+		font_drawText(-GAME_WIDTH/2+20+4,GAME_HEIGHT/2 - 26-4,score_temp);
+		draw_color4f(1,1,1,1);
+		font_drawText(-GAME_WIDTH/2+20,GAME_HEIGHT/2 - 26,score_temp);
 
-	draw_color4f(1,0,0,1);
-	setTextSize(20);
-	char goals_left[100];
-	sprintf(goals_left, "OBJEKTER: %d",
-			instance_count(obj_id_factory)+
-			instance_count(obj_id_turret)+
-			instance_count(obj_id_tank));
-	font_drawText(-GAME_WIDTH/2+20,GAME_HEIGHT/2 - 100,goals_left);
+		draw_color4f(1,0,0,1);
+		setTextSize(20);
+		char goals_left[100];
+		sprintf(goals_left, "OBJEKTER: %d",
+				instance_count(obj_id_factory)+
+				instance_count(obj_id_turret)+
+				instance_count(obj_id_tank));
+		font_drawText(-GAME_WIDTH/2+20,GAME_HEIGHT/2 - 100,goals_left);
 
-	draw_color4f(1,1,1,1);
-	setTextSize(20);
-	char particles_temp[20];
-	char particles2_temp[20];
-	char particles3_temp[20];
-	sprintf(particles_temp,"%d",particles_active);
-	sprintf(particles2_temp,"%d",available_particle_counter);
-	sprintf(particles3_temp,"%d",(available_particle_counter + particles_active));
-	//font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,particles_temp);
-	//font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles2_temp);
-	//font_drawText(-WIDTH/2+20,HEIGHT/2 - 180,particles3_temp);
+		//draw_color4f(1,1,1,1);
+		//setTextSize(20);
+		//char particles_temp[20];
+		//char particles2_temp[20];
+		//char particles3_temp[20];
+		//sprintf(particles_temp,"%d",particles_active);
+		//sprintf(particles2_temp,"%d",available_particle_counter);
+		//sprintf(particles3_temp,"%d",(available_particle_counter + particles_active));
+		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,particles_temp);
+		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles2_temp);
+		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 180,particles3_temp);
 
-	char pos_temp[20];
-	sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->data.body->p.x,player->data.body->p.y);
-	//font_drawText(-WIDTH/2+15,-HEIGHT/2+12,pos_temp);
+		//char pos_temp[20];
+		//sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->data.body->p.x,player->data.body->p.y);
+		//font_drawText(-WIDTH/2+15,-HEIGHT/2+12,pos_temp);
 
-	setTextAlign(TEXT_RIGHT);
-	//font_drawText(WIDTH/2-25,-HEIGHT/2+15,game_state_names[gamestate]);
+		//setTextAlign(TEXT_RIGHT);
+		//font_drawText(WIDTH/2-25,-HEIGHT/2+15,game_state_names[gamestate]);
 
-	draw_color4f(1,1,1,1);
-	setTextSize(15);
-	char level_temp[20];
-	setTextAlign(TEXT_CENTER);
-	//		sprintf(level_temp,"STATION: %d DECK: %d", currentlvl->station, currentlvl->deck);
-	sprintf(level_temp,"LEVEL %d", currentlvl->deck);
-	font_drawText(0, -GAME_HEIGHT/2+24, level_temp);
+		draw_color4f(1,1,1,1);
+		setTextSize(15);
+		char level_temp[20];
+		setTextAlign(TEXT_CENTER);
+		//		sprintf(level_temp,"STATION: %d DECK: %d", currentlvl->station, currentlvl->deck);
+		sprintf(level_temp,"LEVEL %d", currentlvl->deck);
+		font_drawText(0, -GAME_HEIGHT/2+24, level_temp);
 
-	setTextAlign(TEXT_RIGHT);
+		setTextAlign(TEXT_RIGHT);
 
 #if !ARCADE_MODE
-	font_drawText(GAME_WIDTH/2 - 15, GAME_HEIGHT/2 - 20, fps_buf);
+		font_drawText(GAME_WIDTH/2 - 15, GAME_HEIGHT/2 - 20, fps_buf);
 #endif
+		char time_temp[20];
+		font_time2str(time_temp, game_time);
 
-	char time_temp[20];
-	font_time2str(time_temp, game_time);
+		setTextSize(40);
+		setTextAlign(TEXT_CENTER);
 
-	setTextSize(40);
-	setTextAlign(TEXT_CENTER);
-
-	draw_color4f(0,0,0,1);
-	font_drawText(4, GAME_HEIGHT/2 - 29 - 4, time_temp);
-	draw_color4f(1,1,1,1);
-	font_drawText(0, GAME_HEIGHT/2 - 29, time_temp);
+		draw_color4f(0,0,0,1);
+		font_drawText(4, GAME_HEIGHT/2 - 29 - 4, time_temp);
+		draw_color4f(1,1,1,1);
+		font_drawText(0, GAME_HEIGHT/2 - 29, time_temp);
+	}
 
 	switch(gamestate) {
 	case LEVEL_START:
-		setTextSize(60);
 		draw_color4f(1,1,1,1);
 		setTextAlign(TEXT_CENTER);
+
+#if GOT_TOUCH
+		setTextSize(40);
+		if (((int)state_timer)%2) {
+			font_drawText(0, 0, "TOUCH JOYSTICKS");
+		}
+		setTextSize(25);
+		setTextAngle(90);
+		font_drawText(GAME_WIDTH/2-100, 0, "CO-OP PLAYER 2");
+		setTextAngle(270);
+		font_drawText(-GAME_WIDTH/2+100, 0, "CO-OP PLAYER 1");
+
+#define STR_SPACE_START "STEER - SINGLE PLAY - SHOOT"
+		setTextAngle(0);
+		setTextSize(25);
+		draw_color4f(0,0,0,1);
+		font_drawText(4, -GAME_HEIGHT/2+110-4, STR_SPACE_START);
+		draw_color4f(1,1,1,1);
+		font_drawText(0, -GAME_HEIGHT/2+110, STR_SPACE_START);
+#else
+		setTextSize(70);
 		font_drawText(0, 0, "GET READY!");
+#endif
 		/* no break */
 	case LEVEL_RUNNING:
 		break;
@@ -646,12 +695,43 @@ void drawStars()
 	draw_pop_matrix();
 }
 
-void space_init_level(int space_station, int deck)
-{
+
+static void sticks_init() {
 	joystick_release(joy_p1_left);
 	joystick_release(joy_p1_right);
+	joystick_release(joy_p2_left);
+	joystick_release(joy_p2_right);
 
+	((touchable *)joy_p1_left)->visible = 1;
+	((touchable *)joy_p1_right)->visible = 1;
+
+#if GOT_TOUCH
+	if (multiplayer) {
+		((touchable *)joy_p2_left)->visible = 1;
+		((touchable *)joy_p2_right)->visible = 1;
+	} else {
+#else
+	multiplayer = 0;
+	{
+#endif
+		((touchable *)joy_p2_left)->visible = 0;
+		((touchable *)joy_p2_right)->visible = 0;
+	}
+}
+
+static void sticks_hide() {
+	((touchable *)joy_p1_left)->visible = 0;
+	((touchable *)joy_p1_right)->visible = 0;
+	((touchable *)joy_p2_left)->visible = 0;
+	((touchable *)joy_p2_right)->visible = 0;
+}
+
+void space_init_level(int space_station, int deck)
+{
 	static obj_player *player;
+
+	multiplayer = -1;
+	sticks_init();
 
 	if(player==NULL){
 		obj_param_player default_player = {
@@ -822,13 +902,17 @@ void space_init()
 
     stars_init();
 
-    float h = GAME_HEIGHT*0.8;
+    float h = GAME_HEIGHT*0.5;
 
-    joy_p1_left = joystick_create(0, 120, 2, -GAME_WIDTH/2 + 170, -0.1*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
-    joy_p1_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, -0.1*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p1_left = joystick_create(0, 120, 2, -GAME_WIDTH/2 + 170, -0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p1_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, -0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p2_left = joystick_create(0, 120, 2, -GAME_WIDTH/2 + 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p2_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
 
     statesystem_register_touchable(this, joy_p1_left);
     statesystem_register_touchable(this, joy_p1_right);
+    statesystem_register_touchable(this, joy_p2_left);
+    statesystem_register_touchable(this, joy_p2_right);
 
     state_timer = 10;
 	change_state(LEVEL_START);

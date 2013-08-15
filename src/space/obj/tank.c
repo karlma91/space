@@ -147,11 +147,14 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	}
 
 	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX) && se_distance_to_player(tank->data.body->p.x)<tank->max_distance){
+		//TODO hent ut lik kode for skyting og lag en metode av det
 		cpVect shoot_vel = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
+		cpVect shoot_pos = cpvadd(tank->data.body->p, cpvmult(shoot_vel,55));
+
 		shoot_vel = cpvmult(shoot_vel,1400);
 		shoot_vel = cpvadd(shoot_vel, player->data.body->v);
 
-		instance_create(obj_id_bullet, NULL, tank->data.body->p.x, tank->data.body->p.y, shoot_vel.x, shoot_vel.y);
+		instance_create(obj_id_bullet, NULL, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
 		//object_create_bullet(tank->data.body->p,shoot_angle ,tank->data.body->v,obj_id_bullet);
 		sound_play(SND_LASER_2);
 		tank->timer = 0;
@@ -160,7 +163,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	instance *left, *right;
 	cpFloat left_dist, right_dist;
-	instance_nearest_x_two((instance *)tank, obj_id_player, &left, &right, &left_dist, &right_dist);
+	instance_nearest_x_two((instance *)tank, obj_id_tank, &left, &right, &left_dist, &right_dist);
 
 	int left_clear = (left_dist > 250);
 	int right_clear = (right_dist > 250);

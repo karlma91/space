@@ -46,7 +46,7 @@ typedef struct {
 
 	SPRITE_ID *spr_id;
 
-	object_id *obj_type;
+	object_id *obj_type; //TODO change to pointer to shoot function with player as argument (or keep both and use as argument)
 } upg_weapon;
 
 typedef struct {

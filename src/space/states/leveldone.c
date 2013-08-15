@@ -43,6 +43,8 @@ static cpVect star_3 = {350,100};
 
 static void on_enter()
 {
+	btn_next->visible = level_star_count != 0;
+	btn_next->enabled = level_star_count != 0;
 }
 
 static void pre_update()
@@ -78,11 +80,11 @@ static void draw()
 	}
 
 	draw_color4f(1,1,1,1);
-	if (level_star_count == 0) draw_color4f(0.2,0.2,0.2,1);
+	if (level_star_count == 0) draw_color4f(0.1,0.1,0.1,1);
 	sprite_render(&spr_star, &star_1, 0);
-	if (level_star_count == 1) draw_color4f(0.2,0.2,0.2,1);
+	if (level_star_count == 1) draw_color4f(0.1,0.1,0.1,1);
 	sprite_render(&spr_star, &star_2, 0);
-	if (level_star_count == 2) draw_color4f(0.2,0.2,0.2,1);
+	if (level_star_count == 2) draw_color4f(0.1,0.1,0.1,1);
 	sprite_render(&spr_star, &star_3, 0);
 }
 

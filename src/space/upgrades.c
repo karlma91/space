@@ -15,9 +15,9 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 		.level = 1,
 		.lvls = {
 			/* dmg, rate, mass, range, price */
-			{13, 5.0, 1.0, 600, 0},
-			{17, 5.6, 1.5, 620, 3200},
-			{24, 6.3, 2.0, 650, 4500}
+			{28, 3.1, 1.0, 600, 0},
+			{34, 4.4, 1.5, 620, 3200},
+			{48, 5.7, 2.0, 650, 4500}
 		},
 		.spr_id = &SPRITE_PLAYER_GUN,
 		.obj_type = NULL
@@ -27,9 +27,9 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 		.level = 1,
 		.lvls = {
 			/* dmg, rate, mass, price */
-			{3.8, 20.0, 1.8, 550, 12900},
-			{4.2, 22.0, 2.3, 560, 4900},
-			{4.7, 25.0, 2.6, 570, 5950}
+			{7.6, 18.0, 1.8, 550, 12900},
+			{8.4, 23.0, 2.3, 560, 4900},
+			{9.4, 26.0, 2.6, 570, 5950}
 		},
 		.spr_id = &SPRITE_PLAYER_GUN,
 		.obj_type = NULL

@@ -223,10 +223,10 @@ static void action_shoot(obj_player *player)
 
 		for(i=0; i < player->gun_level;i++){
 			//obj_bullet *b = object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
-			cpVect shoot_vel = cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i)));
+			cpVect shoot_vel = cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))); //TODO remove and split into another weapon
+			cpVect shoot_pos = cpvadd(player->data.body->p, cpvmult(shoot_vel,40));
 			shoot_vel = cpvmult(shoot_vel, 1400);
 			shoot_vel = cpvadd(shoot_vel, player->data.body->v);
-			cpVect shoot_pos = player->data.body->p;
 
 			obj_param_bullet friendly_bullet = {.friendly = 1};
 			obj_bullet *b = (obj_bullet *) instance_create(obj_id_bullet, &friendly_bullet, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);

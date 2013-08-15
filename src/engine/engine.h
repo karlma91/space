@@ -19,6 +19,14 @@
 #include <android/log.h>
 #endif
 
+#ifndef GOT_TOUCH
+#define GOT_TOUCH 0
+#endif
+
+#ifndef IS_APP
+#define IS_APP 0
+#endif
+
 #define SLEEP_TIME 1
 
 /* General data structures */

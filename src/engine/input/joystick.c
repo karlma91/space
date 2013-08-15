@@ -37,7 +37,7 @@ joystick *joystick_create(int persistent, float radius, float min_radius, float 
 	joystick_axis(stick,0,0);
 	joystick_release(stick);
 
-	joystick_place(stick, center_x, center_y - height/2.1 + radius);
+	joystick_place(stick, center_x, center_y + (height/2.1 + radius) * (center_y >= GAME_HEIGHT/4 ? 1 : -1));
 	stick->draw_x = stick->pos_x;
 	stick->draw_y = stick->pos_y;
 
