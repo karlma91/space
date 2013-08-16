@@ -8,6 +8,7 @@
 #include "../engine/graphics/camera.h"
 #include "../engine/graphics/particles.h"
 #include "../engine/state/statesystem.h"
+#include "spaceengine.h"
 
 static void add_shape(cpShape *shape, cpFloat friction, cpFloat elasticity);
 
@@ -34,12 +35,34 @@ void se_add_score_and_popup(cpVect p, int score)
 float se_distance_to_player(float x)
 {
 	obj_player *player = ((obj_player *) instance_first(obj_id_player));
-
-	float dx = player->data.body->p.x - x;
-	int lvl_width = currentlvl->width;
-
-	return (dx < -lvl_width/2) ? dx + lvl_width : (dx > lvl_width/2) ? dx - lvl_width : fabsf(dx);
+	cpVect a = cpv(x,0);
+	cpVect b = player->data.body->p;
+	cpVect d = se_distance_v(a, b);
+	return d.x;
 }
+
+cpVect se_distance_a2b(instance *insa, instance *insb)
+{
+	cpVect a = insa->body->p;
+	cpVect b = insb->body->p;
+	cpVect d = se_distance_v(a,b);
+	return d;
+}
+
+cpVect se_distance_v(cpVect a, cpVect b)
+{
+	cpVect d = cpvsub(b,a);
+	int lvl_width = currentlvl->width;
+	if(d.x < -lvl_width/2){
+		d.x += lvl_width;
+	}else if(d.x > lvl_width/2){
+		d.x -= lvl_width;
+	}else{
+		fabsf(d.x);
+	}
+	return d;
+}
+
 
 /**
  * return 1 if object is killed

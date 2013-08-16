@@ -10,6 +10,8 @@
 /* Chipmunk physics library */
 #include "chipmunk.h"
 
+#include "../game.h"
+
 #include "../../engine/engine.h"
 #include "../spaceengine.h"
 
@@ -26,43 +28,61 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	robotarm->hp = robotarm->param.max_hp;
 	robotarm->timer = 0;
 
-	robotarm->segments = 16;
-	robotarm->seg_length = 70;
+	sprite_create(&(robotarm->saw_sprite), SPRITE_GEAR, 300, 300, 0);
+	sprite_create(&(robotarm->data.spr), SPRITE_TANK_BODY, 200, 100, 0);
+	robotarm->segments = 4;
+	robotarm->seg_length = currentlvl->height / (2*robotarm->segments);
 
-	robotarm->x = malloc(sizeof(int)*robotarm->segments);
-	robotarm->y = malloc(sizeof(int)*robotarm->segments);
+	robotarm->x = 	  malloc(sizeof(int)*robotarm->segments);
+	robotarm->y =	  malloc(sizeof(int)*robotarm->segments);
 	robotarm->angle = malloc(sizeof(int)*robotarm->segments);
 	int i;
 	for(i=0; i<robotarm->segments; i++){
-		robotarm->x[i] = 0;
-		robotarm->y[i] = 0;
+		robotarm->x[i] = robotarm->data.x;
+		robotarm->y[i] = robotarm->data.y;
 		robotarm->angle[i] = 0;
 	}
 
+	cpFloat radius = 100.0f;
+	cpFloat mass = 20.0f;
+	cpVect pos = cpv(robotarm->data.x, robotarm->data.y + 100);
+	robotarm->saw = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
+	cpBodySetPos(robotarm->saw, pos);
+	cpBodySetVelLimit(robotarm->saw, 400);
+
+	cpShape *shape = se_add_circle_shape(robotarm->saw, radius, 0.7, 0.0);
+	cpShapeSetGroup(shape, 1);
+	cpShapeSetLayers(shape, LAYER_TANK);
+	cpShapeSetCollisionType(shape, this.ID);
 
 	cpFloat size = 50;
 	/* make and add new body */
-	((instance *) robotarm)->body = cpSpaceAddBody(space, cpBodyNew(20, cpMomentForBox(20.0f, size, size)));
+	robotarm->data.body = cpBodyNew(200, cpMomentForBox(20.0f, size, size));
 	cpBodySetPos(((instance *) robotarm)->body, cpv(robotarm->data.x,size+10));
 	cpBodySetVelLimit(((instance *) robotarm)->body,180);
+
 	/* make and connect new shape to body */
 	robotarm->shape = cpSpaceAddShape(space, cpBoxShapeNew(robotarm->data.body, size, size));
 	cpShapeSetFriction(robotarm->shape, 0.01);
-	cpShapeSetLayers(robotarm->shape,1<<20);
+	cpShapeSetLayers(robotarm->shape, LAYER_ENEMY_BULLET);
 	cpShapeSetCollisionType(robotarm->shape, this.ID);
 
 	cpBodySetUserData(((instance *) robotarm)->body, (instance*)robotarm);
+
+	//connect sawblade with body
+	cpSpaceAddConstraint(space, cpSlideJointNew(robotarm->saw, robotarm->data.body, cpv(0,0), cpv(0,0), 20.0f, (robotarm->segments-1)*robotarm->seg_length));
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	robotarm->timer += dt;
 
-	obj_player *player = ((obj_player*)instance_first(obj_id_player));
 
-	float targetx = player->data.body->p.x;
-	float targety = player->data.body->p.y;
+	float targetx = robotarm->saw->p.x;
+	float targety = robotarm->saw->p.y;
 
+	robotarm->x[robotarm->segments-1] = robotarm->data.body->p.x;
+	robotarm->y[robotarm->segments-1] = robotarm->data.body->p.y;
 
 	int i;
 	for(i=0; i<robotarm->segments; i++){
@@ -76,6 +96,13 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		robotarm->x[i-1] = robotarm->x[i] + cos(robotarm->angle[i])*robotarm->seg_length;
 		robotarm->y[i-1] = robotarm->y[i] + sin(robotarm->angle[i])*robotarm->seg_length;
 	}
+
+	instance *player = instance_first(obj_id_player);
+	cpVect d = se_distance_a2b((instance*)robotarm, player);
+
+	cpBodySetForce(robotarm->saw,cpvzero);
+	d = cpvnormalize(d);
+	cpBodyApplyForce(robotarm->saw,cpvmult(d, 10000),cpvzero);
 
 }
 
@@ -91,7 +118,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	v2.y = robotarm->y[0] + sin(robotarm->angle[0])*robotarm->seg_length;
 	se_rect2arch(&v1);
 	se_rect2arch(&v2);
-	draw_glow_line(v1.x,v1.y,v2.x,v2.y, 20);
+	draw_glow_line(v1.x,v1.y,v2.x,v2.y, 200);
 
 	int i;
 	for(i=0; i<robotarm->segments-1; i++){
@@ -102,8 +129,12 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		v2.y = robotarm->y[i+1];
 		se_rect2arch(&v1);
 		se_rect2arch(&v2);
-		draw_glow_line(v1.x,v1.y,v2.x,v2.y, 50);
+		draw_glow_line(v1.x,v1.y,v2.x,v2.y, 200);
 	}
+	cpVect pos1 = robotarm->saw->p;
+	cpVect pos2 = robotarm->data.body->p;
+	sprite_render(&(robotarm->saw_sprite), &pos1, robotarm->timer * 10 * 180/M_PI);
+	sprite_render(&(robotarm->data.spr), &pos2, 180/M_PI);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)

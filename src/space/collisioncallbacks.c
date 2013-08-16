@@ -30,6 +30,7 @@ void collisioncallbacks_init()
 
 	cpSpaceAddCollisionHandler(space, obj_id_player->ID, obj_id_bullet->ID, collision_object_bullet, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(space, obj_id_player->ID, ID_GROUND, NULL, NULL, collision_player_object, NULL, NULL);
+	cpSpaceAddCollisionHandler(space, obj_id_player->ID, obj_id_robotarm->ID, NULL, NULL, collision_player_object, NULL, NULL);
 	cpSpaceAddCollisionHandler(space, obj_id_player->ID, obj_id_factory->ID, NULL, NULL, collision_player_object, NULL, NULL);
 
 	cpSpaceAddCollisionHandler(space, obj_id_rocket->ID, ID_GROUND, NULL, NULL, callback_rocket_ground, NULL, NULL);

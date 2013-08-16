@@ -784,8 +784,6 @@ void space_init_level(int space_station, int deck)
 	player->data.body->v.x = 0;
 	player->data.body->v.y = -10;
 
-	//objects_add(robotarm_init(200,&robot_temp));
-
 	/* static ground */
 	cpBody  *staticBody = space->staticBody;
 	static cpShape *floor;

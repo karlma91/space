@@ -32,7 +32,6 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	factory->data.alive = 1;
 	factory->data.components.hp_bar = &(factory->hp_bar);
 	factory->data.components.score = &(factory->param.score);
 

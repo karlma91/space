@@ -180,6 +180,8 @@ PARAM_START(robotarm)
 PARAM_END
 OBJ_START(robotarm)
 	cpShape *shape;
+	cpBody *saw;
+	sprite saw_sprite;
 	float timer;
 	float hp;
 	int segments;
@@ -189,5 +191,26 @@ OBJ_START(robotarm)
 	float *angle;
 	hpbar hp_bar;
 OBJ_END
+
+
+PARAM_START(spikeball)
+	float radius;
+	float up_speed;
+	float down_force;
+	float top_delay;
+	float bot_delay;
+	float damage;
+PARAM_END
+OBJ_START(spikeball)
+	float timer;
+	cpShape *shape;
+	cpBody *dolly;
+	cpConstraint *winch;
+	float winch_length;
+OBJ_END
+
+
+
+
 
 #endif /* OBJECT_TYPES_H_ */

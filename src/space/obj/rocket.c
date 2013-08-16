@@ -84,33 +84,20 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	}
 
 	/* gets the player from the list */
-	obj_player *player = ((obj_player*)instance_first(obj_id_player));
+	instance *player = (instance_first(obj_id_player));
 
-	cpVect pl = player->data.body->p;
-	cpVect rc = rocket->data.body->p;
 
-	if(rc.y>currentlvl->height*0.35){
+	if(rocket->data.body->p.y > currentlvl->height * 0.35){
 		rocket->active = 1;
 	}
 
-	cpFloat ptx = (pl.x-rc.x); //direct way
-	cpFloat pltx = (rc.x - currentlvl->left + (currentlvl->right - pl.x));
-	cpFloat prtx = (currentlvl->right - rc.x + (pl.x - currentlvl->left));
-	if(fabs(ptx) < prtx && fabs(ptx) < pltx){
-		ptx = ptx>0? 1:-1;
-	}else if(pltx < prtx){
-		pl.x -= currentlvl->right - currentlvl->left;
-		ptx = -1;
-	}else {
-		pl.x += currentlvl->right - currentlvl->left;
-		ptx = 1;
-	}
+	cpVect d = se_distance_a2b((instance*)rocket, player);
 
 	float target_angle;
 
 	cpBodySetForce(rocket->data.body,cpvzero);
 	if (rocket->active) {
-		target_angle = get_angle(pl,rc);
+		target_angle = cpvtoangle(d);
 		cpBodyApplyForce(rocket->data.body,cpvmult(cpvforangle(target_angle),rocket->param.force),cpvzero);
 	} else {
 		target_angle = M_PI / 2;
