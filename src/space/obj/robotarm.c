@@ -142,8 +142,8 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	free(robotarm->x);
 	free(robotarm->y);
 	free(robotarm->angle);
-	cpSpaceRemoveBody(space, robotarm->data.body);
 	cpSpaceRemoveShape(space, robotarm->shape);
+	cpSpaceRemoveBody(space, robotarm->data.body);
 
 	instance_super_free((instance *)robotarm);
 }

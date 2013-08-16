@@ -30,7 +30,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	sprite_create(&spikeball->data.spr, SPRITE_GEAR, 400, 400, 30);
+	sprite_create(&spikeball->data.spr, SPRITE_SPIKEBALL, 400, 400, 30);
 	float radius = spikeball->param.radius;
 	radius = 100;
 	float mass = 10;
@@ -82,7 +82,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	cpVect a = spikeball->data.body->p;
 	cpVect b = spikeball->dolly->p;
 	draw_glow_line(a.x,a.y,b.x,b.y,50);
-	sprite_render(&(spikeball->data.spr), &(draw_pos), 0);
+	sprite_render(&(spikeball->data.spr), &(draw_pos), cpvtoangle(spikeball->dolly->rot));
 
 }
 

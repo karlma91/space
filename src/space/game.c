@@ -63,6 +63,7 @@ SPRITE_ID SPRITE_NEXT;
 SPRITE_ID SPRITE_HOME;
 SPRITE_ID SPRITE_JOYSTICK;
 SPRITE_ID SPRITE_JOYSTICK_BACK;
+SPRITE_ID SPRITE_SPIKEBALL;
 /* end of global sprite definitions*/
 
 /* global emitter */
@@ -179,6 +180,7 @@ void game_sprites()
 	SPRITE_NEXT  	     = sprite_link("next");
 	SPRITE_JOYSTICK      = sprite_link("joystick");
 	SPRITE_JOYSTICK_BACK = sprite_link("joystick_back");
+	SPRITE_SPIKEBALL     = sprite_link("spikeball");
 }
 
 void game_particles()
