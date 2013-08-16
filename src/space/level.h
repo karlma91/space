@@ -41,4 +41,6 @@ extern void level_get_ships(level_ship **,int *);
 extern int level_get_station_count();
 extern int level_get_level_count(int station);
 
+extern int level_add_param(object_id *, void *param, const char *name);
+
 #endif /* LEVEL_H_ */

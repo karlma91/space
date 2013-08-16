@@ -60,16 +60,8 @@ int level_init()
 
 	for (i = 0; i < OBJECT_MAX_OBJECTS; i++) {
 		object_id *obj_id = object_by_id(i);
-		if (!obj_id)
-			break;
-		int paramsize = obj_id->P_SIZE;
-
-		count[i] = 1;
-		names[i] = realloc(names[i], sizeof(char[count[i]][21]));
-		strcpy(names[i][count[i]-1], "NULL");
-
-		params[i] = realloc(params[i], paramsize);
-		memset(params[i], 0, paramsize);
+		count[i] = 0;
+		level_add_param(obj_id, NULL, "NULL");
 	}
 
 	/* read space station data */
@@ -355,4 +347,27 @@ int level_get_station_count()
 int level_get_level_count(int station)
 {
 	return (station > 0 && station <= station_count) ? worlds[station-1].count : 0;
+}
+
+int level_add_param(object_id *obj_id, void *param, const char *name)
+{
+	if (!obj_id)
+		return -1;
+
+	int id = obj_id->ID;
+	int paramsize = obj_id->P_SIZE;
+
+	++count[id];
+	names[id] = realloc(names[id], sizeof(char[count[id]][21]) * count[id]);
+	strcpy(names[id][count[id]-1], name);
+
+	params[id] = realloc(params[id], paramsize);
+
+	if (param) {
+		memcpy(params[id], param, paramsize);
+	} else {
+		memset(params[id], 0, paramsize);
+	}
+
+	return count[id];
 }
