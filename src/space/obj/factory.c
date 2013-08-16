@@ -33,8 +33,8 @@ static void init(OBJ_TYPE *OBJ_NAME)
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	factory->data.alive = 1;
-	factory->data.components.hp_bar = &(factory->hp_bar);
-	factory->data.components.score = &(factory->param.score);
+	factory->data.components[CMP_HPBAR] = &(factory->hp_bar);
+	factory->data.components[CMP_SCORE] = &(factory->param.score);
 
 	static int randomness= 0;
 	randomness += 123;

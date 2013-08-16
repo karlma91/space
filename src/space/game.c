@@ -38,6 +38,14 @@ unsigned int KEY_RETURN_1 = SDL_SCANCODE_SPACE;
 unsigned int KEY_RETURN_2 = SDL_SCANCODE_RETURN;
 unsigned int KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
 
+
+/* COMPONENTS DEFINITIONS */
+int CMP_HPBAR;
+int CMP_SCORE;
+int CMP_DAMAGE;
+int CMP_BODIES;
+/* END OF COMPONENTS DEFINITIONS */
+
 /* global sprite definitions */
 SPRITE_ID SPRITE_PLAYER;
 SPRITE_ID SPRITE_PLAYER_GUN;
@@ -145,6 +153,14 @@ void game_config()
 #endif
 }
 
+void game_components()
+{
+	CMP_HPBAR = component_register(1);
+	CMP_SCORE = component_register(1);
+	CMP_DAMAGE = component_register(1);
+	CMP_BODIES = component_register(SPACE_BODIES_MAX);
+}
+
 void game_sprites()
 {
 	SPRITE_PLAYER   	 = sprite_link("player");
@@ -221,6 +237,7 @@ void game_init()
 	game_particles();
 	game_font();
 
+	game_components();
 	object_types_init();
 	level_init();
 

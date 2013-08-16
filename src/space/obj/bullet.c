@@ -20,8 +20,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	bullet->data.alive = 1;
-	bullet->data.components.damage = &(bullet->damage);
-	bullet->data.components.body_count = 0;
+	bullet->data.components[CMP_DAMAGE] = &(bullet->damage);
 
 	sprite_create(&(bullet->data.spr), SPRITE_GLOW_DOT, 30, 30, 0);
 

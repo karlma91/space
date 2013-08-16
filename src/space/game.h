@@ -18,6 +18,15 @@
 
 #include "obj/object_types.h"
 
+#define SPACE_BODIES_MAX 5
+
+/* COMPONENTS */
+extern int CMP_HPBAR;
+extern int CMP_SCORE;
+extern int CMP_DAMAGE;
+extern int CMP_BODIES;
+
+/* STATES */
 extern STATE_ID state_menu; /* deprecated state! */
 extern STATE_ID state_gameover; /* deprecated state! */
 extern STATE_ID state_settings;
@@ -28,6 +37,7 @@ extern STATE_ID state_leveldone;
 extern STATE_ID state_stations;
 extern STATE_ID state_levelscreen;
 
+/* SPRITES */
 extern SPRITE_ID SPRITE_PLAYER;
 extern SPRITE_ID SPRITE_PLAYER_GUN;
 extern SPRITE_ID SPRITE_GLOW_DOT;
@@ -45,6 +55,7 @@ extern SPRITE_ID SPRITE_HOME;
 extern SPRITE_ID SPRITE_JOYSTICK;
 extern SPRITE_ID SPRITE_JOYSTICK_BACK;
 
+/* PARTICLES */
 extern int EMITTER_FLAME;
 extern int EMITTER_ROCKET_FLAME;
 extern int EMITTER_EXPLOSION;

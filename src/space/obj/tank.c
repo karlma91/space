@@ -43,9 +43,8 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	tank->data.components.hp_bar = &(tank->hp_bar);
-	tank->data.components.score = &(tank->param.score);
-	tank->data.components.body_count = 2;
+	tank->data.components[CMP_HPBAR] = &(tank->hp_bar);
+	tank->data.components[CMP_SCORE] = &(tank->param.score);
 
 	sprite_create(&(tank->wheel_sprite), SPRITE_TANK_WHEEL, 120, 120, 0);
 	sprite_create(&(tank->data.spr), SPRITE_TANK_BODY, 200, 100, 0);
@@ -79,8 +78,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	tank->wheel1 = addWheel(space, posA, boxOffset);
 	tank->wheel2 = addWheel(space, posB, boxOffset);
 
-	tank->data.components.bodies[0] = tank->wheel1;
-	tank->data.components.bodies[1] = tank->wheel2;
+	tank->data.components[CMP_BODIES] = tank->wheel1;
+	tank->data.components[CMP_BODIES+1] = tank->wheel2;
 
 	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel1 , cpv(-30, -10), cpv(-wheel_offset, -40), cpvzero));
 	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel2, cpv( 30, -10), cpv( wheel_offset, -40), cpvzero));

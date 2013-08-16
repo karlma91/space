@@ -19,9 +19,9 @@
 static int station_count;
 static level_ship *worlds;
 
-static int (count[ID_COUNT]);
-static char (*(names[ID_COUNT]))[21];
-static char *(params[ID_COUNT]);
+static int (count[OBJECT_MAX_OBJECTS]);
+static char (*(names[OBJECT_MAX_OBJECTS]))[21];
+static char *(params[OBJECT_MAX_OBJECTS]);
 
 static int i;
 
@@ -58,7 +58,7 @@ int level_init()
 {
 	int ret;
 
-	for (i = 0; i < ID_COUNT; i++) {
+	for (i = 0; i < OBJECT_MAX_OBJECTS; i++) {
 		object_id *obj_id = object_by_id(i);
 		if (!obj_id)
 			break;

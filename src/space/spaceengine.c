@@ -46,8 +46,9 @@ float se_distance_to_player(float x)
  */
 int se_damage_object(instance *object, float damage)
 {
-	object->components.hp_bar->value -= damage;
-	if (object->components.hp_bar->value <= 0) {
+	hpbar *hp = COMPONENT(object, HPBAR, hpbar*);
+	hp->value -= damage;
+	if (hp->value <= 0) {
 		object->destroyed = 0;
 		return 1;
 	}

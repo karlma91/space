@@ -50,11 +50,11 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 
 	//TODO create a function for damaging other objects
 	//FIXME how to deal with objects already killed?
-	if (se_damage_object(object, *(bullet->components.damage))) {
+	if (se_damage_object(object, *COMPONENT(bullet, DAMAGE, float*))) {
 		if (object->alive) {
 			object->alive = 0;
 			particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
-			se_add_score_and_popup(b->body->p, *(object->components.score));
+			se_add_score_and_popup(b->body->p, *COMPONENT(object, SCORE, int*));
 			sound_play(SND_EXPLOSION);
 		}
 	} else {
@@ -75,7 +75,7 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	se_add_explotion_at_contact_point(arb);
 
-	if (se_damage_object(object, *(bullet->components.damage))) {
+	if (se_damage_object(object, *COMPONENT(bullet, DAMAGE, float *))) {
 		particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 		sound_play(SND_EXPLOSION);
 	} else {
@@ -98,7 +98,7 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 			float f = cpvlength(force);
 			//todo create a super fancy formula for determining physical damage
 			if (f > 10)
-				player->components.hp_bar->value -= f * 0.017; // <- changed player force to impulse f * 0.01 // f * 0.05 // 0.033
+				COMPONENT(player, HPBAR, hpbar *)->value -= f * 0.017; // <- changed player force to impulse f * 0.01 // f * 0.05 // 0.033
 		} else {
 			SDL_Log("Expected object type ID %d, but got %d!\n", obj_id_player->ID, player->TYPE->ID);
 		}

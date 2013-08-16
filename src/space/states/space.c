@@ -307,18 +307,13 @@ static void update_instances(instance *obj)
 			moved_left = 1;
 		}
 
-
 		if(obj->destroyed || moved_left){
-			int i = 0;
-			if (obj->components.body_count) {
-			for(i=0;i < obj->components.body_count; i++){
-				cpBody *body = obj->components.bodies[i];
-				if (body) {
+			int i;
+			cpBody *body;
+			for (i=0, body = obj->components[CMP_BODIES]; i <= SPACE_BODIES_MAX; ++i, ++body) {
 				if(body->p.x < currentlvl->left || moved_left){
 					body->p.x = currentlvl->right - (currentlvl->left -body->p.x );
 				}
-				}
-			}
 			}
 		}
 
@@ -327,16 +322,12 @@ static void update_instances(instance *obj)
 			moved_right = 1;
 		}
 		if(obj->destroyed || moved_right){
-			int i = 0;
-			if (obj->components.body_count) {
-			for(i=0;i < obj->components.body_count; i++){
-				cpBody *body = obj->components.bodies[i];
-				if (body) {
+			int i;
+			cpBody *body;
+			for (i=0, body = obj->components[CMP_BODIES]; i <= SPACE_BODIES_MAX; ++i, ++body) {
 				if(body->p.x > currentlvl->right || moved_right){
 					body->p.x = currentlvl->left + (body->p.x - currentlvl->right);
 				}
-				}
-			}
 			}
 		}
 
