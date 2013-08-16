@@ -5,12 +5,18 @@
 #include "../graphics/sprite.h"
 #include "../data/llist.h"
 
-#ifndef GENERAL_OBJECT_FUNCS
-#define GENERAL_OBJECT_FUNCS 1
-
 #define OBJ_MAGIC_COOKIE 0xB305D7A2
 
-#define ID_COUNT 20 //FIXME TMP define in port progress
+#ifndef GENERAL_OBJECT_FUNCS
+#define GENERAL_OBJECT_FUNCS 1
+#endif
+
+#ifndef OBJECT_MAX_COMPONENTS
+#define OBJECT_MAX_COMPONENTS 30
+#endif
+
+#ifndef OBJECT_MAX_OBJECTS
+#define OBJECT_MAX_OBJECTS 20 //FIXME TMP define in port progress
 
 
 void object_init();
@@ -26,8 +32,7 @@ struct object {
 	const size_t SIZE;
 	const size_t P_SIZE;
 
-	const int components_mask;
-
+	//const int components_mask;
 	const struct {
 		void (*init)(instance *obj);
 		void (*on_create)(instance *obj);
@@ -43,7 +48,8 @@ struct instance {
 
 	int active_components;
 
-	//TODO create a components system?
+	void *components[OBJECT_MAX_COMPONENTS];
+	/*
 	struct {
 		hpbar *hp_bar;
 		int *score;
@@ -51,6 +57,7 @@ struct instance {
 		int body_count;
 		cpBody *(bodies[5]);
 	} components;
+	 */
 
 	int alive;
 	int instance_id;
@@ -63,6 +70,8 @@ struct instance {
 	sprite spr;
 
 }; /* per-instance variables */
+
+int component_register(int pointer_count);
 
 instance *instance_create(object_id *type, const void *param, float x, float y, float hs, float vs);
 instance *instance_super_malloc(object_id *type); //TODO hide from user?
@@ -113,6 +122,8 @@ LList object_get_instances(const object_id *type);
 #define PARAM_START(name) struct OBJ_PARAM_2(name) {
 #define PARAM_END };
 #define PARAM_EMPTY(name) PARAM_START(name) PARAM_END
+
+#define COMPONENT(obj, cmp, type) ((type) ((instance *)obj->components[CMP_##cmp]))
 
 #endif /* GENERAL_OBJECT_FUNCS */
 

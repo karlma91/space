@@ -18,8 +18,10 @@ typedef struct { //TODO move: WARNING: exposed internal data structure
 	LList pool;
 } object_info;
 
+static int component_index = 0;
+
 int object_count = 0;
-object_info *objects_meta = NULL;
+object_info objects_meta[OBJECT_MAX_OBJECTS];
 
 static void destroy_func(instance* obj)
 {
@@ -30,10 +32,13 @@ int object_register(object_id *obj)
 {
 	int id = object_count++;
 
+	if (object_count >= OBJECT_MAX_OBJECTS) {
+		fprintf(stderr, "MAXIMUM NUMBER OF OBJECT DEFINITIONS EXCEEDED!\n");
+		exit(-1);
+	}
+
 	/* set read-only object info*/
 	*(int *)(&obj->ID) = id;
-
-	objects_meta = realloc(objects_meta, object_count * sizeof(object_info));
 
 	objects_meta[id].obj = obj;
 	objects_meta[id].count = 0;
@@ -80,6 +85,20 @@ LList object_get_instances(const object_id *type)
 	return objects_meta[type->ID].active;
 }
 
+int component_register(int pointer_count)
+{
+	int empty_index = component_index;
+	component_index += pointer_count;
+
+	if (component_index < OBJECT_MAX_COMPONENTS) {
+		return empty_index;
+	} else {
+		component_index = empty_index;
+		fprintf(stderr, "ERROR: COMPONENT HOLDER FULL!\n");
+		return -1;
+	}
+}
+
 instance *instance_create(object_id *type, const void *param, float x, float y, float hs, float vs)
 {
 	instance *ins = instance_super_malloc(type);
@@ -95,7 +114,6 @@ instance *instance_create(object_id *type, const void *param, float x, float y, 
 
 	/* sets default values */
 	ins->alive = 1;
-	ins->active_components = type->components_mask;
 
 	if (param) {
 		instance_set_param(ins, param);

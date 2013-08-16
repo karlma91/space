@@ -43,9 +43,9 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	turret->data.components.hp_bar = &(turret->hp_bar);
-	turret->data.components.score = &(turret->param.score);
-	turret->data.components.body_count = 0;
+	turret->data.components[CMP_HPBAR] = &(turret->hp_bar);
+	turret->data.components[CMP_SCORE] = &(turret->param.score);
+
 	turret->data.alive = 1;
 	turret->timer = 0;
 	turret->rate = 0.060;

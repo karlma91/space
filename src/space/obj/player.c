@@ -54,8 +54,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&(player->gun), SPRITE_PLAYER_GUN, 120, 120, 0);
 	sprite_create(&(player->data.spr), SPRITE_PLAYER, 120, 120, 0);
 
-	player->data.components.hp_bar = &player->hp_bar;
-	player->data.components.body_count = 0;
+	player->data.components[CMP_HPBAR] = &player->hp_bar;
+
 
 	player->flame = particles_get_emitter(EMITTER_FLAME);
 	player->disable=0;

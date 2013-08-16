@@ -36,10 +36,10 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	rocket->data.components.hp_bar = &(rocket->hp_bar);
-	rocket->data.components.score = &(rocket->param.score);
-	rocket->data.components.damage = &(damage);
-	rocket->data.components.body_count = 0;
+	rocket->data.components[CMP_HPBAR] = &(rocket->hp_bar);
+	rocket->data.components[CMP_SCORE] = &(rocket->param.score);
+	rocket->data.components[CMP_DAMAGE] = &(damage);
+
 	rocket->data.alive = 1;
 	rocket->flame = particles_get_emitter(EMITTER_ROCKET_FLAME);
 	rocket->angle = M_PI/2;
