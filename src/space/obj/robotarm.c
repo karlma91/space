@@ -28,7 +28,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	robotarm->hp = robotarm->param.max_hp;
 	robotarm->timer = 0;
 
-	sprite_create(&(robotarm->saw_sprite), SPRITE_GEAR, 300, 300, 0);
+	sprite_create(&(robotarm->saw_sprite), SPRITE_SAW, 300, 300, 30);
 	sprite_create(&(robotarm->data.spr), SPRITE_TANK_BODY, 200, 100, 0);
 	robotarm->segments = 4;
 	robotarm->seg_length = currentlvl->height / (2*robotarm->segments);
@@ -76,6 +76,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	robotarm->timer += dt;
+	sprite_update(&(robotarm->saw_sprite));
 
 
 	float targetx = robotarm->saw->p.x;
@@ -133,7 +134,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	}
 	cpVect pos1 = robotarm->saw->p;
 	cpVect pos2 = robotarm->data.body->p;
-	sprite_render(&(robotarm->saw_sprite), &pos1, robotarm->timer * 10 * 180/M_PI);
+	sprite_render(&(robotarm->saw_sprite), &pos1, 0);
 	sprite_render(&(robotarm->data.spr), &pos2, 180/M_PI);
 }
 

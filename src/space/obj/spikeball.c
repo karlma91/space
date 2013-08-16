@@ -81,6 +81,10 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	cpVect draw_pos = spikeball->data.body->p;
 	cpVect a = spikeball->data.body->p;
 	cpVect b = spikeball->dolly->p;
+
+	se_rect2arch(&a);
+	se_rect2arch(&b);
+
 	draw_glow_line(a.x,a.y,b.x,b.y,50);
 	sprite_render(&(spikeball->data.spr), &(draw_pos), cpvtoangle(spikeball->dolly->rot));
 
