@@ -139,9 +139,8 @@ static void level_start()
 		start = 1;
 	} else {
 		multiplayer = 0;
+		start = (p1_ready && (!(p2l || p2r))) || (!GOT_TOUCH && (state_timer > 1.5));
 	}
-
-	start = (p1_ready && (!(p2l || p2r))) || (!GOT_TOUCH && (state_timer > 1.5));
 
 	if (start) {
 		obj_player *player = (obj_player*)instance_first(obj_id_player);
