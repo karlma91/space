@@ -87,13 +87,16 @@ LList object_get_instances(const object_id *type)
 
 int component_register(int pointer_count)
 {
-	int new_index = component_index + pointer_count;
+	int empty_index = component_index;
+	component_index += pointer_count;
 
-	if (new_index < OBJECT_MAX_COMPONENTS) {
-		return component_index = new_index;
+	if (component_index < OBJECT_MAX_COMPONENTS) {
+		return empty_index;
+	} else {
+		component_index = empty_index;
+		fprintf(stderr, "ERROR: COMPONENT HOLDER FULL!\n");
+		return -1;
 	}
-
-	return -1;
 }
 
 instance *instance_create(object_id *type, const void *param, float x, float y, float hs, float vs)
