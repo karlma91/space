@@ -87,6 +87,7 @@ instance *instance_by_id(object_id *type, int instance_id);
 int instance_count(object_id *type);
 int object_register(object_id *obj);
 object_id *object_by_name(const char *obj_name);
+object_id *object_by_id(int id);
 LList object_get_instances(const object_id *type);
 
 #define OBJ_TYPE_3( name ) obj_ ## name

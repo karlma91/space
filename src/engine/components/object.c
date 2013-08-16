@@ -60,6 +60,21 @@ object_id *object_by_name(const char *obj_name)
 	return NULL;
 }
 
+object_id *object_by_id(int id)
+{
+	int obj_id;
+	object_info *obj_meta = objects_meta;
+
+	for (obj_id = 0; obj_id < object_count; obj_id++) {
+		if (id == obj_id) {
+			return obj_meta->obj;
+		}
+		++obj_meta;
+	}
+
+	return NULL;
+}
+
 LList object_get_instances(const object_id *type)
 {
 	return objects_meta[type->ID].active;

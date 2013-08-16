@@ -27,6 +27,19 @@ OBJECT_DECLARE(turret);
 OBJECT_DECLARE(rocket);
 OBJECT_DECLARE(robotarm);
 
+//TODO implementere følgende objekter:
+OBJECT_DECLARE(coin);
+OBJECT_DECLARE(enemy_bomb);
+OBJECT_DECLARE(bombtower);
+OBJECT_DECLARE(explosion);
+OBJECT_DECLARE(tankshield); /* Treig tanks med saktegående turret med lite skjold */
+OBJECT_DECLARE(tankrocket); /* Kjøretøy som må stoppe for å skyte rockets */
+OBJECT_DECLARE(box);
+OBJECT_DECLARE(spikeball); /* Hengende Jernpiggball i taket, faller ned, og trekkes sakte opp */
+
+//OBJECT_DECLARE(box_group); /* Gruppe med små bokser? */
+
+
 /*
  * OBJECT DEFINITIONS
  */

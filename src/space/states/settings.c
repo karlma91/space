@@ -192,7 +192,9 @@ void settings_init()
 	statesystem_register_touchable(state_settings, scroller);
 
 	btn_back = button_create(NULL, 0, "", 0,0,GAME_WIDTH,GAME_HEIGHT);
+
 	button_set_callback(btn_back, statesystem_pop_state, 0);
 	statesystem_register_touchable(this, btn_back);
+	btn_back->visible = 0;
 }
 

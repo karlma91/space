@@ -59,9 +59,17 @@ int level_init()
 	int ret;
 
 	for (i = 0; i < ID_COUNT; i++) {
-		count[i] = 0;
-		names[i] = NULL;
-		params[i] = NULL;
+		object_id *obj_id = object_by_id(i);
+		if (!obj_id)
+			break;
+		int paramsize = obj_id->P_SIZE;
+
+		count[i] = 1;
+		names[i] = realloc(names[i], sizeof(char[count[i]][21]));
+		strcpy(names[i][count[i]-1], "NULL");
+
+		params[i] = realloc(params[i], paramsize);
+		memset(params[i], 0, paramsize);
 	}
 
 	/* read space station data */

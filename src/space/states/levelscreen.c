@@ -167,7 +167,6 @@ void levelscreen_init()
 
 		button btn = button_create(0, 0, stri, 0, 0, w, h);
 		btn_levels[i] = btn;
-
 		button_set_callback(btn, button_callback, (NULL + i+1));
 		button_set_enlargement(btn, 2);
 		button_set_backcolor(btn, col_back);
@@ -178,9 +177,11 @@ void levelscreen_init()
 	statesystem_register_touchable(this, btn_settings);
 
 	btn_disable = button_create(NULL, 0, "", box.x, box.y, box.w, box.h);
+	btn_disable->visible = 0;
 	statesystem_register_touchable(this, btn_disable);
 
 	btn_background = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
+	btn_background->visible = 0;
 	button_set_callback(btn_background, statesystem_set_state, state_stations);
 	statesystem_register_touchable(this, btn_background);
 

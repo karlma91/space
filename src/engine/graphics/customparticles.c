@@ -45,7 +45,7 @@ emitter *particles_add_sparks(cpVect p, float angle, float force)
 
 static void draw_particle_as_score(emitter *em, particle *p)
 {
-    char temp[10];
+    char temp[20];
     int score = ((int)em->data);
     sprintf(temp,"%d",score);
     setTextAlign(TEXT_CENTER);

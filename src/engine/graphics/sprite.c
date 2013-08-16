@@ -92,6 +92,7 @@ void sprite_destroy()
 
 void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed)
 {
+	memset(spr, 0, sizeof *spr);
 	spr->id = id;
 	spr->width = width;
 	spr->height=height;
@@ -102,7 +103,7 @@ void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed
 
 void sprite_update(sprite *spr)
 {
-	if (!spr) return;
+	if (!spr || !spr->id) return;
 
 	sprite_data *data = (sprite_data*)spr->id;
 	spr->sub_index += spr->animation_speed*dt;
@@ -121,9 +122,7 @@ void sprite_update(sprite *spr)
 
 void sprite_get_current_image(sprite *spr, float *sub_map)
 {
-	if (!spr) {
-		return;
-	}
+	if (!spr || !spr->id) return;
 
 	sprite_data *data = (sprite_data*)spr->id;
 	int index = floor(spr->sub_index);
@@ -185,9 +184,14 @@ void sprite_render_scaled(sprite *spr, cpVect *pos, float angle, float size)
 {
 	if (!spr) return;
 
+	int tex_id = 0;
 	sprite_data *data = (sprite_data*)spr->id;
+	if (data) {
+		tex_id = data->tex_id;
+	}
+
 	float sub_map[8];
 	sprite_get_current_image(spr, sub_map);
-	draw_texture(data->tex_id, pos, sub_map, spr->width*size, spr->height*size, angle);
+	draw_texture(tex_id, pos, sub_map, spr->width*size, spr->height*size, angle);
 }
 
