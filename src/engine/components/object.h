@@ -124,6 +124,7 @@ LList object_get_instances(const object_id *type);
 #define PARAM_EMPTY(name) PARAM_START(name) PARAM_END
 
 #define COMPONENT(obj, cmp, type) ((type) ((instance *)obj->components[CMP_##cmp]))
+#define COMPONENT_SET(obj, cmp, value) (((instance *)obj)->components[CMP_##cmp]) = value
 
 #endif /* GENERAL_OBJECT_FUNCS */
 

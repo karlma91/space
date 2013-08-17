@@ -85,11 +85,11 @@ OBJ_END
 
 PARAM_START(bullet)
 	int friendly;
+	float damage;
 PARAM_END
 OBJ_START(bullet)
 	cpShape *shape;
 	int bullet_type;
-	float damage;
 	cpFloat speed;
 	Color color;
 	float energy;

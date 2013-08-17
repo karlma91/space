@@ -20,7 +20,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	bullet->data.alive = 1;
-	bullet->data.components[CMP_DAMAGE] = &(bullet->damage);
+	COMPONENT_SET(bullet, DAMAGE, &(bullet->param.damage));
 
 	sprite_create(&(bullet->data.spr), SPRITE_GLOW_DOT, 30, 30, 0);
 
@@ -28,7 +28,6 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	cpVect pos = {bullet->data.x, bullet->data.y};
 	cpVect vel = {bullet->data.hs, bullet->data.vs};
-	cpVect dir = cpvnormalize_safe(vel);
 
 	bullet->data.body = cpSpaceAddBody(space, cpBodyNew(1, moment));
 	cpBodySetPos(bullet->data.body, pos); //FIXME
@@ -44,12 +43,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	if (bullet->param.friendly) {
 		cpShapeSetLayers(bullet->shape, LAYER_PLAYER_BULLET);
-		bullet->damage = 32;
-		if (keys[SDL_SCANCODE_RSHIFT])
-			bullet->damage = 200000;
 	} else {
 		cpShapeSetLayers(bullet->shape, LAYER_ENEMY_BULLET);
-		bullet->damage = 10;
 	}
 
 	bullet->energy = 750; // number of msec energy

@@ -153,7 +153,8 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		shoot_vel = cpvmult(shoot_vel,1400);
 		shoot_vel = cpvadd(shoot_vel, player->data.body->v);
 
-		instance_create(obj_id_bullet, NULL, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
+		obj_param_bullet opb = {.friendly = 0, .damage = 10};
+		instance_create(obj_id_bullet, &opb, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
 		//object_create_bullet(tank->data.body->p,shoot_angle ,tank->data.body->v,obj_id_bullet);
 		sound_play(SND_LASER_2);
 		tank->timer = 0;

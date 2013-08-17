@@ -26,6 +26,9 @@ extern int CMP_SCORE;
 extern int CMP_DAMAGE;
 extern int CMP_BODIES;
 
+/* component structs? */
+
+
 /* STATES */
 extern STATE_ID state_menu; /* deprecated state! */
 extern STATE_ID state_gameover; /* deprecated state! */
@@ -117,5 +120,6 @@ void game_destroy();
 extern float upg_total_mass;
 
 #define ID_GROUND 0xABA198 //TMP define with random number
+
 
 #endif /* GAME_H_ */

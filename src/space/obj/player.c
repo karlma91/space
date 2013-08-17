@@ -228,10 +228,8 @@ static void action_shoot(obj_player *player)
 			shoot_vel = cpvmult(shoot_vel, 1400);
 			shoot_vel = cpvadd(shoot_vel, player->data.body->v);
 
-			obj_param_bullet friendly_bullet = {.friendly = 1};
-			instance_create(player->bullet_type, &friendly_bullet, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
-
-			//b->damage = player->bullet_dmg;
+			obj_param_bullet opb = {.friendly = 1, .damage = player->bullet_dmg};
+			instance *instance = instance_create(player->bullet_type, &opb, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
 		}
 
 		player->gun_timer = 0;
