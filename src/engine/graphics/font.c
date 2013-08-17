@@ -172,6 +172,8 @@ void init_text(char c)
 		drawDigit(digits[c - '0']);
 	} else if (c >= 'A' && c <= 'Z') {
 		drawLetter(c - 'A');
+	}  else if (c >= 'a' && c <= 'z') {
+		drawLetter(c - 'a');
 	} else {
 		drawSymbol(c);
 	}

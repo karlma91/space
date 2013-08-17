@@ -134,7 +134,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	cpVect pos1 = robotarm->saw->p;
 	cpVect pos2 = robotarm->data.body->p;
 	sprite_render(&(robotarm->saw_sprite), &pos1, 0);
-	sprite_render(&(robotarm->data.spr), &pos2, 180/M_PI);
+	sprite_render(&(robotarm->data.spr), &pos2, 0);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
