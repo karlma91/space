@@ -75,6 +75,7 @@ OBJ_START(player)
 
 	float force;
 	float bullet_dmg;
+	object_id *bullet_type;
 
 	emitter *flame;
 	cpBody *gunwheel;

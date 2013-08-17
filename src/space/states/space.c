@@ -750,6 +750,7 @@ void space_init_level(int space_station, int deck)
 	cpBodySetMass(player->data.body, upg_total_mass);
 	player->param.gun_cooldown = 1 / weapons[weapon_index].lvls[weapons[weapon_index].level].firerate;
 	player->bullet_dmg = weapons[weapon_index].lvls[weapons[weapon_index].level].damage;
+	player->bullet_type = object_by_name(weapons[weapon_index].obj_name);
 	player->hp_bar.max_hp = armors[armor_index].max_hp;
 	player->hp_bar.value = player->hp_bar.max_hp;
 

@@ -21,7 +21,7 @@ typedef enum {
 } PROJECTILE_TYPE;
 
 #define MAX_WEAPON_LEVEL 3
-#define WEAPON_UPGRADES 2
+#define WEAPON_UPGRADES 3
 #define ARMOR_UPGRADES 2
 #define ENGINE_UPGRADES 2
 
@@ -46,7 +46,7 @@ typedef struct {
 
 	SPRITE_ID *spr_id;
 
-	object_id *obj_type; //TODO change to pointer to shoot function with player as argument (or keep both and use as argument)
+	char obj_name[40]; //TODO change to pointer to shoot function with player as argument (or keep both and use as argument)
 } upg_weapon;
 
 typedef struct {

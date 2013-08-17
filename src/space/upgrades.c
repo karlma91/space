@@ -20,20 +20,32 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 			{48, 5.7, 2.0, 650, 4500}
 		},
 		.spr_id = &SPRITE_PLAYER_GUN,
-		.obj_type = NULL
+		.obj_name = "BULLET"
 	}, {
 		.name = "MACHINE GUN",
 		.p_type = PROJECT_BULLET,
 		.level = 1,
 		.lvls = {
-			/* dmg, rate, mass, price */
+			/* dmg, rate, mass, range, price */
 			{7.6, 18.0, 1.8, 550, 12900},
 			{8.4, 23.0, 2.3, 560, 4900},
 			{9.4, 26.0, 2.6, 570, 5950}
 		},
 		.spr_id = &SPRITE_PLAYER_GUN,
-		.obj_type = NULL
-	}
+		.obj_name = "BULLET"
+	}, {
+			.name = "COIN DROPPER",
+			.p_type = PROJECT_BULLET,
+			.level = 1,
+			.lvls = {
+				/* dmg, rate, mass, range, price */
+				{0, 5.0, 0, 99999, 999900},
+				{0, 15.0, 0, 99999, 999992},
+				{0, 30.0, 0, 99999, 999998}
+			},
+			.spr_id = &SPRITE_SPIKEBALL,
+			.obj_name = "COIN"
+		}
 };
 
 upg_armor armors[ARMOR_UPGRADES] = {

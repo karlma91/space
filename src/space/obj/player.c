@@ -229,7 +229,7 @@ static void action_shoot(obj_player *player)
 			shoot_vel = cpvadd(shoot_vel, player->data.body->v);
 
 			obj_param_bullet friendly_bullet = {.friendly = 1};
-			obj_bullet *b = (obj_bullet *) instance_create(obj_id_coin, &friendly_bullet, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
+			instance_create(player->bullet_type, &friendly_bullet, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
 
 			//b->damage = player->bullet_dmg;
 		}
