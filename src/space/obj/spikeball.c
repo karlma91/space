@@ -33,11 +33,13 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&spikeball->data.spr, SPRITE_SPIKEBALL, 400, 400, 30);
 	float radius = spikeball->param.radius;
 	radius = 100;
-	float mass = 10;
+	float mass = 100;
 	spikeball->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(spikeball->data.body, cpv(spikeball->data.x, currentlvl->height-radius));
 
 	spikeball->shape = se_add_circle_shape(spikeball->data.body,radius,0.8,0.2);
+
+	cpBody *static_body = cpSpaceGetStaticBody(space);
 
 	cpShapeSetLayers(spikeball->shape, LAYER_TANK_FACTORY);
 	cpShapeSetCollisionType(spikeball->shape, this.ID);
@@ -45,11 +47,11 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	spikeball->dolly = cpSpaceAddBody(space, cpBodyNew(10, INFINITY));
 	cpSpaceAddShape(space, cpBoxShapeNew(spikeball->dolly, 30, 30));
-	cpBodySetPos(spikeball->dolly, cpv(spikeball->data.x,currentlvl->height-100));
+	cpBodySetPos(spikeball->dolly, cpv(spikeball->data.x,currentlvl->height));
 
-	spikeball->winch = cpSpaceAddConstraint(space, cpSlideJointNew(spikeball->dolly, spikeball->data.body, cpvzero, cpvzero, 0, INFINITY));
+	spikeball->winch = cpSpaceAddConstraint(space, cpSlideJointNew(spikeball->data.body,static_body, cpvzero, cpv(spikeball->data.x,currentlvl->height), 0, INFINITY));
 	cpConstraintSetMaxForce(spikeball->winch, 300000);
-	cpConstraintSetMaxBias(spikeball->winch, 600);
+	cpConstraintSetMaxBias(spikeball->winch, 200);
 	spikeball->winch_length = 100;
 }
 
@@ -61,16 +63,18 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	float lvl_height = currentlvl->height;
 
-	if(p.y > lvl_height - 300){
+	if(p.y > lvl_height - 200 && !spikeball->down ){
 		spikeball->timer += dt;
-		if(spikeball->timer > 1){
+		if(spikeball->timer > 2){
 			spikeball->timer = 0;
-			cpSlideJointSetMax(spikeball->winch, lvl_height-300);
+			spikeball->down = 1;
+			cpSlideJointSetMax(spikeball->winch, lvl_height);
 		}
-	}else if(p.y < 300){
+	}else if(p.y < 200){
 		spikeball->timer += dt;
-		if(spikeball->timer > 1){
+		if(spikeball->timer > 2){
 			spikeball->timer = 0;
+			spikeball->down = 0;
 			cpSlideJointSetMax(spikeball->winch, 100);
 		}
 	}

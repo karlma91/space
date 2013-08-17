@@ -44,7 +44,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	}
 
 	cpFloat radius = 100.0f;
-	cpFloat mass = 20.0f;
+	cpFloat mass = 5.0f;
 	cpVect pos = cpv(robotarm->data.x, robotarm->data.y + 100);
 	robotarm->saw = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(robotarm->saw, pos);
@@ -70,7 +70,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetUserData(((instance *) robotarm)->body, (instance*)robotarm);
 
 	//connect sawblade with body
-	cpSpaceAddConstraint(space, cpSlideJointNew(robotarm->saw, robotarm->data.body, cpv(0,0), cpv(0,0), 20.0f, (robotarm->segments-1)*robotarm->seg_length));
+	cpSpaceAddConstraint(space, cpSlideJointNew(robotarm->saw, robotarm->data.body, cpv(0,0), cpv(0,0), 1.0f, (robotarm->segments)*robotarm->seg_length));
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
@@ -99,12 +99,11 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	}
 
 	instance *player = instance_first(obj_id_player);
-	cpVect d = se_distance_a2b((instance*)robotarm, player);
+	cpVect d = se_distance_v(robotarm->saw->p, player->body->p);
 
-	cpBodySetForce(robotarm->saw,cpvzero);
+	cpBodySetForce(robotarm->saw, cpvzero);
 	d = cpvnormalize(d);
-	cpBodyApplyForce(robotarm->saw,cpvmult(d, 10000),cpvzero);
-
+	cpBodyApplyForce(robotarm->saw, cpvmult(d, 10000), cpvzero);
 }
 
 static void on_render(OBJ_TYPE *OBJ_NAME)

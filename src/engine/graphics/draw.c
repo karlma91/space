@@ -396,6 +396,7 @@ void draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int cente
 	draw_rotate(angle,0,0,1);
 	draw_scale(w,h,1);
 	draw_vertex_pointer(2, GL_FLOAT, 0, centered ? triangle_quad : corner_quad);
+	draw_tex_pointer(2, GL_FLOAT, 0, TEX_MAP_FULL);
 	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 4);
 	draw_pop_matrix();
 }
@@ -528,12 +529,11 @@ void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei cou
 
 void draw_draw_arrays(GLenum mode, GLint first, GLsizei count)
 {
-    float *vertex = matrix2d_get_vertex_pointer();
-    float *tex = matrix2d_get_tex_pointer();
 
     matrix2d_multiply_current(count);
 
-    vertex = matrix2d_get_vertex_data();
+    float * tex = matrix2d_get_tex_pointer();
+    float * vertex = matrix2d_get_vertex_data();
 
     glVertexPointer(2, GL_FLOAT, 0, vertex);
     glTexCoordPointer(2, GL_FLOAT, 0, tex);

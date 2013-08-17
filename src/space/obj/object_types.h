@@ -203,6 +203,7 @@ PARAM_START(spikeball)
 PARAM_END
 OBJ_START(spikeball)
 	float timer;
+	int down;
 	cpShape *shape;
 	cpBody *dolly;
 	cpConstraint *winch;
