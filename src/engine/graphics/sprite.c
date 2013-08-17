@@ -73,7 +73,7 @@ SPRITE_ID sprite_link(const char *name)
 	llist_begin_loop(constant_sprites);
 	while(llist_hasnext(constant_sprites)){
 		sprite_data *spr = llist_next(constant_sprites);
-		if(strcmp(spr->name, name) == 0){
+		if(strcasecmp(spr->name, name) == 0){
 			llist_end_loop(constant_sprites); // <- missing end loop!
 			return (SPRITE_ID)spr;
 		}

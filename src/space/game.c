@@ -65,6 +65,7 @@ SPRITE_ID SPRITE_JOYSTICK;
 SPRITE_ID SPRITE_JOYSTICK_BACK;
 SPRITE_ID SPRITE_SPIKEBALL;
 SPRITE_ID SPRITE_SAW;
+SPRITE_ID SPRITE_COIN;
 /* end of global sprite definitions*/
 
 /* global emitter */
@@ -183,6 +184,7 @@ void game_sprites()
 	SPRITE_JOYSTICK_BACK = sprite_link("joystick_back");
 	SPRITE_SPIKEBALL     = sprite_link("spikeball");
 	SPRITE_SAW           = sprite_link("saw");
+	SPRITE_COIN           = sprite_link("coin");
 }
 
 void game_particles()

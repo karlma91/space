@@ -23,3 +23,4 @@ joystick joystick.png 0 0 0.125 0.25 32
 joystick_back joystick_back.png 0 0 1 1 1
 spikeball spikeball.png 0 0 1 1 1
 saw saw.png 0 0 0.5 1 2
+coin coin.png 0 0 0.0625 1 16

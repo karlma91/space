@@ -100,7 +100,9 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	cpSpaceRemoveBody(space, spikeball->data.body);
 	cpShapeFree(spikeball->shape);
 	cpBodyFree(spikeball->data.body);
-	cpBodyRemoveConstraint(spikeball->dolly,spikeball->winch);
+
+	cpSpaceRemoveConstraint(space,spikeball->winch);
 	cpConstraintFree(spikeball->winch);
+
 	instance_super_free((instance *)spikeball); //TODO move out to objects
 }

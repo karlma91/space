@@ -61,6 +61,10 @@ SPRITE_ID sprite_load(const char *sprite); /* for loading av sprite data */
 /*
  * allokerer og returnerer en ny enhet av sprite. Kalleren er selv ansvarlig for å frigjøre sprite (eller evt. kall sprite_free)
  */
+#define SPRITE(NAME) SPRITE_##name
+#define SPRITE_LINK(NAME) SPRITE(NAME) = sprite_link(#NAME);
+#define SPRITE_DEF(NAME) SPRITE_ID SPRITE_##NAME
+#define SPRITE_DEC(NAME) extern SPRITE_DEF(NAME)
 
 SPRITE_ID sprite_link(const char *name);
 void sprite_get_current_image(sprite *spr, float *sub_map);

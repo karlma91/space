@@ -15,4 +15,6 @@ void object_types_init()
 	OBJECT_REGISTER(rocket);
 	OBJECT_REGISTER(robotarm);
 	OBJECT_REGISTER(spikeball);
+
+	OBJECT_REGISTER(coin);
 }
