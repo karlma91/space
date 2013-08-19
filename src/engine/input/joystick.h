@@ -42,12 +42,15 @@ typedef struct {
 	sprite spr_back;
 	sprite spr_front;
 
+	SDL_Scancode key_left, key_up, key_right, key_down;
+
 	int persistent;
 } joystick;
 
 joystick *joystick_create(int persistent, float radius, float min_radius, float center_x, float center_y, float width, float height, SPRITE_ID spr_back, SPRITE_ID spr_front);
 void joystick_free(joystick *stick);
 
+void joystick_set_hotkeys(joystick *stick, SDL_Scancode key_left, SDL_Scancode key_up, SDL_Scancode key_right, SDL_Scancode key_down);
 void joystick_axis(joystick *stick, float x, float y);
 
 void joystick_touch(joystick *stick, float x, float y);

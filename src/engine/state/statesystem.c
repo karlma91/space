@@ -198,6 +198,7 @@ void statesystem_free(STATE_ID state_id)
 	llist_destroy(state->touch_objects);
 }
 
+
 void statesystem_push_event(SDL_Event *event)
 {
 	if (stack_head->call.sdl_event) {
@@ -207,6 +208,15 @@ void statesystem_push_event(SDL_Event *event)
 	LList list = stack_head->touch_objects;
 	llist_begin_loop(list);
 	switch(event->type) {
+	case SDL_KEYDOWN:
+		while(llist_hasnext(list)) {
+			touchable *touchy = llist_next(list);
+			if (touchy->enabled) {
+				if (touchy->calls->touch_keypress(touchy, event->key.keysym.scancode))
+					break;
+			}
+		}
+		break;
 	case SDL_FINGERDOWN:
 		while(llist_hasnext(list)) {
 			touchable *touchy = llist_next(list);

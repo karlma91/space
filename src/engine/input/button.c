@@ -40,8 +40,22 @@ struct button {
 	Color backcol;
 	Color frontcol;
 
+	SDL_Scancode key1, key2;
+
 	void *data;
 };
+
+static int keypress_down(button btn_id, SDL_Scancode key)
+{
+	struct button *btn = (struct button *) btn_id;
+
+	if (key == btn->key1 || key == btn->key2) {
+
+		return 1;
+	}
+
+	return 0;
+}
 
 button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_x, float pos_y, float width, float height)
 {
@@ -81,6 +95,11 @@ void button_set_callback(button btn_id, void (*callback)(void *), void *data)
 	struct button *btn = (struct button *) btn_id;
 	btn->callback = callback;
 	btn->data = data;
+}
+
+void button_set_hotkeys(button btn_id, SDL_Scancode key, SDL_Scancode key_alt)
+{
+
 }
 
 

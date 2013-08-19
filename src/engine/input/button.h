@@ -21,6 +21,7 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 void button_free(button btn);
 
 void button_set_callback(button btn_id, void (*callback)(void *), void *data);
+void button_set_hotkeys(button btn_id, SDL_Scancode key, SDL_Scancode key_alt);
 
 void button_set_backcolor(button btn_id, Color col);
 void button_set_frontcolor(button btn_id, Color col);

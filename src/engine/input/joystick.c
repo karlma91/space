@@ -17,6 +17,27 @@
 
 //FIXME one controller cancels the other
 
+static int keypress_down(touchable *touch_id, SDL_Scancode key)
+{
+	joystick *stick = (joystick *) touch_id;
+
+	if (key == stick->key_left) {
+
+		return 1;
+	} else if (key == stick->key_up) {
+
+		return 1;
+	} else if (key == stick->key_right) {
+
+		return 1;
+	} else if (key == stick->key_down) {
+
+		return 1;
+	}
+
+	return 0;
+}
+
 joystick *joystick_create(int persistent, float radius, float min_radius, float center_x, float center_y, float width, float height, SPRITE_ID spr_back, SPRITE_ID spr_front)
 {
 	joystick *stick = calloc(1, sizeof *stick);
@@ -97,6 +118,14 @@ void joystick_place(joystick *stick, float pos_x, float pos_y)
 
 	stick->pos_x = pos_x > max_x ? max_x : pos_x < min_x ? min_x : pos_x;
 	stick->pos_y = pos_y > max_y ? max_y : pos_y < min_y ? min_y : pos_y;
+}
+
+void joystick_set_hotkeys(joystick *stick, SDL_Scancode key_left, SDL_Scancode key_up, SDL_Scancode key_right, SDL_Scancode key_down)
+{
+	stick->key_left = key_left;
+	stick->key_up = key_up;
+	stick->key_right = key_right;
+	stick->key_down = key_down;
 }
 
 void joystick_axis(joystick *stick, float x, float y)

@@ -29,7 +29,32 @@ typedef struct {
 	float x_offset;
 	float y_offset;
 
+	SDL_Scancode key_left, key_up, key_right, key_down;
+
 } scroll_priv;
+
+
+static int keypress_down(touchable *scr_id, SDL_Scancode key)
+{
+	scroll_priv * scr = (scroll_priv *) scr_id;
+	float f = 0.9*dt;
+
+	if (key == scr->key_left) {
+		scr->x_offset += scr->max_speed * f;
+		return 1;
+	} else if (key == scr->key_up) {
+		scr->y_offset -= scr->max_speed * f;
+		return 1;
+	} else if (key == scr->key_right) {
+		scr->x_offset -= scr->max_speed * f;
+		return 1;
+	} else if (key == scr->key_down) {
+		scr->y_offset += scr->max_speed * f;
+		return 1;
+	}
+
+	return 0;
+}
 
 static void update(touchable * scr_id)
 {
@@ -124,6 +149,14 @@ static int touch_up(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	return 0;
 }
 
+void scroll_set_hotkeys(touchable * scr_id, SDL_Scancode key_left, SDL_Scancode key_up, SDL_Scancode key_right, SDL_Scancode key_down)
+{
+	scroll_priv * scr = (scroll_priv *) scr_id;
+	scr->key_left = key_left;
+	scr->key_up = key_up;
+	scr->key_right = key_right;
+	scr->key_down = key_down;
+}
 
 scroll_p scroll_create(float pos_x, float pos_y, float width, float height, float friction, float max_speed)
 {
@@ -132,6 +165,9 @@ scroll_p scroll_create(float pos_x, float pos_y, float width, float height, floa
 	REGISTER_CALLS(scr);
 
 	scroll_p scr_id = (scroll_p) scr;
+
+	/* default keybindings */
+	scroll_set_hotkeys(scr_id, SDL_SCANCODE_LEFT,SDL_SCANCODE_UP,SDL_SCANCODE_RIGHT,SDL_SCANCODE_DOWN);
 
 	scr_id->type = CTRL_SCROLL;
 

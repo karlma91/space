@@ -51,6 +51,9 @@ typedef struct touch_calls{
 	int (*touch_motion) (touchable *, SDL_TouchFingerEvent *finger);
 	int (*touch_up) (touchable *, SDL_TouchFingerEvent *finger);
 
+	/* return 1 if keypress was handled */
+	int (*touch_keypress) (touchable *, SDL_Scancode key);
+
 	/*
 	 * on_down callback?
 	 * on_motion callback?
@@ -73,8 +76,9 @@ static void render(touchable *);
 static int touch_down(touchable *, SDL_TouchFingerEvent *finger);
 static int touch_motion(touchable *, SDL_TouchFingerEvent *finger);
 static int touch_up(touchable *, SDL_TouchFingerEvent *finger);
+static int keypress_down(touchable *, SDL_Scancode key);
 
-static const touch_calls calls = {update,render,touch_down,touch_motion,touch_up};
+static const touch_calls calls = {update,render,touch_down,touch_motion,touch_up, keypress_down};
 
 #define REGISTER_CALLS( t ) \
 		((touchable *)t)->calls = &calls; \
