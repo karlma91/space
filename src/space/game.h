@@ -15,8 +15,7 @@
 #include "../engine/graphics/customparticles.h"
 
 #include "../engine/input/button.h"
-
-#include "obj/object_types.h"
+#include "../engine/graphics/draw.h"
 
 #define SPACE_BODIES_MAX 5
 
@@ -25,10 +24,15 @@ extern int CMP_HPBAR;
 extern int CMP_SCORE;
 extern int CMP_DAMAGE;
 extern int CMP_BODIES;
+extern int CMP_MINIMAP;
 
 /* component structs? */
+typedef struct {
+	float size;
+	Color c;
+} minimap;
 
-
+#include "obj/object_types.h"
 /* STATES */
 extern STATE_ID state_menu; /* deprecated state! */
 extern STATE_ID state_gameover; /* deprecated state! */

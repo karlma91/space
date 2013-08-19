@@ -382,14 +382,14 @@ void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 	int i;
 	glBegin(GL_TRIANGLE_STRIP);
 	for(i = 0;i<128; i+=2){
-		glVertex2f(unit_circle[i]*inner_r, unit_circle[i+1]*inner_r);
-		glVertex2f(unit_circle[i]*outer_r, unit_circle[i+1]*outer_r);
+		glVertex2f(x+unit_circle[i]*inner_r, y+unit_circle[i+1]*inner_r);
+		glVertex2f(x+unit_circle[i]*outer_r, y+unit_circle[i+1]*outer_r);
 	}
 	glEnd();
 #endif
 }
 
-void draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered)
+void draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle, int centered)
 {
     draw_push_matrix();
     draw_translate(x,y,0);

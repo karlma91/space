@@ -50,6 +50,8 @@ static void update_camera_position();
 static void sticks_init();
 static void sticks_hide();
 
+static void radar_draw(float x, float y);
+
 int space_rendering_map = 0;
 
 static button btn_pause;
@@ -454,6 +456,7 @@ static void SPACE_draw()
 
 	/* translate view */
 	draw_load_identity();
+	radar_draw(-GAME_WIDTH/2 + 100, GAME_HEIGHT/2 - 300);
 	draw_scale(current_camera->zoom,current_camera->zoom,1);
 	draw_translate(-current_camera->x, -current_camera->y, 0.0f);
 
@@ -469,6 +472,32 @@ static void SPACE_draw()
 
 	space_rendering_map = 0;
 	draw_gui();
+}
+
+static float radar_x;
+static float radar_y;
+static void plot_on_radar(instance *obj)
+{
+	minimap *m = obj->components[CMP_MINIMAP];
+	if(m != NULL){
+		float r = 50;
+		float x = (obj->body->p.x + currentlvl->left)*2*M_PI/currentlvl->width;
+		float y = 1-(obj->body->p.y / currentlvl->height);
+		r = 50+r*y;
+		float px = cos(x)*r;
+		float py = sin(x)*r;
+		draw_color4f(m->c.r, m->c.g, m->c.b, 0.5);
+		draw_box(radar_x + px, radar_y + py, m->size, m->size, x*(180/M_PI), 1);
+	}
+}
+
+static void radar_draw(float x, float y)
+{
+	radar_x = x;
+	radar_y = y;
+	draw_color4f(0.1, 0.2, 0.4, 0.5);
+	draw_donut(radar_x, radar_y, 50, 100);
+	instance_iterate(plot_on_radar);
 }
 
 void draw_gui()

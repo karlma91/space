@@ -9,6 +9,7 @@
 #define OBJECT_TYPES_H_
 
 #include "../../engine/components/object.h"
+#include "../game.h"
 #include "../../engine/graphics/particles.h"
 #include "../../engine/graphics/draw.h"
 
@@ -72,7 +73,7 @@ OBJ_START(player)
 	float gun_timer;
 	float aim_angle;
 	float aim_speed;
-
+	minimap radar_image;
 	float force;
 	float bullet_dmg;
 	object_id *bullet_type;
@@ -106,6 +107,7 @@ OBJ_START(tank)
 	float rot_speed;
 	float max_distance;
 	hpbar hp_bar;
+	minimap radar_image;
 	obj_factory *factory;
 	int factory_id;
 	cpBody *wheel1;
@@ -133,7 +135,7 @@ OBJ_START(factory)
 	int cur;
 	hpbar hp_bar;
 	float max_distance;
-
+	minimap radar_image;
 	/* animation */
 	float rot;
 	emitter *smoke;
