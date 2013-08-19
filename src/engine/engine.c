@@ -68,7 +68,7 @@ state *currentState;
 
 static SDL_GLContext glcontext;
 
-static SDL_Window *window;
+SDL_Window *window;
 static SDL_Rect fullscreen_dimensions;
 
 #include "input/button.h"
