@@ -73,6 +73,8 @@ extern LList active_fingers;
 extern int GAME_WIDTH; // expected minimum width = 4:3 -> 1600
 extern float ASPECT_RATIO; // 2:1 <-> 8:5 <-> 4:3
 
+extern SDL_Window *window;
+
 /* The delta time */
 extern float dt;
 extern int mdt;
