@@ -6,7 +6,7 @@
  */
 
 //#include "pause.h"
-
+#include "stdio.h"
 #include "../game.h"
 #include "../../engine/engine.h"
 #include "../../engine/state/state.h"
