@@ -34,6 +34,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	factory->data.components[CMP_HPBAR] = &(factory->hp_bar);
 	factory->data.components[CMP_SCORE] = &(factory->param.score);
+	factory->data.components[CMP_MINIMAP] = &(factory->radar_image);
+	factory->radar_image.c.b = 1;
+	factory->radar_image.size = 10;
 
 	static int randomness= 0;
 	randomness += 123;

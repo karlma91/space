@@ -50,6 +50,8 @@ static void update_camera_position();
 static void sticks_init();
 static void sticks_hide();
 
+static void radar_draw(float x, float y);
+
 int space_rendering_map = 0;
 
 static button btn_pause;
@@ -454,6 +456,7 @@ static void SPACE_draw()
 
 	/* translate view */
 	draw_load_identity();
+	radar_draw(-GAME_WIDTH/2 + 100, GAME_HEIGHT/2 - 300);
 	draw_scale(current_camera->zoom,current_camera->zoom,1);
 	draw_translate(-current_camera->x, -current_camera->y, 0.0f);
 
@@ -469,6 +472,32 @@ static void SPACE_draw()
 
 	space_rendering_map = 0;
 	draw_gui();
+}
+
+static float radar_x;
+static float radar_y;
+static void plot_on_radar(instance *obj)
+{
+	minimap *m = obj->components[CMP_MINIMAP];
+	if(m != NULL){
+		float r = 50;
+		float x = (obj->body->p.x + currentlvl->left)*2*M_PI/currentlvl->width;
+		float y = 1-(obj->body->p.y / currentlvl->height);
+		r = 50+r*y;
+		float px = cos(x)*r;
+		float py = sin(x)*r;
+		draw_color4f(m->c.r, m->c.g, m->c.b, 0.5);
+		draw_box(radar_x + px, radar_y + py, m->size, m->size, x*(180/M_PI), 1);
+	}
+}
+
+static void radar_draw(float x, float y)
+{
+	radar_x = x;
+	radar_y = y;
+	draw_color4f(0.1, 0.2, 0.4, 0.5);
+	draw_donut(radar_x, radar_y, 50, 100);
+	instance_iterate(plot_on_radar);
 }
 
 void draw_gui()
@@ -828,16 +857,9 @@ static void sdl_event(SDL_Event *event)
 	SDL_Scancode key;
 	switch(event->type) {
 	case SDL_KEYDOWN:
-		key = event->key.keysym.scancode;
-
-		/* Opens the pause menu */
-		if (key == KEY_ESCAPE && gamestate == LEVEL_RUNNING) {
-			statesystem_pause();
-			//pause_game();
-		}
-
 		switch (gamestate) {
 		case LEVEL_PLAYER_DEAD:
+			//TODO implement button for this:
 			if(key == KEY_RETURN_2 || key == KEY_RETURN_1){//state_timer > 3){
 				game_over();
 			}
@@ -851,7 +873,9 @@ static void sdl_event(SDL_Event *event)
 
 static void on_pause()
 {
-	pause_game();
+	if (gamestate == LEVEL_RUNNING) {
+		pause_game();
+	}
 }
 
 static void on_leave()
@@ -876,8 +900,9 @@ void space_init()
     statesystem_add_inner_state(state_space,LEVEL_TRANSITION,level_transition,NULL);
 
     btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-85, GAME_HEIGHT/2-77, 80, 80);
-    button_set_callback(btn_pause, pause_game, 0);
+    button_set_callback(btn_pause, statesystem_pause, 0);
     button_set_enlargement(btn_pause, 2.0f);
+    button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);
     statesystem_register_touchable(this, btn_pause);
 
 	cpVect gravity = cpv(0, -600);
@@ -896,6 +921,9 @@ void space_init()
     joy_p1_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, -0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
     joy_p2_left = joystick_create(0, 120, 2, -GAME_WIDTH/2 + 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
     joy_p2_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+
+    joystick_set_hotkeys(joy_p1_left, KEY_LEFT_1,KEY_UP_1,KEY_RIGHT_1,KEY_DOWN_1);
+    joystick_set_hotkeys(joy_p1_right, KEY_LEFT_2,KEY_UP_2,KEY_RIGHT_2,KEY_DOWN_2);
 
     statesystem_register_touchable(this, joy_p1_left);
     statesystem_register_touchable(this, joy_p1_right);
@@ -924,19 +952,6 @@ int getPlayerScore()
 void input()
 {
 #if !GOT_TOUCH
-	/* update joystick positions */
-	if (!joy_p1_left->pressed) {
-		int axis_x = keys[KEY_RIGHT_1] - keys[KEY_LEFT_1];
-		int axis_y = keys[KEY_UP_1] - keys[KEY_DOWN_1];
-		joystick_axis(joy_p1_left, axis_x, axis_y);
-	}
-
-	if (!joy_p1_right->pressed) {
-		int axis_x = keys[KEY_RIGHT_2] - keys[KEY_LEFT_2];
-		int axis_y = keys[KEY_UP_2] - keys[KEY_DOWN_2];
-		joystick_axis(joy_p1_right, axis_x, axis_y);
-	}
-
 	/*
 	 * Camera modes + F11 = timeout + F8 = reload particles (broken)
 	 */

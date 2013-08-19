@@ -45,6 +45,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	tank->data.components[CMP_HPBAR] = &(tank->hp_bar);
 	tank->data.components[CMP_SCORE] = &(tank->param.score);
+	tank->data.components[CMP_MINIMAP] = &tank->radar_image;
+	tank->radar_image.c.r = 1;
+	tank->radar_image.size = 10;
 
 	sprite_create(&(tank->wheel_sprite), SPRITE_TANK_WHEEL, 120, 120, 0);
 	sprite_create(&(tank->data.spr), SPRITE_TANK_BODY, 200, 100, 0);

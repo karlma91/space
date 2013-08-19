@@ -55,6 +55,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&(player->data.spr), SPRITE_PLAYER, 120, 120, 0);
 
 	player->data.components[CMP_HPBAR] = &player->hp_bar;
+	player->data.components[CMP_MINIMAP] = &player->radar_image;
+	player->radar_image.c.g = 1;
+	player->radar_image.size = 10;
 
 
 	player->flame = particles_get_emitter(EMITTER_FLAME);

@@ -50,6 +50,20 @@ static int engine_selected = 0;
 
 static void update_upgrades();
 
+SDL_Scancode digit2scancode[10] = {
+		SDL_SCANCODE_0,
+		SDL_SCANCODE_1,
+		SDL_SCANCODE_2,
+		SDL_SCANCODE_3,
+		SDL_SCANCODE_4,
+		SDL_SCANCODE_5,
+		SDL_SCANCODE_6,
+		SDL_SCANCODE_7,
+		SDL_SCANCODE_8,
+		SDL_SCANCODE_9,
+};
+
+
 /* * * * * * * * * *
  * state functions *
  * * * * * * * * * */
@@ -267,6 +281,7 @@ void upgrades_init()
 	btn_space = button_create(SPRITE_HOME, 0, "", -GAME_WIDTH/2 + 100, GAME_HEIGHT/2 - 100, 130, 130);
 	button_set_callback(btn_space, statesystem_set_state, state_stations);
 	button_set_enlargement(btn_space, 1.5);
+	button_set_hotkeys(btn_space, KEY_ESCAPE, 0);
 	statesystem_register_touchable(this, btn_space);
 
 	//TODO load balance and bought items/upgrades

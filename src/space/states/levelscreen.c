@@ -171,6 +171,7 @@ void levelscreen_init()
 		button_set_enlargement(btn, 2);
 		button_set_backcolor(btn, col_back);
 		button_set_frontcolor(btn, col_default);
+		button_set_hotkeys(btn, digit2scancode[(i+1) % 10], 0);
 		statesystem_register_touchable(state_levelscreen, btn);
 	}
 
@@ -183,6 +184,7 @@ void levelscreen_init()
 	btn_background = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
 	btn_background->visible = 0;
 	button_set_callback(btn_background, statesystem_set_state, state_stations);
+	button_set_hotkeys(btn_background, KEY_ESCAPE, 0);
 	statesystem_register_touchable(this, btn_background);
 
 	sprite_create(&spr_star, SPRITE_STAR, 250, 250, 0);

@@ -19,22 +19,7 @@
 
 static int keypress_down(touchable *touch_id, SDL_Scancode key)
 {
-	joystick *stick = (joystick *) touch_id;
-
-	if (key == stick->key_left) {
-
-		return 1;
-	} else if (key == stick->key_up) {
-
-		return 1;
-	} else if (key == stick->key_right) {
-
-		return 1;
-	} else if (key == stick->key_down) {
-
-		return 1;
-	}
-
+	// doesn't work for joysticks
 	return 0;
 }
 
@@ -143,6 +128,12 @@ void joystick_axis(joystick *stick, float x, float y)
 static void update(touchable * stick_id)
 {
 	joystick *stick = (joystick *) stick_id;
+
+	if (!stick->pressed) {
+		int axis_x = (stick->key_right && keys[stick->key_right]) - (stick->key_left && keys[stick->key_left]);
+		int axis_y = (stick->key_up && keys[stick->key_up]) - (stick->key_down && keys[stick->key_down]);
+		joystick_axis(stick_id, axis_x, axis_y);
+	}
 
 	float x = stick->draw_axx * STCK_FRCT + stick->axis_x * (1-STCK_FRCT);
 	stick->draw_axx = x;

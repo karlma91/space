@@ -138,6 +138,9 @@ void pause_init()
 	button_set_callback(btn_retry, space_restart_level, 0);
 	button_set_callback(btn_input, input, 0);
 	button_set_callback(btn_resume, resume, 0);
+	button_set_hotkeys(btn_resume, KEY_ESCAPE, KEY_RETURN_2);
+	button_set_hotkeys(btn_retry, SDL_SCANCODE_SPACE, 0);
+	button_set_hotkeys(btn_space, SDL_SCANCODE_BACKSPACE, SDL_SCANCODE_HOME);
 
 	btn_resume->visible = 0;
 

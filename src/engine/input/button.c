@@ -50,7 +50,7 @@ static int keypress_down(button btn_id, SDL_Scancode key)
 	struct button *btn = (struct button *) btn_id;
 
 	if (key == btn->key1 || key == btn->key2) {
-
+		button_click(btn_id);
 		return 1;
 	}
 
@@ -99,7 +99,9 @@ void button_set_callback(button btn_id, void (*callback)(void *), void *data)
 
 void button_set_hotkeys(button btn_id, SDL_Scancode key, SDL_Scancode key_alt)
 {
-
+	struct button *btn = (struct button *) btn_id;
+	btn->key1 = key;
+	btn->key2 = key_alt;
 }
 
 

@@ -44,6 +44,7 @@ int CMP_HPBAR;
 int CMP_SCORE;
 int CMP_DAMAGE;
 int CMP_BODIES;
+int CMP_MINIMAP;
 /* END OF COMPONENTS DEFINITIONS */
 
 /* global sprite definitions */
@@ -162,6 +163,7 @@ void game_components()
 	CMP_SCORE = component_register(1);
 	CMP_DAMAGE = component_register(1);
 	CMP_BODIES = component_register(SPACE_BODIES_MAX);
+	CMP_MINIMAP =  component_register(1);
 }
 
 void game_sprites()
@@ -233,6 +235,7 @@ void game_touchables()
 	btn_settings = button_create(SPRITE_GEAR, 0, "", GAME_WIDTH/2 - 100, GAME_HEIGHT/2 - 100, 125, 125);
 	button_set_callback(btn_settings, open_settings, 0);
 	button_set_enlargement(btn_settings, 1.5);
+	button_set_hotkeys(btn_settings, SDL_SCANCODE_F1, 0);
 }
 
 void game_init()

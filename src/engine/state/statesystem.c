@@ -198,7 +198,6 @@ void statesystem_free(STATE_ID state_id)
 	llist_destroy(state->touch_objects);
 }
 
-
 void statesystem_push_event(SDL_Event *event)
 {
 	if (stack_head->call.sdl_event) {

@@ -117,6 +117,10 @@ void leveldone_init()
 	button_set_callback(btn_retry, space_restart_level, 0);
 	button_set_callback(btn_next, space_next_level, 0);
 
+	button_set_hotkeys(btn_next, KEY_RETURN_1, KEY_RETURN_2);
+	button_set_hotkeys(btn_retry, SDL_SCANCODE_SPACE, 0);
+	button_set_hotkeys(btn_space, KEY_ESCAPE, SDL_SCANCODE_HOME);
+
 	button_set_enlargement(btn_space, 1.5);
 	button_set_enlargement(btn_retry, 1.5);
 	button_set_enlargement(btn_next, 1.5);

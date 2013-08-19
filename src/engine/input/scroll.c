@@ -16,9 +16,7 @@ typedef struct {
 	touchable touch_data;
 
 	float friction;
-
 	int scrolling;
-
 	float max_speed;
 
 	SDL_FingerID finger_1, finger_2;
@@ -36,29 +34,17 @@ typedef struct {
 
 static int keypress_down(touchable *scr_id, SDL_Scancode key)
 {
-	scroll_priv * scr = (scroll_priv *) scr_id;
-	float f = 0.9*dt;
-
-	if (key == scr->key_left) {
-		scr->x_offset += scr->max_speed * f;
-		return 1;
-	} else if (key == scr->key_up) {
-		scr->y_offset -= scr->max_speed * f;
-		return 1;
-	} else if (key == scr->key_right) {
-		scr->x_offset -= scr->max_speed * f;
-		return 1;
-	} else if (key == scr->key_down) {
-		scr->y_offset += scr->max_speed * f;
-		return 1;
-	}
-
 	return 0;
 }
 
 static void update(touchable * scr_id)
 {
 	scroll_priv * scr = (scroll_priv *) scr_id;
+
+	float spd = scr->max_speed * 0.8*dt;
+
+	scr->x_offset +=  (keys[scr->key_left] - keys[scr->key_right]) * spd;
+	scr->y_offset +=  (keys[scr->key_down] - keys[scr->key_up]) * spd;
 
 	if (!scr->scrolling) {
 		scr->x_offset += scr->hs;

@@ -375,21 +375,21 @@ void draw_circle(GLfloat x, GLfloat y, GLfloat radius)
 
 void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
 {
-#if GLES1
-
-
-#else
-	int i;
-	glBegin(GL_TRIANGLE_STRIP);
+	int i = 0;
+	static float v[256];
+	int j = 0;
 	for(i = 0;i<128; i+=2){
-		glVertex2f(unit_circle[i]*inner_r, unit_circle[i+1]*inner_r);
-		glVertex2f(unit_circle[i]*outer_r, unit_circle[i+1]*outer_r);
+		v[j++] = (x+unit_circle[i]*inner_r);
+		v[j++] = y+unit_circle[i+1]*inner_r;
+		v[j++] = (x+unit_circle[i]*outer_r);
+		v[j++] = y+unit_circle[i+1]*outer_r;
 	}
-	glEnd();
-#endif
+	draw_vertex_pointer(2, GL_FLOAT, 0, v);
+	draw_tex_pointer(2, GL_FLOAT, 0, TEX_MAP_FULL);
+	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 128);
 }
 
-void draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered)
+void draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle, int centered)
 {
     draw_push_matrix();
     draw_translate(x,y,0);

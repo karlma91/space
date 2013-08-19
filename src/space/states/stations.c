@@ -152,6 +152,7 @@ void stations_init()
 	btn_home = button_create(SPRITE_PLAYER, 0, "", 0, 0, 250, 250);
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
+	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
 	statesystem_register_touchable(this, btn_home);
 
 	int i;
@@ -164,7 +165,9 @@ void stations_init()
 		button_set_backcolor(btn_stations[i], col_back);
 		button_set_animated(btn_stations[i], 1, (i ? 18 : 15));
 		button_set_enlargement(btn_stations[i], 1.5);
+		button_set_hotkeys(btn_stations[i], digit2scancode[(i+1) % 10], 0);
 		btn_stations[i]->visible = 0;
+
 		statesystem_register_touchable(this, btn_stations[i]);
 	}
 
