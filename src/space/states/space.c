@@ -456,7 +456,6 @@ static void SPACE_draw()
 
 	/* translate view */
 	draw_load_identity();
-	radar_draw(-GAME_WIDTH/2 + 100, GAME_HEIGHT/2 - 300);
 	draw_scale(current_camera->zoom,current_camera->zoom,1);
 	draw_translate(-current_camera->x, -current_camera->y, 0.0f);
 
@@ -495,7 +494,7 @@ static void radar_draw(float x, float y)
 {
 	radar_x = x;
 	radar_y = y;
-	draw_color4f(0.1, 0.2, 0.4, 0.5);
+	draw_color4f(0.3, 0.5, 0.7, 0.6);
 	draw_donut(radar_x, radar_y, 50, 100);
 	instance_iterate(plot_on_radar);
 }
@@ -506,14 +505,15 @@ void draw_gui()
 	draw_load_identity();
 	draw_color4f(1,1,1,1);
 
-	/* draw GUI */
+	obj_player *player = ((obj_player*)instance_first(obj_id_player));
+
 	setTextAngle(0); // TODO don't use global variables for setting font properties
 	setTextAlign(TEXT_LEFT);
 	setTextSize(35);
 
-	obj_player *player = ((obj_player*)instance_first(obj_id_player));
-
 	if (gamestate != LEVEL_START) {
+		radar_draw(-GAME_WIDTH/2 + 115, GAME_HEIGHT/2 - 165);
+
 		/* simple score animation */
 		char score_temp[20];
 		static int score_anim = 0;
@@ -531,14 +531,14 @@ void draw_gui()
 		draw_color4f(1,1,1,1);
 		font_drawText(-GAME_WIDTH/2+20,GAME_HEIGHT/2 - 26,score_temp);
 
-		draw_color4f(1,0,0,1);
+		draw_color4f(0.5,0.1,0.1,1);
 		setTextSize(20);
 		char goals_left[100];
-		sprintf(goals_left, "OBJEKTER: %d",
+		sprintf(goals_left, "%d",
 				instance_count(obj_id_factory)+
 				instance_count(obj_id_turret)+
 				instance_count(obj_id_tank));
-		font_drawText(-GAME_WIDTH/2+20,GAME_HEIGHT/2 - 100,goals_left);
+		font_drawText(-GAME_WIDTH/2+20,-GAME_HEIGHT/2 + 100,goals_left);
 
 		//draw_color4f(1,1,1,1);
 		//setTextSize(20);
