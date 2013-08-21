@@ -62,7 +62,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
 	cpBodySetPos(factory->data.body, cpv(factory->data.x,64+size/2));
 
-	polyshape_add_shapes(POLYSHAPE_RAMP, factory->data.body, 600, 1, 0.7, 10, this.ID, LAYER_TANK_FACTORY);
+	polyshape_add_shapes(POLYSHAPE_RAMP, factory->data.body, 400, 1, 0.7, 11111, this.ID, LAYER_TANK_FACTORY);
 	cpBodySetUserData(factory->data.body, factory);
 
 	hpbar_init(&factory->hp_bar, factory->param.max_hp, 200, 35, -50, 180,
