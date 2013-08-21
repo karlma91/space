@@ -62,7 +62,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
 	cpBodySetPos(factory->data.body, cpv(factory->data.x,64+size/2));
 
-	polyshape_add_shapes(POLYSHAPE_RAMP, factory->data.body, 400, 1, 0.7, 11111, this.ID, LAYER_TANK_FACTORY);
+	polyshape_add_shapes(factory->param.shape_id, factory->data.body, 400, 1, 0.7, 11111, this.ID, LAYER_TANK_FACTORY);
 	cpBodySetUserData(factory->data.body, factory);
 
 	hpbar_init(&factory->hp_bar, factory->param.max_hp, 200, 35, -50, 180,
@@ -93,7 +93,6 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 	factory->rot += 381 * dt;
 	cpVect draw_pos = factory->data.body->p;
-	draw_pos.y += 8;
 
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	sprite_render(&(factory->data.spr), &(draw_pos), 0);

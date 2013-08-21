@@ -15,11 +15,12 @@ polyshape * polyshape_read(char *filename)
 		llist_set_remove_callback(p->polylist,polyshape_remove);
 
 		char file_path[100];
-		sprintf(file_path,"gamedata/phys/%s", filename);
+		sprintf(file_path,"game_data/shapes/%s", filename);
 		char buff[10000];
 		FILE *f = fopen(file_path,"r");
 		if(f == NULL){
-		     SDL_Log("[polyshape] no file %s", filename);
+		     SDL_Log("ERROR: [polyshape] no file %s", filename);
+		     return NULL;
 		}
 		int i=0;
 		int c = 0;

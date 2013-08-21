@@ -1,6 +1,9 @@
 #ifndef POLYSHAPE_H_
 #define POLYSHAPE_H_
 
+//TODO move polyshape.c and polyshape.h to engine
+//TODO rename polyshape -> shape
+
 #include "../engine/data/llist.h"
 #include "chipmunk.h"
 

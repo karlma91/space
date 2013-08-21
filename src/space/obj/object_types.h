@@ -128,6 +128,9 @@ PARAM_START(factory)
 	object_id *type;
 	void *param;
 	SPRITE_ID sprite_id;
+
+	char shape_name[32];
+	polyshape *shape_id;
 PARAM_END
 OBJ_START(factory)
 	cpShape *shape;

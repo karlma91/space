@@ -180,11 +180,12 @@ int level_init()
 			offset += offset_add;
 			arg.rocket.tex_id = texture_load(fname);
 		} else if (obj_id == obj_id_factory) {
-			expected = 7;
-			ret = sscanf(&buffer[offset], "%d %f %f %d %s %s %s%n\n", &arg.factory.max_tanks, &arg.factory.max_hp, &arg.factory.spawn_delay, &arg.factory.score, object_buf, buf, &fname[0], &offset_add);
+			expected = 8;
+			ret = sscanf(&buffer[offset], "%d %f %f %d %s %s %s %s%n\n", &arg.factory.max_tanks, &arg.factory.max_hp, &arg.factory.spawn_delay, &arg.factory.score, object_buf, buf, &fname[0], &arg.factory.shape_name[0], &offset_add);
 			offset += offset_add;
 
 			arg.factory.sprite_id = sprite_link(fname);
+			arg.factory.shape_id = polyshape_read(arg.factory.shape_name);
 
 			int sub_id = -1;
 			/* find arg.tank subtype */
