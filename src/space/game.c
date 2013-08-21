@@ -1,6 +1,8 @@
 #include "game.h"
 #include "../engine/engine.h"
 
+#include "cJSON.h"
+
 #include "states/space.h"
 //#include "states/stations.h"
 #include "states/leveldone.h"
@@ -68,6 +70,11 @@ SPRITE_ID SPRITE_SPIKEBALL;
 SPRITE_ID SPRITE_SAW;
 SPRITE_ID SPRITE_COIN;
 /* end of global sprite definitions*/
+
+/* polyshapes */
+POLYSHAPE_ID POLYSHAPE_RAMP;
+
+/* end*
 
 /* global emitter */
 int EMITTER_FLAME;
@@ -189,6 +196,11 @@ void game_sprites()
 	SPRITE_COIN           = sprite_link("coin");
 }
 
+void game_polyshapes()
+{
+	POLYSHAPE_RAMP = polyshape_read("ramp");
+}
+
 void game_particles()
 {
 #define PARTICLE_STRESS 0
@@ -242,6 +254,7 @@ void game_init()
 {
 	//TODO generalize particles.c and sprites.c, (and level.c?)
 	game_sprites();
+	game_polyshapes();
 	game_audio();
 	game_particles();
 	game_font();

@@ -24,6 +24,8 @@
 #include "chipmunk.h"
 #include "../spaceengine.h"
 
+#include "../polyshape.h"
+
 static void remove_factory_from_tank(obj_tank *);
 
 static void init(OBJ_TYPE *OBJ_NAME)
@@ -60,14 +62,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
 	cpBodySetPos(factory->data.body, cpv(factory->data.x,64+size/2));
 
-	/* make and connect new shape to body */
-	factory->shape = cpSpaceAddShape(space,cpBoxShapeNew(factory->data.body, size, size));
-	cpShapeSetFriction(factory->shape, 1);
-	cpShapeSetElasticity(factory->shape, 0.7f);
-
-	//cpShapeSetGroup(fac->shape, 10);
-	cpShapeSetLayers(factory->shape, LAYER_TANK_FACTORY);
-	cpShapeSetCollisionType(factory->shape, this.ID);
+	polyshape_add_shapes(POLYSHAPE_RAMP, factory->data.body, 600, 1, 0.7, 10, this.ID, LAYER_TANK_FACTORY);
 	cpBodySetUserData(factory->data.body, factory);
 
 	hpbar_init(&factory->hp_bar, factory->param.max_hp, 200, 35, -50, 180,
@@ -124,9 +119,8 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);
 	particles_release_emitter(factory->smoke);
 
-	cpSpaceRemoveShape(space, factory->shape);
+	cpBodyEachShape(factory->data.body, se_shape_from_space, NULL);
 	cpSpaceRemoveBody(space, factory->data.body);
-	cpShapeFree(factory->shape);
 	cpBodyFree(factory->data.body);
 
 	instance_iterate_type((void (*)(instance *))remove_factory_from_tank, obj_id_tank);

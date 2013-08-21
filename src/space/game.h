@@ -14,6 +14,8 @@
 #include "../engine/graphics/particles.h"
 #include "../engine/graphics/customparticles.h"
 
+#include "polyshape.h"
+
 #include "../engine/input/button.h"
 #include "../engine/graphics/draw.h"
 
@@ -64,6 +66,10 @@ extern SPRITE_ID SPRITE_JOYSTICK_BACK;
 extern SPRITE_ID SPRITE_SPIKEBALL;
 extern SPRITE_ID SPRITE_SAW;
 extern SPRITE_ID SPRITE_COIN;
+
+/* POLYSHAPES */
+extern POLYSHAPE_ID POLYSHAPE_RAMP;
+
 
 /* PARTICLES */
 extern int EMITTER_FLAME;
