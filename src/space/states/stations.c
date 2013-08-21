@@ -27,7 +27,6 @@ static int station_count = 2;
 
 static scroll_p scroller;
 
-static int tex_title;
 static int tex_stars;
 static int tex_stars_2;
 
@@ -176,7 +175,6 @@ void stations_init()
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000); // max 4 000 gu / sec
 	statesystem_register_touchable(this, scroller);
 
-	tex_title = texture_load("space_title.png");
 	tex_stars = texture_load("stars.jpg");
 	tex_stars_2 = texture_load("stars_2.png");
 }

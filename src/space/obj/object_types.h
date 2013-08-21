@@ -128,7 +128,6 @@ PARAM_START(factory)
 	object_id *type;
 	void *param;
 	SPRITE_ID sprite_id;
-
 	char shape_name[32];
 	polyshape *shape_id;
 PARAM_END
@@ -151,6 +150,8 @@ PARAM_START(turret)
 	float shoot_interval;
 	int burst_number;
 	int tex_id;
+	char shape_name[32];
+	polyshape *shape_id;
 PARAM_END
 OBJ_START(turret)
 	cpShape *shape;

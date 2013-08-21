@@ -173,6 +173,7 @@ void game_components()
 	CMP_MINIMAP =  component_register(1);
 }
 
+//TODO create macro for sprite_linking
 void game_sprites()
 {
 	SPRITE_PLAYER   	 = sprite_link("player");
