@@ -39,22 +39,23 @@ polyshape * polyshape_read(char *filename)
 		for (i = 0; i < cJSON_GetArraySize(bodies); i++){
 			cJSON *body = cJSON_GetArrayItem(bodies, i);
 			cJSON *polygons = cJSON_GetObjectItem(body, "polygons");
-			for (i=0; i < cJSON_GetArraySize(polygons); i++){
-				cJSON *polygon = cJSON_GetArrayItem(polygons, i);
+			int k;
+			for (k=0; k < cJSON_GetArraySize(polygons); k++){
+				cJSON *polygon = cJSON_GetArrayItem(polygons, k);
 				shape_instance *data = calloc(1, sizeof(shape_instance));
 				int size = cJSON_GetArraySize(polygon);
 				data->num = size;
 				data->shape = calloc(size, sizeof(cpVect));
-				for (i = 0; i <size; i++){
-					cJSON *vertex = cJSON_GetArrayItem(polygon, i);
-					data->shape[i].x = (cJSON_GetObjectItem(vertex, "x")->valuedouble - 0.5);
-					data->shape[i].y = (cJSON_GetObjectItem(vertex, "y")->valuedouble - 0.5);
-					SDL_Log("DATATATAT: %f,   %f",data->shape[i].x,data->shape[i].y);
+				int j;
+				for (j = 0; j <size; j++){
+					cJSON *vertex = cJSON_GetArrayItem(polygon, j);
+					data->shape[j].x = (cJSON_GetObjectItem(vertex, "x")->valuedouble - 0.5);
+					data->shape[j].y = (cJSON_GetObjectItem(vertex, "y")->valuedouble - 0.5);
 				}
-				for (i = 0; i <size/2; i++) {
-					cpVect t = data->shape[i];
-					data->shape[i] = data->shape[size-1-i];
-					data->shape[size-1-i] = t;
+				for (j = 0; j <size/2; j++) {
+					cpVect t = data->shape[j];
+					data->shape[j] = data->shape[size-1-j];
+					data->shape[size-1-j] = t;
 				}
 				p->shapes += 1;
 				llist_add(p->polylist, data);
