@@ -203,4 +203,5 @@ void hm_destroy(hashmap *hm)
 		}
 	}
 	free(hm->buckets);
+	free(hm);
 }
