@@ -18,6 +18,7 @@ typedef struct {
 
 void polyshape_destroy(polyshape *p);
 polyshape * polyshape_read(char *filename);
+polyshape * polyshape_link(char *name);
 void polyshape_add_shapes(cpSpace *space, polyshape *p, cpBody * body, int size, float friction, float elasticity, int group, int type, int layer);
 
 #endif /* POLYSHAPE_H_ */
