@@ -1,19 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "polyshape.h"
+#include "shape.h"
 #include "cJSON.h"
 #include "SDL_log.h"
-#include "states/space.h"
-#include "../engine/io/waffle_utils.h"
+#include "../io/waffle_utils.h"
 
-static void polyshape_remove(void*);
+static void shape_remove(void*);
 
 polyshape * polyshape_read(char *filename)
 {
 		polyshape * p = malloc(sizeof(polyshape));
 		p->shapes = 0;
 		p->polylist = llist_create();
-		llist_set_remove_callback(p->polylist,polyshape_remove);
+		llist_set_remove_callback(p->polylist,shape_remove);
 
 		char file_path[100];
 		sprintf(file_path,"shapes/%s", filename);
@@ -60,7 +59,7 @@ polyshape * polyshape_read(char *filename)
 		return p;
 }
 
-void polyshape_add_shapes(polyshape *p, cpBody * body, int size, float friction, float elasticity, int group, int type, int layer)
+void polyshape_add_shapes(cpSpace *space, polyshape *p, cpBody * body, int size, float friction, float elasticity, int group, int type, int layer)
 {
 	llist_begin_loop(p->polylist);
 	while(llist_hasnext(p->polylist)){
@@ -82,7 +81,7 @@ void polyshape_add_shapes(polyshape *p, cpBody * body, int size, float friction,
 	llist_end_loop(p->polylist);
 }
 
-static void polyshape_remove(void *data)
+static void shape_remove(void *data)
 {
 	shape_instance *s = (shape_instance*)data;
 	free(s->shape);

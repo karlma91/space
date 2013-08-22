@@ -14,7 +14,7 @@
 #include "../engine/graphics/particles.h"
 #include "../engine/graphics/customparticles.h"
 
-#include "polyshape.h"
+#include "../engine/components/shape.h"
 
 #include "../engine/input/button.h"
 #include "../engine/graphics/draw.h"
