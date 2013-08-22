@@ -20,9 +20,9 @@ typedef struct {
 
 hashmap * hm_create();
 void hm_destroy(hashmap *hm);
-int hm_add(hashmap *hm, char *key, void *data);
-void* hm_remove(hashmap *hm, char *key);
-void * hm_get(hashmap *hm, char *key);
+int hm_add(hashmap *hm, const char *key, void *data);
+void* hm_remove(hashmap *hm, const char *key);
+void * hm_get(hashmap *hm, const char *key);
 hashiterator * hm_get_iterator(hashmap *hm);
 void * hm_iterator_next(hashiterator *iterator);
 void hm_destroy_iterator(hashiterator *iterator);

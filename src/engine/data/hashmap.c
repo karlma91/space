@@ -90,7 +90,7 @@ static void hm_resize(hashmap *hm)
 	hm->size = size;
 }
 
-static hashnode * hm_create_node(char *key, void *data)
+static hashnode * hm_create_node(const char *key, void *data)
 {
 	hashnode *node = malloc(sizeof(hashnode));
 	strcpy(node->key, key);
@@ -99,7 +99,7 @@ static hashnode * hm_create_node(char *key, void *data)
 	return node;
 }
 
-void* hm_remove(hashmap *hm, char *key){
+void* hm_remove(hashmap *hm, const char *key){
 	int index = hash((unsigned char*)key) % hm->size;
 	hashnode *prev =NULL;
 	hashnode *node = hm->buckets[index];
@@ -121,7 +121,7 @@ void* hm_remove(hashmap *hm, char *key){
 	return NULL;
 }
 
-int hm_add(hashmap *hm, char *key, void *data)
+int hm_add(hashmap *hm, const char *key, void *data)
 {
 	if(hm->count == hm->size){
 		hm_resize(hm);
@@ -130,13 +130,13 @@ int hm_add(hashmap *hm, char *key, void *data)
 	if(hm_add_internal(hm->buckets,node,hm->size) == 0){
 		hm->count += 1;
 	}else{
+		free(node);
 		return 1;
 	}
-
 	return 0;
 }
 
-void * hm_get(hashmap *hm, char *key)
+void * hm_get(hashmap *hm, const char *key)
 {
 	int index = hash((unsigned char*)key) % hm->size;
 	hashnode *node = hm->buckets[index];
