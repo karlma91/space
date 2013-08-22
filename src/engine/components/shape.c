@@ -103,6 +103,7 @@ static void shape_remove(void *data)
 
 void polyshape_destroy(polyshape *p)
 {
+	hm_destroy(names);
 	llist_destroy(p->polylist);
 	free(p);
 }
