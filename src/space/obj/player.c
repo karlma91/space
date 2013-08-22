@@ -107,7 +107,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	if (player_cheat_invulnerable)
-		player->hp_bar.value = 100;
+		player->hp_bar.value = 10000;
 
 	player->gun_timer += dt;
 

@@ -4,6 +4,7 @@
 #include "cJSON.h"
 #include "SDL_log.h"
 #include "states/space.h"
+#include "../engine/io/waffle_utils.h"
 
 static void polyshape_remove(void*);
 
@@ -15,22 +16,16 @@ polyshape * polyshape_read(char *filename)
 		llist_set_remove_callback(p->polylist,polyshape_remove);
 
 		char file_path[100];
-		sprintf(file_path,"game_data/shapes/%s", filename);
+		sprintf(file_path,"shapes/%s", filename);
 		char buff[10000];
-		FILE *f = fopen(file_path,"r");
-		if(f == NULL){
-		     SDL_Log("ERROR: [polyshape] no file %s", filename);
+
+		int filesize = waffle_read_file(file_path, buff, 10000);
+
+		if (filesize == 0) {
 		     return NULL;
 		}
-		int i=0;
-		int c = 0;
-		while(c != EOF){
-			c = fgetc(f);
-			buff[i++] = (char)c;
-		}
-		buff[i-1]='\0';
-		//SDL_Log("The file %s",buff);
 
+		int i;
 		cJSON *root = cJSON_Parse(buff);
 		if(root == NULL){
 			 SDL_Log("[polyshape] could not parse: %s", filename);
