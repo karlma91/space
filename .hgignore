@@ -16,6 +16,12 @@ game_data/sound/*
 *~
 src/*~
 resources/win/space.res.o
+*.png
+*.jpg
+*.mp3
+*.wav
+*.ogg
 
 syntax: regexp
 ^Debug$
+.*

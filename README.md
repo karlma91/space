@@ -1,28 +1,29 @@
 # SPACE (working title)
+ETA: Dec. 2013 - Jan. 2014
 A cross-platform space game being written in C.
 
-ETA: January 2014?
 
 ## Platforms supported:
-- iOS
-- Android
-- Mac OS X
-- Windows 7
-- Linux (currently missing SDL2 libs)
+1. **iOS**
+2. *Android*
+3. Mac OS X
+4. Windows 7
+5. Linux (currently missing SDL2 libs)
 
 
 ## This repository should not contain:
-1. textures
-2. sounds
-3. music
-4. eclipse project files
+* Textures
+* Sounds
+* Music
+* Eclipse project files
 
 
 ## Shortcuts:
-* Planning Board [Trello](https://trello.com/b/p0dbPsik/space)
-* tzer0's music: [CodeBlocked](https://dl.dropboxusercontent.com/u/1184173/renoise/CodeBlocked/index.html)
-* [Milestones](about:blank)
-* [Space development plan](https://docs.google.com/document/d/1Dtj3eIV7wXX-JbMaPKmj9ORMLq9SSRsVYANchJQ3Ihg/edit)
+* SPACE planning board at [Trello](https://trello.com/b/p0dbPsik/space)
+* Project [Milestones](about:blank)
+* Space [development plan](https://docs.google.com/document/d/1Dtj3eIV7wXX-JbMaPKmj9ORMLq9SSRsVYANchJQ3Ihg/edit)
+* Space dropbox
+* tzer0's music, CodeBlocked: [CodeBlocked](https://dl.dropboxusercontent.com/u/1184173/renoise/CodeBlocked/index.html)
 
 
 ## Libraries:
