@@ -1,11 +1,12 @@
 # SPACE (working title)
-ETA: Dec. 2013 - Jan. 2014
+**ETA:** Dec. 2013 - Jan. 2014
+
 A cross-platform space game being written in C.
 
 
 ## Platforms supported:
 1. **iOS**
-2. *Android*
+2. **Android**
 3. Mac OS X
 4. Windows 7
 5. Linux (currently missing SDL2 libs)
