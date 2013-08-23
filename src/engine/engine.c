@@ -31,6 +31,18 @@
 #include "../space/game.h" //TODO remove dependency
 
 #define GAME_VERSION "PRE-ALPHA 8.8" //TMP placement for this define
+#if TARGET_OS_IPHONE
+#include "hgversion.h"
+#endif
+#ifndef HGVERSION
+#define HGVERSION
+#endif
+
+#define STRING_2(x) #x
+#define STRING_1(x) STRING_2(x)
+#define REVISION_ID  STRING_1(HGVERSION)
+
+#define FULL_VERSION_STRING GAME_VERSION" "REVISION_ID
 
 #define FPS_LIMIT 1
 
@@ -292,9 +304,7 @@ static void main_init() {
 
 	//TODO Make sure faulty inits stops the program from proceeding
 	waffle_init();      /* prepare game resources and general methods*/
-
 	game_config();      /* load default and user-changed settings */
-
 	display_init();     /* sets attributes and creates windows and renderer*/
 	initGL();           /* setup a gl context */
 
@@ -484,12 +494,12 @@ static void main_tick(void *data)
 
 		draw_load_identity();
 		setTextAlign(TEXT_RIGHT);
-		setTextSize(20);
-		float box_width = strlen(GAME_VERSION)*20*1.5+10;
+		setTextSize(15);
+		float box_width = strlen(FULL_VERSION_STRING)*15*1.5+10;
 		draw_color4f(0,0,0,1);
 		draw_box(GAME_WIDTH/2-box_width,-GAME_HEIGHT/2,box_width,40,0,0);
 		draw_color4f(0.7,0,0,1);
-		font_drawText(GAME_WIDTH/2-5,-GAME_HEIGHT/2+20,GAME_VERSION);
+		font_drawText(GAME_WIDTH/2-5,-GAME_HEIGHT/2+20,FULL_VERSION_STRING);
 
 		SDL_GL_SwapWindow(window);
 	}

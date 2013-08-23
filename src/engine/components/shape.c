@@ -10,7 +10,7 @@ static void shape_remove(void*);
 
 hashmap *names;
 
-polyshape * polyshape_read(char *filename)
+polyshape * shape_read(char *filename)
 {
 	if(names == NULL){
 		names = hm_create();
@@ -72,8 +72,13 @@ polyshape * polyshape_read(char *filename)
 	return p;
 }
 
-void polyshape_add_shapes(cpSpace *space, polyshape *p, cpBody * body, int size, float friction, float elasticity, int group, int type, int layer)
+void shape_add_shapes(cpSpace *space, polyshape *p, cpBody * body, int size, float friction, float elasticity, int group, int type, int layer)
 {
+	if (!p) {
+		SDL_Log("ERROR: polyshape pointer to NULL in add_shapes!");
+		//TODO add a default shape instead
+		return;
+	}
 	llist_begin_loop(p->polylist);
 	while(llist_hasnext(p->polylist)){
 		shape_instance *data = (shape_instance*)llist_next(p->polylist);
@@ -101,7 +106,7 @@ static void shape_remove(void *data)
 	free(s);
 }
 
-void polyshape_destroy(polyshape *p)
+void shape_destroy(polyshape *p)
 {
 	hm_destroy(names);
 	llist_destroy(p->polylist);

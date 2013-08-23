@@ -185,7 +185,7 @@ int level_init()
 			offset += offset_add;
 
 			arg.factory.sprite_id = sprite_link(fname);
-			arg.factory.shape_id = polyshape_read(arg.factory.shape_name);
+			arg.factory.shape_id = shape_read(arg.factory.shape_name);
 
 			int sub_id = -1;
 			/* find arg.tank subtype */

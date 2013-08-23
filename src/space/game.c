@@ -199,7 +199,7 @@ void game_sprites()
 
 void game_polyshapes()
 {
-	POLYSHAPE_RAMP = polyshape_read("ramp.shape");
+	POLYSHAPE_RAMP = shape_read("ramp.shape");
 }
 
 void game_particles()
