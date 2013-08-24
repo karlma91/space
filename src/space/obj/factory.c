@@ -34,11 +34,10 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	factory->data.components[CMP_HPBAR] = &(factory->hp_bar);
-	factory->data.components[CMP_SCORE] = &(factory->param.score);
-	factory->data.components[CMP_MINIMAP] = &(factory->radar_image);
-	factory->radar_image.c.b = 1;
-	factory->radar_image.size = 10;
+	COMPONENT_SET(factory, HPBAR, &factory->hp_bar);
+	COMPONENT_SET(factory, COINS, &factory->param.coins);
+	COMPONENT_SET(factory, MINIMAP, &factory->radar_image);
+	factory->radar_image = cmp_new_minimap(20, COL_BLUE);
 
 	static int randomness= 0;
 	randomness += 123;
@@ -60,7 +59,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	/* make and add new body */
 	factory->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
-	cpBodySetPos(factory->data.body, cpv(factory->data.x,64+size/2));
+	cpBodySetPos(factory->data.body, cpv(factory->data.p_start.x,64+size/2));
 
 	shape_add_shapes(space, factory->param.shape_id, factory->data.body, 400, 1, 0.7, 11111, this.ID, LAYER_TANK_FACTORY);
 	cpBodySetUserData(factory->data.body, factory);
@@ -117,6 +116,7 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);
 	particles_release_emitter(factory->smoke);
+	se_spawn_coins(factory);
 
 	cpBodyEachShape(factory->data.body, se_shape_from_space, NULL);
 	cpSpaceRemoveBody(space, factory->data.body);

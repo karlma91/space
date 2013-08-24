@@ -64,7 +64,7 @@ struct instance {
 	int disabled;
 	int destroyed;
 
-	float x,y,hs,vs;
+	cpVect p_start, v_start;
 
 	cpBody *body;
 	sprite spr;
@@ -125,6 +125,7 @@ LList object_get_instances(const object_id *type);
 
 #define COMPONENT(obj, cmp, type) ((type) ((instance *)obj->components[CMP_##cmp]))
 #define COMPONENT_SET(obj, cmp, value) (((instance *)obj)->components[CMP_##cmp]) = value
+#define REGISTER_CMP(cmp, count) CMP_##cmp = component_register(count);
 
 #endif /* GENERAL_OBJECT_FUNCS */
 

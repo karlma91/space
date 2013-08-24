@@ -39,7 +39,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 {
 	player->gun_level = 1;
 	player->lives = 3;
-	player->score = 0;
+	player->coins = 0;
 	player->rotation_speed = 2.5;
 	player->aim_angle = 0;
 	player->aim_speed = 0.5;
@@ -68,18 +68,18 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
 	cpBodySetPos(player->data.body, cpv(0,990));
 	cpBodySetVelLimit(player->data.body,450); //700
+	cpBodySetUserData(player->data.body, (void*)player);
 
 	/* make and connect new shape to body */
 	player->shape = se_add_circle_shape(player->data.body,radius,0.8,0.9);
-
 	cpShapeSetLayers(player->shape, LAYER_PLAYER);
 	cpShapeSetCollisionType(player->shape, this.ID);
+	cpShapeSetGroup(player->shape, 341); // use a group to keep the car parts from colliding
 
-	cpBodySetUserData(player->data.body, (void*)player);
+	player->cash_magnet = se_add_circle_shape(player->data.body, radius, 0,0);
+	player->cash_magnet->sensor = 1;
 
 	hpbar_init(&(player->hp_bar), 100, 120, 25, -59, 50, &(player->data.body->p));
-
-	cpShapeSetGroup(player->shape, 341); // use a group to keep the car parts from colliding
 
 	//FIXME cleanup
 	player->gunwheel = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));

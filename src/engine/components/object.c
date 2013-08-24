@@ -96,10 +96,10 @@ instance *instance_create(object_id *type, const void *param, float x, float y, 
 {
 	instance *ins = instance_super_malloc(type);
 
-	ins->x = x;
-	ins->y = y;
-	ins->hs = hs;
-	ins->vs = vs;
+	ins->p_start.x = x;
+	ins->p_start.y = y;
+	ins->v_start.x = hs;
+	ins->v_start.y = vs;
 
 	//TODO remove x,y,hs,vs in ins.
 	//TODO init body

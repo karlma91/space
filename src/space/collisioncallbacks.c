@@ -55,7 +55,7 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 		if (object->alive) {
 			object->alive = 0;
 			particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
-			se_add_score_and_popup(b->body->p, *COMPONENT(object, SCORE, int*));
+			//se_add_score_and_popup(b->body->p, *COMPONENT(object, SCORE, int*));
 			sound_play(SND_EXPLOSION);
 		}
 	} else {

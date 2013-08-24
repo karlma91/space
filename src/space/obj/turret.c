@@ -43,8 +43,10 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	turret->data.components[CMP_HPBAR] = &(turret->hp_bar);
-	turret->data.components[CMP_SCORE] = &(turret->param.score);
+	COMPONENT_SET(turret, HPBAR, &turret->hp_bar);
+	COMPONENT_SET(turret, COINS, &turret->param.coins);
+	COMPONENT_SET(turret, MINIMAP, &turret->radar_image);
+	turret->radar_image = cmp_new_minimap(10, COL_BLUE);
 
 	turret->data.alive = 1;
 	turret->timer = 0;
@@ -56,7 +58,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpFloat size = 100;
 	turret->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
-	cpBodySetPos(turret->data.body, cpv(turret->data.x,currentlvl->height - size/2));
+	cpBodySetPos(turret->data.body, cpv(turret->data.p_start.x,currentlvl->height - size/2));
 
 	turret->data.body->velocity_func = velfunc;
 
@@ -151,6 +153,7 @@ static void shape_from_space(cpBody *body, cpShape *shape, void *data)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
+	se_spawn_coins(OBJ_NAME);
 	cpBodyEachShape(turret->data.body,shape_from_space,NULL);
 
 	cpSpaceRemoveBody(space, turret->data.body);

@@ -57,16 +57,17 @@ PARAM_START(player)
 	float max_hp;
 	int tex_id;
 	float gun_cooldown;
+	float cash_radius;
 PARAM_END
-
 OBJ_START(player)
 	cpShape *shape;
+	cpShape *cash_magnet;
 	hpbar hp_bar;
 	int lives;
 	float lost_life_timer;
 	int disable; //todo move this out to instance?
 	int gun_level;
-	int score;
+	int coins;
 	float rotation_speed;
 	float direction; /* in radians [0, 2*PI]*/
 	float direction_target; /* in radians [0, 2*PI]*/
@@ -98,7 +99,7 @@ OBJ_END
 
 PARAM_START(tank)
 	float max_hp;
-	int score;
+	int coins;
 PARAM_END
 OBJ_START(tank)
 	cpShape *shape;
@@ -124,7 +125,7 @@ PARAM_START(factory)
 	int max_tanks;
 	float max_hp;
 	float spawn_delay;
-	int score;
+	int coins;
 	object_id *type;
 	void *param;
 	SPRITE_ID sprite_id;
@@ -145,7 +146,7 @@ OBJ_END
 
 PARAM_START(turret)
 	float max_hp;
-	int score;
+	int coins;
 	float rot_speed;
 	float shoot_interval;
 	int burst_number;
@@ -162,13 +163,15 @@ OBJ_START(turret)
 	int shooting;
 	float rate;
 	hpbar hp_bar;
+	minimap radar_image;
 OBJ_END
 
 PARAM_START(rocket)
 	float max_hp;
-	int score;
+	int coins;
 	int tex_id;
 	float force;
+	float damage;
 PARAM_END
 OBJ_START(rocket)
 	cpShape *shape;
@@ -180,6 +183,7 @@ OBJ_START(rocket)
 	float rot_speed;
 	hpbar hp_bar;
 	emitter *flame;
+	minimap radar_image;
 OBJ_END
 
 PARAM_START(robotarm)

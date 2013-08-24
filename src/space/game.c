@@ -43,7 +43,8 @@ unsigned int KEY_ESCAPE = SDL_SCANCODE_ESCAPE;
 
 /* COMPONENTS DEFINITIONS */
 int CMP_HPBAR;
-int CMP_SCORE;
+int CMP_COINS;
+//int CMP_SCORE;
 int CMP_DAMAGE;
 int CMP_BODIES;
 int CMP_MINIMAP;
@@ -166,11 +167,12 @@ void game_config()
 
 void game_components()
 {
-	CMP_HPBAR = component_register(1);
-	CMP_SCORE = component_register(1);
-	CMP_DAMAGE = component_register(1);
-	CMP_BODIES = component_register(SPACE_BODIES_MAX);
-	CMP_MINIMAP =  component_register(1);
+	REGISTER_CMP(HPBAR, 1);
+	REGISTER_CMP(COINS, 1);
+	//REGISTER_CMP(SCORE, 1);
+	REGISTER_CMP(DAMAGE, 1);
+	REGISTER_CMP(BODIES, SPACE_BODIES_MAX);
+	REGISTER_CMP(MINIMAP, 1);
 }
 
 //TODO create macro for sprite_linking
@@ -286,6 +288,12 @@ void game_init()
 	sound_music(MUSIC_LEVEL);
 }
 
+/* Component functions */
+minimap cmp_new_minimap(float size, Color c)
+{
+	minimap m = {size, c};
+	return m;
+}
 
 void game_destroy()
 {

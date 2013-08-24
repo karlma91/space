@@ -38,14 +38,16 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	robotarm->angle = malloc(sizeof(int)*robotarm->segments);
 	int i;
 	for(i=0; i<robotarm->segments; i++){
-		robotarm->x[i] = robotarm->data.x;
-		robotarm->y[i] = robotarm->data.y;
+		robotarm->x[i] = robotarm->data.p_start.x;
+		robotarm->y[i] = robotarm->data.p_start.y;
 		robotarm->angle[i] = 0;
 	}
 
 	cpFloat radius = 100.0f;
 	cpFloat mass = 5.0f;
-	cpVect pos = cpv(robotarm->data.x, robotarm->data.y + 100);
+	cpVect pos = robotarm->data.p_start;
+	pos.y += 100;
+
 	robotarm->saw = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(robotarm->saw, pos);
 	cpBodySetVelLimit(robotarm->saw, 400);
@@ -58,7 +60,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpFloat size = 50;
 	/* make and add new body */
 	robotarm->data.body = cpBodyNew(200, cpMomentForBox(20.0f, size, size));
-	cpBodySetPos(((instance *) robotarm)->body, cpv(robotarm->data.x,size+10));
+	cpBodySetPos(((instance *) robotarm)->body, cpv(robotarm->data.p_start.x,size+10));
 	cpBodySetVelLimit(((instance *) robotarm)->body,180);
 
 	/* make and connect new shape to body */

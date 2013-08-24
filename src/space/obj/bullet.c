@@ -26,13 +26,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
 
-	cpVect pos = {bullet->data.x, bullet->data.y};
-	cpVect vel = {bullet->data.hs, bullet->data.vs};
-
 	bullet->data.body = cpSpaceAddBody(space, cpBodyNew(1, moment));
-	cpBodySetPos(bullet->data.body, pos); //FIXME
+	cpBodySetPos(bullet->data.body, bullet->data.p_start); //FIXME
 	cpBodySetUserData(bullet->data.body, (instance*) bullet);
-	cpBodySetVel(bullet->data.body,vel); //3000 //FIXME
+	cpBodySetVel(bullet->data.body, bullet->data.v_start); //3000 //FIXME
 	bullet->data.body->velocity_func = bulletVelocityFunc;
 
 	bullet->shape = se_add_circle_shape(bullet->data.body, 15, 1, 0);

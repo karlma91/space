@@ -26,7 +26,6 @@
 #include "chipmunk.h"
 #include "../spaceengine.h"
 
-
 /* static prototypes */
 static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset);
 static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset);
@@ -37,17 +36,17 @@ static const float tex_map[3][8] = {
 };
 */
 
+
 static void init(OBJ_TYPE *OBJ_NAME)
 {
 }
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	tank->data.components[CMP_HPBAR] = &(tank->hp_bar);
-	tank->data.components[CMP_SCORE] = &(tank->param.score);
-	tank->data.components[CMP_MINIMAP] = &tank->radar_image;
-	tank->radar_image.c.r = 1;
-	tank->radar_image.size = 10;
+	COMPONENT_SET(tank, HPBAR, &tank->hp_bar);
+	COMPONENT_SET(tank, COINS, &tank->param.coins);
+	COMPONENT_SET(tank, MINIMAP, &tank->radar_image);
+	tank->radar_image = cmp_new_minimap(10, COL_RED);
 
 	sprite_create(&(tank->wheel_sprite), SPRITE_TANK_WHEEL, 120, 120, 0);
 	sprite_create(&(tank->data.spr), SPRITE_TANK_BODY, 200, 100, 0);
@@ -62,16 +61,17 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 		start_height = tank->factory->data.body->p.y - 100;
 	}
 
+	cpVect boxOffset = cpvzero;
+
 	tank->rot_speed = M_PI/2;
+	tank->data.body = addChassis(space, tank,
+			cpv(tank->data.p_start.x, start_height + 10), boxOffset);
 
 	// Make a car with some nice soft suspension
 	float wheel_offset = 40;
-	cpVect boxOffset = cpv(0, 0);
-	cpVect posA = cpv(tank->data.x - wheel_offset, start_height - 25);
-	cpVect posB = cpv(tank->data.x + wheel_offset, start_height - 25);
+	cpVect posA = cpv(tank->data.body->p.x - wheel_offset, start_height - 25);
+	cpVect posB = cpv(tank->data.body->p.x + wheel_offset, start_height - 25);
 
-	tank->data.body = addChassis(space, tank,
-			cpv(tank->data.x, start_height + 10), boxOffset);
 
 	tank->debug_left_dist = -1;
 	tank->debug_right_dist = -1;
@@ -276,6 +276,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(EMITTER_FRAGMENTS, tank->data.body->p);
+	se_spawn_coins(tank);
 
 	cpBodyEachShape(tank->data.body,se_shape_from_space,NULL);
 	cpBodyEachConstraint(tank->data.body,se_constrain_from_space,NULL);

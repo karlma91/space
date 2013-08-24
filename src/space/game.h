@@ -23,7 +23,8 @@
 
 /* COMPONENTS */
 extern int CMP_HPBAR;
-extern int CMP_SCORE;
+extern int CMP_COINS;
+//extern int CMP_SCORE;
 extern int CMP_DAMAGE;
 extern int CMP_BODIES;
 extern int CMP_MINIMAP;
@@ -33,6 +34,7 @@ typedef struct {
 	float size;
 	Color c;
 } minimap;
+minimap cmp_new_minimap(float size, Color c);
 
 #include "obj/object_types.h"
 /* STATES */

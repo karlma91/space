@@ -167,21 +167,21 @@ int level_init()
 
 		if (obj_id == obj_id_tank) {
 			expected = 3;
-			ret = sscanf(&buffer[offset], "%f %d %s%n\n", &arg.tank.max_hp, &arg.tank.score, &fname[0], &offset_add);
+			ret = sscanf(&buffer[offset], "%f %d %s%n\n", &arg.tank.max_hp, &arg.tank.coins, &fname[0], &offset_add);
 			offset += offset_add;
 		} else if (obj_id == obj_id_turret) {
 			expected = 6;
-			ret = sscanf(&buffer[offset], "%f %d %f %f %d %s%n\n", &arg.turret.max_hp, &arg.turret.score, &arg.turret.rot_speed, &arg.turret.shoot_interval,&arg.turret.burst_number, &fname[0], &offset_add);
+			ret = sscanf(&buffer[offset], "%f %d %f %f %d %s%n\n", &arg.turret.max_hp, &arg.turret.coins, &arg.turret.rot_speed, &arg.turret.shoot_interval,&arg.turret.burst_number, &fname[0], &offset_add);
 			offset += offset_add;
 			arg.turret.tex_id = texture_load(fname);
 		} else if (obj_id == obj_id_rocket) {
 			expected = 4;
-			ret = sscanf(&buffer[offset], "%f %d %s %f%n\n", &arg.rocket.max_hp, &arg.rocket.score, &fname[0], &arg.rocket.force, &offset_add);
+			ret = sscanf(&buffer[offset], "%f %d %s %f%n\n", &arg.rocket.max_hp, &arg.rocket.coins, &fname[0], &arg.rocket.force, &offset_add);
 			offset += offset_add;
 			arg.rocket.tex_id = texture_load(fname);
 		} else if (obj_id == obj_id_factory) {
 			expected = 8;
-			ret = sscanf(&buffer[offset], "%d %f %f %d %s %s %s %s%n\n", &arg.factory.max_tanks, &arg.factory.max_hp, &arg.factory.spawn_delay, &arg.factory.score, object_buf, buf, &fname[0], &arg.factory.shape_name[0], &offset_add);
+			ret = sscanf(&buffer[offset], "%d %f %f %d %s %s %s %s%n\n", &arg.factory.max_tanks, &arg.factory.max_hp, &arg.factory.spawn_delay, &arg.factory.coins, object_buf, buf, &fname[0], &arg.factory.shape_name[0], &offset_add);
 			offset += offset_add;
 
 			arg.factory.sprite_id = sprite_link(fname);
