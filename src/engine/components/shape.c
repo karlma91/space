@@ -72,7 +72,7 @@ polyshape * shape_read(char *filename)
 	return p;
 }
 
-void shape_add_shapes(cpSpace *space, polyshape *p, cpBody * body, int size, float friction, float elasticity, int group, int type, int layer)
+void shape_add_shapes(cpSpace *space, polyshape *p, cpBody * body, int size, float friction, float elasticity, cpGroup group, cpCollisionType type, cpLayers layer)
 {
 	if (!p) {
 		SDL_Log("ERROR: polyshape pointer to NULL in add_shapes!");

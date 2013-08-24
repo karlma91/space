@@ -42,7 +42,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBody *static_body = cpSpaceGetStaticBody(space);
 
 	cpShapeSetLayers(spikeball->shape, LAYER_TANK_FACTORY);
-	cpShapeSetCollisionType(spikeball->shape, this.ID);
+	cpShapeSetCollisionType(spikeball->shape, &this);
 	cpBodySetUserData(spikeball->data.body, spikeball);
 
 	spikeball->dolly = cpSpaceAddBody(space, cpBodyNew(10, INFINITY));

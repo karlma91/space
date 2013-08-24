@@ -28,7 +28,7 @@
 
 /* static prototypes */
 static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset);
-static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset);
+static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup group);
 
 /*
 static const float tex_map[3][8] = {
@@ -76,10 +76,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	tank->debug_left_dist = -1;
 	tank->debug_right_dist = -1;
 
-	cpShapeSetCollisionType(tank->shape, this.ID);
+	cpShapeSetCollisionType(tank->shape, &this);
 
-	tank->wheel1 = addWheel(space, posA, boxOffset);
-	tank->wheel2 = addWheel(space, posB, boxOffset);
+	tank->wheel1 = addWheel(space, posA, boxOffset, tank);
+	tank->wheel2 = addWheel(space, posB, boxOffset, tank);
 
 	tank->data.components[CMP_BODIES] = tank->wheel1;
 	tank->data.components[CMP_BODIES+1] = tank->wheel2;
@@ -206,7 +206,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 /*
  * make a wheel
  */
-static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset) {
+static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup group) {
 	cpFloat radius = 15.0f;
 	cpFloat mass = 1.0f;
 	cpBody *body = cpSpaceAddBody(space,
@@ -216,9 +216,9 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset) {
 
 	cpShape *shape = se_add_circle_shape(body, radius, 0.7, 0.0);
 
-	cpShapeSetGroup(shape, 1); // use a group to keep the car parts from colliding
-	cpSpaceAddCollisionHandler(space, this.ID, 0x7B080B, NULL, NULL,
-			NULL, NULL, NULL ); //0x7B080B == a hard-coded random number
+	cpShapeSetGroup(shape, group); // use a group to keep the car parts from colliding
+	//cpSpaceAddCollisionHandler(space, &this, 0x7B080B, NULL, NULL,
+	//		NULL, NULL, NULL ); //0x7B080B == a hard-coded random number
 	cpShapeSetLayers(shape, LAYER_WHEEL);
 
 	return body;
@@ -276,7 +276,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(EMITTER_FRAGMENTS, tank->data.body->p);
-	se_spawn_coins(tank);
+	se_spawn_coins((instance *)tank);
 
 	cpBodyEachShape(tank->data.body,se_shape_from_space,NULL);
 	cpBodyEachConstraint(tank->data.body,se_constrain_from_space,NULL);

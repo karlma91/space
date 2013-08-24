@@ -73,8 +73,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	/* make and connect new shape to body */
 	player->shape = se_add_circle_shape(player->data.body,radius,0.8,0.9);
 	cpShapeSetLayers(player->shape, LAYER_PLAYER);
-	cpShapeSetCollisionType(player->shape, this.ID);
-	cpShapeSetGroup(player->shape, 341); // use a group to keep the car parts from colliding
+	cpShapeSetCollisionType(player->shape, &this);
+	cpShapeSetGroup(player->shape, player);
 
 	player->cash_magnet = se_add_circle_shape(player->data.body, radius, 0,0);
 	player->cash_magnet->sensor = 1;
@@ -86,8 +86,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetPos(player->gunwheel, player->data.body->p);
 
 	cpShape *shape = se_add_circle_shape(player->gunwheel,radius,0.9,0.8);
-
-	cpShapeSetGroup(shape, 341); // use a group to keep the car parts from colliding
+	cpShapeSetGroup(shape, &this);
 	cpShapeSetLayers(shape,LAYER_PLAYER_BULLET);
 }
 

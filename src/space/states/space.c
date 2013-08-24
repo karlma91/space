@@ -475,10 +475,10 @@ static void plot_on_radar(instance *obj)
 {
 	minimap *m = obj->components[CMP_MINIMAP];
 	if(m != NULL){
-		float r = 50;
+		float r = 63;
 		float x = (obj->body->p.x + currentlvl->left)*2*M_PI/currentlvl->width;
 		float y = 1-(obj->body->p.y / currentlvl->height);
-		r = 60+r*y;
+		r = 50+r*y;
 		float px = cos(x)*r;
 		float py = sin(x)*r;
 		draw_color4f(m->c.r, m->c.g, m->c.b, 0.5);

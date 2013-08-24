@@ -35,8 +35,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	bullet->shape = se_add_circle_shape(bullet->data.body, 15, 1, 0);
 
 	// Sets bullets collision type
-	cpShapeSetCollisionType(bullet->shape, this.ID);
-	cpShapeSetGroup(bullet->shape, 10);
+	cpShapeSetCollisionType(bullet->shape, &this);
+	cpShapeSetGroup(bullet->shape, bullet);
 
 	if (bullet->param.friendly) {
 		cpShapeSetLayers(bullet->shape, LAYER_PLAYER_BULLET);

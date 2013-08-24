@@ -68,7 +68,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	//cpShapeSetGroup(fac->shape, 10);
 	cpShapeSetFriction(turret->shape, 1);
 	cpShapeSetLayers(turret->shape, LAYER_TANK_FACTORY);
-	cpShapeSetCollisionType(turret->shape, obj_id_factory->ID);
+	cpShapeSetCollisionType(turret->shape, &this);
 	cpBodySetUserData(turret->data.body, turret);
 
 	hpbar_init(&turret->hp_bar,turret->param.max_hp,80,16,-40,60,&(turret->data.body->p));

@@ -68,7 +68,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	//cpShapeSetGroup(tempShape, 1); // use a group to keep the car parts from colliding
 
 	cpShapeSetLayers(rocket->shape, LAYER_TANK);
-	cpShapeSetCollisionType(rocket->shape, this.ID);
+	cpShapeSetCollisionType(rocket->shape, &this);
 	cpBodySetUserData(rocket->data.body, rocket);
 
 	hpbar_init(&rocket->hp_bar, rocket->param.max_hp, 80, 16, -40, 60, &(rocket->data.body->p));
