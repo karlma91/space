@@ -20,21 +20,12 @@
 #include "../../engine/graphics/draw.h"
 #include "../../engine/graphics/particles.h"
 
-/* Game components */
-#include "objects.h"
-
 #include "chipmunk.h"
 #include "../spaceengine.h"
 
 /* static prototypes */
-static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset);
+static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset, cpGroup group);
 static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup group);
-
-/*
-static const float tex_map[3][8] = {
-		{0,0.5, 1,0.5, 0,0, 1,0}, {0,1, 0.5,1, 0,0.5, 0.5,0.5}, {0.5,1, 1,1, 0.5,0.5, 1,0.5}
-};
-*/
 
 
 static void init(OBJ_TYPE *OBJ_NAME)
@@ -62,10 +53,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	}
 
 	cpVect boxOffset = cpvzero;
-
+	tank->data.p_start.y = start_height + 10;
 	tank->rot_speed = M_PI/2;
-	tank->data.body = addChassis(space, tank,
-			cpv(tank->data.p_start.x, start_height + 10), boxOffset);
+	tank->data.body = addChassis(space, tank,tank->data.p_start, boxOffset, tank);
 
 	// Make a car with some nice soft suspension
 	float wheel_offset = 40;
@@ -215,11 +205,8 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup g
 	cpBodySetAngVelLimit(body, 200);
 
 	cpShape *shape = se_add_circle_shape(body, radius, 0.7, 0.0);
-
-	cpShapeSetGroup(shape, group); // use a group to keep the car parts from colliding
-	//cpSpaceAddCollisionHandler(space, &this, 0x7B080B, NULL, NULL,
-	//		NULL, NULL, NULL ); //0x7B080B == a hard-coded random number
-	cpShapeSetLayers(shape, LAYER_WHEEL);
+	cpShapeSetGroup(shape, group);
+	cpShapeSetLayers(shape, LAYER_ENEMY);
 
 	return body;
 }
@@ -227,7 +214,7 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup g
 /**
  * make a chassies
  */
-static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset)
+static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset, cpGroup group)
 {
 	cpFloat mass = 2.0f;
 	cpFloat width = 80;
@@ -237,10 +224,8 @@ static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect box
 	cpBodySetPos(body, cpvadd(pos, boxOffset));
 
 	tank->shape = se_add_box_shape(body,width,height,0.6,0.0);
-
-	//cpShapeSetGroup(tempShape, 1); // use a group to keep the car parts from colliding
-
-	cpShapeSetLayers(tank->shape, LAYER_TANK);
+	cpShapeSetGroup(tank->shape, group);
+	cpShapeSetLayers(tank->shape, LAYER_ENEMY);
 
 	return body;
 }

@@ -1,6 +1,5 @@
 #include "chipmunk.h"
 #include "states/space.h"
-#include "obj/objects.h"
 #include "game.h"
 
 #include "../engine/engine.h"

@@ -54,7 +54,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	cpShape *shape = se_add_circle_shape(robotarm->saw, radius, 0.7, 0.0);
 	cpShapeSetGroup(shape, robotarm);
-	cpShapeSetLayers(shape, LAYER_TANK);
+	cpShapeSetLayers(shape, LAYER_ENEMY);
 	cpShapeSetCollisionType(shape, &this);
 
 	cpFloat size = 50;
@@ -66,7 +66,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	/* make and connect new shape to body */
 	robotarm->shape = cpSpaceAddShape(space, cpBoxShapeNew(robotarm->data.body, size, size));
 	cpShapeSetFriction(robotarm->shape, 0.01);
-	cpShapeSetLayers(robotarm->shape, LAYER_ENEMY_BULLET);
+	cpShapeSetLayers(robotarm->shape, LAYER_BULLET_ENEMY);
 	cpShapeSetCollisionType(robotarm->shape, &this);
 	cpShapeSetGroup(robotarm->shape, robotarm);
 

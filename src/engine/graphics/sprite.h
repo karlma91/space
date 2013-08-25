@@ -1,29 +1,9 @@
 /*
  * sprite.h
  *
- * En generell implementasjon av sprites.
- *
- * SPRITE_ID:
- * - konstant sprite data (slik som: texture, uv-koordinater, antall sub_images, origin, etc..)
- *
- * sprite:
- *  - id: Referanse til konstant sprite data
- *  - posisjonspeker / posisjon
- *  - vinkelpeker / vinkel
- *  - float sprite_index (sub_image index)
- *  - image/sprite_speed (animasjonshastighet)
- *
- *
  *  Created on: 4. juli 2013
  *      Author: Mathias
- * TODO: sprite_init
- * TODO: sprite_load
- * TODO: sprite_destroy
- *
  *      Author: Karl
- * TODO: automatisk animasjon basert på animasjonshastighet
- * TODO: manuell animasjon ved å sette sprite_index direkte og la sprite_speed = 0
- * TODO: resten
  */
 
 #ifndef SPRITE_H_
@@ -66,6 +46,7 @@ SPRITE_ID sprite_load(const char *sprite); /* for loading av sprite data */
 #define SPRITE_DEF(NAME) SPRITE_ID SPRITE_##NAME
 #define SPRITE_DEC(NAME) extern SPRITE_DEF(NAME)
 
+#define REGISTER_SPRITE( NAME ) SPRITE_##NAME = sprite_link(#NAME);
 SPRITE_ID sprite_link(const char *name);
 void sprite_get_current_image(sprite *spr, float *sub_map);
 int sprite_get_texture(sprite *spr);

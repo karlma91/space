@@ -28,9 +28,6 @@
 #include "../level.h"
 //#include "../collisioncallbacks.h"
 
-/* Game components */
-#include "../obj/objects.h"
-
 static float accumulator = 0;
 
 //TODO: remove in final game <-- ?
@@ -752,7 +749,7 @@ void space_init_level(int space_station, int deck)
 		obj_param_player default_player = {
 				.max_hp = 200,
 				.gun_cooldown = 0.2f,
-				.cash_radius = 120
+				.cash_radius = 300
 		};
 		player = (obj_player *)instance_create(obj_id_player, &default_player, 0,0,0,0);
 	} else {

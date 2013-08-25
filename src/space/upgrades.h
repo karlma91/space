@@ -8,8 +8,7 @@
 #ifndef UPGRADES_H_
 #define UPGRADES_H_
 
-
-#include "obj/objects.h"
+#include "../engine/graphics/sprite.h"
 
 typedef enum {
 	PROJECT_LASER,

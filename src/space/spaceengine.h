@@ -1,7 +1,6 @@
 #ifndef SPACEENGINE_H_
 #define SPACEENGINE_H_
 #include "chipmunk.h"
-#include "obj/objects.h"
 #include "../engine/components/object.h"
 
 cpShape *se_add_circle_shape(cpBody *body, cpFloat radius, cpFloat friction,

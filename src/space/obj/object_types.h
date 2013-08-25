@@ -14,6 +14,18 @@
 #include "../../engine/graphics/draw.h"
 
 void object_types_init();
+void instance_nearest_x_two(instance *ins, object_id *obj_id, instance **left, instance **right, cpFloat *instance, cpFloat *right_distance);
+
+
+/* COLLISION LAYERS */
+extern int LAYER_PLAYER;
+extern int LAYER_ENEMY;
+extern int LAYER_BUILDING;
+extern int LAYER_BULLET_PLAYER;
+extern int LAYER_BULLET_ENEMY;
+extern int LAYER_SHIELD_PLAYER;
+extern int LAYER_SHIELD_ENEMY;
+extern int LAYER_PICKUP;
 
 /*
  * OBJECT DECLARATION

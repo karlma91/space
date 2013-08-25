@@ -30,7 +30,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	coin->shape = se_add_circle_shape(coin->data.body,COIN_RADIUS-5,0.8,0.2);
 	coin->data.body->velocity_func = vel_func;
-	cpShapeSetLayers(coin->shape, LAYER_PLAYER);
+	cpShapeSetLayers(coin->shape, LAYER_PICKUP);
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)

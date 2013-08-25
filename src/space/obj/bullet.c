@@ -1,6 +1,3 @@
-/* header */
-#include "objects.h"
-
 #include "object_types.h"
 #define OBJ_NAME bullet
 #include "../../engine/components/object.h"
@@ -39,9 +36,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpShapeSetGroup(bullet->shape, bullet);
 
 	if (bullet->param.friendly) {
-		cpShapeSetLayers(bullet->shape, LAYER_PLAYER_BULLET);
+		cpShapeSetLayers(bullet->shape, LAYER_BULLET_PLAYER);
 	} else {
-		cpShapeSetLayers(bullet->shape, LAYER_ENEMY_BULLET);
+		cpShapeSetLayers(bullet->shape, LAYER_BULLET_ENEMY);
 	}
 
 	bullet->energy = 750; // number of msec energy

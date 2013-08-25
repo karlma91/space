@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "level.h"
-#include "obj/objects.h"
 #include "obj/object_types.h"
 
 #include "tilemap.h"

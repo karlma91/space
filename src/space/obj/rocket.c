@@ -23,9 +23,6 @@
 #include "../../engine/graphics/draw.h"
 #include "../../engine/graphics/particles.h"
 
-/* Game components */
-#include "objects.h"
-
 #include "../spaceengine.h"
 
 static void init(OBJ_TYPE *OBJ_NAME)
@@ -67,7 +64,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	//cpShapeSetGroup(tempShape, 1); // use a group to keep the car parts from colliding
 
-	cpShapeSetLayers(rocket->shape, LAYER_TANK);
+	cpShapeSetLayers(rocket->shape, LAYER_ENEMY);
 	cpShapeSetCollisionType(rocket->shape, &this);
 	cpBodySetUserData(rocket->data.body, rocket);
 

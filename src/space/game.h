@@ -18,6 +18,7 @@
 
 #include "../engine/input/button.h"
 #include "../engine/graphics/draw.h"
+#include "../engine/graphics/sprite.h"
 
 #define SPACE_BODIES_MAX 5
 
