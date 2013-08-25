@@ -237,6 +237,7 @@ OBJ_END
 PARAM_EMPTY(coin)
 OBJ_START(coin)
 	cpShape *shape;
+	cpBool pulled; //TODO create pickup component
 OBJ_END
 
 

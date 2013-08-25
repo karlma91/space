@@ -50,6 +50,7 @@ cpVect se_distance_a2b(instance *insa, instance *insb)
 
 cpVect se_distance_v(cpVect a, cpVect b)
 {
+	//FIXME (not working properly at level edge?)
 	cpVect d = cpvsub(b,a);
 	int lvl_width = currentlvl->width;
 	if(d.x < -lvl_width/2){

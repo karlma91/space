@@ -126,22 +126,20 @@ static void callback_rocket_ground(cpArbiter *arb, cpSpace *space, void *unused)
 }
 
 
-static void sensor_pickup(cpArbiter *arb, cpSpace *space, void *unused)
+static int sensor_pickup(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
-	instance *player = ((instance *)(a->body->data));
+	obj_coin *coin = ((obj_coin *)(b->body->data));
 
-	if (player)  {
-		if (player->TYPE == obj_id_player) {
-			add_sparks_at_contactpoint(arb);
-			COMPONENT(player, HPBAR, hpbar *)->value -= 207; // <- changed player force to impulse f * 0.01 // f * 0.05 // 0.033
-		} else {
-			SDL_Log("Expected object type ID %p, but got %p!\n", obj_id_player, player->TYPE);
+	if (coin) {
+		if (coin->data.TYPE != obj_id_coin) {
+			SDL_Log("ERROR: expected coin in sensor_pickup!");
+			exit(1);
 		}
-	} else {
-		SDL_Log("Expected object from collision between player and ground, but got NULL\n");
+		coin->pulled = 1;
 	}
+	return 0;
 }
 
 void collisioncallbacks_init()
