@@ -49,6 +49,9 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 			diff = cpvmult(diff, 50/length);
 		} else if (length > 100) {
 			diff = cpvmult(diff, 0.5);
+		} else {
+			((obj_player *) player)->coins += 1;
+			coin->data.alive = 0;
 		}
 		coin->data.body->v = cpvadd(coin->data.body->v, diff);
 	}

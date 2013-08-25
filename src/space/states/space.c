@@ -191,7 +191,7 @@ static void level_cleared()
 	update_all();
 
 	static int tmp_atom = 0;
-	if (state_timer > 1 && !tmp_atom) {
+	if (state_timer > 2 && !tmp_atom) {
 		float p = (player->hp_bar.value / player->hp_bar.max_hp);
 		player->coins += (int)(p*p * 4)*4 * 25;
 
