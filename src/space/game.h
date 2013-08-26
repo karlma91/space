@@ -14,14 +14,18 @@
 #include "../engine/graphics/particles.h"
 #include "../engine/graphics/customparticles.h"
 
+#include "../engine/components/shape.h"
+
 #include "../engine/input/button.h"
 #include "../engine/graphics/draw.h"
+#include "../engine/graphics/sprite.h"
 
 #define SPACE_BODIES_MAX 5
 
 /* COMPONENTS */
 extern int CMP_HPBAR;
-extern int CMP_SCORE;
+extern int CMP_COINS;
+//extern int CMP_SCORE;
 extern int CMP_DAMAGE;
 extern int CMP_BODIES;
 extern int CMP_MINIMAP;
@@ -31,6 +35,7 @@ typedef struct {
 	float size;
 	Color c;
 } minimap;
+minimap cmp_new_minimap(float size, Color c);
 
 #include "obj/object_types.h"
 /* STATES */
@@ -64,6 +69,10 @@ extern SPRITE_ID SPRITE_JOYSTICK_BACK;
 extern SPRITE_ID SPRITE_SPIKEBALL;
 extern SPRITE_ID SPRITE_SAW;
 extern SPRITE_ID SPRITE_COIN;
+
+/* POLYSHAPES */
+extern POLYSHAPE_ID POLYSHAPE_RAMP;
+
 
 /* PARTICLES */
 extern int EMITTER_FLAME;
@@ -123,7 +132,7 @@ void game_destroy();
 
 extern float upg_total_mass;
 
-#define ID_GROUND 0xABA198 //TMP define with random number
+#define ID_GROUND (void *)0x1017 //TMP define with random number
 
 /* digits hotkeys */
 extern SDL_Scancode digit2scancode[10];

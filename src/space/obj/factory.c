@@ -20,9 +20,11 @@
 #include "../../engine/graphics/draw.h"
 #include "../../engine/graphics/particles.h"
 #include "../../engine/graphics/texture.h"
+#include "../../engine/components/shape.h"
 
 #include "chipmunk.h"
 #include "../spaceengine.h"
+
 
 static void remove_factory_from_tank(obj_tank *);
 
@@ -32,11 +34,10 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	factory->data.components[CMP_HPBAR] = &(factory->hp_bar);
-	factory->data.components[CMP_SCORE] = &(factory->param.score);
-	factory->data.components[CMP_MINIMAP] = &(factory->radar_image);
-	factory->radar_image.c.b = 1;
-	factory->radar_image.size = 10;
+	COMPONENT_SET(factory, HPBAR, &factory->hp_bar);
+	COMPONENT_SET(factory, COINS, &factory->param.coins);
+	COMPONENT_SET(factory, MINIMAP, &factory->radar_image);
+	factory->radar_image = cmp_new_minimap(20, COL_BLUE);
 
 	static int randomness= 0;
 	randomness += 123;
@@ -58,16 +59,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	/* make and add new body */
 	factory->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
-	cpBodySetPos(factory->data.body, cpv(factory->data.x,64+size/2));
+	cpBodySetPos(factory->data.body, cpv(factory->data.p_start.x,64+size/2));
 
-	/* make and connect new shape to body */
-	factory->shape = cpSpaceAddShape(space,cpBoxShapeNew(factory->data.body, size, size));
-	cpShapeSetFriction(factory->shape, 1);
-	cpShapeSetElasticity(factory->shape, 0.7f);
-
-	//cpShapeSetGroup(fac->shape, 10);
-	cpShapeSetLayers(factory->shape, LAYER_TANK_FACTORY);
-	cpShapeSetCollisionType(factory->shape, this.ID);
+	shape_add_shapes(space, factory->param.shape_id, factory->data.body, 400, 1, 0.7, factory, &this, LAYER_BUILDING);
 	cpBodySetUserData(factory->data.body, factory);
 
 	hpbar_init(&factory->hp_bar, factory->param.max_hp, 200, 35, -50, 180,
@@ -98,7 +92,6 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 	factory->rot += 381 * dt;
 	cpVect draw_pos = factory->data.body->p;
-	draw_pos.y += 8;
 
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	sprite_render(&(factory->data.spr), &(draw_pos), 0);
@@ -123,10 +116,10 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);
 	particles_release_emitter(factory->smoke);
+	se_spawn_coins(factory);
 
-	cpSpaceRemoveShape(space, factory->shape);
+	cpBodyEachShape(factory->data.body, se_shape_from_space, NULL);
 	cpSpaceRemoveBody(space, factory->data.body);
-	cpShapeFree(factory->shape);
 	cpBodyFree(factory->data.body);
 
 	instance_iterate_type((void (*)(instance *))remove_factory_from_tank, obj_id_tank);

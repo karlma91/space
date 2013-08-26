@@ -35,21 +35,21 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	radius = 100;
 	float mass = 100;
 	spikeball->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
-	cpBodySetPos(spikeball->data.body, cpv(spikeball->data.x, currentlvl->height-radius));
+	cpBodySetPos(spikeball->data.body, cpv(spikeball->data.p_start.x, currentlvl->height-radius));
 
 	spikeball->shape = se_add_circle_shape(spikeball->data.body,radius,0.8,0.2);
 
 	cpBody *static_body = cpSpaceGetStaticBody(space);
 
-	cpShapeSetLayers(spikeball->shape, LAYER_TANK_FACTORY);
-	cpShapeSetCollisionType(spikeball->shape, this.ID);
+	cpShapeSetLayers(spikeball->shape, LAYER_BUILDING);
+	cpShapeSetCollisionType(spikeball->shape, &this);
 	cpBodySetUserData(spikeball->data.body, spikeball);
 
 	spikeball->dolly = cpSpaceAddBody(space, cpBodyNew(10, INFINITY));
 	cpSpaceAddShape(space, cpBoxShapeNew(spikeball->dolly, 30, 30));
-	cpBodySetPos(spikeball->dolly, cpv(spikeball->data.x,currentlvl->height));
+	cpBodySetPos(spikeball->dolly, cpv(spikeball->data.p_start.x,currentlvl->height));
 
-	spikeball->winch = cpSpaceAddConstraint(space, cpSlideJointNew(spikeball->data.body,static_body, cpvzero, cpv(spikeball->data.x,currentlvl->height), 0, INFINITY));
+	spikeball->winch = cpSpaceAddConstraint(space, cpSlideJointNew(spikeball->data.body,static_body, cpvzero, cpv(spikeball->data.p_start.x,currentlvl->height), 0, INFINITY));
 	cpConstraintSetMaxForce(spikeball->winch, 300000);
 	cpConstraintSetMaxBias(spikeball->winch, 200);
 	spikeball->winch_length = 100;

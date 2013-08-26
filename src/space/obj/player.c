@@ -21,9 +21,6 @@
 #include "../../engine/graphics/draw.h"
 #include "../../engine/graphics/particles.h"
 
-/* Game components */
-#include "objects.h"
-
 #include "chipmunk.h"
 #include "../spaceengine.h"
 
@@ -39,7 +36,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 {
 	player->gun_level = 1;
 	player->lives = 3;
-	player->score = 0;
+	player->coins = 0;
 	player->rotation_speed = 2.5;
 	player->aim_angle = 0;
 	player->aim_speed = 0.5;
@@ -56,9 +53,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	player->data.components[CMP_HPBAR] = &player->hp_bar;
 	player->data.components[CMP_MINIMAP] = &player->radar_image;
-	player->radar_image.c.g = 1;
-	player->radar_image.size = 10;
-
+	player->radar_image = cmp_new_minimap(10, COL_GREEN);
 
 	player->flame = particles_get_emitter(EMITTER_FLAME);
 	player->disable=0;
@@ -68,27 +63,32 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
 	cpBodySetPos(player->data.body, cpv(0,990));
 	cpBodySetVelLimit(player->data.body,450); //700
+	cpBodySetUserData(player->data.body, (void*)player);
 
 	/* make and connect new shape to body */
 	player->shape = se_add_circle_shape(player->data.body,radius,0.8,0.9);
-
+	//TODO create method for setting type, layers and group in one call
+	cpShapeSetCollisionType(player->shape, &this);
 	cpShapeSetLayers(player->shape, LAYER_PLAYER);
-	cpShapeSetCollisionType(player->shape, this.ID);
+	cpShapeSetGroup(player->shape, player);
 
-	cpBodySetUserData(player->data.body, (void*)player);
+	player->cash_magnet = se_add_circle_shape(player->data.body, player->param.cash_radius, 0,0);
+	player->cash_magnet->sensor = 1;
+	cpShapeSetCollisionType(player->cash_magnet, &this);
+	cpShapeSetLayers(player->cash_magnet, LAYER_PICKUP);
+	cpShapeSetGroup(player->cash_magnet, player);
 
 	hpbar_init(&(player->hp_bar), 100, 120, 25, -59, 50, &(player->data.body->p));
-
-	cpShapeSetGroup(player->shape, 341); // use a group to keep the car parts from colliding
 
 	//FIXME cleanup
 	player->gunwheel = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(player->gunwheel, player->data.body->p);
+	cpBodySetUserData(player->gunwheel, (void*)player);
 
 	cpShape *shape = se_add_circle_shape(player->gunwheel,radius,0.9,0.8);
-
-	cpShapeSetGroup(shape, 341); // use a group to keep the car parts from colliding
-	cpShapeSetLayers(shape,LAYER_PLAYER_BULLET);
+	cpShapeSetCollisionType(shape, &this);
+	cpShapeSetLayers(shape,LAYER_PLAYER);
+	cpShapeSetGroup(shape, player);
 }
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
@@ -107,7 +107,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	if (player_cheat_invulnerable)
-		player->hp_bar.value = 100;
+		player->hp_bar.value = 10000;
 
 	player->gun_timer += dt;
 

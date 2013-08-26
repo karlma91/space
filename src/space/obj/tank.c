@@ -20,22 +20,13 @@
 #include "../../engine/graphics/draw.h"
 #include "../../engine/graphics/particles.h"
 
-/* Game components */
-#include "objects.h"
-
 #include "chipmunk.h"
 #include "../spaceengine.h"
 
-
 /* static prototypes */
-static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset);
-static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset);
+static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset, cpGroup group);
+static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup group);
 
-/*
-static const float tex_map[3][8] = {
-		{0,0.5, 1,0.5, 0,0, 1,0}, {0,1, 0.5,1, 0,0.5, 0.5,0.5}, {0.5,1, 1,1, 0.5,0.5, 1,0.5}
-};
-*/
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
@@ -43,11 +34,10 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	tank->data.components[CMP_HPBAR] = &(tank->hp_bar);
-	tank->data.components[CMP_SCORE] = &(tank->param.score);
-	tank->data.components[CMP_MINIMAP] = &tank->radar_image;
-	tank->radar_image.c.r = 1;
-	tank->radar_image.size = 10;
+	COMPONENT_SET(tank, HPBAR, &tank->hp_bar);
+	COMPONENT_SET(tank, COINS, &tank->param.coins);
+	COMPONENT_SET(tank, MINIMAP, &tank->radar_image);
+	tank->radar_image = cmp_new_minimap(10, COL_RED);
 
 	sprite_create(&(tank->wheel_sprite), SPRITE_TANK_WHEEL, 120, 120, 0);
 	sprite_create(&(tank->data.spr), SPRITE_TANK_BODY, 200, 100, 0);
@@ -62,24 +52,24 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 		start_height = tank->factory->data.body->p.y - 100;
 	}
 
+	cpVect boxOffset = cpvzero;
+	tank->data.p_start.y = start_height + 10;
 	tank->rot_speed = M_PI/2;
+	tank->data.body = addChassis(space, tank,tank->data.p_start, boxOffset, tank);
 
 	// Make a car with some nice soft suspension
 	float wheel_offset = 40;
-	cpVect boxOffset = cpv(0, 0);
-	cpVect posA = cpv(tank->data.x - wheel_offset, start_height - 25);
-	cpVect posB = cpv(tank->data.x + wheel_offset, start_height - 25);
+	cpVect posA = cpv(tank->data.body->p.x - wheel_offset, start_height - 25);
+	cpVect posB = cpv(tank->data.body->p.x + wheel_offset, start_height - 25);
 
-	tank->data.body = addChassis(space, tank,
-			cpv(tank->data.x, start_height + 10), boxOffset);
 
 	tank->debug_left_dist = -1;
 	tank->debug_right_dist = -1;
 
-	cpShapeSetCollisionType(tank->shape, this.ID);
+	cpShapeSetCollisionType(tank->shape, &this);
 
-	tank->wheel1 = addWheel(space, posA, boxOffset);
-	tank->wheel2 = addWheel(space, posB, boxOffset);
+	tank->wheel1 = addWheel(space, posA, boxOffset, tank);
+	tank->wheel2 = addWheel(space, posB, boxOffset, tank);
 
 	tank->data.components[CMP_BODIES] = tank->wheel1;
 	tank->data.components[CMP_BODIES+1] = tank->wheel2;
@@ -206,7 +196,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 /*
  * make a wheel
  */
-static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset) {
+static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup group) {
 	cpFloat radius = 15.0f;
 	cpFloat mass = 1.0f;
 	cpBody *body = cpSpaceAddBody(space,
@@ -215,11 +205,8 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset) {
 	cpBodySetAngVelLimit(body, 200);
 
 	cpShape *shape = se_add_circle_shape(body, radius, 0.7, 0.0);
-
-	cpShapeSetGroup(shape, 1); // use a group to keep the car parts from colliding
-	cpSpaceAddCollisionHandler(space, this.ID, 0x7B080B, NULL, NULL,
-			NULL, NULL, NULL ); //0x7B080B == a hard-coded random number
-	cpShapeSetLayers(shape, LAYER_WHEEL);
+	cpShapeSetGroup(shape, group);
+	cpShapeSetLayers(shape, LAYER_ENEMY);
 
 	return body;
 }
@@ -227,7 +214,7 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset) {
 /**
  * make a chassies
  */
-static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset)
+static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset, cpGroup group)
 {
 	cpFloat mass = 2.0f;
 	cpFloat width = 80;
@@ -237,10 +224,8 @@ static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect box
 	cpBodySetPos(body, cpvadd(pos, boxOffset));
 
 	tank->shape = se_add_box_shape(body,width,height,0.6,0.0);
-
-	//cpShapeSetGroup(tempShape, 1); // use a group to keep the car parts from colliding
-
-	cpShapeSetLayers(tank->shape, LAYER_TANK);
+	cpShapeSetGroup(tank->shape, group);
+	cpShapeSetLayers(tank->shape, LAYER_ENEMY);
 
 	return body;
 }
@@ -276,6 +261,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(EMITTER_FRAGMENTS, tank->data.body->p);
+	se_spawn_coins((instance *)tank);
 
 	cpBodyEachShape(tank->data.body,se_shape_from_space,NULL);
 	cpBodyEachConstraint(tank->data.body,se_constrain_from_space,NULL);

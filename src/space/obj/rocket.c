@@ -23,12 +23,7 @@
 #include "../../engine/graphics/draw.h"
 #include "../../engine/graphics/particles.h"
 
-/* Game components */
-#include "objects.h"
-
 #include "../spaceengine.h"
-
-float damage = 50;
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
@@ -36,9 +31,13 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	rocket->data.components[CMP_HPBAR] = &(rocket->hp_bar);
-	rocket->data.components[CMP_SCORE] = &(rocket->param.score);
-	rocket->data.components[CMP_DAMAGE] = &(damage);
+	rocket->param.damage = 50; // TODO parse damage from file
+
+	COMPONENT_SET(rocket, HPBAR, &rocket->hp_bar);
+	COMPONENT_SET(rocket, COINS, &rocket->param.coins);
+	COMPONENT_SET(rocket, DAMAGE, &rocket->param.damage);
+	COMPONENT_SET(rocket, MINIMAP, &rocket->radar_image);
+	rocket->radar_image = cmp_new_minimap(5, COL_RED);
 
 	rocket->data.alive = 1;
 	rocket->flame = particles_get_emitter(EMITTER_ROCKET_FLAME);
@@ -59,14 +58,14 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpVect boxOffset = cpv(0, 0);
 
 	rocket->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, width, height)));
-	cpBodySetPos(rocket->data.body , cpvadd(cpv(rocket->data.x, start_height), boxOffset));
+	cpBodySetPos(rocket->data.body , cpvadd(cpv(rocket->data.p_start.x, start_height), boxOffset));
 	cpBodySetVelLimit(rocket->data.body,1000);
 	rocket->shape = se_add_box_shape(rocket->data.body,width,height,0.7,0.0);
 
 	//cpShapeSetGroup(tempShape, 1); // use a group to keep the car parts from colliding
 
-	cpShapeSetLayers(rocket->shape, LAYER_TANK);
-	cpShapeSetCollisionType(rocket->shape, this.ID);
+	cpShapeSetLayers(rocket->shape, LAYER_ENEMY);
+	cpShapeSetCollisionType(rocket->shape, &this);
 	cpBodySetUserData(rocket->data.body, rocket);
 
 	hpbar_init(&rocket->hp_bar, rocket->param.max_hp, 80, 16, -40, 60, &(rocket->data.body->p));
@@ -123,6 +122,7 @@ static void shape_from_space(cpBody *body, cpShape *shape, void *data)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
+	se_spawn_coins(OBJ_NAME);
 	cpBodyEachShape(rocket->data.body,shape_from_space,NULL);
 
 	cpSpaceRemoveBody(space, rocket->data.body);

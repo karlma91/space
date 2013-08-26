@@ -1,6 +1,5 @@
 #include "chipmunk.h"
 #include "states/space.h"
-#include "obj/objects.h"
 #include "game.h"
 
 #include "../engine/engine.h"
@@ -29,7 +28,7 @@ cpShape *se_add_box_shape(cpBody *body, cpFloat width, cpFloat height, cpFloat f
 void se_add_score_and_popup(cpVect p, int score)
 {
     particles_add_score_popup(p, score);
-	((obj_player *) instance_first(obj_id_player))->score += score;
+	((obj_player *) instance_first(obj_id_player))->coins += score;
 }
 
 float se_distance_to_player(float x)
@@ -51,6 +50,7 @@ cpVect se_distance_a2b(instance *insa, instance *insb)
 
 cpVect se_distance_v(cpVect a, cpVect b)
 {
+	//FIXME (not working properly at level edge?)
 	cpVect d = cpvsub(b,a);
 	int lvl_width = currentlvl->width;
 	if(d.x < -lvl_width/2){
@@ -216,4 +216,19 @@ int se_inside_view(cpVect *pos, float margin)
 	return cam_distance <= current_camera->width + margin;
 }
 
+void se_spawn_coins(instance * ins)
+{
+	int *coins_ptr = COMPONENT(ins, COINS, int *);
+	if (coins_ptr) {
+		cpVect pos = ins->body->p;
+		int i = (*coins_ptr) & 0xFF; /* limit number of coins to 255*/
+		float rnd_x, rnd_y;
+		while (i) {
+			rnd_x = 2 - ((i & 0x3) + 1);
+			rnd_y = 2 - (((i & 0x3) ^ 0x3) + 1);
+			instance_create(obj_id_coin, NULL, pos.x + rnd_x, pos.y + rnd_y*2, 0, 0);
+			--i;
+		}
+	}
+}
 

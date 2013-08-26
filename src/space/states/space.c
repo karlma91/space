@@ -28,9 +28,6 @@
 #include "../level.h"
 //#include "../collisioncallbacks.h"
 
-/* Game components */
-#include "../obj/objects.h"
-
 static float accumulator = 0;
 
 //TODO: remove in final game <-- ?
@@ -122,7 +119,7 @@ static float state_timer = 0;
  * Inner state functions
  */
 
-#define QUICK_ENTER 0
+#define QUICK_ENTER 1
 
 static void level_start()
 {
@@ -182,7 +179,7 @@ static void level_player_dead()
 		lvl_cleared=0;
 		sticks_hide();
 
-		leveldone_status(0, player->score, game_time);
+		leveldone_status(0, player->coins, game_time);
 		statesystem_push_state(state_leveldone);
 	} else {
 		tmp_atom = 0;
@@ -191,25 +188,21 @@ static void level_player_dead()
 static void level_cleared()
 {
 	obj_player *player = (obj_player *)instance_first(obj_id_player);
-	//TODO: add a 3 seconds animation of remaining time being added to score
 	update_all();
 
 	static int tmp_atom = 0;
-	if (state_timer > 1 && !tmp_atom) {
-		tmp_atom = 1;
-		int time_remaining = (currentlvl->timelimit - game_time + 0.5f);
-		int score_bonus = time_remaining * 75; // tidligere 25!
-		score_bonus += (player->hp_bar.value / player->hp_bar.max_hp) * 100 * 35; // adds score bonus for remaining hp
-
-		player->score += score_bonus; //Time bonus (75 * sec left)
+	if (state_timer > 2 && !tmp_atom) {
+		float p = (player->hp_bar.value / player->hp_bar.max_hp);
+		player->coins += (int)(p*p * 4)*4 * 25;
 
 		lvl_cleared=1;
 		sticks_hide();
 
 		//TODO set star rating based on missions
-		leveldone_status(1 + player->score / (4000.0 + 1000 * currentlvl->deck), player->score, game_time);
+		leveldone_status(1 + player->coins / (4000.0 + 1000 * currentlvl->deck), player->coins, game_time);
 
 		statesystem_push_state(state_leveldone);
+		tmp_atom = 1;
 	} else {
 		tmp_atom = 0;
 	}
@@ -479,7 +472,7 @@ static void plot_on_radar(instance *obj)
 {
 	minimap *m = obj->components[CMP_MINIMAP];
 	if(m != NULL){
-		float r = 50;
+		float r = 63;
 		float x = (obj->body->p.x + currentlvl->left)*2*M_PI/currentlvl->width;
 		float y = 1-(obj->body->p.y / currentlvl->height);
 		r = 50+r*y;
@@ -495,7 +488,7 @@ static void radar_draw(float x, float y)
 	radar_x = x;
 	radar_y = y;
 	draw_color4f(0.3, 0.5, 0.7, 0.6);
-	draw_donut(radar_x, radar_y, 50, 100);
+	draw_donut(radar_x, radar_y, 50, 110);
 	instance_iterate(plot_on_radar);
 }
 
@@ -512,17 +505,17 @@ void draw_gui()
 	setTextSize(35);
 
 	if (gamestate != LEVEL_START) {
-		radar_draw(-GAME_WIDTH/2 + 115, GAME_HEIGHT/2 - 165);
+		radar_draw(-GAME_WIDTH/2 + 120, GAME_HEIGHT/2 - 175);
 
 		/* simple score animation */
 		char score_temp[20];
 		static int score_anim = 0;
 		static int score_adder = 1;
-		if (score_anim + score_adder < player->score) {
+		if (score_anim + score_adder < player->coins) {
 			score_anim += score_adder;
 			score_adder += 11;
 		} else {
-			score_anim = player->score;
+			score_anim = player->coins;
 			score_adder = 1;
 		}
 		sprintf(score_temp,"%d",score_anim);
@@ -755,7 +748,8 @@ void space_init_level(int space_station, int deck)
 	if(player==NULL){
 		obj_param_player default_player = {
 				.max_hp = 200,
-				.gun_cooldown = 0.2f
+				.gun_cooldown = 0.2f,
+				.cash_radius = 300
 		};
 		player = (obj_player *)instance_create(obj_id_player, &default_player, 0,0,0,0);
 	} else {
@@ -944,7 +938,7 @@ int getPlayerScore()
 {
 	obj_player *player = ((obj_player*)instance_first(obj_id_player));
 	if (player != NULL)
-		return player->score;
+		return player->coins;
 	else
 		return -1;
 }

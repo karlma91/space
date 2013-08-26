@@ -14,6 +14,18 @@
 #include "../../engine/graphics/draw.h"
 
 void object_types_init();
+void instance_nearest_x_two(instance *ins, object_id *obj_id, instance **left, instance **right, cpFloat *instance, cpFloat *right_distance);
+
+
+/* COLLISION LAYERS */
+extern int LAYER_PLAYER;
+extern int LAYER_ENEMY;
+extern int LAYER_BUILDING;
+extern int LAYER_BULLET_PLAYER;
+extern int LAYER_BULLET_ENEMY;
+extern int LAYER_SHIELD_PLAYER;
+extern int LAYER_SHIELD_ENEMY;
+extern int LAYER_PICKUP;
 
 /*
  * OBJECT DECLARATION
@@ -57,16 +69,17 @@ PARAM_START(player)
 	float max_hp;
 	int tex_id;
 	float gun_cooldown;
+	float cash_radius;
 PARAM_END
-
 OBJ_START(player)
 	cpShape *shape;
+	cpShape *cash_magnet;
 	hpbar hp_bar;
 	int lives;
 	float lost_life_timer;
 	int disable; //todo move this out to instance?
 	int gun_level;
-	int score;
+	int coins;
 	float rotation_speed;
 	float direction; /* in radians [0, 2*PI]*/
 	float direction_target; /* in radians [0, 2*PI]*/
@@ -98,7 +111,7 @@ OBJ_END
 
 PARAM_START(tank)
 	float max_hp;
-	int score;
+	int coins;
 PARAM_END
 OBJ_START(tank)
 	cpShape *shape;
@@ -124,10 +137,12 @@ PARAM_START(factory)
 	int max_tanks;
 	float max_hp;
 	float spawn_delay;
-	int score;
+	int coins;
 	object_id *type;
 	void *param;
 	SPRITE_ID sprite_id;
+	char shape_name[32];
+	polyshape *shape_id;
 PARAM_END
 OBJ_START(factory)
 	cpShape *shape;
@@ -143,11 +158,13 @@ OBJ_END
 
 PARAM_START(turret)
 	float max_hp;
-	int score;
+	int coins;
 	float rot_speed;
 	float shoot_interval;
 	int burst_number;
 	int tex_id;
+	char shape_name[32];
+	polyshape *shape_id;
 PARAM_END
 OBJ_START(turret)
 	cpShape *shape;
@@ -158,13 +175,15 @@ OBJ_START(turret)
 	int shooting;
 	float rate;
 	hpbar hp_bar;
+	minimap radar_image;
 OBJ_END
 
 PARAM_START(rocket)
 	float max_hp;
-	int score;
+	int coins;
 	int tex_id;
 	float force;
+	float damage;
 PARAM_END
 OBJ_START(rocket)
 	cpShape *shape;
@@ -176,6 +195,7 @@ OBJ_START(rocket)
 	float rot_speed;
 	hpbar hp_bar;
 	emitter *flame;
+	minimap radar_image;
 OBJ_END
 
 PARAM_START(robotarm)
@@ -217,6 +237,7 @@ OBJ_END
 PARAM_EMPTY(coin)
 OBJ_START(coin)
 	cpShape *shape;
+	cpBool pulled; //TODO create pickup component
 OBJ_END
 
 

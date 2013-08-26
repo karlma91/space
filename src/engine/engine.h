@@ -6,7 +6,6 @@
 #include "input/button.h"
 #include "data/llist.h"
 #include "graphics/camera.h"
-
 #if __IPHONEOS__
 #define IS_APP 1
 #define GOT_TOUCH 1

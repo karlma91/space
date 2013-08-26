@@ -56,7 +56,7 @@ void sprite_init()
 			exit(5);
 		}
 		SDL_Log("SPRITE: %s %s %f %f %f %f %d", name, file_name, u, v, width, height, subimages);
-		sprite_data *data = calloc(1,sizeof *data);
+		sprite_data *data = (sprite_data*)calloc(1, sizeof(sprite_data));
 		strcpy(data->name, name);
 		data->height = height;
 		data->width = width;

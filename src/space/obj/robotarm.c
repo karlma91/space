@@ -38,34 +38,37 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	robotarm->angle = malloc(sizeof(int)*robotarm->segments);
 	int i;
 	for(i=0; i<robotarm->segments; i++){
-		robotarm->x[i] = robotarm->data.x;
-		robotarm->y[i] = robotarm->data.y;
+		robotarm->x[i] = robotarm->data.p_start.x;
+		robotarm->y[i] = robotarm->data.p_start.y;
 		robotarm->angle[i] = 0;
 	}
 
 	cpFloat radius = 100.0f;
 	cpFloat mass = 5.0f;
-	cpVect pos = cpv(robotarm->data.x, robotarm->data.y + 100);
+	cpVect pos = robotarm->data.p_start;
+	pos.y += 100;
+
 	robotarm->saw = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(robotarm->saw, pos);
 	cpBodySetVelLimit(robotarm->saw, 400);
 
 	cpShape *shape = se_add_circle_shape(robotarm->saw, radius, 0.7, 0.0);
-	cpShapeSetGroup(shape, 1);
-	cpShapeSetLayers(shape, LAYER_TANK);
-	cpShapeSetCollisionType(shape, this.ID);
+	cpShapeSetGroup(shape, robotarm);
+	cpShapeSetLayers(shape, LAYER_ENEMY);
+	cpShapeSetCollisionType(shape, &this);
 
 	cpFloat size = 50;
 	/* make and add new body */
 	robotarm->data.body = cpBodyNew(200, cpMomentForBox(20.0f, size, size));
-	cpBodySetPos(((instance *) robotarm)->body, cpv(robotarm->data.x,size+10));
+	cpBodySetPos(((instance *) robotarm)->body, cpv(robotarm->data.p_start.x,size+10));
 	cpBodySetVelLimit(((instance *) robotarm)->body,180);
 
 	/* make and connect new shape to body */
 	robotarm->shape = cpSpaceAddShape(space, cpBoxShapeNew(robotarm->data.body, size, size));
 	cpShapeSetFriction(robotarm->shape, 0.01);
-	cpShapeSetLayers(robotarm->shape, LAYER_ENEMY_BULLET);
-	cpShapeSetCollisionType(robotarm->shape, this.ID);
+	cpShapeSetLayers(robotarm->shape, LAYER_BULLET_ENEMY);
+	cpShapeSetCollisionType(robotarm->shape, &this);
+	cpShapeSetGroup(robotarm->shape, robotarm);
 
 	cpBodySetUserData(((instance *) robotarm)->body, (instance*)robotarm);
 

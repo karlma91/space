@@ -1,7 +1,7 @@
 #ifndef SPACEENGINE_H_
 #define SPACEENGINE_H_
 #include "chipmunk.h"
-#include "obj/objects.h"
+#include "../engine/components/object.h"
 
 cpShape *se_add_circle_shape(cpBody *body, cpFloat radius, cpFloat friction,
 		cpFloat elasticity);
@@ -24,5 +24,6 @@ void se_rect2arch_column(float x, cpVect *polar);
 void se_rect2arch_from_data(cpVect *pos, cpVect *polar);
 
 int se_inside_view(cpVect *pos, float margin);
+void se_spawn_coins(instance *ins);
 
 #endif /* SPACEENGINE_H_ */
