@@ -118,6 +118,7 @@ int draw_init(){
 	return 0;
 }
 
+/*
 void draw_light_map()
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -146,7 +147,7 @@ void draw_light_map()
 	glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
 	draw_render_light_map();
 }
-
+*/
 static void draw_render_light_map()
 {
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);

@@ -5,7 +5,7 @@
 #include "../data/llist.h"
 #include "../input/touch.h"
 
-#include "SDL_Log.h"
+#include "SDL.h"
 #define MAX_INNER_STATES 10
 
 LList states;
