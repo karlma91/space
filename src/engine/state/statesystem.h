@@ -41,7 +41,7 @@ STATE_ID statesystem_get_render_state(void);
 
 STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs);
 
-void statesystem_add_inner_state(STATE_ID state, int inner_state, void (*update)(), void (*draw)());
+void statesystem_add_inner_state(STATE_ID state, int inner_state, void (*update)(void), void (*draw)(void));
 void statesystem_set_inner_state(STATE_ID state, int inner_state);
 
 void statesystem_push_state(STATE_ID state);

@@ -8,16 +8,16 @@
 #include "sound.h"
 
 #if SOUND_DISABLED
-void sound_init() {}
+void sound_init(void) {}
 Mix_Music *sound_load_music(const char *name) {return NULL;}
 Mix_Chunk *sound_load_chunk(const char *name) {return NULL;}
 void sound_play(Mix_Chunk *chunk) {}
 void sound_music(Mix_Music *music) {}
-void sound_destroy() {}
-void sound_mute() {}
-void sound_unmute() {}
-void sound_music_mute() {}
-void sound_music_unmute() {}
+void sound_destroy(void) {}
+void sound_mute(void) {}
+void sound_unmute(void) {}
+void sound_music_mute(void) {}
+void sound_music_unmute(void) {}
 #else
 
 #include "SDL_log.h"

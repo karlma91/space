@@ -32,7 +32,7 @@ void sprite_destroy(void);
  * //game_foo.h
  * extern int SPRITE_BAR;
  * //game_foo.c
- * foo_init() {
+ * foo_init(void) {
  * 	SPRITE_BAR = sprite_load("bar.sprite");
  * }
  */

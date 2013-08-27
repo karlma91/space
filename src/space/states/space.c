@@ -979,7 +979,7 @@ void input(void)
 #endif
 }
 
-void space_start_demo() {
+void space_start_demo(void) {
 	//TODO set and reset all per-game variables
 	multiplayer = 0;
 
@@ -989,7 +989,7 @@ void space_start_demo() {
 	statesystem_set_state(state_space);
 }
 
-void space_start_multiplayer() {
+void space_start_multiplayer(void) {
 	//TODO set and reset all per-game variables
 	multiplayer = 1;
 

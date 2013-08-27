@@ -135,7 +135,7 @@ static void on_leave(void)
 {
 }
 
-static void pre_update() {
+static void pre_update(void) {
 
 #if ARCADE_MODE
 	static float key_dt = 0;
@@ -294,7 +294,7 @@ static void draw_highscore(int start_index)
 #endif
 }
 
-void gameover_showhighscores() {
+void gameover_showhighscores(void) {
 	gameover_setstate(show_highscore);
 	statesystem_set_state(state_gameover);
 }
@@ -305,4 +305,4 @@ int gameover_setstate(enum gameover_state state)
 	return 0;
 }
 
-static void post_update() {}
+static void post_update(void) {}

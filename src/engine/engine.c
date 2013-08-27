@@ -164,7 +164,7 @@ static int HandleAppEvents(void *userdata, SDL_Event *event)
 	}
 }
 
-static void setAspectRatio() {
+static void setAspectRatio(void) {
 	//SDL_ShowCursor(!config.fullscreen);
 
 	if (config.fullscreen) {
@@ -241,7 +241,7 @@ static void display_init(void)
 	SDL_ShowWindow(window);
 }
 
-static void initGL() {
+static void initGL(void) {
 	// Create an OpenGL context associated with the window.
 	glcontext = SDL_GL_CreateContext(window);
 
@@ -299,7 +299,7 @@ static void initGL() {
 	SDL_Log("DEBUG - initGL done!\n");
 }
 
-static void main_init() {
+static void main_init(void) {
 	srand(time(0)); /* init pseudo-random generator */
 
 	//TODO Make sure faulty inits stops the program from proceeding
@@ -562,7 +562,7 @@ static int main_run(void)
 	return 0;
 }
 
-static int main_destroy() {
+static int main_destroy(void) {
 	SDL_Log("DEBUG - SDL_destroy\n");
 	//cpSpaceFreeChildren(space);
 
@@ -597,7 +597,7 @@ int main(int argc, char *args[]) {
 	return 0;
 }
 
-void main_stop() {
+void main_stop(void) {
 	main_running = 0;
 }
 

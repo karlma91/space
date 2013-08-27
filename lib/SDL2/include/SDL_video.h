@@ -193,7 +193,7 @@ typedef enum
 {
     SDL_GL_CONTEXT_PROFILE_CORE           = 0x0001,
     SDL_GL_CONTEXT_PROFILE_COMPATIBILITY  = 0x0002,
-    SDL_GL_CONTEXT_PROFILE_ES             = 0x0004
+    SDL_GL_CONTEXT_PROFILE_ES             = 0x0004 /* GLX_CONTEXT_ES2_PROFILE_BIT_EXT */
 } SDL_GLprofile;
 
 typedef enum
@@ -821,7 +821,7 @@ extern DECLSPEC void SDLCALL SDL_DisableScreenSaver(void);
 /**
  *  \name OpenGL support functions
  */
-/*@{*/
+/* @{ */
 
 /**
  *  \brief Dynamically load an OpenGL library.
@@ -939,7 +939,7 @@ extern DECLSPEC void SDLCALL SDL_GL_SwapWindow(SDL_Window * window);
  */
 extern DECLSPEC void SDLCALL SDL_GL_DeleteContext(SDL_GLContext context);
 
-/*@}*//*OpenGL support functions*/
+/* @} *//* OpenGL support functions */
 
 
 /* Ends C function definitions when using C++ */

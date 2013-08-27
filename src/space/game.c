@@ -138,7 +138,7 @@ static int handler(void* config, const char* section, const char* name,
 }
 #endif
 
-void game_config()
+void game_config(void)
 {
 #if !(TARGET_OS_IPHONE || __ANDROID__)
 	if (ini_parse("bin/config.ini", handler, &config) < 0) {
@@ -165,7 +165,7 @@ void game_config()
 #endif
 }
 
-void game_components()
+void game_components(void)
 {
 	REGISTER_CMP(HPBAR, 1);
 	REGISTER_CMP(COINS, 1);
@@ -175,7 +175,7 @@ void game_components()
 	REGISTER_CMP(MINIMAP, 1);
 }
 
-void game_sprites()
+void game_sprites(void)
 {
 	REGISTER_SPRITE( PLAYER );
 	REGISTER_SPRITE( PLAYER_GUN );
@@ -198,12 +198,12 @@ void game_sprites()
 	REGISTER_SPRITE( COIN );
 }
 
-void game_polyshapes()
+void game_polyshapes(void)
 {
 	POLYSHAPE_RAMP = shape_read("ramp.shape");
 }
 
-void game_particles()
+void game_particles(void)
 {
 #define PARTICLE_STRESS 0
 #if PARTICLE_STRESS
@@ -219,13 +219,13 @@ void game_particles()
     EMITTER_FRAGMENTS =     read_emitter_from_file("fragments.xml");
 }
 
-void game_font()
+void game_font(void)
 {
    FONT_NORMAL = bmfont_read_font("Arial.fnt");
    FONT_BIG = bmfont_read_font("bigariel.fnt");
 }
 
-void game_audio()
+void game_audio(void)
 {
 	SND_LASER_1 = sound_load_chunk("laser_01.ogg");
 	SND_LASER_2 = sound_load_chunk("laser_02.ogg");
@@ -238,13 +238,13 @@ void game_audio()
 
 
 /* general button callbacks */
-static void open_settings()
+static void open_settings(void)
 {
 	statesystem_push_state(state_settings);
 }
 
 /* all global touchables goes in here. NB! Cannot contain direct reference to any state-id as they are uninitialized! */
-void game_touchables()
+void game_touchables(void)
 {
 	btn_settings = button_create(SPRITE_GEAR, 0, "", GAME_WIDTH/2 - 100, GAME_HEIGHT/2 - 100, 125, 125);
 	button_set_callback(btn_settings, open_settings, 0);
@@ -252,7 +252,7 @@ void game_touchables()
 	button_set_hotkeys(btn_settings, SDL_SCANCODE_F1, 0);
 }
 
-void game_init()
+void game_init(void)
 {
 	//TODO generalize particles.c and sprites.c, (and level.c?)
 	game_sprites();
@@ -294,7 +294,7 @@ minimap cmp_new_minimap(float size, Color c)
 	return m;
 }
 
-void game_destroy()
+void game_destroy(void)
 {
 
 	level_destroy();

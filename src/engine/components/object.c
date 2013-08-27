@@ -124,7 +124,7 @@ instance *instance_create(object_id *type, const void *param, float x, float y, 
 #define INT_MIN -2147483648
 #endif
 
-void object_init() {
+void object_init(void) {
 
 }
 

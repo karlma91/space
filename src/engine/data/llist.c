@@ -69,7 +69,7 @@ static int is_valid(struct llist *list) {
 	return 0;
 }
 
-static __inline__ node* new_node() {
+static __inline__ node* new_node(void) {
 	node *node;
 
 #if LLIST_DEBUG
@@ -408,7 +408,7 @@ int llist_destroy(LList id)
 	return 1;
 }
 
-void llist_free_nodes() {
+void llist_free_nodes(void) {
 	node *node = node_pool;
 	while (node_pool) {
 		node_pool = node->next;
