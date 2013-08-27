@@ -32,6 +32,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	coin->shape = se_add_circle_shape(coin->data.body,COIN_RADIUS-5,0.8,0.2);
 	coin->data.body->velocity_func = vel_func;
 	cpShapeSetCollisionType(coin->shape, &this);
+	cpShapeSetGroup(coin->shape, &this);
 	cpShapeSetLayers(coin->shape, LAYER_PICKUP);
 }
 

@@ -27,6 +27,8 @@
 static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset, cpGroup group);
 static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup group);
 
+#define MASS 5.0f
+#define MASS_WHEEL 10.0f
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
@@ -77,8 +79,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel1 , cpv(-30, -10), cpv(-wheel_offset, -40), cpvzero));
 	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel2, cpv( 30, -10), cpv( wheel_offset, -40), cpvzero));
 
-	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
-	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 60.0f, 0.5f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
 
 	cpBodySetUserData(tank->data.body, tank);
 
@@ -198,15 +200,14 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
  */
 static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup group) {
 	cpFloat radius = 15.0f;
-	cpFloat mass = 1.0f;
 	cpBody *body = cpSpaceAddBody(space,
-			cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
+			cpBodyNew(MASS_WHEEL, cpMomentForCircle(MASS_WHEEL, 0.0f, radius, cpvzero)));
 	cpBodySetPos(body, cpvadd(pos, boxOffset));
 	cpBodySetAngVelLimit(body, 200);
 
-	cpShape *shape = se_add_circle_shape(body, radius, 0.7, 0.0);
-	cpShapeSetGroup(shape, group);
-	cpShapeSetLayers(shape, LAYER_ENEMY);
+	cpShape *shape = se_add_circle_shape(body, radius, 0.8, 0.7);
+	cpShapeSetGroup(shape, &this);
+	cpShapeSetLayers(shape, LAYER_BULLET_ENEMY);
 
 	return body;
 }
@@ -216,11 +217,10 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup g
  */
 static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset, cpGroup group)
 {
-	cpFloat mass = 2.0f;
 	cpFloat width = 80;
 	cpFloat height = 30;
 
-	cpBody *body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, width, height)));
+	cpBody *body = cpSpaceAddBody(space, cpBodyNew(MASS, cpMomentForBox(MASS, width, height)));
 	cpBodySetPos(body, cpvadd(pos, boxOffset));
 
 	tank->shape = se_add_box_shape(body,width,height,0.6,0.0);
