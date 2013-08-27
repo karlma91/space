@@ -60,19 +60,19 @@ static inline Color LAColor(float l, float a)
 extern GLfloat triangle_quad[8];
 extern GLfloat corner_quad[8];
 
-void draw_light_map();
+void draw_light_map(void);
 
-void draw_push_color();
-void draw_pop_color();
-void draw_push_blend();
-void draw_pop_blend();
+void draw_push_color(void);
+void draw_pop_color(void);
+void draw_push_blend(void);
+void draw_pop_blend(void);
 
 void draw_translate(GLfloat x, GLfloat y, GLfloat z);
 void draw_rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
 void draw_scale(GLfloat x, GLfloat y, GLfloat z);
-void draw_push_matrix();
-void draw_pop_matrix();
-void draw_load_identity();
+void draw_push_matrix(void);
+void draw_pop_matrix(void);
+void draw_load_identity(void);
 void draw_draw_arrays(GLenum mode, GLint first, GLsizei count);
 void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 void draw_tex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
@@ -85,8 +85,8 @@ void draw_color(Color color);
 void draw_line(int tex_id, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_glow_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 void draw_line_strip(const GLfloat *strip, int l, float w);
-int draw_init();
-void draw_destroy();
+int draw_init(void);
+void draw_destroy(void);
 void draw_circle(GLfloat x, GLfloat y, GLfloat radius);
 void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r);
 void draw_polygon(int count, cpVect *verts, Color lineColor, Color fillColor);
@@ -111,13 +111,13 @@ void draw_box_append(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,in
 void draw_sprite_line(sprite *spr, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w);
 
 
-void draw_append_quad();
-void draw_append_quad_simple();
-void draw_append_color_quad();
-void draw_append_color_tex_quad();
-void draw_flush();
-void draw_flush_and_multiply();
-void draw_flush_color();
-void draw_flush_simple();
+void draw_append_quad(void);
+void draw_append_quad_simple(void);
+void draw_append_color_quad(void);
+void draw_append_color_tex_quad(void);
+void draw_flush(void);
+void draw_flush_and_multiply(void);
+void draw_flush_color(void);
+void draw_flush_simple(void);
 
 #endif /* DRAW_H_ */

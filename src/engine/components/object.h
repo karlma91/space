@@ -19,8 +19,8 @@
 #define OBJECT_MAX_OBJECTS 20 //FIXME TMP define in port progress
 
 
-void object_init();
-void object_destroy();
+void object_init(void);
+void object_destroy(void);
 
 typedef struct instance instance;
 typedef struct object object_id;
@@ -82,7 +82,7 @@ void instance_iterate(void (*f)(instance *));
 void instance_iterate_type(void (*f)(instance *), object_id *type);
 void instance_remove(instance *);
 int instance_set_param(instance *, const void *param);
-void instance_clear();
+void instance_clear(void);
 
 instance *instance_nearest(cpVect pos, object_id *type);
 instance *instance_first(object_id *type);

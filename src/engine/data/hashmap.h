@@ -18,7 +18,7 @@ typedef struct {
 
 } hashmap;
 
-hashmap * hm_create();
+hashmap * hm_create(void);
 void hm_destroy(hashmap *hm);
 int hm_add(hashmap *hm, const char *key, void *data);
 void* hm_remove(hashmap *hm, const char *key);

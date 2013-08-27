@@ -57,10 +57,10 @@ extern configuration config;
 /* State  struct */
 typedef struct state_ state;
 struct state_ {
-	void (*init)();
-	void (*update)();
-	void (*render)();
-	void (*destroy)();
+	void (*init)(void);
+	void (*update)(void);
+	void (*render)(void);
+	void (*destroy)(void);
 	state *parentState;
 };
 

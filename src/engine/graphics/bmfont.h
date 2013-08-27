@@ -27,7 +27,7 @@ typedef struct _bm_font{
 } bm_font;
 
 bm_font * bmfont_read_font(char *filename);
-void bmfont_init();
+void bmfont_init(void);
 void bmfont_render(bm_font *font, int align, float x, float y, char *format, ...);
 
 #endif

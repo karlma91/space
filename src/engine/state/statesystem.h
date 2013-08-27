@@ -27,17 +27,17 @@ typedef struct {
 /**
  * standard functions
  */
-void statesystem_init();
-void statesystem_update();
-void statesystem_draw();
-void statesystem_pause();
-void statesystem_destroy();
+void statesystem_init(void);
+void statesystem_update(void);
+void statesystem_draw(void);
+void statesystem_pause(void);
+void statesystem_destroy(void);
 
 /**
  * statesystem functions
  */
 
-STATE_ID statesystem_get_render_state();
+STATE_ID statesystem_get_render_state(void);
 
 STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs);
 
@@ -45,7 +45,7 @@ void statesystem_add_inner_state(STATE_ID state, int inner_state, void (*update)
 void statesystem_set_inner_state(STATE_ID state, int inner_state);
 
 void statesystem_push_state(STATE_ID state);
-void statesystem_pop_state();
+void statesystem_pop_state(void);
 void statesystem_set_state(STATE_ID state);
 
 void statesystem_call_update(STATE_ID state_id);

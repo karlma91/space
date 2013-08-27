@@ -10,7 +10,7 @@
 
 void stack_push_float(float a);
 void stack_push_int(int a);
-float stack_pop_float();
-int stack_pop_int();
+float stack_pop_float(void);
+int stack_pop_int(void);
 
 #endif /* STACK_H_ */

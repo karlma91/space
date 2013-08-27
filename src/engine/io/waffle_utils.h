@@ -29,8 +29,8 @@ enum WAFFLE_DIR {
 	WAFFLE_TMP
 };
 
-extern void waffle_init();
-extern void waffle_destroy();
+extern void waffle_init(void);
+extern void waffle_destroy(void);
 
 int checksum(char *data, int length);
 

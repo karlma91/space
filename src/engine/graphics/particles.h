@@ -103,20 +103,20 @@ struct emitter {
 
 
 int read_emitter_from_file (char *filename);
-void particles_init();
-void particles_destroy();
-void particles_draw();
-void particles_update();
+void particles_init(void);
+void particles_destroy(void);
+void particles_draw(void);
+void particles_update(void);
 void particles_release_emitter(emitter* e);
 
 emitter *particles_add_score_popup(cpVect p,int score);
 emitter *particles_add_sparks(cpVect p, float angle, float force);
 
-void particles_clear();
+void particles_clear(void);
 emitter *particles_get_emitter(int type);
 emitter *particles_get_emitter_at(int type,cpVect p);
 
-void particles_reload_particles();
+void particles_reload_particles(void);
 
 extern unsigned int particles_active;
 extern int available_particle_counter; //TMP

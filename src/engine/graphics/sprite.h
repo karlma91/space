@@ -23,8 +23,8 @@ typedef struct {
 	float height;
 } sprite;
 
-void sprite_init();
-void sprite_destroy();
+void sprite_init(void);
+void sprite_destroy(void);
 
 /*
  * sprite_load brukes for å koble og loade en sprite-fil til en SPRITE_ID, f.eks:

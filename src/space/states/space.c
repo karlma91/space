@@ -276,7 +276,7 @@ static void update_all()
 	accumulator += dt;
 
 	instance_iterate(update_instances);
-	particles_update(dt);
+	particles_update();
 
 	/* update all chipmunk objects 60 times per second */
 	while(accumulator >= phys_step)
@@ -460,7 +460,7 @@ static void SPACE_draw()
 	instance_iterate(render_instances);
 
 	/* draw particle effects */
-	particles_draw(dt);
+	particles_draw();
 
 	space_rendering_map = 0;
 	draw_gui();
