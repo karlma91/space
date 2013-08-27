@@ -53,7 +53,7 @@ int get_sub_index(const object_id *obj_id, const char* sub_name) {
 }
 
 //TODO: rewrite object parsing: general and automatic object parsing
-int level_init()
+int level_init(void)
 {
 	int ret;
 
@@ -333,13 +333,13 @@ void level_get_ships(level_ship **ship, int *count)
 	*count = station_count;
 }
 
-void level_destroy()
+void level_destroy(void)
 {
 	station_count = 0;
 	free(worlds);
 }
 
-int level_get_station_count()
+int level_get_station_count(void)
 {
 	return station_count;
 }

@@ -26,7 +26,7 @@ typedef struct {
 #define FILE_BUFFER_SIZE 8192 /* NB! make sure buffer is large enough */
 static char buffer[FILE_BUFFER_SIZE];
 
-void sprite_init()
+void sprite_init(void)
 {
 	SDL_Log("SPRITE INTIT:");
 	constant_sprites = llist_create();
@@ -83,7 +83,7 @@ SPRITE_ID sprite_link(const char *name)
 	return NULL;
 }
 
-void sprite_destroy()
+void sprite_destroy(void)
 {
 	llist_destroy(constant_sprites);
 	//TODO go through and release all sprite data

@@ -232,7 +232,7 @@ void instance_iterate_type(void (*f)(instance *), object_id *type) {
 }
 
 /* removes all nodes from all lists */
-void instance_clear()
+void instance_clear(void)
 {
 	int obj_id;
 	object_info *obj = objects_meta;
@@ -244,7 +244,7 @@ void instance_clear()
 }
 
 /* frees all nodes in all object lists */
-void object_destroy()
+void object_destroy(void)
 {
 	int obj_id;
 	object_info *obj = objects_meta;

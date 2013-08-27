@@ -17,7 +17,7 @@ void stack_push_int(int a)
 	int_stack[int_top] = a;
 }
 
-float stack_pop_float()
+float stack_pop_float(void)
 {
 	assert(float_top != -1);
 	float a = float_stack[float_top];
@@ -25,7 +25,7 @@ float stack_pop_float()
 	return a;
 }
 
-int stack_pop_int()
+int stack_pop_int(void)
 {
 	assert(int_top != -1);
 	int a = int_stack[int_top];

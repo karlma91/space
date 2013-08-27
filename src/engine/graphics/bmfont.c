@@ -16,7 +16,7 @@ static char buffer[FILE_BUFFER_SIZE];
 
 static void flush_line(bm_font *font, float text_width, float x, float y);
 
-void bmfont_init()
+void bmfont_init(void)
 {
     font_list = llist_create();
     llist_set_remove_callback(font_list, free);

@@ -33,7 +33,7 @@ JNIEXPORT void JNICALL Java_org_libsdl_app_SDLActivity_set_1apk_1path
 
 static ZZIP_DIR *game_data = NULL;
 
-void waffle_init()
+void waffle_init(void)
 {
 	zzip_error_t zzip_err;
 	SDL_Log("Loading game resources...");
@@ -74,7 +74,7 @@ void waffle_init()
 	SDL_Log("Game resources OK!");
 }
 
-void waffle_destroy()
+void waffle_destroy(void)
 {
 	zzip_dir_close(game_data);
 }

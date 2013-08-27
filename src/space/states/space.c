@@ -38,14 +38,14 @@ STATE_ID state_space;
  * The global space state
  */
 
-static void SPACE_draw();
+static void SPACE_draw(void);
 static void update_instances(instance *);
 static void render_instances(instance *);
 static void update_camera_zoom(int mode);
-static void update_camera_position();
+static void update_camera_position(void);
 
-static void sticks_init();
-static void sticks_hide();
+static void sticks_init(void);
+static void sticks_hide(void);
 
 static void radar_draw(float x, float y);
 
@@ -70,7 +70,7 @@ level *currentlvl;
 
 static camera space_cam;
 
-static void input();
+static void input(void);
 
 /*
  * The ingame states for level transition and delays
@@ -103,15 +103,15 @@ int multiplayer;
  */
 enum game_state gamestate = LEVEL_START;
 
-static void level_start();
-static void level_running();
-static void level_player_dead();
-static void level_cleared();
-static void level_transition();
+static void level_start(void);
+static void level_running(void);
+static void level_player_dead(void);
+static void level_cleared(void);
+static void level_transition(void);
 static void change_state(enum game_state state);
-static void update_all();
+static void update_all(void);
 
-static void draw_gui();
+static void draw_gui(void);
 
 /* The state timer */
 static float state_timer = 0;
@@ -121,7 +121,7 @@ static float state_timer = 0;
 
 #define QUICK_ENTER 1
 
-static void level_start()
+static void level_start(void)
 {
 	game_time = 0;
 #if QUICK_ENTER
@@ -148,7 +148,7 @@ static void level_start()
 		change_state(LEVEL_RUNNING);
 	}
 }
-static void level_running()
+static void level_running(void)
 {
 	/* update game time */
 	game_time += dt;
@@ -168,7 +168,7 @@ static void level_running()
 }
 
 int lvl_cleared = 0; //TODO tmp lvl cleared;
-static void level_player_dead()
+static void level_player_dead(void)
 {
 	obj_player *player = (obj_player *)instance_first(obj_id_player);
 	update_all();
@@ -185,7 +185,7 @@ static void level_player_dead()
 		tmp_atom = 0;
 	}
 }
-static void level_cleared()
+static void level_cleared(void)
 {
 	obj_player *player = (obj_player *)instance_first(obj_id_player);
 	update_all();
@@ -207,7 +207,7 @@ static void level_cleared()
 		tmp_atom = 0;
 	}
 }
-static void level_transition()
+static void level_transition(void)
 {
 #if ARCADE_MODE
 	//if(state_timer > 1){
@@ -251,7 +251,7 @@ static void change_state(enum game_state state)
 /**
  * Main space update function
  */
-static void pre_update()
+static void pre_update(void)
 {
 	input();
 
@@ -260,7 +260,7 @@ static void pre_update()
 	//state_functions[gamestate]();
 }
 
-static void post_update()
+static void post_update(void)
 {
 	update_camera_zoom(current_camera->mode);
 	update_camera_position();
@@ -270,7 +270,7 @@ static void post_update()
 /**
  * Updates all the objects in objects and in chipmunk
  */
-static void update_all()
+static void update_all(void)
 {
 	/* chipmunk timestep counter */
 	accumulator += dt;
@@ -369,7 +369,7 @@ static void render_instances(instance *obj)
 }
 
 
-static void draw()
+static void draw(void)
 {
 	SPACE_draw();
 #if LIGHT_SYSTEM
@@ -384,7 +384,7 @@ static void update_camera_zoom(int mode)
 	camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
 }
 
-static void update_camera_position()
+static void update_camera_position(void)
 {
 
     static int follow_player = 1;
@@ -441,7 +441,7 @@ static void update_camera_position()
     cam_right_limit = currentlvl->right - current_camera->width;
 }
 
-static void SPACE_draw()
+static void SPACE_draw(void)
 {
 	space_rendering_map = 1;
 	/* draw background */
@@ -492,7 +492,7 @@ static void radar_draw(float x, float y)
 	instance_iterate(plot_on_radar);
 }
 
-void draw_gui()
+void draw_gui(void)
 {
 	/* reset transform matrix */
 	draw_load_identity();
@@ -659,7 +659,7 @@ static int stars_x[star_count];
 static int stars_y[star_count];
 static float stars_size[star_count];
 #define SW 8000
-static void stars_init()
+static void stars_init(void)
 {
 	//init stars
 	srand(122531);
@@ -670,7 +670,7 @@ static void stars_init()
 		stars_size[i] = 2 + 5*(rand() % 1000) / 1000.0f;
 	}
 }
-void drawStars()
+void drawStars(void)
 {
 	static int tick2death = 1;
 
@@ -708,7 +708,7 @@ void drawStars()
 }
 
 
-static void sticks_init() {
+static void sticks_init(void) {
 	joystick_release(joy_p1_left);
 	joystick_release(joy_p1_right);
 	joystick_release(joy_p2_left);
@@ -731,7 +731,7 @@ static void sticks_init() {
 	}
 }
 
-static void sticks_hide() {
+static void sticks_hide(void) {
 	((touchable *)joy_p1_left)->visible = 0;
 	((touchable *)joy_p1_right)->visible = 0;
 	((touchable *)joy_p2_left)->visible = 0;
@@ -829,18 +829,18 @@ void space_init_level(int space_station, int deck)
 	particles_clear();
 }
 
-static void on_enter()
+static void on_enter(void)
 {
 	game_paused = 0;
 }
 
-static void game_over()
+static void game_over(void)
 {
 	lvl_cleared=0;
 	statesystem_push_state(state_leveldone);
 }
 
-static void pause_game()
+static void pause_game(void)
 {
 	statesystem_push_state(state_pause);
 	game_paused = 1;
@@ -865,26 +865,26 @@ static void sdl_event(SDL_Event *event)
 	}
 }
 
-static void on_pause()
+static void on_pause(void)
 {
 	if (gamestate == LEVEL_RUNNING) {
 		pause_game();
 	}
 }
 
-static void on_leave()
+static void on_leave(void)
 {
 
 }
 
-static void destroy()
+static void destroy(void)
 {
     cpSpaceDestroy(space);
 	joystick_free(joy_p1_left);
 	joystick_free(joy_p1_right);
 }
 
-void space_init()
+void space_init(void)
 {
 	statesystem_register(state_space,LEVEL_STATE_COUNT);
     statesystem_add_inner_state(state_space,LEVEL_START,level_start,NULL);
@@ -904,7 +904,7 @@ void space_init()
 	cpSpaceSetGravity(space, gravity);
 	cpSpaceSetDamping(space, 0.99);
 
-	extern void collisioncallbacks_init();
+	extern void collisioncallbacks_init(void);
     collisioncallbacks_init();
 
     stars_init();
@@ -929,12 +929,12 @@ void space_init()
 }
 
 
-float getGameTime()
+float getGameTime(void)
 {
 	return game_time;
 }
 
-int getPlayerScore()
+int getPlayerScore(void)
 {
 	obj_player *player = ((obj_player*)instance_first(obj_id_player));
 	if (player != NULL)
@@ -943,7 +943,7 @@ int getPlayerScore()
 		return -1;
 }
 
-void input()
+void input(void)
 {
 #if !GOT_TOUCH
 	/*
@@ -997,13 +997,13 @@ void space_start_multiplayer() {
 	statesystem_set_state(state_space);
 }
 
-void space_restart_level()
+void space_restart_level(void)
 {
 	statesystem_set_state(state_space);
 	space_init_level(currentlvl->station, currentlvl->deck);
 }
 
-void space_next_level()
+void space_next_level(void)
 {
 	int station = currentlvl->station;
 	int deck = currentlvl->deck + 1;

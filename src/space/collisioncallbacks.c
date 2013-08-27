@@ -142,7 +142,7 @@ static int sensor_pickup(cpArbiter *arb, cpSpace *space, void *unused)
 	return 0;
 }
 
-void collisioncallbacks_init()
+void collisioncallbacks_init(void)
 {
 	cpSpaceAddCollisionHandler(space, obj_id_tank, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(space, obj_id_rocket, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);

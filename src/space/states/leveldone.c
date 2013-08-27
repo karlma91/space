@@ -41,22 +41,22 @@ static cpVect star_3 = {350,100};
  * state functions *
  * * * * * * * * * */
 
-static void on_enter()
+static void on_enter(void)
 {
 	btn_next->visible = level_star_count != 0;
 	btn_next->enabled = level_star_count != 0;
 }
 
-static void pre_update()
+static void pre_update(void)
 {
 	statesystem_call_update(state_space);
 }
 
-static void post_update()
+static void post_update(void)
 {
 }
 
-static void draw()
+static void draw(void)
 {
 	draw_color4f(0,0,0,0.8);
 	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
@@ -92,20 +92,20 @@ static void sdl_event(SDL_Event *event)
 {
 }
 
-static void on_pause()
+static void on_pause(void)
 {
 }
 
-static void on_leave()
+static void on_leave(void)
 {
 }
 
-static void destroy()
+static void destroy(void)
 {
 }
 
 
-void leveldone_init()
+void leveldone_init(void)
 {
 	statesystem_register(state_leveldone,0);
 

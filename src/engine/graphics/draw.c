@@ -119,7 +119,7 @@ int draw_init(){
 }
 
 /*
-void draw_light_map()
+void draw_light_map(void)
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebufferOES(GL_FRAMEBUFFER_OES, light_buffer);
@@ -148,7 +148,7 @@ void draw_light_map()
 	draw_render_light_map();
 }
 */
-static void draw_render_light_map()
+static void draw_render_light_map(void)
 {
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	draw_push_blend();
@@ -180,7 +180,7 @@ void draw_color(Color color)
 #endif
 }
 
-void draw_push_color()
+void draw_push_color(void)
 {
 	GLfloat color[4];
 	glGetFloatv(GL_CURRENT_COLOR, color);
@@ -190,7 +190,7 @@ void draw_push_color()
 	stack_push_float(color[3]);
 }
 
-void draw_pop_color()
+void draw_pop_color(void)
 {
 	GLfloat a = stack_pop_float();
 	GLfloat b = stack_pop_float();
@@ -199,7 +199,7 @@ void draw_pop_color()
 	draw_color4f(r,g,b,a);
 }
 
-void draw_push_blend()
+void draw_push_blend(void)
 {
 	int dst;
 	int src;
@@ -209,7 +209,7 @@ void draw_push_blend()
 	stack_push_int(src);
 }
 
-void draw_pop_blend()
+void draw_pop_blend(void)
 {
 	int src = stack_pop_int();
 	int dst = stack_pop_int();
@@ -351,7 +351,7 @@ void draw_color4f(float r, float g, float b, float a)
 	glColor4f(r,g,b,a);
 }
 
-void draw_destroy()
+void draw_destroy(void)
 {
 
 	//TODO! --> release texture resources
@@ -566,41 +566,41 @@ void draw_scale(GLfloat x, GLfloat y, GLfloat z)
     matrix2d_scale(x,y);
 }
 
-void draw_push_matrix()
+void draw_push_matrix(void)
 {
     matrix2d_pushmatrix();
 }
 
-void draw_pop_matrix()
+void draw_pop_matrix(void)
 {
     matrix2d_popmatrix();
 }
 
-void draw_load_identity()
+void draw_load_identity(void)
 {
     glLoadIdentity();
     matrix2d_loadindentity();
 }
 
 // todo combine different gl pointers into an interleaved array
-void draw_append_quad_simple()
+void draw_append_quad_simple(void)
 {
 	matrix2d_append_quad_simple();
 }
-void draw_append_quad()
+void draw_append_quad(void)
 {
 	matrix2d_append_quad_tex();
 }
-void draw_append_color_quad()
+void draw_append_color_quad(void)
 {
 	matrix2d_append_quad_color();
 }
-void draw_append_color_tex_quad()
+void draw_append_color_tex_quad(void)
 {
 	matrix2d_append_quad_tex_color();
 }
 
-void draw_flush_color()
+void draw_flush_color(void)
 {
 	int size = matrix2d_get_count();
 	//fprintf(stderr,"COLOR_FLUSH: %d\n",size/2);
@@ -610,7 +610,7 @@ void draw_flush_color()
 	draw_flush();
 	glDisableClientState(GL_COLOR_ARRAY);
 }
-void draw_flush()
+void draw_flush(void)
 {
 	glEnable(GL_TEXTURE_2D);
 	float *vertex = matrix2d_get_vertex_data();
@@ -624,7 +624,7 @@ void draw_flush()
 	glDisable(GL_TEXTURE_2D);
 }
 
-void draw_flush_and_multiply()
+void draw_flush_and_multiply(void)
 {
     glEnable(GL_TEXTURE_2D);
     float *vertex = matrix2d_get_vertex_data();
@@ -639,7 +639,7 @@ void draw_flush_and_multiply()
     matrix2d_reset();
     glDisable(GL_TEXTURE_2D);
 }
-void draw_flush_simple()
+void draw_flush_simple(void)
 {
 	float *vertex = matrix2d_get_vertex_data();
 	int size = matrix2d_get_count();

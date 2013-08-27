@@ -86,7 +86,7 @@ void statesystem_push_state(STATE_ID state_id)
     stack_head->call.on_enter();
 }
 
-void statesystem_pop_state()
+void statesystem_pop_state(void)
 {
     State *temp = stack_head;
     stack_head = stack_head->prev;
@@ -113,7 +113,7 @@ void statesystem_set_state(STATE_ID state_id)
     stack_tail = state;
 }
 
-void statesystem_update()
+void statesystem_update(void)
 {
 	if (stack_head->call.pre_update) {
 		stack_head->call.pre_update();
@@ -137,7 +137,7 @@ void statesystem_update()
     }
 }
 
-void statesystem_draw()
+void statesystem_draw(void)
 {
     State *state = stack_tail;
     while(state){
@@ -165,14 +165,14 @@ void statesystem_draw()
     state_beeing_rendered = NULL;
 }
 
-void statesystem_pause()
+void statesystem_pause(void)
 {
 	if (stack_head->call.on_pause) {
 		stack_head->call.on_pause();
 	}
 }
 
-void statesystem_destroy()
+void statesystem_destroy(void)
 {
 	llist_begin_loop(states);
 	while (llist_hasnext(states)) {
@@ -274,7 +274,7 @@ void statesystem_call_update(STATE_ID state_id)
 	}
 }
 
-STATE_ID statesystem_get_render_state()
+STATE_ID statesystem_get_render_state(void)
 {
 	return state_beeing_rendered;
 }

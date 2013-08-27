@@ -179,12 +179,12 @@ void init_text(char c)
 	}
 }
 
-void font_init()
+void font_init(void)
 {
 
 }
 
-void font_destroy()
+void font_destroy(void)
 {
 
 }

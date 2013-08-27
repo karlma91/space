@@ -48,7 +48,7 @@ static int weapon_selected = 0;
 static int armor_selected = 0;
 static int engine_selected = 0;
 
-static void update_upgrades();
+static void update_upgrades(void);
 
 SDL_Scancode digit2scancode[10] = {
 		SDL_SCANCODE_0,
@@ -68,20 +68,20 @@ SDL_Scancode digit2scancode[10] = {
  * state functions *
  * * * * * * * * * */
 
-static void on_enter()
+static void on_enter(void)
 {
 	update_upgrades();
 }
 
-static void pre_update()
+static void pre_update(void)
 {
 }
 
-static void post_update()
+static void post_update(void)
 {
 }
 
-static void draw_testarea()
+static void draw_testarea(void)
 {
 	//glScissor(300,200,500,500);
 
@@ -98,7 +98,7 @@ static void draw_testarea()
 	//glScissor(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
 }
 
-static void draw_specs()
+static void draw_specs(void)
 {
 	static const float specs_x = 100;
 	draw_color4f(1,1,1,1);
@@ -116,7 +116,7 @@ static void draw_specs()
 	font_drawText(specs_x, -200, spec_buffer);
 }
 
-static void draw()
+static void draw(void)
 {
 	float y;
 	float y_offset = 140;
@@ -153,20 +153,20 @@ static void sdl_event(SDL_Event *event)
 {
 }
 
-static void on_pause()
+static void on_pause(void)
 {
 }
 
-static void on_leave()
+static void on_leave(void)
 {
 }
 
-static void destroy()
+static void destroy(void)
 {
 }
 
 
-static void update_upgrades()
+static void update_upgrades(void)
 {
 	upg_weapon *w = &weapons[weapon_selected];
 	upg_armor *a = &armors[armor_selected];
@@ -250,7 +250,7 @@ static void upgrade_click(enum UPGRADE_GROUPS id)
 	update_upgrades();
 }
 
-void upgrades_init()
+void upgrades_init(void)
 {
 	statesystem_register(state_store,0);
 

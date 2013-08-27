@@ -33,7 +33,7 @@ static unsigned long hash(unsigned char *str)
     return hash;
 }
 
-hashmap * hm_create()
+hashmap * hm_create(void)
 {
 	hashmap *hm = malloc(sizeof(hashmap));
 	if(hm){

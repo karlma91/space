@@ -32,19 +32,19 @@ static int valid_cheat = 0;
  * state functions *
  * * * * * * * * * */
 
-static void on_enter()
+static void on_enter(void)
 {
 }
 
-static void pre_update()
+static void pre_update(void)
 {
 }
 
-static void post_update()
+static void post_update(void)
 {
 }
 
-static void draw()
+static void draw(void)
 {
 	draw_load_identity();
 
@@ -63,7 +63,7 @@ static void draw()
 	font_drawText(btn_input->get.x, btn_input->get.y-150, input_buffer);
 }
 
-static void cheat()
+static void cheat(void)
 {
 	/* CHEAT */
 	object_id *obj = object_by_name(input_buffer);
@@ -96,26 +96,26 @@ static void sdl_event(SDL_Event *event)
 	}
 }
 
-static void on_pause()
+static void on_pause(void)
 {
 }
 
-static void on_leave()
+static void on_leave(void)
 {
 }
 
-static void destroy()
+static void destroy(void)
 {
 }
 
 
-static void resume()
+static void resume(void)
 {
 	SDL_StopTextInput();
 	statesystem_set_state(state_space);
 }
 
-static void input()
+static void input(void)
 {
 	memset(input_buffer,0,1000);
 	SDL_StartTextInput();
@@ -123,7 +123,7 @@ static void input()
 	SDL_SetTextInputRect(&r);
 }
 
-void pause_init()
+void pause_init(void)
 {
 	statesystem_register(state_pause, 0);
 

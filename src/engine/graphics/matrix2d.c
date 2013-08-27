@@ -41,7 +41,7 @@ static float *matrix2d_append_quad(float *data, float *mesh);
 static void append_quad_color();
 static float * matrix2d_multiply_to_quad(float *data, float *mesh, int count);
 
-int * matrix2d_get_blend_func()
+int * matrix2d_get_blend_func(void)
 {
     return blend_function;
 }
@@ -49,12 +49,12 @@ int * matrix2d_get_blend_func()
 /*
  * Texture
  */
-float * matrix2d_get_tex_data()
+float * matrix2d_get_tex_data(void)
 {
     return tex;
 }
 
-float * matrix2d_get_tex_pointer()
+float * matrix2d_get_tex_pointer(void)
 {
     return tex_pointer;
 }
@@ -67,12 +67,12 @@ void matrix2d_tex_pointer(float *f)
 /*
  * Vertex
  */
-float *matrix2d_get_vertex_data()
+float *matrix2d_get_vertex_data(void)
 {
     return vertex;
 }
 
-float * matrix2d_get_vertex_pointer()
+float * matrix2d_get_vertex_pointer(void)
 {
     return vertex_pointer;
 }
@@ -85,12 +85,12 @@ void matrix2d_vertex_pointer(float *f)
 /*
  * Color
  */
-float *matrix2d_get_color_data()
+float *matrix2d_get_color_data(void)
 {
     return color;
 }
 
-float * matrix2d_get_color_pointer()
+float * matrix2d_get_color_pointer(void)
 {
     return color_pointer;
 }
@@ -100,12 +100,12 @@ void matrix2d_color_pointer(float *f)
 	color_pointer = f;
 }
 
-int matrix2d_get_count()
+int matrix2d_get_count(void)
 {
 	return (vertex_append - vertex);
 }
 
-static void append_quad_color()
+static void append_quad_color(void)
 {
 	float c[4];
 	draw_get_current_color(c);
@@ -123,23 +123,23 @@ void matrix2d_append_strip(int first, int count)
 
 }
 
-void matrix2d_append_quad_simple()
+void matrix2d_append_quad_simple(void)
 {
 	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer, 4);
 }
 
-void matrix2d_append_quad_tex()
+void matrix2d_append_quad_tex(void)
 {
 	tex_append = matrix2d_append_quad(tex_append, tex_pointer);
 	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer,4);
 }
 
-void matrix2d_append_quad_color()
+void matrix2d_append_quad_color(void)
 {
 	append_quad_color();
 	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer,4);
 }
-void matrix2d_append_quad_tex_color()
+void matrix2d_append_quad_tex_color(void)
 {
 	append_quad_color();
 	tex_append = matrix2d_append_quad(tex_append, tex_pointer);
@@ -166,7 +166,7 @@ static float *matrix2d_append_quad(float *data, float *mesh)
 }
 
 
-void matrix2d_reset()
+void matrix2d_reset(void)
 {
 	vertex_append = vertex;
 	tex_append = tex;
@@ -204,7 +204,7 @@ void matrix2d_scale(float x, float y)
     cur->y2 *= y;
 }
 
-void matrix2d_pushmatrix()
+void matrix2d_pushmatrix(void)
 {
 	++current_matrix;
 	matrix *m = cur+1;
@@ -215,7 +215,7 @@ void matrix2d_pushmatrix()
 	cur = m;
 }
 
-void matrix2d_popmatrix()
+void matrix2d_popmatrix(void)
 {
     if (current_matrix > 0) {
     	--current_matrix;
@@ -225,7 +225,7 @@ void matrix2d_popmatrix()
     }
 }
 
-void matrix2d_loadindentity()
+void matrix2d_loadindentity(void)
 {
     cur->x1 = 1; cur->y1 = 0; cur->z1 = 0;
     cur->x2 = 0; cur->y2 = 1; cur->z2 = 0;
@@ -283,7 +283,7 @@ void matrix2d_multiply_point(float *point)
     point[1] = cur->x2*x + cur->y2*y + cur->z2;
 }
 
-void matrix2d_print()
+void matrix2d_print(void)
 {
     fprintf(stderr, "[ %f , %f , %f ]\n",cur->x1,cur->y1,cur->z1);
     fprintf(stderr, "[ %f , %f , %f ]\n",cur->x2,cur->y2,cur->z2);

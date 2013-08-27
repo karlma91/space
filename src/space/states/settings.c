@@ -54,19 +54,19 @@ Color col_btn_unchecked = {1, 1, 1, 1};
  * state functions *
  * * * * * * * * * */
 
-static void on_enter()
+static void on_enter(void)
 {
 }
 
-static void pre_update()
+static void pre_update(void)
 {
 }
 
-static void post_update()
+static void post_update(void)
 {
 }
 
-static void draw()
+static void draw(void)
 {
 	float yoffset = scroll_get_yoffset(scroller);
 
@@ -94,15 +94,15 @@ static void sdl_event(SDL_Event *event)
 {
 }
 
-static void on_pause()
+static void on_pause(void)
 {
 }
 
-static void on_leave()
+static void on_leave(void)
 {
 }
 
-static void destroy()
+static void destroy(void)
 {
 }
 
@@ -166,7 +166,7 @@ static void option_click(settings_option option)
 	}
 }
 
-void settings_init()
+void settings_init(void)
 {
 	statesystem_register(state_settings,0);
 

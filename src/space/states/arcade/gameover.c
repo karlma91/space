@@ -26,7 +26,7 @@
 STATE_ID state_gameover;
 
 /* static prototypes */
-static void draw_highscore();
+static void draw_highscore(int);
 
 #define MAX_NAME_LENGTH 3
 
@@ -110,7 +110,7 @@ static void sdl_event(SDL_Event *event)
 #endif
 }
 
-void gameover_init()
+void gameover_init(void)
 {
 #if ARCADE_MODE
 	list = malloc(sizeof(scorelist));
@@ -122,16 +122,16 @@ void gameover_init()
 }
 
 
-static void on_enter()
+static void on_enter(void)
 {
 	sound_music(MUSIC_GAMEOVER);
 }
 
-static void on_pause()
+static void on_pause(void)
 {
 }
 
-static void on_leave()
+static void on_leave(void)
 {
 }
 
@@ -186,7 +186,7 @@ static void pre_update() {
 }
 
 Color color;
-static void draw()
+static void draw(void)
 {
 #if ARCADE_MODE
 	static float timer;
@@ -257,7 +257,7 @@ static void draw()
 #endif
 }
 
-static void destroy()
+static void destroy(void)
 {
 #if ARCADE_MODE
 	highscorelist_writefile(list);

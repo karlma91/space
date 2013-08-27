@@ -34,16 +34,16 @@ static int tex_stars_2;
  * state functions *
  * * * * * * * * * */
 
-static void on_enter()
+static void on_enter(void)
 {
 }
 
-static void pre_update()
+static void pre_update(void)
 {
 
 }
 
-static void post_update()
+static void post_update(void)
 {
 }
 
@@ -51,7 +51,7 @@ static void sdl_event(SDL_Event *event)
 {
 }
 
-static void draw()
+static void draw(void)
 {
 	draw_color4f(1,1,1,1);
 
@@ -120,24 +120,24 @@ static void button_callback(void *data)
 	levelscreen_change_to(data);
 }
 
-static void on_pause()
+static void on_pause(void)
 {
 }
 
-static void on_leave()
+static void on_leave(void)
 {
 }
 
-static void destroy()
+static void destroy(void)
 {
 }
 
-static void open_upgrades()
+static void open_upgrades(void)
 {
 	statesystem_push_state(state_store);
 }
 
-void stations_init()
+void stations_init(void)
 {
 	statesystem_register(state_stations, 0);
 

@@ -76,7 +76,7 @@ static particle *(available_particle_stack[MAX_PARTICLES]);
 /**
  * Resets everything and load files to templates.
  */
-void particles_init()
+void particles_init(void)
 {
 	int i;
 	/* sets in use list empty */
@@ -100,7 +100,7 @@ void particles_init()
 	}
 }
 
-void particles_update()
+void particles_update(void)
 {
     emitter **prev = &(emitters_in_use_list);
     emitter *e = emitters_in_use_list;
@@ -118,7 +118,7 @@ void particles_update()
     }
 }
 
-void particles_draw()
+void particles_draw(void)
 {
 	particles_active = 0;
 	emitter **prev = &(emitters_in_use_list);
@@ -171,7 +171,7 @@ void particles_release_emitter(emitter* e)
 /**
  * resets all emitters and particles
  */
-void particles_destroy()
+void particles_destroy(void)
 {
 	particles_clear();
 
@@ -190,7 +190,7 @@ void particles_destroy()
 /**
  * resets all the active particles
  */
-void particles_clear()
+void particles_clear(void)
 {
 	emitter **prev = &(emitters_in_use_list);
 	emitter *e = emitters_in_use_list;
@@ -311,7 +311,7 @@ static void set_particle_available(particle *p)
  * get a particle from the available pool and put it in the in_use list
  * if the pool is empty, then it returns available_pool[0]
  */
-static emitter * get_emitter()
+static emitter * get_emitter(void)
 {
 	if(available_emitter_counter == -1){
 		return NULL;
@@ -333,7 +333,7 @@ static emitter * get_emitter()
  * get a particle from the available pool and put it in the in_use list
  * if the pool is empty, then it returns available_pool[0]
  */
-static particle * get_particle()
+static particle * get_particle(void)
 {
 	if(available_particle_counter == 0){
 		return NULL;

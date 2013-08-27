@@ -58,7 +58,7 @@ upg_engine engines[ENGINE_UPGRADES] = {
 	{.name = "LIGHTNING JET", .force = 550, .max_speed = 475, .price = 9500, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_PLAYER}
 };
 
-void test_me()
+void test_me(void)
 {
 	/*
 	upg_weapon w;

@@ -58,7 +58,7 @@ static void remove_audio(audio * a)
 	}
 }
 
-void sound_init()
+void sound_init(void)
 {
 	if (!Mix_Init(MIX_INIT_OGG)) {
 		SDL_Log("ERROR: Mixer could not be initialized!");
@@ -140,7 +140,7 @@ void sound_music(Mix_Music *music)
 	}
 }
 
-void sound_destroy()
+void sound_destroy(void)
 {
 	llist_destroy(chunks);
 	llist_destroy(tracks);
@@ -149,24 +149,24 @@ void sound_destroy()
 }
 
 
-void sound_mute()
+void sound_mute(void)
 {
 	Mix_HaltChannel(-1);
 	Mix_Volume(-1, 0);
 }
 
-void sound_unmute()
+void sound_unmute(void)
 {
 	Mix_Volume(-1, SDL_MIX_MAXVOLUME);
 }
 
-void sound_music_mute()
+void sound_music_mute(void)
 {
 	Mix_VolumeMusic(0);
 	Mix_PauseMusic();
 }
 
-void sound_music_unmute()
+void sound_music_unmute(void)
 {
 	Mix_VolumeMusic(SOUND_DEFAULT_MUSIC_VOLUME);
 	Mix_ResumeMusic();

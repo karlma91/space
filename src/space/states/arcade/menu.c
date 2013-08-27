@@ -24,13 +24,13 @@ static button btn_start_tmp;
 
 #define MAX_MENU_ITEMS 5
 
-static void inner_main();
-static void inner_ingame();
+static void inner_main(void);
+static void inner_ingame(void);
 
 struct menu {
 	int num_items;
 	int escape_item;
-	void (*func)();
+	void (*func)(void);
 	char texts[MAX_MENU_ITEMS][20];
 };
 
@@ -98,17 +98,17 @@ static void sdl_event(SDL_Event *event)
 	}
 }
 
-static void on_enter()
+static void on_enter(void)
 {
 	select_id = 0;
 	sound_music(MUSIC_MENU);
 }
 
-static void on_pause()
+static void on_pause(void)
 {
 }
 
-static void on_leave()
+static void on_leave(void)
 {
 }
 
@@ -125,7 +125,7 @@ void menu_change_current_menu(int menu)
 	}
 }
 
-static void pre_update()
+static void pre_update(void)
 {
 	if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 		switch(current_menu){
@@ -149,7 +149,7 @@ static void pre_update()
 
 static void post_update(){}
 
-static void draw()
+static void draw(void)
 {
 	draw_load_identity();
 
@@ -196,7 +196,7 @@ static void draw()
 	}
 }
 
-static void inner_main()
+static void inner_main(void)
 {
 	switch (select_id) {
 	case 0: //START GAME
@@ -218,7 +218,7 @@ static void inner_main()
 	}
 }
 
-static void inner_ingame()
+static void inner_ingame(void)
 {
 	switch (select_id) {
 	case 0: //RESUME GAME
@@ -236,12 +236,12 @@ static void inner_ingame()
 	}
 }
 
-static void destroy()
+static void destroy(void)
 {
 
 }
 
-void menu_init()
+void menu_init(void)
 {
 	curMenu = &mainMenuTest;
 	statesystem_register(state_menu, 0);

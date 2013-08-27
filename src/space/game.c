@@ -13,10 +13,10 @@
 //#include "states/leveldone.h"
 //#include "states/settings.h"
 
-extern void pause_init();
-extern void settings_init();
-extern void upgrades_init();
-extern void stations_init();
+extern void pause_init(void);
+extern void settings_init(void);
+extern void upgrades_init(void);
+extern void stations_init(void);
 
 
 #include "states/arcade/menu.h"

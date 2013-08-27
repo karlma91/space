@@ -132,7 +132,7 @@ static int texture_from_name(const char *file)
 }
 
 #include "SDL_endian.h"
-int texture_init()
+int texture_init(void)
 {
 	texture_load("error.png"); /* image to be shown for images which fails to load */
 
@@ -143,7 +143,7 @@ int texture_init()
 	return 0;
 }
 
-int texture_destroy()
+int texture_destroy(void)
 {
 	return 0;
 }

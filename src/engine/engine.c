@@ -97,13 +97,13 @@ configuration config = {
 
 static int main_destroy();
 
-static void main_pause()
+static void main_pause(void)
 {
 	statesystem_pause();
 	paused = 1;
 }
 
-static void main_unpause()
+static void main_unpause(void)
 {
 	paused = 0;
 }
@@ -184,7 +184,7 @@ static void setAspectRatio() {
 	GAME_WIDTH = GAME_HEIGHT * ASPECT_RATIO;
 }
 
-static void display_init()
+static void display_init(void)
 {
 	SDL_Log("DEBUG - SDL_init\n");
 	if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
@@ -353,7 +353,7 @@ static void main_init() {
 	active_fingers = llist_create();
 }
 
-static void check_events()
+static void check_events(void)
 {
 	SDL_Event event;
 	SDL_PumpEvents();
@@ -436,7 +436,7 @@ static void check_events()
 	}
 }
 
-static void main_sleep()
+static void main_sleep(void)
 {
 #if FPS_LIMIT
 		//not use 100% of cpu
@@ -539,7 +539,7 @@ static void main_tick(void *data)
 	}
 }
 
-static int main_run()
+static int main_run(void)
 {
 #if __IPHONEOS__
     // Initialize the Game Center for scoring and matchmaking

@@ -47,20 +47,20 @@ static float alpha = 0;
  * state functions *
  * * * * * * * * * */
 
-static void on_enter()
+static void on_enter(void)
 {
 	alpha = 0;
 }
 
-static void pre_update()
+static void pre_update(void)
 {
 }
 
-static void post_update()
+static void post_update(void)
 {
 }
 
-static void draw()
+static void draw(void)
 {
 	int i;
 
@@ -93,15 +93,15 @@ static void draw()
 static void sdl_event(SDL_Event *event) {
 }
 
-static void on_pause()
+static void on_pause(void)
 {
 }
 
-static void on_leave()
+static void on_leave(void)
 {
 }
 
-static void destroy()
+static void destroy(void)
 {
 }
 
@@ -154,7 +154,7 @@ static void button_callback(void *data)
 	}
 }
 
-void levelscreen_init()
+void levelscreen_init(void)
 {
 	statesystem_register(state_levelscreen,0);
 

@@ -110,7 +110,7 @@ static void __inline__ free_node(node *node) {
 
 /* global function definitions */
 
-LList llist_create()
+LList llist_create(void)
 {
 	struct llist *list = calloc(1, sizeof *list);
 
