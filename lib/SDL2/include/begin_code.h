@@ -35,25 +35,21 @@
 
 /* Some compilers use a special export keyword */
 #ifndef DECLSPEC
-# if defined(__BEOS__) || defined(__HAIKU__)
-#  if defined(__GNUC__)
-#   define DECLSPEC	__declspec(dllexport)
-#  else
-#   define DECLSPEC	__declspec(export)
-#  endif
-# elif defined(__WIN32__)
+# if defined(__WIN32__)
 #  ifdef __BORLANDC__
 #   ifdef BUILD_SDL
 #    define DECLSPEC
 #   else
-#    define DECLSPEC	__declspec(dllimport)
+#    define DECLSPEC    __declspec(dllimport)
 #   endif
 #  else
-#   define DECLSPEC	__declspec(dllexport)
+#   define DECLSPEC __declspec(dllexport)
 #  endif
 # else
 #  if defined(__GNUC__) && __GNUC__ >= 4
-#   define DECLSPEC	__attribute__ ((visibility("default")))
+#   define DECLSPEC __attribute__ ((visibility("default")))
+#  elif defined(__GNUC__) && __GNUC__ >= 2
+#   define DECLSPEC __declspec(dllexport)
 #  else
 #   define DECLSPEC
 #  endif
@@ -106,7 +102,7 @@
     defined(__WATCOMC__) || defined(__LCC__) || \
     defined(__DECC)
 #ifndef __inline__
-#define __inline__	__inline
+#define __inline__  __inline
 #endif
 #define SDL_INLINE_OKAY
 #else
@@ -128,12 +124,14 @@
 #define __inline__
 #endif
 
+#ifndef SDL_FORCE_INLINE
 #if defined(_MSC_VER)
 #define SDL_FORCE_INLINE __forceinline
 #elif ( (defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__) )
 #define SDL_FORCE_INLINE __attribute__((always_inline)) static inline
 #else
 #define SDL_FORCE_INLINE static __inline__
+#endif
 #endif
 
 /* Apparently this is needed by several Windows compilers */

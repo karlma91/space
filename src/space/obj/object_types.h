@@ -13,7 +13,7 @@
 #include "../../engine/graphics/particles.h"
 #include "../../engine/graphics/draw.h"
 
-void object_types_init();
+void object_types_init(void);
 void instance_nearest_x_two(instance *ins, object_id *obj_id, instance **left, instance **right, cpFloat *instance, cpFloat *right_distance);
 
 

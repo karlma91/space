@@ -9,7 +9,7 @@
 #define LEVELSCREEN_H_
 #include "../level.h"
 
-void levelscreen_init();
+void levelscreen_init(void);
 void levelscreen_change_to(level_ship * ship);
 
 #endif /* LEVELSCREEN_H_ */

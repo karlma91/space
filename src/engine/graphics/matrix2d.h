@@ -2,7 +2,7 @@
 #ifndef MATRIX2D_H_
 #define MATRIX2D_H_
 
-void matrix2d_reset();
+void matrix2d_reset(void);
 
 float * matrix2d_get_tex_data(void);
 float * matrix2d_get_tex_pointer(void);

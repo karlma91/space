@@ -92,7 +92,7 @@ extern button btn_fullscreen;
 extern camera default_camera;
 extern camera *current_camera;
 
-extern void main_stop();
+extern void main_stop(void);
 
 void normalized2game(float *x, float *y);
 

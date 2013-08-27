@@ -10,7 +10,7 @@ enum gameover_state {
 };
 
 extern int gameover_setstate(enum gameover_state state);
-void gameover_init();
-void gameover_showhighscores();
+void gameover_init(void);
+void gameover_showhighscores(void);
 
 #endif /* GAMEOVER_H_ */

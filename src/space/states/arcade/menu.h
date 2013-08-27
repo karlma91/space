@@ -6,7 +6,7 @@ enum MINU_INNER_STATES {
 	MENU_INGAME
 };
 
-void menu_init();
+void menu_init(void);
 void menu_change_current_menu(int);
 
 #endif /* MENU_H_ */

@@ -126,9 +126,9 @@ extern int weapon_index;
 extern int armor_index;
 extern int engine_index;
 
-void game_config();
-void game_init();
-void game_destroy();
+void game_config(void);
+void game_init(void);
+void game_destroy(void);
 
 extern float upg_total_mass;
 

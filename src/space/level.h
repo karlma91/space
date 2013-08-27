@@ -31,13 +31,13 @@ typedef struct level {
 	tilemap *tiles;
 } level;
 
-extern int level_init();
+extern int level_init(void);
 extern level *level_load(int space_station, int deck);
 extern void level_unload(level *);
-extern void level_destroy();
+extern void level_destroy(void);
 extern void level_get_ships(level_ship **,int *);
 
-extern int level_get_station_count();
+extern int level_get_station_count(void);
 extern int level_get_level_count(int station);
 
 extern int level_add_param(object_id *, void *param, const char *name);
