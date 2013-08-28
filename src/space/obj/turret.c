@@ -37,6 +37,7 @@ static const float tex_map[2][8] = {
 };
 
 #define TURRET_SIZE 400
+#define SHOOT_VEL 1500
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
@@ -79,7 +80,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	cpVect pl = player->data.body->p;
 	cpVect rc = turret->data.body->p;
 
-	cpFloat best_angle = se_get_best_shoot_angle(rc,turret->data.body->v, pl, player->data.body->v, 3000);
+	cpFloat best_angle = se_get_best_shoot_angle(rc,turret->data.body->v, pl, player->data.body->v, SHOOT_VEL);
 
 	best_angle = best_angle - cpvtoangle(turret->data.body->rot);
 	if(best_angle < 0){
@@ -98,7 +99,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 		cpVect shoot_vel = cpvforangle(turret->barrel_angle);
 		cpVect shoot_pos = cpvadd(turret->data.body->p, cpvmult(shoot_vel,40));
-		shoot_vel = cpvmult(shoot_vel, 1350);
+		shoot_vel = cpvmult(shoot_vel, SHOOT_VEL);
 
 		obj_param_bullet opb = {.friendly = 0, .damage = 10};
 		instance_create(obj_id_bullet, &opb, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
