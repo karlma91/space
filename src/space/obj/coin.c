@@ -6,7 +6,7 @@
 #include "../spaceengine.h"
 #include "../game.h"
 
-#define COIN_DAMPING 0.98f
+#define COIN_DAMPING 0.90f
 #define COIN_RADIUS 20
 #define COIN_SIZE 40
 #define COIN_MASS 0.1f
@@ -28,7 +28,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	coin->data.body = cpSpaceAddBody(space, cpBodyNew(COIN_MASS, cpMomentForCircle(COIN_MASS, 0.0f, COIN_RADIUS, cpvzero)));
 	cpBodySetUserData(coin->data.body, coin);
 	cpBodySetPos(coin->data.body, coin->data.p_start);
-
+	float angle = (1.0f*rand() / RAND_MAX) * M_PI*2;
+	float force = 500 + (1.0f*rand() / RAND_MAX)*1000 ;
+	coin->data.body->v = cpvmult(cpvforangle(angle), force);
 	coin->shape = se_add_circle_shape(coin->data.body,COIN_RADIUS-5,0.8,0.2);
 	coin->data.body->velocity_func = vel_func;
 	cpShapeSetCollisionType(coin->shape, &this);
