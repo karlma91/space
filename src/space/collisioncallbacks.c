@@ -51,9 +51,10 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 
 	//TODO create a function for damaging other objects
 	//FIXME how to deal with objects already killed?
-	if (se_damage_object(object, *COMPONENT(bullet, DAMAGE, float*))) {
+	if (se_damage_object(object, bullet)) {
 		if (object->alive) {
-			object->alive = 0;
+			//object->alive = 0;
+
 			particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 			//se_add_score_and_popup(b->body->p, *COMPONENT(object, SCORE, int*));
 			sound_play(SND_EXPLOSION);
@@ -76,7 +77,7 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	se_add_explotion_at_contact_point(arb);
 
-	if (se_damage_object(object, *COMPONENT(bullet, DAMAGE, float *))) {
+	if (se_damage_object(object, bullet)) {
 		particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 		sound_play(SND_EXPLOSION);
 	} else {

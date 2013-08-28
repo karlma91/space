@@ -67,13 +67,16 @@ cpVect se_distance_v(cpVect a, cpVect b)
 /**
  * return 1 if object is killed
  */
-int se_damage_object(instance *object, float damage)
+int se_damage_object(instance *object, instance *dmg_dealer)
 {
-	hpbar *hp = COMPONENT(object, HPBAR, hpbar*);
-	hp->value -= damage;
-	if (hp->value <= 0) {
-		object->destroyed = 0;
-		return 1;
+	float *damage = COMPONENT(dmg_dealer, DAMAGE, float*);
+	if (damage) {
+		hpbar *hp = COMPONENT(object, HPBAR, hpbar*);
+		hp->value -= *damage;
+		if (hp->value <= 0) {
+			object->alive = 0;
+			return 1;
+		}
 	}
 	return 0;
 }
@@ -221,7 +224,7 @@ void se_spawn_coins(instance * ins)
 	int *coins_ptr = COMPONENT(ins, COINS, int *);
 	if (coins_ptr) {
 		cpVect pos = ins->body->p;
-		int i = (*coins_ptr) & 0xFF; /* limit number of coins to 255*/
+		int i = (*coins_ptr) & 0xFFF; /* limit number of coins to 4096*/
 		float rnd_x, rnd_y;
 		while (i) {
 			rnd_x = 2 - ((i & 0x3) + 1);

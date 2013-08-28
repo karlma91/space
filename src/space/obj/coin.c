@@ -29,7 +29,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetUserData(coin->data.body, coin);
 	cpBodySetPos(coin->data.body, coin->data.p_start);
 	float angle = (1.0f*rand() / RAND_MAX) * M_PI*2;
-	float force = 500 + (1.0f*rand() / RAND_MAX)*1000 ;
+	float force = 400 + (1.0f*rand() / RAND_MAX)*1000; //TODO avgjør force utifra antal coins som spawner (altså utenfor create, i spawn metoden)
 	coin->data.body->v = cpvmult(cpvforangle(angle), force);
 	coin->shape = se_add_circle_shape(coin->data.body,COIN_RADIUS-5,0.8,0.2);
 	coin->data.body->velocity_func = vel_func;
@@ -48,15 +48,16 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		//TODO handle TMP magnet
 		cpVect diff = se_distance_a2b((instance *)coin, player);
 		float length = cpvlength(diff);
-		if (length > 400) {
-			diff = cpvmult(diff, 50/length);
-		} else if (length > 100) {
-			diff = cpvmult(diff, 0.5);
+			//coin->pulled = 0;
+			//diff = cpvmult(diff, 50/length);
+		if (length > 60) {
+			diff = cpvnormalize(diff);
+			diff = cpvmult(diff, 300);
+			coin->data.body->v = cpvadd(coin->data.body->v, diff);
 		} else {
-			((obj_player *) player)->coins += 1;
+			((obj_player *) player)->coins += 10;
 			coin->data.alive = 0;
 		}
-		coin->data.body->v = cpvadd(coin->data.body->v, diff);
 	}
 }
 
