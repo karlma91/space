@@ -74,6 +74,7 @@ SPRITE_ID SPRITE_COIN;
 
 /* polyshapes */
 POLYSHAPE_ID POLYSHAPE_RAMP;
+POLYSHAPE_ID POLYSHAPE_TURRET;
 
 /* end*
 
@@ -201,6 +202,7 @@ void game_sprites(void)
 void game_polyshapes(void)
 {
 	POLYSHAPE_RAMP = shape_read("ramp.shape");
+	POLYSHAPE_TURRET = shape_read("turret.shape");
 }
 
 void game_particles(void)

@@ -29,6 +29,7 @@ static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup gr
 
 #define MASS 5.0f
 #define MASS_WHEEL 10.0f
+#define SHOOT_VEL 1500
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
@@ -109,21 +110,14 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	cpVect pl = player->data.body->p;
 	cpVect rc = tank->data.body->p;
-
-	cpFloat ptx = (pl.x-rc.x); //direct way
-	cpFloat pltx = (rc.x - currentlvl->left + (currentlvl->right - pl.x));
-	cpFloat prtx = (currentlvl->right - rc.x + (pl.x - currentlvl->left));
-	if(fabs(ptx) < prtx && fabs(ptx) < pltx){
-		ptx = ptx>0? 1:-1;
-	}else if(pltx < prtx){
-		pl.x -= currentlvl->right - currentlvl->left;
-		ptx = -1;
-	}else {
-		pl.x += currentlvl->right - currentlvl->left;
-		ptx = 1;
+	float ptx = se_distance_to_player(tank->data.body->p.x);
+	if(ptx > 0 && ptx > currentlvl->right - rc.x){
+		pl.x += currentlvl->width;
+	}else if(ptx < 0 && ptx > rc.x - currentlvl->left ){
+		pl.x -= currentlvl->width;
 	}
 
-	cpFloat best_angle = se_get_best_shoot_angle(rc,tank->data.body->v, pl, player->data.body->v, 3000);
+	cpFloat best_angle = se_get_best_shoot_angle(rc,tank->data.body->v, pl, player->data.body->v, SHOOT_VEL);
 
 	best_angle = best_angle - cpvtoangle(tank->data.body->rot);
 	if(best_angle < 0){
@@ -143,9 +137,9 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX) && se_distance_to_player(tank->data.body->p.x)<tank->max_distance){
 		//TODO hent ut lik kode for skyting og lag en metode av det
 		cpVect shoot_vel = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
-		cpVect shoot_pos = cpvadd(tank->data.body->p, cpvmult(shoot_vel,55));
+		cpVect shoot_pos = cpvadd(tank->data.body->p, cpvmult(shoot_vel,1));
 
-		shoot_vel = cpvmult(shoot_vel,1400);
+		shoot_vel = cpvmult(shoot_vel,SHOOT_VEL);
 		shoot_vel = cpvadd(shoot_vel, player->data.body->v);
 
 		obj_param_bullet opb = {.friendly = 0, .damage = 10};

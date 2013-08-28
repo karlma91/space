@@ -36,6 +36,7 @@ static const float tex_map[2][8] = {
 		{0.5,1, 1,1, 0.5,0, 1,0}
 };
 
+#define TURRET_SIZE 400
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
@@ -55,20 +56,15 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	turret->barrel_angle = 3*(M_PI/2);
 	turret->max_distance = 800;
 
-	cpFloat size = 100;
 	turret->data.body = cpSpaceAddBody(space,
-			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
-	cpBodySetPos(turret->data.body, cpv(turret->data.p_start.x,currentlvl->height - size/2));
+			cpBodyNew(100, cpMomentForBox(100.0f, TURRET_SIZE, TURRET_SIZE)));
+	cpBodySetPos(turret->data.body, cpv(turret->data.p_start.x,currentlvl->height - TURRET_SIZE/2));
 
 	turret->data.body->velocity_func = velfunc;
 
 	/* make and connect new shape to body */
-	turret->shape = cpSpaceAddShape(space,cpBoxShapeNew(turret->data.body, size, size));
+	shape_add_shapes(space, POLYSHAPE_TURRET, turret->data.body, TURRET_SIZE, 1, 0.7, turret, &this, LAYER_BUILDING, 2);
 
-	//cpShapeSetGroup(fac->shape, 10);
-	cpShapeSetFriction(turret->shape, 1);
-	cpShapeSetLayers(turret->shape, LAYER_BUILDING);
-	cpShapeSetCollisionType(turret->shape, &this);
 	cpBodySetUserData(turret->data.body, turret);
 
 	hpbar_init(&turret->hp_bar,turret->param.max_hp,80,16,-40,60,&(turret->data.body->p));
@@ -131,8 +127,8 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	GLfloat dir = cpBodyGetAngle(turret->data.body);
 
 	draw_color4f(1,1,1,1);
-	draw_texture(texture, &(turret->data.body->p), &tex_map[0][0],100, 100, dir*(180/M_PI));
-	draw_texture(texture, &(turret->data.body->p), &tex_map[1][0],100, 100, turret->barrel_angle*(180/M_PI));
+	draw_texture(texture, &(turret->data.body->p), &tex_map[0][0],TURRET_SIZE, TURRET_SIZE, dir*(180/M_PI));
+	draw_texture(texture, &(turret->data.body->p), &tex_map[1][0],TURRET_SIZE, TURRET_SIZE, turret->barrel_angle*(180/M_PI));
 
 	hpbar_draw(&turret->hp_bar);
 }
