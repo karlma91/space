@@ -302,7 +302,7 @@ static void update_instances(instance *obj)
 			moved_left = 1;
 		}
 
-		if(obj->destroyed || moved_left){
+		if(!obj->alive || moved_left){
 			int i;
 			cpBody *body;
 			for (i=0, body = obj->components[CMP_BODIES]; body && i <= SPACE_BODIES_MAX; ++i, body = obj->components[CMP_BODIES+i]) {
@@ -316,7 +316,7 @@ static void update_instances(instance *obj)
 			obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
 			moved_right = 1;
 		}
-		if(obj->destroyed || moved_right){
+		if(!obj->alive || moved_right){
 			int i;
 			cpBody *body;
 			for (i=0, body = obj->components[CMP_BODIES]; body && i <= SPACE_BODIES_MAX; ++i, body = obj->components[CMP_BODIES+i]) {
@@ -749,7 +749,7 @@ void space_init_level(int space_station, int deck)
 		obj_param_player default_player = {
 				.max_hp = 200,
 				.gun_cooldown = 0.2f,
-				.cash_radius = 300
+				.cash_radius = 250
 		};
 		player = (obj_player *)instance_create(obj_id_player, &default_player, 0,0,0,0);
 	} else {

@@ -108,9 +108,12 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	/* gets the player from the list */
 	obj_player *player = ((obj_player*)instance_first(obj_id_player));
 
+	static float ptx = 0;
+
+	if (player) {
 	cpVect pl = player->data.body->p;
 	cpVect rc = tank->data.body->p;
-	float ptx = se_distance_to_player(tank->data.body->p.x);
+	ptx = se_distance_to_player(tank->data.body->p.x);
 	if(ptx > 0 && ptx > currentlvl->right - rc.x){
 		pl.x += currentlvl->width;
 	}else if(ptx < 0 && ptx > rc.x - currentlvl->left ){
@@ -137,16 +140,16 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	if(tank->timer > 1 + ((3.0f*rand())/RAND_MAX) && se_distance_to_player(tank->data.body->p.x)<tank->max_distance){
 		//TODO hent ut lik kode for skyting og lag en metode av det
 		cpVect shoot_vel = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
-		cpVect shoot_pos = cpvadd(tank->data.body->p, cpvmult(shoot_vel,1));
+		cpVect shoot_pos = cpvadd(tank->data.body->p, cpvmult(shoot_vel,55));
 
 		shoot_vel = cpvmult(shoot_vel,SHOOT_VEL);
-		shoot_vel = cpvadd(shoot_vel, player->data.body->v);
 
 		obj_param_bullet opb = {.friendly = 0, .damage = 10};
 		instance_create(obj_id_bullet, &opb, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
 		//object_create_bullet(tank->data.body->p,shoot_angle ,tank->data.body->v,obj_id_bullet);
 		sound_play(SND_LASER_2);
 		tank->timer = 0;
+	}
 	}
 
 

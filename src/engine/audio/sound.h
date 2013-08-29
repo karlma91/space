@@ -8,7 +8,7 @@
 #ifndef SOUND_H_
 #define SOUND_H_
 
-#define SOUND_DISABLED 1
+#define SOUND_DISABLED 0
 #if SOUND_DISABLED
 typedef void *Mix_Music;
 typedef void *Mix_Chunk;

@@ -62,7 +62,6 @@ struct instance {
 	int alive;
 	int instance_id;
 	int disabled;
-	int destroyed;
 
 	cpVect p_start, v_start;
 
