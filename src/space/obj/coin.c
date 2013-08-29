@@ -1,10 +1,10 @@
 #include "object_types.h"
-
-#define OBJ_NAME coin
-#include "../../engine/components/object.h"
 #include "../states/space.h"
 #include "../spaceengine.h"
 #include "../game.h"
+
+#define OBJ_NAME coin
+#include "we_defobj.h"
 
 #define COIN_DAMPING 0.90f
 #define COIN_RADIUS 20
@@ -52,7 +52,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 			//diff = cpvmult(diff, 50/length);
 		if (length > 60) {
 			diff = cpvnormalize(diff);
-			diff = cpvmult(diff, 300);
+			diff = cpvmult(diff, 140);
 			coin->data.body->v = cpvadd(coin->data.body->v, diff);
 		} else {
 			((obj_player *) player)->coins += 10;

@@ -3,8 +3,8 @@
 
 #include "chipmunk.h"
 #include "../level.h"
-#include "../../engine/input/joystick.h"
-#include "../../engine/graphics/camera.h"
+#include "we_input.h"
+#include "we_graphics.h"
 
 void space_init(void);
 

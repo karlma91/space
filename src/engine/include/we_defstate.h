@@ -1,9 +1,8 @@
+
 /*
- * state.h
+ * statedef.h
  *
  * Denne filen skal inkluderes av all c-filer som beskriver en enkelt state
- * (statesystem.h er allerede inkludert i denne filen), andre filer som
- * behandler states skal kun inkludere statesystem.h
  *
  *  Created on: 3. juli 2013
  *      Author: Mathias

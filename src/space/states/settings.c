@@ -8,12 +8,7 @@
 //#include "settings.h"
 
 #include "../game.h"
-#include "../../engine/engine.h"
-#include "../../engine/state/state.h"
-#include "../../engine/input/button.h"
-#include "../../engine/input/scroll.h"
-#include "../../engine/audio/sound.h"
-#include "../../engine/graphics/draw.h"
+#include "we_defstate.h"
 
 STATE_ID state_settings;
 

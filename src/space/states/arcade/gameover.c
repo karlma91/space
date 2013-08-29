@@ -7,21 +7,11 @@
 #include <time.h>
 
 #include "../../game.h"
-#include "../../../engine/engine.h"
-
 
 /* Game state */
-#include "../../../engine/engine.h"
 #include "menu.h"
 #include "../space.h"
-#include "../../../engine/state/state.h"
-
-/* Drawing */
-#include "../../../engine/graphics/draw.h"
-
-
-/* Game components */
-#include "../../../engine/data/highscorelist.h"
+#include "we_defstate.h"
 
 STATE_ID state_gameover;
 

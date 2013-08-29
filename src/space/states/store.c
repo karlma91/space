@@ -5,15 +5,9 @@
  *      Author: Mathias
  */
 
-//#include "store.h"
-
 #include "../game.h"
-#include "../../engine/engine.h"
-#include "../../engine/state/state.h"
-
-#include "../../engine/graphics/draw.h"
-
 #include "../upgrades.h"
+#include "we_defstate.h"
 
 STATE_ID state_store;
 

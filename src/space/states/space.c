@@ -4,10 +4,8 @@
 /* standard c-libraries */
 #include <stdio.h>
 
-
 #include "../game.h"
-#include "../../engine/engine.h"
-#include "../../engine/state/state.h"
+#include "we_defstate.h"
 
 /* Game state */
 #include "arcade/menu.h"
@@ -15,18 +13,9 @@
 #include "leveldone.h"
 #include "../upgrades.h"
 
-/* Drawing */
-#include "../../engine/graphics/draw.h"
-
-#include "../../engine/graphics/particles.h"
 #include "../tilemap.h"
-
-#include "../../engine/input/button.h"
-//#include "../../engine/io/waffle_utils.h"
 #include "../spaceengine.h"
-
 #include "../level.h"
-//#include "../collisioncallbacks.h"
 
 static float accumulator = 0;
 

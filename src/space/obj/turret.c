@@ -1,32 +1,11 @@
-/* standard c-libraries */
-#include <stdio.h>
-#include <math.h>
-
 #include "object_types.h"
-#define OBJ_NAME turret
-#include "../../engine/components/object.h"
-
-/* Chipmunk physics library */
 #include "chipmunk.h"
-
 #include "../game.h"
-#include "../../engine/engine.h"
-#include "../../engine/state/statesystem.h"
-#include "../../engine/io/waffle_utils.h"
-
-#include "../../engine/audio/sound.h"
-
-/* Game state */
 #include "../states/space.h"
-
-/* Drawing */
-#include "../../engine/graphics/draw.h"
-
-
-#include "../../engine/graphics/particles.h"
-
-#include "chipmunk.h"
 #include "../spaceengine.h"
+
+#define OBJ_NAME turret
+#include "we_defobj.h"
 
 /* static prototypes */
 static void velfunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);

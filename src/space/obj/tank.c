@@ -1,27 +1,11 @@
-/* standard c-libraries */
-#include <stdio.h>
-#include <math.h>
-
 #include "object_types.h"
-#define OBJ_NAME tank
-#include "../../engine/components/object.h"
-
-#include "../game.h"
-#include "../../engine/engine.h"
-#include "../../engine/state/statesystem.h"
-#include "../../engine/io/waffle_utils.h"
-
-#include "../../engine/audio/sound.h"
-
-/* Game state */
-#include "../states/space.h"
-
-/* Drawing */
-#include "../../engine/graphics/draw.h"
-#include "../../engine/graphics/particles.h"
-
 #include "chipmunk.h"
+#include "../game.h"
+#include "../states/space.h"
 #include "../spaceengine.h"
+
+#define OBJ_NAME tank
+#include "we_defobj.h"
 
 /* static prototypes */
 static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpGroup group);
@@ -73,8 +57,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel1 , cpv(-30, -10), cpv(-wheel_offset, -30), cpvzero));
 	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel2, cpv( 30, -10), cpv( wheel_offset, -30), cpvzero));
 
-	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel1 , cpv(-30, 0), cpvzero, 30.0f, 600.0f, 0.5f));
-	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 30.0f, 600.0f, 0.5f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
 
 	cpBodySetUserData(tank->data.body, tank);
 

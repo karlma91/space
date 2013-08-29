@@ -1,29 +1,11 @@
-/* standard c-libraries */
-#include <stdio.h>
-#include <math.h>
-
 #include "object_types.h"
-#define OBJ_NAME factory
-#include "../../engine/components/object.h"
-
 #include "../game.h"
-#include "../../engine/engine.h"
-#include "../../engine/state/statesystem.h"
-#include "../../engine/io/waffle_utils.h"
-
-#include "../../engine/audio/sound.h"
-
-/* Game state */
 #include "../states/space.h"
-
-/* Drawing */
-#include "../../engine/graphics/draw.h"
-#include "../../engine/graphics/particles.h"
-#include "../../engine/graphics/texture.h"
-#include "../../engine/components/shape.h"
-
-#include "chipmunk.h"
 #include "../spaceengine.h"
+#include "chipmunk.h"
+
+#define OBJ_NAME factory
+#include "we_defobj.h"
 
 
 static void remove_factory_from_tank(obj_tank *);

@@ -5,15 +5,11 @@
  *      Author: Karl
  */
 
-#include <stdio.h>
 #include "space.h"
 #include "levelscreen.h"
 
 #include "../game.h"
-#include "../../engine/engine.h"
-#include "../../engine/state/state.h"
-
-#include "../../engine/graphics/draw.h"
+#include "we_defstate.h"
 
 STATE_ID state_levelscreen;
 

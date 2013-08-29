@@ -4,20 +4,9 @@
  *  Created on: 11. juli 2013
  *      Author: Mathias
  */
-#include <stdio.h>
-
-#include "leveldone.h"
-
 #include "../game.h"
-#include "../../engine/engine.h"
-#include "../../engine/state/state.h"
-
-#include "../../engine/graphics/draw.h"
-
-
-#include "../../engine/input/button.h"
-#include "../../engine/data/highscorelist.h"
-
+#include "leveldone.h"
+#include "we_defstate.h"
 #include "space.h"
 
 STATE_ID state_leveldone;

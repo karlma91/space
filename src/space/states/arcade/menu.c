@@ -1,24 +1,10 @@
-/* header */
 #include "menu.h"
-
-/* standard c-libraries */
-#include <stdio.h>
-
 #include "../../game.h"
-
-/* Game state */
-#include "../../../engine/engine.h"
-#include "../../../engine/state/state.h"
 #include "../space.h"
 #include "gameover.h"
+#include "we_defstate.h"
 
 STATE_ID state_menu;
-
-/* Drawing */
-#include "../../../engine/graphics/draw.h"
-
-
-#include "../../../engine/input/button.h"
 
 static button btn_start_tmp;
 

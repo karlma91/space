@@ -1,11 +1,7 @@
 #include "object_types.h"
 
-#include <stdio.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
 #include "../level.h"
-#include "../../engine/data/llist.h"
+#include "we_data.h"
 
 /* Bit-layers */
 #define L1 (1 << 0)

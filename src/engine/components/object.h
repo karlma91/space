@@ -120,40 +120,4 @@ LList object_get_instances(const object_id *type);
 
 #endif /* GENERAL_OBJECT_FUNCS */
 
-/*** PER-OBJECT ***/
-#ifdef OBJ_NAME
-#ifndef PER_OBJECT_CODEBLOCK
-#define PER_OBJECT_CODEBLOCK 1
-
-#define STRINGIFY_2(str) #str
-#define STRINGIFY(str) STRINGIFY_2(str)
-
-#define OBJ_TYPE OBJ_TYPE_2(OBJ_NAME)
-#define OBJ_PARAM_TYPE OBJ_PARAM_2(OBJ_NAME)
-#define OBJ_ID OBJ_ID_2(OBJ_NAME)
-
-static void init(OBJ_TYPE *obj);
-static void on_create(OBJ_TYPE *obj);
-static void on_update(OBJ_TYPE *obj);
-static void on_render(OBJ_TYPE *obj);
-static void on_destroy(OBJ_TYPE *obj);
-
-static object_id this = {
-	.OBJ_IDENTIFIER = OBJ_MAGIC_COOKIE,
-	.ID = -1,
-	.NAME = STRINGIFY(OBJ_NAME),
-	.SIZE = sizeof(OBJ_TYPE),
-	.P_SIZE = sizeof(OBJ_PARAM_TYPE),
-	.call = {
-		(void (*)(instance *)) init,
-		(void (*)(instance *)) on_create,
-		(void (*)(instance *)) on_update,
-		(void (*)(instance *)) on_render,
-		(void (*)(instance *)) on_destroy
-	}
-};
-object_id *OBJ_ID = &this;
-
-#endif /* PER_OBJECT_CODEBLOCK */
-#endif /* OBJ_TYPE_NAME */
 

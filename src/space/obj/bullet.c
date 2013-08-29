@@ -1,12 +1,10 @@
 #include "object_types.h"
-#define OBJ_NAME bullet
-#include "../../engine/components/object.h"
-
 #include "../game.h"
 #include "../spaceengine.h"
 #include "../states/space.h"
-#include "../../engine/engine.h"
 
+#define OBJ_NAME bullet
+#include "we_defobj.h"
 
 static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
 

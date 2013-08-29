@@ -21,7 +21,7 @@ resources/win/space.res.o
 *.mp3
 *.wav
 *.ogg
+.*
 
 syntax: regexp
 ^Debug$
-.*

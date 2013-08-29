@@ -5,15 +5,10 @@
  *      Author: Mathias
  */
 
-//#include "pause.h"
-#include "stdio.h"
 #include "../game.h"
-#include "../../engine/engine.h"
-#include "../../engine/state/state.h"
 #include "../obj/object_types.h"
 #include "../upgrades.h"
-
-#include "../../engine/input/button.h"
+#include "we_defstate.h"
 
 #include "space.h"
 

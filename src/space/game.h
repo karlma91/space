@@ -8,17 +8,7 @@
 #ifndef GAME_H_
 #define GAME_H_
 
-#include "../engine/state/statesystem.h"
-#include "../engine/audio/sound.h"
-
-#include "../engine/graphics/particles.h"
-#include "../engine/graphics/customparticles.h"
-
-#include "../engine/components/shape.h"
-
-#include "../engine/input/button.h"
-#include "../engine/graphics/draw.h"
-#include "../engine/graphics/sprite.h"
+#include "we.h"
 
 #define SPACE_BODIES_MAX 5
 

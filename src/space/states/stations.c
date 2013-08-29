@@ -5,15 +5,9 @@
  *      Author: Karl
  */
 
-#include <stdio.h>
-//#include "stations.h"
-#include "levelscreen.h"
-
 #include "../game.h"
-#include "../../engine/engine.h"
-#include "../../engine/state/state.h"
-#include "../../engine/input/button.h"
-#include "../../engine/input/scroll.h"
+#include "we_defstate.h"
+#include "levelscreen.h"
 
 STATE_ID state_stations;
 

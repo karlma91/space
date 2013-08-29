@@ -1,23 +1,11 @@
 #include "object_types.h"
+#include "chipmunk.h"
+#include "../game.h"
+#include "../spaceengine.h"
+#include "../states/space.h"
 
 #define OBJ_NAME robotarm
-#include "../../engine/components/object.h"
-
-/* standard c-libraries */
-#include <stdio.h>
-#include <math.h>
-
-/* Chipmunk physics library */
-#include "chipmunk.h"
-
-#include "../game.h"
-
-#include "../../engine/engine.h"
-#include "../spaceengine.h"
-
-/* Drawing */
-#include "../../engine/graphics/draw.h"
-#include "../states/space.h"
+#include "we_defobj.h"
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {

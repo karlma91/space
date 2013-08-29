@@ -1,10 +1,10 @@
 #include "object_types.h"
-
-#define OBJ_NAME template
-#include "../../engine/components/object.h"
 #include "../states/space.h"
 #include "../spaceengine.h"
 #include "../game.h"
+
+#define OBJ_NAME template
+#include "we_defobj.h"
 
 
 static void init(OBJ_TYPE *OBJ_NAME)
