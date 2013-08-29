@@ -11,14 +11,10 @@
 typedef struct _hashnode hashnode;
 typedef struct _hashiterator hashiterator;
 
-typedef struct {
-	int size;
-	int count;
-	hashnode **buckets;
-
-} hashmap;
+typedef struct _hashmap hashmap;
 
 hashmap * hm_create(void);
+int hm_size(hashmap *hm);
 void hm_destroy(hashmap *hm);
 int hm_add(hashmap *hm, const char *key, void *data);
 void* hm_remove(hashmap *hm, const char *key);

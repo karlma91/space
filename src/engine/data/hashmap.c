@@ -11,6 +11,13 @@
 #define MAX_KEY_LENGTH 64
 #define INITIAL_SIZE 128
 
+typedef struct _hashmap{
+	int size;
+	int count;
+	hashnode **buckets;
+	hashnode * pool;
+};
+
 struct _hashnode {
 	char key[MAX_KEY_LENGTH];
 	void *data;
@@ -39,6 +46,7 @@ hashmap * hm_create(void)
 	if(hm){
 		hm->size = INITIAL_SIZE;
 		hm->count = 0;
+		hm->pool = NULL;
 		hm->buckets = malloc(hm->size * sizeof(hashnode *));
 		if(hm->buckets){
 			int i;
@@ -50,6 +58,11 @@ hashmap * hm_create(void)
 	}else{
 		return NULL;
 	}
+}
+
+int hm_size(hashmap *hm)
+{
+	return hm->count;
 }
 
 static int hm_add_internal(hashnode **buckets, hashnode *node, int size)
@@ -90,9 +103,15 @@ static void hm_resize(hashmap *hm)
 	hm->size = size;
 }
 
-static hashnode * hm_create_node(const char *key, void *data)
+static hashnode * hm_create_node(hashmap *hm, const char *key, void *data)
 {
-	hashnode *node = malloc(sizeof(hashnode));
+	hashnode *node;
+	if(hm->pool != NULL){
+		node = hm->pool;
+		hm->pool = hm->pool->next;
+	}else{
+		node = malloc(sizeof(hashnode));
+	}
 	strcpy(node->key, key);
 	node->data = data;
 	node->next = NULL;
@@ -112,7 +131,9 @@ void* hm_remove(hashmap *hm, const char *key){
 			}
 			hm->count--;
 			void *data = node->data;
-			free(node);
+			node->data = NULL;
+			node->next = hm->pool;
+			hm->pool = node;
 			return data;
 		}
 		prev = node;
@@ -126,7 +147,7 @@ int hm_add(hashmap *hm, const char *key, void *data)
 	if(hm->count == hm->size){
 		hm_resize(hm);
 	}
-	hashnode *node = hm_create_node(key, data);
+	hashnode *node = hm_create_node( hm, key, data );
 	if(hm_add_internal(hm->buckets,node,hm->size) == 0){
 		hm->count += 1;
 	}else{
@@ -193,7 +214,9 @@ void hm_destroy_iterator(hashiterator *it)
 
 void hm_destroy(hashmap *hm)
 {
+
 	int i;
+	/* free all used nodes */
 	for(i=0; i < hm->size; i++){
 		hashnode *node = hm->buckets[i];
 		while(node != NULL){
@@ -201,6 +224,13 @@ void hm_destroy(hashmap *hm)
 			free(node);
 			node = next;
 		}
+	}
+
+	/* free unused nodes */
+	while(hm->pool != NULL){
+		hashnode *node = hm->pool;
+		hm->pool = hm->pool->next;
+		free(node);
 	}
 	free(hm->buckets);
 	free(hm);
