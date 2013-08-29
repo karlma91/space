@@ -29,6 +29,7 @@ extern int CMP_COINS;
 extern int CMP_DAMAGE;
 extern int CMP_BODIES;
 extern int CMP_MINIMAP;
+extern int CMP_CREATOR;
 
 /* component structs? */
 typedef struct {

@@ -43,26 +43,14 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	rocket->flame = particles_get_emitter(EMITTER_ROCKET_FLAME);
 	rocket->angle = M_PI/2;
 
-	cpFloat start_height;
 	cpFloat height = 30;
 	cpFloat mass = 2.0f;
 	cpFloat width = 30;
-	if (rocket->factory) {
-		rocket->factory_id = rocket->factory->data.instance_id;
-		start_height = rocket->factory->data.body->p.y;
-	}else{
-		start_height = 200 + 100;
-	}
-
-	// Make a car with some nice soft suspension
-	cpVect boxOffset = cpv(0, 0);
 
 	rocket->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, width, height)));
-	cpBodySetPos(rocket->data.body , cpvadd(cpv(rocket->data.p_start.x, start_height), boxOffset));
+	cpBodySetPos(rocket->data.body , rocket->data.p_start);
 	cpBodySetVelLimit(rocket->data.body,1000);
 	rocket->shape = se_add_box_shape(rocket->data.body,width,height,0.7,0.0);
-
-	//cpShapeSetGroup(tempShape, 1); // use a group to keep the car parts from colliding
 
 	cpShapeSetLayers(rocket->shape, LAYER_ENEMY);
 	cpShapeSetCollisionType(rocket->shape, &this);
@@ -130,8 +118,10 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	cpBodyFree(rocket->data.body);
 
 	particles_release_emitter(rocket->flame);
-	if(rocket->factory != NULL){
-		rocket->factory->cur--;
+
+	obj_factory *factory = COMPONENT(rocket, CREATOR, obj_factory*);
+	if (factory){
+		factory->cur--;
 	}
 
 	instance_super_free((instance *)rocket);

@@ -107,6 +107,7 @@ instance *instance_create(object_id *type, const void *param, float x, float y, 
 
 	/* sets default values */
 	ins->alive = 1;
+	ins->destroyed = 0;
 
 	if (param) {
 		instance_set_param(ins, param);
@@ -209,25 +210,25 @@ void instance_add(instance* ins)
 }
 
 /* iterate through all lists of object */
-void instance_iterate(void (*f)(instance *))
+void instance_iterate(void (*f)(instance *, void *data), void *data)
 {
 	int obj_id;
 	object_info *obj = objects_meta;
 
 	for (obj_id = 0; obj_id < object_count; obj_id++) {
-		llist_iterate_func(obj->active, (void (*)(void *))f);
+		llist_iterate_func(obj->active, (void (*)(void *, void *))f, data);
 		++obj;
 	}
 }
 
 /* iterate through one type of object */
-void instance_iterate_type(void (*f)(instance *), object_id *type) {
+void instance_iterate_type(object_id *type, void (*f)(instance *, void *data), void *data) {
 	if (err_obj(type)) {
 		SDL_Log("ERROR: in list_iterate_type: Invalid object type %p\n", type);
 		exit(-1);
 	} else {
 		object_info *obj = objects_meta + type->ID;
-		llist_iterate_func(obj->active, (void (*)(void *))f);
+		llist_iterate_func(obj->active, (void (*)(void *, void *))f, data);
 	}
 }
 

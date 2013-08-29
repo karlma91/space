@@ -24,8 +24,8 @@
 #include "../spaceengine.h"
 
 /* static prototypes */
-static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset, cpGroup group);
-static cpBody *addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup group);
+static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpGroup group);
+static cpBody *addWheel(cpSpace *space, cpVect pos, cpGroup group);
 
 #define MASS 5.0f
 #define MASS_WHEEL 10.0f
@@ -48,22 +48,15 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	tank->max_distance = 800;
 
-	cpFloat start_height = 80; // default start height (if spawned without factory)
+	cpFloat start_height = tank->data.p_start.y - 50;
 
-	if (tank->factory){
-		tank->factory_id = tank->factory->data.instance_id;
-		start_height = tank->factory->data.body->p.y - 100;
-	}
-
-	cpVect boxOffset = cpvzero;
-	tank->data.p_start.y = start_height + 10;
 	tank->rot_speed = M_PI/2;
-	tank->data.body = addChassis(space, tank,tank->data.p_start, boxOffset, tank);
+	tank->data.body = addChassis(space, tank,tank->data.p_start, tank);
 
 	// Make a car with some nice soft suspension
 	float wheel_offset = 40;
-	cpVect posA = cpv(tank->data.body->p.x - wheel_offset, start_height - 25);
-	cpVect posB = cpv(tank->data.body->p.x + wheel_offset, start_height - 25);
+	cpVect posA = cpv(tank->data.body->p.x - wheel_offset, start_height);
+	cpVect posB = cpv(tank->data.body->p.x + wheel_offset, start_height);
 
 
 	tank->debug_left_dist = -1;
@@ -71,17 +64,17 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	cpShapeSetCollisionType(tank->shape, &this);
 
-	tank->wheel1 = addWheel(space, posA, boxOffset, tank);
-	tank->wheel2 = addWheel(space, posB, boxOffset, tank);
+	tank->wheel1 = addWheel(space, posA, tank);
+	tank->wheel2 = addWheel(space, posB, tank);
 
 	tank->data.components[CMP_BODIES] = tank->wheel1;
 	tank->data.components[CMP_BODIES+1] = tank->wheel2;
 
-	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel1 , cpv(-30, -10), cpv(-wheel_offset, -40), cpvzero));
-	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel2, cpv( 30, -10), cpv( wheel_offset, -40), cpvzero));
+	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel1 , cpv(-30, -10), cpv(-wheel_offset, -30), cpvzero));
+	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel2, cpv( 30, -10), cpv( wheel_offset, -30), cpvzero));
 
-	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
-	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel1 , cpv(-30, 0), cpvzero, 30.0f, 600.0f, 0.5f));
+	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 30.0f, 600.0f, 0.5f));
 
 	cpBodySetUserData(tank->data.body, tank);
 
@@ -195,11 +188,11 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 /*
  * make a wheel
  */
-static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup group) {
+static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
 	cpFloat radius = 15.0f;
 	cpBody *body = cpSpaceAddBody(space,
 			cpBodyNew(MASS_WHEEL, cpMomentForCircle(MASS_WHEEL, 0.0f, radius, cpvzero)));
-	cpBodySetPos(body, cpvadd(pos, boxOffset));
+	cpBodySetPos(body, pos);
 	cpBodySetAngVelLimit(body, 200);
 
 	cpShape *shape = se_add_circle_shape(body, radius, 0.8, 0.7);
@@ -212,13 +205,13 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpVect boxOffset, cpGroup g
 /**
  * make a chassies
  */
-static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpVect boxOffset, cpGroup group)
+static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpGroup group)
 {
 	cpFloat width = 80;
 	cpFloat height = 30;
 
 	cpBody *body = cpSpaceAddBody(space, cpBodyNew(MASS, cpMomentForBox(MASS, width, height)));
-	cpBodySetPos(body, cpvadd(pos, boxOffset));
+	cpBodySetPos(body, pos);
 
 	tank->shape = se_add_box_shape(body,width,height,0.6,0.0);
 	cpShapeSetGroup(tank->shape, group);
@@ -273,8 +266,9 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	cpBodyFree(tank->wheel1);
 	cpBodyFree(tank->wheel2);
 
-	if(tank->factory != NULL){
-		tank->factory->cur--;
+	obj_factory *factory = COMPONENT(tank, CREATOR, obj_factory*);
+	if (factory){
+		factory->cur--;
 	}
 
 	instance_super_free((instance *)tank);

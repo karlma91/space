@@ -74,12 +74,10 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	sprite_update(&(factory->data.spr));
 	if (factory->timer > factory->param.spawn_delay && factory->cur < factory->param.max_tanks) {
 		if(se_distance_to_player(factory->data.body->p.x) < factory->max_distance) {
-			instance * ins = instance_create(factory->param.type, factory->param.param,factory->data.body->p.x,0,0,0);
-			if (factory->param.type == obj_id_tank) {
-				((obj_tank *) ins)->factory = factory;
-			} else if (factory->param.type == obj_id_rocket) {
-				((obj_rocket *) ins)->factory = factory;
-			}
+			float x = factory->data.body->p.x;
+			float y = factory->data.body->p.y - 150;
+			instance * ins = instance_create(factory->param.type, factory->param.param,x,y,0,0);
+			COMPONENT_SET(ins, CREATOR, factory);
 			factory->timer = 0;
 			factory->cur += 1;
 		}
@@ -106,14 +104,9 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 }
 
 //FIXME Somewhat slow temporary fix, as objects_iterate_type does not support extra arguments!
-static void remove_factory_from_tank(obj_tank *tank) {
-	if (tank->factory) {
-		tank->factory = (obj_factory *)instance_by_id(obj_id_factory, tank->factory_id);
-	}
-}
-static void remove_factory_from_rocket(obj_rocket *rocket) {
-	if (rocket->factory) {
-		rocket->factory = (obj_factory *)instance_by_id(obj_id_factory, rocket->factory_id);
+static void remove_factory_from_child(instance *child, void *factory) {
+	if (COMPONENT(child, CREATOR, void *) == factory) {
+		COMPONENT_SET(child, CREATOR, NULL);
 	}
 }
 
@@ -121,14 +114,12 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);
 	particles_release_emitter(factory->smoke);
-	se_spawn_coins(factory);
+	se_spawn_coins((instance *)factory);
 
 	cpBodyEachShape(factory->data.body, se_shape_from_space, NULL);
 	cpSpaceRemoveBody(space, factory->data.body);
 	cpBodyFree(factory->data.body);
 
-	instance_iterate_type((void (*)(instance *))remove_factory_from_tank, obj_id_tank);
-	instance_iterate_type((void (*)(instance *))remove_factory_from_rocket, obj_id_rocket);
-
+	instance_iterate_type((object_id *) factory->param.type, remove_factory_from_child, factory);
 	instance_super_free((instance *)factory); //TODO move out to objects
 }

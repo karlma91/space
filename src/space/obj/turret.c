@@ -76,6 +76,9 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	/* get target: first player instance added */
 	obj_player *player = ((obj_player*)instance_first(obj_id_player));
+	if (player == NULL) {
+		return;
+	}
 
 	cpVect pl = player->data.body->p;
 	cpVect rc = turret->data.body->p;

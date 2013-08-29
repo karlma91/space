@@ -121,8 +121,6 @@ OBJ_START(tank)
 	float max_distance;
 	hpbar hp_bar;
 	minimap radar_image;
-	obj_factory *factory;
-	int factory_id;
 	cpBody *wheel1;
 	cpBody *wheel2;
 	int state;
@@ -187,8 +185,6 @@ PARAM_START(rocket)
 PARAM_END
 OBJ_START(rocket)
 	cpShape *shape;
-	obj_factory *factory;
-	int factory_id;
 	float timer;
 	float angle;
 	int active;

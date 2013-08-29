@@ -49,19 +49,11 @@ struct instance {
 	int active_components;
 
 	void *components[OBJECT_MAX_COMPONENTS];
-	/*
-	struct {
-		hpbar *hp_bar;
-		int *score;
-		float *damage;
-		int body_count;
-		cpBody *(bodies[5]);
-	} components;
-	 */
 
 	int alive;
-	int instance_id;
 	int disabled;
+	int destroyed;
+	int instance_id;
 
 	cpVect p_start, v_start;
 
@@ -77,8 +69,8 @@ instance *instance_super_malloc(object_id *type); //TODO hide from user?
 void instance_super_free(instance *);
 
 void instance_add(instance *);
-void instance_iterate(void (*f)(instance *));
-void instance_iterate_type(void (*f)(instance *), object_id *type);
+void instance_iterate(void (*f)(instance *, void *data), void *data);
+void instance_iterate_type(object_id *type, void (*f)(instance *, void *data), void *data);
 void instance_remove(instance *);
 int instance_set_param(instance *, const void *param);
 void instance_clear(void);
@@ -122,7 +114,7 @@ LList object_get_instances(const object_id *type);
 #define PARAM_END };
 #define PARAM_EMPTY(name) PARAM_START(name) PARAM_END
 
-#define COMPONENT(obj, cmp, type) ((type) ((instance *)obj->components[CMP_##cmp]))
+#define COMPONENT(obj, cmp, type) ((type) (((instance *)obj)->components[CMP_##cmp]))
 #define COMPONENT_SET(obj, cmp, value) (((instance *)obj)->components[CMP_##cmp]) = value
 #define REGISTER_CMP(cmp, count) CMP_##cmp = component_register(count);
 

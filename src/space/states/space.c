@@ -39,8 +39,8 @@ STATE_ID state_space;
  */
 
 static void SPACE_draw(void);
-static void update_instances(instance *);
-static void render_instances(instance *);
+static void update_instances(instance *, void *);
+static void render_instances(instance *, void *);
 static void update_camera_zoom(int mode);
 static void update_camera_position(void);
 
@@ -275,7 +275,7 @@ static void update_all(void)
 	/* chipmunk timestep counter */
 	accumulator += dt;
 
-	instance_iterate(update_instances);
+	instance_iterate(update_instances, NULL);
 	particles_update();
 
 	/* update all chipmunk objects 60 times per second */
@@ -286,7 +286,7 @@ static void update_all(void)
 	}
 }
 
-static void update_instances(instance *obj)
+static void update_instances(instance *obj, void *data)
 {
 	int moved_left = 0;
 	int moved_right = 0;
@@ -332,7 +332,7 @@ static void update_instances(instance *obj)
 	}
 }
 
-static void render_instances(instance *obj)
+static void render_instances(instance *obj, void *data)
 {
 	if((obj->body->p.x > current_camera->left - 200) && (obj->body->p.x < current_camera->right + 200)) {
 		instance_render(obj);
@@ -381,7 +381,7 @@ static void update_camera_zoom(int mode)
 {
 	obj_player *player = ((obj_player*)instance_first(obj_id_player));
 
-	camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
+	//camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
 }
 
 static void update_camera_position(void)
@@ -396,13 +396,11 @@ static void update_camera_position(void)
     obj_player *player = ((obj_player*)instance_first(obj_id_player));
     obj_tank *tank = ((obj_tank*)instance_first(obj_id_tank));
 
-
-
     if(tank != NULL && !follow_player){
         cpVect vel = tank->data.body->v;
         vel = cpvnormalize(vel);
         camera_update(current_camera, tank->data.body->p, cpv(0,1));
-    }else{
+    } else if (player) {
     	cpVect c_pos = player->data.body->p;
     	cpVect c_rot = player->data.body->rot;
 
@@ -433,7 +431,7 @@ static void update_camera_position(void)
     		c_pos.x += last * 300;
     	}
     	*/
-
+    	camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
     	camera_update(current_camera, c_pos, c_rot);
     }
 
@@ -457,7 +455,7 @@ static void SPACE_draw(void)
 
 	setTextAngle(0);
 	/* draw all objects */
-	instance_iterate(render_instances);
+	instance_iterate(render_instances, NULL);
 
 	/* draw particle effects */
 	particles_draw();
@@ -489,7 +487,7 @@ static void radar_draw(float x, float y)
 	radar_y = y;
 	draw_color4f(0.3, 0.5, 0.7, 0.6);
 	draw_donut(radar_x, radar_y, 50, 110);
-	instance_iterate(plot_on_radar);
+	instance_iterate(plot_on_radar, NULL);
 }
 
 void draw_gui(void)
@@ -507,6 +505,8 @@ void draw_gui(void)
 	if (gamestate != LEVEL_START) {
 		radar_draw(-GAME_WIDTH/2 + 120, GAME_HEIGHT/2 - 175);
 
+		if (player) {
+
 		/* simple score animation */
 		char score_temp[20];
 		static int score_anim = 0;
@@ -518,11 +518,13 @@ void draw_gui(void)
 			score_anim = player->coins;
 			score_adder = 1;
 		}
+
 		sprintf(score_temp,"%d",score_anim);
 		draw_color4f(0,0,0,1);
 		font_drawText(-GAME_WIDTH/2+20+4,GAME_HEIGHT/2 - 26-4,score_temp);
 		draw_color4f(1,1,1,1);
 		font_drawText(-GAME_WIDTH/2+20,GAME_HEIGHT/2 - 26,score_temp);
+		}
 
 		draw_color4f(0.5,0.1,0.1,1);
 		setTextSize(20);

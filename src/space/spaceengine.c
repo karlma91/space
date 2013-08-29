@@ -34,10 +34,13 @@ void se_add_score_and_popup(cpVect p, int score)
 float se_distance_to_player(float x)
 {
 	obj_player *player = ((obj_player *) instance_first(obj_id_player));
-	cpVect a = cpv(x,0);
-	cpVect b = player->data.body->p;
-	cpVect d = se_distance_v(a, b);
-	return d.x;
+	if(player){
+		cpVect a = cpv(x,0);
+		cpVect b = player->data.body->p;
+		cpVect d = se_distance_v(a, b);
+		return d.x;
+	}
+	return 0;
 }
 
 cpVect se_distance_a2b(instance *insa, instance *insb)
@@ -74,7 +77,7 @@ int se_damage_object(instance *object, instance *dmg_dealer)
 		hpbar *hp = COMPONENT(object, HPBAR, hpbar*);
 		hp->value -= *damage;
 		if (hp->value <= 0) {
-			object->alive = 0;
+			object->destroyed = 1;
 			return 1;
 		}
 	}

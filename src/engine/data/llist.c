@@ -154,6 +154,18 @@ int llist_add(LList id, void *p)
 	return 1;
 }
 
+void *llist_pop(LList id) {
+	struct llist *list = (struct llist *)id;
+
+	if (list) {
+		void *last = list->tail->item;
+		if (llist_remove(id, last)) {
+			return last;
+		}
+	}
+	return NULL;
+}
+
 int llist_remove(LList id, void *p)
 {
 	struct llist *list = (struct llist *)id;
@@ -311,7 +323,7 @@ int llist_set_remove_callback(LList id, void (*remove_callback)(void *))
 	return 0;
 }
 
-void llist_iterate_func(LList id, void (*func)(void *))
+void llist_iterate_func(LList id, void (*func)(void *item, void *data), void *data)
 {
 	if (is_valid(id) && func) {
 		node *n;
@@ -319,7 +331,7 @@ void llist_iterate_func(LList id, void (*func)(void *))
 		llist_begin_loop(id);
 		while (llist_hasnext(id)) {
 			n = llist_next(id);
-			func(n);
+			func(n, data);
 		}
 		llist_end_loop(id);
 	}

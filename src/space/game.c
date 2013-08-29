@@ -48,6 +48,7 @@ int CMP_COINS;
 int CMP_DAMAGE;
 int CMP_BODIES;
 int CMP_MINIMAP;
+int CMP_CREATOR;
 /* END OF COMPONENTS DEFINITIONS */
 
 /* global sprite definitions */
@@ -174,6 +175,7 @@ void game_components(void)
 	REGISTER_CMP(DAMAGE, 1);
 	REGISTER_CMP(BODIES, SPACE_BODIES_MAX);
 	REGISTER_CMP(MINIMAP, 1);
+	REGISTER_CMP(CREATOR, 1);
 }
 
 void game_sprites(void)

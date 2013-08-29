@@ -17,6 +17,7 @@ LList llist_create(void); /* lager en ny lenket liste og returnerer et id-nummer
 int llist_set_remove_callback(LList list, void (*remove_callback)(void *)); /* funksjonstilbakekall n�r peker fjernes */
 
 int llist_add(LList list, void *p); /* legger til angitt peker i list */
+void *llist_pop(LList id);
 int llist_remove(LList list, void *p); /* fjerner angitt peker fra list */
 
 int llist_contains(LList id, void *p);
@@ -27,7 +28,7 @@ void* llist_first(LList list); /* returnerer f�rste peker i listen */
 void* llist_last(LList list);  /* returnerer siste peker i listen */
 void* llist_at_index(LList list, int index); /* returnerer pekeren  p� angitt index */
 
-void llist_iterate_func(LList list, void (*func)(void *)); /* kaller p� func for hver peker */
+void llist_iterate_func(LList id, void (*func)(void *item, void *data), void *data); /* kaller p� func for hver peker */
 
 int llist_begin_loop(LList list);   /* push-er ny iterasjons-peker */
 int llist_hasnext(LList list); /* returnerer 1 om n�v�rende iterasjonspeker ikke er NULL */
