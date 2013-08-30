@@ -25,7 +25,7 @@ object_info objects_meta[OBJECT_MAX_OBJECTS];
 
 static void destroy_func(instance* obj)
 {
-	obj->TYPE->call.on_destroy(obj);
+	obj->TYPE->call.on_remove(obj);
 }
 
 int object_register(object_id *obj)

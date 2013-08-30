@@ -228,7 +228,7 @@ static void action_shoot(obj_player *player)
 }
 
 
-static void on_destroy(OBJ_TYPE *OBJ_NAME)
+static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	//free(player); // does not work since player is currently static inside space.c
 }

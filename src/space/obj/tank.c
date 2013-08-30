@@ -232,7 +232,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 }
 
 
-static void on_destroy(OBJ_TYPE *OBJ_NAME)
+static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(EMITTER_FRAGMENTS, tank->data.body->p);
 	se_spawn_coins((instance *)tank);

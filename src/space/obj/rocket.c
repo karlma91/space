@@ -90,7 +90,7 @@ static void shape_from_space(cpBody *body, cpShape *shape, void *data)
     cpShapeFree(shape);
 }
 
-static void on_destroy(OBJ_TYPE *OBJ_NAME)
+static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	//TODO finn ut om rocket sprengte eller ikke
 	//se_spawn_coins(object);
