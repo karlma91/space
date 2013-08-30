@@ -38,6 +38,7 @@ struct object {
 		void (*on_create)(instance *obj);
 		void (*on_update)(instance *obj);
 		void (*on_render)(instance *obj);
+		void (*on_destroy)(instance *obj);
 		void (*on_remove)(instance *obj);
 	} call;
 }; /* per-object type variables */

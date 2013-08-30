@@ -317,7 +317,7 @@ static void update_instances(instance *obj, void *data)
 
 		instance_update(obj);
 	}else{
-		instance_remove(obj);
+		instance_remove(obj); //todo move into object.c!
 	}
 }
 

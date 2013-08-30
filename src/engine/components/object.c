@@ -329,10 +329,9 @@ int instance_count(object_id *type)
 	return llist_size(objects_meta[type->ID].active);
 }
 
-void instance_remove(instance *obj)
+void instance_remove(instance *obj) //TODO change this to a soft-remove method: obj->alive = 0; and remove object in its own object_poststep-method;
 {
 	//TODO restructure removal method completely
 	llist_remove(objects_meta[obj->TYPE->ID].active, obj);
 }
-
 

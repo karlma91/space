@@ -89,6 +89,11 @@ static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cp
 	cpBodyUpdateVelocity(body, g, damping, dt);
 }
 
+static void on_destroy(OBJ_TYPE *OBJ_NAME)
+{
+
+}
+
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	cpSpaceRemoveShape(space, bullet->shape);

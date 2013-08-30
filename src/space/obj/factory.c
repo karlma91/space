@@ -92,6 +92,11 @@ static void remove_factory_from_child(instance *child, void *factory) {
 	}
 }
 
+static void on_destroy(OBJ_TYPE *OBJ_NAME)
+{
+
+}
+
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);

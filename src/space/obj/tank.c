@@ -231,6 +231,10 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	sprite_render(&(tank->turret_sprite), &pos, barrel_angle);
 }
 
+static void on_destroy(OBJ_TYPE *OBJ_NAME)
+{
+
+}
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
