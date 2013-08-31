@@ -45,14 +45,14 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 	instance *object = (instance *)(a->body->data);
 	instance *bullet = (instance*)(b->body->data);
 
-	bullet->alive = 0;
+	instance_remove(bullet);
 
 	se_add_explotion_at_contact_point(arb);
 
 	//FIXME how to deal with objects already killed?
 	if (se_damage_object(object, bullet)) {
 		if (object->alive) {
-			object->alive = 0;
+			instance_remove(bullet);
 
 			particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 			//se_add_score_and_popup(b->body->p, *COMPONENT(object, SCORE, int*));
@@ -72,7 +72,7 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	instance *object = (instance *)(a->body->data);
 	instance *bullet = (instance*)(b->body->data);
 
-	bullet->alive = 0;
+	instance_remove(bullet);
 
 	se_add_explotion_at_contact_point(arb);
 
@@ -114,7 +114,7 @@ static void callback_bullet_ground(cpArbiter *arb, cpSpace *space, void *unused)
 	instance *object = ((instance *)(a->body->data));
 	add_sparks_at_contactpoint(arb);
 	sound_play(SND_LASER_1);
-	object->alive = 0;
+	instance_remove(object);
 }
 
 static void callback_rocket_ground(cpArbiter *arb, cpSpace *space, void *unused)
@@ -122,7 +122,7 @@ static void callback_rocket_ground(cpArbiter *arb, cpSpace *space, void *unused)
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
 	instance *object = ((instance *)(a->body->data));
 	se_add_explotion_at_contact_point(arb);
-	object->alive = 0;
+	instance_remove(object);
 }
 
 

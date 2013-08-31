@@ -56,7 +56,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 			coin->data.body->v = cpvadd(coin->data.body->v, diff);
 		} else {
 			((obj_player *) player)->coins += 10;
-			coin->data.alive = 0;
+			instance_remove(coin);
 		}
 	}
 }
@@ -70,7 +70,6 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)

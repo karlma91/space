@@ -11,7 +11,7 @@
 #define INS_MAGIC_COOKIE 0xA2F4C681
 
 //TODO split active instances from list of objects?
-typedef struct { //TODO move: WARNING: exposed internal data structure
+typedef struct {
 	object_id *obj;
 	int count;
 	LList active;
@@ -22,6 +22,8 @@ static int component_index = 0;
 
 int object_count = 0;
 object_info objects_meta[OBJECT_MAX_OBJECTS];
+
+static LList ins2destroy;
 
 static void destroy_func(instance* obj)
 {
@@ -106,8 +108,7 @@ instance *instance_create(object_id *type, const void *param, float x, float y, 
 	//TODO set body pos and vel
 
 	/* sets default values */
-	ins->alive = 1;
-	ins->destroyed = 0;
+	*((int *) &ins->alive) = 1;
 
 	if (param) {
 		instance_set_param(ins, param);
@@ -126,7 +127,7 @@ instance *instance_create(object_id *type, const void *param, float x, float y, 
 #endif
 
 void object_init(void) {
-
+	ins2destroy = llist_create();
 }
 
 instance *instance_super_malloc(object_id *type)
@@ -329,9 +330,32 @@ int instance_count(object_id *type)
 	return llist_size(objects_meta[type->ID].active);
 }
 
-void instance_remove(instance *obj) //TODO change this to a soft-remove method: obj->alive = 0; and remove object in its own object_poststep-method;
+void instance_destroy(instance *ins)
 {
-	//TODO restructure removal method completely
-	llist_remove(objects_meta[obj->TYPE->ID].active, obj);
+	if (!ins->destroyed) {
+		*((int *) &ins->destroyed) = 1;
+		llist_add(ins2destroy, ins);
+	}
 }
 
+void instance_remove(instance *ins)
+{
+	*((int *) &ins->alive) = 0;
+}
+
+static void instance_remove_dead(instance *ins, void *unused)
+{
+	if (!ins->alive) {
+		llist_remove(objects_meta[ins->TYPE->ID].active, ins);
+	}
+}
+
+void instance_poststep(void) // "hidden" method called from statesystem
+{
+	instance *ins;
+	while ((ins = llist_pop(ins2destroy)) != NULL) {
+		ins->TYPE->call.on_destroy(ins);
+	}
+
+	instance_iterate(instance_remove_dead, NULL);
+}

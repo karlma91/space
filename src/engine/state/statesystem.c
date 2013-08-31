@@ -135,6 +135,10 @@ void statesystem_update(void)
     if( stack_head->call.post_update){
         stack_head->call.post_update();
     }
+
+    /* Call instance_poststep to update all lists and remove all dead objects */
+    void instance_poststep(void);
+    instance_poststep();
 }
 
 void statesystem_draw(void)

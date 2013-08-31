@@ -85,7 +85,6 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	draw_bar(factory->data.body->p.x+160,factory->data.body->p.y-150,40,150,factory->timer / factory->param.spawn_delay,0);
 }
 
-//FIXME Somewhat slow temporary fix, as objects_iterate_type does not support extra arguments!
 static void remove_factory_from_child(instance *child, void *factory) {
 	if (COMPONENT(child, CREATOR, void *) == factory) {
 		COMPONENT_SET(child, CREATOR, NULL);
@@ -94,14 +93,14 @@ static void remove_factory_from_child(instance *child, void *factory) {
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-
+	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);
+	se_spawn_coins((instance *)factory);
+	instance_remove((instance *)factory);
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);
 	particles_release_emitter(factory->smoke);
-	se_spawn_coins((instance *)factory);
 
 	cpBodyEachShape(factory->data.body, se_shape_from_space, NULL);
 	cpSpaceRemoveBody(space, factory->data.body);

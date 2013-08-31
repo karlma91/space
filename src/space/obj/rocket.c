@@ -21,7 +21,6 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	COMPONENT_SET(rocket, MINIMAP, &rocket->radar_image);
 	rocket->radar_image = cmp_new_minimap(5, COL_RED);
 
-	rocket->data.alive = 1;
 	rocket->flame = particles_get_emitter(EMITTER_ROCKET_FLAME);
 	rocket->angle = M_PI/2;
 
@@ -92,13 +91,12 @@ static void shape_from_space(cpBody *body, cpShape *shape, void *data)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-
+	se_spawn_coins(rocket);
+	instance_remove(rocket);
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	//TODO finn ut om rocket sprengte eller ikke
-	//se_spawn_coins(object);
 	cpBodyEachShape(rocket->data.body,shape_from_space,NULL);
 
 	cpSpaceRemoveBody(space, rocket->data.body);

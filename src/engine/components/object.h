@@ -51,9 +51,9 @@ struct instance {
 
 	void *components[OBJECT_MAX_COMPONENTS];
 
-	int alive;
+	const int alive;
+	const int destroyed;
 	int disabled;
-	int destroyed;
 	int instance_id;
 
 	cpVect p_start, v_start;
@@ -65,6 +65,8 @@ struct instance {
 
 int component_register(int pointer_count);
 
+//TODO support filtered iterator
+
 instance *instance_create(object_id *type, const void *param, float x, float y, float hs, float vs);
 instance *instance_super_malloc(object_id *type); //TODO hide from user?
 void instance_super_free(instance *);
@@ -72,6 +74,7 @@ void instance_super_free(instance *);
 void instance_add(instance *);
 void instance_iterate(void (*f)(instance *, void *data), void *data);
 void instance_iterate_type(object_id *type, void (*f)(instance *, void *data), void *data);
+void instance_destroy(instance *);
 void instance_remove(instance *);
 int instance_set_param(instance *, const void *param);
 void instance_clear(void);
@@ -85,6 +88,7 @@ instance *instance_by_id(object_id *type, int instance_id);
 #define instance_update(ins) ins->TYPE->call.on_update(ins)
 #define instance_render(ins) ins->TYPE->call.on_render(ins)
 
+//int instance_count_active(object_id *type); //TODO implement this method, returning the number of instances that are not destroyed
 int instance_count(object_id *type);
 int object_register(object_id *obj);
 object_id *object_by_name(const char *obj_name);

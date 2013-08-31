@@ -29,7 +29,6 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	COMPONENT_SET(turret, MINIMAP, &turret->radar_image);
 	turret->radar_image = cmp_new_minimap(10, COL_BLUE);
 
-	turret->data.alive = 1;
 	turret->timer = 0;
 	turret->rate = 0.060;
 	turret->bullets = 0;
@@ -132,12 +131,12 @@ static void shape_from_space(cpBody *body, cpShape *shape, void *data)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-
+	se_spawn_coins(turret);
+	instance_remove(turret);
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	se_spawn_coins(OBJ_NAME);
 	cpBodyEachShape(turret->data.body,shape_from_space,NULL);
 
 	cpSpaceRemoveBody(space, turret->data.body);

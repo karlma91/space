@@ -338,6 +338,7 @@ static void main_init(void) {
 	particles_init();   /* load and prepare all particle systems */
 	//font_init();      /* (currently not in use) */
 	statesystem_init(); /* init all states */
+	object_init();
 	game_init();
 
 	// Handle iOS app-events (pause, low-memory, terminating, etc...) and SDL_QUIT

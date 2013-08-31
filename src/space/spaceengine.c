@@ -77,7 +77,7 @@ int se_damage_object(instance *object, instance *dmg_dealer)
 		hpbar *hp = COMPONENT(object, HPBAR, hpbar*);
 		hp->value -= *damage;
 		if (hp->value <= 0) {
-			object->destroyed = 1;
+			instance_destroy(object);
 			return 1;
 		}
 	}

@@ -282,8 +282,8 @@ static void update_instances(instance *obj, void *data)
 
 	if(obj->alive){
 		if(obj->body->p.y > currentlvl->height  || obj->body->p.y < 0){
-			obj->alive = 0;
-			SDL_Log("WARNING: object killed outside of level!");
+			instance_remove(obj);
+			SDL_Log("WARNING: %s[%d] killed outside of level!", obj->TYPE->NAME, obj->instance_id);
 		}
 
 		if (obj->body->p.x < currentlvl->left ){
@@ -291,7 +291,7 @@ static void update_instances(instance *obj, void *data)
 			moved_left = 1;
 		}
 
-		if(!obj->alive || moved_left){
+		if (obj->destroyed || moved_left) {
 			int i;
 			cpBody *body;
 			for (i=0, body = obj->components[CMP_BODIES]; body && i <= SPACE_BODIES_MAX; ++i, body = obj->components[CMP_BODIES+i]) {
@@ -305,7 +305,7 @@ static void update_instances(instance *obj, void *data)
 			obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
 			moved_right = 1;
 		}
-		if(!obj->alive || moved_right){
+		if (obj->destroyed || moved_right) {
 			int i;
 			cpBody *body;
 			for (i=0, body = obj->components[CMP_BODIES]; body && i <= SPACE_BODIES_MAX; ++i, body = obj->components[CMP_BODIES+i]) {
@@ -316,8 +316,6 @@ static void update_instances(instance *obj, void *data)
 		}
 
 		instance_update(obj);
-	}else{
-		instance_remove(obj); //todo move into object.c!
 	}
 }
 

@@ -14,7 +14,6 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	bullet->data.alive = 1;
 	COMPONENT_SET(bullet, DAMAGE, &(bullet->param.damage));
 
 	sprite_create(&(bullet->data.spr), SPRITE_GLOW_DOT, 30, 30, 0);
@@ -45,7 +44,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	if (bullet->energy < 0) {
-		bullet->data.alive = 0;
+		instance_remove(bullet);
 	} else {
 		bullet->energy -= mdt;
 	}
@@ -91,7 +90,6 @@ static void bulletVelocityFunc(cpBody *body, cpVect gravity, cpFloat damping, cp
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)

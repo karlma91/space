@@ -233,14 +233,14 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
+	particles_get_emitter_at(EMITTER_FRAGMENTS, tank->data.body->p);
+	se_spawn_coins((instance *)tank);
 
+	instance_remove(tank); //TODO don't call this method, but just remove constraints
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(EMITTER_FRAGMENTS, tank->data.body->p);
-	se_spawn_coins((instance *)tank);
-
 	cpBodyEachShape(tank->data.body,se_shape_from_space,NULL);
 	cpBodyEachConstraint(tank->data.body,se_constrain_from_space,NULL);
 

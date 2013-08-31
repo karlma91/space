@@ -158,11 +158,14 @@ void *llist_pop(LList id) {
 	struct llist *list = (struct llist *)id;
 
 	if (list) {
-		void *last = list->tail->item;
-		if (llist_remove(id, last)) {
-			return last;
+		node* last = list->tail;
+		if (last) {
+			void *item = last->item;
+			llist_remove(id, item);
+			return item;
 		}
 	}
+
 	return NULL;
 }
 
