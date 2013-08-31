@@ -74,7 +74,9 @@ void instance_super_free(instance *);
 void instance_add(instance *);
 void instance_iterate(void (*f)(instance *, void *data), void *data);
 void instance_iterate_type(object_id *type, void (*f)(instance *, void *data), void *data);
+void instance_update(instance *);
 void instance_destroy(instance *);
+void instance_revive(instance *);
 void instance_remove(instance *);
 int instance_set_param(instance *, const void *param);
 void instance_clear(void);
@@ -85,7 +87,6 @@ instance *instance_n(object_id *type, int n);
 instance *instance_last(object_id *type);
 instance *instance_by_id(object_id *type, int instance_id);
 
-#define instance_update(ins) ins->TYPE->call.on_update(ins)
 #define instance_render(ins) ins->TYPE->call.on_render(ins)
 
 //int instance_count_active(object_id *type); //TODO implement this method, returning the number of instances that are not destroyed

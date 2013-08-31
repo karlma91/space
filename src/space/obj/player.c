@@ -17,6 +17,7 @@ static void action_shoot(obj_player *);
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
+	instance_revive((instance *)player);
 	player->gun_level = 1;
 	player->lives = 3;
 	player->coins = 0;

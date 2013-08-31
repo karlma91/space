@@ -259,6 +259,12 @@ void object_destroy(void)
 	//TODO remove all object definitions
 }
 
+void instance_update(instance *ins) {
+	if (!ins->destroyed) { //TODO avgjøre om destroyed skal bestemme on update skal kalles eller ikke
+		ins->TYPE->call.on_update(ins);
+	}
+}
+
 
 //TODO swap arguments?
 instance *instance_nearest(cpVect pos, object_id *type)
@@ -336,6 +342,11 @@ void instance_destroy(instance *ins)
 		*((int *) &ins->destroyed) = 1;
 		llist_add(ins2destroy, ins);
 	}
+}
+
+void instance_revive(instance *ins)
+{
+	*((int *) &ins->destroyed) = 0;
 }
 
 void instance_remove(instance *ins)
