@@ -15,7 +15,7 @@ static const float tex_map[2][8] = {
 		{0.5,1, 1,1, 0.5,0, 1,0}
 };
 
-#define TURRET_SIZE 400
+#define TURRET_SIZE 200
 #define SHOOT_VEL 1500
 
 static void init(OBJ_TYPE *OBJ_NAME)

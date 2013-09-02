@@ -453,12 +453,12 @@ static void SPACE_draw(void)
 
 static float radar_x;
 static float radar_y;
-static void plot_on_radar(instance *obj)
+static void plot_on_radar(instance *obj, int *x_ref)
 {
 	minimap *m = obj->components[CMP_MINIMAP];
 	if(m != NULL){
 		float r = 63;
-		float x = (obj->body->p.x + currentlvl->left)*2*M_PI/currentlvl->width;
+		float x = (obj->body->p.x - *x_ref + currentlvl->left)*2*M_PI/currentlvl->width + M_PI / 2;
 		float y = 1-(obj->body->p.y / currentlvl->height);
 		r = 50+r*y;
 		float px = cos(x)*r;
@@ -470,11 +470,12 @@ static void plot_on_radar(instance *obj)
 
 static void radar_draw(float x, float y)
 {
+	int offset = se_distance_to_player(0);
 	radar_x = x;
 	radar_y = y;
 	draw_color4f(0.3, 0.5, 0.7, 0.6);
 	draw_donut(radar_x, radar_y, 50, 110);
-	instance_iterate(plot_on_radar, NULL);
+	instance_iterate((void (*)(instance *, void *))plot_on_radar, &offset);
 }
 
 void draw_gui(void)

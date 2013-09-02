@@ -206,7 +206,6 @@ static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpGroup gr
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-
 	GLfloat dir = cpBodyGetAngle(tank->data.body);
 	GLfloat rot = cpBodyGetAngle(tank->wheel1)*(180/M_PI);
 	GLfloat barrel_angle = (tank->barrel_angle + dir) * (180/M_PI);
