@@ -233,6 +233,23 @@ void instance_iterate_type(object_id *type, void (*f)(instance *, void *data), v
 	}
 }
 
+void instance_iterate_comp(int comp_index, void (*f)(instance *, void *data), void *data)
+{
+	int obj_id;
+	object_info *obj = objects_meta;
+
+	for (obj_id = 0; obj_id < object_count; obj_id++) {
+		//TODO make use of bitsets in object, much more reliable than just checking first instance
+		instance *ins = llist_first(obj->active);
+		if (ins) {
+			if (ins->components[comp_index]) {
+				llist_iterate_func(obj->active, (void (*)(void *, void *))f, data);
+			}
+		}
+		++obj;
+	}
+}
+
 /* removes all nodes from all lists */
 void instance_clear(void)
 {

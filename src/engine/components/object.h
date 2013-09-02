@@ -74,6 +74,7 @@ void instance_super_free(instance *);
 void instance_add(instance *);
 void instance_iterate(void (*f)(instance *, void *data), void *data);
 void instance_iterate_type(object_id *type, void (*f)(instance *, void *data), void *data);
+void instance_iterate_comp(int comp_index, void (*f)(instance *, void *data), void *data);
 void instance_update(instance *);
 void instance_destroy(instance *);
 void instance_revive(instance *);

@@ -451,7 +451,7 @@ static void SPACE_draw(void)
 	draw_gui();
 }
 
-static float radar_x;
+static float radar_x; //TODO cleanup this non-object oriented code
 static float radar_y;
 static void plot_on_radar(instance *obj, int *x_ref)
 {
@@ -475,7 +475,7 @@ static void radar_draw(float x, float y)
 	radar_y = y;
 	draw_color4f(0.3, 0.5, 0.7, 0.6);
 	draw_donut(radar_x, radar_y, 50, 110);
-	instance_iterate((void (*)(instance *, void *))plot_on_radar, &offset);
+	instance_iterate_comp(CMP_MINIMAP, (void (*)(instance *, void *))plot_on_radar, &offset);
 }
 
 void draw_gui(void)
