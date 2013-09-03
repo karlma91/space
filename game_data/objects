@@ -1,7 +1,7 @@
 TANK LIGHT 25 10 tank_00.png
 TANK HEAVY 100 25 tank_00.png
-ROCKET NORMAL 10 5 rocket.png 5000
-ROCKET HARD 10 5 rocket.png 7000
+ROCKET NORMAL 10 5 rocket.png 2000
+ROCKET HARD 10 5 rocket.png 3000
 TURRET TURE 250 50 2 2 12 turret.png
 FACTORY SMALL 2 250 3 50 TANK LIGHT tank_factory_blue factory.shape
 FACTORY BIG 2 450 10 125 TANK HEAVY tank_factory_red factory.shape

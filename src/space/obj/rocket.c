@@ -7,9 +7,13 @@
 #define OBJ_NAME rocket
 #include "we_defobj.h"
 
+#define ROCKET_SIZE 150
+#define ROCKET_VEL_LIMIT 600
+
 static void init(OBJ_TYPE *OBJ_NAME)
 {
 }
+
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
@@ -24,13 +28,13 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	rocket->flame = particles_get_emitter(EMITTER_ROCKET_FLAME);
 	rocket->angle = M_PI/2;
 
-	cpFloat height = 30;
+	cpFloat height = ROCKET_SIZE/8;
 	cpFloat mass = 2.0f;
-	cpFloat width = 30;
+	cpFloat width = ROCKET_SIZE/2;
 
 	rocket->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, width, height)));
 	cpBodySetPos(rocket->data.body , rocket->data.p_start);
-	cpBodySetVelLimit(rocket->data.body,1000);
+	cpBodySetVelLimit(rocket->data.body,ROCKET_VEL_LIMIT);
 	rocket->shape = se_add_box_shape(rocket->data.body,width,height,0.7,0.0);
 
 	cpShapeSetLayers(rocket->shape, LAYER_ENEMY);
@@ -63,13 +67,13 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	float target_angle;
 
-	cpBodySetForce(rocket->data.body,cpvzero);
+	//cpBodySetForce(rocket->data.body,cpvzero);
 	if (rocket->active) {
 		target_angle = cpvtoangle(d);
-		cpBodyApplyForce(rocket->data.body,cpvmult(cpvforangle(target_angle),rocket->param.force),cpvzero);
+		cpBodySetForce(rocket->data.body,cpvmult(cpvforangle(target_angle),rocket->param.force));
 	} else {
 		target_angle = M_PI / 2;
-		cpBodyApplyForce(rocket->data.body,cpvmult(cpv(0,1),rocket->param.force),cpvzero);
+		cpBodySetForce(rocket->data.body,cpvmult(cpv(0,1),rocket->param.force));
 	}
 
 	rocket->angle = turn_toangle(rocket->angle, target_angle,1 * (2*M_PI* dt));
@@ -79,7 +83,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	draw_color4f(1,1,1,1);
 	hpbar_draw(&rocket->hp_bar);
-	draw_texture(rocket->param.tex_id, &(rocket->data.body->p),TEX_MAP_FULL,100, 100, rocket->angle*(180/M_PI));
+	draw_texture(rocket->param.tex_id, &(rocket->data.body->p),TEX_MAP_FULL,ROCKET_SIZE, ROCKET_SIZE, rocket->angle*(180/M_PI));
 }
 
 
