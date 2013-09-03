@@ -62,7 +62,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpShapeSetLayers(player->cash_magnet, LAYER_PICKUP);
 	cpShapeSetGroup(player->cash_magnet, player);
 
-	hpbar_init(&(player->hp_bar), 100, 120, 25, -59, 50, &(player->data.body->p));
+	hpbar_init(&(player->hp_bar), 100, 120, 25, 0, 50, &(player->data.body->p));
 
 	//FIXME cleanup
 	player->gunwheel = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));

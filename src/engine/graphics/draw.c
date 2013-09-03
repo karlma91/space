@@ -19,7 +19,6 @@ GLfloat corner_quad[8] = {0, 0,
 		0, 1,
 		1,  1};
 
-
 /* COLOR DEFINITIONS */
 const Color COL_WHITE = {1,1,1,1};
 const Color COL_BLACK = {0,0,0,1};
@@ -30,6 +29,8 @@ const Color COL_BLUE  = {0,0,1,1};
 GLuint light_buffer, light_texture;
 
 Color rainbow_col[1536];
+
+static int TEX_BAR;
 
 static GLfloat unit_circle[128];
 static void draw_render_light_map();
@@ -82,7 +83,6 @@ int draw_init(){
 	glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, light_texture, 0);
 #endif
 
-
 	int i=0,j=0;
 	for(i = 0; i < 128; i += 2) {
 		unit_circle[i] = sinf( 2*M_PI*i / (128-2));
@@ -99,6 +99,8 @@ int draw_init(){
 	/*
 	 *
 	 */
+
+	TEX_BAR = texture_load("bar.png");
 
 	/* generate rainbow colors */
 	float min_col = 0.2f;
@@ -434,6 +436,7 @@ void draw_get_current_color(float *c)
 void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 {
 	cpVect pos = {x, y};
+	cpVect pos_org = pos;
 	float angle = 0;
 
 #if EXPERIMENTAL_GRAPHICS
@@ -454,24 +457,44 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 	/* outer edge */
 	draw_color4f(1, 1, 1, 1);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	draw_box(x, y, w, h, angle, 0);
+	//draw_box(x, y, w, h, angle, 1);
+	//draw_box(x + w/2, y + h/2, w, h, angle, 1);
 
 	/* inner edge */
-
-	border = 0.1 * (w > h ? h : w);
+	//border = 0.1 * (w > h ? h : w);
+	border = 0;
 	draw_color4f(0, 0, 0, 1);
-	draw_box(x + border, y + border, w - border * 2, h - border * 2, angle, 0);
+	//draw_box(x + border, y + border, w - border * 2, h - border * 2, angle, 1);
+	//draw_box(x + w/2, y + h/2, w - border * 2, h - border * 2, angle, 1);
+
+	//TODO
+	//TODO
+	//TODO
 
 	/* hp bar */
 	border *= 2;
 	if (w > h) {
+		float width_red = (w - border * 2) * p;
+		float width_bar = (w - border * 2) * p2;
+		float height = h - border * 2;
+
+		cpVect pos_red = pos_org;//cpvadd(pos_org, cpv(border + width_red/2, border + height/2));
+		cpVect pos_bar = pos_org;//cpvadd(pos_org, cpv(border + width_bar/2, border + height/2));
+
 		draw_color4f(1,0,0, 1);
-		draw_box(x + border, y + border, (w - border * 2) * p, h - border * 2, angle, 0);
+		//draw_box(x + border, y + border, width_red, height, angle, 0);
+		draw_texture(TEX_BAR, &pos_red, TEX_MAP_FULL, width_red, height, 0);
+
 		draw_color4f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1, 1);
-		draw_box(x + border, y + border, (w - border * 2) * p2, h - border * 2, angle, 0);
+		//draw_box(x + border, y + border, width_bar, height, angle, 0);
+		draw_texture(TEX_BAR, &pos_bar, TEX_MAP_FULL, width_bar, height, 0);
+
 	} else {
+		float width = w - border * 2;
+		float height = (h - border * 2) * p;
+		cpVect pos_bar = cpvadd(pos_org, cpv(border + width/2, border + height/2));
 		draw_color4f(1-p,1-p,1,1);
-		draw_box(x + border, y + border, w - border * 2, (h - border * 2) * p, angle, 0);
+		draw_texture(TEX_BAR, &pos_bar, TEX_MAP_FULL, height, width, 90);
 	}
 
 	draw_pop_color();

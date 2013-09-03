@@ -41,7 +41,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpShapeSetCollisionType(rocket->shape, &this);
 	cpBodySetUserData(rocket->data.body, rocket);
 
-	hpbar_init(&rocket->hp_bar, rocket->param.max_hp, 80, 16, -40, 60, &(rocket->data.body->p));
+	hpbar_init(&rocket->hp_bar, rocket->param.max_hp, 80, 18, 0, 60, &(rocket->data.body->p));
 }
 
 

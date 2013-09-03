@@ -46,7 +46,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	shape_add_shapes(space, factory->param.shape_id, factory->data.body, 400, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
 	cpBodySetUserData(factory->data.body, factory);
 
-	hpbar_init(&factory->hp_bar, factory->param.max_hp, 200, 35, -50, 180,
+	hpbar_init(&factory->hp_bar, factory->param.max_hp, 200, 35, 0, 180,
 			&(factory->data.body->p));
 }
 

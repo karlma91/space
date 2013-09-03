@@ -46,7 +46,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	cpBodySetUserData(turret->data.body, turret);
 
-	hpbar_init(&turret->hp_bar,turret->param.max_hp,80,16,-40,60,&(turret->data.body->p));
+	hpbar_init(&turret->hp_bar,turret->param.max_hp,80,20,0,60,&(turret->data.body->p));
 }
 
 

@@ -62,7 +62,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	cpBodySetUserData(tank->data.body, tank);
 
-	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,-40,60,&(tank->data.body->p));
+	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,0,60,&(tank->data.body->p));
 }
 
 static void set_wheel_velocity(obj_tank *tank, float velocity)
