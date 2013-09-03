@@ -27,7 +27,7 @@ void sound_music_unmute(void) {}
 #if __IPHONEOS__
 #define SOUND_PATH ""
 #else
-#define SOUND_PATH "sound/"
+#define SOUND_PATH "game_data/sound/"
 #endif
 
 #define SOUND_DEFAULT_VOLUME (SDL_MIX_MAXVOLUME/8)
