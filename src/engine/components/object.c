@@ -224,12 +224,14 @@ void instance_iterate(void (*f)(instance *, void *data), void *data)
 
 /* iterate through one type of object */
 void instance_iterate_type(object_id *type, void (*f)(instance *, void *data), void *data) {
-	if (err_obj(type)) {
-		SDL_Log("ERROR: in list_iterate_type: Invalid object type %p\n", type);
-		exit(-1);
-	} else {
-		object_info *obj = objects_meta + type->ID;
-		llist_iterate_func(obj->active, (void (*)(void *, void *))f, data);
+	if (type) {
+		if (err_obj(type)) {
+			SDL_Log("ERROR: in list_iterate_type: Invalid object type %p\n", type);
+			exit(-1);
+		} else {
+			object_info *obj = objects_meta + type->ID;
+			llist_iterate_func(obj->active, (void (*)(void *, void *))f, data);
+		}
 	}
 }
 

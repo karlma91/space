@@ -73,7 +73,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	cpVect pos_body = player->data.body->p;
 	cpVect pos_gun = player->gunwheel->p;
-
+	draw_color4f(1,1,1,1);
 	sprite_render(&(player->gun), &(pos_gun), player->aim_angle * 180/M_PI);
 	sprite_render(&(player->data.spr), &(pos_body), player->direction * 180/M_PI);
 	hpbar_draw(&player->hp_bar);
