@@ -146,7 +146,7 @@ static void level_running(void)
 
 	update_all();
 	obj_player *player = (obj_player*)instance_first(obj_id_player);
-	if(player->hp_bar.value <= 0){
+	if(player && player->hp_bar.value <= 0){
 		player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
@@ -287,7 +287,7 @@ static void update_instances(instance *obj, void *data)
 		}
 
 		if (obj->body->p.x < currentlvl->left ){
-			obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x );
+			obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x ); //TODO use modulo
 			moved_left = 1;
 		}
 
@@ -296,13 +296,13 @@ static void update_instances(instance *obj, void *data)
 			cpBody *body;
 			for (i=0, body = obj->components[CMP_BODIES]; body && i <= SPACE_BODIES_MAX; ++i, body = obj->components[CMP_BODIES+i]) {
 				if(body->p.x < currentlvl->left || moved_left){
-					body->p.x = currentlvl->right - (currentlvl->left -body->p.x );
+					body->p.x = currentlvl->right - (currentlvl->left -body->p.x ); //TODO use modulo
 				}
 			}
 		}
 
 		if (obj->body->p.x > currentlvl->right){
-			obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right);
+			obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right); //TODO use modulo
 			moved_right = 1;
 		}
 		if (obj->destroyed || moved_right) {

@@ -31,22 +31,23 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&(tank->turret_sprite), SPRITE_TANK_TURRET, 150, 150, 0);
 
 	tank->max_distance = 800;
+	tank->rot_speed = M_PI/2;
 
 	cpFloat start_height = tank->data.p_start.y - 50;
 
-	tank->rot_speed = M_PI/2;
-	tank->data.body = addChassis(space, tank,tank->data.p_start, tank);
+	cpFloat width = 80;
+	cpFloat height = 30;
+	tank->data.body = cpSpaceAddBody(space, cpBodyNew(MASS, cpMomentForBox(MASS, width, height)));
+	cpBodySetPos(tank->data.body, tank->data.p_start);
+	cpBodySetUserData(tank->data.body, tank);
+
+	cpShape *shape = we_add_box_shape(space, tank->data.body, width, height, 0.6, 0.0);
+	we_shape_collision(shape, &this, LAYER_ENEMY, tank);
 
 	// Make a car with some nice soft suspension
 	float wheel_offset = 40;
 	cpVect posA = cpv(tank->data.body->p.x - wheel_offset, start_height);
 	cpVect posB = cpv(tank->data.body->p.x + wheel_offset, start_height);
-
-
-	tank->debug_left_dist = -1;
-	tank->debug_right_dist = -1;
-
-	cpShapeSetCollisionType(tank->shape, &this);
 
 	tank->wheel1 = addWheel(space, posA, tank);
 	tank->wheel2 = addWheel(space, posB, tank);
@@ -60,22 +61,20 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
 	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
 
-	cpBodySetUserData(tank->data.body, tank);
-
 	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,0,60,&(tank->data.body->p));
 }
 
 static void set_wheel_velocity(obj_tank *tank, float velocity)
 {
-	cpBodySetAngVel(tank->wheel1,velocity);
-	cpBodySetAngVel(tank->wheel2,velocity);
+	cpBodySetAngVel(tank->wheel1, velocity);
+	cpBodySetAngVel(tank->wheel2, velocity);
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 
 #if !ARCADE_MODE
-	if (keys[SDL_SCANCODE_F2]) {
+	if (keys[SDL_SCANCODE_F2]) { //DEBUG
 		tank->data.body->p.x = 0;
 		tank->data.body->p.y = 200;
 	}
@@ -137,9 +136,6 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	int left_clear = (left_dist > 250);
 	int right_clear = (right_dist > 250);
 
-	tank->debug_left_dist = left ? left_dist : -1;
-	tank->debug_right_dist = right ? right_dist : -1;
-
 	//TMP DEBUG OVERSTYRING AV TANK
 	if (keys[SDL_SCANCODE_LCTRL]) {
 		if (keys[SDL_SCANCODE_K])
@@ -179,30 +175,13 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
 	cpBodySetPos(body, pos);
 	cpBodySetAngVelLimit(body, 200);
 
-	cpShape *shape = se_add_circle_shape(body, radius, 0.8, 0.7);
+	cpShape *shape = we_add_circle_shape(space, body, radius, 0.8, 0.7);
 	cpShapeSetGroup(shape, &this);
 	cpShapeSetLayers(shape, LAYER_BULLET_ENEMY);
 
 	return body;
 }
 
-/**
- * make a chassies
- */
-static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpGroup group)
-{
-	cpFloat width = 80;
-	cpFloat height = 30;
-
-	cpBody *body = cpSpaceAddBody(space, cpBodyNew(MASS, cpMomentForBox(MASS, width, height)));
-	cpBodySetPos(body, pos);
-
-	tank->shape = se_add_box_shape(body,width,height,0.6,0.0);
-	cpShapeSetGroup(tank->shape, group);
-	cpShapeSetLayers(tank->shape, LAYER_ENEMY);
-
-	return body;
-}
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
@@ -234,30 +213,15 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(EMITTER_FRAGMENTS, tank->data.body->p);
 	se_spawn_coins((instance *)tank);
-
-	cpBodyEachConstraint(tank->data.body,se_constrain_from_space,NULL);
+	we_body_remove_constraints(space, tank->data.body);
 	//instance_remove(tank); //TODO don't call this method, but just remove constraints
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	cpBodyEachShape(tank->data.body,se_shape_from_space,NULL);
-	cpBodyEachConstraint(tank->data.body,se_constrain_from_space,NULL);
-
-	cpSpaceRemoveBody(space, tank->data.body);
-	cpBodyFree(tank->data.body);
-
-	cpBodyEachShape(tank->wheel1,se_shape_from_space,NULL);
-	cpBodyEachShape(tank->wheel2,se_shape_from_space,NULL);
-	cpSpaceRemoveBody(space, tank->wheel1);
-	cpSpaceRemoveBody(space, tank->wheel2);
-	cpBodyFree(tank->wheel1);
-	cpBodyFree(tank->wheel2);
-
-	obj_factory *factory = COMPONENT(tank, CREATOR, obj_factory*);
-	if (factory){
-		factory->cur--;
-	}
-
+	we_body_remove(space, &tank->data.body);
+	we_body_remove(space, &tank->wheel1);
+	we_body_remove(space, &tank->wheel2);
+	factory_remove_child(tank);
 	instance_super_free((instance *)tank);
 }

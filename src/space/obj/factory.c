@@ -8,8 +8,6 @@
 #include "we_defobj.h"
 
 
-static void remove_factory_from_tank(obj_tank *);
-
 static void init(OBJ_TYPE *OBJ_NAME)
 {
 }
@@ -85,9 +83,18 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	draw_bar(factory->data.body->p.x+160,factory->data.body->p.y-150,40,150,factory->timer / factory->param.spawn_delay,0);
 }
 
-static void remove_factory_from_child(instance *child, void *factory) {
+static void remove_factory_from_child(instance *child, void *factory)
+{
 	if (COMPONENT(child, CREATOR, void *) == factory) {
 		COMPONENT_SET(child, CREATOR, NULL);
+	}
+}
+
+void factory_remove_child(instance *child)
+{
+	obj_factory *factory = COMPONENT(child, CREATOR, obj_factory*);
+	if (factory && factory->data.TYPE == obj_id_factory) {
+		--factory->cur;
 	}
 }
 
@@ -101,11 +108,7 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	particles_release_emitter(factory->smoke);
-
-	cpBodyEachShape(factory->data.body, se_shape_from_space, NULL);
-	cpSpaceRemoveBody(space, factory->data.body);
-	cpBodyFree(factory->data.body);
-
+	we_body_remove(space, &factory->data.body);
 	instance_iterate_type((object_id *) factory->param.type, remove_factory_from_child, factory);
 	instance_super_free((instance *)factory); //TODO move out to objects
 }

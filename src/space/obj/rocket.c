@@ -14,7 +14,6 @@ static void init(OBJ_TYPE *OBJ_NAME)
 {
 }
 
-
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	rocket->param.damage = 50; // TODO parse damage from file
@@ -33,13 +32,12 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpFloat width = ROCKET_SIZE/2;
 
 	rocket->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, width, height)));
-	cpBodySetPos(rocket->data.body , rocket->data.p_start);
-	cpBodySetVelLimit(rocket->data.body,ROCKET_VEL_LIMIT);
-	rocket->shape = se_add_box_shape(rocket->data.body,width,height,0.7,0.0);
-
-	cpShapeSetLayers(rocket->shape, LAYER_ENEMY);
-	cpShapeSetCollisionType(rocket->shape, &this);
 	cpBodySetUserData(rocket->data.body, rocket);
+	cpBodySetPos(rocket->data.body, rocket->data.p_start);
+	cpBodySetVelLimit(rocket->data.body, ROCKET_VEL_LIMIT);
+
+	cpShape *shape = we_add_box_shape(space, rocket->data.body,width,height,0.7,0.0);
+	we_shape_collision(shape, &this, LAYER_ENEMY, CP_NO_GROUP);
 
 	hpbar_init(&rocket->hp_bar, rocket->param.max_hp, 80, 18, 0, 60, &(rocket->data.body->p));
 }
@@ -95,23 +93,14 @@ static void shape_from_space(cpBody *body, cpShape *shape, void *data)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	se_spawn_coins(rocket);
-	instance_remove(rocket);
+	se_spawn_coins((instance *)rocket);
+	instance_remove((instance *)rocket);
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	cpBodyEachShape(rocket->data.body,shape_from_space,NULL);
-
-	cpSpaceRemoveBody(space, rocket->data.body);
-	cpBodyFree(rocket->data.body);
-
 	particles_release_emitter(rocket->flame);
-
-	obj_factory *factory = COMPONENT(rocket, CREATOR, obj_factory*);
-	if (factory){
-		factory->cur--;
-	}
-
+	we_body_remove(space, &rocket->data.body);
+	factory_remove_child(rocket);
 	instance_super_free((instance *)rocket);
 }

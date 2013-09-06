@@ -28,14 +28,15 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	coin->data.body = cpSpaceAddBody(space, cpBodyNew(COIN_MASS, cpMomentForCircle(COIN_MASS, 0.0f, COIN_RADIUS, cpvzero)));
 	cpBodySetUserData(coin->data.body, coin);
 	cpBodySetPos(coin->data.body, coin->data.p_start);
+
 	float angle = (1.0f*rand() / RAND_MAX) * M_PI*2;
 	float force = 400 + (1.0f*rand() / RAND_MAX)*1000; //TODO avgjør force utifra antal coins som spawner (altså utenfor create, i spawn metoden)
 	coin->data.body->v = cpvmult(cpvforangle(angle), force);
-	coin->shape = se_add_circle_shape(coin->data.body,COIN_RADIUS-5,0.8,0.2);
+
+	cpShape *shape = we_add_circle_shape(space, coin->data.body,COIN_RADIUS-5,0.8,0.2);
+	we_shape_collision(shape, &this, LAYER_PICKUP, &this);
+
 	coin->data.body->velocity_func = vel_func;
-	cpShapeSetCollisionType(coin->shape, &this);
-	cpShapeSetGroup(coin->shape, &this);
-	cpShapeSetLayers(coin->shape, LAYER_PICKUP);
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
@@ -74,12 +75,6 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-
-	cpSpaceRemoveShape(space, coin->shape);
-	cpShapeFree(coin->shape);
-
-	cpSpaceRemoveBody(space, coin->data.body);
-	cpBodyFree(coin->data.body);
-
+	we_body_remove(space, &coin->data.body);
 	instance_super_free((instance*)coin);
 }

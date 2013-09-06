@@ -63,6 +63,7 @@ static void cheat(void)
 	/* CHEAT */
 	object_id *obj = object_by_name(input_buffer);
 	obj_player *player = (obj_player *)instance_first(obj_id_player);
+	if (!player) return;
 	valid_cheat = (obj != NULL);
 	player->bullet_type = obj ? obj : object_by_name(weapons[weapon_index].obj_name); /* override player's bullet object */
 }

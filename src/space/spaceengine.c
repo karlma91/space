@@ -9,22 +9,6 @@
 #include "../engine/state/statesystem.h"
 #include "spaceengine.h"
 
-static void add_shape(cpShape *shape, cpFloat friction, cpFloat elasticity);
-
-cpShape *se_add_circle_shape(cpBody *body, cpFloat radius, cpFloat friction, cpFloat elasticity)
-{
-	cpShape *shape = cpCircleShapeNew(body, radius, cpvzero);
-	add_shape(shape,friction,elasticity);
-	return shape;
-}
-
-cpShape *se_add_box_shape(cpBody *body, cpFloat width, cpFloat height, cpFloat friction, cpFloat elasticity)
-{
-	cpShape *shape = cpBoxShapeNew(body, width, height);
-	add_shape(shape,friction,elasticity);
-	return shape;
-}
-
 void se_add_score_and_popup(cpVect p, int score)
 {
     particles_add_score_popup(p, score);
@@ -45,10 +29,14 @@ float se_distance_to_player(float x)
 
 cpVect se_distance_a2b(instance *insa, instance *insb)
 {
-	cpVect a = insa->body->p;
-	cpVect b = insb->body->p;
-	cpVect d = se_distance_v(a,b);
-	return d;
+	if (insa && insb) {
+		cpVect a = insa->body->p;
+		cpVect b = insb->body->p;
+		cpVect d = se_distance_v(a,b);
+		return d;
+	} else {
+		return cpv(999999,999999);
+	}
 }
 
 cpVect se_distance_v(cpVect a, cpVect b)
@@ -113,13 +101,6 @@ cpFloat get_angle(cpVect a, cpVect b)
 }
 
 
-static void add_shape(cpShape *shape, cpFloat friction, cpFloat elasticity)
-{
-	cpSpaceAddShape(space, shape);
-	cpShapeSetFriction(shape, friction);
-	cpShapeSetElasticity(shape, elasticity);
-}
-
 //TODO add preferred angle to handle situations with two possible solutions
 float turn_toangle(float from_angle, float to_angle, float step_size)
 {
@@ -151,16 +132,6 @@ float turn_toangle(float from_angle, float to_angle, float step_size)
 
 	//SDL_Log("angle: %0.4f\n",from_angle*180/M_PI);
 	return from_angle;
-}
-void se_shape_from_space(cpBody *body, cpShape *shape, void *data)
-{
-    cpSpaceRemoveShape(space, shape);
-    cpShapeFree(shape);
-}
-void se_constrain_from_space(cpBody *body, cpConstraint *constraint, void *data)
-{
-    cpSpaceRemoveConstraint(space, constraint);
-    cpConstraintFree(constraint);
 }
 
 float se_rect2arch(cpVect *pos)

@@ -29,6 +29,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
+	cpShape *shape;
 	cpFloat radius = 30;
 	cpFloat mass = 2;
 
@@ -50,17 +51,12 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetUserData(player->data.body, (void*)player);
 
 	/* make and connect new shape to body */
-	player->shape = se_add_circle_shape(player->data.body,radius,0.8,0.9);
-	//TODO create method for setting type, layers and group in one call
-	cpShapeSetCollisionType(player->shape, &this);
-	cpShapeSetLayers(player->shape, LAYER_PLAYER);
-	cpShapeSetGroup(player->shape, player);
+	shape = we_add_circle_shape(space, player->data.body,radius,0.8,0.9);
+	we_shape_collision(shape, &this, LAYER_PLAYER, player);
 
-	player->cash_magnet = se_add_circle_shape(player->data.body, player->param.cash_radius, 0,0);
-	player->cash_magnet->sensor = 1;
-	cpShapeSetCollisionType(player->cash_magnet, &this);
-	cpShapeSetLayers(player->cash_magnet, LAYER_PICKUP);
-	cpShapeSetGroup(player->cash_magnet, player);
+	shape = we_add_circle_shape(space, player->data.body, player->param.cash_radius, 0,0);
+	we_shape_collision(shape, &this, LAYER_PICKUP, player);
+	cpShapeSetSensor(shape, 1);
 
 	hpbar_init(&(player->hp_bar), 100, 120, 25, 0, 50, &(player->data.body->p));
 
@@ -69,16 +65,12 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetPos(player->gunwheel, player->data.body->p);
 	cpBodySetUserData(player->gunwheel, (void*)player);
 
-	cpShape *shape = se_add_circle_shape(player->gunwheel,radius,0.9,0.8);
-	cpShapeSetCollisionType(shape, &this);
-	cpShapeSetLayers(shape,LAYER_PLAYER);
-	cpShapeSetGroup(shape, player);
+	shape = we_add_circle_shape(space, player->gunwheel,radius,0.9,0.8);
+	we_shape_collision(shape, &this, LAYER_PLAYER, player);
 }
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	//float s = 0.001;
-
 	cpVect pos_body = player->data.body->p;
 	cpVect pos_gun = player->gunwheel->p;
 

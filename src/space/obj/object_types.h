@@ -69,8 +69,6 @@ PARAM_START(player)
 	float cash_radius;
 PARAM_END
 OBJ_START(player)
-	cpShape *shape;
-	cpShape *cash_magnet;
 	hpbar hp_bar;
 	int lives;
 	float lost_life_timer;
@@ -99,7 +97,6 @@ PARAM_START(bullet)
 	float damage;
 PARAM_END
 OBJ_START(bullet)
-	cpShape *shape;
 	int bullet_type;
 	cpFloat speed;
 	Color color;
@@ -111,7 +108,6 @@ PARAM_START(tank)
 	int coins;
 PARAM_END
 OBJ_START(tank)
-	cpShape *shape;
 	float timer;
 	float barrel_angle;
 	float rot_speed;
@@ -128,6 +124,7 @@ OBJ_START(tank)
 	cpFloat debug_right_dist;
 OBJ_END
 
+void factory_remove_child(instance *child);
 PARAM_START(factory)
 	int max_tanks;
 	float max_hp;
@@ -140,7 +137,6 @@ PARAM_START(factory)
 	polyshape *shape_id;
 PARAM_END
 OBJ_START(factory)
-	cpShape *shape;
 	cpFloat timer;
 	int cur;
 	hpbar hp_bar;
@@ -162,7 +158,6 @@ PARAM_START(turret)
 	polyshape *shape_id;
 PARAM_END
 OBJ_START(turret)
-	cpShape *shape;
 	float timer;
 	float barrel_angle;
 	int bullets;
@@ -181,7 +176,6 @@ PARAM_START(rocket)
 	float damage;
 PARAM_END
 OBJ_START(rocket)
-	cpShape *shape;
 	float timer;
 	float angle;
 	int active;
@@ -195,7 +189,6 @@ PARAM_START(robotarm)
 	float max_hp;
 PARAM_END
 OBJ_START(robotarm)
-	cpShape *shape;
 	cpBody *saw;
 	sprite saw_sprite;
 	float timer;
@@ -220,7 +213,6 @@ PARAM_END
 OBJ_START(spikeball)
 	float timer;
 	int down;
-	cpShape *shape;
 	cpBody *dolly;
 	cpConstraint *winch;
 	float winch_length;
@@ -229,7 +221,6 @@ OBJ_END
 
 PARAM_EMPTY(coin)
 OBJ_START(coin)
-	cpShape *shape;
 	cpBool pulled; //TODO create pickup component
 OBJ_END
 

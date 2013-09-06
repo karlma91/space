@@ -317,7 +317,7 @@ void draw_sprite_line(sprite *spr, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y
 void draw_glow_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
 	draw_line(TEX_GLOW,  x0,  y0,  x1,  y1,  w);
-	draw_color4f(1,1,1,1);
+	draw_color4f(1,1,1,-1);
 	draw_line(TEX_GLOW_DOT,  x0,  y0,  x1,  y1,  w);
 }
 
@@ -350,7 +350,13 @@ void draw_line_strip(const GLfloat *strip, int l, float w)
 
 void draw_color4f(float r, float g, float b, float a)
 {
-	glColor4f(r,g,b,a);
+	static float a_last = 1;
+	if (a == -1) {
+		glColor4f(r,g,b,a_last);
+	} else {
+		glColor4f(r,g,b,a);
+		a_last = a;
+	}
 }
 
 void draw_destroy(void)

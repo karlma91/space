@@ -13,7 +13,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	robotarm->hp = robotarm->param.max_hp;
+	cpShape *shape;
 	robotarm->timer = 0;
 
 	sprite_create(&(robotarm->saw_sprite), SPRITE_SAW, 300, 300, 30);
@@ -40,25 +40,20 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetPos(robotarm->saw, pos);
 	cpBodySetVelLimit(robotarm->saw, 400);
 
-	cpShape *shape = se_add_circle_shape(robotarm->saw, radius, 0.7, 0.0);
-	cpShapeSetGroup(shape, robotarm);
-	cpShapeSetLayers(shape, LAYER_ENEMY);
-	cpShapeSetCollisionType(shape, &this);
+	shape = we_add_circle_shape(space, robotarm->saw, radius, 0.7, 0.0);
+	we_shape_collision(shape, &this, LAYER_ENEMY, robotarm);
 
 	cpFloat size = 50;
 	/* make and add new body */
 	robotarm->data.body = cpBodyNew(200, cpMomentForBox(20.0f, size, size));
+	cpBodySetUserData(((instance *) robotarm)->body, (instance*)robotarm);
 	cpBodySetPos(((instance *) robotarm)->body, cpv(robotarm->data.p_start.x,size+10));
 	cpBodySetVelLimit(((instance *) robotarm)->body,180);
 
 	/* make and connect new shape to body */
-	robotarm->shape = cpSpaceAddShape(space, cpBoxShapeNew(robotarm->data.body, size, size));
-	cpShapeSetFriction(robotarm->shape, 0.01);
-	cpShapeSetLayers(robotarm->shape, LAYER_BULLET_ENEMY);
-	cpShapeSetCollisionType(robotarm->shape, &this);
-	cpShapeSetGroup(robotarm->shape, robotarm);
-
-	cpBodySetUserData(((instance *) robotarm)->body, (instance*)robotarm);
+	shape = cpSpaceAddShape(space, cpBoxShapeNew(robotarm->data.body, size, size));
+	cpShapeSetFriction(shape, 0.01);
+	we_shape_collision(shape, &this, LAYER_BULLET_ENEMY, robotarm);
 
 	//connect sawblade with body
 	cpSpaceAddConstraint(space, cpSlideJointNew(robotarm->saw, robotarm->data.body, cpv(0,0), cpv(0,0), 1.0f, (robotarm->segments)*robotarm->seg_length));
@@ -137,13 +132,9 @@ static void on_remove(OBJ_TYPE *OBJ_NAME)
 	free(robotarm->x);
 	free(robotarm->y);
 	free(robotarm->angle);
-	cpSpaceRemoveShape(space, robotarm->shape);
-	cpShapeFree(robotarm->shape);
 
-	//FIXME remove robotarm->saw!!
-
-	//cpSpaceRemoveBody(space, robotarm->data.body);
-	cpBodyFree(robotarm->data.body);
+	we_body_remove(space, &robotarm->saw);
+	we_body_remove(space, &robotarm->data.body);
 
 	instance_super_free((instance *)robotarm);
 }

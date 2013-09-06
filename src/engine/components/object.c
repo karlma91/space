@@ -387,3 +387,65 @@ void instance_poststep(void) // "hidden" method called from statesystem
 
 	instance_iterate(instance_remove_dead, NULL);
 }
+
+
+
+static void add_shape(cpSpace *space, cpShape *shape, cpFloat friction, cpFloat elasticity)
+{
+	cpSpaceAddShape(space, shape);
+	cpShapeSetFriction(shape, friction);
+	cpShapeSetElasticity(shape, elasticity);
+}
+
+void we_shape_collision(cpShape *shape, cpCollisionType type, cpLayers layers, cpGroup group)
+{
+	cpShapeSetCollisionType(shape, type);
+	cpShapeSetLayers(shape, layers);
+	cpShapeSetGroup(shape, group);
+}
+
+cpShape *we_add_circle_shape(cpSpace *space, cpBody *body, cpFloat radius, cpFloat friction, cpFloat elasticity)
+{
+	cpShape *shape = cpCircleShapeNew(body, radius, cpvzero);
+	add_shape(space, shape, friction, elasticity);
+	return shape;
+}
+
+cpShape *we_add_box_shape(cpSpace *space, cpBody *body, cpFloat width, cpFloat height, cpFloat friction, cpFloat elasticity)
+{
+	cpShape *shape = cpBoxShapeNew(body, width, height);
+	add_shape(space, shape, friction, elasticity);
+	return shape;
+}
+
+
+
+void we_space_remove_shape(cpBody *body, cpShape *shape, void *space)
+{
+    cpSpaceRemoveShape((cpSpace *) space, shape);
+    cpShapeFree(shape);
+}
+void we_space_remove_constraint(cpBody *body, cpConstraint *constraint, void *space)
+{
+    cpSpaceRemoveConstraint((cpSpace *) space, constraint);
+    cpConstraintFree(constraint);
+}
+
+void we_body_remove_shapes(cpSpace *space, cpBody *body)
+{
+	cpBodyEachShape(body, we_space_remove_shape, space);
+}
+
+void we_body_remove_constraints(cpSpace *space, cpBody *body)
+{
+	cpBodyEachConstraint(body, we_space_remove_constraint, space);
+}
+
+void we_body_remove(cpSpace *space, cpBody **body)
+{
+	we_body_remove_shapes(space, *body);
+	we_body_remove_constraints(space, *body);
+	cpSpaceRemoveBody(space, *body);
+	cpBodyFree(*body);
+	*body = NULL;
+}
