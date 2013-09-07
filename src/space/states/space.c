@@ -256,6 +256,33 @@ static void post_update(void)
 }
 
 
+int nan_check(cpBody *body)
+{
+	return (body->p.x != body->p.x || body->p.y != body->p.y) << 0 |
+			(body->v.x != body->v.x || body->v.y != body->v.y) << 1 |
+			(body->w != body->w) << 2 |
+			(body->a != body->a) << 3;
+}
+void nan_check_instance(instance *ins, void *msg)
+{
+	int nan = nan_check(ins->body);
+	if (nan) {
+		SDL_Log("ERROR: %s, NaN for %s[%d]'s body (NaN var: %d)", (char *)msg, ins->TYPE->NAME, ins->instance_id, nan);
+		main_stop();
+	}
+}
+
+void nan_check_all(char *msg)
+{
+	int nan = nan_check(space->staticBody);
+	if (nan) {
+		SDL_Log("ERROR: %s, NaN for static space body (NaN var: %d)", msg, nan);
+		main_stop();
+	}
+
+	instance_iterate(nan_check_instance, msg);
+}
+
 /**
  * Updates all the objects in objects and in chipmunk
  */
@@ -264,7 +291,9 @@ static void update_all(void)
 	/* chipmunk timestep counter */
 	accumulator += dt;
 
+	nan_check_all("pre_iterate");
 	instance_iterate(update_instances, NULL);
+	nan_check_all("post_iterate");
 	particles_update();
 
 	/* update all chipmunk objects 60 times per second */
@@ -273,6 +302,8 @@ static void update_all(void)
 		cpSpaceStep(space, phys_step);
 		accumulator -= phys_step;
 	}
+
+	nan_check_all("post_phys");
 }
 
 static void update_instances(instance *obj, void *data)
@@ -791,8 +822,8 @@ void space_init_level(int space_station, int deck)
 
 	/* static ground */
 	cpBody  *staticBody = space->staticBody;
-	static cpShape *floor;
-	static cpShape *ceiling;
+	static cpShape *floor = NULL;
+	static cpShape *ceiling = NULL;
 	/* remove floor and ceiling */
 	if(floor != NULL && ceiling != NULL){
 		cpSpaceRemoveStaticShape(space,floor);

@@ -9,6 +9,8 @@
 #include "../engine/state/statesystem.h"
 #include "spaceengine.h"
 
+#include <float.h>
+
 void se_add_score_and_popup(cpVect p, int score)
 {
     particles_add_score_popup(p, score);
@@ -81,7 +83,9 @@ cpFloat se_get_best_shoot_angle(cpVect a, cpVect va, cpVect b, cpVect vb, cpFloa
 
 	cpFloat c = cpvlength(vb);
 	cpFloat s = bullet_speed;
-	cpFloat G = acos(cpvdot(v, vb)/(cpvlength(vb) * cpvlength(v)));
+
+	cpFloat g = cpvdot(v, vb)/(cpvlength(vb) * cpvlength(v));
+	cpFloat G = acos(g < 1 ? (g > -1 ? g : -1) : 1);
 	cpFloat angle = asin((c * sin(G)) / s);
 
 	cpFloat bc = cpvtoangle(v);
@@ -90,6 +94,11 @@ cpFloat se_get_best_shoot_angle(cpVect a, cpVect va, cpVect b, cpVect vb, cpFloa
 		angle  = -angle;
 	}
 	angle  = M_PI + (bc - angle);
+
+	if (angle != angle) {
+		SDL_Log("ERROR: invalid angle!");
+		raise(SIGKILL);
+	}
 
 	return angle;
 }

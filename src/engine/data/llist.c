@@ -31,6 +31,8 @@ struct llist {
 	LList id;
 	int size;
 
+	int group;
+
 	node *head;
 	node *tail;
 
@@ -124,6 +126,13 @@ LList llist_create(void)
 	return list->id;
 }
 
+LList llist_create_group(void)
+{
+	struct llist *list = (struct llist *)llist_create();
+	list->group = 1;
+	return list->id;
+}
+
 int llist_add(LList id, void *p)
 {
 	struct llist *list = (struct llist *)id;
@@ -131,6 +140,11 @@ int llist_add(LList id, void *p)
 
 	if (!p || !is_valid(list))
 		return 0;
+
+	if (list->group && !is_valid((struct llist *)p)) {
+		fprintf(stderr, "list: ERROR list groups can only add other list\n");
+		exit(-1);
+	}
 
 	node = new_node();
 

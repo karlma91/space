@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <float.h>
+#include <signal.h>
 
 #include "../io/waffle_utils.h"
 
@@ -14,8 +15,11 @@
 typedef struct {
 	object_id *obj;
 	int count;
+
+	LList alive;
 	LList active;
 	LList destroyed;
+
 	LList pool;
 } object_info;
 
@@ -45,8 +49,20 @@ int object_register(object_id *obj)
 
 	objects_meta[id].obj = obj;
 	objects_meta[id].count = 0;
-	objects_meta[id].active = llist_create();
-	objects_meta[id].destroyed = llist_create();
+
+	LList alive, active, destroyed;
+
+	alive = llist_create_group();
+	active = llist_create();
+	destroyed = llist_create();
+
+	llist_add(alive, active);
+	llist_add(alive, destroyed);
+
+	objects_meta[id].alive = alive;
+	objects_meta[id].active = active;
+	objects_meta[id].destroyed = destroyed;
+
 	objects_meta[id].pool = llist_create();
 
 	llist_set_remove_callback(objects_meta[id].active, (void (*) (void *))destroy_func);
@@ -99,6 +115,11 @@ int component_register(int pointer_count)
 instance *instance_create(object_id *type, const void *param, float x, float y, float hs, float vs)
 {
 	instance *ins = instance_super_malloc(type);
+
+	if (x != x || y != y || hs != hs || vs != vs) {
+		SDL_Log("ERROR in instance_create: params NaN!");
+		raise(SIGKILL);
+	}
 
 	ins->p_start.x = x;
 	ins->p_start.y = y;
@@ -273,7 +294,9 @@ void object_destroy(void)
 	object_info *obj = objects_meta;
 
 	for (obj_id = 0; obj_id < object_count; ++obj_id, ++obj) {
+		llist_destroy(obj->alive);
 		llist_destroy(obj->active);
+		llist_destroy(obj->destroyed);
 		obj->count = 0;
 	}
 

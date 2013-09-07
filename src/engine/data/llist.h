@@ -13,6 +13,7 @@
 typedef void* LList;
 
 LList llist_create(void); /* lager en ny lenket liste og returnerer et id-nummer til denne */
+LList llist_create_group(void); /* lager en ny lenket liste av lister */
 
 int llist_set_remove_callback(LList list, void (*remove_callback)(void *)); /* funksjonstilbakekall n�r peker fjernes */
 
