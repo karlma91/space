@@ -22,13 +22,12 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetUserData(spikeball->data.body, spikeball);
 	cpBodySetPos(spikeball->data.body, cpv(spikeball->data.p_start.x, currentlvl->height-radius));
 
-	cpSpace *shape = we_add_circle_shape(space, spikeball->data.body,radius,0.8,0.2);
+	cpShape *shape = we_add_circle_shape(space, spikeball->data.body,radius,0.8,0.2);
 	we_shape_collision(shape, &this, LAYER_BUILDING, CP_NO_GROUP);
 
 	spikeball->dolly = cpSpaceAddBody(space, cpBodyNew(10, INFINITY));
-	cpSpaceAddShape(space, cpBoxShapeNew(spikeball->dolly, 30, 30));
 	cpBodySetPos(spikeball->dolly, cpv(spikeball->data.p_start.x,currentlvl->height));
-
+	cpSpaceAddShape(space, cpBoxShapeNew(spikeball->dolly, 30, 30));
 	cpBody *static_body = cpSpaceGetStaticBody(space);
 	spikeball->winch = cpSpaceAddConstraint(space, cpSlideJointNew(spikeball->data.body,static_body, cpvzero, cpv(spikeball->data.p_start.x,currentlvl->height), 0, INFINITY));
 	cpConstraintSetMaxForce(spikeball->winch, 300000);
@@ -81,5 +80,6 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	we_body_remove(space, &spikeball->data.body);
+	we_body_remove(space, &spikeball->dolly);
 	instance_super_free((instance *)spikeball); //TODO move out to objects
 }

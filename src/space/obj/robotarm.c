@@ -44,7 +44,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	we_shape_collision(shape, &this, LAYER_ENEMY, robotarm);
 
 	cpFloat size = 50;
-	/* make and add new body */
+	/* make and add new static body */
 	robotarm->data.body = cpBodyNew(200, cpMomentForBox(20.0f, size, size));
 	cpBodySetUserData(((instance *) robotarm)->body, (instance*)robotarm);
 	cpBodySetPos(((instance *) robotarm)->body, cpv(robotarm->data.p_start.x,size+10));
@@ -134,7 +134,7 @@ static void on_remove(OBJ_TYPE *OBJ_NAME)
 	free(robotarm->angle);
 
 	we_body_remove(space, &robotarm->saw);
-	we_body_remove(space, &robotarm->data.body);
+	we_body_remove_static(space, &robotarm->data.body);
 
 	instance_super_free((instance *)robotarm);
 }

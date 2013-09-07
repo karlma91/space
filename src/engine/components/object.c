@@ -15,6 +15,7 @@ typedef struct {
 	object_id *obj;
 	int count;
 	LList active;
+	LList destroyed;
 	LList pool;
 } object_info;
 
@@ -45,6 +46,7 @@ int object_register(object_id *obj)
 	objects_meta[id].obj = obj;
 	objects_meta[id].count = 0;
 	objects_meta[id].active = llist_create();
+	objects_meta[id].destroyed = llist_create();
 	objects_meta[id].pool = llist_create();
 
 	llist_set_remove_callback(objects_meta[id].active, (void (*) (void *))destroy_func);
@@ -448,6 +450,14 @@ void we_body_remove(cpSpace *space, cpBody **body)
 	we_body_remove_shapes(space, *body);
 	we_body_remove_constraints(space, *body);
 	cpSpaceRemoveBody(space, *body);
+	cpBodyFree(*body);
+	*body = NULL;
+}
+
+void we_body_remove_static(cpSpace *space, cpBody **body)
+{
+	we_body_remove_shapes(space, *body);
+	we_body_remove_constraints(space, *body);
 	cpBodyFree(*body);
 	*body = NULL;
 }
