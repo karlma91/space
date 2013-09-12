@@ -82,6 +82,13 @@ extern bm_font * FONT_BIG;
 /* GLOBAL SOUND CHUNKS */
 extern Mix_Chunk *SND_LASER_1;
 extern Mix_Chunk *SND_LASER_2;
+extern Mix_Chunk *SND_LASER_MISS;
+extern Mix_Chunk *SND_HIT_1;
+extern Mix_Chunk *SND_HIT_2;
+extern Mix_Chunk *SND_TANK_EXPLODE;
+extern Mix_Chunk *SND_FACTORY_EXPLODE;
+extern Mix_Chunk *SND_TURRET_EXPLODE;
+extern Mix_Chunk *SND_COIN;
 extern Mix_Chunk *SND_EXPLOSION;
 
 /* GLOBAL MUSIC TRACKS */

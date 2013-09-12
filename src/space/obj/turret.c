@@ -131,6 +131,7 @@ static void shape_from_space(cpBody *body, cpShape *shape, void *data)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
+	sound_play(SND_FACTORY_EXPLODE);
 	se_spawn_coins(turret);
 	instance_remove(turret);
 }

@@ -222,6 +222,7 @@ static void action_shoot(obj_player *player)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
+	sound_play(SND_FACTORY_EXPLODE);
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)

@@ -214,6 +214,7 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	particles_get_emitter_at(EMITTER_FRAGMENTS, tank->data.body->p);
 	se_spawn_coins((instance *)tank);
 	we_body_remove_constraints(space, tank->data.body);
+	sound_play(SND_TANK_EXPLODE);
 	//instance_remove(tank); //TODO don't call this method, but just remove constraints
 }
 

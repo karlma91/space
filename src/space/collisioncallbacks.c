@@ -56,10 +56,13 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 
 			particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
 			//se_add_score_and_popup(b->body->p, *COMPONENT(object, SCORE, int*));
-			sound_play(SND_EXPLOSION);
 		}
 	} else {
-		sound_play(SND_EXPLOSION);
+		if (object->TYPE == obj_id_factory) { //TODO play/get sound_id from object
+			sound_play(SND_HIT_1);
+		} else {
+			sound_play(SND_HIT_2);
+		}
 	}
 	//cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
 
@@ -78,9 +81,8 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	if (se_damage_object(object, bullet)) {
 		particles_get_emitter_at(EMITTER_EXPLOSION, b->body->p);
-		sound_play(SND_EXPLOSION);
 	} else {
-		sound_play(SND_EXPLOSION);
+		sound_play(SND_HIT_2);
 	}
 
 	return 0;
@@ -98,8 +100,11 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 			cpVect force = cpArbiterTotalImpulse(arb);
 			float f = cpvlength(force);
 			//todo create a super fancy formula for determining physical damage
-			if (f > 10)
-				COMPONENT(player, HPBAR, hpbar *)->value -= f * 0.017; // <- changed player force to impulse f * 0.01 // f * 0.05 // 0.033
+			if (f > 15) {
+				float hp = (COMPONENT(player, HPBAR, hpbar *)->value -= f * 0.017); // <- changed player force to impulse f * 0.01 // f * 0.05 // 0.033
+				if (hp>0)
+					sound_play(SND_LASER_MISS);
+			}
 		} else {
 			SDL_Log("Expected object type ID %p, but got %p!\n", obj_id_player, player->TYPE);
 		}
@@ -113,7 +118,7 @@ static void callback_bullet_ground(cpArbiter *arb, cpSpace *space, void *unused)
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
 	instance *object = ((instance *)(a->body->data));
 	add_sparks_at_contactpoint(arb);
-	sound_play(SND_LASER_1);
+	sound_play(SND_LASER_MISS);
 	instance_remove(object);
 }
 

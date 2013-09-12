@@ -57,6 +57,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 			coin->data.body->v = cpvadd(coin->data.body->v, diff);
 		} else {
 			((obj_player *) player)->coins += 10;
+			sound_play(SND_COIN);
 			instance_remove(coin);
 		}
 	}

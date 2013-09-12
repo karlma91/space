@@ -97,6 +97,13 @@ bm_font * FONT_BIG;
 /* GLOBAL SOUND CHUNKS */
 Mix_Chunk *SND_LASER_1;
 Mix_Chunk *SND_LASER_2;
+Mix_Chunk *SND_LASER_MISS;
+Mix_Chunk *SND_HIT_1;
+Mix_Chunk *SND_HIT_2;
+Mix_Chunk *SND_TANK_EXPLODE;
+Mix_Chunk *SND_FACTORY_EXPLODE;
+Mix_Chunk *SND_TURRET_EXPLODE;
+Mix_Chunk *SND_COIN;
 Mix_Chunk *SND_EXPLOSION;
 
 /* GLOBAL MUSIC TRACKS */
@@ -231,8 +238,15 @@ void game_font(void)
 
 void game_audio(void)
 {
-	SND_LASER_1 = sound_load_chunk("laser_01.ogg");
+	SND_LASER_1 = sound_load_chunk("laser_03.ogg");
 	SND_LASER_2 = sound_load_chunk("laser_02.ogg");
+	SND_LASER_MISS = sound_load_chunk("laser_melt.ogg");
+	SND_HIT_1 = sound_load_chunk("hit_01.ogg");
+	SND_HIT_2 = sound_load_chunk("hit_02.ogg");
+	SND_TANK_EXPLODE = sound_load_chunk("hit_03.ogg");
+	SND_FACTORY_EXPLODE = sound_load_chunk("factory_explode.ogg");
+	SND_TURRET_EXPLODE = sound_load_chunk("turret_explode.ogg");
+	SND_COIN = sound_load_chunk("coin_pickup.ogg");
 	SND_EXPLOSION = sound_load_chunk("explosion.ogg");
 
 	MUSIC_MENU = sound_load_music("Broken_Logic.ogg");
