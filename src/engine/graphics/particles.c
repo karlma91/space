@@ -37,7 +37,7 @@ static void default_particle_draw(emitter *em, particle *p);
 
 static void particle_update_pos(particle *p);
 
-static emitter * get_emitter();
+static emitter * get_emitter(particle_system * s);
 static void set_emitter_available(emitter *e);
 
 /**
@@ -58,7 +58,6 @@ static emitter *main_emitter_pool;
 //TODO: make emitter_templates dynamic size
 static emitter emitter_templates[40];
 
-static emitter *emitters_in_use_list;
 static emitter *(*available_emitter_stack);
 static int available_emitter_counter;
 
@@ -80,7 +79,6 @@ void particles_init(void)
 {
 	int i;
 	/* sets in use list empty */
-	emitters_in_use_list = NULL;
 
 	available_particle_counter = -1;
 	/* sets all particles available */
@@ -100,29 +98,35 @@ void particles_init(void)
 	}
 }
 
-void particles_update(void)
+particle_system * particles_create_system()
 {
-    emitter **prev = &(emitters_in_use_list);
-    emitter *e = emitters_in_use_list;
-    while(e){
-	if(e->alive == 0)
-	    {
-	    *prev = e->next;
-	    set_emitter_available(e);
-	    e = *prev;
-	    }else{
-		emitter_update(e);
-		prev = &(e->next);
-		e = e->next;
-	    }
-    }
+	particle_system * s = (particle_system *)calloc(1, sizeof *s);
+	return s;
 }
 
-void particles_draw(void)
+void particles_update(particle_system *s)
+{
+	emitter **prev = &(s->emitters_in_use);
+	emitter *e = s->emitters_in_use;
+	while(e){
+		if(e->alive == 0)
+		{
+			*prev = e->next;
+			set_emitter_available(e);
+			e = *prev;
+		}else{
+			emitter_update(e);
+			prev = &(e->next);
+			e = e->next;
+		}
+	}
+}
+
+void particles_draw(particle_system *s)
 {
 	particles_active = 0;
-	emitter **prev = &(emitters_in_use_list);
-	emitter *e = emitters_in_use_list;
+	emitter **prev = &(s->emitters_in_use);
+	emitter *e = s->emitters_in_use;
 	while(e){
 		draw_all_particles(e);
 		prev = &(e->next);
@@ -130,8 +134,9 @@ void particles_draw(void)
 	}
 }
 
-emitter *particles_get_emitter_at(int type, cpVect p){
-	emitter *e = particles_get_emitter(type);
+emitter *particles_get_emitter_at(particle_system *s, int type, cpVect p)
+{
+	emitter *e = particles_get_emitter(s, type);
 	if(e){
 		e->p = p;
 		return e;
@@ -141,9 +146,9 @@ emitter *particles_get_emitter_at(int type, cpVect p){
 }
 
 
-emitter *particles_get_emitter(int type)
+emitter *particles_get_emitter(particle_system *s, int type)
 {
-	emitter *e = get_emitter();
+	emitter *e = get_emitter(s);
 	if(e != NULL){
 		emitter *next = e->next;
 		*e = (emitter_templates[type]);
@@ -169,19 +174,24 @@ void particles_release_emitter(emitter* e)
 }
 
 /**
- * resets all emitters and particles
+ * destroys a system, puts all emitters available and frees system
  */
-void particles_destroy(void)
-{
-	particles_clear();
-
+void particles_destroy_system(particle_system *s) {
 	/* clears emitter list */
-	emitter *e = emitters_in_use_list;
+	particles_clear(s);
+	emitter *e = s->emitters_in_use;
 	while(e){
 		set_emitter_available(e);
 		e = e->next;
 	}
-	emitters_in_use_list = NULL;
+	free(s);
+}
+
+/**
+ * resets all emitters and particles
+ */
+void particles_destroy()
+{
 	free(main_emitter_pool);
 	free(available_emitter_stack);
 	max_emitters = 0;
@@ -190,26 +200,24 @@ void particles_destroy(void)
 /**
  * resets all the active particles
  */
-void particles_clear(void)
+void particles_clear(particle_system *s)
 {
-	emitter **prev = &(emitters_in_use_list);
-	emitter *e = emitters_in_use_list;
+	emitter **prev = &(s->emitters_in_use);
+	emitter *e = s->emitters_in_use;
 	while(e){
-		particle **prev = &(e->head);
+		particle **prev_p = &(e->head);
 		particle *p = e->head;
 		while(p){
 			p->alive = 0;
-			*prev = p->next;
+			*prev_p = p->next;
 			set_particle_available(p);
 			e->list_length--;
-			p = *prev;
+			p = *prev_p;
 		}
 		prev = &(e->next);
 		e = e->next;
 	}
 }
-
-
 
 /**
  * ***********************
@@ -311,7 +319,7 @@ static void set_particle_available(particle *p)
  * get a particle from the available pool and put it in the in_use list
  * if the pool is empty, then it returns available_pool[0]
  */
-static emitter * get_emitter(void)
+static emitter * get_emitter(particle_system * s)
 {
 	if(available_emitter_counter == -1){
 		return NULL;
@@ -324,8 +332,8 @@ static emitter * get_emitter(void)
 	e->alive = 1;
 
 	/* puts emitter in inuse list */
-	e->next = emitters_in_use_list;
-	emitters_in_use_list = e;
+	e->next = s->emitters_in_use;
+	s->emitters_in_use = e;
 	return e;
 }
 
@@ -401,7 +409,7 @@ static void draw_all_particles(emitter *em)
 {
 	draw_push_blend();
 	if(em->additive){
-	    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	}
 
 	particle *p = em->head;
