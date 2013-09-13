@@ -90,11 +90,6 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	cpVect pl = player->data.body->p;
 	cpVect rc = tank->data.body->p;
 	ptx = se_distance_to_player(tank->data.body->p.x);
-	if(ptx > 0 && ptx > currentlvl->right - rc.x){
-		pl.x += currentlvl->width;
-	}else if(ptx < 0 && ptx > rc.x - currentlvl->left ){
-		pl.x -= currentlvl->width;
-	}
 
 	cpFloat best_angle = se_get_best_shoot_angle(rc,tank->data.body->v, pl, player->data.body->v, SHOOT_VEL);
 

@@ -366,7 +366,7 @@ void draw_destroy(void)
 	//...
 }
 
-void draw_circle(GLfloat x, GLfloat y, GLfloat radius)
+void draw_circle(GLfloat x, GLfloat y, GLfloat radius) //TODO update to use array buffers
 {
 #if GLES1
 
@@ -376,6 +376,7 @@ void draw_circle(GLfloat x, GLfloat y, GLfloat radius)
 	glBegin(GL_TRIANGLE_FAN);
 	glVertex2f(0,0);
 	for(i = 0;i<128; i+=2){
+		glTranslatef(x,y,0);
 		glVertex2f(unit_circle[i]*radius, unit_circle[i+1]*radius);
 	}
 	glEnd();

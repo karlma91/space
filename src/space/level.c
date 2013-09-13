@@ -271,7 +271,10 @@ level *level_load(int space_station, int deck)
 	lvl->width = (lvl->tiles->width*lvl->tiles->tile_width);
 
 	// level render transformation data
-	lvl->inner_radius = 4*(currentlvl->right - currentlvl->left)/(2*M_PI);//2100;
+	//lvl->outer_radius = (currentlvl->right - currentlvl->left)/(2*M_PI);//2100;
+	//lvl->inner_radius = lvl->outer_radius - currentlvl->height;
+	lvl->inner_radius = (currentlvl->right - currentlvl->left)/(2*M_PI);//2100;
+	lvl->outer_radius = lvl->outer_radius + currentlvl->height;
 	lvl->theta_max = atan2f(GAME_WIDTH/2, lvl->inner_radius);//M_PI/8;
 
 

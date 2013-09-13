@@ -77,7 +77,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	cpVect draw_pos = factory->data.body->p;
 
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-	sprite_render(&(factory->data.spr), &(draw_pos), 0);
+	sprite_render(&(factory->data.spr), &(draw_pos), factory->data.body->a * 180 / M_PI);
 
 	hpbar_draw(&factory->hp_bar);
 	draw_bar(factory->data.body->p.x+160,factory->data.body->p.y-150,40,150,factory->timer / factory->param.spawn_delay,0);

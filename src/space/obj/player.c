@@ -182,7 +182,7 @@ static void controls(obj_player *player)
 #if !ARCADE_MODE
 		if (keys[SDL_SCANCODE_E]){
 			player->data.body->p.x=0;
-			player->data.body->p.y=500;
+			player->data.body->p.y=0;
 		}
 
 		if (keys[SDL_SCANCODE_H]) {

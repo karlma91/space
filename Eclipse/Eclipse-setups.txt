@@ -50,4 +50,4 @@ windows:
 
 linux:
 -L../lib/inih/linux -L../lib/mxml/linux -L../lib/chipmunk/linux -L../lib/SDL2/linux -L../lib/SDL2_image/linux -L../lib/zzip/linux -lX11 -lXi -lm -ldl -lXmu -lpthread -lGL -lSDL2 -lchipmunk -lSDL2_image -linih -lz -lzzip -lmxml 
--c -fmessage-length=0 -I/usr/include/X11 -I../lib/inih/include -I../lib/inih -I/usr/include -I/usr/include/GL -I../lib/SDL2/linux/include -I../lib/chipmunk/linux/include -I../lib/mxml/linux -I../lib/SDL2_image -I../lib/zlib/include -I../lib/zzip/include -I../lib/cjson
+-c -fmessage-length=0 -I/usr/include/X11 -I../lib/inih/include -I../lib/inih -I/usr/include -I/usr/include/GL -I../lib/SDL2/linux/include -I../lib/chipmunk/linux/include -I../lib/mxml/linux -I../lib/SDL2_image -I../lib/zlib/include -I../lib/zzip/include -I../lib/cjson -I../src/engine/include

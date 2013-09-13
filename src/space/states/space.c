@@ -54,6 +54,10 @@ cpSpace *space;
 static float cam_left_limit;
 static float cam_right_limit;
 
+/* level boundaries */
+static LList *ll_floor;
+static cpShape *ceiling;
+
 /* level data */
 level *currentlvl;
 
@@ -308,82 +312,14 @@ static void update_all(void)
 
 static void update_instances(instance *obj, void *data)
 {
-	int moved_left = 0;
-	int moved_right = 0;
-
 	if(obj->alive){
-		if(obj->body->p.y > currentlvl->height  || obj->body->p.y < 0){
-			instance_remove(obj);
-			SDL_Log("WARNING: %s[%d] killed outside of level!", obj->TYPE->NAME, obj->instance_id);
-		}
-
-		if (obj->body->p.x < currentlvl->left ){
-			obj->body->p.x = currentlvl->right - abs(currentlvl->left -obj->body->p.x ); //TODO use modulo
-			moved_left = 1;
-		}
-
-		if (obj->destroyed || moved_left) {
-			int i;
-			cpBody *body;
-			for (i=0, body = obj->components[CMP_BODIES]; body && i <= SPACE_BODIES_MAX; ++i, body = obj->components[CMP_BODIES+i]) {
-				if(body->p.x < currentlvl->left || moved_left){
-					body->p.x = currentlvl->right - (currentlvl->left -body->p.x ); //TODO use modulo
-				}
-			}
-		}
-
-		if (obj->body->p.x > currentlvl->right){
-			obj->body->p.x = currentlvl->left + (obj->body->p.x - currentlvl->right); //TODO use modulo
-			moved_right = 1;
-		}
-		if (obj->destroyed || moved_right) {
-			int i;
-			cpBody *body;
-			for (i=0, body = obj->components[CMP_BODIES]; body && i <= SPACE_BODIES_MAX; ++i, body = obj->components[CMP_BODIES+i]) {
-				if(body->p.x > currentlvl->right || moved_right){
-					body->p.x = currentlvl->left + (body->p.x - currentlvl->right);
-				}
-			}
-		}
-
 		instance_update(obj);
 	}
 }
 
 static void render_instances(instance *obj, void *data)
 {
-	if((obj->body->p.x > current_camera->left - 200) && (obj->body->p.x < current_camera->right + 200)) {
-		instance_render(obj);
-		return;
-	}
-
-	if(current_camera->x < cam_left_limit){
-		float old_cam_x = current_camera->x;
-		float new_cam_center_x = current_camera->x + currentlvl->width;
-		float new_cam_left = new_cam_center_x - current_camera->width;
-		float new_cam_right = new_cam_center_x + current_camera->width;
-		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){
-		    current_camera->x = new_cam_center_x;
-			draw_push_matrix();
-			draw_translate(-(currentlvl->right + abs(currentlvl->left)),0,0);
-			instance_render(obj);
-			draw_pop_matrix();
-			current_camera->x = old_cam_x;
-		}
-	}else if(current_camera->x > cam_right_limit){
-		float old_cam_x = current_camera->x;
-		float new_cam_center_x = current_camera->x - currentlvl->width;
-		float new_cam_left = new_cam_center_x - current_camera->width;
-		float new_cam_right = new_cam_center_x + current_camera->width;
-		if((obj->body->p.x > new_cam_left - 200 && obj->body->p.x < new_cam_right + 200)){
-		    current_camera->x = new_cam_center_x;
-			draw_push_matrix();
-			draw_translate((currentlvl->right + abs(currentlvl->left)),0,0);
-			instance_render(obj);
-			draw_pop_matrix();
-			current_camera->x = old_cam_x;
-		}
-	}
+	instance_render(obj);
 }
 
 
@@ -395,16 +331,14 @@ static void draw(void)
 #endif
 }
 
-static void update_camera_zoom(int mode)
+static void update_camera_zoom(int mode) //TODO remove method
 {
 	obj_player *player = ((obj_player*)instance_first(obj_id_player));
-
 	//camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
 }
 
 static void update_camera_position(void)
 {
-
     static int follow_player = 1;
     if(keys[SDL_SCANCODE_F]){
         keys[SDL_SCANCODE_F] = 0;
@@ -422,39 +356,40 @@ static void update_camera_position(void)
     	cpVect c_pos = player->data.body->p;
     	cpVect c_rot = player->data.body->rot;
 
-    	/*
-    	if (accelerometer) {
-#define SINT16_MAX ((float)(0x7FFF))
-    	    // get joystick (accelerometer) axis values and normalize them
-    	    float ax = (float) SDL_JoystickGetAxis(accelerometer, 0) / SINT16_MAX * 5;
-    	    float ay = -(float) SDL_JoystickGetAxis(accelerometer, 1) / SINT16_MAX * 5;
-    	    float az = (float) SDL_JoystickGetAxis(accelerometer, 2) / SINT16_MAX * 5;
-
-    	    static int teller = 0;
-    	    if (++teller > 30) {
-    	    SDL_Log("\t%f\t%f\t%f",ax,ay,az);
-    	    teller = 0;
-    	    }
-
-    	    float roll = atan2(ax, ay) * 180.0f / M_PI;
-    	    //float pitch = atan2(ax, hypotf(ay, az)) * 1.0f / M_PI;
-
-
-			if (ay > 1) ay = 1;
-			if (ay < -1) ay = -1;
-
-    	    static float last = 0;
-    	    last = last*0.7 + ay*0.3;
-
-    		c_pos.x += last * 300;
-    	}
-    	*/
     	camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
     	camera_update(current_camera, c_pos, c_rot);
     }
 
     cam_left_limit = currentlvl->left + current_camera->width;
     cam_right_limit = currentlvl->right - current_camera->width;
+}
+
+static void draw_deck()
+{
+	/* draw ceiling */
+	draw_color4f(0.1,0.3,0.7,0.9);
+	{
+		glScalef(current_camera->zoom,current_camera->zoom,1); //TODO REMOVE
+		glTranslatef(-current_camera->x, -current_camera->y, 0.0f); //TODO REMOVE
+	}
+	draw_circle(0,0,currentlvl->inner_radius);
+	{
+		glLoadIdentity(); //TODO REMOVE
+	}
+
+	/* draw floor */
+	draw_donut(0,0,currentlvl->outer_radius, currentlvl->outer_radius + 3000);
+
+	// DEBUG SEGMENTS
+	llist_begin_loop(ll_floor);
+	while(llist_hasnext(ll_floor)) {
+		cpShape *seg = (cpShape *)llist_next(ll_floor);
+		cpVect a = cpSegmentShapeGetA(seg);
+		cpVect b = cpSegmentShapeGetB(seg);
+		cpFloat r = cpSegmentShapeGetRadius(seg);
+		draw_line(TEX_GLOW_DOT, a.x, a.y, b.x, b.y, r);
+	}
+	llist_end_loop(ll_floor);
 }
 
 static void SPACE_draw(void)
@@ -474,6 +409,7 @@ static void SPACE_draw(void)
 	setTextAngle(0);
 	/* draw all objects */
 	instance_iterate(render_instances, NULL);
+	draw_deck();
 
 	/* draw particle effects */
 	particles_draw();
@@ -821,23 +757,40 @@ void space_init_level(int space_station, int deck)
 	player->data.body->v.y = -10;
 
 	/* static ground */
-	cpBody  *staticBody = space->staticBody;
-	static cpShape *floor = NULL;
-	static cpShape *ceiling = NULL;
+	cpBody *staticBody = space->staticBody;
+
 	/* remove floor and ceiling */
-	if(floor != NULL && ceiling != NULL){
-		cpSpaceRemoveStaticShape(space,floor);
+	if(llist_size(ll_floor) > 0 && ceiling != NULL){
 		cpSpaceRemoveStaticShape(space,ceiling);
+		llist_begin_loop(ll_floor);
+		while(llist_hasnext(ll_floor)) {
+			cpShape *seg = (cpShape *)llist_next(ll_floor);
+			cpSpaceRemoveStaticShape(space, seg);
+		}
+		llist_end_loop(ll_floor);
 	}
 
-	currentlvl->floor = offset;
-	currentlvl->ceiling = currentlvl->height - offset/2;
-	floor = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left-100,0), cpv(currentlvl->right+100,0), offset)); // ground level at 0
-	cpShapeSetFriction(floor, 0.9f);
-	cpShapeSetCollisionType(floor, ID_GROUND);
-	cpShapeSetElasticity(floor, 0.7f);
+	static const int segments = 100;
+	static const float seg_radius = 10;
+	static const float seg_length = 5000;
+	int i;
+	for (i = 0; i < segments; ++i) {
+		cpVect angle = cpvforangle(2 * M_PI * i / segments);
+		cpVect n = cpvmult(cpvperp(angle), seg_length);
+		cpVect p = cpvmult(angle, currentlvl->outer_radius + seg_radius);
 
-	ceiling = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, cpv(currentlvl->left-100,currentlvl->height), cpv(currentlvl->right+100,currentlvl->height), offset));
+		cpVect a = cpvadd(p,cpvneg(n));
+		cpVect b = cpvadd(p,n);
+
+		cpShape *seg = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, a, b, seg_radius)); // ground level at 0
+		cpShapeSetFriction(seg, 0.9f);
+		cpShapeSetCollisionType(seg, ID_GROUND);
+		cpShapeSetElasticity(seg, 0.7f);
+
+		llist_add(ll_floor, seg);
+	}
+
+	ceiling = cpSpaceAddShape(space, cpCircleShapeNew(staticBody, currentlvl->inner_radius,cpvzero));
 	cpShapeSetFriction(ceiling, 0.9f);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
 	cpShapeSetElasticity(ceiling, 0.7f);
@@ -903,6 +856,7 @@ static void destroy(void)
     cpSpaceDestroy(space);
 	joystick_free(joy_p1_left);
 	joystick_free(joy_p1_right);
+	llist_destroy(ll_floor);
 }
 
 void space_init(void)
@@ -919,6 +873,9 @@ void space_init(void)
     button_set_enlargement(btn_pause, 2.0f);
     button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);
     statesystem_register_touchable(this, btn_pause);
+
+    ll_floor = llist_create();
+    ceiling = NULL;
 
 	cpVect gravity = cpv(0, -600);
 	space = cpSpaceNew();

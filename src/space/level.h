@@ -22,10 +22,11 @@ typedef struct level {
 	int right;
 	int width;
 	int timelimit;
-	int ceiling;
-	int floor;
+	//int ceiling;
+	//int floor;
 
 	float inner_radius;
+	float outer_radius;
 	float theta_max;
 
 	tilemap *tiles;
