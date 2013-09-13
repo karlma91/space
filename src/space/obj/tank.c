@@ -211,7 +211,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(EMITTER_FRAGMENTS, tank->data.body->p);
+	particles_get_emitter_at(parti, EMITTER_FRAGMENTS, tank->data.body->p);
 	se_spawn_coins((instance *)tank);
 	we_body_remove_constraints(space, tank->data.body);
 	sound_play(SND_TANK_EXPLODE);

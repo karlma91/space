@@ -32,7 +32,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&factory->data.spr, factory->param.sprite_id, 400, 400, 30);
 
 	if (factory->param.type == obj_id_tank) {
-		factory->smoke = particles_get_emitter(EMITTER_SMOKE);
+		factory->smoke = particles_get_emitter(parti, EMITTER_SMOKE);
+		factory->smoke->self_draw = 1;
 		factory->data.spr.sub_index = rand() & 0x7;
 	}
 
@@ -65,7 +66,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	if (factory->smoke) {
 		factory->smoke->p.x = factory->data.body->p.x - 80;
-		factory->smoke->p.y = factory->data.body->p.y + 255;
+		factory->smoke->p.y = factory->data.body->p.y + 200;
 	}
 }
 
@@ -75,7 +76,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 	factory->rot += 381 * dt;
 	cpVect draw_pos = factory->data.body->p;
-
+	particles_draw_emitter(factory->smoke);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	sprite_render(&(factory->data.spr), &(draw_pos), 0);
 
@@ -100,7 +101,7 @@ void factory_remove_child(instance *child)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(EMITTER_FRAGMENTS, factory->data.body->p);
+	particles_get_emitter_at(parti, EMITTER_FRAGMENTS, factory->data.body->p);
 	sound_play(SND_FACTORY_EXPLODE);
 	se_spawn_coins((instance *)factory);
 	instance_remove((instance *)factory);

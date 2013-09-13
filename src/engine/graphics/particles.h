@@ -40,6 +40,8 @@ struct emitter {
 
 	int type;
 
+	int self_draw;
+
 	SPRITE_ID sprite_id;
 
 	/** particle draw functions **/
@@ -118,11 +120,12 @@ void particles_draw(particle_system *s);
 void particles_update(particle_system *s);
 void particles_release_emitter(emitter* e);
 particle_system * particles_create_system();
+void particles_draw_emitter(emitter *e);
 
 emitter *particles_add_score_popup(particle_system *s, cpVect p, int score);
 emitter *particles_add_sparks(particle_system *s, cpVect p, float angle, float force);
 
-void particles_clear(void);
+void particles_clear(particle_system *s);
 emitter *particles_get_emitter(particle_system *s, int type);
 emitter *particles_get_emitter_at(particle_system *s, int type,cpVect p);
 

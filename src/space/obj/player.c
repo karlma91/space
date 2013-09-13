@@ -40,7 +40,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->data.components[CMP_MINIMAP] = &player->radar_image;
 	player->radar_image = cmp_new_minimap(10, COL_GREEN);
 
-	player->flame = particles_get_emitter(EMITTER_FLAME);
+	player->flame = particles_get_emitter(parti, EMITTER_FLAME);
 	player->disable=0;
 	init(player);
 

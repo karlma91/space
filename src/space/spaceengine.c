@@ -10,10 +10,11 @@
 #include "spaceengine.h"
 
 #include <float.h>
+#include <signal.h>
 
 void se_add_score_and_popup(cpVect p, int score)
 {
-    particles_add_score_popup(p, score);
+    particles_add_score_popup(parti, p, score);
 	((obj_player *) instance_first(obj_id_player))->coins += score;
 }
 

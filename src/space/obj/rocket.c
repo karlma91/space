@@ -24,7 +24,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	COMPONENT_SET(rocket, MINIMAP, &rocket->radar_image);
 	rocket->radar_image = cmp_new_minimap(5, COL_RED);
 
-	rocket->flame = particles_get_emitter(EMITTER_ROCKET_FLAME);
+	rocket->flame = particles_get_emitter(parti, EMITTER_ROCKET_FLAME);
 	rocket->angle = M_PI/2;
 
 	cpFloat height = ROCKET_SIZE/8;

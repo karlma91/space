@@ -122,13 +122,22 @@ void particles_update(particle_system *s)
 	}
 }
 
+void particles_draw_emitter(emitter *e)
+{
+	if(e) {
+		draw_all_particles(e);
+	}
+}
+
 void particles_draw(particle_system *s)
 {
 	particles_active = 0;
 	emitter **prev = &(s->emitters_in_use);
 	emitter *e = s->emitters_in_use;
 	while(e){
-		draw_all_particles(e);
+		if(e->self_draw == 0){
+			draw_all_particles(e);
+		}
 		prev = &(e->next);
 		e = e->next;
 	}
@@ -330,6 +339,7 @@ static emitter * get_emitter(particle_system * s)
 	--available_emitter_counter;
 
 	e->alive = 1;
+	e->self_draw = 0;
 
 	/* puts emitter in inuse list */
 	e->next = s->emitters_in_use;
@@ -407,6 +417,7 @@ static float range_get_random(range r)
 
 static void draw_all_particles(emitter *em)
 {
+	draw_push_color();
 	draw_push_blend();
 	if(em->additive){
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -456,6 +467,7 @@ static void draw_all_particles(emitter *em)
 		draw_flush_color();
 	}
 	draw_pop_blend();
+	draw_pop_color();
 
 }
 
