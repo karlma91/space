@@ -16,7 +16,6 @@
 #include "../tilemap.h"
 #include "../spaceengine.h"
 #include "../level.h"
-#include "../../engine/tween/easing.h"
 
 static float position_start = 50;
 static float position_end = 400;
@@ -472,12 +471,12 @@ static void SPACE_draw(void)
 	/* draw background */
 	drawStars();
 
-	position_time += dt * position_dir;
+	position_time += dt * position_dir * 0.1;
 	if(position_time > 1 || position_time < 0){
 		position_dir *= -1;
 	}
+	position_now = tween_move_f(position_start, position_end, position_time, ExponentialEaseInOut);
 
-	position_now = position_start + BounceEaseInOut(position_time) * (position_end - position_start);
 	draw_box(0,position_now, 100, 100, 0, 1);
 
 	/* translate view */
