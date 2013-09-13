@@ -11,7 +11,9 @@ void camera_update(camera *cam, cpVect pos, cpVect rot)
     static float cam_dx;
     cam_dx = cam_dx * pos_delay + ((rot.x * pos_rel_x - pos_rel_offset_x) * GAME_WIDTH) * (1 - pos_delay) / cam->zoom;
 
-    cam->x = pos.x + cam_dx;
+    //cam->x = pos.x + cam_dx;
+    cam->x = pos.x;
+    cam->y = pos.y;
 
     /* camera constraints */
     cam->width = GAME_WIDTH / (2 * cam->zoom);
@@ -71,6 +73,7 @@ void camera_update_zoom(camera *cam, cpVect pos, float level_height)
         case 5:
             cam->zoom = 1.0f*GAME_HEIGHT/level_height;
             cam->y = pos.y;
+            cam->x = pos.x;
             //cam->y = 1.0f*level_height/2;
             break;
         case 6:

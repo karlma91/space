@@ -179,6 +179,7 @@ void settings_init(void)
 	option_click(OPT_MUSIC); /* music on */
 	option_click(OPT_UNLOCK); /* everything unlocked */
 	option_click(OPT_ASSISTED_STEERING); /* assisted steering activated by default */
+	option_click(OPT_INVULNERABLE); /* assisted steering activated by default */
 
 	/* disabled/unimplemented buttons */
 	btn_options[OPT_UNLOCK]->enabled = 0;

@@ -377,6 +377,7 @@ static void draw_deck()
 	/* draw ceiling */
 	draw_color4f(0.1,0.3,0.7,0.9);
 	{
+		glRotatef(current_camera->rotation, 0,0,1);
 		glScalef(current_camera->zoom,current_camera->zoom,1); //TODO REMOVE
 		glTranslatef(-current_camera->x, -current_camera->y, 0.0f); //TODO REMOVE
 	}
@@ -406,7 +407,7 @@ static void SPACE_draw(void)
 	/* draw background */
 	drawStars();
 
-	position_time += dt * position_dir * 0.1;
+	position_time += dt * position_dir * 0.5;
 	if(position_time > 1 || position_time < 0){
 		position_dir *= -1;
 	}
@@ -416,6 +417,8 @@ static void SPACE_draw(void)
 
 	/* translate view */
 	draw_load_identity();
+	current_camera->rotation = -cpvtoangle(cpv(current_camera->x, current_camera->y))*180/M_PI+-90;
+	draw_rotate(current_camera->rotation, 0,0,1);
 	draw_scale(current_camera->zoom,current_camera->zoom,1);
 	draw_translate(-current_camera->x, -current_camera->y, 0.0f);
 
