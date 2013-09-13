@@ -18,6 +18,8 @@ extern joystick *joy_p2_left, *joy_p2_right;
 
 extern int space_rendering_map;
 
+extern particle_system *parti;
+
 /* init new level */
 void space_init_level(int space_station, int deck);
 

@@ -17,6 +17,12 @@
 #include "../spaceengine.h"
 #include "../level.h"
 
+static float position_start = 50;
+static float position_end = 400;
+static float position_now = 0;
+static float position_time = 0;
+static float position_dir = 1;
+
 static float accumulator = 0;
 
 //TODO: remove in final game <-- ?
@@ -25,7 +31,7 @@ STATE_ID state_space;
 
 /**
  * The global space state
- */
+*/
 
 static void SPACE_draw(void);
 static void update_instances(instance *, void *);
@@ -39,6 +45,8 @@ static void sticks_hide(void);
 static void radar_draw(float x, float y);
 
 int space_rendering_map = 0;
+
+particle_system *parti;
 
 static button btn_pause;
 static int game_paused = 0;
@@ -298,7 +306,7 @@ static void update_all(void)
 	nan_check_all("pre_iterate");
 	instance_iterate(update_instances, NULL);
 	nan_check_all("post_iterate");
-	particles_update();
+	particles_update(parti);
 
 	/* update all chipmunk objects 60 times per second */
 	while(accumulator >= phys_step)
@@ -398,6 +406,14 @@ static void SPACE_draw(void)
 	/* draw background */
 	drawStars();
 
+	position_time += dt * position_dir * 0.1;
+	if(position_time > 1 || position_time < 0){
+		position_dir *= -1;
+	}
+	position_now = tween_move_f(position_start, position_end, position_time, ExponentialEaseInOut);
+
+	draw_box(0,position_now, 100, 100, 0, 1);
+
 	/* translate view */
 	draw_load_identity();
 	draw_scale(current_camera->zoom,current_camera->zoom,1);
@@ -412,7 +428,7 @@ static void SPACE_draw(void)
 	draw_deck();
 
 	/* draw particle effects */
-	particles_draw();
+	particles_draw(parti);
 
 	space_rendering_map = 0;
 	draw_gui();
@@ -800,7 +816,7 @@ void space_init_level(int space_station, int deck)
 	 */
 	update_all();
 
-	particles_clear();
+	particles_clear(parti);
 }
 
 static void on_enter(void)
@@ -853,7 +869,8 @@ static void on_leave(void)
 
 static void destroy(void)
 {
-    cpSpaceDestroy(space);
+	particles_destroy_system(parti);
+	cpSpaceDestroy(space);
 	joystick_free(joy_p1_left);
 	joystick_free(joy_p1_right);
 	llist_destroy(ll_floor);
@@ -861,6 +878,7 @@ static void destroy(void)
 
 void space_init(void)
 {
+	parti = particles_create_system();
 	statesystem_register(state_space,LEVEL_STATE_COUNT);
     statesystem_add_inner_state(state_space,LEVEL_START,level_start,NULL);
     statesystem_add_inner_state(state_space,LEVEL_RUNNING,level_running,NULL);

@@ -3,6 +3,7 @@
 
 #include "chipmunk.h"
 #include "sprite.h"
+#include "../data/llist.h"
 
 
 typedef struct particle_color {
@@ -16,6 +17,7 @@ typedef struct range {
 
 typedef struct particle particle;
 typedef struct emitter emitter;
+typedef struct system particle_system;
 struct particle {
 
 	int alive;
@@ -37,6 +39,8 @@ struct particle {
 struct emitter {
 
 	int type;
+
+	int self_draw;
 
 	SPRITE_ID sprite_id;
 
@@ -101,20 +105,29 @@ struct emitter {
 	emitter *next;
 };
 
+struct system {
+	emitter *emitters_in_use;
+	cpVect offset;
+	float offset_rot;
+};
+
 
 int read_emitter_from_file (char *filename);
 void particles_init(void);
 void particles_destroy(void);
-void particles_draw(void);
-void particles_update(void);
+void particles_destroy_system(particle_system *s);
+void particles_draw(particle_system *s);
+void particles_update(particle_system *s);
 void particles_release_emitter(emitter* e);
+particle_system * particles_create_system();
+void particles_draw_emitter(emitter *e);
 
-emitter *particles_add_score_popup(cpVect p,int score);
-emitter *particles_add_sparks(cpVect p, float angle, float force);
+emitter *particles_add_score_popup(particle_system *s, cpVect p, int score);
+emitter *particles_add_sparks(particle_system *s, cpVect p, float angle, float force);
 
-void particles_clear(void);
-emitter *particles_get_emitter(int type);
-emitter *particles_get_emitter_at(int type,cpVect p);
+void particles_clear(particle_system *s);
+emitter *particles_get_emitter(particle_system *s, int type);
+emitter *particles_get_emitter_at(particle_system *s, int type,cpVect p);
 
 void particles_reload_particles(void);
 

@@ -23,5 +23,6 @@
 #include "we_state.h"
 #include "we_input.h"
 #include "we_io.h"
+#include "we_tween.h"
 
 #endif /* WAFFLE_ENGINE_H_ */
