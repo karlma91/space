@@ -70,7 +70,8 @@ void camera_update_zoom(camera *cam, cpVect pos, float level_height)
             break;
         case 5:
             cam->zoom = 1.0f*GAME_HEIGHT/level_height;
-            cam->y = 1.0f*level_height/2;
+            cam->y = pos.y;
+            //cam->y = 1.0f*level_height/2;
             break;
         case 6:
             scrlvl = 1.0f * GAME_HEIGHT/level_height;
