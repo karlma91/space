@@ -274,7 +274,7 @@ level *level_load(int space_station, int deck)
 	//lvl->outer_radius = (currentlvl->right - currentlvl->left)/(2*M_PI);//2100;
 	//lvl->inner_radius = lvl->outer_radius - currentlvl->height;
 	lvl->inner_radius = (currentlvl->right - currentlvl->left)/(2*M_PI);//2100;
-	lvl->outer_radius = lvl->outer_radius + currentlvl->height;
+	lvl->outer_radius = lvl->inner_radius + currentlvl->height;
 	lvl->theta_max = atan2f(GAME_WIDTH/2, lvl->inner_radius);//M_PI/8;
 
 
