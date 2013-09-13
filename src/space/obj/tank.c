@@ -38,6 +38,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpFloat width = 80;
 	cpFloat height = 30;
 	tank->data.body = cpSpaceAddBody(space, cpBodyNew(MASS, cpMomentForBox(MASS, width, height)));
+	tank->data.body->velocity_func = space_velocity;
 	cpBodySetPos(tank->data.body, tank->data.p_start);
 	cpBodySetUserData(tank->data.body, tank);
 
@@ -169,6 +170,7 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
 			cpBodyNew(MASS_WHEEL, cpMomentForCircle(MASS_WHEEL, 0.0f, radius, cpvzero)));
 	cpBodySetPos(body, pos);
 	cpBodySetAngVelLimit(body, 200);
+	body->velocity_func = space_velocity;
 
 	cpShape *shape = we_add_circle_shape(space, body, radius, 0.8, 0.7);
 	cpShapeSetGroup(shape, &this);

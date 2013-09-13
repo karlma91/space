@@ -87,7 +87,8 @@ cpFloat se_get_best_shoot_angle(cpVect a, cpVect va, cpVect b, cpVect vb, cpFloa
 
 	cpFloat g = cpvdot(v, vb)/(cpvlength(vb) * cpvlength(v));
 	cpFloat G = acos(g < 1 ? (g > -1 ? g : -1) : 1);
-	cpFloat angle = asin((c * sin(G)) / s);
+	cpFloat as = (c * sin(G)) / s;
+	cpFloat angle = asin(as < 1 ? (as > -1 ? as : -1) : 1);
 
 	cpFloat bc = cpvtoangle(v);
 

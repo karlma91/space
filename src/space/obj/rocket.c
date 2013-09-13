@@ -32,6 +32,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpFloat width = ROCKET_SIZE/2;
 
 	rocket->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, width, height)));
+	rocket->data.body->velocity_func = space_velocity;
 	cpBodySetUserData(rocket->data.body, rocket);
 	cpBodySetPos(rocket->data.body, rocket->data.p_start);
 	cpBodySetVelLimit(rocket->data.body, ROCKET_VEL_LIMIT);

@@ -25,6 +25,10 @@ static void init(OBJ_TYPE *OBJ_NAME)
 	player->aim_angle = 0;
 	player->aim_speed = 0.5;
 	player->gun_timer = 0;
+
+	cpBodySetAngle(player->data.body,3*(M_PI/2));
+	player->data.body->p = cpvzero;
+	player->data.body->v = cpvzero;
 }
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
@@ -42,10 +46,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	player->flame = particles_get_emitter(parti, EMITTER_FLAME);
 	player->disable=0;
-	init(player);
 
 	/* make and add new body */
 	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
+	player->data.body->velocity_func = space_velocity;
 	cpBodySetPos(player->data.body, cpv(0,990));
 	cpBodySetVelLimit(player->data.body,450); //700
 	cpBodySetUserData(player->data.body, (void*)player);
@@ -64,9 +68,12 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->gunwheel = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(player->gunwheel, player->data.body->p);
 	cpBodySetUserData(player->gunwheel, (void*)player);
+	player->gunwheel->velocity_func = space_velocity;
 
 	shape = we_add_circle_shape(space, player->gunwheel,radius,0.9,0.8);
 	we_shape_collision(shape, &this, LAYER_PLAYER, player);
+
+	init(player);
 }
 
 static void on_render(OBJ_TYPE *OBJ_NAME)

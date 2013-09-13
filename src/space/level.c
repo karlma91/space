@@ -273,7 +273,7 @@ level *level_load(int space_station, int deck)
 	// level render transformation data
 	//lvl->outer_radius = (currentlvl->right - currentlvl->left)/(2*M_PI);//2100;
 	//lvl->inner_radius = lvl->outer_radius - currentlvl->height;
-	lvl->inner_radius = (currentlvl->right - currentlvl->left)/(2*M_PI);//2100;
+	lvl->inner_radius = currentlvl->width/(2*M_PI);//2100;
 	lvl->outer_radius = lvl->inner_radius + currentlvl->height;
 	lvl->theta_max = atan2f(GAME_WIDTH/2, lvl->inner_radius);//M_PI/8;
 
@@ -315,7 +315,9 @@ level *level_load(int space_station, int deck)
 		SDL_Log("Adding object: %s_%s x=%d\n", group, subtype, x);
 
 		void* args = params[obj_id->ID] + obj_id->P_SIZE * sub_id;
-		instance_create(obj_id, args,x,0,0,0);
+
+		cpVect pos = cpvmult(cpvforangle(2 * M_PI * x / lvl->width),lvl->outer_radius);
+		instance_create(obj_id, args,pos.x,pos.y,0,0);
 	}
 
 	SDL_Log("DEBUG: Finished adding objects to level");

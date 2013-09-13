@@ -63,7 +63,7 @@ static float cam_left_limit;
 static float cam_right_limit;
 
 /* level boundaries */
-static LList *ll_floor;
+static LList *ll_floor_segs;
 static cpShape *ceiling;
 
 /* level data */
@@ -113,6 +113,17 @@ static void change_state(enum game_state state);
 static void update_all(void);
 
 static void draw_gui(void);
+
+#define GRAVITY 600.0f
+#define DAMPING 0.99f
+
+void space_vel_func(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt) {
+	gravity = cpvmult(cpvnormalize_safe(body->p), cpvlength(gravity));
+	cpBodyUpdateVelocity(body, gravity, damping, dt);
+}
+
+cpBodyVelocityFunc space_velocity = &space_vel_func;
+
 
 /* The state timer */
 static float state_timer = 0;
@@ -375,7 +386,7 @@ static void update_camera_position(void)
 static void draw_deck()
 {
 	/* draw ceiling */
-	draw_color4f(0.1,0.3,0.7,0.9);
+	draw_color4f(0.1,0.3,0.7,0.6);
 	{
 		glRotatef(current_camera->rotation, 0,0,1);
 		glScalef(current_camera->zoom,current_camera->zoom,1); //TODO REMOVE
@@ -390,15 +401,15 @@ static void draw_deck()
 	draw_donut(0,0,currentlvl->outer_radius, currentlvl->outer_radius + 3000);
 
 	// DEBUG SEGMENTS
-	llist_begin_loop(ll_floor);
-	while(llist_hasnext(ll_floor)) {
-		cpShape *seg = (cpShape *)llist_next(ll_floor);
+	llist_begin_loop(ll_floor_segs);
+	while(0 && llist_hasnext(ll_floor_segs)) {
+		cpShape *seg = (cpShape *)llist_next(ll_floor_segs);
 		cpVect a = cpSegmentShapeGetA(seg);
 		cpVect b = cpSegmentShapeGetB(seg);
 		cpFloat r = cpSegmentShapeGetRadius(seg);
-		draw_line(TEX_GLOW_DOT, a.x, a.y, b.x, b.y, r);
+		draw_line(TEX_GLOW, a.x, a.y, b.x, b.y, r);
 	}
-	llist_end_loop(ll_floor);
+	llist_end_loop(ll_floor_segs);
 }
 
 static void SPACE_draw(void)
@@ -437,31 +448,30 @@ static void SPACE_draw(void)
 	draw_gui();
 }
 
-static float radar_x; //TODO cleanup this non-object oriented code
-static float radar_y;
-static void plot_on_radar(instance *obj, int *x_ref)
+
+#define RADAR_SIZE 120.0f
+static void plot_on_radar(instance *obj, void *unused)
 {
 	minimap *m = obj->components[CMP_MINIMAP];
 	if(m != NULL){
-		float r = 63;
-		float x = (obj->body->p.x - *x_ref + currentlvl->left)*2*M_PI/currentlvl->width + M_PI / 2;
-		float y = 1-(obj->body->p.y / currentlvl->height);
-		r = 50+r*y;
-		float px = cos(x)*r;
-		float py = sin(x)*r;
+		cpVect p = cpvmult(obj->body->p, 1 / currentlvl->outer_radius * RADAR_SIZE);
 		draw_color4f(m->c.r, m->c.g, m->c.b, 0.5);
-		draw_box(radar_x + px, radar_y + py, m->size, m->size, x*(180/M_PI), 1);
+		draw_box(p.x, p.y, m->size, m->size, cpvtoangle(p)*180/M_PI, 1);
 	}
 }
 
 static void radar_draw(float x, float y)
 {
-	int offset = se_distance_to_player(0);
-	radar_x = x;
-	radar_y = y;
+	obj_player *player = ((obj_player *) instance_first(obj_id_player));
+	draw_push_matrix();
+	if (player) {
+		draw_translate(x, y, 0);
+		draw_rotate(-cpvtoangle(player->data.body->p)*180/M_PI-90, 0, 0, 1);
+	}
 	draw_color4f(0.3, 0.5, 0.7, 0.6);
-	draw_donut(radar_x, radar_y, 50, 110);
-	instance_iterate_comp(CMP_MINIMAP, (void (*)(instance *, void *))plot_on_radar, &offset);
+	draw_donut(0, 0, currentlvl->inner_radius / currentlvl->outer_radius * RADAR_SIZE, RADAR_SIZE);
+	instance_iterate_comp(CMP_MINIMAP, (void (*)(instance *, void *))plot_on_radar, NULL);
+	draw_pop_matrix();
 }
 
 void draw_gui(void)
@@ -764,34 +774,20 @@ void space_init_level(int space_station, int deck)
 		exit(-1);
 	}
 
-
-	float offset = currentlvl->tiles->tile_height;
-	/* SETS the gamestate */
 	change_state(LEVEL_START);
-
-	player->data.body->p.x = currentlvl->left + offset + 50;
-	player->data.body->p.y = currentlvl->height - offset - 50;
-	cpBodySetAngle(player->data.body,3*(M_PI/2));
-	player->data.body->v.x = 0;
-	player->data.body->v.y = -10;
 
 	/* static ground */
 	cpBody *staticBody = space->staticBody;
 
 	/* remove floor and ceiling */
-	if(llist_size(ll_floor) > 0 && ceiling != NULL){
+	if(llist_size(ll_floor_segs) > 0 && ceiling != NULL){
 		cpSpaceRemoveStaticShape(space,ceiling);
-		llist_begin_loop(ll_floor);
-		while(llist_hasnext(ll_floor)) {
-			cpShape *seg = (cpShape *)llist_next(ll_floor);
-			cpSpaceRemoveStaticShape(space, seg);
-		}
-		llist_end_loop(ll_floor);
+		llist_clear(ll_floor_segs);
 	}
 
-	static const int segments = 100;
-	static const float seg_radius = 10;
-	static const float seg_length = 5000;
+	static const int segments = 300;
+	static const float seg_radius = 50;
+	static const float seg_length = 300;
 	int i;
 	for (i = 0; i < segments; ++i) {
 		cpVect angle = cpvforangle(2 * M_PI * i / segments);
@@ -806,7 +802,7 @@ void space_init_level(int space_station, int deck)
 		cpShapeSetCollisionType(seg, ID_GROUND);
 		cpShapeSetElasticity(seg, 0.7f);
 
-		llist_add(ll_floor, seg);
+		llist_add(ll_floor_segs, seg);
 	}
 
 	ceiling = cpSpaceAddShape(space, cpCircleShapeNew(staticBody, currentlvl->inner_radius,cpvzero));
@@ -873,10 +869,15 @@ static void on_leave(void)
 static void destroy(void)
 {
 	particles_destroy_system(parti);
+	llist_destroy(ll_floor_segs);
 	cpSpaceDestroy(space);
 	joystick_free(joy_p1_left);
 	joystick_free(joy_p1_right);
-	llist_destroy(ll_floor);
+}
+
+static void remove_static(cpShape *shape)
+{
+	cpSpaceRemoveStaticShape(space, shape);
 }
 
 void space_init(void)
@@ -895,13 +896,13 @@ void space_init(void)
     button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);
     statesystem_register_touchable(this, btn_pause);
 
-    ll_floor = llist_create();
+    ll_floor_segs = llist_create();
+    llist_set_remove_callback(ll_floor_segs, remove_static);
     ceiling = NULL;
 
-	cpVect gravity = cpv(0, -600);
 	space = cpSpaceNew();
-	cpSpaceSetGravity(space, gravity);
-	cpSpaceSetDamping(space, 0.99);
+	cpSpaceSetGravity(space, cpv(GRAVITY,0));
+	cpSpaceSetDamping(space, DAMPING);
 
 	extern void collisioncallbacks_init(void);
     collisioncallbacks_init();

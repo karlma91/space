@@ -7,9 +7,6 @@
 #define OBJ_NAME turret
 #include "we_defobj.h"
 
-/* static prototypes */
-static void velfunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt);
-
 static const float tex_map[2][8] = {
 		{0,1, 0.5,1, 0,0, 0.5,0},
 		{0.5,1, 1,1, 0.5,0, 1,0}
@@ -38,8 +35,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	turret->data.body = cpSpaceAddBody(space,
 			cpBodyNew(100, cpMomentForBox(100.0f, TURRET_SIZE, TURRET_SIZE)));
 	cpBodySetPos(turret->data.body, cpv(turret->data.p_start.x,currentlvl->height - TURRET_SIZE/2));
-
-	turret->data.body->velocity_func = velfunc;
+	turret->data.body->velocity_func = space_velocity;
 
 	/* make and connect new shape to body */
 	shape_add_shapes(space, POLYSHAPE_TURRET, turret->data.body, TURRET_SIZE, 1, 0.7, turret, &this, LAYER_BUILDING, 2);
@@ -113,14 +109,6 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	draw_texture(texture, &(turret->data.body->p), &tex_map[1][0],TURRET_SIZE, TURRET_SIZE, turret->barrel_angle*(180/M_PI));
 
 	hpbar_draw(&turret->hp_bar);
-}
-
-
-static void velfunc(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt)
-{
-	cpVect g = cpv(0,100);
-
-	cpBodyUpdateVelocity(body, g, damping, dt);
 }
 
 static void shape_from_space(cpBody *body, cpShape *shape, void *data)

@@ -17,7 +17,7 @@ extern joystick *joy_p1_left, *joy_p1_right;
 extern joystick *joy_p2_left, *joy_p2_right;
 
 extern int space_rendering_map;
-
+extern cpBodyVelocityFunc space_velocity;
 extern particle_system *parti;
 
 /* init new level */
