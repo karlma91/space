@@ -31,7 +31,7 @@ static float uv_buffer[TILEMAP_ARRAY_BUFFER_SIZE];
 void tilemap_render(tilemap *map)
 {
 	glEnable(GL_TEXTURE_2D);
-	draw_color4f(1,1,1,1);
+	draw_color4f(1,1,1,0.3);
 	texture_bind(map->texture_id);
 
 	int i,j;

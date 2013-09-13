@@ -785,7 +785,7 @@ void space_init_level(int space_station, int deck)
 		llist_clear(ll_floor_segs);
 	}
 
-	static const int segments = 300;
+	static const int segments = 100;
 	static const float seg_radius = 50;
 	static const float seg_length = 300;
 	int i;
