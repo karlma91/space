@@ -112,6 +112,30 @@ int component_register(int pointer_count)
 	}
 }
 
+instance *instance_super_malloc(object_id *type)
+{
+	LList list = objects_meta[type->ID].pool;
+	instance *ins = llist_first(list);
+
+	int size = type->SIZE;
+
+	if (ins == NULL) {
+#ifdef DEBUG_MEMORY
+		SDL_Log( "Info: Allocating new object id %d of size %u\n", id, size);
+#endif
+		ins = calloc(1, size);
+	} else {
+		llist_remove(list, (void *)ins);
+		memset(ins,0,size);
+	}
+
+	/* set read-only instance data */
+	*((object_id **)&ins->TYPE) = type;
+	*((int *)&ins->INS_IDENTIFIER) = INS_MAGIC_COOKIE;
+
+	return ins;
+}
+
 instance *instance_create(object_id *type, const void *param, cpVect p, cpVect v)
 {
 	instance *ins = instance_super_malloc(type);
@@ -149,30 +173,6 @@ instance *instance_create(object_id *type, const void *param, cpVect p, cpVect v
 
 void object_init(void) {
 	ins2destroy = llist_create();
-}
-
-instance *instance_super_malloc(object_id *type)
-{
-	LList list = objects_meta[type->ID].pool;
-	instance *ins = llist_first(list);
-
-	int size = type->SIZE;
-
-	if (ins == NULL) {
-#ifdef DEBUG_MEMORY
-		SDL_Log( "Info: Allocating new object id %d of size %u\n", id, size);
-#endif
-		ins = calloc(1, size);
-	} else {
-		llist_remove(list, (void *)ins);
-		memset(ins,0,size);
-	}
-
-	/* set read-only instance data */
-	*((object_id **)&ins->TYPE) = type;
-	*((int *)&ins->INS_IDENTIFIER) = INS_MAGIC_COOKIE;
-
-	return ins;
 }
 
 #define  err_ins(x) \
@@ -400,6 +400,7 @@ static void instance_remove_dead(instance *ins, void *unused)
 {
 	if (!ins->alive) {
 		llist_remove(objects_meta[ins->TYPE->ID].active, ins);
+		instance_super_free(ins);
 	}
 }
 

@@ -130,6 +130,4 @@ static void on_remove(OBJ_TYPE *OBJ_NAME)
 
 	cpSpaceRemoveBody(space, turret->data.body);
 	cpBodyFree(turret->data.body);
-
-	instance_super_free((instance *)turret);
 }

@@ -77,5 +77,4 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	we_body_remove(space, &coin->data.body);
-	instance_super_free((instance*)coin);
 }

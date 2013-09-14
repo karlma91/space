@@ -103,5 +103,4 @@ static void on_remove(OBJ_TYPE *OBJ_NAME)
 	particles_release_emitter(rocket->flame);
 	we_body_remove(space, &rocket->data.body);
 	factory_remove_child(rocket);
-	instance_super_free((instance *)rocket);
 }

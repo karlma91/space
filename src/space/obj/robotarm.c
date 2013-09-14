@@ -135,6 +135,4 @@ static void on_remove(OBJ_TYPE *OBJ_NAME)
 
 	we_body_remove(space, &robotarm->saw);
 	we_body_remove_static(space, &robotarm->data.body);
-
-	instance_super_free((instance *)robotarm);
 }

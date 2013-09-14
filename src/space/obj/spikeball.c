@@ -81,5 +81,4 @@ static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	we_body_remove(space, &spikeball->data.body);
 	we_body_remove(space, &spikeball->dolly);
-	instance_super_free((instance *)spikeball); //TODO move out to objects
 }

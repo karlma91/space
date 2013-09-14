@@ -220,5 +220,4 @@ static void on_remove(OBJ_TYPE *OBJ_NAME)
 	we_body_remove(space, &tank->wheel1);
 	we_body_remove(space, &tank->wheel2);
 	factory_remove_child(tank);
-	instance_super_free((instance *)tank);
 }

@@ -114,5 +114,4 @@ static void on_remove(OBJ_TYPE *OBJ_NAME)
 	particles_release_emitter(factory->smoke);
 	we_body_remove(space, &factory->data.body);
 	instance_iterate_type((object_id *) factory->param.type, remove_factory_from_child, factory);
-	instance_super_free((instance *)factory); //TODO move out to objects
 }
