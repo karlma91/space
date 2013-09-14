@@ -9,7 +9,7 @@
 #define POOL_H_
 
 
-
+typedef struct pool pool;
 
 
 #endif /* POOL_H_ */

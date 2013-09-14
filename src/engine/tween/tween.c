@@ -7,8 +7,8 @@
 #include "tween.h"
 #include "stdlib.h"
 
-LList tween_pool;
-LList manager_pool;
+pool * tween_pool;
+pool * manager_pool;
 
 struct manager {
 	LList tweens;
@@ -18,6 +18,7 @@ struct manager {
 struct tween {
 	int dims;
 	int done;
+	int started;
 	int repeat;
 	float start[TWEEN_DIMS];
 	float end[TWEEN_DIMS];
@@ -29,38 +30,24 @@ struct tween {
 
 void tween_init()
 {
-	tween_pool = llist_create();
-	manager_pool = llist_create();
+	tween_pool = pool_create(sizeof(tween));
+	manager_pool = pool_create(sizeof(manager));
 }
 
 manager * tween_manager()
 {
-	manager *m;
-	if(llist_size(tween_pool)){
-		m = llist_pop(manager_pool);
-	}else{
-		m = calloc(1, sizeof *m);
-	}
+	return (manager *)pool_instance(manager_pool);
 }
 
 void tween_update_manager(manager *m, float dt)
 {
-	llist_begin_loop(m->tweens);
-	while(llist_hasnext(m->tweens)){
-		tween * t = llist_next(m->tweens);
-		tween_step(t,dt);
-	}
-	llist_end_loop(m->tweens);
+	llist_iterate_func(m->tweens, tween_step, dt);
 }
 
 tween * tween_create(float *start, float *end, int num, float duration, float (*easing)(float))
 {
-	tween *t;
-	if(llist_size(tween_pool)){
-		t = llist_pop(tween_pool);
-	}else{
-		t = calloc(1, sizeof *t);
-	}
+	tween *t = (tween *)pool_instance(tween_pool);
+
 	t->dims = num;
 	memcpy(t->start, start, num);
 	memcpy(t->end, start, num);
@@ -75,13 +62,15 @@ tween * tween_create(float *start, float *end, int num, float duration, float (*
 
 void tween_step(tween *t, float dt)
 {
-	t->time += dt;
-	if(t->time > t->duration){
-		if(t->repeat){
-			t->time = 0;
-		}else{
-			t->time = t->duration;
-			t->done = 1;
+	if(t->start){
+		t->time += dt;
+		if( t->time > t->duration){
+			if(t->repeat){
+				t->time = 0;
+			}else{
+				t->time = t->duration;
+				t->done = 1;
+			}
 		}
 	}
 }
@@ -115,5 +104,6 @@ float tween_move_f(float start, float end, float time, float duration, float (*e
 
 void tween_destroy()
 {
-	llist_destroy(tween_pool);
+	pool_destroy(manager_pool);
+	pool_destroy(tween_pool);
 }
