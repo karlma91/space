@@ -12,49 +12,57 @@
 #include <float.h>
 #include <signal.h>
 
+static void space_vel_func(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt) {
+	gravity = cpvmult(cpvnormalize_safe(body->p), cpvlength(gravity));
+	cpBodyUpdateVelocity(body, gravity, damping, dt);
+}
+static void space_vel_func_zero_g(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt) {
+	cpBodyUpdateVelocity(body, cpvzero, damping, dt);
+}
+
 void se_add_score_and_popup(cpVect p, int score)
 {
     particles_add_score_popup(parti, p, score);
 	((obj_player *) instance_first(obj_id_player))->coins += score;
 }
 
-float se_distance_to_player(float x)
+float se_arcdist2player(float x) //TODO return arc distance?
 {
 	obj_player *player = ((obj_player *) instance_first(obj_id_player));
 	if(player){
 		cpVect a = cpv(x,0);
 		cpVect b = player->data.body->p;
-		cpVect d = se_distance_v(a, b);
+		cpVect d = se_dist_v(a, b);
 		return d.x;
 	}
 	return 0;
 }
 
-cpVect se_distance_a2b(instance *insa, instance *insb)
+cpVect se_dist_a2b(instance *insa, instance *insb)
 {
 	if (insa && insb) {
 		cpVect a = insa->body->p;
 		cpVect b = insb->body->p;
-		cpVect d = se_distance_v(a,b);
+		cpVect d = se_dist_v(a,b);
 		return d;
 	} else {
 		return cpv(999999,999999);
 	}
 }
 
-cpVect se_distance_v(cpVect a, cpVect b)
+cpVect se_dist_v(cpVect a, cpVect b)
 {
-	//FIXME (not working properly at level edge?)
-	cpVect d = cpvsub(b,a);
-	int lvl_width = currentlvl->width;
-	if(d.x < -lvl_width/2){
-		d.x += lvl_width;
-	}else if(d.x > lvl_width/2){
-		d.x -= lvl_width;
-	}else{
-		fabsf(d.x);
-	}
-	return d;
+	return cpvsub(b,a);
+	//cpVect d = cpvsub(b,a);
+	//int lvl_width = currentlvl->width;
+	//if(d.x < -lvl_width/2){
+	//	d.x += lvl_width;
+	//}else if(d.x > lvl_width/2){
+	//	d.x -= lvl_width;
+	//}else{
+	//	fabsf(d.x);
+	//}
+	//return d;
 }
 
 
@@ -112,7 +120,7 @@ cpFloat get_angle(cpVect a, cpVect b)
 }
 
 
-//TODO add preferred angle to handle situations with two possible solutions
+//TODO add preferred angle to handle situations with two possible solutions?
 float turn_toangle(float from_angle, float to_angle, float step_size)
 {
 	from_angle += from_angle >= (2*M_PI) ? -(2*M_PI) : from_angle < 0 ? (2*M_PI) : 0;
@@ -141,7 +149,6 @@ float turn_toangle(float from_angle, float to_angle, float step_size)
 		from_angle = to_angle;
 	}
 
-	//SDL_Log("angle: %0.4f\n",from_angle*180/M_PI);
 	return from_angle;
 }
 
@@ -210,13 +217,31 @@ void se_spawn_coins(instance * ins)
 	if (coins_ptr) {
 		cpVect pos = ins->body->p;
 		int i = (*coins_ptr) & 0xFFF; /* limit number of coins to 4096*/
+
+		obj_param_coin arg;
+		arg.explo_fmax = minf(i*20 + 400, 1500);
+
 		float rnd_x, rnd_y;
 		while (i) {
 			rnd_x = 2 - ((i & 0x3) + 1);
 			rnd_y = 2 - (((i & 0x3) ^ 0x3) + 1);
-			instance_create(obj_id_coin, NULL, cpvadd(pos,cpv(rnd_x,rnd_y*2)), cpvzero);
+			instance_create(obj_id_coin, &arg, cpvadd(pos,cpv(rnd_x,rnd_y*2)), cpvzero);
 			--i;
 		}
 	}
 }
 
+cpFloat se_tangent(cpVect p)
+{
+	return cpvtoangle(cpvperp(p));
+}
+
+void se_tangent_body(cpBody *body)
+{
+	cpBodySetAngle(body, se_tangent(body->p));
+}
+
+void se_velfunc(cpBody *body, int with_gravity)
+{
+	body->velocity_func = with_gravity ? space_vel_func : space_vel_func_zero_g;
+}

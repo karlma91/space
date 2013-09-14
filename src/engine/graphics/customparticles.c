@@ -53,9 +53,6 @@ static void draw_particle_as_score(emitter *em, particle *p)
 
     float angle = 0;
     cpVect pos = p->p;
-#if EXPERIMENTAL_GRAPHICS
-    //angle = se_rect2arch(&pos) * 180 / M_PI;
-#endif
 
     setTextAngle(angle);
     font_drawText(pos.x,pos.y,temp);
@@ -66,8 +63,5 @@ static void draw_particle_as_score(emitter *em, particle *p)
 static void draw_particle_as_spark(emitter *em, particle *p)
 {
     cpVect pos = p->p;
-#if EXPERIMENTAL_GRAPHICS
-    se_rect2arch(&pos);
-#endif
     draw_glow_line(pos.x,pos.y,pos.x + p->v.x*p->size,pos.y+ p->v.y*p->size, p->size);
 }

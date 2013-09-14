@@ -49,10 +49,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	/* make and add new body */
 	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
-	player->data.body->velocity_func = space_velocity;
 	cpBodySetPos(player->data.body, cpv(0,990));
 	cpBodySetVelLimit(player->data.body,450); //700
 	cpBodySetUserData(player->data.body, (void*)player);
+	se_velfunc(player->data.body, 1);
 
 	/* make and connect new shape to body */
 	shape = we_add_circle_shape(space, player->data.body,radius,0.8,0.9);
@@ -68,7 +68,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->gunwheel = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(player->gunwheel, player->data.body->p);
 	cpBodySetUserData(player->gunwheel, (void*)player);
-	player->gunwheel->velocity_func = space_velocity;
+	se_velfunc(player->gunwheel, 1);
 
 	shape = we_add_circle_shape(space, player->gunwheel,radius,0.9,0.8);
 	we_shape_collision(shape, &this, LAYER_PLAYER, player);
@@ -78,11 +78,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	cpVect pos_body = player->data.body->p;
-	cpVect pos_gun = player->gunwheel->p;
 	draw_color4f(1,1,1,1);
-	sprite_render(&(player->gun), &(pos_gun), player->aim_angle * 180/M_PI);
-	sprite_render(&(player->data.spr), &(pos_body), player->direction * 180/M_PI);
+	sprite_render(&(player->gun), player->gunwheel->p, player->aim_angle);
+	sprite_render(&(player->data.spr), player->data.body->p, player->direction);
 	hpbar_draw(&player->hp_bar);
 }
 
@@ -100,18 +98,18 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 		cpBodySetAngVel(player->data.body,0);
 		player->flame->p = player->data.body->p;
-		player->flame->angular_offset = player->direction * (180/M_PI)+90;
+		player->flame->angular_offset = we_rad2deg(player->direction) + 90;
 
-		player->gunwheel->p = player->data.body->p;
-		player->gunwheel->rot = cpvforangle(player->aim_angle);
-		player->gunwheel->v = player->data.body->v;
+		cpBodySetPos(player->gunwheel, player->data.body->p);
+		cpBodySetVel(player->gunwheel, player->data.body->v);
+		cpBodySetAngle(player->gunwheel,player->aim_angle);
 
 		if (player->disable == 0){
 			controls(player);
 		}
 	} else {
 		float body_angle = cpvtoangle(player->data.body->rot);
-		player->direction = turn_toangle(body_angle, player->direction, 2 * M_PI * dt / 1000);
+		player->direction = turn_toangle(body_angle, player->direction, WE_2PI * dt / 1000);
 		player->aim_angle = cpvtoangle(player->gunwheel->rot);
 		player->flame->disable = 1;
 	}
@@ -136,7 +134,7 @@ static void controls(obj_player *player)
 		}
 		*/
 
-		cpVect player_dir = cpvrotate(cpv(joy_p1_left->axis_x, joy_p1_left->axis_y),cpvforangle(-current_camera->rotation / 180 * M_PI));
+		cpVect player_dir = cpvrotate(cpv(joy_p1_left->axis_x, joy_p1_left->axis_y),cpvforangle(-current_camera->rotation));
 		cpVect j = cpvmult(player_dir, player->force);
 
 		if (player_assisted_steering) {
@@ -160,7 +158,7 @@ static void controls(obj_player *player)
 	} else {
 		player->flame->disable = 1;
 		float vel_angle = cpvtoangle(cpBodyGetVel(player->data.body));
-		player->direction = turn_toangle(vel_angle, player->direction, 2 * M_PI * dt / 10000);
+		player->direction = turn_toangle(vel_angle, player->direction,WE_2PI * dt / 10000);
 	}
 
 
@@ -173,7 +171,7 @@ static void controls(obj_player *player)
 	float aim_angle_target = 0;
 
 	if (joy_p1_right->amplitude) {
-		aim_angle_target = joy_p1_right->direction -current_camera->rotation / 180 * M_PI;
+		aim_angle_target = joy_p1_right->direction -current_camera->rotation;
 		if (!instant) {
 			dir_step = (player->aim_speed * 2*M_PI) * dt; // 0.5 rps
 			player->aim_angle = turn_toangle(player->aim_angle, aim_angle_target, dir_step);

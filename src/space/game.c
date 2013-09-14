@@ -71,6 +71,7 @@ SPRITE_ID SPRITE_JOYSTICK_BACK;
 SPRITE_ID SPRITE_SPIKEBALL;
 SPRITE_ID SPRITE_SAW;
 SPRITE_ID SPRITE_COIN;
+SPRITE_ID SPRITE_TURRET;
 /* end of global sprite definitions*/
 
 /* polyshapes */
@@ -206,6 +207,7 @@ void game_sprites(void)
 	REGISTER_SPRITE( SPIKEBALL );
 	REGISTER_SPRITE( SAW );
 	REGISTER_SPRITE( COIN );
+	REGISTER_SPRITE( TURRET );
 }
 
 void game_polyshapes(void)

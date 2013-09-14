@@ -166,6 +166,7 @@ OBJ_START(turret)
 	float rate;
 	hpbar hp_bar;
 	minimap radar_image;
+	cpBody *tower;
 OBJ_END
 
 PARAM_START(rocket)
@@ -177,12 +178,12 @@ PARAM_START(rocket)
 PARAM_END
 OBJ_START(rocket)
 	float timer;
-	float angle;
 	int active;
 	float rot_speed;
 	hpbar hp_bar;
 	emitter *flame;
 	minimap radar_image;
+	float fuel; //TODO move into params
 OBJ_END
 
 PARAM_START(robotarm)
@@ -219,7 +220,9 @@ OBJ_START(spikeball)
 OBJ_END
 
 
-PARAM_EMPTY(coin)
+PARAM_START(coin)
+	float explo_fmax;
+PARAM_END
 OBJ_START(coin)
 	cpBool pulled; //TODO create pickup component
 OBJ_END

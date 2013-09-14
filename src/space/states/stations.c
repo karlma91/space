@@ -61,7 +61,7 @@ static void draw(void)
 					x2, y2,
 					x1, y1,
 					x2, y1};
-	draw_texture(tex_stars,&cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
+	draw_texture(tex_stars,cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
 	}
 	{
 	float x1 = - (xoffset / 4) / GAME_WIDTH;
@@ -72,7 +72,7 @@ static void draw(void)
 					x2, y2,
 					x1, y1,
 					x2, y1};
-	draw_texture(tex_stars_2,&cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
+	draw_texture(tex_stars_2,cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
 	}
 	{
 	float x1 = - (xoffset / 3.6) / GAME_WIDTH;
@@ -83,7 +83,7 @@ static void draw(void)
 					x2, y2,
 					x1, y1,
 					x2, y1};
-	draw_texture(tex_stars_2,&cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
+	draw_texture(tex_stars_2,cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
 	}
 	{
 	float x1 = - (xoffset / 3.2) / GAME_WIDTH;
@@ -94,7 +94,7 @@ static void draw(void)
 					x2, y2,
 					x1, y1,
 					x2, y1};
-	draw_texture(tex_stars_2,&cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
+	draw_texture(tex_stars_2,cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
 	}
 
 	int i;

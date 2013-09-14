@@ -70,11 +70,11 @@ static void draw(void)
 
 	draw_color4f(1,1,1,1);
 	if (level_star_count == 0) draw_color4f(0.1,0.1,0.1,1);
-	sprite_render(&spr_star, &star_1, 0);
+	sprite_render(&spr_star, star_1, 0);
 	if (level_star_count == 1) draw_color4f(0.1,0.1,0.1,1);
-	sprite_render(&spr_star, &star_2, 0);
+	sprite_render(&spr_star, star_2, 0);
 	if (level_star_count == 2) draw_color4f(0.1,0.1,0.1,1);
-	sprite_render(&spr_star, &star_3, 0);
+	sprite_render(&spr_star, star_3, 0);
 }
 
 static void sdl_event(SDL_Event *event)

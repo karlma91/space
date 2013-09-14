@@ -85,7 +85,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	}
 
 	instance *player = instance_first(obj_id_player);
-	cpVect d = se_distance_v(robotarm->saw->p, player->body->p);
+	cpVect d = se_dist_v(robotarm->saw->p, player->body->p);
 
 	cpBodySetForce(robotarm->saw, cpvzero);
 	d = cpvnormalize(d);
@@ -102,8 +102,6 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	v1.y = robotarm->y[0];
 	v2.x = robotarm->x[0] + cos(robotarm->angle[0])*robotarm->seg_length;
 	v2.y = robotarm->y[0] + sin(robotarm->angle[0])*robotarm->seg_length;
-	se_rect2arch(&v1);
-	se_rect2arch(&v2);
 	draw_glow_line(v1.x,v1.y,v2.x,v2.y, 200);
 
 	int i;
@@ -113,14 +111,11 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		v1.y = robotarm->y[i];
 		v2.x = robotarm->x[i+1];
 		v2.y = robotarm->y[i+1];
-		se_rect2arch(&v1);
-		se_rect2arch(&v2);
 		draw_glow_line(v1.x,v1.y,v2.x,v2.y, 200);
 	}
-	cpVect pos1 = robotarm->saw->p;
-	cpVect pos2 = robotarm->data.body->p;
-	sprite_render(&(robotarm->saw_sprite), &pos1, 0);
-	sprite_render(&(robotarm->data.spr), &pos2, 0);
+
+	sprite_render_body(&(robotarm->saw_sprite), robotarm->saw);
+	sprite_render_body(&(robotarm->data.spr), robotarm->data.body);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)

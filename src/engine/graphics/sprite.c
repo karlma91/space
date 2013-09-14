@@ -26,9 +26,10 @@ typedef struct {
 #define FILE_BUFFER_SIZE 8192 /* NB! make sure buffer is large enough */
 static char buffer[FILE_BUFFER_SIZE];
 
+//TODO use hashmap and drop public use of SPRITE_ID!!
 void sprite_init(void)
 {
-	SDL_Log("SPRITE INTIT:");
+	SDL_Log("SPRITE INIT:");
 	constant_sprites = llist_create();
 	llist_set_remove_callback(constant_sprites,free);
 
@@ -175,12 +176,17 @@ void sprite_set_index_normalized(sprite *spr, float p)
 	}
 }
 
-void sprite_render(sprite *spr, cpVect *pos, float angle)
+void sprite_render(sprite *spr, cpVect pos, float angle)
 {
 	sprite_render_scaled(spr, pos, angle, 1);
 }
 
-void sprite_render_scaled(sprite *spr, cpVect *pos, float angle, float size)
+void sprite_render_body(sprite *spr, cpBody *body)
+{
+	sprite_render_scaled(spr, body->p, body->a, 1);
+}
+
+void sprite_render_scaled(sprite *spr, cpVect pos, float angle, float size)
 {
 	if (!spr) return;
 

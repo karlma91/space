@@ -227,7 +227,7 @@ void draw_line(int tex_id, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float
 	draw_push_blend();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	draw_translate(x0, y0, 0.0f);
-	draw_rotate(atan2f(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
+	draw_rotate(atan2f(y1-y0,x1-x0), 0.0f, 0.0f, 1.0f);
 	GLfloat length = sqrtf((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
 	draw_scale(1,w,1);
 
@@ -269,7 +269,7 @@ void draw_sprite_line(sprite *spr, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y
 
     draw_push_matrix();
     draw_translate(x0, y0, 0.0f);
-    draw_rotate(atan2f(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
+    draw_rotate(atan2f(y1-y0,x1-x0), 0.0f, 0.0f, 1.0f);
     GLfloat length = sqrtf((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
     draw_scale(1,w,1);
 
@@ -314,6 +314,7 @@ void draw_sprite_line(sprite *spr, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y
 
 }
 
+//TODO use cpVect!!
 void draw_glow_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
 	draw_line(TEX_GLOW,  x0,  y0,  x1,  y1,  w);
@@ -325,7 +326,7 @@ void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
 {
     draw_push_matrix();
     draw_translate(x0, y0, 0.0f);
-	draw_rotate(atan2f(y1-y0,x1-x0)*(180/M_PI), 0.0f, 0.0f, 1.0f);
+	draw_rotate(atan2f(y1-y0,x1-x0), 0.0f, 0.0f, 1.0f);
 	GLfloat length = sqrtf((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
 	draw_scale(1,w,1);
 	w /= 2;
@@ -434,10 +435,6 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 	cpVect pos_org = pos;
 	float angle = 0;
 
-#if EXPERIMENTAL_GRAPHICS
-	angle = se_rect2arch(&pos) * 180 / M_PI;
-#endif
-
 	x = pos.x;
 	y = pos.y;
 
@@ -478,43 +475,38 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 
 		draw_color4f(1,0,0, 1);
 		//draw_box(x + border, y + border, width_red, height, angle, 0);
-		draw_texture(TEX_BAR, &pos_red, TEX_MAP_FULL, width_red, height, 0);
+		draw_texture(TEX_BAR, pos_red, TEX_MAP_FULL, width_red, height, 0);
 
 		draw_color4f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1, 1);
 		//draw_box(x + border, y + border, width_bar, height, angle, 0);
-		draw_texture(TEX_BAR, &pos_bar, TEX_MAP_FULL, width_bar, height, 0);
+		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, width_bar, height, 0);
 
 	} else {
 		float width = w - border * 2;
 		float height = (h - border * 2) * p;
 		cpVect pos_bar = cpvadd(pos_org, cpv(border + width/2, border + height/2));
 		draw_color4f(1-p,1-p,1,1);
-		draw_texture(TEX_BAR, &pos_bar, TEX_MAP_FULL, height, width, 90);
+		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, height, width, 90);
 	}
 
 	draw_pop_color();
 	draw_pop_blend();
 }
 
-void draw_texture(int tex_id, cpVect *pos, const float *tex_map, float width, float height, float angle)
+void draw_texture(int tex_id, cpVect pos, const float *tex_map, float width, float height, float angle)
 {
-	cpVect pos_buf = *pos;
-#if EXPERIMENTAL_GRAPHICS
-	angle += se_rect2arch(&pos_buf) * 180 / M_PI; //EXPERIMENTAL GRAPHICS
-#endif
-
 	texture_bind(tex_id);
-	draw_current_texture_all(&pos_buf, tex_map, width, height, angle, triangle_quad);
+	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
 }
 
-void draw_current_texture(cpVect *pos, const float *tex_map, float width, float height, float angle)
+void draw_current_texture(cpVect pos, const float *tex_map, float width, float height, float angle)
 {
 	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
 }
-void draw_current_texture_append(cpVect *pos, const float *tex_map, float width, float height, float angle)
+void draw_current_texture_append(cpVect pos, const float *tex_map, float width, float height, float angle)
 {
 	draw_push_matrix();
-	draw_translate(pos->x, pos->y, 0.0f);
+	draw_translate(pos.x, pos.y, 0.0f);
 	draw_rotate(angle,0,0,1);
 	draw_scale(width,height,1);
 	draw_vertex_pointer(2, GL_FLOAT, 0, triangle_quad);
@@ -523,11 +515,11 @@ void draw_current_texture_append(cpVect *pos, const float *tex_map, float width,
 	draw_pop_matrix();
 }
 
-void draw_current_texture_all(cpVect *pos, const float *tex_map, float width, float height, float angle, GLfloat *mesh)
+void draw_current_texture_all(cpVect pos, const float *tex_map, float width, float height, float angle, GLfloat *mesh)
 {
     draw_push_matrix();
 
-    draw_translate(pos->x, pos->y, 0.0f);
+    draw_translate(pos.x, pos.y, 0.0f);
 	draw_rotate(angle,0,0,1);
 	draw_scale(width,height,1);
 
@@ -576,7 +568,7 @@ void draw_translate(GLfloat x, GLfloat y, GLfloat z)
 
 void draw_rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 {
-    matrix2d_rotate(angle*(M_PI/180));
+    matrix2d_rotate(angle);
 }
 
 void draw_scale(GLfloat x, GLfloat y, GLfloat z)

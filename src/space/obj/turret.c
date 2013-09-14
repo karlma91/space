@@ -32,17 +32,22 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	turret->barrel_angle = 3*(M_PI/2);
 	turret->max_distance = 800;
 
-	turret->data.body = cpSpaceAddBody(space,
-			cpBodyNew(100, cpMomentForBox(100.0f, TURRET_SIZE, TURRET_SIZE)));
-	cpBodySetPos(turret->data.body, cpv(turret->data.p_start.x,currentlvl->height - TURRET_SIZE/2));
-	turret->data.body->velocity_func = space_velocity;
+	turret->tower = cpSpaceAddBody(space, cpBodyNew(100, cpMomentForBox(100, TURRET_SIZE, TURRET_SIZE)));
+	cpBodySetUserData(turret->tower, turret);
+	cpBodySetPos(turret->tower, turret->data.p_start);
+	se_tangent_body(turret->tower);
+	se_velfunc(turret->tower, 1);
+	shape_add_shapes(space, POLYSHAPE_TURRET, turret->tower, TURRET_SIZE, 1, 0.7, turret, &this, LAYER_BUILDING, 1);
 
-	/* make and connect new shape to body */
+	turret->data.body = cpSpaceAddBody(space, cpBodyNew(100, cpMomentForCircle(100.0f, 0, TURRET_SIZE,cpvzero)));
+	cpBodySetUserData(turret->data.body, turret);
+	cpBodySetPos(turret->data.body, turret->data.p_start);
+	se_tangent_body(turret->data.body);
+	se_velfunc(turret->data.body, 1);
 	shape_add_shapes(space, POLYSHAPE_TURRET, turret->data.body, TURRET_SIZE, 1, 0.7, turret, &this, LAYER_BUILDING, 2);
 
-	cpBodySetUserData(turret->data.body, turret);
-
 	hpbar_init(&turret->hp_bar,turret->param.max_hp,80,20,0,60,&(turret->data.body->p));
+	sprite_create(&turret->data.spr, SPRITE_TURRET, TURRET_SIZE, TURRET_SIZE, 0);
 }
 
 
@@ -71,7 +76,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		turret->shooting = 1;
 		turret->timer = 0;
 	}
-	if(turret->shooting && turret->timer > turret->rate && se_distance_to_player(turret->data.body->p.x) < turret->max_distance){
+	if(turret->shooting && turret->timer > turret->rate && se_arcdist2player(turret->data.body->p.x) < turret->max_distance){
 		turret->bullets += 1;
 
 		cpVect shoot_vel = cpvforangle(turret->barrel_angle);
@@ -105,8 +110,10 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	GLfloat dir = cpBodyGetAngle(turret->data.body);
 
 	draw_color4f(1,1,1,1);
-	draw_texture(texture, &(turret->data.body->p), &tex_map[0][0],TURRET_SIZE, TURRET_SIZE, dir*(180/M_PI));
-	draw_texture(texture, &(turret->data.body->p), &tex_map[1][0],TURRET_SIZE, TURRET_SIZE, turret->barrel_angle*(180/M_PI));
+	sprite_set_index(&turret->data.spr, 0);
+	sprite_render_body(&turret->data.spr, turret->tower);
+	sprite_set_index(&turret->data.spr, 1);
+	sprite_render_body(&turret->data.spr, turret->data.body);
 
 	hpbar_draw(&turret->hp_bar);
 }
@@ -126,8 +133,6 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	cpBodyEachShape(turret->data.body,shape_from_space,NULL);
-
-	cpSpaceRemoveBody(space, turret->data.body);
-	cpBodyFree(turret->data.body);
+	we_body_remove(space, &turret->data.body);
+	we_body_remove(space, &turret->tower);
 }

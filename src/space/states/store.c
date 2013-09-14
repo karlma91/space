@@ -280,7 +280,7 @@ void upgrades_init(void)
 
 	//TODO load balance and bought items/upgrades
 	for (i = 0; i < WEAPON_UPGRADES; i++) {
-		weapons[i].level = 0; //TMP inntil loading er laget
+		weapons[i].level = 1; //TMP inntil loading er laget
 	}
 
 	update_upgrades();

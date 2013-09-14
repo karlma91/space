@@ -19,10 +19,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	COMPONENT_SET(factory, MINIMAP, &factory->radar_image);
 	factory->radar_image = cmp_new_minimap(20, COL_BLUE);
 
-	static int randomness= 0;
-	randomness += 123;
-	randomness *= randomness;
-	factory->timer = (factory->param.spawn_delay) * ((randomness % 0xFF + 160) / 400.0f + 0.2f);
+	factory->timer = factory->param.spawn_delay * (we_randf * 0.8f + 0.2f);
 
 	factory->max_distance = 900; //TODO read from object definition
 	//fac->hp = fac->param.max_hp; //TODO FIXME
@@ -41,8 +38,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	factory->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
 	cpBodySetPos(factory->data.body, factory->data.p_start);
-	cpBodySetAngle(factory->data.body, cpvtoangle(cpvperp(factory->data.body->p)));
-	factory->data.body->velocity_func = space_velocity;
+	se_tangent_body(factory->data.body);
+	se_velfunc(factory->data.body, 1);
 
 	shape_add_shapes(space, factory->param.shape_id, factory->data.body, 400, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
 	cpBodySetUserData(factory->data.body, factory);
@@ -56,10 +53,13 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	factory->timer += dt;
 	sprite_update(&(factory->data.spr));
 	if (factory->timer > factory->param.spawn_delay && factory->cur < factory->param.max_tanks) {
-		if(se_distance_to_player(factory->data.body->p.x) < factory->max_distance) {
-			float x = factory->data.body->p.x;
-			float y = factory->data.body->p.y - 150;
-			instance * ins = instance_create(factory->param.type, factory->param.param,cpv(x,y),cpvzero);
+		if(se_arcdist2player(factory->data.body->p.x) < factory->max_distance) {
+			cpVect pos = factory->data.body->p;
+			we_cart2pol(pos);
+			pos.x += 150;
+			we_pol2cart(pos);
+
+			instance * ins = instance_create(factory->param.type, factory->param.param, pos, cpvzero);
 			COMPONENT_SET(ins, CREATOR, factory);
 			factory->timer = 0;
 			factory->cur += 1;
@@ -67,8 +67,10 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	}
 
 	if (factory->smoke) {
-		factory->smoke->p.x = factory->data.body->p.x - 80;
-		factory->smoke->p.y = factory->data.body->p.y + 200;
+		cpVect pos = factory->data.body->p;
+		cpVect rot = factory->data.body->rot;
+		pos = cpvadd(pos,cpvrotate(cpv(-80,200),rot));
+		factory->smoke->p = pos;
 	}
 }
 
@@ -77,10 +79,9 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	draw_color4f(1,1,1,1);
 
 	factory->rot += 381 * dt;
-	cpVect draw_pos = factory->data.body->p;
 	particles_draw_emitter(factory->smoke);
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-	sprite_render(&(factory->data.spr), &(draw_pos), factory->data.body->a * 180 / M_PI);
+	//glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	sprite_render_body(&(factory->data.spr), factory->data.body);
 
 	hpbar_draw(&factory->hp_bar);
 	draw_bar(factory->data.body->p.x+160,factory->data.body->p.y-150,40,150,factory->timer / factory->param.spawn_delay,0);

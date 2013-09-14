@@ -11,6 +11,7 @@
 #include "../graphics/draw.h"
 #include "../data/llist.h"
 #include "../engine.h"
+#include "we_utils.h"
 
 #define THIS_IS_A_TOUCH_OBJECT 1
 #include "touch.h"
@@ -157,10 +158,10 @@ static void render(touchable * stick_id)
 
 	draw_color4f(1,1,1,1);
 
-	sprite_render(&(stick->spr_back), &btn_pos, 0);
+	sprite_render(&(stick->spr_back), btn_pos, 0);
 
 	sprite_set_index_normalized(&(stick->spr_front), stick->draw_amp);
-	sprite_render(&(stick->spr_front), &btn_pos, stick->draw_dir * 180 / M_PI - 90);
+	sprite_render(&(stick->spr_front), btn_pos, stick->draw_dir - WE_PI_2);
 
 	//draw_flush_simple();
 }

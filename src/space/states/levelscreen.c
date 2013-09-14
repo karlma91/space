@@ -82,7 +82,7 @@ static void draw(void)
 		if (stars_unlocked == i+1) {
 			draw_color4f(0,0,0,1);
 		}
-		sprite_render(&spr_star, &star_pos[i], 0);
+		sprite_render(&spr_star, star_pos[i], 0);
 	}
 }
 

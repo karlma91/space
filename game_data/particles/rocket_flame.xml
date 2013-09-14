@@ -4,10 +4,10 @@
 	<spawnInterval enabled="true" max="50" min="16" ></spawnInterval>
 	<spawnCount enabled="true" max="3" min="1" />
 	<initialLife enabled="false" max="200" min="150" />
-	<initialSize enabled="true" max="64" min="32" />
+	<initialSize enabled="true" max="94" min="62" />
 	<xOffset enabled="false" max="0.0" min="0.0" />
 	<yOffset enabled="false" max="0.0" min="0.0" />
-	<initialDistance enabled="false" max="18" min="16" />
+	<initialDistance enabled="false" max="38" min="30" />
 	<speed enabled="true" max="800" min="500" />
 	<length enabled="false" max="1000.0" min="1000.0" />
 	<emitCount enabled="false" max="1000.0" min="1000.0" />

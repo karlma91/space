@@ -15,9 +15,9 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 		.level = 1,
 		.lvls = {
 			/* dmg, rate, mass, range, price */
-			{28, 3.1, 1.0, 600, 0},
-			{34, 4.4, 1.5, 620, 3200},
-			{48, 5.7, 2.0, 650, 4500}
+			{58, 1.1, 1.0, 600, 0},
+			{64, 2.4, 1.5, 620, 3200},
+			{78, 3.7, 2.0, 650, 4500}
 		},
 		.spr_id = &SPRITE_PLAYER_GUN,
 		.obj_name = "BULLET"

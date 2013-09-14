@@ -177,6 +177,7 @@ void settings_init(void)
 	/* set predefined button states */
 	option_click(OPT_SOUND); /* sound on */
 	option_click(OPT_MUSIC); /* music on */
+	option_click(OPT_MUSIC); /* music off */
 	option_click(OPT_UNLOCK); /* everything unlocked */
 	option_click(OPT_ASSISTED_STEERING); /* assisted steering activated by default */
 	option_click(OPT_INVULNERABLE); /* assisted steering activated by default */

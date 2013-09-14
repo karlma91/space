@@ -28,9 +28,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	coin->data.body = cpSpaceAddBody(space, cpBodyNew(COIN_MASS, cpMomentForCircle(COIN_MASS, 0.0f, COIN_RADIUS, cpvzero)));
 	cpBodySetUserData(coin->data.body, coin);
 	cpBodySetPos(coin->data.body, coin->data.p_start);
+	se_tangent_body(coin->data.body);
 
-	float angle = we_randf * M_PI*2;
-	float force = 400 + we_randf * 1000; //TODO avgjør force utifra antal coins som spawner (altså utenfor create, i spawn metoden)
+	float angle = we_randf * WE_2PI;
+	float force = we_randf * coin->param.explo_fmax;
 	coin->data.body->v = cpvmult(cpvforangle(angle), force);
 
 	cpShape *shape = we_add_circle_shape(space, coin->data.body,COIN_RADIUS-5,0.8,0.2);
@@ -47,7 +48,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		instance *player = instance_first(obj_id_player);
 
 		//TODO handle TMP magnet
-		cpVect diff = se_distance_a2b((instance *)coin, player);
+		cpVect diff = se_dist_a2b((instance *)coin, player);
 		float length = cpvlength(diff);
 			//coin->pulled = 0;
 			//diff = cpvmult(diff, 50/length);
@@ -66,8 +67,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	draw_color4f(1,1,1,1);
-	cpVect pos = coin->data.body->p;
-	sprite_render(&(coin->data.spr), &pos, 0);
+	sprite_render_body(&(coin->data.spr), coin->data.body);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)

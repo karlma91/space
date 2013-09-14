@@ -20,7 +20,6 @@ extern float font_text_size, font_text_angle;
 #define setTextAlign(tmp_alignment) font_text_align=tmp_alignment;
 #define setTextSize(tmp_size) font_text_size=tmp_size;
 #define setTextAngle(tmp_angle) font_text_angle=tmp_angle;
-#define setTextAngleRad(tmp_angle) font_text_angle=MATH_180PI*tmp_angle;
 
 #endif
 

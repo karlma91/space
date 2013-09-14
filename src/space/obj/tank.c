@@ -38,9 +38,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpFloat width = 80;
 	cpFloat height = 30;
 	tank->data.body = cpSpaceAddBody(space, cpBodyNew(MASS, cpMomentForBox(MASS, width, height)));
-	tank->data.body->velocity_func = space_velocity;
 	cpBodySetPos(tank->data.body, tank->data.p_start);
 	cpBodySetUserData(tank->data.body, tank);
+	se_tangent_body(tank->data.body);
+	se_velfunc(tank->data.body, 1);
 
 	cpShape *shape = we_add_box_shape(space, tank->data.body, width, height, 0.6, 0.0);
 	we_shape_collision(shape, &this, LAYER_ENEMY, tank);
@@ -90,7 +91,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	if (player) {
 	cpVect pl = player->data.body->p;
 	cpVect rc = tank->data.body->p;
-	ptx = se_distance_to_player(tank->data.body->p.x);
+	ptx = se_arcdist2player(tank->data.body->p.x);
 
 	cpFloat best_angle = se_get_best_shoot_angle(rc,tank->data.body->v, pl, player->data.body->v, SHOOT_VEL);
 
@@ -109,7 +110,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		tank->barrel_angle = 0;
 	}
 
-	if(tank->timer > 1 + (3.0f*we_randf) && se_distance_to_player(tank->data.body->p.x)<tank->max_distance){
+	if(tank->timer > 1 + (3.0f*we_randf) && se_arcdist2player(tank->data.body->p.x)<tank->max_distance){
 		//TODO hent ut lik kode for skyting og lag en metode av det
 		cpVect shoot_vel = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
 		cpVect shoot_pos = cpvadd(tank->data.body->p, cpvmult(shoot_vel,55));
@@ -169,7 +170,8 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
 			cpBodyNew(MASS_WHEEL, cpMomentForCircle(MASS_WHEEL, 0.0f, radius, cpvzero)));
 	cpBodySetPos(body, pos);
 	cpBodySetAngVelLimit(body, 200);
-	body->velocity_func = space_velocity;
+	se_tangent_body(body);
+	se_velfunc(body, 1);
 
 	cpShape *shape = we_add_circle_shape(space, body, radius, 0.8, 0.7);
 	cpShapeSetGroup(shape, &this);
@@ -182,27 +184,23 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	GLfloat dir = cpBodyGetAngle(tank->data.body);
-	GLfloat rot = cpBodyGetAngle(tank->wheel1)*(180/M_PI);
-	GLfloat barrel_angle = (tank->barrel_angle + dir) * (180/M_PI);
+	GLfloat rot = cpBodyGetAngle(tank->wheel1);
+	GLfloat barrel_angle = (tank->barrel_angle + dir);
 
 	hpbar_draw(&tank->hp_bar);
 
 	draw_color4f(1,1,1,1);
 
-	cpVect pos_w1 = tank->wheel1->p;
-	sprite_render(&(tank->wheel_sprite), &pos_w1, rot);
-
-	cpVect pos_w2 = tank->wheel2->p;
-	sprite_render(&(tank->wheel_sprite), &pos_w2, rot);
+	sprite_render_body(&(tank->wheel_sprite), tank->wheel1);
+	sprite_render_body(&(tank->wheel_sprite), tank->wheel2);
 
 	if (tank->param.max_hp >= 100) {//TODO add color into param
 		draw_color4f(1,0.2,0,1);
 	}
 
 	cpVect pos = tank->data.body->p;
-
-	sprite_render(&(tank->data.spr), &pos, dir*180/M_PI);
-	sprite_render(&(tank->turret_sprite), &pos, barrel_angle);
+	sprite_render_body(&(tank->data.spr), tank->data.body);
+	sprite_render(&(tank->turret_sprite), pos, barrel_angle);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)

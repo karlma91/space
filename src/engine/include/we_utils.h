@@ -26,6 +26,6 @@
 #define WE_P2C(r, a) cpvmult(cpvforangle(a),r)
 #define we_pol2cart(vect) vect=WE_P2C(vect.x,vect.y)
 #define we_cart2pol(vect) \
-	{float x=polar.x,y=polar.y; vect.x=hypotf(x,y),vect.y=atan2f(y,x)}
+	{float x=vect.x,y=vect.y; vect.x=hypotf(x,y),vect.y=atan2f(y,x);}
 
 #endif /* WE_UTILS_H_ */

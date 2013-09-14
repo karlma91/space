@@ -5,8 +5,6 @@
 #include "../io/xmlh.h"
 #include "../io/waffle_utils.h"
 #include "../engine.h"
-#include "../../space/spaceengine.h" //TODO remove dependency
-#include "../../space/states/space.h" //TODO remove dependency
 #include "we_utils.h"
 
 #define PARTICLE_READ_BUFFER_SIZE 4096
@@ -451,14 +449,7 @@ static void draw_all_particles(emitter *em)
 			}
 		}
 		draw_color4f(c.r,c.g,c.b,alpha);
-
-		/* make sure particle is wrapped around level */
-		//TODO FIXME lage en generell room width + height
-		float width = currentlvl->width, dx = current_camera->x - p->p.x;//, absdx = fabsf(dx);
-		p->p.x += (dx > 0 ? (dx > width - GAME_WIDTH ? width : 0) : (dx < GAME_WIDTH - width ? -width : 0));
-
-		if (se_inside_view(&p->p, p->size))
-			em->draw_particle(em,p);
+		em->draw_particle(em,p);
 
 		p = p->next;
 	}
@@ -473,19 +464,11 @@ static void draw_all_particles(emitter *em)
 static void default_particle_draw(emitter *em, particle *p)
 {
 	float angle = 0;
-	cpVect pos = p->p;
-
-#if EXPERIMENTAL_GRAPHICS
-	angle = se_rect2arch(&pos) * 180 / M_PI;
-#endif
 
 	if(em->rotation){
-#if !EXPERIMENTAL_GRAPHICS
-		//draw_rotate(p->angle, 0, 0, 1);  //TODO move gl code // unsupported by EXPERIMENTAL_GRAPHICS
-#endif
 		p->angle += p->rot_speed*dt;
 	}
-	sprite_render(&p->spr, &p->p, p->angle + angle);
+	sprite_render(&p->spr, p->p, p->angle + angle);
 }
 
 

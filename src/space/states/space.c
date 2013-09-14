@@ -33,7 +33,6 @@ STATE_ID state_space;
  * The global space state
 */
 
-static void SPACE_draw(void);
 static void update_instances(instance *, void *);
 static void render_instances(instance *, void *);
 static void update_camera_zoom(int mode);
@@ -116,13 +115,6 @@ static void draw_gui(void);
 
 #define GRAVITY 600.0f
 #define DAMPING 0.99f
-
-void space_vel_func(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt) {
-	gravity = cpvmult(cpvnormalize_safe(body->p), cpvlength(gravity));
-	cpBodyUpdateVelocity(body, gravity, damping, dt);
-}
-
-cpBodyVelocityFunc space_velocity = &space_vel_func;
 
 
 /* The state timer */
@@ -341,15 +333,6 @@ static void render_instances(instance *obj, void *data)
 	instance_render(obj);
 }
 
-
-static void draw(void)
-{
-	SPACE_draw();
-#if LIGHT_SYSTEM
-	draw_light_map();
-#endif
-}
-
 static void update_camera_zoom(int mode) //TODO remove method
 {
 	obj_player *player = ((obj_player*)instance_first(obj_id_player));
@@ -390,7 +373,7 @@ static void draw_deck()
 	draw_circle(cpvzero, currentlvl->inner_radius);
 
 	/* draw floor */
-	draw_donut(cpvzero, currentlvl->outer_radius, currentlvl->outer_radius + 3000);
+	draw_donut(cpvzero, currentlvl->outer_radius - 15, currentlvl->outer_radius + 3000);
 
 	// DEBUG SEGMENTS
 	llist_begin_loop(ll_floor_segs);
@@ -404,11 +387,9 @@ static void draw_deck()
 	llist_end_loop(ll_floor_segs);
 }
 
-static void SPACE_draw(void)
+static void draw(void)
 {
 	space_rendering_map = 1;
-	/* draw background */
-	drawStars();
 
 	position_time += dt * position_dir * 0.5;
 	if(position_time > 1 || position_time < 0){
@@ -420,24 +401,28 @@ static void SPACE_draw(void)
 
 	/* translate view */
 	draw_load_identity();
-	current_camera->rotation = -cpvtoangle(cpv(current_camera->x, current_camera->y))*180/M_PI+-90;
-	draw_rotate(current_camera->rotation, 0,0,1);
-	draw_scale(current_camera->zoom,current_camera->zoom,1);
-	draw_translate(-current_camera->x, -current_camera->y, 0.0f);
+	current_camera->rotation = -se_tangent(cpv(current_camera->x,current_camera->y));
+	draw_rotate(current_camera->rotation, 0,0,1); //TODO move this into a camera method
+	draw_scale(current_camera->zoom,current_camera->zoom,1); //TODO move this into a camera method
+	draw_translate(-current_camera->x, -current_camera->y, 0.0f); //TODO move this into a camera method
+
+	drawStars();
 
 	/* draw tilemap */
 	tilemap_render(currentlvl->tiles);
+	draw_deck();
 
 	setTextAngle(0);
 	/* draw all objects */
 	instance_iterate(render_instances, NULL);
-	draw_deck();
 
 	/* draw particle effects */
 	particles_draw(parti);
 
 	space_rendering_map = 0;
 	draw_gui();
+
+	//draw_light_map();
 }
 
 
@@ -448,7 +433,7 @@ static void plot_on_radar(instance *obj, void *unused)
 	if(m != NULL){
 		cpVect p = cpvmult(obj->body->p, 1 / currentlvl->outer_radius * RADAR_SIZE);
 		draw_color4f(m->c.r, m->c.g, m->c.b, 0.5);
-		draw_box(p.x, p.y, m->size, m->size, cpvtoangle(p)*180/M_PI, 1);
+		draw_box(p.x, p.y, m->size, m->size, cpvtoangle(p), 1);
 	}
 }
 
@@ -458,7 +443,7 @@ static void radar_draw(float x, float y)
 	draw_push_matrix();
 	if (player) {
 		draw_translate(x, y, 0);
-		draw_rotate(-cpvtoangle(player->data.body->p)*180/M_PI-90, 0, 0, 1);
+		draw_rotate(-se_tangent(player->data.body->p), 0, 0, 1);
 	}
 	draw_color4f(0.3, 0.5, 0.7, 0.6);
 	draw_donut(cpvzero, currentlvl->inner_radius / currentlvl->outer_radius * RADAR_SIZE, RADAR_SIZE);
@@ -628,22 +613,21 @@ void draw_gui(void)
 
 
 #if GLES1
-#define star_count 100
+#define star_count 50
 #else
-#define star_count 100
+#define star_count 50
 #endif
 
 static int stars_x[star_count];
 static int stars_y[star_count];
 static float stars_size[star_count];
-#define SW 8000
 static void stars_init(void)
 {
 	//init stars
 	int i;
 	for (i=0; i<star_count; i++) {
-		stars_x[i] = rand()%(GAME_WIDTH*2*2) - GAME_WIDTH*2; // make sure that radius is greater than WIDTH * sqrt(2)
-		stars_y[i] = rand()%(GAME_WIDTH*2*2) - GAME_WIDTH*2;
+		stars_x[i] = rand()%(GAME_WIDTH*2) - GAME_WIDTH; // make sure that radius is greater than WIDTH * sqrt(2)
+		stars_y[i] = rand()%(GAME_WIDTH*2) - GAME_WIDTH;
 		stars_size[i] = 2 + 5*(rand() % 1000) / 1000.0f;
 	}
 }
@@ -655,22 +639,12 @@ void drawStars(void)
 		tick2death--;
 		return;
 	}
-
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
 	draw_push_matrix();
 
-	draw_scale(0.5f * current_camera->zoom,0.5f * current_camera->zoom, 1);
-
 	static float spaceship_angle;
-	spaceship_angle += 0.01f * 360*dt;
-	float cam_angle;
-	if (currentlvl)
-		cam_angle = (current_camera->x - currentlvl->left)  / (currentlvl->right - currentlvl->left) * 360 + spaceship_angle;
-	else
-		cam_angle = spaceship_angle;
-
-	draw_rotate(-cam_angle,0,0,1);
+	spaceship_angle -= 0.01f * WE_2PI*dt;
+	float cam_angle = spaceship_angle + current_camera->rotation;
+	draw_rotate(cam_angle,0,0,1);
 
 	int i;
 	draw_color4f(1,1,1,1);

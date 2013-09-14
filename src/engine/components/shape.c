@@ -87,19 +87,19 @@ void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, floa
 	}
 	int addall = shapes == 0 ? 1 : 0;
 	llist_begin_loop(p);
-	while(llist_hasnext(p)){
-		LList rb = (LList)llist_next(p);
-		if(addall | (shapes | 1)){
+	while (llist_hasnext(p)) {
+		LList rb = (LList) llist_next(p);
+		if (addall | (shapes | 1)) {
 			llist_begin_loop(rb);
-			while(llist_hasnext(rb)){
-				shape_instance *data = (shape_instance*)llist_next(rb);
+			while (llist_hasnext(rb)) {
+				shape_instance *data = (shape_instance*) llist_next(rb);
 				cpVect d[data->num];
 				int i;
-				for(i=0; i<data->num; i++){
+				for (i = 0; i < data->num; i++) {
 					d[i] = data->shape[i];
-					d[i] = cpvmult(d[i],size);
+					d[i] = cpvmult(d[i], size);
 				}
-				cpShape *sh = cpPolyShapeNew(body, data->num, d, cpv(0,0));
+				cpShape *sh = cpPolyShapeNew(body, data->num, d, cpv(0, 0));
 				cpShapeSetFriction(sh, friction);
 				cpShapeSetElasticity(sh, elasticity);
 				cpShapeSetGroup(sh, group);
@@ -112,7 +112,7 @@ void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, floa
 		}
 	}
 	llist_end_loop(p);
-	if(shapes != 0){
+	if (shapes != 0) {
 		SDL_Log("ERROR: polyshape trying to  add non existing shape");
 	}
 

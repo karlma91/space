@@ -57,7 +57,8 @@ void sprite_set_index(sprite *spr, int index);
 void sprite_set_index_normalized(sprite *spr, float p);
 
 void sprite_update(sprite *spr);
-void sprite_render(sprite *spr, cpVect *pos, float angle);
-void sprite_render_scaled(sprite *spr, cpVect *pos, float angle, float size);
+void sprite_render(sprite *spr, cpVect pos, float angle);
+void sprite_render_body(sprite *spr, cpBody *body);
+void sprite_render_scaled(sprite *spr, cpVect pos, float angle, float size);
 
 #endif /* SPRITE_H_ */
