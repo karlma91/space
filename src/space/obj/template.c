@@ -29,5 +29,4 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	instance_super_free((instance*)OBJ_NAME);
 }

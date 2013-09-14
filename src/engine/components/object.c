@@ -112,19 +112,41 @@ int component_register(int pointer_count)
 	}
 }
 
-instance *instance_create(object_id *type, const void *param, float x, float y, float hs, float vs)
+instance *instance_super_malloc(object_id *type)
+{
+	LList list = objects_meta[type->ID].pool;
+	instance *ins = llist_first(list);
+
+	int size = type->SIZE;
+
+	if (ins == NULL) {
+#ifdef DEBUG_MEMORY
+		SDL_Log( "Info: Allocating new object id %d of size %u\n", id, size);
+#endif
+		ins = calloc(1, size);
+	} else {
+		llist_remove(list, (void *)ins);
+		memset(ins,0,size);
+	}
+
+	/* set read-only instance data */
+	*((object_id **)&ins->TYPE) = type;
+	*((int *)&ins->INS_IDENTIFIER) = INS_MAGIC_COOKIE;
+
+	return ins;
+}
+
+instance *instance_create(object_id *type, const void *param, cpVect p, cpVect v)
 {
 	instance *ins = instance_super_malloc(type);
 
-	if (x != x || y != y || hs != hs || vs != vs) {
+	if (p.x != p.x || p.y != p.y || v.x != v.x || v.y != v.y) {
 		SDL_Log("ERROR in instance_create: params NaN!");
 		raise(SIGKILL);
 	}
 
-	ins->p_start.x = x;
-	ins->p_start.y = y;
-	ins->v_start.x = hs;
-	ins->v_start.y = vs;
+	ins->p_start = p;
+	ins->v_start = v;
 
 	//TODO remove x,y,hs,vs in ins.
 	//TODO init body
@@ -151,30 +173,6 @@ instance *instance_create(object_id *type, const void *param, float x, float y, 
 
 void object_init(void) {
 	ins2destroy = llist_create();
-}
-
-instance *instance_super_malloc(object_id *type)
-{
-	LList list = objects_meta[type->ID].pool;
-	instance *ins = llist_first(list);
-
-	int size = type->SIZE;
-
-	if (ins == NULL) {
-#ifdef DEBUG_MEMORY
-		SDL_Log( "Info: Allocating new object id %d of size %u\n", id, size);
-#endif
-		ins = calloc(1, size);
-	} else {
-		llist_remove(list, (void *)ins);
-		memset(ins,0,size);
-	}
-
-	/* set read-only instance data */
-	*((object_id **)&ins->TYPE) = type;
-	*((int *)&ins->INS_IDENTIFIER) = INS_MAGIC_COOKIE;
-
-	return ins;
 }
 
 #define  err_ins(x) \
@@ -402,6 +400,7 @@ static void instance_remove_dead(instance *ins, void *unused)
 {
 	if (!ins->alive) {
 		llist_remove(objects_meta[ins->TYPE->ID].active, ins);
+		instance_super_free(ins);
 	}
 }
 

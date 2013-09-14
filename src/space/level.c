@@ -316,8 +316,9 @@ level *level_load(int space_station, int deck)
 
 		void* args = params[obj_id->ID] + obj_id->P_SIZE * sub_id;
 
-		cpVect pos = cpvmult(cpvforangle(2 * M_PI * x / lvl->width),lvl->outer_radius);
-		instance_create(obj_id, args,pos.x,pos.y,0,0);
+		float r = lvl->outer_radius-lvl->height/2;
+		float a = (WE_2PI * x / lvl->width);
+		instance_create(obj_id, args, WE_P2C(r,a), cpvzero);
 	}
 
 	SDL_Log("DEBUG: Finished adding objects to level");
