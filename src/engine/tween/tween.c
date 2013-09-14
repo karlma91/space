@@ -5,6 +5,7 @@
  *      Author: karlmka
  */
 #include "tween.h"
+#include "pool.h"
 #include "stdlib.h"
 
 pool * tween_pool;
@@ -41,7 +42,7 @@ manager * tween_manager()
 
 void tween_update_manager(manager *m, float dt)
 {
-	llist_iterate_func(m->tweens, tween_step, dt);
+	llist_iterate_func(m->tweens, tween_step, (void*)&dt);
 }
 
 tween * tween_create(float *start, float *end, int num, float duration, float (*easing)(float))

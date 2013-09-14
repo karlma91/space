@@ -4,6 +4,8 @@
  *  Created on: Sep 14, 2013
  *      Author: karlmka
  */
+#include "we_data.h"
+#include <stdlib.h>
 #include "pool.h"
 
 struct pool {
