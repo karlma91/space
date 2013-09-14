@@ -218,7 +218,7 @@ static void action_shoot(obj_player *player)
 			if (player->bullet_type == obj_id_bullet) {
 				params = &opb;
 			}
-			instance *instance = instance_create(player->bullet_type, params, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
+			instance *instance = instance_create(player->bullet_type, params, shoot_pos, shoot_vel);
 		}
 
 		player->gun_timer = 0;

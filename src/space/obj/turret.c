@@ -79,7 +79,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		shoot_vel = cpvmult(shoot_vel, SHOOT_VEL);
 
 		obj_param_bullet opb = {.friendly = 0, .damage = 10};
-		instance_create(obj_id_bullet, &opb, shoot_pos.x, shoot_pos.y, shoot_vel.x, shoot_vel.y);
+		instance_create(obj_id_bullet, &opb, shoot_pos, shoot_vel);
 
 		//TODO add the following data as params to bullet
 		//turret->data.body->p

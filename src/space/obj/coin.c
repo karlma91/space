@@ -29,8 +29,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetUserData(coin->data.body, coin);
 	cpBodySetPos(coin->data.body, coin->data.p_start);
 
-	float angle = (1.0f*rand() / RAND_MAX) * M_PI*2;
-	float force = 400 + (1.0f*rand() / RAND_MAX)*1000; //TODO avgjør force utifra antal coins som spawner (altså utenfor create, i spawn metoden)
+	float angle = we_randf * M_PI*2;
+	float force = 400 + we_randf * 1000; //TODO avgjør force utifra antal coins som spawner (altså utenfor create, i spawn metoden)
 	coin->data.body->v = cpvmult(cpvforangle(angle), force);
 
 	cpShape *shape = we_add_circle_shape(space, coin->data.body,COIN_RADIUS-5,0.8,0.2);

@@ -7,11 +7,10 @@
 #include "../engine.h"
 #include "../../space/spaceengine.h" //TODO remove dependency
 #include "../../space/states/space.h" //TODO remove dependency
+#include "we_utils.h"
 
 #define PARTICLE_READ_BUFFER_SIZE 4096
 #define MAX_PARTICLES 100000
-
-#define RAND_FLOAT (1.0f*rand() / RAND_MAX)
 
 /**
  * parse functions
@@ -388,7 +387,7 @@ static void add_particle(emitter *em)
 	p->alive = 1;
 
 	/* speed */
-	float angle = ((RAND_FLOAT - 0.5)*((em->spread)) + (em->angular_offset+90))*(M_PI/180);
+	float angle = ((we_randf - 0.5)*((em->spread)) + (em->angular_offset+90))*(M_PI/180);
 	float speed = range_get_random(em->speed) * 0.001f;
 	cpVect t = cpvforangle(angle);
 	p->v = cpvmult(t,speed);
@@ -412,7 +411,7 @@ static void add_particle(emitter *em)
  */
 static float range_get_random(range r)
 {
-	return r.min + ((float)rand()/(float)RAND_MAX)*(r.max-r.min);
+	return r.min + we_randf * (r.max-r.min);
 }
 
 static void draw_all_particles(emitter *em)

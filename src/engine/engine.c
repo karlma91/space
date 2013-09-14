@@ -234,8 +234,8 @@ static void display_init(void)
 
 	if (!window) {
 		SDL_Log("ERROR - could not create window!\n");
-		SDL_Quit();
-		exit(-1);
+		//SDL_Quit();
+		//exit(-1);
 	}
 
 	SDL_ShowWindow(window);

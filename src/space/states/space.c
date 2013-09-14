@@ -648,7 +648,6 @@ static float stars_size[star_count];
 static void stars_init(void)
 {
 	//init stars
-	srand(122531);
 	int i;
 	for (i=0; i<star_count; i++) {
 		stars_x[i] = rand()%(GAME_WIDTH*2*2) - GAME_WIDTH*2; // make sure that radius is greater than WIDTH * sqrt(2)
@@ -737,7 +736,7 @@ void space_init_level(int space_station, int deck)
 				.gun_cooldown = 0.2f,
 				.cash_radius = 250
 		};
-		player = (obj_player *)instance_create(obj_id_player, &default_player, 0,0,0,0);
+		player = (obj_player *)instance_create(obj_id_player, &default_player, cpvzero, cpvzero);
 	} else {
 		player->disable = 1;
 		//player->hp_bar.value = player->param->max_hp;

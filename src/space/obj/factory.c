@@ -40,7 +40,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	/* make and add new body */
 	factory->data.body = cpSpaceAddBody(space,
 			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
-	cpBodySetPos(factory->data.body, cpv(factory->data.p_start.x,64+size/2));
+	cpBodySetPos(factory->data.body, factory->data.p_start);
+	cpBodySetAngle(factory->data.body, cpvtoangle(cpvperp(factory->data.body->p)));
 	factory->data.body->velocity_func = space_velocity;
 
 	shape_add_shapes(space, factory->param.shape_id, factory->data.body, 400, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
@@ -58,7 +59,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		if(se_distance_to_player(factory->data.body->p.x) < factory->max_distance) {
 			float x = factory->data.body->p.x;
 			float y = factory->data.body->p.y - 150;
-			instance * ins = instance_create(factory->param.type, factory->param.param,x,y,0,0);
+			instance * ins = instance_create(factory->param.type, factory->param.param,cpv(x,y),cpvzero);
 			COMPONENT_SET(ins, CREATOR, factory);
 			factory->timer = 0;
 			factory->cur += 1;

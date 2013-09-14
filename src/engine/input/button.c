@@ -11,6 +11,7 @@
 #include "../engine.h"
 #include "../data/llist.h"
 #include "../graphics/draw.h"
+#include "we_utils.h"
 
 #define THIS_IS_A_TOUCH_OBJECT 1
 #include "touch.h"
@@ -125,7 +126,7 @@ void button_set_frontcolor(button btn_id, Color col)
 
 void button_set_animated(button btn_id, int animated, float fps) {
 	struct button *btn = (struct button *) btn_id;
-	btn->spr.sub_index += 50.0f * rand() / RAND_MAX; //TODO hardkodet!
+	btn->spr.sub_index += 50.0f * we_randf; //TODO hardkodet!
 	btn->animated = animated;
 	btn->spr.animation_speed = fps;
 }

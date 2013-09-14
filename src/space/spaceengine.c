@@ -214,7 +214,7 @@ void se_spawn_coins(instance * ins)
 		while (i) {
 			rnd_x = 2 - ((i & 0x3) + 1);
 			rnd_y = 2 - (((i & 0x3) ^ 0x3) + 1);
-			instance_create(obj_id_coin, NULL, pos.x + rnd_x, pos.y + rnd_y*2, 0, 0);
+			instance_create(obj_id_coin, NULL, cpvadd(pos,cpv(rnd_x,rnd_y*2)), cpvzero);
 			--i;
 		}
 	}

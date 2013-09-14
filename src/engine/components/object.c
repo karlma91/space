@@ -112,19 +112,17 @@ int component_register(int pointer_count)
 	}
 }
 
-instance *instance_create(object_id *type, const void *param, float x, float y, float hs, float vs)
+instance *instance_create(object_id *type, const void *param, cpVect p, cpVect v)
 {
 	instance *ins = instance_super_malloc(type);
 
-	if (x != x || y != y || hs != hs || vs != vs) {
+	if (p.x != p.x || p.y != p.y || v.x != v.x || v.y != v.y) {
 		SDL_Log("ERROR in instance_create: params NaN!");
 		raise(SIGKILL);
 	}
 
-	ins->p_start.x = x;
-	ins->p_start.y = y;
-	ins->v_start.x = hs;
-	ins->v_start.y = vs;
+	ins->p_start = p;
+	ins->v_start = v;
 
 	//TODO remove x,y,hs,vs in ins.
 	//TODO init body
