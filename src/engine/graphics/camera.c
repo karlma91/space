@@ -74,31 +74,12 @@ void camera_update_zoom(camera *cam, cpVect pos, float level_height)
             cam->zoom = 1.0f*GAME_HEIGHT/level_height;
             cam->y = pos.y;
             cam->x = pos.x;
-            //cam->y = 1.0f*level_height/2;
             break;
         case 6:
-            scrlvl = 1.0f * GAME_HEIGHT/level_height;
-            /* parameters to change */
-            zoomlvl = 4; /* amount of zoom less is more zoom */
-            float startlvl = 0.8;
-            float endlvl = 0.2;
-
-            float freq = startlvl-endlvl;
-            if (py < 0) {
-                /* undefined zoom! Reset/fix player position? */
-            } else if ( py < endlvl) {
-                cam->zoom = 2 / zoomlvl + scrlvl;
-                cam->y = GAME_HEIGHT / (2*cam->zoom);
-            } else if (py < startlvl) {
-                cam->zoom = (1 - cos( (1/freq)*M_PI*(py + (freq-endlvl) ))) / zoomlvl + scrlvl;
-                cam->y = GAME_HEIGHT / (2*cam->zoom);
-            } else if (py < 1) {
-                cam->zoom = scrlvl;
-                cam->y = level_height / (2);
-            }else{
-                /* undefined zoom! Reset/fix player position? */
-            }
-            break;
+        	cam->zoom = 0.3f*GAME_HEIGHT/(level_height);
+        	cam->y = 0;
+        	cam->x = 0;
+        	break;
         default:
             cam->zoom = 1.0f*GAME_HEIGHT/level_height;
             cam->y = 1.0f*level_height/2;

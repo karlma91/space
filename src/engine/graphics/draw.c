@@ -366,33 +366,21 @@ void draw_destroy(void)
 	//...
 }
 
-void draw_circle(GLfloat x, GLfloat y, GLfloat radius) //TODO update to use array buffers
+void draw_circle(cpVect pos, GLfloat radius)
 {
-#if GLES1
-
-
-#else
-	int i;
-	glBegin(GL_TRIANGLE_FAN);
-	glVertex2f(0,0);
-	for(i = 0;i<128; i+=2){
-		glTranslatef(x,y,0);
-		glVertex2f(unit_circle[i]*radius, unit_circle[i+1]*radius);
-	}
-	glEnd();
-#endif
+	draw_donut(pos, 0, radius);
 }
 
-void draw_donut(GLfloat x, GLfloat y, GLfloat inner_r, GLfloat outer_r)
+void draw_donut(cpVect p, GLfloat inner_r, GLfloat outer_r)
 {
 	int i = 0;
 	static float v[256];
 	int j = 0;
 	for(i = 0;i<128; i+=2){
-		v[j++] = (x+unit_circle[i]*inner_r);
-		v[j++] = y+unit_circle[i+1]*inner_r;
-		v[j++] = (x+unit_circle[i]*outer_r);
-		v[j++] = y+unit_circle[i+1]*outer_r;
+		v[j++] = (p.x+unit_circle[i]*inner_r);
+		v[j++] = p.y+unit_circle[i+1]*inner_r;
+		v[j++] = (p.x+unit_circle[i]*outer_r);
+		v[j++] = p.y+unit_circle[i+1]*outer_r;
 	}
 	draw_vertex_pointer(2, GL_FLOAT, 0, v);
 	draw_tex_pointer(2, GL_FLOAT, 0, TEX_MAP_FULL);

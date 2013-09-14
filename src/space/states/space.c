@@ -387,18 +387,10 @@ static void draw_deck()
 {
 	/* draw ceiling */
 	draw_color4f(0.1,0.3,0.7,0.6);
-	{
-		glRotatef(current_camera->rotation, 0,0,1);
-		glScalef(current_camera->zoom,current_camera->zoom,1); //TODO REMOVE
-		glTranslatef(-current_camera->x, -current_camera->y, 0.0f); //TODO REMOVE
-	}
-	draw_circle(0,0,currentlvl->inner_radius);
-	{
-		glLoadIdentity(); //TODO REMOVE
-	}
+	draw_circle(cpvzero, currentlvl->inner_radius);
 
 	/* draw floor */
-	draw_donut(0,0,currentlvl->outer_radius, currentlvl->outer_radius + 3000);
+	draw_donut(cpvzero, currentlvl->outer_radius, currentlvl->outer_radius + 3000);
 
 	// DEBUG SEGMENTS
 	llist_begin_loop(ll_floor_segs);
@@ -422,9 +414,9 @@ static void SPACE_draw(void)
 	if(position_time > 1 || position_time < 0){
 		position_dir *= -1;
 	}
-	position_now = tween_move_f(position_start, position_end, position_time, ExponentialEaseInOut);
+	//position_now = tween_move_f(position_start, position_end, position_time, ExponentialEaseInOut);
 
-	draw_box(0,position_now, 100, 100, 0, 1);
+	//draw_box(0,position_now, 100, 100, 0, 1);
 
 	/* translate view */
 	draw_load_identity();
@@ -469,7 +461,7 @@ static void radar_draw(float x, float y)
 		draw_rotate(-cpvtoangle(player->data.body->p)*180/M_PI-90, 0, 0, 1);
 	}
 	draw_color4f(0.3, 0.5, 0.7, 0.6);
-	draw_donut(0, 0, currentlvl->inner_radius / currentlvl->outer_radius * RADAR_SIZE, RADAR_SIZE);
+	draw_donut(cpvzero, currentlvl->inner_radius / currentlvl->outer_radius * RADAR_SIZE, RADAR_SIZE);
 	instance_iterate_comp(CMP_MINIMAP, (void (*)(instance *, void *))plot_on_radar, NULL);
 	draw_pop_matrix();
 }
