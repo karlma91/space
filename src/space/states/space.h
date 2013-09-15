@@ -27,8 +27,8 @@ extern int getPlayerScore(void);
 
 extern void drawStars(void);
 
-void space_start_demo(void);
-void space_start_multiplayer(void);
+void space_start_demo(int station, int deck);
+void space_start_multiplayer(int station, int deck);
 
 void space_restart_level(void);
 void space_next_level(void);

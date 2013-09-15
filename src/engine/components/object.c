@@ -16,9 +16,9 @@ typedef struct {
 	object_id *obj;
 	int count;
 
-	LList alive;
+	//LList alive;
 	LList active;
-	LList destroyed;
+	//LList destroyed;
 
 	LList pool;
 } object_info;
@@ -26,13 +26,34 @@ typedef struct {
 static int component_index = 0;
 
 int object_count = 0;
+static int debug_allocs = 0;
+static int debug_frees = 0;
 object_info objects_meta[OBJECT_MAX_OBJECTS];
 
 static LList ins2destroy;
+static int terminating = 0;
 
 static void destroy_func(instance* obj)
 {
 	obj->TYPE->call.on_remove(obj);
+}
+
+static void free_dead_func(void *obj)
+{
+#ifdef DEBUG_MEMORY
+	SDL_Log("TMP: removing %p[%s]",obj, ((instance *)obj)->TYPE->NAME);
+#endif
+	free(obj);
+	++debug_frees;
+}
+
+static void free_active_func(instance *obj)
+{
+	if (!((instance*)obj)->destroyed) {
+		obj->TYPE->call.on_destroy(obj);
+	}
+	destroy_func(obj);
+	free_dead_func(obj);
 }
 
 int object_register(object_id *obj)
@@ -52,16 +73,16 @@ int object_register(object_id *obj)
 
 	LList alive, active, destroyed;
 
-	alive = llist_create_group();
+	//alive = llist_create_group();
 	active = llist_create();
-	destroyed = llist_create();
+	//destroyed = llist_create();
 
-	llist_add(alive, active);
-	llist_add(alive, destroyed);
+	//llist_add(alive, active);
+	//llist_add(alive, destroyed);
 
-	objects_meta[id].alive = alive;
+	//objects_meta[id].alive = alive;
 	objects_meta[id].active = active;
-	objects_meta[id].destroyed = destroyed;
+	//objects_meta[id].destroyed = destroyed;
 
 	objects_meta[id].pool = llist_create();
 
@@ -120,10 +141,11 @@ instance *instance_super_malloc(object_id *type)
 	int size = type->SIZE;
 
 	if (ins == NULL) {
-#ifdef DEBUG_MEMORY
-		SDL_Log( "Info: Allocating new object id %d of size %u\n", id, size);
-#endif
 		ins = calloc(1, size);
+		++debug_allocs;
+#ifdef DEBUG_MEMORY
+		SDL_Log("TMP: allocating %p[%s] size: %u",ins, type->NAME, size);
+#endif
 	} else {
 		llist_remove(list, (void *)ins);
 		memset(ins,0,size);
@@ -138,6 +160,10 @@ instance *instance_super_malloc(object_id *type)
 
 instance *instance_create(object_id *type, const void *param, cpVect p, cpVect v)
 {
+	if (terminating) {
+		return NULL;
+	}
+
 	instance *ins = instance_super_malloc(type);
 
 	if (p.x != p.x || p.y != p.y || v.x != v.x || v.y != v.y) {
@@ -173,6 +199,7 @@ instance *instance_create(object_id *type, const void *param, cpVect p, cpVect v
 
 void object_init(void) {
 	ins2destroy = llist_create();
+	terminating = 0;
 }
 
 #define  err_ins(x) \
@@ -291,12 +318,18 @@ void object_destroy(void)
 	int obj_id;
 	object_info *obj = objects_meta;
 
+	terminating = 1;
+
 	for (obj_id = 0; obj_id < object_count; ++obj_id, ++obj) {
-		llist_destroy(obj->alive);
+		//llist_destroy(obj->alive);
+		llist_set_remove_callback(obj->active, free_active_func);
 		llist_destroy(obj->active);
-		llist_destroy(obj->destroyed);
+		llist_set_remove_callback(obj->pool, free_dead_func);
+		llist_destroy(obj->pool);
 		obj->count = 0;
 	}
+
+	SDL_Log("INFO: %d of %d instances freed!", debug_frees, debug_allocs);
 
 	//TODO remove all object definitions
 }

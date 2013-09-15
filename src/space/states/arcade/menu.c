@@ -116,7 +116,7 @@ static void pre_update(void)
 	if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
 		switch(current_menu){
 			case MENU_MAIN:
-				space_start_demo();
+				space_start_demo(1,1);
 				break;
 			case MENU_INGAME:
 				statesystem_set_state(state_space);
@@ -186,7 +186,7 @@ static void inner_main(void)
 {
 	switch (select_id) {
 	case 0: //START GAME
-		space_start_demo();
+		space_start_demo(1,1);
 		break;
 	case 1: //LEVEL SELECT
 
@@ -211,7 +211,7 @@ static void inner_ingame(void)
 		statesystem_set_state(state_space);
 		break;
 	case 1: //RESTART GAME
-		space_start_demo();
+		space_start_demo(1,1);
 		break;
 	case 2:
 		curMenu = &mainMenuTest;

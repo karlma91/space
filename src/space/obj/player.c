@@ -73,14 +73,16 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	shape = we_add_circle_shape(space, player->gunwheel,radius,0.9,0.8);
 	we_shape_collision(shape, &this, LAYER_PLAYER, player);
 
+	//cpSpaceAddConstraint(space, cpPinJointNew(player->data.body, player->gunwheel, cpvzero, cpvzero));
+
 	init(player);
 }
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	draw_color4f(1,1,1,1);
-	sprite_render(&(player->gun), player->gunwheel->p, player->aim_angle);
-	sprite_render(&(player->data.spr), player->data.body->p, player->direction);
+	sprite_render(&(player->gun), player->gunwheel->p, player->aim_angle); //TODO use render body
+	sprite_render(&(player->data.spr), player->data.body->p, player->direction); //TODO use render body
 	hpbar_draw(&player->hp_bar);
 }
 
@@ -102,7 +104,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 		cpBodySetPos(player->gunwheel, player->data.body->p);
 		cpBodySetVel(player->gunwheel, player->data.body->v);
-		cpBodySetAngle(player->gunwheel,player->aim_angle);
+		cpBodySetAngle(player->gunwheel,player->aim_angle); //TODO remove aim_angle and use body instead
 
 		if (player->disable == 0){
 			controls(player);

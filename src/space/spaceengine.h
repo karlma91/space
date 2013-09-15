@@ -3,7 +3,7 @@
 #include "chipmunk.h"
 #include "../engine/components/object.h"
 
-cpFloat se_get_best_shoot_angle(cpVect a, cpVect va, cpVect b, cpVect vb, cpFloat bullet_speed);
+cpFloat se_get_best_shoot_angle(cpBody *body1, cpBody *body2, cpFloat bullet_speed);
 cpFloat get_angle(cpVect a, cpVect b);
 void se_add_score_and_popup(cpVect p, int score);
 int se_damage_object(instance *object, instance *dmg_dealer);

@@ -76,10 +76,10 @@ OBJ_START(player)
 	int gun_level;
 	int coins;
 	float rotation_speed;
-	float direction; /* in radians [0, 2*PI]*/
+	float direction; /* in radians [0, 2*PI]*/ //TODO remove this
 	float direction_target; /* in radians [0, 2*PI]*/
 	float gun_timer;
-	float aim_angle;
+	float aim_angle; //TODO remove this
 	float aim_speed;
 	minimap radar_image;
 	float force;
@@ -109,13 +109,13 @@ PARAM_START(tank)
 PARAM_END
 OBJ_START(tank)
 	float timer;
-	float barrel_angle;
 	float rot_speed;
 	float max_distance;
 	hpbar hp_bar;
 	minimap radar_image;
 	cpBody *wheel1;
 	cpBody *wheel2;
+	cpBody *barrel;
 	int state;
 	sprite wheel_sprite;
 	sprite turret_sprite;
@@ -159,7 +159,6 @@ PARAM_START(turret)
 PARAM_END
 OBJ_START(turret)
 	float timer;
-	float barrel_angle;
 	int bullets;
 	float max_distance;
 	int shooting;

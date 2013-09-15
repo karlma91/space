@@ -15,6 +15,9 @@
 static void space_vel_func(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt) {
 	gravity = cpvmult(cpvnormalize_safe(body->p), cpvlength(gravity));
 	cpBodyUpdateVelocity(body, gravity, damping, dt);
+}static void space_vel_neg_func(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt) {
+	gravity = cpvmult(cpvnormalize_safe(body->p), -cpvlength(gravity));
+	cpBodyUpdateVelocity(body, gravity, damping, dt);
 }
 static void space_vel_func_zero_g(cpBody *body, cpVect gravity, cpFloat damping, cpFloat dt) {
 	cpBodyUpdateVelocity(body, cpvzero, damping, dt);
@@ -86,8 +89,11 @@ int se_damage_object(instance *object, instance *dmg_dealer)
 /**
  * returns the best angle to shoot at a moving object obj2 from obj1
  */
-cpFloat se_get_best_shoot_angle(cpVect a, cpVect va, cpVect b, cpVect vb, cpFloat bullet_speed)
+cpFloat se_get_best_shoot_angle(cpBody *body1, cpBody *body2, cpFloat bullet_speed)
 {
+	cpVect a = body1->p, va = body1->v;
+	cpVect b = body2->p, vb = body2->v;
+
 	cpVect v = cpvsub(a, b);
 
 	cpFloat c = cpvlength(vb);
@@ -243,5 +249,15 @@ void se_tangent_body(cpBody *body)
 
 void se_velfunc(cpBody *body, int with_gravity)
 {
-	body->velocity_func = with_gravity ? space_vel_func : space_vel_func_zero_g;
+	switch(with_gravity) {
+	case 1:
+		body->velocity_func = space_vel_func;
+		break;
+	case -1:
+		body->velocity_func = space_vel_neg_func;
+		break;
+	case 0:
+		body->velocity_func = space_vel_func_zero_g;
+		break;
+	}
 }

@@ -370,7 +370,7 @@ static void draw_deck()
 {
 	/* draw ceiling */
 	draw_color4f(0.1,0.3,0.7,0.6);
-	draw_circle(cpvzero, currentlvl->inner_radius);
+	draw_circle(cpvzero, currentlvl->inner_radius + 15);
 
 	/* draw floor */
 	draw_donut(cpvzero, currentlvl->outer_radius - 15, currentlvl->outer_radius + 3000);
@@ -944,21 +944,19 @@ void input(void)
 #endif
 }
 
-void space_start_demo(void) {
+void space_start_demo(int station, int deck) {
 	//TODO set and reset all per-game variables
 	multiplayer = 0;
-
 	current_camera = &space_cam;
-
-	space_init_level(1,1);
+	space_init_level(station,deck);
 	statesystem_set_state(state_space);
 }
 
-void space_start_multiplayer(void) {
+void space_start_multiplayer(int station, int deck) {
 	//TODO set and reset all per-game variables
 	multiplayer = 1;
 
-	space_init_level(1,1);
+	space_init_level(station, deck);
 	statesystem_set_state(state_space);
 }
 

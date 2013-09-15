@@ -13,6 +13,7 @@ static cpBody *addWheel(cpSpace *space, cpVect pos, cpGroup group);
 
 #define MASS 5.0f
 #define MASS_WHEEL 10.0f
+#define MASS_BARREL 2.0f
 #define SHOOT_VEL 1500
 
 static void init(OBJ_TYPE *OBJ_NAME)
@@ -63,6 +64,15 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
 	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
 
+	tank->barrel = cpSpaceAddBody(space, cpBodyNew(MASS_BARREL, cpMomentForBox(MASS_BARREL, width/2,height/2)));
+	cpBodySetPos(tank->barrel, tank->data.p_start);
+	cpBodySetUserData(tank->barrel, tank);
+	se_tangent_body(tank->barrel);
+	se_velfunc(tank->barrel, 1);
+	shape_add_shapes(space, POLYSHAPE_TANK, tank->barrel, width/2, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
+	cpSpaceAddConstraint(space, cpSimpleMotorNew(tank->data.body, tank->barrel, 0));
+	cpSpaceAddConstraint(space, cpPinJointNew(tank->data.body, tank->barrel, cpvzero, cpvzero));
+
 	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,0,60,&(tank->data.body->p));
 }
 
@@ -74,7 +84,6 @@ static void set_wheel_velocity(obj_tank *tank, float velocity)
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
 {
-
 #if !ARCADE_MODE
 	if (keys[SDL_SCANCODE_F2]) { //DEBUG
 		tank->data.body->p.x = 0;
@@ -89,39 +98,23 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	static float ptx = 0;
 
 	if (player) {
-	cpVect pl = player->data.body->p;
-	cpVect rc = tank->data.body->p;
-	ptx = se_arcdist2player(tank->data.body->p.x);
+		cpFloat best_angle = se_get_best_shoot_angle(tank->data.body, player->data.body, SHOOT_VEL);
 
-	cpFloat best_angle = se_get_best_shoot_angle(rc,tank->data.body->v, pl, player->data.body->v, SHOOT_VEL);
+		tank->barrel->a = turn_toangle(tank->barrel->a, best_angle, tank->rot_speed * dt);
+		cpBodySetAngle(tank->barrel, tank->barrel->a);
 
-	best_angle = best_angle - cpvtoangle(tank->data.body->rot);
-	if(best_angle < 0){
-		best_angle += 2*M_PI;
-	}else if(best_angle>2*M_PI){
-		best_angle -= 2*M_PI;
-	}
-	tank->barrel_angle=turn_toangle(tank->barrel_angle, best_angle, tank->rot_speed * dt);
+		if(tank->timer > 1 + (3.0f*we_randf) && se_arcdist2player(tank->data.body->p.x)<tank->max_distance){
+			//TODO hent ut lik kode for skyting og lag en metode av det
+			cpVect shoot_vel = tank->barrel->rot;
+			cpVect shoot_pos = cpvadd(tank->data.body->p, cpvmult(shoot_vel,55));
 
+			shoot_vel = cpvmult(shoot_vel,SHOOT_VEL);
 
-	if(tank->barrel_angle > M_PI && tank->barrel_angle < 3*(M_PI/2)){
-		tank->barrel_angle = M_PI;
-	}else if(tank->barrel_angle<0 || tank->barrel_angle > 3*(M_PI/2)){
-		tank->barrel_angle = 0;
-	}
-
-	if(tank->timer > 1 + (3.0f*we_randf) && se_arcdist2player(tank->data.body->p.x)<tank->max_distance){
-		//TODO hent ut lik kode for skyting og lag en metode av det
-		cpVect shoot_vel = cpvforangle(tank->barrel_angle + cpBodyGetAngle(tank->data.body));
-		cpVect shoot_pos = cpvadd(tank->data.body->p, cpvmult(shoot_vel,55));
-
-		shoot_vel = cpvmult(shoot_vel,SHOOT_VEL);
-
-		obj_param_bullet opb = {.friendly = 0, .damage = 10};
-		instance_create(obj_id_bullet, &opb, shoot_pos, shoot_vel);
-		sound_play(SND_LASER_2);
-		tank->timer = 0;
-	}
+			obj_param_bullet opb = {.friendly = 0, .damage = 10};
+			instance_create(obj_id_bullet, &opb, shoot_pos, shoot_vel);
+			sound_play(SND_LASER_2);
+			tank->timer = 0;
+		}
 	}
 
 
@@ -134,6 +127,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	float velocity_low = 50000;
 	float velocity_heigh = 200000;
+	ptx = se_arcdist2player(tank->data.body->p.x);
 
 	//TMP DEBUG OVERSTYRING AV TANK
 	if (keys[SDL_SCANCODE_LCTRL]) {
@@ -176,8 +170,6 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
 	se_tangent_body(body);
 	se_velfunc(body, 1);
 
-
-
 	cpShape *shape = we_add_circle_shape(space, body, radius, 0.9, 0.5);
 	cpShapeSetGroup(shape, &this);
 	cpShapeSetLayers(shape, LAYER_BULLET_ENEMY);
@@ -188,14 +180,9 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	GLfloat dir = cpBodyGetAngle(tank->data.body);
-	GLfloat rot = cpBodyGetAngle(tank->wheel1);
-	GLfloat barrel_angle = (tank->barrel_angle + dir);
-
 	hpbar_draw(&tank->hp_bar);
 
 	draw_color4f(1,1,1,1);
-
 	sprite_render_body(&(tank->wheel_sprite), tank->wheel1);
 	sprite_render_body(&(tank->wheel_sprite), tank->wheel2);
 
@@ -203,9 +190,8 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		draw_color4f(1,0.2,0,1);
 	}
 
-	cpVect pos = tank->data.body->p;
 	sprite_render_body(&(tank->data.spr), tank->data.body);
-	sprite_render(&(tank->turret_sprite), pos, barrel_angle);
+	sprite_render_body(&(tank->turret_sprite), tank->barrel);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
@@ -220,6 +206,7 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	we_body_remove(space, &tank->data.body);
+	we_body_remove(space, &tank->barrel);
 	we_body_remove(space, &tank->wheel1);
 	we_body_remove(space, &tank->wheel2);
 	factory_remove_child(tank);

@@ -143,8 +143,7 @@ static void button_callback(void *data)
 	int level = *((int *) &data);
 
 	if (level == selected_level) {
-		space_start_demo();
-		space_init_level(current_ship->id, level);
+		space_start_demo(current_ship->id, level);
 	} else {
 		set_selected_level(level);
 	}
