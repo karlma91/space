@@ -89,7 +89,7 @@ void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, floa
 	llist_begin_loop(p);
 	while (llist_hasnext(p)) {
 		LList rb = (LList) llist_next(p);
-		if (addall | (shapes | 1)) {
+		if (addall || (shapes & 0x1)) {
 			llist_begin_loop(rb);
 			while (llist_hasnext(rb)) {
 				shape_instance *data = (shape_instance*) llist_next(rb);
@@ -106,10 +106,10 @@ void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, floa
 				cpShapeSetCollisionType(sh, type);
 				cpShapeSetLayers(sh, layer);
 				cpSpaceAddShape(space, sh);
-				shapes = shapes >> 1;
 			}
 			llist_end_loop(rb);
 		}
+		shapes = shapes >> 1;
 	}
 	llist_end_loop(p);
 	if (shapes != 0) {
