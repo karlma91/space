@@ -3,9 +3,10 @@
 #include "../states/space.h"
 #include "../spaceengine.h"
 #include "chipmunk.h"
-
+#include "we_tween.h"
 #define OBJ_NAME factory
 #include "we_defobj.h"
+
 
 
 static void init(OBJ_TYPE *OBJ_NAME)
@@ -14,10 +15,12 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
+	tween_init();
 	COMPONENT_SET(factory, HPBAR, &factory->hp_bar);
 	COMPONENT_SET(factory, COINS, &factory->param.coins);
 	COMPONENT_SET(factory, MINIMAP, &factory->radar_image);
 	factory->radar_image = cmp_new_minimap(20, COL_BLUE);
+
 
 	factory->timer = factory->param.spawn_delay * (we_randf * 0.8f + 0.2f);
 
@@ -46,6 +49,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	hpbar_init(&factory->hp_bar, factory->param.max_hp, 200, 35, 0, 180,
 			&(factory->data.body->p));
+
+
+
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
@@ -77,7 +83,6 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	draw_color4f(1,1,1,1);
-
 	factory->rot += 381 * dt;
 	particles_draw_emitter(factory->smoke);
 	//glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);

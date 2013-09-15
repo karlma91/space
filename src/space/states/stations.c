@@ -24,6 +24,14 @@ static scroll_p scroller;
 static int tex_stars;
 static int tex_stars_2;
 
+// TODO: cooler system
+//tween test
+static tween *test;
+static tween *tests;
+static tween *testr;
+static cpVect a, b;
+static float r;
+
 /* * * * * * * * * *
  * state functions *
  * * * * * * * * * */
@@ -34,7 +42,7 @@ static void on_enter(void)
 
 static void pre_update(void)
 {
-
+	tween_update(dt);
 }
 
 static void post_update(void)
@@ -105,6 +113,11 @@ static void draw(void)
 		//TODO skrive antall levler klart?
 	}
 
+	test = tween_cpv_is_done_remove(test, &a);
+	tests = tween_cpv_is_done_remove(tests, &b);
+	testr = tween_float_is_done_remove(testr, &r);
+	draw_box(a.x + xoffset,a.y + yoffset,b.x,b.y,r,1);
+
 	//cpVect pos = {0,0.7f*GAME_HEIGHT/2};
 	//draw_texture(tex_title, &pos, TEX_MAP_FULL, 1200, 300, 0);
 }
@@ -171,5 +184,15 @@ void stations_init(void)
 
 	tex_stars = texture_load("stars.jpg");
 	tex_stars_2 = texture_load("stars_2.png");
+
+	//TODO: TMP TWEEN TEST
+	tween_init();
+	test = tween_cpv_create(cpv(0,300), cpv(0,500), 5, ElasticEaseInOut);
+	tests = tween_cpv_create(cpv(10,10), cpv(100,100), 10, LinearInterpolation);
+	float str = 0;
+	float endr = 3.14;
+	testr = tween_create(&(str), &(endr), 1, 2, ExponentialEaseInOut);
+	tween_repeat(testr, 1, 1);
+
 }
 

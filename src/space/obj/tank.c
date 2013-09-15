@@ -68,8 +68,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 static void set_wheel_velocity(obj_tank *tank, float velocity)
 {
-	cpBodySetAngVel(tank->wheel1, velocity);
-	cpBodySetAngVel(tank->wheel2, velocity);
+	cpBodySetTorque(tank->wheel1, velocity);
+	cpBodySetTorque(tank->wheel2, velocity);
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
@@ -132,27 +132,30 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	int left_clear = (left_dist > 250);
 	int right_clear = (right_dist > 250);
 
+	float velocity_low = 50000;
+	float velocity_heigh = 200000;
+
 	//TMP DEBUG OVERSTYRING AV TANK
 	if (keys[SDL_SCANCODE_LCTRL]) {
 		if (keys[SDL_SCANCODE_K])
-			set_wheel_velocity(tank, 500);
+			set_wheel_velocity(tank, 500000);
 		else if (keys[SDL_SCANCODE_L])
-			set_wheel_velocity(tank, -500);
+			set_wheel_velocity(tank, -500000);
 		else
 			set_wheel_velocity(tank, 0);
 	} else {
 		if (ptx < 0) {
 			if (left_clear)
-				set_wheel_velocity(tank, left_dist > 400 ? 20 : 5);
+				set_wheel_velocity(tank, left_dist > 400 ? velocity_heigh : velocity_low);
 			else if (right_clear)
-				set_wheel_velocity(tank, right_dist > 400 ? -20 : -5);
+				set_wheel_velocity(tank, right_dist > 400 ? -velocity_heigh : -velocity_low);
 			else
 				set_wheel_velocity(tank, 0);
 		} else if (ptx > 0) {
 			if (right_clear)
-				set_wheel_velocity(tank, right_dist > 400 ? -20 : -5);
+				set_wheel_velocity(tank, right_dist > 400 ? -velocity_heigh : -velocity_low);
 			else if (left_clear)
-				set_wheel_velocity(tank, left_dist > 400 ? 20 : 5);
+				set_wheel_velocity(tank, left_dist > 400 ? velocity_heigh : velocity_low);
 			else
 				set_wheel_velocity(tank, 0);
 		} else {
@@ -165,15 +168,17 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
  * make a wheel
  */
 static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
-	cpFloat radius = 15.0f;
+	cpFloat radius = 40.0f;
 	cpBody *body = cpSpaceAddBody(space,
 			cpBodyNew(MASS_WHEEL, cpMomentForCircle(MASS_WHEEL, 0.0f, radius, cpvzero)));
 	cpBodySetPos(body, pos);
-	cpBodySetAngVelLimit(body, 200);
+	cpBodySetAngVelLimit(body, 20);
 	se_tangent_body(body);
 	se_velfunc(body, 1);
 
-	cpShape *shape = we_add_circle_shape(space, body, radius, 0.8, 0.7);
+
+
+	cpShape *shape = we_add_circle_shape(space, body, radius, 0.9, 0.5);
 	cpShapeSetGroup(shape, &this);
 	cpShapeSetLayers(shape, LAYER_BULLET_ENEMY);
 

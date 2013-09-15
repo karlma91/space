@@ -107,7 +107,7 @@ cpFloat se_get_best_shoot_angle(cpVect a, cpVect va, cpVect b, cpVect vb, cpFloa
 
 	if (angle != angle) {
 		SDL_Log("ERROR: invalid angle!");
-		raise(SIGKILL);
+		//raise(SIGKILL);
 	}
 
 	return angle;

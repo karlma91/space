@@ -142,7 +142,7 @@ instance *instance_create(object_id *type, const void *param, cpVect p, cpVect v
 
 	if (p.x != p.x || p.y != p.y || v.x != v.x || v.y != v.y) {
 		SDL_Log("ERROR in instance_create: params NaN!");
-		raise(SIGKILL);
+		//raise(SIGKILL);
 	}
 
 	ins->p_start = p;
