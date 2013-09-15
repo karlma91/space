@@ -27,6 +27,7 @@ tween * tween_create(float *start, float *end, int num, float duration, float (*
 	t->running = 1;
 	t->repeat = 0;
 	t->done = 0;
+	t->time = 0;
 	return t;
 }
 
@@ -111,7 +112,7 @@ void tween_update(float dt)
 static void tween_iter_step(void *t, void *d)
 {
 	float dt = *((float*)d);
-	tween_step((tween*)t,dt);
+	tween_step((tween*)t, dt);
 }
 
 void tween_step(tween *t, float dt)
@@ -119,7 +120,6 @@ void tween_step(tween *t, float dt)
 	if(t->running) {
 		t->time += dt * (t->dir);
 		if( t->time > t->duration || t->time < 0) {
-
 			if(t->repeat) {
 				if(t->yoyo){
 					t->dir *= -1;

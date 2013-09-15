@@ -114,6 +114,9 @@ static void draw(void)
 	}
 
 	test = tween_cpv_is_done_remove(test, &a);
+	if(test == NULL) {
+		test = tween_cpv_create(a, cpv(we_randf*1000-500, we_randf*1000-500), 5, ElasticEaseInOut);
+	}
 	tests = tween_cpv_is_done_remove(tests, &b);
 	testr = tween_float_is_done_remove(testr, &r);
 	draw_box(a.x + xoffset,a.y + yoffset,b.x,b.y,r,1);
@@ -187,8 +190,9 @@ void stations_init(void)
 
 	//TODO: TMP TWEEN TEST
 	tween_init();
-	test = tween_cpv_create(cpv(0,300), cpv(0,500), 5, ElasticEaseInOut);
+	test = tween_cpv_create(cpv(0,300), cpv(500,500), 5, ElasticEaseInOut);
 	tests = tween_cpv_create(cpv(10,10), cpv(100,100), 10, LinearInterpolation);
+	tween_repeat(tests,0,1);
 	float str = 0;
 	float endr = 3.14;
 	testr = tween_create(&(str), &(endr), 1, 2, ExponentialEaseInOut);
