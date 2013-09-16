@@ -40,12 +40,15 @@ struct emitter {
 
 	int type;
 
+	particle_system * ps;
+
 	int self_draw;
 
 	SPRITE_ID sprite_id;
 
 	/** particle draw functions **/
 	void (*draw_particle)(emitter *em, particle *p);
+	void (*velocity_func)(emitter *em, particle *p);
 
 	/** particle list **/
 	int list_length;
@@ -109,6 +112,7 @@ struct system {
 	emitter *emitters_in_use;
 	cpVect offset;
 	float offset_rot;
+	cpVect (*gravity_dir_func)(cpVect p);
 };
 
 
@@ -121,6 +125,8 @@ void particles_update(particle_system *s);
 void particles_release_emitter(emitter* e);
 particle_system * particles_create_system();
 void particles_draw_emitter(emitter *e);
+
+void particle_set_gravity_func(particle_system *s, cpVect (*gravity_dir_func)(cpVect p));
 
 emitter *particles_add_score_popup(particle_system *s, cpVect p, int score);
 emitter *particles_add_sparks(particle_system *s, cpVect p, float angle, float force);
