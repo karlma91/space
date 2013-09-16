@@ -58,7 +58,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	factory->timer += dt;
 	sprite_update(&(factory->data.spr));
 	if (factory->timer > factory->param.spawn_delay && factory->cur < factory->param.max_tanks) {
-		if(se_arcdist2player(factory->data.body->p.x) < factory->max_distance) {
+		if(se_arcdist2player(factory->data.body->p) < factory->max_distance) {
 			cpVect pos = factory->data.body->p;
 			we_cart2pol(pos);
 			pos.x += 150;

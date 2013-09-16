@@ -75,7 +75,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		turret->timer = 0;
 	}
 	if (turret->shooting && turret->timer > turret->rate
-			&& se_arcdist2player(turret->data.body->p.x)
+			&& se_arcdist2player(turret->data.body->p)
 					< turret->max_distance) {
 		turret->bullets += 1;
 

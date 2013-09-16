@@ -9,7 +9,7 @@ void se_add_score_and_popup(cpVect p, int score);
 int se_damage_object(instance *object, instance *dmg_dealer);
 float turn_toangle(float from_angle, float to_angle, float step_size);
 
-float se_arcdist2player(float x);
+float se_arcdist2player(cpVect p);
 cpVect se_dist_a2b(instance *insa, instance *insb);
 cpVect se_dist_v(cpVect a, cpVect b);
 

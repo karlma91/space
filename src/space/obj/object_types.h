@@ -11,7 +11,7 @@
 #include "../game.h"
 
 void object_types_init(void);
-void instance_nearest_x_two(instance *ins, object_id *obj_id, instance **left, instance **right, cpFloat *instance, cpFloat *right_distance);
+void instance_get2nearest(instance *ins, object_id *obj_id, instance **left, instance **right, cpFloat *instance, cpFloat *right_distance);
 
 
 /* COLLISION LAYERS */

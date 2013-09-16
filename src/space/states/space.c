@@ -114,7 +114,7 @@ static void update_all(void);
 static void draw_gui(void);
 
 #define GRAVITY 600.0f
-#define DAMPING 0.99f
+#define DAMPING 0.8f
 
 
 /* The state timer */
@@ -368,12 +368,14 @@ static void update_camera_position(void)
 
 static void draw_deck()
 {
+	float margin = 0;//15;
+
 	/* draw ceiling */
 	draw_color4f(0.1,0.3,0.7,0.6);
-	draw_circle(cpvzero, currentlvl->inner_radius + 15);
+	draw_circle(cpvzero, currentlvl->inner_radius + margin);
 
 	/* draw floor */
-	draw_donut(cpvzero, currentlvl->outer_radius - 15, currentlvl->outer_radius + 3000);
+	draw_donut(cpvzero, currentlvl->outer_radius - margin, currentlvl->outer_radius + 3000);
 
 	// DEBUG SEGMENTS
 	llist_begin_loop(ll_floor_segs);

@@ -40,21 +40,23 @@ void object_types_init(void)
 	OBJECT_REGISTER(coin);
 }
 
+#define FLOAT_LARGE 9999999
 
-
-#ifndef INT_MIN
-#define INT_MIN -2147483648
-#endif
-
-void instance_nearest_x_two(instance *object, object_id *obj_id, instance **left, instance **right, cpFloat *left_distance, cpFloat *right_distance)
+void instance_get2nearest(instance *object, object_id *obj_id, instance **left, instance **right, cpFloat *left_distance, cpFloat *right_distance)
 {
 	LList list = object_get_instances(obj_id);
 
-	cpFloat min_length_left = INT_MIN;
-	cpFloat min_length_right = INT_MAX;
+	cpFloat min_length_left = FLOAT_LARGE;
+	cpFloat min_length_right = FLOAT_LARGE;
 	cpFloat length;
 
+	int left_set = 0;
+	int right_set = 0;
+
 	int check_id = (obj_id == object->TYPE);
+
+	cpVect p1 = object->body->p;
+	cpVect rot1 = object->body->rot;
 
 	llist_begin_loop(list);
 	while(llist_hasnext(list)) {
@@ -62,15 +64,21 @@ void instance_nearest_x_two(instance *object, object_id *obj_id, instance **left
 		if (check_id && object->instance_id == obj->instance_id)
 			continue; //skip self
 
-		cpVect v = obj->body->p;
-		length = v.x - object->body->p.x;
-		if (length < 0) { //left side
-			if (length > min_length_left) {
+		cpVect p2 = obj->body->p;
+
+		length = cpvdistsq(p1, p2);
+		cpVect rot2 = cpvnormalize_safe(cpvsub(p2,p1));
+		cpFloat dot = cpvdot(rot1,rot2);
+
+		if (dot < 0) { //left side
+			if (length < min_length_left) {
+				left_set = 1;
 				min_length_left = length;
 				*left = obj;
 			}
 		} else { //right side
 			if (length < min_length_right) {
+				right_set = 1;
 				min_length_right = length;
 				*right = obj;
 			}
@@ -78,17 +86,16 @@ void instance_nearest_x_two(instance *object, object_id *obj_id, instance **left
 	}
 	llist_end_loop(list);
 
-
-	if (min_length_left == INT_MIN) {
+	if (!left_set) {
 		*left = NULL;
-		*left_distance =  INT_MAX;
+		*left_distance = FLOAT_LARGE;
 	} else {
-		*left_distance =  -min_length_left;
+		*left_distance = sqrtf(min_length_left);
 	}
-	if (min_length_right == INT_MAX) {
+	if (!right_set) {
 		*right = NULL;
-		*right_distance = INT_MAX;
+		*right_distance = FLOAT_LARGE;
 	} else {
-		*right_distance = min_length_right;
+		*right_distance = sqrtf(min_length_right);
 	}
 }

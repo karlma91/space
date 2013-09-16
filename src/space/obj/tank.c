@@ -69,17 +69,17 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetUserData(tank->barrel, tank);
 	se_tangent_body(tank->barrel);
 	se_velfunc(tank->barrel, 1);
-	shape_add_shapes(space, POLYSHAPE_TANK, tank->barrel, width/2, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
+	shape_add_shapes(space, POLYSHAPE_TANK, tank->barrel, 150, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
 	cpSpaceAddConstraint(space, cpSimpleMotorNew(tank->data.body, tank->barrel, 0));
 	cpSpaceAddConstraint(space, cpPinJointNew(tank->data.body, tank->barrel, cpvzero, cpvzero));
 
 	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,0,60,&(tank->data.body->p));
 }
 
-static void set_wheel_velocity(obj_tank *tank, float velocity)
+static void set_wheel_torque(obj_tank *tank, float torque)
 {
-	cpBodySetTorque(tank->wheel1, velocity);
-	cpBodySetTorque(tank->wheel2, velocity);
+	cpBodySetTorque(tank->wheel1, torque);
+	cpBodySetTorque(tank->wheel2, torque);
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
@@ -103,7 +103,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		tank->barrel->a = turn_toangle(tank->barrel->a, best_angle, tank->rot_speed * dt);
 		cpBodySetAngle(tank->barrel, tank->barrel->a);
 
-		if(tank->timer > 1 + (3.0f*we_randf) && se_arcdist2player(tank->data.body->p.x)<tank->max_distance){
+		if(tank->timer > 1 + (3.0f*we_randf) && se_arcdist2player(tank->data.body->p)<tank->max_distance){
 			//TODO hent ut lik kode for skyting og lag en metode av det
 			cpVect shoot_vel = tank->barrel->rot;
 			cpVect shoot_pos = cpvadd(tank->data.body->p, cpvmult(shoot_vel,55));
@@ -117,43 +117,42 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		}
 	}
 
-
 	instance *left, *right;
 	cpFloat left_dist, right_dist;
-	instance_nearest_x_two((instance *)tank, obj_id_tank, &left, &right, &left_dist, &right_dist);
+	instance_get2nearest((instance *)tank, obj_id_tank, &left, &right, &left_dist, &right_dist);
 
-	int left_clear = (left_dist > 250);
-	int right_clear = (right_dist > 250);
+	int left_clear = (left_dist > 300);
+	int right_clear = (right_dist > 300);
 
-	float velocity_low = 50000;
-	float velocity_heigh = 200000;
-	ptx = se_arcdist2player(tank->data.body->p.x);
+	float velocity_high = 80000;
+	float velocity_low = 20000;
+	ptx = se_arcdist2player(tank->data.body->p);
 
 	//TMP DEBUG OVERSTYRING AV TANK
 	if (keys[SDL_SCANCODE_LCTRL]) {
 		if (keys[SDL_SCANCODE_K])
-			set_wheel_velocity(tank, 500000);
+			set_wheel_torque(tank, 500000);
 		else if (keys[SDL_SCANCODE_L])
-			set_wheel_velocity(tank, -500000);
+			set_wheel_torque(tank, -500000);
 		else
-			set_wheel_velocity(tank, 0);
+			set_wheel_torque(tank, 0);
 	} else {
 		if (ptx < 0) {
 			if (left_clear)
-				set_wheel_velocity(tank, left_dist > 400 ? velocity_heigh : velocity_low);
+				set_wheel_torque(tank, left_dist > 500 ? velocity_high : velocity_low);
 			else if (right_clear)
-				set_wheel_velocity(tank, right_dist > 400 ? -velocity_heigh : -velocity_low);
+				set_wheel_torque(tank, right_dist > 500 ? -velocity_high : -velocity_low);
 			else
-				set_wheel_velocity(tank, 0);
+				set_wheel_torque(tank, 0);
 		} else if (ptx > 0) {
 			if (right_clear)
-				set_wheel_velocity(tank, right_dist > 400 ? -velocity_heigh : -velocity_low);
+				set_wheel_torque(tank, right_dist > 500 ? -velocity_high : -velocity_low);
 			else if (left_clear)
-				set_wheel_velocity(tank, left_dist > 400 ? velocity_heigh : velocity_low);
+				set_wheel_torque(tank, left_dist > 500 ? velocity_high : velocity_low);
 			else
-				set_wheel_velocity(tank, 0);
+				set_wheel_torque(tank, 0);
 		} else {
-			set_wheel_velocity(tank, 0);
+			set_wheel_torque(tank, 0);
 		}
 	}
 }
@@ -162,7 +161,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
  * make a wheel
  */
 static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
-	cpFloat radius = 40.0f;
+	cpFloat radius = 30.0f;
 	cpBody *body = cpSpaceAddBody(space,
 			cpBodyNew(MASS_WHEEL, cpMomentForCircle(MASS_WHEEL, 0.0f, radius, cpvzero)));
 	cpBodySetPos(body, pos);
@@ -183,11 +182,23 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	hpbar_draw(&tank->hp_bar);
 
 	draw_color4f(1,1,1,1);
+	if (1) { //TODO REMOVE TMP TEST
+		instance *left, *right;
+		cpFloat left_dist, right_dist;
+		instance_get2nearest((instance *)tank, obj_id_tank, &left, &right, &left_dist, &right_dist);
+		draw_color4f(1,(left_dist > 300),(left_dist > 300),1);
+		sprite_render_body(&(tank->wheel_sprite), tank->wheel1);
+		draw_color4f(1,(right_dist > 300),(right_dist > 300),1);
+		sprite_render_body(&(tank->wheel_sprite), tank->wheel2);
+	} else {
 	sprite_render_body(&(tank->wheel_sprite), tank->wheel1);
 	sprite_render_body(&(tank->wheel_sprite), tank->wheel2);
+	}
 
 	if (tank->param.max_hp >= 100) {//TODO add color into param
 		draw_color4f(1,0.2,0,1);
+	} else {
+		draw_color4f(1,1,1,1);
 	}
 
 	sprite_render_body(&(tank->data.spr), tank->data.body);
@@ -199,6 +210,8 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	particles_get_emitter_at(parti, EMITTER_FRAGMENTS, tank->data.body->p);
 	se_spawn_coins((instance *)tank);
 	we_body_remove_constraints(space, tank->data.body);
+	cpBodySetTorque(tank->wheel1, 0);
+	cpBodySetTorque(tank->wheel2, 0);
 	sound_play(SND_TANK_EXPLODE);
 	//instance_remove(tank); //TODO don't call this method, but just remove constraints
 }

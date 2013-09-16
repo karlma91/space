@@ -212,7 +212,6 @@ static void action_shoot(obj_player *player)
 			shoot_vel = cpvmult(shoot_vel, 1400);
 			shoot_vel = cpvadd(shoot_vel, player->data.body->v);
 
-
 			obj_param_bullet opb = {.friendly = 1, .damage = player->bullet_dmg};
 			void *params = NULL;
 			if (player->bullet_type == obj_id_bullet) {

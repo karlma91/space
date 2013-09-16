@@ -29,14 +29,15 @@ void se_add_score_and_popup(cpVect p, int score)
 	((obj_player *) instance_first(obj_id_player))->coins += score;
 }
 
-float se_arcdist2player(float x) //TODO return arc distance?
+float se_arcdist2player(cpVect a)
 {
 	obj_player *player = ((obj_player *) instance_first(obj_id_player));
-	if(player){
-		cpVect a = cpv(x,0);
+	if (player) {
 		cpVect b = player->data.body->p;
-		cpVect d = se_dist_v(a, b);
-		return d.x;
+		we_cart2pol(a);
+		we_cart2pol(b);
+
+		return (b.y - a.y) * currentlvl->outer_radius;
 	}
 	return 0;
 }
@@ -129,7 +130,16 @@ cpFloat get_angle(cpVect a, cpVect b)
 //TODO add preferred angle to handle situations with two possible solutions?
 float turn_toangle(float from_angle, float to_angle, float step_size)
 {
-	from_angle += from_angle >= (2*M_PI) ? -(2*M_PI) : from_angle < 0 ? (2*M_PI) : 0;
+	if (from_angle >= WE_2PI) {
+		from_angle -= ((int)(from_angle/WE_2PI))*WE_2PI;
+	} else if (from_angle < 0) {
+		from_angle -= ((int)(from_angle/WE_2PI))*WE_2PI;
+	}
+	if (to_angle >= WE_2PI) {
+		to_angle -= ((int)(to_angle/WE_2PI))*WE_2PI;
+	} else if (to_angle < 0) {
+		to_angle -= ((int)(to_angle/WE_2PI))*WE_2PI;
+	}
 
 	if (to_angle < from_angle - step_size) {
 		if ((from_angle - to_angle) < M_PI) {
