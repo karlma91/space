@@ -287,6 +287,8 @@ void game_init(void)
 	object_types_init();
 	level_init();
 
+	tween_init();
+
     game_touchables();
 
 	/* init all states (warning: make sure that no init method depends on uninitialized state_id!) */

@@ -38,11 +38,21 @@ static float r;
 
 static void on_enter(void)
 {
+    //TODO: TMP TWEEN TEST
+    test = tween_cpv_create(cpv(0,300), cpv(500,500), 2, LinearInterpolation);
+    tests = tween_cpv_create(cpv(50,50), cpv(100,100), 2, ElasticEaseInOut);
+    tween_repeat(tests, 1, 1);
+    float str = 0;
+    float endr = 3.14;
+    testr = tween_create(&(str), &(endr), 1, 3, ElasticEaseInOut);
+    tween_repeat(testr, 2, 1);
 }
 
 static void pre_update(void)
 {
-	tween_update(dt);
+    test = tween_cpv_is_done_remove(test, &a);
+    tests = tween_cpv_is_done_remove(tests, &b);
+    testr = tween_float_is_done_remove(testr, &r);
 }
 
 static void post_update(void)
@@ -56,7 +66,6 @@ static void sdl_event(SDL_Event *event)
 static void draw(void)
 {
 	draw_color4f(1,1,1,1);
-
 	float xoffset = scroll_get_xoffset(scroller);
 	float yoffset = scroll_get_yoffset(scroller);
 
@@ -113,12 +122,7 @@ static void draw(void)
 		//TODO skrive antall levler klart?
 	}
 
-	test = tween_cpv_is_done_remove(test, &a);
-	if(test == NULL) {
-		test = tween_cpv_create(a, cpv(we_randf*1000-500, we_randf*1000-500), 5, ElasticEaseInOut);
-	}
-	tests = tween_cpv_is_done_remove(tests, &b);
-	testr = tween_float_is_done_remove(testr, &r);
+
 	draw_box(a.x + xoffset,a.y + yoffset,b.x,b.y,r,1);
 
 	//cpVect pos = {0,0.7f*GAME_HEIGHT/2};
@@ -136,6 +140,9 @@ static void on_pause(void)
 
 static void on_leave(void)
 {
+    test = tween_release(test);
+    tests = tween_release(tests);
+    testr = tween_release(testr);
 }
 
 static void destroy(void)
@@ -187,16 +194,6 @@ void stations_init(void)
 
 	tex_stars = texture_load("stars.jpg");
 	tex_stars_2 = texture_load("stars_2.png");
-
-	//TODO: TMP TWEEN TEST
-	tween_init();
-	test = tween_cpv_create(cpv(0,300), cpv(500,500), 5, ElasticEaseInOut);
-	tests = tween_cpv_create(cpv(10,10), cpv(100,100), 10, LinearInterpolation);
-	tween_repeat(tests,0,1);
-	float str = 0;
-	float endr = 3.14;
-	testr = tween_create(&(str), &(endr), 1, 2, ExponentialEaseInOut);
-	tween_repeat(testr, 1, 1);
 
 }
 

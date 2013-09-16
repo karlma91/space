@@ -23,66 +23,31 @@ tween * tween_create(float *start, float *end, int num, float duration, float (*
 	}else{
 		t->easing = easing;
 	}
-	t->dir = 1;
-	t->running = 1;
-	t->repeat = 0;
-	t->done = 0;
-	t->time = 0;
-	return t;
-}
 
-tween * tween_cpv_create(cpVect start, cpVect end, float duration, float (*easing)(float))
-{
-	float s[2];
-	s[0] = start.x;
-	s[1] = start.y;
-	float e[2];
-	e[0] = end.x;
-	e[1] = end.y;
-	tween *t = tween_create(s, e, 2, duration, easing);
+	t->dir = 1;
+	t->d.running =   TRUE;
+	t->d.done =     FALSE;
+	t->d.yoyo =     FALSE;
+	t->repeat = 0;
+	t->time = 0;
 	return t;
 }
 
 void tween_start(tween *t)
 {
-	t->running = 1;
+	t->d.running = TRUE;
 }
 
 /**
- * time = 0 infinite repeats
+ * times = negative infinite repeats
  */
 void tween_repeat(tween *t, int times, int yoyo)
 {
-	t->repeat = 1;
-	t->yoyo = yoyo;
-}
-
-tween * tween_cpv_is_done_remove(tween *t, cpVect *a )
-{
-	if(t != NULL){
-		if(t->done) {
-			tween_release(t);
-			return NULL;
-		}else {
-			*a = tween_cpv_pos(t);
-		}
+	t->repeat = times;
+	if(yoyo != 0){
+		t->d.yoyo = TRUE;
 	}
-	return t;
 }
-
-tween * tween_float_is_done_remove(tween *t, float *a )
-{
-	if(t != NULL){
-		if(t->done) {
-			tween_release(t);
-			return NULL;
-		}else {
-			tween_pos(t, a);
-		}
-	}
-	return t;
-}
-
 
 /**
  * useage:
@@ -95,20 +60,6 @@ tween * tween_release(tween *t)
 	return NULL;
 }
 
-void tween_update(float dt)
-{
-	llist_begin_loop(tween_pool->in_use);
-	while(llist_hasnext(tween_pool->in_use)) {
-		tween *t = llist_next(tween_pool->in_use);
-		if(t->running) {
-			if(!t->done) {
-				tween_step(t, dt);
-			}
-		}
-	}
-	llist_end_loop(tween_pool->in_use);
-}
-
 static void tween_iter_step(void *t, void *d)
 {
 	float dt = *((float*)d);
@@ -117,30 +68,26 @@ static void tween_iter_step(void *t, void *d)
 
 void tween_step(tween *t, float dt)
 {
-	if(t->running) {
+	if(t->d.running) {
 		t->time += dt * (t->dir);
 		if( t->time > t->duration || t->time < 0) {
-			if(t->repeat) {
-				if(t->yoyo){
+			if(t->repeat != 0) {
+			    if(t->repeat > 0){
+			        t->repeat -= 1;
+			    }
+				if(t->d.yoyo){
 					t->dir *= -1;
 				}else{
 					t->time = 0;
 				}
 			}else {
 				t->time = t->duration;
-				t->done = 1;
+				t->d.done = TRUE;
 			}
 		}
 	}
 }
 
-cpVect tween_cpv_pos(tween *t)
-{
-	cpVect v;
-	v.x = tween_pos_i(t,0);
-	v.y = tween_pos_i(t,1);
-	return v;
-}
 
 void tween_pos(tween *t, float *pos)
 {

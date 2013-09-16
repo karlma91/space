@@ -15,7 +15,6 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	tween_init();
 	COMPONENT_SET(factory, HPBAR, &factory->hp_bar);
 	COMPONENT_SET(factory, COINS, &factory->param.coins);
 	COMPONENT_SET(factory, MINIMAP, &factory->radar_image);
