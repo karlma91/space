@@ -76,6 +76,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		cpVect rot = factory->data.body->rot;
 		pos = cpvadd(pos,cpvrotate(cpv(-80,200),rot));
 		factory->smoke->p = pos;
+        factory->smoke->angular_offset = we_rad2deg(factory->data.body->a);
 	}
 }
 

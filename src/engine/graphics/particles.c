@@ -37,6 +37,10 @@ static void particle_update_pos(particle *p);
 static emitter * get_emitter(particle_system * s);
 static void set_emitter_available(emitter *e);
 
+static cpVect default_gravity_func(cpVect pos) {
+    return cpv(0,-1);
+}
+
 /**
  * stack operators
  */
@@ -98,6 +102,7 @@ void particles_init(void)
 particle_system * particles_create_system()
 {
 	particle_system * s = (particle_system *)calloc(1, sizeof *s);
+	s->gravity_dir_func = default_gravity_func;
 	return s;
 }
 
@@ -117,6 +122,13 @@ void particles_update(particle_system *s)
 			e = e->next;
 		}
 	}
+}
+
+void particle_set_gravity_func(particle_system *s, cpVect (*gravity_dir_func)(cpVect p))
+{
+    if(gravity_dir_func != NULL){
+        s->gravity_dir_func = gravity_dir_func;
+    }
 }
 
 void particles_draw_emitter(emitter *e)
@@ -164,6 +176,11 @@ emitter *particles_get_emitter(particle_system *s, int type)
 		if(e->length_enabled){
 			e->length_set = range_get_random(e->length);
 		}
+
+		e->alive = 1;
+		e->self_draw = 0;
+	    e->ps = s;
+
 		e->next = next;
 		return e;
 	}else{
@@ -300,8 +317,17 @@ static void update_all_particles(emitter *em)
 			em->list_length--;
 			p = *prev;
 		}else{
-			p->v.y -= em->gravityfactor * 0.0001f * mdt;
-			p->v.x += em->windfactor * 0.0001f * mdt;
+
+		    cpVect g = em->ps->gravity_dir_func(p->p);
+
+		    p->v = cpvadd(p->v, cpvmult(g, em->gravityfactor * 0.0001f * mdt));
+
+		   // cpVect wind =  cpvmult(cpvperp(g), em->windfactor * 0.0001f * mdt);
+		   // p->v = cpvadd(p->v, wind);
+
+		    if(em->rotation){
+		        p->angle += p->rot_speed*dt;
+		    }
 
 			particle_update_pos(p);
 
@@ -334,9 +360,6 @@ static emitter * get_emitter(particle_system * s)
 	emitter *e = available_emitter_stack[available_emitter_counter];
 	available_emitter_stack[available_emitter_counter] = NULL;
 	--available_emitter_counter;
-
-	e->alive = 1;
-	e->self_draw = 0;
 
 	/* puts emitter in inuse list */
 	e->next = s->emitters_in_use;
@@ -464,10 +487,6 @@ static void draw_all_particles(emitter *em)
 static void default_particle_draw(emitter *em, particle *p)
 {
 	float angle = 0;
-
-	if(em->rotation){
-		p->angle += p->rot_speed*dt;
-	}
 	sprite_render(&p->spr, p->p, p->angle + angle);
 }
 

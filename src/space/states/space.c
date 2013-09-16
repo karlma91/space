@@ -119,6 +119,7 @@ static void draw_gui(void);
 
 /* The state timer */
 static float state_timer = 0;
+
 /**
  * Inner state functions
  */
@@ -845,9 +846,16 @@ static void remove_static(cpShape *shape)
 	cpSpaceRemoveStaticShape(space, shape);
 }
 
+
+static cpVect space_particle_g_func(cpVect pos)
+{
+    return cpvnormalize_safe(pos);
+}
+
 void space_init(void)
 {
 	parti = particles_create_system();
+	particle_set_gravity_func(parti, space_particle_g_func );
 	statesystem_register(state_space,LEVEL_STATE_COUNT);
     statesystem_add_inner_state(state_space,LEVEL_START,level_start,NULL);
     statesystem_add_inner_state(state_space,LEVEL_RUNNING,level_running,NULL);
