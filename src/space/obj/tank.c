@@ -11,9 +11,9 @@
 static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpGroup group);
 static cpBody *addWheel(cpSpace *space, cpVect pos, cpGroup group);
 
-#define MASS 5.0f
-#define MASS_WHEEL 10.0f
-#define MASS_BARREL 2.0f
+#define MASS 4.0f
+#define MASS_WHEEL 4.0f
+#define MASS_BARREL 1.0f
 #define SHOOT_VEL 1500
 
 static void init(OBJ_TYPE *OBJ_NAME)
@@ -130,8 +130,8 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	int left_clear = (left_dist > 300);
 	int right_clear = (right_dist > 300);
 
-	float velocity_high = 500000;
-	float velocity_low = 20000;
+	float velocity_high = 100000;
+	float velocity_low = 10000;
 	ptx = se_arcdist2player(tank->data.body->p);
 
 	//TODO use motors

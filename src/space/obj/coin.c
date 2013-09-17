@@ -43,6 +43,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	sprite_update(&(coin->data.spr));
+	se_tangent_body(coin->data.body);
 
 	if (coin->pulled) {
 		instance *player = instance_first(obj_id_player);

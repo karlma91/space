@@ -37,7 +37,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	}
 
 	/* make and add new body */
-	float m = 1; //500
+	float m = 20; //500
 	factory->data.body = cpSpaceAddBody(space,
 			cpBodyNew(m, cpMomentForBox(m, size, size)));
 	cpBodySetPos(factory->data.body, factory->data.p_start);
