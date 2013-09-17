@@ -82,7 +82,8 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 	draw_color4f(1, 0.2, 0.2, 1);
 	sprite_render_body(&rocket->data.spr, rocket->data.body);
-	hpbar_draw(&rocket->hp_bar);
+
+	hpbar_draw(&rocket->hp_bar, cpvtoangle(rocket->data.body->p));
 }
 
 

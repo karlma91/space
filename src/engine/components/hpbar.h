@@ -24,6 +24,6 @@ typedef struct {
 } hpbar;
 
 void hpbar_init(hpbar *hp_bar, float max_hp, float width, float height, float x_offset, float y_offset, cpVect *pos);
-extern void hpbar_draw(hpbar *hp_bar);
+void hpbar_draw(hpbar *hp_bar, cpFloat angle);
 
 #endif /* HPBAR_H_ */

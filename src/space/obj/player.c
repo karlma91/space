@@ -83,7 +83,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	draw_color4f(1,1,1,1);
 	sprite_render(&(player->gun), player->gunwheel->p, player->aim_angle); //TODO use render body
 	sprite_render(&(player->data.spr), player->data.body->p, player->direction); //TODO use render body
-	hpbar_draw(&player->hp_bar);
+	hpbar_draw(&player->hp_bar, cpvtoangle(player->data.body->p));
 }
 
 #include <time.h>

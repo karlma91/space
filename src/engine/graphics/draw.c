@@ -429,14 +429,9 @@ void draw_get_current_color(float *c)
 }
 
 //TODO: color customization
-void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
+void draw_bar(cpVect pos, cpFloat w, cpFloat h, cpFloat angle, cpFloat p, cpFloat p2)
 {
-	cpVect pos = {x, y};
 	cpVect pos_org = pos;
-	float angle = 0;
-
-	x = pos.x;
-	y = pos.y;
 
 	float border;
 	/* save current blend function and color */
@@ -475,18 +470,18 @@ void draw_bar(cpFloat x, cpFloat y, cpFloat w, cpFloat h, cpFloat p, cpFloat p2)
 
 		draw_color4f(1,0,0, 1);
 		//draw_box(x + border, y + border, width_red, height, angle, 0);
-		draw_texture(TEX_BAR, pos_red, TEX_MAP_FULL, width_red, height, 0);
+		draw_texture(TEX_BAR, pos_red, TEX_MAP_FULL, width_red, height, angle);
 
 		draw_color4f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1, 1);
 		//draw_box(x + border, y + border, width_bar, height, angle, 0);
-		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, width_bar, height, 0);
+		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, width_bar, height, angle);
 
 	} else {
 		float width = w - border * 2;
 		float height = (h - border * 2) * p;
 		cpVect pos_bar = cpvadd(pos_org, cpv(border + width/2, border + height/2));
 		draw_color4f(1-p,1-p,1,1);
-		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, height, width, 90);
+		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, height, width, M_PI + angle);
 	}
 
 	draw_pop_color();

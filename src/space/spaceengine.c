@@ -88,7 +88,7 @@ int se_damage_object(instance *object, instance *dmg_dealer)
 }
 
 /**
- * returns the best angle to shoot at a moving object obj2 from obj1
+ * returns the best angle to shoot at a moving object obj2 from obj1 (angle between 0 and 2PI?)
  */
 cpFloat se_get_best_shoot_angle(cpBody *body1, cpBody *body2, cpFloat bullet_speed)
 {

@@ -23,7 +23,7 @@ void hpbar_init(hpbar *hp_bar, float max_hp, float width, float height, float x_
 	*hp_bar = values;
 }
 
-void hpbar_draw(hpbar *hp_bar)
+void hpbar_draw(hpbar *hp_bar, cpFloat angle)
 {
 	float hp_percent = hp_bar->value / hp_bar->max_hp;
 	hp_percent = hp_percent < 0 ? 0 : hp_percent > 1 ? 1 : hp_percent;
@@ -41,9 +41,10 @@ void hpbar_draw(hpbar *hp_bar)
 		hp_bar->hp_timer = 2;
 	}
 
+
 	if ((hp_bar->hp_timer > 0 || hp_percent < 0.5) && hp_bar->draw_value > 0) {
 		hp_bar->hp_timer -= dt;
-		draw_bar(*(hp_bar->x) + hp_bar->x_offset, *(hp_bar->y) + hp_bar->y_offset, hp_bar->width, hp_bar->height, hp_bar->draw_value, hp_percent);
+		draw_bar(cpv(*(hp_bar->x) + hp_bar->x_offset, *(hp_bar->y) + hp_bar->y_offset), hp_bar->width, hp_bar->height, 0, hp_bar->draw_value, hp_percent);
 	}
 }
 

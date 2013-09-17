@@ -88,8 +88,10 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	//glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	sprite_render_body(&(factory->data.spr), factory->data.body);
 
-	hpbar_draw(&factory->hp_bar);
-	draw_bar(factory->data.body->p.x+160,factory->data.body->p.y-150,40,150,factory->timer / factory->param.spawn_delay,0);
+	hpbar_draw(&factory->hp_bar, cpvtoangle(cpvperp(factory->data.body->p)));
+
+	cpVect pos = cpvadd(factory->data.body->p, cpvrotate(cpv(160, -150), factory->data.body->rot));
+	draw_bar(pos, 40, 150, factory->data.body->a, factory->timer / factory->param.spawn_delay,0);
 }
 
 static void remove_factory_from_child(instance *child, void *factory)

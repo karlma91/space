@@ -101,6 +101,12 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		cpFloat best_angle = se_get_best_shoot_angle(tank->data.body, player->data.body, SHOOT_VEL);
 
 		tank->barrel->a = turn_toangle(tank->barrel->a, best_angle, tank->rot_speed * dt);
+
+		//limit barrel between [0, PI]
+		cpVect barrel_angle = cpvforangle(tank->barrel->a - tank->data.body->a);
+		tank->barrel->a = cpvdot(barrel_angle, cpv(0,1)) < 0 ? (tank->data.body->a +
+				(cpvdot(barrel_angle, cpv(1,0)) > 0 ? 0 : WE_PI))  : tank->barrel->a;
+
 		cpBodySetAngle(tank->barrel, tank->barrel->a);
 
 		if(tank->timer > 1 + (3.0f*we_randf) && se_arcdist2player(tank->data.body->p)<tank->max_distance){
@@ -124,10 +130,11 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	int left_clear = (left_dist > 300);
 	int right_clear = (right_dist > 300);
 
-	float velocity_high = 80000;
+	float velocity_high = 500000;
 	float velocity_low = 20000;
 	ptx = se_arcdist2player(tank->data.body->p);
 
+	//TODO use motors
 	//TMP DEBUG OVERSTYRING AV TANK
 	if (keys[SDL_SCANCODE_LCTRL]) {
 		if (keys[SDL_SCANCODE_K])
@@ -179,7 +186,7 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	hpbar_draw(&tank->hp_bar);
+	hpbar_draw(&tank->hp_bar,cpvtoangle(tank->data.body->p));
 
 	draw_color4f(1,1,1,1);
 	if (1) { //TODO REMOVE TMP TEST

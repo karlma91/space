@@ -104,7 +104,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	sprite_set_index(&turret->data.spr, 1);
 	sprite_render_body(&turret->data.spr, turret->data.body);
 
-	hpbar_draw(&turret->hp_bar);
+	hpbar_draw(&turret->hp_bar, cpvtoangle(turret->data.body->p));
 }
 
 static void shape_from_space(cpBody *body, cpShape *shape, void *data)
