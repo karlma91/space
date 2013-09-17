@@ -10,9 +10,13 @@
 
 #include "chipmunk.h"
 
-#define WE_PI 3.14159265359
-#define WE_2PI 6.28318530718
+#define WE_PI_6 0.52359877559
+#define WE_PI_4 0.78539816339
+#define WE_PI_3 1.0471975512
 #define WE_PI_2 1.57079632679
+#define WE_PI 3.14159265359
+#define WE_3PI_2 4.71238898038
+#define WE_2PI 6.28318530718
 #define WE_180_PI 57.2957795131
 
 #define we_rad2deg(x) ((x) * WE_180_PI)

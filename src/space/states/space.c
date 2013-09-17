@@ -554,9 +554,9 @@ void draw_gui(void)
 			font_drawText(0, 0, "TOUCH JOYSTICKS");
 		}
 		setTextSize(25);
-		setTextAngle(90);
+		setTextAngle(WE_PI_2);
 		font_drawText(GAME_WIDTH/2-100, 0, "CO-OP PLAYER 2");
-		setTextAngle(270);
+		setTextAngle(WE_3PI_2);
 		font_drawText(-GAME_WIDTH/2+100, 0, "CO-OP PLAYER 1");
 
 #define STR_SPACE_START "STEER - SINGLE PLAY - SHOOT"
