@@ -481,7 +481,7 @@ void draw_bar(cpVect pos, cpFloat w, cpFloat h, cpFloat angle, cpFloat p, cpFloa
 		float height = (h - border * 2) * p;
 		cpVect pos_bar = cpvadd(pos_org, cpv(border + width/2, border + height/2));
 		draw_color4f(1-p,1-p,1,1);
-		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, height, width, M_PI + angle);
+		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, height, width, angle);
 	}
 
 	draw_pop_color();

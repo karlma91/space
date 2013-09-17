@@ -37,8 +37,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	}
 
 	/* make and add new body */
+	float m = 1; //500
 	factory->data.body = cpSpaceAddBody(space,
-			cpBodyNew(500, cpMomentForBox(5000.0f, size, size)));
+			cpBodyNew(m, cpMomentForBox(m, size, size)));
 	cpBodySetPos(factory->data.body, factory->data.p_start);
 	se_tangent_body(factory->data.body);
 	se_velfunc(factory->data.body, 1);
@@ -76,7 +77,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		cpVect rot = factory->data.body->rot;
 		pos = cpvadd(pos,cpvrotate(cpv(-80,200),rot));
 		factory->smoke->p = pos;
-        factory->smoke->angular_offset = we_rad2deg(factory->data.body->a);
+		factory->smoke->angular_offset = we_rad2deg(factory->data.body->a);
 	}
 }
 
@@ -91,7 +92,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	hpbar_draw(&factory->hp_bar, cpvtoangle(cpvperp(factory->data.body->p)));
 
 	cpVect pos = cpvadd(factory->data.body->p, cpvrotate(cpv(160, -150), factory->data.body->rot));
-	draw_bar(pos, 40, 150, factory->data.body->a, factory->timer / factory->param.spawn_delay,0);
+	draw_bar(pos, 40, 150, 0, factory->timer / factory->param.spawn_delay, 0);
 }
 
 static void remove_factory_from_child(instance *child, void *factory)

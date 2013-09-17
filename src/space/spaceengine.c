@@ -92,32 +92,30 @@ int se_damage_object(instance *object, instance *dmg_dealer)
  */
 cpFloat se_get_best_shoot_angle(cpBody *body1, cpBody *body2, cpFloat bullet_speed)
 {
-	cpVect a = body1->p, va = body1->v;
-	cpVect b = body2->p, vb = body2->v;
+	cpVect p1 = body1->p;//, v1 = body1->v;
+	cpVect p2 = body2->p, v2 = body2->v;
+	cpVect p21 = cpvsub(p1, p2);
+	cpFloat v2_abs = cpvlength(v2);
 
-	cpVect v = cpvsub(a, b);
+	cpFloat beta_x = cpvdot(p21, v2) / (cpvlength(v2) * cpvlength(p21));
+	cpFloat beta = acos(maxf(minf(beta_x,1),-1));
+	cpFloat alpha_y = (v2_abs * sin(beta)) / bullet_speed;
+	cpFloat alpha = asin(maxf(minf(alpha_y,1),-1));
 
-	cpFloat c = cpvlength(vb);
-	cpFloat s = bullet_speed;
+	cpFloat p21_angle = cpvtoangle(p21);
+	cpFloat beta_y = cpvdot(cpvperp(p21), v2);
 
-	cpFloat g = cpvdot(v, vb)/(cpvlength(vb) * cpvlength(v));
-	cpFloat G = acos(g < 1 ? (g > -1 ? g : -1) : 1);
-	cpFloat as = (c * sin(G)) / s;
-	cpFloat angle = asin(as < 1 ? (as > -1 ? as : -1) : 1);
-
-	cpFloat bc = cpvtoangle(v);
-
-	if(vb.x < 0){
-		angle  = -angle;
+	if (beta_y < 0){
+		alpha  = -alpha;
 	}
-	angle  = M_PI + (bc - angle);
+	alpha  = WE_PI + (p21_angle - alpha);
 
-	if (angle != angle) {
+	if (alpha != alpha) {
 		SDL_Log("ERROR: invalid angle!");
 		//raise(SIGKILL);
 	}
 
-	return angle;
+	return alpha;
 }
 
 cpFloat get_angle(cpVect a, cpVect b)
