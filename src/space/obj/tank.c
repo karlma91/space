@@ -186,16 +186,24 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
+	float alpha = 2;
+	if (tank->data.time_destroyed > 2) { //TODO automatically? or in its own destroyed_tick?
+		instance_remove(tank);
+		alpha = 0;
+	} else if (tank->data.destroyed) {
+		alpha = maxf(0, 1 - tank->data.time_destroyed / 2);
+	}
+
 	hpbar_draw(&tank->hp_bar,cpvtoangle(tank->data.body->p));
 
-	draw_color4f(1,1,1,1);
+	draw_color4f(1,1,1,alpha);
 	if (1) { //TODO REMOVE TMP TEST
 		instance *left, *right;
 		cpFloat left_dist, right_dist;
 		instance_get2nearest((instance *)tank, obj_id_tank, &left, &right, &left_dist, &right_dist);
-		draw_color4f(1,(left_dist > 300),(left_dist > 300),1);
+		draw_color4f(1,(left_dist > 300),(left_dist > 300),alpha);
 		sprite_render_body(&(tank->wheel_sprite), tank->wheel1);
-		draw_color4f(1,(right_dist > 300),(right_dist > 300),1);
+		draw_color4f(1,(right_dist > 300),(right_dist > 300),alpha);
 		sprite_render_body(&(tank->wheel_sprite), tank->wheel2);
 	} else {
 	sprite_render_body(&(tank->wheel_sprite), tank->wheel1);
@@ -203,9 +211,9 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	}
 
 	if (tank->param.max_hp >= 100) {//TODO add color into param
-		draw_color4f(1,0.2,0,1);
+		draw_color4f(1,0.2,0,alpha);
 	} else {
-		draw_color4f(1,1,1,1);
+		draw_color4f(1,1,1,alpha);
 	}
 
 	sprite_render_body(&(tank->data.spr), tank->data.body);

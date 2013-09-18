@@ -29,7 +29,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	turret->timer = 0;
 	turret->rate = 0.060;
 	turret->bullets = 0;
-	turret->max_distance = 800;
+	turret->max_distance = 600;
 
 	cpVect p_start = turret->data.p_start;
 	we_cart2pol(p_start);
@@ -61,7 +61,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	/* get target: first player instance added */
-	obj_player *player = ((obj_player*) instance_first(obj_id_player));
+	obj_player *player = ((obj_player*) instance_nearest(turret->data.body->p, obj_id_player));
 	if (player == NULL) {
 		return;
 	}
@@ -69,15 +69,18 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	cpFloat best_angle = se_get_best_shoot_angle(turret->data.body, player->data.body, SHOOT_VEL);
 
 	turret->data.body->a = turn_toangle(turret->data.body->a, best_angle, turret->param.rot_speed * dt);
+	cpVect turret_angle = cpvforangle(turret->data.body->a - turret->tower->a);
+	turret->data.body->a = cpvdot(turret_angle, cpv(0,1)) > WE_PI_6/2 ? (turret->tower->a
+					+ (cpvdot(turret_angle, cpv(1,0)) > 0 ? WE_PI_6/2 : WE_PI-WE_PI_6/2))  : turret->data.body->a;
 	cpBodySetAngle(turret->data.body, turret->data.body->a);
 
+	//TODO generalisere maskingevær skyting
 	if (turret->timer > turret->param.shoot_interval) {
 		turret->shooting = 1;
 		turret->timer = 0;
 	}
 	if (turret->shooting && turret->timer > turret->rate
-			&& se_arcdist2player(turret->data.body->p)
-					< turret->max_distance) {
+			&& cpvlengthsq(se_dist_a2b((instance*)turret, (instance*)player)) <  turret->max_distance * turret->max_distance) {
 		turret->bullets += 1;
 
 		cpVect shoot_vel = cpvmult(turret->data.body->rot, SHOOT_VEL);
@@ -99,19 +102,21 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	draw_color4f(1,1,1,1);
+	float alpha = 2;
+	if (turret->data.time_destroyed > 2) {
+		instance_remove(turret);
+		alpha = 0;
+	} else if (turret->data.destroyed) {
+		alpha = maxf(0, 1 - turret->data.time_destroyed / 2);
+	}
+
+	draw_color4f(1,1,1,alpha);
 	sprite_set_index(&turret->data.spr, 0);
 	sprite_render_body(&turret->data.spr, turret->tower);
 	sprite_set_index(&turret->data.spr, 1);
 	sprite_render_body(&turret->data.spr, turret->data.body);
 
 	hpbar_draw(&turret->hp_bar, cpvtoangle(turret->data.body->p));
-}
-
-static void shape_from_space(cpBody *body, cpShape *shape, void *data)
-{
-    cpSpaceRemoveShape(space, shape);
-    cpShapeFree(shape);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)

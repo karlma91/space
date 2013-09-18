@@ -27,6 +27,8 @@
 #define minf(a,b) (a <= b ? a : b)
 #define maxf(a,b) (a >= b ? a : b)
 
+#define WE_PI_PI(a) (a > WE_PI || a < -WE_PI ? a - roundf(a / WE_2PI) * WE_2PI : a)
+
 #define WE_P2C(r, a) cpvmult(cpvforangle(a),r)
 #define we_pol2cart(vect) vect=WE_P2C(vect.x,vect.y)
 #define we_cart2pol(vect) \

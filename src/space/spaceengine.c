@@ -31,13 +31,13 @@ void se_add_score_and_popup(cpVect p, int score)
 
 float se_arcdist2player(cpVect a)
 {
-	obj_player *player = ((obj_player *) instance_first(obj_id_player));
+	instance *player = instance_nearest(a, obj_id_player);
 	if (player) {
-		cpVect b = player->data.body->p;
+		cpVect b = player->body->p;
 		we_cart2pol(a);
 		we_cart2pol(b);
-
-		return (b.y - a.y) * currentlvl->outer_radius;
+		cpFloat angle_diff = b.y - a.y;
+		return (WE_PI_PI(angle_diff)) * currentlvl->outer_radius;
 	}
 	return 0;
 }
@@ -126,7 +126,7 @@ cpFloat get_angle(cpVect a, cpVect b)
 
 
 //TODO add preferred angle to handle situations with two possible solutions?
-float turn_toangle(float from_angle, float to_angle, float step_size)
+float turn_toangle(float from_angle, float to_angle, float step_size) //TODO add limit/constraints
 {
 	if (from_angle >= WE_2PI) {
 		from_angle -= ((int)(from_angle/WE_2PI))*WE_2PI;
@@ -172,18 +172,13 @@ float se_rect2arch(cpVect *pos)
 	if (!space_rendering_map || (statesystem_get_render_state() != state_space))
 		return 0;
 
-	float inner_radius = currentlvl->inner_radius;
-	float theta = -currentlvl->theta_max * (current_camera->x - pos->x) / ((current_camera->right - current_camera->left)/2);
+	float angle = pos->x / currentlvl->width * WE_2PI;
+	float r = currentlvl->inner_radius + currentlvl->height - pos->y;
 
-	float o_x = current_camera->x;
-	float o_y = currentlvl->height + inner_radius;
+	pos->x = r * sinf(angle);
+	pos->y = r * cosf(angle);
 
-	float ry = currentlvl->height - pos->y;
-
-	pos->x = o_x + (inner_radius + ry) * sinf(theta);
-	pos->y = o_y - (inner_radius + ry) * cosf(theta);
-
-	return theta;
+	return angle;
 #else
 	return 0;
 #endif
@@ -192,24 +187,18 @@ float se_rect2arch(cpVect *pos)
 void se_rect2arch_column(float x, cpVect *polar)
 {
 #if EXPERIMENTAL_GRAPHICS
-	float theta = -currentlvl->theta_max *(current_camera->x - x) / ((current_camera->right - current_camera->left)/2);
+	//float theta = -currentlvl->theta_max *(current_camera->x - x) / ((current_camera->right - current_camera->left)/2);
+	float angle = x / currentlvl->width * WE_2PI;
 
-    polar->x = sinf(theta);
-    polar->y = cosf(theta);
+    polar->x = sinf(angle);
+    polar->y = cosf(angle);
 #endif
 }
 
 void se_rect2arch_from_data(cpVect *pos, cpVect *polar)
 {
 #if EXPERIMENTAL_GRAPHICS
-	float inner_radius = currentlvl->inner_radius;
-    float o_x = current_camera->x;
-    float o_y = currentlvl->height + inner_radius;
-
-    float ry = currentlvl->height - pos->y;
-
-    pos->x = o_x + (inner_radius + ry) * polar->x;
-    pos->y = o_y - (inner_radius + ry) * polar->y;
+    *pos = cpvmult(*polar, currentlvl->inner_radius + currentlvl->height - pos->y);
 #endif
 }
 

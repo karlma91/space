@@ -31,19 +31,15 @@ static float uv_buffer[TILEMAP_ARRAY_BUFFER_SIZE];
 void tilemap_render(tilemap *map)
 {
 	glEnable(GL_TEXTURE_2D);
-	draw_color4f(1,1,1,0.3);
+	draw_color4f(1,1,1,1);
 	texture_bind(map->texture_id);
 
 	int i,j;
 	int x,y;
-
-	//TODO: check if cam_left and cam_right is correct
 	int j_start, j_end;
-	j_start = (current_camera->left - map->tile_width) / map->tile_width + map->width / 2 - 2; //OLD: 0
-	j_end = (current_camera->right + map->tile_width) / map->tile_width + map->width / 2 + 2; //OLD: map->width
 
 	//DEBUG
-	static int DEBUG_TILEMAP = 0;
+	static int DEBUG_TILEMAP = 1;
 	if (keys[SDL_SCANCODE_Y]) {
 		keys[SDL_SCANCODE_Y] = 0;
 		DEBUG_TILEMAP ^=1;
@@ -51,6 +47,10 @@ void tilemap_render(tilemap *map)
 	if (DEBUG_TILEMAP) {
 		j_start = 0;
 		j_end = map->width;
+	} else {
+	//TODO optimize tilemap rendering for transformed tilemap
+		j_start = (current_camera->left - map->tile_width) / map->tile_width + map->width / 2 - 2; //OLD: 0
+		j_end = (current_camera->right + map->tile_width) / map->tile_width + map->width / 2 + 2; //OLD: map->width
 	}
 
 	int map_height = map->height;

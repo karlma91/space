@@ -39,16 +39,20 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
 {
-	if (bullet->energy < 0) {
-		instance_remove(bullet);
-	} else {
-		bullet->energy -= mdt;
+	if ((bullet->energy -= mdt) < 0) {
+		instance_destroy(bullet);
 	}
 }
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	float alpha = bullet->energy < 500 ? bullet->energy / 500 : 1;
+	float alpha = 1;
+	if (bullet->data.destroyed) {
+		alpha = bullet->energy / 250;
+		if ((bullet->energy -= mdt) < 0) {
+			instance_remove(bullet);
+		}
+	}
 
 	if (bullet->param.friendly) {
 		draw_color4f(0.3, 0.3, 0.9, alpha);
@@ -64,6 +68,9 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
+	bullet->param.damage = 0; // TODO remove collision for this body's shapes
+	//TODO add fade tween/animation here?
+	bullet->energy = 250; //TMP 250 ms fade
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)

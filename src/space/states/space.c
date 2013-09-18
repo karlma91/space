@@ -372,7 +372,7 @@ static void draw_deck()
 	float margin = 0;//15;
 
 	/* draw ceiling */
-	draw_color4f(0.1,0.3,0.7,0.6);
+	draw_color4f(0.1,0.1,0.2,1);
 	draw_circle(cpvzero, currentlvl->inner_radius + margin);
 
 	/* draw floor */
@@ -413,7 +413,7 @@ static void draw(void)
 
 	/* draw tilemap */
 	tilemap_render(currentlvl->tiles);
-	draw_deck();
+	//draw_deck();
 
 	setTextAngle(0);
 	/* draw all objects */

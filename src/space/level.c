@@ -260,23 +260,26 @@ level *level_load(int space_station, int deck)
 
 	int retExp = 0;
 	lvl->tiles = calloc(1, sizeof *lvl->tiles);
+
 	ret = tilemap_create(lvl->tiles,tilemap_name);
 	if (ret != retExp) {
 		SDL_Log("Error while parsing level header. Could not load tilemap %s.\n", tilemap_name);
 		return NULL;
 	}
+
 	lvl->height = lvl->tiles->height*lvl->tiles->tile_height;
 	lvl->left = -(lvl->tiles->width*lvl->tiles->tile_width)/2;
 	lvl->right = (lvl->tiles->width*lvl->tiles->tile_width)/2;
 	lvl->width = (lvl->tiles->width*lvl->tiles->tile_width);
 
 	// level render transformation data
-	//lvl->outer_radius = (currentlvl->right - currentlvl->left)/(2*M_PI);//2100;
+	//lvl->outer_radius = currentlvl->width/(WE_2PI);//2100;
 	//lvl->inner_radius = lvl->outer_radius - currentlvl->height;
-	lvl->inner_radius = currentlvl->width/(2*M_PI);//2100;
-	lvl->outer_radius = lvl->inner_radius + currentlvl->height;
-	lvl->theta_max = atan2f(GAME_WIDTH/2, lvl->inner_radius);//M_PI/8;
-
+	//if (lvl->inner_radius < 0) {
+	//	SDL_Log("WARNING: PARTLY INVERTED LEVEL!");
+	//}
+	lvl->inner_radius = currentlvl->width/(WE_2PI);
+	lvl->outer_radius = lvl->inner_radius + currentlvl->height - lvl->tiles->tile_height;
 
 	/* read level specific data */
 	retExp = 3;

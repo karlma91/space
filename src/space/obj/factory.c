@@ -86,13 +86,11 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	draw_color4f(1,1,1,1);
 	factory->rot += 381 * dt;
 	particles_draw_emitter(factory->smoke);
-	//glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	sprite_render_body(&(factory->data.spr), factory->data.body);
-
-	hpbar_draw(&factory->hp_bar, cpvtoangle(cpvperp(factory->data.body->p)));
 
 	cpVect pos = cpvadd(factory->data.body->p, cpvrotate(cpv(160, -150), factory->data.body->rot));
 	draw_bar(pos, 40, 150, 0, factory->timer / factory->param.spawn_delay, 0);
+	hpbar_draw(&factory->hp_bar, cpvtoangle(cpvperp(factory->data.body->p)));
 }
 
 static void remove_factory_from_child(instance *child, void *factory)

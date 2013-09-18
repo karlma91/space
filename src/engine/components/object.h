@@ -61,6 +61,7 @@ struct instance {
 	cpBody *body;
 	sprite spr;
 
+	float time_destroyed;
 }; /* per-instance variables */
 
 int component_register(int pointer_count);

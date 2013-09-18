@@ -45,6 +45,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->radar_image = cmp_new_minimap(10, COL_GREEN);
 
 	player->flame = particles_get_emitter(parti, EMITTER_FLAME);
+	player->flame->self_draw = 1;
 	player->disable=0;
 
 	/* make and add new body */
@@ -80,6 +81,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
+	player->flame->p = player->data.body->p;
+	player->flame->angular_offset = we_rad2deg(player->direction) + 90;
+	particles_draw_emitter(player->flame);
+
 	draw_color4f(1,1,1,1);
 	sprite_render(&(player->gun), player->gunwheel->p, player->aim_angle); //TODO use render body
 	sprite_render(&(player->data.spr), player->data.body->p, player->direction); //TODO use render body
@@ -99,8 +104,6 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		player->direction = turn_toangle(player->direction_target, player->direction, 2 * M_PI * dt / 1000);
 
 		cpBodySetAngVel(player->data.body,0);
-		player->flame->p = player->data.body->p;
-		player->flame->angular_offset = we_rad2deg(player->direction) + 90;
 
 		cpBodySetPos(player->gunwheel, player->data.body->p);
 		cpBodySetVel(player->gunwheel, player->data.body->v);

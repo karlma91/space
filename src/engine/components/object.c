@@ -8,6 +8,7 @@
 #include <signal.h>
 
 #include "../io/waffle_utils.h"
+#include "../engine.h"
 
 #define INS_MAGIC_COOKIE 0xA2F4C681
 
@@ -337,6 +338,8 @@ void object_destroy(void)
 void instance_update(instance *ins) {
 	if (!ins->destroyed) { //TODO avgjøre om destroyed skal bestemme on update skal kalles eller ikke
 		ins->TYPE->call.on_update(ins);
+	} else {
+		ins->time_destroyed += dt;
 	}
 }
 

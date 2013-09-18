@@ -27,7 +27,6 @@ typedef struct level {
 
 	float inner_radius;
 	float outer_radius;
-	float theta_max;
 
 	tilemap *tiles;
 } level;
