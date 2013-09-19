@@ -62,11 +62,10 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	cpVect draw_pos = spikeball->data.body->p;
 	cpVect a = spikeball->data.body->p;
 	cpVect b = spikeball->dolly->p;
 
-	draw_glow_line(a.x,a.y,b.x,b.y,50);
+	draw_glow_line(a, b, 50);
 	sprite_render_body(&(spikeball->data.spr), spikeball->data.body);
 }
 

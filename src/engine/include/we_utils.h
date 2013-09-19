@@ -30,8 +30,7 @@
 #define WE_PI_PI(a) (a > WE_PI || a < -WE_PI ? a - roundf(a / WE_2PI) * WE_2PI : a)
 
 #define WE_P2C(r, a) cpvmult(cpvforangle(a),r)
-#define we_pol2cart(vect) vect=WE_P2C(vect.x,vect.y)
-#define we_cart2pol(vect) \
-	{float x=vect.x,y=vect.y; vect.x=hypotf(x,y),vect.y=atan2f(y,x);}
+#define we_pol2cart(vect) WE_P2C(vect.x,vect.y)
+#define we_cart2pol(cart) cpv(hypotf(cart.x,cart.y),atan2f(cart.y,cart.x))
 
 #endif /* WE_UTILS_H_ */

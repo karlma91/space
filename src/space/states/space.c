@@ -385,7 +385,7 @@ static void draw_deck()
 		cpVect a = cpSegmentShapeGetA(seg);
 		cpVect b = cpSegmentShapeGetB(seg);
 		cpFloat r = cpSegmentShapeGetRadius(seg);
-		draw_line(TEX_GLOW, a.x, a.y, b.x, b.y, r);
+		draw_line(TEX_GLOW, a, b, r);
 	}
 	llist_end_loop(ll_floor_segs);
 }
@@ -405,9 +405,9 @@ static void draw(void)
 	/* translate view */
 	draw_load_identity();
 	current_camera->rotation = -se_tangent(cpv(current_camera->x,current_camera->y));
-	draw_rotate(current_camera->rotation, 0,0,1); //TODO move this into a camera method
-	draw_scale(current_camera->zoom,current_camera->zoom,1); //TODO move this into a camera method
-	draw_translate(-current_camera->x, -current_camera->y, 0.0f); //TODO move this into a camera method
+	draw_rotate(current_camera->rotation); //TODO move this into a camera method
+	draw_scale(current_camera->zoom,current_camera->zoom); //TODO move this into a camera method
+	draw_translate(-current_camera->x, -current_camera->y); //TODO move this into a camera method
 
 	drawStars();
 
@@ -436,7 +436,7 @@ static void plot_on_radar(instance *obj, void *unused)
 	if(m != NULL){
 		cpVect p = cpvmult(obj->body->p, 1 / currentlvl->outer_radius * RADAR_SIZE);
 		draw_color4f(m->c.r, m->c.g, m->c.b, 0.5);
-		draw_box(p.x, p.y, m->size, m->size, cpvtoangle(p), 1);
+		draw_box(p, cpv(m->size, m->size), cpvtoangle(p), 1);
 	}
 }
 
@@ -445,8 +445,8 @@ static void radar_draw(float x, float y)
 	obj_player *player = ((obj_player *) instance_first(obj_id_player));
 	draw_push_matrix();
 	if (player) {
-		draw_translate(x, y, 0);
-		draw_rotate(-se_tangent(player->data.body->p), 0, 0, 1);
+		draw_translate(x, y);
+		draw_rotate(-se_tangent(player->data.body->p));
 	}
 	draw_color4f(0.3, 0.5, 0.7, 0.6);
 	draw_donut(cpvzero, currentlvl->inner_radius / currentlvl->outer_radius * RADAR_SIZE, RADAR_SIZE);
@@ -647,15 +647,14 @@ void drawStars(void)
 	static float spaceship_angle;
 	spaceship_angle -= 0.01f * WE_2PI*dt;
 	float cam_angle = spaceship_angle + current_camera->rotation;
-	draw_rotate(cam_angle,0,0,1);
+	draw_rotate(cam_angle);
 
 	int i;
 	draw_color4f(1,1,1,1);
 	for (i = 0; i < star_count; i++) {
-		float size = stars_size[i];
-		float star_x = (stars_x[i]);
-		float star_y = (stars_y[i]);
-		draw_box_append(star_x,star_y,size,size,0,1);
+		cpVect p = {stars_x[i], stars_y[i]};
+		cpVect s = {stars_size[i],stars_size[i]};
+		draw_box_append(p,s,0,1);
 	}
 	draw_flush_simple();
 	draw_pop_matrix();

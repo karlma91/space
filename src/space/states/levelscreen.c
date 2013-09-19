@@ -26,7 +26,7 @@ static int selected_level = 0;
 static int level_count = 0;
 static level_ship *current_ship;
 
-static rect box = {0,0,1000,800};
+static rect box = {{0,0}, {1000,800}};
 
 static float w = 150;
 static float h = 150;
@@ -68,15 +68,15 @@ static void draw(void)
 	}
 
 	draw_color4f(0,0,0,alpha);
-	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
+	draw_box(cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 
 	draw_color4f(0.1,0.2,0.4,0.6);
-	draw_box(box.x,box.y,box.w,box.h,0,1);
+	draw_box(box.p,box.s,0,1);
 
 	draw_color4f(1,1,1,1);
 	setTextAlign(TEXT_CENTER);
 	setTextSize(50);
-	font_drawText(0,box.y+box.h / 2 - 60,title);
+	font_drawText(0,box.p.y+box.s.y / 2 - 60,title);
 
 	for (i = 0; i < 3; i++) {
 		if (stars_unlocked == i+1) {
@@ -122,10 +122,10 @@ void levelscreen_change_to(level_ship * ship)
 	set_selected_level(1); //TODO select last unlocked level
 
 	float margin = 30;
-	float y = box.y - box.h/2 + h / 2 + margin;
+	float y = box.p.y - box.s.y/2 + h / 2 + margin;
 	int i;
 	for (i = 0; i < level_count; i++) {
-		float x = box.x - box.w/2 + (box.w-margin*2) * (i+0.5) / level_count;
+		float x = box.p.x - box.s.x/2 + (box.s.x-margin*2) * (i+0.5) / level_count;
 		btn_levels[i]->visible = 1;
 		btn_levels[i]->enabled = 1;
 		touch_place(btn_levels[i], x, y);
@@ -172,7 +172,7 @@ void levelscreen_init(void)
 
 	statesystem_register_touchable(this, btn_settings);
 
-	btn_disable = button_create(NULL, 0, "", box.x, box.y, box.w, box.h);
+	btn_disable = button_create(NULL, 0, "", box.p.x, box.p.y, box.s.x, box.s.y);
 	btn_disable->visible = 0;
 	statesystem_register_touchable(this, btn_disable);
 

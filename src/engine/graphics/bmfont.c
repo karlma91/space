@@ -109,7 +109,7 @@ static void draw_char(bm_font *f, bm_char *c)
     draw_append_quad();
     //draw_current_texture(&pos,tex_map,c->w,c->h,0);
     //draw_current_texture_all(&pos,tex_map,1,1,0,quad);
-    draw_translate(c->x_advance - c->x_offset,0,0);
+    draw_translate(c->x_advance - c->x_offset,0);
 }
 
 void bmfont_render(bm_font *font, int align, float x, float y, char *format, ...)
@@ -138,14 +138,14 @@ void bmfont_render(bm_font *font, int align, float x, float y, char *format, ...
             if(text[i] == '\0'){
                 break;
             }else{
-                draw_translate(0, font->line_height,0);
+                draw_translate(0, font->line_height);
             }
         }else if(text[i] != ' '){
             bm_char * c = &(font->chars[text[i]]);
             draw_char(font, c);
             text_width+= (c->x_advance - c->x_offset);
         }else{
-            draw_translate(16,0,0);
+            draw_translate(16,0);
             text_width+=16;
         }
         i++;
@@ -157,9 +157,9 @@ static void flush_line(bm_font *font, float text_width, float x, float y)
 {
     draw_push_matrix();
     draw_load_identity();
-    draw_translate(x-(text_width/2.0f)*font->scale, y, 0.0f);
+    draw_translate(x-(text_width/2.0f)*font->scale, y);
     text_width=0;
-    draw_scale(font->scale,-font->scale,1);
+    draw_scale(font->scale,-font->scale);
     draw_flush_and_multiply();
     draw_pop_matrix();
 }

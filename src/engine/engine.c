@@ -252,7 +252,7 @@ static void initGL(void) {
 	SDL_GL_SetSwapInterval(FPS_LIMIT); // 1 = v-sync on
 
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	draw_blend(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	/* set the clear color to dark blue */
 	//	glClearColor(0, 0.08, 0.15, 1);
@@ -475,7 +475,7 @@ static void main_tick(void *data)
 
 	draw_load_identity();
 	draw_color4f(0,0,0,1);
-	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
+	draw_box(cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 
 	if (!paused) {
 		check_events();
@@ -498,7 +498,7 @@ static void main_tick(void *data)
 		setTextSize(15);
 		float box_width = strlen(FULL_VERSION_STRING)*15*1.5+10;
 		draw_color4f(0,0,0,1);
-		draw_box(GAME_WIDTH/2-box_width,-GAME_HEIGHT/2,box_width,40,0,0);
+		draw_box(cpv(GAME_WIDTH/2-box_width,-GAME_HEIGHT/2),cpv(box_width,40),0,0);
 		draw_color4f(0.7,0,0,1);
 		font_drawText(GAME_WIDTH/2-5,-GAME_HEIGHT/2+20,FULL_VERSION_STRING);
 

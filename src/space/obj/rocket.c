@@ -71,7 +71,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	if (rocket->flame) {
 		rocket->flame->p = rocket->data.body->p;
-		rocket->flame->angular_offset = we_rad2deg(rocket->data.body->a) + 90;
+		rocket->flame->angular_offset = rocket->data.body->a + WE_PI_2;
 		rocket->flame->disable = (cpvlength(cpBodyGetForce(rocket->data.body)) < 0.1);
 	}
 }

@@ -34,7 +34,8 @@ typedef struct {
 } vect;
 
 typedef struct {
-	float x, y, w, h;
+	cpVect p;
+	cpVect s;
 } rect;
 
 /* config struct */

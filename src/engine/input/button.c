@@ -206,7 +206,9 @@ static void render(button btn_id)
 		draw_color(btn->backcol);
 		if (btn->stretch) {
 			//draw_glow_line(btn->p1x,btn->p1y,btn->p2x,btn->p2y,btn->height);
-			draw_sprite_line(&(btn->spr),x - width/2, y, x + width/2, y, height);
+			cpVect a = cpvadd(btn_pos, cpv(-width/2,0));
+			cpVect b = cpvadd(btn_pos, cpv(width/2,0));
+			draw_sprite_line(&(btn->spr), a, b, height);
 		} else {
 			sprite_render_scaled(&(btn->spr), btn_pos, 0, scale);
 		}

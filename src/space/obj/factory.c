@@ -61,9 +61,9 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	if (factory->timer > factory->param.spawn_delay && factory->cur < factory->param.max_tanks) {
 		if(se_arcdist2player(factory->data.body->p) < factory->max_distance) {
 			cpVect pos = factory->data.body->p;
-			we_cart2pol(pos);
+			pos = we_cart2pol(pos);
 			pos.x += 150;
-			we_pol2cart(pos);
+			pos = we_pol2cart(pos);
 
 			instance * ins = instance_create(factory->param.type, factory->param.param, pos, cpvzero);
 			COMPONENT_SET(ins, CREATOR, factory);
@@ -77,7 +77,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		cpVect rot = factory->data.body->rot;
 		pos = cpvadd(pos,cpvrotate(cpv(-80,200),rot));
 		factory->smoke->p = pos;
-		factory->smoke->angular_offset = we_rad2deg(factory->data.body->a);
+		factory->smoke->angular_offset = factory->data.body->a;
 	}
 }
 
@@ -89,7 +89,8 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	sprite_render_body(&(factory->data.spr), factory->data.body);
 
 	cpVect pos = cpvadd(factory->data.body->p, cpvrotate(cpv(160, -150), factory->data.body->rot));
-	draw_bar(pos, 40, 150, 0, factory->timer / factory->param.spawn_delay, 0);
+	cpVect size = cpv(50, 150);
+	draw_bar(pos, size, se_tangent(factory->data.body->p), factory->timer / factory->param.spawn_delay, 0);
 	hpbar_draw(&factory->hp_bar, cpvtoangle(cpvperp(factory->data.body->p)));
 }
 

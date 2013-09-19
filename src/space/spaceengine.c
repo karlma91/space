@@ -34,8 +34,8 @@ float se_arcdist2player(cpVect a)
 	instance *player = instance_nearest(a, obj_id_player);
 	if (player) {
 		cpVect b = player->body->p;
-		we_cart2pol(a);
-		we_cart2pol(b);
+		a = we_cart2pol(a);
+		b = we_cart2pol(b);
 		cpFloat angle_diff = b.y - a.y;
 		return (WE_PI_PI(angle_diff)) * currentlvl->outer_radius;
 	}

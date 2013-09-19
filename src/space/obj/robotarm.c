@@ -102,7 +102,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	v1.y = robotarm->y[0];
 	v2.x = robotarm->x[0] + cos(robotarm->angle[0])*robotarm->seg_length;
 	v2.y = robotarm->y[0] + sin(robotarm->angle[0])*robotarm->seg_length;
-	draw_glow_line(v1.x,v1.y,v2.x,v2.y, 200);
+	draw_glow_line(v1, v2, 200);
 
 	int i;
 	for(i=0; i<robotarm->segments-1; i++){
@@ -111,7 +111,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		v1.y = robotarm->y[i];
 		v2.x = robotarm->x[i+1];
 		v2.y = robotarm->y[i+1];
-		draw_glow_line(v1.x,v1.y,v2.x,v2.y, 200);
+		draw_glow_line(v1, v2, 200);
 	}
 
 	sprite_render_body(&(robotarm->saw_sprite), robotarm->saw);

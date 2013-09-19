@@ -16,9 +16,8 @@ float *matrix2d_get_color_data(void);
 float *matrix2d_get_color_pointer(void);
 void matrix2d_color_pointer(float *f);
 
-int * matrix2d_get_blend_func(void);
-
 void matrix2d_translate(float x, float y);
+void matrix2d_rotatev(float c, float s);
 void matrix2d_rotate(float a);
 void matrix2d_scale(float x, float y);
 void matrix2d_setmatrix(float *m);

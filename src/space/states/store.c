@@ -11,7 +11,7 @@
 
 STATE_ID state_store;
 
-static rect box = {0,0,-1,GAME_HEIGHT};
+static rect box = {{0,0}, {-1,GAME_HEIGHT}};
 //static int tex_sketch;
 
 enum UPGRADE_GROUPS {
@@ -81,7 +81,7 @@ static void draw_testarea(void)
 
 	draw_color4f(0,0,0,1);
 	draw_load_identity();
-	draw_box(350,180,550,550,0,1);
+	draw_box(cpv(350,180),cpv(550,550),0,1);
 
 
 	/*TODO gj�re om test area til en egen state? som viser player som kj�rer og skyter
@@ -115,7 +115,7 @@ static void draw(void)
 	float y;
 	float y_offset = 140;
 	draw_color4f(0.1,0.2,0.4,1);
-	draw_box(box.x,box.y,box.w,box.h,0,1);
+	draw_box(box.p,box.s,0,1);
 
 	//draw_color4f(1,1,1,1);
 	//draw_texture(tex_sketch, &cpvzero,TEX_MAP_FULL, box.w,box.h,0);
@@ -137,7 +137,7 @@ static void draw(void)
 	font_draw_int(x_upg,y - y_offset,engines[engine_selected].price);
 
 	setTextSize(50);
-	font_drawText(0, box.y+box.h / 2 - 60, "STORE");
+	font_drawText(0, box.p.y+box.s.y / 2 - 60, "STORE");
 
 	draw_testarea();
 	draw_specs();
@@ -248,7 +248,7 @@ void upgrades_init(void)
 {
 	statesystem_register(state_store,0);
 
-	box.w = GAME_WIDTH;
+	box.s.x = GAME_WIDTH;
 
 	float x_prev = x_upg - 255;
 	float x_next = x_upg + 255;

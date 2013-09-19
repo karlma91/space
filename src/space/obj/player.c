@@ -82,7 +82,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	player->flame->p = player->data.body->p;
-	player->flame->angular_offset = we_rad2deg(player->direction) + 90;
+	player->flame->angular_offset = player->direction + WE_PI_2;
 	particles_draw_emitter(player->flame);
 
 	draw_color4f(1,1,1,1);

@@ -140,7 +140,7 @@ static void draw(void)
 	draw_load_identity();
 
 	draw_color4f(0,0,0,0.5f);
-	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
+	draw_box(cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 
 	static float timer;
 	timer +=dt;

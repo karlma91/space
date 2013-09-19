@@ -33,18 +33,10 @@ float * color_append = color;
 
 int current_matrix;
 
-int blend_function[2];
-int prev_blend_function[2];
-
 static void multiply_current(float *f);
 static float *matrix2d_append_quad(float *data, float *mesh);
 static void append_quad_color();
 static float * matrix2d_multiply_to_quad(float *data, float *mesh, int count);
-
-int * matrix2d_get_blend_func(void)
-{
-    return blend_function;
-}
 
 /*
  * Texture
@@ -179,11 +171,9 @@ void matrix2d_translate(float x, float y)
     cur->z2 += cur->x2*x + cur->y2*y;
 }
 
-void matrix2d_rotate(float a)
+void matrix2d_rotatev(float c, float s)
 {
-	float x,y,c,s;
-	c = cosf(a);
-    s = sinf(a);
+	float x,y;
 
     x = cur->x1;
     y = cur->y1;
@@ -194,6 +184,10 @@ void matrix2d_rotate(float a)
     y = cur->y2;
     cur->x2 = x*c + y*s;
     cur->y2 = y*c - x*s;
+}
+void matrix2d_rotate(float a)
+{
+	matrix2d_rotatev(cosf(a),sinf(a));
 }
 
 void matrix2d_scale(float x, float y)

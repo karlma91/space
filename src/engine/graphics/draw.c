@@ -37,6 +37,14 @@ static void draw_render_light_map();
 
 #define DEBUG SDL_Log( "line: %d\n", __LINE__);
 
+// GL VARIABLE BUFFER
+static float gl_red = 1;
+static float gl_green = 1;
+static float gl_blue = 1;
+static float gl_alpha = 1;
+static int gl_blend_src = 0;
+static int gl_blend_dst = 0;
+
 GLfloat color_stack[10];
 
 #if (__MACOSX__ | __WIN32__)
@@ -130,7 +138,7 @@ void draw_light_map(void)
 	glClearColor(0,0,0,0);
 
 
-	//glBlendFunc(GL_ONE,GL_ONE_MINUS_SRC_COLOR);
+	//draw_blend(GL_ONE,GL_ONE_MINUS_SRC_COLOR);
 	glLoadIdentity();
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, TEX_LIGHT);
@@ -157,8 +165,8 @@ static void draw_render_light_map(void)
 	glLoadIdentity();
 	glColor4f(1,1,1,1);
 	glEnable(GL_TEXTURE_2D);
-	glBlendFunc(GL_DST_COLOR,GL_SRC_COLOR);
-	//glBlendFunc(GL_ONE,GL_ZERO);
+	draw_blend(GL_DST_COLOR,GL_SRC_COLOR);
+	//draw_blend(GL_ONE,GL_ZERO);
 	glBindTexture(GL_TEXTURE_2D, light_texture);
 	int w = 256;
 	int h = 256;
@@ -182,14 +190,19 @@ void draw_color(Color color)
 #endif
 }
 
+void draw_blend(GLenum src_factor, GLenum dst_factor)
+{
+	glBlendFunc(src_factor, dst_factor);
+	gl_blend_src = src_factor;
+	gl_blend_dst = dst_factor;
+}
+
 void draw_push_color(void)
 {
-	GLfloat color[4];
-	glGetFloatv(GL_CURRENT_COLOR, color);
-	stack_push_float(color[0]);
-	stack_push_float(color[1]);
-	stack_push_float(color[2]);
-	stack_push_float(color[3]);
+	stack_push_float(gl_red);
+	stack_push_float(gl_green);
+	stack_push_float(gl_blue);
+	stack_push_float(gl_alpha);
 }
 
 void draw_pop_color(void)
@@ -203,33 +216,32 @@ void draw_pop_color(void)
 
 void draw_push_blend(void)
 {
-	int dst;
-	int src;
-	glGetIntegerv(GL_BLEND_DST, &dst);
-	glGetIntegerv(GL_BLEND_SRC, &src);
-	stack_push_int(dst);
-	stack_push_int(src);
+	stack_push_int(gl_blend_dst);
+	stack_push_int(gl_blend_src);
 }
 
 void draw_pop_blend(void)
 {
 	int src = stack_pop_int();
 	int dst = stack_pop_int();
-	glBlendFunc(src, dst);
+	draw_blend(src, dst);
 }
 
-void draw_line(int tex_id, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
+void draw_line(int tex_id, cpVect a, cpVect b, float w)
 {
-
 	glEnable(GL_TEXTURE_2D);
+
+	float dx = b.x-a.x;
+	float dy = b.y-a.y;
 
 	draw_push_matrix();
 	draw_push_blend();
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	draw_translate(x0, y0, 0.0f);
-	draw_rotate(atan2f(y1-y0,x1-x0), 0.0f, 0.0f, 1.0f);
-	GLfloat length = sqrtf((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
-	draw_scale(1,w,1);
+	draw_blend(GL_SRC_ALPHA, GL_ONE);
+	draw_translate(a.x, a.y);
+	draw_rotate(atan2f(dy,dx));
+
+	GLfloat length = hypotf(dx,dy);
+	draw_scale(1,w);
 
 	w /=2; // tmp-fix
 
@@ -262,19 +274,24 @@ void draw_line(int tex_id, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float
 	glDisable(GL_TEXTURE_2D);
 
 }
-void draw_sprite_line(sprite *spr, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
-{
 
+void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w)
+{
     glEnable(GL_TEXTURE_2D);
 
+#warning Very similair to draw_line!!
+	float dx = b.x-a.x;
+	float dy = b.y-a.y;
+
     draw_push_matrix();
-    draw_translate(x0, y0, 0.0f);
-    draw_rotate(atan2f(y1-y0,x1-x0), 0.0f, 0.0f, 1.0f);
-    GLfloat length = sqrtf((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
-    draw_scale(1,w,1);
+    draw_push_matrix();
+
+    draw_translate(a.x, a.y);
+	draw_rotate(atan2f(dy,dx));
+	GLfloat length = hypotf(dy, dx);
+    draw_scale(1,w);
 
     w /=2; // tmp-fix
-
 
     GLfloat line_mesh[16] = {-w, -0.5,
             -w,  0.5,
@@ -314,21 +331,24 @@ void draw_sprite_line(sprite *spr, GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y
 
 }
 
-//TODO use cpVect!!
-void draw_glow_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
+void draw_glow_line(cpVect a, cpVect b, float w)
 {
-	draw_line(TEX_GLOW,  x0,  y0,  x1,  y1,  w);
-	draw_color4f(1,1,1,-1);
-	draw_line(TEX_GLOW_DOT,  x0,  y0,  x1,  y1,  w);
+	draw_line(TEX_GLOW, a, b, w);
+	draw_color3f(1,1,1);
+	draw_line(TEX_GLOW_DOT, a, b, w);
 }
 
-void draw_quad_line(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1, float w)
+void draw_quad_line(cpVect a, cpVect b, float w)
 {
+#warning Very similair to draw_line!
+	float dx = b.x-a.x;
+	float dy = b.y-a.y;
+
     draw_push_matrix();
-    draw_translate(x0, y0, 0.0f);
-	draw_rotate(atan2f(y1-y0,x1-x0), 0.0f, 0.0f, 1.0f);
-	GLfloat length = sqrtf((y1-y0)*(y1-y0) + (x1-x0)*(x1-x0));
-	draw_scale(1,w,1);
+    draw_translate(a.x, a.y);
+	draw_rotate(atan2f(dy,dx));
+	GLfloat length = hypotf(dy, dx);
+	draw_scale(1,w);
 	w /= 2;
 	GLfloat line[8] = { -w, -0.5,
 			-w,  0.5,
@@ -345,24 +365,26 @@ void draw_line_strip(const GLfloat *strip, int l, float w)
 {
 	int i;
 	for(i = 0; i<l-2; i+=2) {
-		draw_quad_line(strip[i],strip[i+1],strip[i+2],strip[i+3],w/4);
+		draw_quad_line(cpv(strip[i],strip[i+1]),cpv(strip[i+2],strip[i+3]),w/4);
 	}
 }
 
 void draw_color4f(float r, float g, float b, float a)
 {
-	static float a_last = 1;
-	if (a == -1) {
-		glColor4f(r,g,b,a_last);
-	} else {
-		glColor4f(r,g,b,a);
-		a_last = a;
-	}
+	glColor4f(r,g,b,a);
+	gl_red = r;
+	gl_green = g;
+	gl_blue = b;
+	gl_alpha = a;
+}
+
+void draw_color3f(float r, float g, float b)
+{
+	glColor4f(r,g,b,gl_alpha);
 }
 
 void draw_destroy(void)
 {
-
 	//TODO! --> release texture resources
 	//...
 }
@@ -388,24 +410,25 @@ void draw_donut(cpVect p, GLfloat inner_r, GLfloat outer_r)
 	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 128);
 }
 
-void draw_box(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle, int centered)
+static void box_common(cpVect p, cpVect s, GLfloat angle, int centered)
 {
     draw_push_matrix();
-    draw_translate(x,y,0);
-	draw_rotate(angle,0,0,1);
-	draw_scale(w,h,1);
+    draw_translate(p.x,p.y);
+	draw_rotate(angle);
+	draw_scale(s.x, s.y);
 	draw_vertex_pointer(2, GL_FLOAT, 0, centered ? triangle_quad : corner_quad);
 	draw_tex_pointer(2, GL_FLOAT, 0, TEX_MAP_FULL);
+}
+
+void draw_box(cpVect p, cpVect s, GLfloat angle, int centered)
+{
+	box_common(p,s,angle,centered);
 	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 4);
 	draw_pop_matrix();
 }
-void draw_box_append(GLfloat x, GLfloat y, GLfloat w, GLfloat h,GLfloat angle,int centered)
+void draw_box_append(cpVect p, cpVect s, GLfloat angle, int centered)
 {
-    draw_push_matrix();
-    draw_translate(x,y,0);
-	draw_rotate(angle,0,0,1);
-	draw_scale(w,h,1);
-	draw_vertex_pointer(2, GL_FLOAT, 0, centered ? triangle_quad : corner_quad);
+	box_common(p,s,angle,centered);
 	draw_append_quad_simple();
 	draw_pop_matrix();
 }
@@ -425,11 +448,14 @@ Color draw_col_grad(int hue)
 
 void draw_get_current_color(float *c)
 {
-    glGetFloatv(GL_CURRENT_COLOR, c);
+	*c = gl_red;
+	*++c = gl_green;
+	*++c = gl_blue;
+	*++c = gl_alpha;
 }
 
 //TODO: color customization
-void draw_bar(cpVect pos, cpFloat w, cpFloat h, cpFloat angle, cpFloat p, cpFloat p2)
+void draw_bar(cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2)
 {
 	cpVect pos_org = pos;
 
@@ -443,7 +469,7 @@ void draw_bar(cpVect pos, cpFloat w, cpFloat h, cpFloat angle, cpFloat p, cpFloa
 
 	/* outer edge */
 	draw_color4f(1, 1, 1, 1);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	draw_blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//draw_box(x, y, w, h, angle, 1);
 	//draw_box(x + w/2, y + h/2, w, h, angle, 1);
 
@@ -454,69 +480,67 @@ void draw_bar(cpVect pos, cpFloat w, cpFloat h, cpFloat angle, cpFloat p, cpFloa
 	//draw_box(x + border, y + border, w - border * 2, h - border * 2, angle, 1);
 	//draw_box(x + w/2, y + h/2, w - border * 2, h - border * 2, angle, 1);
 
-	//TODO
-	//TODO
-	//TODO
+	//FIXME
 
 	/* hp bar */
 	border *= 2;
-	if (w > h) {
-		float width_red = (w - border * 2) * p;
-		float width_bar = (w - border * 2) * p2;
-		float height = h - border * 2;
+	if (size.x > size.y) {
+		float height = size.y - border * 2;
+		cpVect size_red = {(size.x - border * 2) * p, height};
+		cpVect size_bar = {(size.x - border * 2) * p2, height};
 
 		cpVect pos_red = pos_org;//cpvadd(pos_org, cpv(border + width_red/2, border + height/2));
 		cpVect pos_bar = pos_org;//cpvadd(pos_org, cpv(border + width_bar/2, border + height/2));
 
 		draw_color4f(1,0,0, 1);
 		//draw_box(x + border, y + border, width_red, height, angle, 0);
-		draw_texture(TEX_BAR, pos_red, TEX_MAP_FULL, width_red, height, angle);
+		draw_texture(TEX_BAR, pos_red, TEX_MAP_FULL, size_red, angle);
 
 		draw_color4f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1, 1);
 		//draw_box(x + border, y + border, width_bar, height, angle, 0);
-		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, width_bar, height, angle);
+		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, size_bar, angle);
 
 	} else {
-		float width = w - border * 2;
-		float height = (h - border * 2) * p;
-		cpVect pos_bar = cpvadd(pos_org, cpv(border + width/2, border + height/2));
+#warning vertical bar not working!
+		cpVect size = {size.y * p, size.x};
+		cpVect pos_bar = cpvadd(pos_org, cpv(size.x/2, size.y/2));
 		draw_color4f(1-p,1-p,1,1);
-		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, height, width, angle);
+		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, size, angle);
 	}
 
 	draw_pop_color();
 	draw_pop_blend();
 }
 
-void draw_texture(int tex_id, cpVect pos, const float *tex_map, float width, float height, float angle)
+void draw_texture(int tex_id, cpVect pos, const float *tex_map, cpVect size, float angle)
 {
 	texture_bind(tex_id);
-	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
+	draw_current_texture_all(pos, tex_map, size, angle, triangle_quad);
 }
 
-void draw_current_texture(cpVect pos, const float *tex_map, float width, float height, float angle)
+void draw_current_texture(cpVect pos, const float *tex_map, cpVect size, float angle)
 {
-	draw_current_texture_all(pos, tex_map, width, height, angle, triangle_quad);
+	draw_current_texture_all(pos, tex_map, size, angle, triangle_quad);
 }
-void draw_current_texture_append(cpVect pos, const float *tex_map, float width, float height, float angle)
+void draw_current_texture_append(cpVect pos, const float *tex_map, cpVect size, float angle)
 {
 	draw_push_matrix();
-	draw_translate(pos.x, pos.y, 0.0f);
-	draw_rotate(angle,0,0,1);
-	draw_scale(width,height,1);
+	draw_translate(pos.x, pos.y);
+	draw_rotate(angle);
+	draw_scalev(size);
 	draw_vertex_pointer(2, GL_FLOAT, 0, triangle_quad);
 	draw_tex_pointer(2, GL_FLOAT, 0, tex_map);
 	draw_append_color_tex_quad();
 	draw_pop_matrix();
 }
 
-void draw_current_texture_all(cpVect pos, const float *tex_map, float width, float height, float angle, GLfloat *mesh)
+void draw_current_texture_all(cpVect pos, const float *tex_map, cpVect size, float angle, GLfloat *mesh)
 {
     draw_push_matrix();
 
-    draw_translate(pos.x, pos.y, 0.0f);
-	draw_rotate(angle,0,0,1);
-	draw_scale(width,height,1);
+    draw_translate(pos.x, pos.y);
+	draw_rotate(angle);
+	draw_scalev(size);
 
 	draw_current_texture_basic(tex_map, mesh, 4);
 
@@ -556,17 +580,32 @@ void draw_tex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *poi
     matrix2d_tex_pointer((float*)pointer);
 }
 
-void draw_translate(GLfloat x, GLfloat y, GLfloat z)
+void draw_translatev(cpVect offset)
+{
+    matrix2d_translate(offset.x,offset.y);
+}
+
+void draw_translate(GLfloat x, GLfloat y)
 {
     matrix2d_translate(x,y);
 }
 
-void draw_rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+void draw_rotatev(cpVect rot)
+{
+    matrix2d_rotatev(rot.x, rot.y);
+}
+
+void draw_rotate(GLfloat angle)
 {
     matrix2d_rotate(angle);
 }
 
-void draw_scale(GLfloat x, GLfloat y, GLfloat z)
+void draw_scalev(cpVect scale)
+{
+    matrix2d_scale(scale.x,scale.y);
+}
+
+void draw_scale(GLfloat x, GLfloat y)
 {
     matrix2d_scale(x,y);
 }

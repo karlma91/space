@@ -198,6 +198,6 @@ void sprite_render_scaled(sprite *spr, cpVect pos, float angle, float size)
 
 	float sub_map[8];
 	sprite_get_current_image(spr, sub_map);
-	draw_texture(tex_id, pos, sub_map, spr->width*size, spr->height*size, angle);
+	draw_texture(tex_id, pos, sub_map, cpvmult(cpv(spr->width, spr->height), size), angle);
 }
 

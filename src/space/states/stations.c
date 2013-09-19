@@ -65,6 +65,7 @@ static void sdl_event(SDL_Event *event)
 
 static void draw(void)
 {
+	cpVect full = cpv(GAME_WIDTH, GAME_HEIGHT);
 	draw_color4f(1,1,1,1);
 	float xoffset = scroll_get_xoffset(scroller);
 	float yoffset = scroll_get_yoffset(scroller);
@@ -78,7 +79,7 @@ static void draw(void)
 					x2, y2,
 					x1, y1,
 					x2, y1};
-	draw_texture(tex_stars,cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
+	draw_texture(tex_stars,cpvzero,map,full,0);
 	}
 	{
 	float x1 = - (xoffset / 4) / GAME_WIDTH;
@@ -89,7 +90,7 @@ static void draw(void)
 					x2, y2,
 					x1, y1,
 					x2, y1};
-	draw_texture(tex_stars_2,cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
+	draw_texture(tex_stars_2,cpvzero,map,full,0);
 	}
 	{
 	float x1 = - (xoffset / 3.6) / GAME_WIDTH;
@@ -100,7 +101,7 @@ static void draw(void)
 					x2, y2,
 					x1, y1,
 					x2, y1};
-	draw_texture(tex_stars_2,cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
+	draw_texture(tex_stars_2,cpvzero,map,full,0);
 	}
 	{
 	float x1 = - (xoffset / 3.2) / GAME_WIDTH;
@@ -111,7 +112,7 @@ static void draw(void)
 					x2, y2,
 					x1, y1,
 					x2, y1};
-	draw_texture(tex_stars_2,cpvzero,map,GAME_WIDTH,GAME_HEIGHT,0);
+	draw_texture(tex_stars_2,cpvzero,map,full,0);
 	}
 
 	int i;
@@ -123,7 +124,7 @@ static void draw(void)
 	}
 
 
-	draw_box(a.x + xoffset,a.y + yoffset,b.x,b.y,r,1);
+	draw_box(cpvadd(a,cpv(xoffset,yoffset)), b, r, 1);
 
 	//cpVect pos = {0,0.7f*GAME_HEIGHT/2};
 	//draw_texture(tex_title, &pos, TEX_MAP_FULL, 1200, 300, 0);

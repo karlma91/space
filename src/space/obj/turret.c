@@ -32,9 +32,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	turret->max_distance = 600;
 
 	cpVect p_start = turret->data.p_start;
-	we_cart2pol(p_start);
+	p_start = we_cart2pol(p_start);
 	p_start.x = currentlvl->inner_radius + TURRET_SIZE/2;
-	we_pol2cart(p_start);
+	p_start = we_pol2cart(p_start);
 
 	turret->tower = cpSpaceAddBody(space, cpBodyNew(100, cpMomentForBox(100, TURRET_SIZE, TURRET_SIZE)));
 	cpBodySetUserData(turret->tower, turret);

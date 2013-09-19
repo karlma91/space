@@ -48,7 +48,7 @@ static void post_update(void)
 static void draw(void)
 {
 	draw_color4f(0,0,0,0.8);
-	draw_box(0,0,GAME_WIDTH,GAME_HEIGHT,0,1);
+	draw_box(cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 
 	//TODO finn ut om spiller d�de eller ikke, istedenfor � bruke level_star_count
 	if (level_star_count) {

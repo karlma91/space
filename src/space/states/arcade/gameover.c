@@ -62,10 +62,21 @@ static void sdl_event(SDL_Event *event)
 				gameover_state = enter_name;
 			} else if (key == KEY_RIGHT_2 || key == KEY_RIGHT_1) {
 				/* add score */
+
+				scorelist level_scores;
+				level_scores.elements = 0;
+				level_scores.filename[0] = '0';
+				level_scores.head = NULL;
+
+				char level_score_file[50];
+				sprintf(&level_score_file[0], "arcade.score", currentlvl->station, currentlvl->deck);
+				highscorelist_readfile(&level_scores,level_score_file);
+
+
 				gameover_state = show_highscore;
 				win = 0;
 				score_value = getPlayerScore();
-				score_position = highscorelist_addscore(list,&input[0], score_value);
+				score_position = highscorelist_addscore(&level_scores,list,&input[0], score_value);
 				score_newly_added = 1;
 			}
 			break;
@@ -231,7 +242,7 @@ static void draw(void)
 		setTextAlign(TEXT_CENTER);
 		font_drawText(0,0.4f*GAME_HEIGHT, "HIGHSCORES");
 
-		draw_highscore();
+		draw_highscore(list);
 
 		if (score_newly_added) {
 			char current_score_buffer[100];

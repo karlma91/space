@@ -25,7 +25,7 @@ static void drawDigit(int d)
 {
 	for (j = 0; d && j < 7; d >>= 1, j++)
 		if (d & 0x1)
-			draw_quad_line(digits_x[j], digits_y[j], digits_x[(j+1)], digits_y[(j+1)], 0.125f);
+			draw_quad_line(cpv(digits_x[j], digits_y[j]), cpv(digits_x[(j+1)], digits_y[(j+1)]), 0.125f);
 }
 
 const GLfloat letters[26][14] = {
@@ -87,9 +87,9 @@ static void drawSymbol(char c)
 			draw_line_strip(COMMA,4, 0.5f);
 			break;
 		case ':':
-			draw_translate(0,0.8f,0);
+			draw_translate(0,0.8f);
 			draw_line_strip(DOT,10, 0.5f);
-			draw_translate(0,-0.8f,0);
+			draw_translate(0,-0.8f);
 			/* no break */
 		case '.':
 			draw_line_strip(DOT,10, 0.5f);
@@ -111,22 +111,22 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 {
 
 	draw_push_blend();
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	draw_blend(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	draw_push_matrix();
-	draw_translate(x, y, 0.0f);
-	draw_rotate(font_text_angle, 0, 0, 1);
-	draw_scale(font_text_size, font_text_size, 1);
+	draw_translate(x, y);
+	draw_rotate(font_text_angle);
+	draw_scale(font_text_size, font_text_size);
 
 	switch(font_text_align) {
 		case TEXT_LEFT:
-			draw_translate(0.5f, 0, 0);
+			draw_translate(0.5f, 0);
 			draw_push_matrix();
 			break;
 		case TEXT_CENTER:
-			draw_translate(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING))/2.0f + 0.5f + CHAR_SPACING/2, 0, 0.0f);
+			draw_translate(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING))/2.0f + 0.5f + CHAR_SPACING/2, 0);
 			break;
 		case TEXT_RIGHT:
-			draw_translate(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING) - 0.5f  - CHAR_SPACING), 0,0);
+			draw_translate(-(strlen(text) * (CHAR_WIDTH + CHAR_SPACING) - 0.5f  - CHAR_SPACING), 0);
 			break;
 	}
 
@@ -135,7 +135,7 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 		if (text[i] == '\n') {
 			if (font_text_align == TEXT_LEFT) {
 				draw_pop_matrix();
-				draw_translate(0, -(CHAR_WIDTH+CHAR_SPACING), 0);
+				draw_translate(0, -(CHAR_WIDTH+CHAR_SPACING));
 				draw_push_matrix();
 				i++;
 				continue;
@@ -144,7 +144,7 @@ void font_drawText(GLfloat x, GLfloat y, char* text)
 			init_text(text[i]);
 		}
 		i++;
-		draw_translate((CHAR_WIDTH + CHAR_SPACING), 0, 0);
+		draw_translate((CHAR_WIDTH + CHAR_SPACING), 0);
 	}
 	draw_flush_simple();
 

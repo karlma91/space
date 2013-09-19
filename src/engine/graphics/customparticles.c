@@ -32,7 +32,7 @@ emitter *particles_add_sparks(particle_system *s, cpVect p, float angle, float f
             intensity = force/2000;
         }
         e->draw_particle = draw_particle_as_spark;
-        e->angular_offset = angle * (180/M_PI)+90;
+        e->angular_offset = angle + WE_PI_2;
         e->speed.min = 0;
         e->speed.max = intensity*3000;
         e->init_life.min = 0;
@@ -63,5 +63,5 @@ static void draw_particle_as_score(emitter *em, particle *p)
 static void draw_particle_as_spark(emitter *em, particle *p)
 {
     cpVect pos = p->p;
-    draw_glow_line(pos.x,pos.y,pos.x + p->v.x*p->size,pos.y+ p->v.y*p->size, p->size);
+    draw_glow_line(pos,cpvadd(pos, cpvmult(p->v, p->size)), p->size);
 }

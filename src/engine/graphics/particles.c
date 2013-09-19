@@ -408,7 +408,7 @@ static void add_particle(emitter *em)
 	p->alive = 1;
 
 	/* speed */
-	float angle = ((we_randf - 0.5)*((em->spread)) + (em->angular_offset+90))*(M_PI/180);
+	float angle = em->spread * (we_randf - 0.5) + em->angular_offset + WE_PI_2;
 	float speed = range_get_random(em->speed) * 0.001f;
 	cpVect t = cpvforangle(angle);
 	p->v = cpvmult(t,speed);
@@ -440,7 +440,7 @@ static void draw_all_particles(emitter *em)
 	draw_push_color();
 	draw_push_blend();
 	if(em->additive){
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		draw_blend(GL_SRC_ALPHA, GL_ONE);
 	}
 
 	particle *p = em->head;
@@ -585,8 +585,10 @@ int read_emitter_from_file (char *filename)
 				parse_bool(node,"enabled",&(emi->length_enabled));
 			}else if(TESTNAME("spread")){
 				parse_float(node,"value", &(emi->spread));
+				emi->spread /= WE_180_PI; //convert to radians
 			}else if(TESTNAME("angularOffset")){
 				parse_float(node,"value",&(emi->angular_offset));
+				emi->angular_offset /= WE_180_PI; //convert to radians
 			}else if(TESTNAME("growthFactor")){
 				parse_float(node,"value",&(emi->growthfactor));
 			}else if(TESTNAME("gravityFactor")){
