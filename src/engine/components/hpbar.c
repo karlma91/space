@@ -41,10 +41,10 @@ void hpbar_draw(hpbar *hp_bar, cpFloat angle)
 		hp_bar->hp_timer = 2;
 	}
 
-
 	if ((hp_bar->hp_timer > 0 || hp_percent < 0.5) && hp_bar->draw_value > 0) {
 		hp_bar->hp_timer -= dt;
-		draw_bar(cpv(*(hp_bar->x) + hp_bar->x_offset, *(hp_bar->y) + hp_bar->y_offset), cpv(hp_bar->width, hp_bar->height), 0, hp_bar->draw_value, hp_percent);
+		cpVect pos = cpvadd(cpv(*(hp_bar->x), *(hp_bar->y)), cpvrotate(cpv(hp_bar->x_offset, hp_bar->y_offset), pos));
+		draw_bar(pos, cpv(hp_bar->width, hp_bar->height), angle, hp_bar->draw_value, hp_percent);
 	}
 }
 
