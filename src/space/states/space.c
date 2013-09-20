@@ -422,6 +422,8 @@ static void draw(void)
 	/* draw particle effects */
 	particles_draw(parti);
 
+	debugdraw_space(space);
+
 	space_rendering_map = 0;
 	draw_gui();
 

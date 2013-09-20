@@ -5,13 +5,8 @@
 #include "draw.h"
 
 typedef struct {
-	union {
-		float f[6];
-		struct {
-			float x1, y1, z1;
-			float x2, y2, z2;
-		};
-	};
+    float x1, y1, z1;
+    float x2, y2, z2;
 } matrix;
 
 static matrix stack[50];

@@ -16,5 +16,6 @@
 #include "../graphics/matrix2d.h"
 #include "../graphics/particles.h"
 #include "../graphics/customparticles.h"
+#include "../testing/debugdraw.h"
 
 #endif /* WE_GRAPHICS_H_ */
