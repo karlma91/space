@@ -10,6 +10,10 @@
 
 #include "chipmunk.h"
 
+#ifndef
+#define WE_DEBUG 0
+#endif
+
 #define WE_PI_6 0.52359877559
 #define WE_PI_4 0.78539816339
 #define WE_PI_3 1.0471975512
