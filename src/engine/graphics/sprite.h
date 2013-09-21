@@ -11,7 +11,7 @@
 
 #include "chipmunk.h"
 
-typedef void * SPRITE_ID; /* Peker til konstant sprite data*/
+typedef void * SPRITE_ID; /* Peker til konstant sprite_data (ikke sprite!)*/
 
 /* public instance sprite */
 typedef struct {

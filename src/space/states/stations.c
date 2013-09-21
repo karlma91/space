@@ -32,6 +32,9 @@ static tween *testr;
 static cpVect a, b;
 static float r;
 
+// TODO: add this in state struct for each state ?
+static layer_system * la_sys;
+
 /* * * * * * * * * *
  * state functions *
  * * * * * * * * * */
@@ -65,12 +68,13 @@ static void sdl_event(SDL_Event *event)
 
 static void draw(void)
 {
+
 	cpVect full = cpv(GAME_WIDTH, GAME_HEIGHT);
 	draw_color4f(1,1,1,1);
 	float xoffset = scroll_get_xoffset(scroller);
 	float yoffset = scroll_get_yoffset(scroller);
 
-	{
+	/*{
 	float x1 = - (xoffset / 7) / GAME_WIDTH;
 	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT;
 	float y1 = (yoffset / 7) / GAME_HEIGHT;
@@ -113,8 +117,11 @@ static void draw(void)
 					x1, y1,
 					x2, y1};
 	draw_texture(tex_stars_2,cpvzero,map,full,0);
-	}
+	}*/
 
+
+	draw_color4f(1,1,1,1);
+	layersystem_render(la_sys, cpv(xoffset, yoffset));
 	int i;
 	for (i = 0; i < station_count; i++) {
 		touch_place(btn_stations[i], -(station_count - 1) / 2.0 * 650 + 1000 * i + xoffset, yoffset+(i-0.5)*270);
@@ -128,6 +135,7 @@ static void draw(void)
 
 	//cpVect pos = {0,0.7f*GAME_HEIGHT/2};
 	//draw_texture(tex_title, &pos, TEX_MAP_FULL, 1200, 300, 0);
+
 }
 
 static void button_callback(void *data)
@@ -170,7 +178,7 @@ void stations_init(void)
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
-	statesystem_register_touchable(this, btn_home);
+	///////////////////////////statesystem_register_touchable(this, btn_home);
 
 	int i;
 	for (i = 0; i < station_count; i++) {
@@ -196,5 +204,14 @@ void stations_init(void)
 	tex_stars = texture_load("stars.jpg");
 	tex_stars_2 = texture_load("stars_2.png");
 
+	la_sys = layersystem_new(100);
+	for(i = 0; i<la_sys->num_layers; i++){
+		float depth =  2 + 10*tan((1.0f*i/la_sys->num_layers)*WE_PI_2);
+		layersystem_set_layer_parallax(la_sys, i, depth, 1);
+	}
+	for(i = 0; i<100; i++){
+		float size = 50 + we_randf*150;
+		layersystem_add_sprite(la_sys, roundf(we_randf*(la_sys->num_layers-1)), SPRITE_SPIKEBALL, size, size, cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600), we_randf*WE_2PI);
+	}
 }
 

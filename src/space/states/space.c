@@ -72,6 +72,8 @@ static camera space_cam;
 
 static void input(void);
 
+static layer_system *layersystem;
+
 /*
  * The ingame states for level transition and delays
  */
@@ -401,7 +403,6 @@ static void draw(void)
 	//position_now = tween_move_f(position_start, position_end, position_time, ExponentialEaseInOut);
 
 	//draw_box(0,position_now, 100, 100, 0, 1);
-
 	/* translate view */
 	draw_load_identity();
 	current_camera->rotation = -se_tangent(cpv(current_camera->x,current_camera->y));
@@ -409,7 +410,10 @@ static void draw(void)
 	draw_scale(current_camera->zoom,current_camera->zoom); //TODO move this into a camera method
 	draw_translate(-current_camera->x, -current_camera->y); //TODO move this into a camera method
 
-	drawStars();
+	draw_color4f(1,1,1,1);
+	layersystem_render(layersystem, cpv(current_camera->x, current_camera->y));
+
+	//drawStars();
 
 	/* draw tilemap */
 	tilemap_render(currentlvl->tiles);
@@ -857,6 +861,16 @@ static cpVect space_particle_g_func(cpVect pos)
 
 void space_init(void)
 {
+	layersystem = layersystem_new(10);
+	int i;
+	for(i = 0; i<layersystem->num_layers; i++){
+		float depth =  1 + 10*tan((1.0f*i/layersystem->num_layers)*WE_PI_2);
+		layersystem_set_layer_parallax(layersystem, i, depth, 1);
+	}
+	for(i = 0; i<100; i++){
+		float size = 50 + we_randf*150;
+		layersystem_add_sprite(layersystem, roundf(we_randf*(layersystem->num_layers-1)), SPRITE_SPIKEBALL, size, size, cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600), we_randf*WE_2PI);
+	}
 	parti = particles_create_system();
 	particle_set_gravity_func(parti, space_particle_g_func );
 	statesystem_register(state_space,LEVEL_STATE_COUNT);
