@@ -22,7 +22,7 @@ static void add_sparks_at_contactpoint(cpArbiter *arb)
 			cpVect v = cpArbiterGetPoint(arb, 0);
 			cpVect n = cpArbiterGetNormal(arb, 0);
 			float angle = cpvtoangle(n);
-			particles_add_sparks(parti, v,angle,f);
+			particles_add_sparks(current_particles, v,angle,f);
 		}
 	}
 }
@@ -31,7 +31,7 @@ static void se_add_explotion_at_contact_point(cpArbiter *arb)
 {
 	if(cpArbiterGetCount(arb) >0){
 		cpVect v = cpArbiterGetPoint(arb, 0);
-		particles_get_emitter_at(parti, EMITTER_EXPLOSION, v);
+		particles_get_emitter_at(current_particles, EMITTER_EXPLOSION, v);
 	}
 }
 
@@ -54,7 +54,7 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 		if (object->alive) {
 			instance_remove(bullet);
 
-			particles_get_emitter_at(parti, EMITTER_EXPLOSION, b->body->p);
+			particles_get_emitter_at(current_particles, EMITTER_EXPLOSION, b->body->p);
 			//se_add_score_and_popup(b->body->p, *COMPONENT(object, SCORE, int*));
 		}
 	} else {
@@ -80,7 +80,7 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	se_add_explotion_at_contact_point(arb);
 
 	if (se_damage_object(object, bullet)) {
-		particles_get_emitter_at(parti, EMITTER_EXPLOSION, b->body->p);
+		particles_get_emitter_at(current_particles, EMITTER_EXPLOSION, b->body->p);
 	} else {
 		sound_play(SND_HIT_2);
 	}
@@ -149,19 +149,19 @@ static int sensor_pickup(cpArbiter *arb, cpSpace *space, void *unused)
 
 void collisioncallbacks_init(void)
 {
-	cpSpaceAddCollisionHandler(space, obj_id_tank, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, obj_id_rocket, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, obj_id_factory, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, obj_id_turret, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_tank, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_rocket, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_factory, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_turret, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
 
-	cpSpaceAddCollisionHandler(space, obj_id_bullet, ID_GROUND, NULL, NULL, callback_bullet_ground, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, obj_id_bullet, ID_GROUND, NULL, NULL, callback_bullet_ground, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, obj_id_rocket, ID_GROUND, NULL, NULL, callback_rocket_ground, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, ID_GROUND, NULL, NULL, callback_bullet_ground, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, ID_GROUND, NULL, NULL, callback_bullet_ground, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_rocket, ID_GROUND, NULL, NULL, callback_rocket_ground, NULL, NULL);
 
-	cpSpaceAddCollisionHandler(space, obj_id_player, obj_id_bullet, collision_object_bullet, NULL, NULL, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, obj_id_player, ID_GROUND, NULL, NULL, collision_player_object, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, obj_id_player, obj_id_robotarm, NULL, NULL, collision_player_object, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, obj_id_player, obj_id_factory, NULL, NULL, collision_player_object, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, obj_id_player, obj_id_rocket, collision_object_bullet, NULL, NULL, NULL, NULL);
-	cpSpaceAddCollisionHandler(space, obj_id_player, obj_id_coin, sensor_pickup, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_player, obj_id_bullet, collision_object_bullet, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_player, ID_GROUND, NULL, NULL, collision_player_object, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_player, obj_id_robotarm, NULL, NULL, collision_player_object, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_player, obj_id_factory, NULL, NULL, collision_player_object, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_player, obj_id_rocket, collision_object_bullet, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_player, obj_id_coin, sensor_pickup, NULL, NULL, NULL, NULL);
 }

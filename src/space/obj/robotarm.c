@@ -36,11 +36,11 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpVect pos = robotarm->data.p_start;
 	pos.y += 100;
 
-	robotarm->saw = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
+	robotarm->saw = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(robotarm->saw, pos);
 	cpBodySetVelLimit(robotarm->saw, 400);
 
-	shape = we_add_circle_shape(space, robotarm->saw, radius, 0.7, 0.0);
+	shape = we_add_circle_shape(current_space, robotarm->saw, radius, 0.7, 0.0);
 	we_shape_collision(shape, &this, LAYER_ENEMY, robotarm);
 
 	cpFloat size = 50;
@@ -51,12 +51,12 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetVelLimit(((instance *) robotarm)->body,180);
 
 	/* make and connect new shape to body */
-	shape = cpSpaceAddShape(space, cpBoxShapeNew(robotarm->data.body, size, size));
+	shape = cpSpaceAddShape(current_space, cpBoxShapeNew(robotarm->data.body, size, size));
 	cpShapeSetFriction(shape, 0.01);
 	we_shape_collision(shape, &this, LAYER_BULLET_ENEMY, robotarm);
 
 	//connect sawblade with body
-	cpSpaceAddConstraint(space, cpSlideJointNew(robotarm->saw, robotarm->data.body, cpv(0,0), cpv(0,0), 1.0f, (robotarm->segments)*robotarm->seg_length));
+	cpSpaceAddConstraint(current_space, cpSlideJointNew(robotarm->saw, robotarm->data.body, cpv(0,0), cpv(0,0), 1.0f, (robotarm->segments)*robotarm->seg_length));
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
@@ -128,6 +128,6 @@ static void on_remove(OBJ_TYPE *OBJ_NAME)
 	free(robotarm->y);
 	free(robotarm->angle);
 
-	we_body_remove(space, &robotarm->saw);
-	we_body_remove_static(space, &robotarm->data.body);
+	we_body_remove(current_space, &robotarm->saw);
+	we_body_remove_static(current_space, &robotarm->data.body);
 }

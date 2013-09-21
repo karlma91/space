@@ -38,13 +38,13 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	cpFloat width = 80;
 	cpFloat height = 30;
-	tank->data.body = cpSpaceAddBody(space, cpBodyNew(MASS, cpMomentForBox(MASS, width, height)));
+	tank->data.body = cpSpaceAddBody(current_space, cpBodyNew(MASS, cpMomentForBox(MASS, width, height)));
 	cpBodySetPos(tank->data.body, tank->data.p_start);
 	cpBodySetUserData(tank->data.body, tank);
 	se_tangent_body(tank->data.body);
 	se_velfunc(tank->data.body, 1);
 
-	cpShape *shape = we_add_box_shape(space, tank->data.body, width, height, 0.6, 0.0);
+	cpShape *shape = we_add_box_shape(current_space, tank->data.body, width, height, 0.6, 0.0);
 	we_shape_collision(shape, &this, LAYER_ENEMY, tank);
 
 	// Make a car with some nice soft suspension
@@ -52,26 +52,26 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpVect posA = cpv(tank->data.body->p.x - wheel_offset, start_height);
 	cpVect posB = cpv(tank->data.body->p.x + wheel_offset, start_height);
 
-	tank->wheel1 = addWheel(space, posA, tank);
-	tank->wheel2 = addWheel(space, posB, tank);
+	tank->wheel1 = addWheel(current_space, posA, tank);
+	tank->wheel2 = addWheel(current_space, posB, tank);
 
 	tank->data.components[CMP_BODIES] = tank->wheel1;
 	tank->data.components[CMP_BODIES+1] = tank->wheel2;
 
-	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel1 , cpv(-30, -10), cpv(-wheel_offset, -30), cpvzero));
-	cpSpaceAddConstraint(space, cpGrooveJointNew(tank->data.body, tank->wheel2, cpv( 30, -10), cpv( wheel_offset, -30), cpvzero));
+	cpSpaceAddConstraint(current_space, cpGrooveJointNew(tank->data.body, tank->wheel1 , cpv(-30, -10), cpv(-wheel_offset, -30), cpvzero));
+	cpSpaceAddConstraint(current_space, cpGrooveJointNew(tank->data.body, tank->wheel2, cpv( 30, -10), cpv( wheel_offset, -30), cpvzero));
 
-	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
-	cpSpaceAddConstraint(space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
+	cpSpaceAddConstraint(current_space, cpDampedSpringNew(tank->data.body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
+	cpSpaceAddConstraint(current_space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
 
-	tank->barrel = cpSpaceAddBody(space, cpBodyNew(MASS_BARREL, cpMomentForBox(MASS_BARREL, width/2,height/2)));
+	tank->barrel = cpSpaceAddBody(current_space, cpBodyNew(MASS_BARREL, cpMomentForBox(MASS_BARREL, width/2,height/2)));
 	cpBodySetPos(tank->barrel, tank->data.p_start);
 	cpBodySetUserData(tank->barrel, tank);
 	se_tangent_body(tank->barrel);
 	se_velfunc(tank->barrel, 1);
-	shape_add_shapes(space, POLYSHAPE_TANK, tank->barrel, 150, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
-	cpSpaceAddConstraint(space, cpSimpleMotorNew(tank->data.body, tank->barrel, 0));
-	cpSpaceAddConstraint(space, cpPinJointNew(tank->data.body, tank->barrel, cpvzero, cpvzero));
+	shape_add_shapes(current_space, POLYSHAPE_TANK, tank->barrel, 150, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
+	cpSpaceAddConstraint(current_space, cpSimpleMotorNew(tank->data.body, tank->barrel, 0));
+	cpSpaceAddConstraint(current_space, cpPinJointNew(tank->data.body, tank->barrel, cpvzero, cpvzero));
 
 	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,0,60,&(tank->data.body->p));
 }
@@ -222,9 +222,9 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(parti, EMITTER_FRAGMENTS, tank->data.body->p);
+	particles_get_emitter_at(current_particles, EMITTER_FRAGMENTS, tank->data.body->p);
 	se_spawn_coins((instance *)tank);
-	we_body_remove_constraints(space, tank->data.body);
+	we_body_remove_constraints(current_space, tank->data.body);
 	cpBodySetTorque(tank->wheel1, 0);
 	cpBodySetTorque(tank->wheel2, 0);
 	sound_play(SND_TANK_EXPLODE);
@@ -233,9 +233,9 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	we_body_remove(space, &tank->data.body);
-	we_body_remove(space, &tank->barrel);
-	we_body_remove(space, &tank->wheel1);
-	we_body_remove(space, &tank->wheel2);
+	we_body_remove(current_space, &tank->data.body);
+	we_body_remove(current_space, &tank->barrel);
+	we_body_remove(current_space, &tank->wheel1);
+	we_body_remove(current_space, &tank->wheel2);
 	factory_remove_child(tank);
 }

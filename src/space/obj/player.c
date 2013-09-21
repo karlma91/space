@@ -44,34 +44,34 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->data.components[CMP_MINIMAP] = &player->radar_image;
 	player->radar_image = cmp_new_minimap(10, COL_GREEN);
 
-	player->flame = particles_get_emitter(parti, EMITTER_FLAME);
+	player->flame = particles_get_emitter(current_particles, EMITTER_FLAME);
 	player->flame->self_draw = 1;
 	player->disable=0;
 
 	/* make and add new body */
-	player->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
+	player->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
 	cpBodySetPos(player->data.body, cpv(0,990));
 	cpBodySetVelLimit(player->data.body,450); //700
 	cpBodySetUserData(player->data.body, (void*)player);
 	se_velfunc(player->data.body, 1);
 
 	/* make and connect new shape to body */
-	shape = we_add_circle_shape(space, player->data.body,radius,0.8,0.9);
+	shape = we_add_circle_shape(current_space, player->data.body,radius,0.8,0.9);
 	we_shape_collision(shape, &this, LAYER_PLAYER, player);
 
-	shape = we_add_circle_shape(space, player->data.body, player->param.cash_radius, 0,0);
+	shape = we_add_circle_shape(current_space, player->data.body, player->param.cash_radius, 0,0);
 	we_shape_collision(shape, &this, LAYER_PICKUP, player);
 	cpShapeSetSensor(shape, 1);
 
 	hpbar_init(&(player->hp_bar), 100, 120, 25, 0, 50, &(player->data.body->p));
 
 	//FIXME cleanup
-	player->gunwheel = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
+	player->gunwheel = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(player->gunwheel, player->data.body->p);
 	cpBodySetUserData(player->gunwheel, (void*)player);
 	se_velfunc(player->gunwheel, 1);
 
-	shape = we_add_circle_shape(space, player->gunwheel,radius,0.9,0.8);
+	shape = we_add_circle_shape(current_space, player->gunwheel,radius,0.9,0.8);
 	we_shape_collision(shape, &this, LAYER_PLAYER, player);
 
 	//cpSpaceAddConstraint(space, cpPinJointNew(player->data.body, player->gunwheel, cpvzero, cpvzero));
@@ -143,7 +143,7 @@ static void controls(obj_player *player)
 		cpVect j = cpvmult(player_dir, player->force);
 
 		if (player_assisted_steering) {
-			cpVect F = cpvmult(cpSpaceGetGravity(space),cpBodyGetMass(player->data.body)*dt);
+			cpVect F = cpvmult(cpSpaceGetGravity(current_space),cpBodyGetMass(player->data.body)*dt);
 			j.x -= F.x;
 			j.y -= F.y;
 

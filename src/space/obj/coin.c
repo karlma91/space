@@ -25,7 +25,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&coin->data.spr, SPRITE_COIN, COIN_SIZE, COIN_SIZE, COIN_FPS);
 	sprite_set_index(&coin->data.spr, rand() & 0xF);
 
-	coin->data.body = cpSpaceAddBody(space, cpBodyNew(COIN_MASS, cpMomentForCircle(COIN_MASS, 0.0f, COIN_RADIUS, cpvzero)));
+	coin->data.body = cpSpaceAddBody(current_space, cpBodyNew(COIN_MASS, cpMomentForCircle(COIN_MASS, 0.0f, COIN_RADIUS, cpvzero)));
 	cpBodySetUserData(coin->data.body, coin);
 	cpBodySetPos(coin->data.body, coin->data.p_start);
 	se_tangent_body(coin->data.body);
@@ -34,7 +34,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	float force = we_randf * coin->param.explo_fmax;
 	coin->data.body->v = cpvmult(cpvforangle(angle), force);
 
-	cpShape *shape = we_add_circle_shape(space, coin->data.body,COIN_RADIUS-5,0.8,0.2);
+	cpShape *shape = we_add_circle_shape(current_space, coin->data.body,COIN_RADIUS-5,0.8,0.2);
 	we_shape_collision(shape, &this, LAYER_PICKUP, &this);
 
 	coin->data.body->velocity_func = vel_func;
@@ -77,5 +77,5 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	we_body_remove(space, &coin->data.body);
+	we_body_remove(current_space, &coin->data.body);
 }

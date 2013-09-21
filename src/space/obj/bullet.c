@@ -18,13 +18,13 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
 
-	bullet->data.body = cpSpaceAddBody(space, cpBodyNew(1, moment));
+	bullet->data.body = cpSpaceAddBody(current_space, cpBodyNew(1, moment));
 	cpBodySetPos(bullet->data.body, bullet->data.p_start); //FIXME
 	cpBodySetUserData(bullet->data.body, (instance*) bullet);
 	cpBodySetVel(bullet->data.body, bullet->data.v_start); //3000 //FIXME
 	se_velfunc(bullet->data.body, 0);
 
-	cpShape *shape = we_add_circle_shape(space, bullet->data.body, 15, 1, 0);
+	cpShape *shape = we_add_circle_shape(current_space, bullet->data.body, 15, 1, 0);
 	cpShapeSetCollisionType(shape, &this);
 	cpShapeSetGroup(shape, bullet);
 
@@ -75,5 +75,5 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	we_body_remove(space, &bullet->data.body);
+	we_body_remove(current_space, &bullet->data.body);
 }

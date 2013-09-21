@@ -9,6 +9,13 @@
 #define STATESYSTEM_H_
 
 #include "SDL_events.h"
+#include "chipmunk.h"
+#include "../components/object.h"
+#include "../graphics/particles.h"
+
+extern cpSpace *current_space;
+extern object_system *current_objects;
+extern particle_system *current_particles;
 
 typedef void * STATE_ID;
 
@@ -40,6 +47,9 @@ void statesystem_destroy(void);
 STATE_ID statesystem_get_render_state(void);
 
 STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs);
+
+void statesystem_enable_objects(STATE_ID state_id, int enabled);
+void statesystem_enable_particles(STATE_ID state_id, int enabled);
 
 void statesystem_add_inner_state(STATE_ID state, int inner_state, void (*update)(void), void (*draw)(void));
 void statesystem_set_inner_state(STATE_ID state, int inner_state);

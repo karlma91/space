@@ -10,7 +10,7 @@
 
 #include "chipmunk.h"
 
-#ifndef
+#ifndef WE_DEBUG
 #define WE_DEBUG 0
 #endif
 

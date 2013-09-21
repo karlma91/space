@@ -36,22 +36,22 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	p_start.x = currentlvl->inner_radius + TURRET_SIZE/2;
 	p_start = we_pol2cart(p_start);
 
-	turret->tower = cpSpaceAddBody(space, cpBodyNew(100, cpMomentForBox(100, TURRET_SIZE, TURRET_SIZE)));
+	turret->tower = cpSpaceAddBody(current_space, cpBodyNew(100, cpMomentForBox(100, TURRET_SIZE, TURRET_SIZE)));
 	cpBodySetUserData(turret->tower, turret);
 	cpBodySetPos(turret->tower, p_start);
 	se_tangent_body(turret->tower);
 	se_velfunc(turret->tower, -1);
-	shape_add_shapes(space, POLYSHAPE_TURRET, turret->tower, TURRET_SIZE, 1, 0.7, turret, NULL, LAYER_BUILDING, 2);
+	shape_add_shapes(current_space, POLYSHAPE_TURRET, turret->tower, TURRET_SIZE, 1, 0.7, turret, NULL, LAYER_BUILDING, 2);
 
 	float mass = 14;
-	turret->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForCircle(mass, 0, TURRET_SIZE,cpvzero)));
+	turret->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0, TURRET_SIZE,cpvzero)));
 	cpBodySetUserData(turret->data.body, turret);
 	cpBodySetPos(turret->data.body, p_start);
 	se_tangent_body(turret->data.body);
 	se_velfunc(turret->data.body, -1);
-	shape_add_shapes(space, POLYSHAPE_TURRET, turret->data.body, TURRET_SIZE, 1, 0.7, turret, &this, LAYER_ENEMY, 1);
+	shape_add_shapes(current_space, POLYSHAPE_TURRET, turret->data.body, TURRET_SIZE, 1, 0.7, turret, &this, LAYER_ENEMY, 1);
 
-	cpSpaceAddConstraint(space, cpPinJointNew(turret->data.body, turret->tower, cpvzero, cpvzero));
+	cpSpaceAddConstraint(current_space, cpPinJointNew(turret->data.body, turret->tower, cpvzero, cpvzero));
 
 	hpbar_init(&turret->hp_bar,turret->param.max_hp,80,20,0,60,&(turret->data.body->p));
 	sprite_create(&turret->data.spr, SPRITE_TURRET, TURRET_SIZE, TURRET_SIZE, 0);
@@ -125,11 +125,11 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	se_spawn_coins((instance *)turret);
 	//instance_remove((instance *)turret);
 	se_velfunc(turret->data.body, 1);
-	we_body_remove_constraints(space, turret->data.body);
+	we_body_remove_constraints(current_space, turret->data.body);
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	we_body_remove(space, &turret->data.body);
-	we_body_remove(space, &turret->tower);
+	we_body_remove(current_space, &turret->data.body);
+	we_body_remove(current_space, &turret->tower);
 }

@@ -339,6 +339,7 @@ static void main_init(void) {
 	//font_init();      /* (currently not in use) */
 	statesystem_init(); /* init all states */
 	object_init();
+	objectsystem_init();
 	game_init();
 
 	// Handle iOS app-events (pause, low-memory, terminating, etc...) and SDL_QUIT
@@ -569,6 +570,7 @@ static int main_destroy(void) {
 
 	game_destroy();
 	object_destroy();
+	objectsystem_destroy();
 
 	/* destroy states */
 	statesystem_destroy();
@@ -587,9 +589,12 @@ static int main_destroy(void) {
 	// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
 	//SDL_GL_MakeCurrent(NULL, NULL);
 	SDL_GL_DeleteContext(glcontext);
-	SDL_Quit();
 
+#if !TARGET_OS_IPHONE
+	SDL_Quit();
 	exit(0);
+#endif
+
 	return 0;
 }
 

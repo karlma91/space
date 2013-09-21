@@ -25,14 +25,14 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	COMPONENT_SET(rocket, MINIMAP, &rocket->radar_image);
 	rocket->radar_image = cmp_new_minimap(5, COL_RED);
 
-	rocket->flame = particles_get_emitter(parti, EMITTER_ROCKET_FLAME);
+	rocket->flame = particles_get_emitter(current_particles, EMITTER_ROCKET_FLAME);
 	rocket->flame->self_draw = 1;
 
 	cpFloat height = ROCKET_SIZE/8;
 	cpFloat mass = 2.0f;
 	cpFloat width = ROCKET_SIZE/2;
 
-	rocket->data.body = cpSpaceAddBody(space, cpBodyNew(mass, cpMomentForBox(mass, width, height)));
+	rocket->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForBox(mass, width, height)));
 	cpBodySetPos(rocket->data.body, rocket->data.p_start);
 	cpBodySetVelLimit(rocket->data.body, ROCKET_VEL_LIMIT);
 	cpBodySetUserData(rocket->data.body, rocket);
@@ -40,7 +40,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	se_tangent_body(rocket->data.body);
 	cpBodySetAngle(rocket->data.body, rocket->data.body->a + WE_PI_2);
 
-	cpShape *shape = we_add_box_shape(space, rocket->data.body,width,height,0.7,0.0);
+	cpShape *shape = we_add_box_shape(current_space, rocket->data.body,width,height,0.7,0.0);
 	we_shape_collision(shape, &this, LAYER_ENEMY, CP_NO_GROUP);
 
 	hpbar_init(&rocket->hp_bar, rocket->param.max_hp, 80, 18, 0, 60, &(rocket->data.body->p));
@@ -89,7 +89,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void shape_from_space(cpBody *body, cpShape *shape, void *data)
 {
-    cpSpaceRemoveShape(space, shape);
+    cpSpaceRemoveShape(current_space, shape);
     cpShapeFree(shape);
 }
 
@@ -102,6 +102,6 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	particles_release_emitter(rocket->flame);
-	we_body_remove(space, &rocket->data.body);
+	we_body_remove(current_space, &rocket->data.body);
 	factory_remove_child(rocket);
 }

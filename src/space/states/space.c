@@ -23,10 +23,6 @@ static float position_now = 0;
 static float position_time = 0;
 static float position_dir = 1;
 
-static float accumulator = 0;
-
-//TODO: remove in final game <-- ?
-
 STATE_ID state_space;
 
 /**
@@ -45,7 +41,7 @@ static void radar_draw(float x, float y);
 
 int space_rendering_map = 0;
 
-particle_system *parti;
+particle_system *current_particles;
 
 static button btn_pause;
 static int game_paused = 0;
@@ -53,9 +49,6 @@ static int game_paused = 0;
 static float game_time;
 
 // Chipmunk
-static cpFloat phys_step = 1/60.0f;
-/* extern */
-cpSpace *space;
 
 /* camera settings */
 static float cam_left_limit;
@@ -160,7 +153,7 @@ static void level_running(void)
 
 	input();
 
-	update_all();
+	//update_all();
 	obj_player *player = (obj_player*)instance_first(obj_id_player);
 	if(player && player->hp_bar.value <= 0){
 		player->disable = 1;
@@ -176,7 +169,7 @@ int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead(void)
 {
 	obj_player *player = (obj_player *)instance_first(obj_id_player);
-	update_all();
+	//update_all();
 
 	static int tmp_atom = 0;
 	if (state_timer > 1 && !tmp_atom) {
@@ -193,7 +186,7 @@ static void level_player_dead(void)
 static void level_cleared(void)
 {
 	obj_player *player = (obj_player *)instance_first(obj_id_player);
-	update_all();
+	//update_all();
 
 	static int tmp_atom = 0;
 	if (state_timer > 2 && !tmp_atom) {
@@ -288,46 +281,6 @@ void nan_check_instance(instance *ins, void *msg)
 	}
 }
 
-void nan_check_all(char *msg)
-{
-	int nan = nan_check(space->staticBody);
-	if (nan) {
-		SDL_Log("ERROR: %s, NaN for static space body (NaN var: %d)", msg, nan);
-		main_stop();
-	}
-
-	instance_iterate(nan_check_instance, msg);
-}
-
-/**
- * Updates all the objects in objects and in chipmunk
- */
-static void update_all(void)
-{
-	/* chipmunk timestep counter */
-	accumulator += dt;
-
-	nan_check_all("pre_iterate");
-	instance_iterate(update_instances, NULL);
-	nan_check_all("post_iterate");
-	particles_update(parti);
-
-	/* update all chipmunk objects 60 times per second */
-	while(accumulator >= phys_step)
-	{
-		cpSpaceStep(space, phys_step);
-		accumulator -= phys_step;
-	}
-
-	nan_check_all("post_phys");
-}
-
-static void update_instances(instance *obj, void *data)
-{
-	if(obj->alive){
-		instance_update(obj);
-	}
-}
 
 static void render_instances(instance *obj, void *data)
 {
@@ -420,7 +373,7 @@ static void draw(void)
 	instance_iterate(render_instances, NULL);
 
 	/* draw particle effects */
-	particles_draw(parti);
+	particles_draw(current_particles);
 
 	space_rendering_map = 0;
 	draw_gui();
@@ -717,7 +670,7 @@ void space_init_level(int space_station, int deck)
 		}
 	}
 	//TODO manage persistent objects(like player) in a better way, instead of removing and then re-adding
-	instance_clear();
+	objectsystem_clear();
 	instance_add((instance*)player);
 
 	/* set player specs based on selected upgrades */
@@ -744,11 +697,11 @@ void space_init_level(int space_station, int deck)
 	change_state(LEVEL_START);
 
 	/* static ground */
-	cpBody *staticBody = space->staticBody;
+	cpBody *staticBody = current_space->staticBody;
 
 	/* remove floor and ceiling */
 	if(llist_size(ll_floor_segs) > 0 && ceiling != NULL){
-		cpSpaceRemoveStaticShape(space,ceiling);
+		cpSpaceRemoveStaticShape(current_space,ceiling);
 		llist_clear(ll_floor_segs);
 	}
 
@@ -764,7 +717,7 @@ void space_init_level(int space_station, int deck)
 		cpVect a = cpvadd(p,cpvneg(n));
 		cpVect b = cpvadd(p,n);
 
-		cpShape *seg = cpSpaceAddShape(space, cpSegmentShapeNew(staticBody, a, b, seg_radius)); // ground level at 0
+		cpShape *seg = cpSpaceAddShape(current_space, cpSegmentShapeNew(staticBody, a, b, seg_radius)); // ground level at 0
 		cpShapeSetFriction(seg, 0.9f);
 		cpShapeSetCollisionType(seg, ID_GROUND);
 		cpShapeSetElasticity(seg, 0.7f);
@@ -772,7 +725,7 @@ void space_init_level(int space_station, int deck)
 		llist_add(ll_floor_segs, seg);
 	}
 
-	ceiling = cpSpaceAddShape(space, cpCircleShapeNew(staticBody, currentlvl->inner_radius,cpvzero));
+	ceiling = cpSpaceAddShape(current_space, cpCircleShapeNew(staticBody, currentlvl->inner_radius,cpvzero));
 	cpShapeSetFriction(ceiling, 0.9f);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
 	cpShapeSetElasticity(ceiling, 0.7f);
@@ -780,9 +733,9 @@ void space_init_level(int space_station, int deck)
 	/*
 	 * puts all shapes in correct position
 	 */
-	update_all();
+	//update_all();
 
-	particles_clear(parti);
+	particles_clear(current_particles);
 }
 
 static void on_enter(void)
@@ -835,16 +788,16 @@ static void on_leave(void)
 
 static void destroy(void)
 {
-	particles_destroy_system(parti);
+	particles_destroy_system(current_particles);
 	llist_destroy(ll_floor_segs);
-	cpSpaceDestroy(space);
+	cpSpaceDestroy(current_space);
 	joystick_free(joy_p1_left);
 	joystick_free(joy_p1_right);
 }
 
 static void remove_static(cpShape *shape)
 {
-	cpSpaceRemoveStaticShape(space, shape);
+	cpSpaceRemoveStaticShape(current_space, shape);
 }
 
 
@@ -855,8 +808,8 @@ static cpVect space_particle_g_func(cpVect pos)
 
 void space_init(void)
 {
-	parti = particles_create_system();
-	particle_set_gravity_func(parti, space_particle_g_func );
+	current_particles = particles_create_system();
+	particle_set_gravity_func(current_particles, space_particle_g_func );
 	statesystem_register(state_space,LEVEL_STATE_COUNT);
     statesystem_add_inner_state(state_space,LEVEL_START,level_start,NULL);
     statesystem_add_inner_state(state_space,LEVEL_RUNNING,level_running,NULL);
@@ -874,9 +827,10 @@ void space_init(void)
     llist_set_remove_callback(ll_floor_segs, remove_static);
     ceiling = NULL;
 
-	space = cpSpaceNew();
-	cpSpaceSetGravity(space, cpv(GRAVITY,0));
-	cpSpaceSetDamping(space, DAMPING);
+    statesystem_enable_objects(state_space, 1);
+
+	cpSpaceSetGravity(current_space, cpv(GRAVITY,0));
+	cpSpaceSetDamping(current_space, DAMPING);
 
 	extern void collisioncallbacks_init(void);
     collisioncallbacks_init();
@@ -947,26 +901,26 @@ void input(void)
 	if(keys[SDL_SCANCODE_G]){
 		keys[SDL_SCANCODE_G] = 0;
 		cpVect gravity = cpv(0, -2);
-		cpSpaceSetGravity(space, gravity);
+		cpSpaceSetGravity(current_space, gravity);
 	}
 #endif
 #endif
 }
 
 void space_start_demo(int station, int deck) {
+	statesystem_set_state(state_space);
 	//TODO set and reset all per-game variables
 	multiplayer = 0;
 	current_camera = &space_cam;
 	space_init_level(station,deck);
-	statesystem_set_state(state_space);
 }
 
 void space_start_multiplayer(int station, int deck) {
+	statesystem_set_state(state_space);
 	//TODO set and reset all per-game variables
 	multiplayer = 1;
 
 	space_init_level(station, deck);
-	statesystem_set_state(state_space);
 }
 
 void space_restart_level(void)

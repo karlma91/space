@@ -8,16 +8,13 @@
 
 void space_init(void);
 
-/* chipmunk physics space */
-extern cpSpace *space;
-
 extern int multiplayer;
 extern level *currentlvl;
 extern joystick *joy_p1_left, *joy_p1_right;
 extern joystick *joy_p2_left, *joy_p2_right;
 
 extern int space_rendering_map;
-extern particle_system *parti;
+extern particle_system *current_particles;
 
 /* init new level */
 void space_init_level(int space_station, int deck);

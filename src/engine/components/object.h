@@ -6,6 +6,7 @@
 #include "../data/llist.h"
 
 #define OBJ_MAGIC_COOKIE 0xB305D7A2
+#define INS_MAGIC_COOKIE 0xA2F4C681
 
 #ifndef GENERAL_OBJECT_FUNCS
 #define GENERAL_OBJECT_FUNCS 1
@@ -18,9 +19,23 @@
 #ifndef OBJECT_MAX_OBJECTS
 #define OBJECT_MAX_OBJECTS 20 //FIXME TMP define in port progress
 
-
 void object_init(void);
 void object_destroy(void);
+
+extern int objsys_terminating;
+
+typedef struct {
+	int count;
+
+	LList active;
+	LList pool;
+} object_info;
+
+typedef struct object_system {
+	cpSpace *space;
+	object_info objects_meta[OBJECT_MAX_OBJECTS];
+	LList ins2destroy;
+} object_system;
 
 typedef struct instance instance;
 typedef struct object object_id;
@@ -68,6 +83,12 @@ int component_register(int pointer_count);
 
 //TODO support filtered iterator
 
+void objectsystem_init(void);
+void objectsystem_destroy(void);
+object_system *objectsystem_new(void);
+void objectsystem_free(object_system *system);
+
+
 instance *instance_create(object_id *type, const void *param, cpVect p, cpVect v);
 
 void instance_add(instance *);
@@ -79,7 +100,7 @@ void instance_destroy(instance *);
 void instance_revive(instance *);
 void instance_remove(instance *);
 int instance_set_param(instance *, const void *param);
-void instance_clear(void);
+void objectsystem_clear(void);
 
 instance *instance_nearest(cpVect pos, object_id *type);
 instance *instance_first(object_id *type);
@@ -92,6 +113,7 @@ instance *instance_by_id(object_id *type, int instance_id);
 //int instance_count_active(object_id *type); //TODO implement this method, returning the number of instances that are not destroyed
 int instance_count(object_id *type);
 int object_register(object_id *obj);
+int object_getcount(void);
 object_id *object_by_name(const char *obj_name);
 object_id *object_by_id(int id);
 LList object_get_instances(const object_id *type);

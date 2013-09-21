@@ -31,20 +31,20 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&factory->data.spr, factory->param.sprite_id, 400, 400, 30);
 
 	if (factory->param.type == obj_id_tank) {
-		factory->smoke = particles_get_emitter(parti, EMITTER_SMOKE);
+		factory->smoke = particles_get_emitter(current_particles, EMITTER_SMOKE);
 		factory->smoke->self_draw = 1;
 		factory->data.spr.sub_index = rand() & 0x7;
 	}
 
 	/* make and add new body */
 	float m = 20; //500
-	factory->data.body = cpSpaceAddBody(space,
+	factory->data.body = cpSpaceAddBody(current_space,
 			cpBodyNew(m, cpMomentForBox(m, size, size)));
 	cpBodySetPos(factory->data.body, factory->data.p_start);
 	se_tangent_body(factory->data.body);
 	se_velfunc(factory->data.body, 1);
 
-	shape_add_shapes(space, factory->param.shape_id, factory->data.body, 400, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
+	shape_add_shapes(current_space, factory->param.shape_id, factory->data.body, 400, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
 	cpBodySetUserData(factory->data.body, factory);
 
 	hpbar_init(&factory->hp_bar, factory->param.max_hp, 200, 35, 0, 180,
@@ -111,7 +111,7 @@ void factory_remove_child(instance *child)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(parti, EMITTER_FRAGMENTS, factory->data.body->p);
+	particles_get_emitter_at(current_particles, EMITTER_FRAGMENTS, factory->data.body->p);
 	sound_play(SND_FACTORY_EXPLODE);
 	se_spawn_coins((instance *)factory);
 	instance_remove((instance *)factory);
@@ -120,6 +120,6 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	particles_release_emitter(factory->smoke);
-	we_body_remove(space, &factory->data.body);
+	we_body_remove(current_space, &factory->data.body);
 	instance_iterate_type((object_id *) factory->param.type, remove_factory_from_child, factory);
 }

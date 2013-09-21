@@ -4,11 +4,18 @@
 #include "statesystem.h"
 #include "../data/llist.h"
 #include "../input/touch.h"
+#include "../engine.h"
 
 #include "SDL.h"
 #define MAX_INNER_STATES 10
 
 LList states;
+
+cpSpace *current_space;
+object_system *current_objects;
+particle_system *current_particles;
+static cpFloat phys_step = 1/60.0f;
+static float accumulator = 0;
 
 typedef struct systemstate State;
 struct systemstate {
@@ -24,6 +31,12 @@ struct systemstate {
 
     LList touch_objects;
 
+    int objects_enabled;
+    int particles_enabled;
+
+    object_system *objects;
+    particle_system *particles;
+
     void (*inner_update[MAX_INNER_STATES])();
     void (*inner_draw[MAX_INNER_STATES])();
 
@@ -35,7 +48,7 @@ static STATE_ID state_beeing_rendered = NULL;
 State *stack_head = NULL;
 State *stack_tail = NULL;
 
-void statesystem_init() // no longer needed?
+void statesystem_init()
 {
 	states = llist_create();
 }
@@ -58,6 +71,24 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
 
     return state->id;
 }
+
+void statesystem_enable_objects(STATE_ID state_id, int enabled)
+{
+	State *state = (State *) state_id;
+	if (state->objects == NULL && enabled) {
+		state->objects = objectsystem_new();
+		state->objects_enabled = 1;
+		current_objects = state->objects;
+	}
+	state->objects_enabled = enabled;
+}
+
+void statesystem_enable_particles(STATE_ID state_id, int enabled)
+{
+	State *state = (State *) state_id;
+
+}
+
 void statesystem_add_inner_state(STATE_ID state_id, int inner_state, void (*update)(), void (*draw)())
 {
 	State *state = (State *) state_id;
@@ -107,18 +138,29 @@ void statesystem_set_state(STATE_ID state_id)
 
 	state = (State *) state_id;
 
+	current_objects = state->objects;
+	current_particles = state->particles;
     state->call.on_enter();
     state->time_alive = 0;
     stack_head = state;
     stack_tail = state;
 }
 
+static void update_instances(instance *obj, void *data)
+{
+	if(obj->alive){
+		instance_update(obj);
+	}
+}
+
 void statesystem_update(void)
 {
+	/* state pre-update */
 	if (stack_head->call.pre_update) {
 		stack_head->call.pre_update();
 	}
 
+	/* update touchables  */
 	LList list = stack_head->touch_objects;
 	llist_begin_loop(list);
 	while(llist_hasnext(list)) {
@@ -127,31 +169,63 @@ void statesystem_update(void)
 	}
 	llist_end_loop(list);
 
-	if(stack_head->inner_states > 0 &&
-			stack_head->inner_update[stack_head->current_inner_state]){
+	/* inner state update */
+	if (stack_head->inner_states > 0
+			&& stack_head->inner_update[stack_head->current_inner_state]) {
 		stack_head->inner_update[stack_head->current_inner_state]();
 	}
 
-    if( stack_head->call.post_update){
-        stack_head->call.post_update();
-    }
+	/* update objects */
+	//TODO check object system
+	if (stack_head->objects_enabled) {
+		instance_iterate(update_instances, NULL);
 
-    /* Call instance_poststep to update all lists and remove all dead objects */
-    void instance_poststep(void);
-    instance_poststep();
+		/* update Chipmunk */
+		//TODO check object system
+		accumulator += dt;
+		while (accumulator >= phys_step) {
+			cpSpaceStep(current_space, phys_step);
+			accumulator -= phys_step;
+		}
+	}
+
+	/* update particle system */
+	if (stack_head->particles_enabled) {
+		particles_update(current_particles);
+	}
+
+	/* state post update */
+	if (stack_head->call.post_update) {
+		stack_head->call.post_update();
+	}
+
+	/* update all lists and remove all dead objects */
+	if (stack_head->objects_enabled) {
+		void instance_poststep(void);
+		instance_poststep();
+	}
 }
+
 
 void statesystem_draw(void)
 {
+	/* render all states in stack */
     State *state = stack_tail;
     while(state){
+    	/* render current state */
     	state_beeing_rendered = state->id;
     	state->call.draw();
+
+    	/* render inner state */ //FIXME check if working?
     	if(state->inner_states > 0 &&
     			state->inner_draw[state->current_inner_state]){
     		state->inner_draw[state->current_inner_state]();
     	}
 
+    	//TODO render instances automatically from here
+    	//TODO render debug shapes automatically from here
+
+    	/* render touchables */
     	LList list = state->touch_objects;
     	llist_begin_loop(list);
     	while(llist_hasnext(list)) {
@@ -163,7 +237,6 @@ void statesystem_draw(void)
     	llist_end_loop(list);
 
     	state = state->next;
-
     }
 
     state_beeing_rendered = NULL;
