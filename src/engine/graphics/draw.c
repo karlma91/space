@@ -567,7 +567,7 @@ void draw_draw_arrays(GLenum mode, GLint first, GLsizei count)
 
     glVertexPointer(2, GL_FLOAT, 0, vertex);
     glTexCoordPointer(2, GL_FLOAT, 0, tex);
-    glDrawArrays(GL_TRIANGLE_STRIP, first, count);
+    glDrawArrays(mode, first, count);
 }
 
 void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
