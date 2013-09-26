@@ -119,11 +119,11 @@ struct system {
 int read_emitter_from_file (char *filename);
 void particles_init(void);
 void particles_destroy(void);
-void particles_destroy_system(particle_system *s);
+void particlesystem_free(particle_system *s);
 void particles_draw(particle_system *s);
 void particles_update(particle_system *s);
 void particles_release_emitter(emitter* e);
-particle_system * particles_create_system();
+particle_system *particlesystem_new();
 void particles_draw_emitter(emitter *e);
 
 void particle_set_gravity_func(particle_system *s, cpVect (*gravity_dir_func)(cpVect p));

@@ -18,6 +18,7 @@ typedef enum {
 	OPT_SOUND,
 	OPT_MUSIC,
 	OPT_ASSISTED_STEERING,
+	OPT_DEBUG,
 	OPT_DELETE,
 	OPT_INVULNERABLE, // TODO: DISABLE DEBUG CHEAT!
 	OPT_UNLOCK, // TODO: DISABLE DEBUG CHEAT!
@@ -29,7 +30,8 @@ char str_options[OPTION_COUNT][50] = {
 		"TOGGLE SOUND",
 		"TOGGLE MUSIC",
 		"ASSISTED STEERING",
-		"DELETE ALL",
+        "DEBUG DRAW",
+        "DELETE ALL",
 		"CHEAT: INVULNERABLE",
 		"CHEAT: UNLOCK ALL",
 };
@@ -112,6 +114,7 @@ static int bit_get_status(int bit_index)
 	return (bit_settings >> bit_index) & 0x1;
 }
 
+extern int debug_draw;
 static void option_click(settings_option option)
 {
 	SDL_Log("Option button #%d clicked :D (%s)", option, str_options[option]);
@@ -140,7 +143,11 @@ static void option_click(settings_option option)
 	case OPT_ASSISTED_STEERING:
 		player_assisted_steering = bit_toggle(option);
 		button_set_backcolor(btn_options[option], player_assisted_steering ? col_btn_checked : col_btn_unchecked);
-		break;
+        break;
+    case OPT_DEBUG:
+        debug_draw = bit_toggle(option);
+        button_set_backcolor(btn_options[option], debug_draw ? col_btn_checked : col_btn_unchecked);
+        break;
 	case OPT_DELETE:
 		/* TODO implement this unimplemented option! */
 		break;

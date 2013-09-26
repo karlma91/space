@@ -569,11 +569,11 @@ static int main_destroy(void) {
 	//cpSpaceFreeChildren(space);
 
 	game_destroy();
-	object_destroy();
-	objectsystem_destroy();
 
 	/* destroy states */
 	statesystem_destroy();
+	objectsystem_destroy();
+	object_destroy();
 
 	sound_destroy();
 	draw_destroy();

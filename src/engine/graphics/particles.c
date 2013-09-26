@@ -99,7 +99,7 @@ void particles_init(void)
 	}
 }
 
-particle_system * particles_create_system()
+particle_system *particlesystem_new()
 {
 	particle_system * s = (particle_system *)calloc(1, sizeof *s);
 	s->gravity_dir_func = default_gravity_func;
@@ -199,8 +199,11 @@ void particles_release_emitter(emitter* e)
 /**
  * destroys a system, puts all emitters available and frees system
  */
-void particles_destroy_system(particle_system *s) {
+void particlesystem_free(particle_system *s) {
 	/* clears emitter list */
+	if (!s)
+		return;
+
 	particles_clear(s);
 	emitter *e = s->emitters_in_use;
 	while(e){

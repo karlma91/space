@@ -9,7 +9,7 @@
 #include "SDL.h"
 #define MAX_INNER_STATES 10
 
-LList states;
+LList ll_states;
 
 cpSpace *current_space;
 object_system *current_objects;
@@ -48,9 +48,12 @@ static STATE_ID state_beeing_rendered = NULL;
 State *stack_head = NULL;
 State *stack_tail = NULL;
 
+static void statesystem_free(STATE_ID state_id);
+
 void statesystem_init()
 {
-	states = llist_create();
+	ll_states = llist_create();
+	llist_set_remove_callback(ll_states, statesystem_free);
 }
 
 STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
@@ -66,7 +69,7 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
 		exit(-1);
 	}
 
-    llist_add(states, (void*)state);
+    llist_add(ll_states, (void*)state);
     state->call = *funcs;
 
     return state->id;
@@ -77,7 +80,6 @@ void statesystem_enable_objects(STATE_ID state_id, int enabled)
 	State *state = (State *) state_id;
 	if (state->objects == NULL && enabled) {
 		state->objects = objectsystem_new();
-		state->objects_enabled = 1;
 		current_objects = state->objects;
 	}
 	state->objects_enabled = enabled;
@@ -86,7 +88,11 @@ void statesystem_enable_objects(STATE_ID state_id, int enabled)
 void statesystem_enable_particles(STATE_ID state_id, int enabled)
 {
 	State *state = (State *) state_id;
-
+	if (state->particles == NULL && enabled) {
+		state->particles = particlesystem_new();
+		current_particles = state->particles;
+	}
+	state->particles_enabled = enabled;
 }
 
 void statesystem_add_inner_state(STATE_ID state_id, int inner_state, void (*update)(), void (*draw)())
@@ -249,18 +255,7 @@ void statesystem_pause(void)
 	}
 }
 
-void statesystem_destroy(void)
-{
-	llist_begin_loop(states);
-	while (llist_hasnext(states)) {
-		statesystem_free(llist_next(states));
-	}
-	llist_end_loop(states);
-
-	llist_destroy(states);
-}
-
-void statesystem_free(STATE_ID state_id)
+static void statesystem_free(STATE_ID state_id)
 {
 	State *state = (State *) state_id;
 
@@ -272,8 +267,19 @@ void statesystem_free(STATE_ID state_id)
 		//  free(state->inner_draw);
 	}
 
+	//free object and particle systems
+	objectsystem_free(state->objects);
+	particlesystem_free(state->particles);
+
+	//free buttons and other touchable objects
 	llist_destroy(state->touch_objects);
 }
+
+void statesystem_destroy(void)
+{
+	llist_destroy(ll_states);
+}
+
 
 void statesystem_push_event(SDL_Event *event)
 {

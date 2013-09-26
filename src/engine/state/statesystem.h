@@ -63,7 +63,5 @@ void statesystem_push_event(SDL_Event *event);
 
 void statesystem_register_touchable(STATE_ID state, void *touchable);
 
-void statesystem_free(STATE_ID state);
-
 #endif /* STATESYSTEM_H_ */
 

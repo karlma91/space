@@ -80,6 +80,7 @@ void objectsystem_init(void)
 
 void objectsystem_destroy(void)
 {
+	objsys_terminating = 1;
 	llist_destroy(ll_systems);
 	SDL_Log("INFO: %d of %d instances freed!", debug_frees, debug_allocs);
 }
@@ -108,12 +109,27 @@ object_system *objectsystem_new(void)
 
 void objectsystem_free(object_system *system)
 {
+	if (!system)
+		return;
+
+	int term_state = objsys_terminating;
+	objsys_terminating = 1;
+
 	llist_destroy(system->ins2destroy);
+
 	int id;
 	for (id=0; id < object_getcount(); id++) {
+		llist_set_remove_callback(system->objects_meta[id].active, (void (*) (void *))free_active_func);
+		llist_set_remove_callback(system->objects_meta[id].pool, (void (*) (void *))free_dead_func);
 		llist_destroy(system->objects_meta[id].active);
 		llist_destroy(system->objects_meta[id].pool);
 	}
+
+	cpSpaceDestroy(system->space);
+	llist_remove(ll_systems, system);
+
+	objsys_terminating = term_state;
+	free(system);
 }
 
 

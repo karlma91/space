@@ -166,6 +166,13 @@ float turn_toangle(float from_angle, float to_angle, float step_size) //TODO add
 	return from_angle;
 }
 
+static inline cpFloat rect2arch_r(cpFloat y)
+{
+	float r_in = currentlvl->inner_radius;
+	float r_out = currentlvl->outer_radius;
+	return r_out - y / currentlvl->height * (r_out - r_in);
+}
+
 float se_rect2arch(cpVect *pos)
 {
 #if EXPERIMENTAL_GRAPHICS
@@ -173,10 +180,10 @@ float se_rect2arch(cpVect *pos)
 		return 0;
 
 	float angle = pos->x / currentlvl->width * WE_2PI;
-	float r = currentlvl->inner_radius + currentlvl->height - pos->y;
+	float r = rect2arch_r(pos->y);
 
-	pos->x = r * sinf(angle);
-	pos->y = r * cosf(angle);
+	pos->x = r * cosf(angle);
+	pos->y = r * sinf(angle);
 
 	return angle;
 #else
@@ -187,18 +194,17 @@ float se_rect2arch(cpVect *pos)
 void se_rect2arch_column(float x, cpVect *polar)
 {
 #if EXPERIMENTAL_GRAPHICS
-	//float theta = -currentlvl->theta_max *(current_camera->x - x) / ((current_camera->right - current_camera->left)/2);
 	float angle = x / currentlvl->width * WE_2PI;
 
-    polar->x = sinf(angle);
-    polar->y = cosf(angle);
+    polar->x = cosf(angle);
+    polar->y = sinf(angle);
 #endif
 }
 
 void se_rect2arch_from_data(cpVect *pos, cpVect *polar)
 {
 #if EXPERIMENTAL_GRAPHICS
-    *pos = cpvmult(*polar, currentlvl->inner_radius + currentlvl->height - pos->y);
+    *pos = cpvmult(*polar, rect2arch_r(pos->y));
 #endif
 }
 

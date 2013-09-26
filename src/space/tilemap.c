@@ -58,8 +58,6 @@ void tilemap_render(tilemap *map)
 	static int tile_count_max = 0;
 	int tile_count = 0;
 
-	map_height +=4;
-
 	// prepare vertex and uv buffers
 
 	cpVect data2;
@@ -194,7 +192,7 @@ int tilemap_create (tilemap *map, char *filename)
 	mxmlDelete(tree);
 
 	// post-edit height (to be able to draw tiles below ground)
-	map->height -= 4;
+	//map->height -= 4;
 
 	int width = map->image_width / map->tile_width;
 	int height = map->image_height / map->tile_height;

@@ -6,6 +6,8 @@
 
 static void circle_line(cpVect p, float r);
 
+int debug_draw = 0;
+
 static void DrawShape(cpShape *shape, void * unused)
 {
     cpBody *body = shape->body;
@@ -48,7 +50,8 @@ static void DrawShape(cpShape *shape, void * unused)
 
 void debugdraw_space(cpSpace *space)
 {
-    cpSpaceEachShape(space, (cpSpaceShapeIteratorFunc)DrawShape, NULL);
+    if (debug_draw)
+        cpSpaceEachShape(space, (cpSpaceShapeIteratorFunc)DrawShape, NULL);
 }
 
 static void circle_line(cpVect p, float r)

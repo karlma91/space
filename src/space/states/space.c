@@ -41,8 +41,6 @@ static void radar_draw(float x, float y);
 
 int space_rendering_map = 0;
 
-particle_system *current_particles;
-
 static button btn_pause;
 static int game_paused = 0;
 
@@ -324,24 +322,14 @@ static void update_camera_position(void)
 
 static void draw_deck()
 {
-	float margin = 0;//15;
-
 	/* draw ceiling */
-	draw_color4f(0.1,0.1,0.2,1);
-	draw_circle(cpvzero, currentlvl->inner_radius + margin);
+	//draw_color4f(0.1,0.1,0.2,1);
+	draw_color4f(0,0,0,1);
+	draw_circle(cpvzero, currentlvl->inner_radius);
 
 	/* draw floor */
-	draw_donut(cpvzero, currentlvl->outer_radius - margin, currentlvl->outer_radius + 3000);
+	draw_donut(cpvzero, currentlvl->outer_radius, currentlvl->outer_radius + 3000);
 
-	// DEBUG SEGMENTS
-	llist_begin_loop(ll_floor_segs);
-	while(0 && llist_hasnext(ll_floor_segs)) {
-		cpShape *seg = (cpShape *)llist_next(ll_floor_segs);
-		cpVect a = cpSegmentShapeGetA(seg);
-		cpVect b = cpSegmentShapeGetB(seg);
-		cpFloat r = cpSegmentShapeGetRadius(seg);
-		draw_line(TEX_GLOW, a, b, r);
-	}
 	llist_end_loop(ll_floor_segs);
 }
 
@@ -370,16 +358,16 @@ static void draw(void)
 
 	/* draw tilemap */
 	tilemap_render(currentlvl->tiles);
-	//draw_deck();
+	draw_deck();
 
 	setTextAngle(0);
 	/* draw all objects */
 	instance_iterate(render_instances, NULL);
 
 	/* draw particle effects */
-	particles_draw(current_particles);
+	particles_draw(current_particles); //TODO render from layers
 
-	debugdraw_space(space);
+	debugdraw_space(current_space);
 
 	space_rendering_map = 0;
 	draw_gui();
@@ -794,9 +782,7 @@ static void on_leave(void)
 
 static void destroy(void)
 {
-	particles_destroy_system(current_particles);
 	llist_destroy(ll_floor_segs);
-	cpSpaceDestroy(current_space);
 	joystick_free(joy_p1_left);
 	joystick_free(joy_p1_right);
 }
@@ -814,7 +800,7 @@ static cpVect space_particle_g_func(cpVect pos)
 
 void space_init(void)
 {
-	current_particles = particles_create_system();
+	current_particles = particlesystem_new();
 	particle_set_gravity_func(current_particles, space_particle_g_func );
 
 	layersystem = layersystem_new(10);
@@ -827,7 +813,7 @@ void space_init(void)
 		float size = 50 + we_randf*150;
 		layersystem_add_sprite(layersystem, roundf(we_randf*(layersystem->num_layers-1)), SPRITE_SPIKEBALL, size, size, cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600), we_randf*WE_2PI);
 	}
-	
+
 	statesystem_register(state_space,LEVEL_STATE_COUNT);
     statesystem_add_inner_state(state_space,LEVEL_START,level_start,NULL);
     statesystem_add_inner_state(state_space,LEVEL_RUNNING,level_running,NULL);
@@ -846,6 +832,7 @@ void space_init(void)
     ceiling = NULL;
 
     statesystem_enable_objects(state_space, 1);
+    statesystem_enable_particles(state_space, 1);
 
 	cpSpaceSetGravity(current_space, cpv(GRAVITY,0));
 	cpSpaceSetDamping(current_space, DAMPING);
