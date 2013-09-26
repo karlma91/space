@@ -89,7 +89,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	sprite_render_body(&(factory->data.spr), factory->data.body);
 
 	cpVect pos = cpvadd(factory->data.body->p, cpvrotate(cpv(160, -150), factory->data.body->rot));
-	cpVect size = cpv(50, 150);
+	cpVect size = cpv(25, 100);
 	draw_bar(pos, size, se_tangent(factory->data.body->p), factory->timer / factory->param.spawn_delay, 0);
 	hpbar_draw(&factory->hp_bar, cpvtoangle(cpvperp(factory->data.body->p)));
 }

@@ -19,8 +19,7 @@ typedef struct {
 	float height;
 	float x_offset;
 	float y_offset;
-	cpFloat *x;
-	cpFloat *y;
+	cpVect *pos;
 } hpbar;
 
 void hpbar_init(hpbar *hp_bar, float max_hp, float width, float height, float x_offset, float y_offset, cpVect *pos);

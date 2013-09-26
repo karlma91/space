@@ -459,7 +459,6 @@ void draw_bar(cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2)
 {
 	cpVect pos_org = pos;
 
-	float border;
 	/* save current blend function and color */
 	draw_push_color();
 	draw_push_blend();
@@ -467,27 +466,12 @@ void draw_bar(cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2)
 	p = (p < 1 ? (p > 0 ? p : 0) : 1);
 	p2 = (p2 < 1 ? (p2 > 0 ? p2 : 0) : 1);
 
-	/* outer edge */
-	draw_color4f(1, 1, 1, 1);
-	draw_blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//draw_box(x, y, w, h, angle, 1);
-	//draw_box(x + w/2, y + h/2, w, h, angle, 1);
-
-	/* inner edge */
-	//border = 0.1 * (w > h ? h : w);
-	border = 0;
-	draw_color4f(0, 0, 0, 1);
-	//draw_box(x + border, y + border, w - border * 2, h - border * 2, angle, 1);
-	//draw_box(x + w/2, y + h/2, w - border * 2, h - border * 2, angle, 1);
-
-	//FIXME
+	//draw_blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	/* hp bar */
-	border *= 2;
 	if (size.x > size.y) {
-		float height = size.y - border * 2;
-		cpVect size_red = {(size.x - border * 2) * p, height};
-		cpVect size_bar = {(size.x - border * 2) * p2, height};
+		cpVect size_red = {size.x * p, size.y};
+		cpVect size_bar = {size.x * p2, size.y};
 
 		cpVect pos_red = pos_org;//cpvadd(pos_org, cpv(border + width_red/2, border + height/2));
 		cpVect pos_bar = pos_org;//cpvadd(pos_org, cpv(border + width_bar/2, border + height/2));
@@ -496,16 +480,19 @@ void draw_bar(cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2)
 		//draw_box(x + border, y + border, width_red, height, angle, 0);
 		draw_texture(TEX_BAR, pos_red, TEX_MAP_FULL, size_red, angle);
 
-		draw_color4f(1-((p*p)*(p*p))*((p*p)*(p*p)), 0.8-(1-p)*(1-p)*0.8 + 0.1, 0.1, 1);
+		cpFloat pp = p*p;
+		cpFloat pppp = pp*pp;
+		cpFloat p_1 = 1-p;
+
+		draw_color4f(1-pppp*pppp, 0.8-p_1*p_1*0.8 + 0.1, 0.1, 1);
 		//draw_box(x + border, y + border, width_bar, height, angle, 0);
 		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, size_bar, angle);
 
 	} else {
-#warning vertical bar not working!
-		cpVect size = {size.y * p, size.x};
-		cpVect pos_bar = cpvadd(pos_org, cpv(size.x/2, size.y/2));
+		cpVect size_bar = {size.y * p, size.x};
+		cpVect pos_bar = pos_org;//cpvadd(pos_org, cpvmult(size, 0.5));
 		draw_color4f(1-p,1-p,1,1);
-		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, size, angle);
+		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, size_bar, angle + M_PI_2);
 	}
 
 	draw_pop_color();
