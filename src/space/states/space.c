@@ -699,6 +699,11 @@ void space_init_level(int space_station, int deck)
 		llist_clear(ll_floor_segs);
 	}
 
+	float r_in = currentlvl->inner_radius;
+	float r_out = currentlvl->outer_radius;
+	float r_ceil = r_in + 64 * (r_out - r_in) / currentlvl->height;
+	float r_floor = r_out - 5 * 64 * (r_out - r_in) / currentlvl->height;
+
 	static const int segments = 100;
 	static const float seg_radius = 50;
 	static const float seg_length = 300;
@@ -706,7 +711,7 @@ void space_init_level(int space_station, int deck)
 	for (i = 0; i < segments; ++i) {
 		cpVect angle = cpvforangle(2 * M_PI * i / segments);
 		cpVect n = cpvmult(cpvperp(angle), seg_length);
-		cpVect p = cpvmult(angle, currentlvl->outer_radius + seg_radius);
+		cpVect p = cpvmult(angle, r_floor + seg_radius);
 
 		cpVect a = cpvadd(p,cpvneg(n));
 		cpVect b = cpvadd(p,n);
@@ -718,8 +723,7 @@ void space_init_level(int space_station, int deck)
 
 		llist_add(ll_floor_segs, seg);
 	}
-
-	ceiling = cpSpaceAddShape(current_space, cpCircleShapeNew(staticBody, currentlvl->inner_radius,cpvzero));
+	ceiling = cpSpaceAddShape(current_space, cpCircleShapeNew(staticBody, r_ceil, cpvzero));
 	cpShapeSetFriction(ceiling, 0.9f);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
 	cpShapeSetElasticity(ceiling, 0.7f);

@@ -279,7 +279,7 @@ level *level_load(int space_station, int deck)
 	//	SDL_Log("WARNING: PARTLY INVERTED LEVEL!");
 	//}
 	lvl->inner_radius = currentlvl->width/(WE_2PI);
-	lvl->outer_radius = lvl->inner_radius + currentlvl->height - lvl->tiles->tile_height;
+	lvl->outer_radius = lvl->inner_radius + currentlvl->height;
 
 	/* read level specific data */
 	retExp = 3;

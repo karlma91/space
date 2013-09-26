@@ -178,7 +178,7 @@ void stations_init(void)
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
-	///////////////////////////statesystem_register_touchable(this, btn_home);
+	statesystem_register_touchable(this, btn_home);
 
 	int i;
 	for (i = 0; i < station_count; i++) {
