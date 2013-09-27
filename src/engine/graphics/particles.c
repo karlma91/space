@@ -6,9 +6,9 @@
 #include "../io/waffle_utils.h"
 #include "../engine.h"
 #include "we_utils.h"
+#include "we_data.h"
 
 #define PARTICLE_READ_BUFFER_SIZE 4096
-#define MAX_PARTICLES 100000
 
 /**
  * parse functions
@@ -34,7 +34,7 @@ static void default_particle_draw(emitter *em, particle *p);
 
 static void particle_update_pos(particle *p);
 
-static emitter * get_emitter(particle_system * s);
+static emitter * get_emitter(void);
 static void set_emitter_available(emitter *e);
 
 static cpVect default_gravity_func(cpVect pos) {
@@ -52,22 +52,15 @@ static void set_particle_available(particle *p);
  * variables
  */
 static int current_emitter = -1;
-static int max_emitters;
 
-static emitter *main_emitter_pool;
+static struct pool * main_emitter_pool;
 
 //TODO: make emitter_templates dynamic size
 static emitter emitter_templates[40];
 
-static emitter *(*available_emitter_stack);
-static int available_emitter_counter;
-
 unsigned int particles_active = 0;
 
-static particle main_partice_pool[MAX_PARTICLES];
-int available_particle_counter;
-static particle *(available_particle_stack[MAX_PARTICLES]);
-
+static struct pool *main_particle_pool;
 
 /**
  * GLOABL FUNCTIONS
@@ -78,50 +71,31 @@ static particle *(available_particle_stack[MAX_PARTICLES]);
  */
 void particles_init(void)
 {
-	int i;
-	/* sets in use list empty */
-
-	available_particle_counter = -1;
-	/* sets all particles available */
-	for(i=0; i<MAX_PARTICLES; i++){
-		main_partice_pool[i].next = NULL;
-		set_particle_available(&(main_partice_pool[i]));
-	}
-
-	max_emitters = 50;
-	main_emitter_pool = (emitter *) calloc(max_emitters, sizeof *main_emitter_pool);
-	available_emitter_stack = (emitter**) calloc(max_emitters, sizeof *available_emitter_stack);
-
-	available_emitter_counter = -1;
-	/* sets all emitters available */
-	for(i=0; i<max_emitters; i++){
-		set_emitter_available(&(main_emitter_pool[i]));
-	}
+	main_emitter_pool = pool_create(sizeof(emitter));
+	main_particle_pool = pool_create(sizeof(particle));
 }
 
 particle_system *particlesystem_new()
 {
 	particle_system * s = (particle_system *)calloc(1, sizeof *s);
+	s->emitters = llist_create();
 	s->gravity_dir_func = default_gravity_func;
 	return s;
 }
 
 void particles_update(particle_system *s)
 {
-	emitter **prev = &(s->emitters_in_use);
-	emitter *e = s->emitters_in_use;
-	while(e){
-		if(e->alive == 0)
-		{
-			*prev = e->next;
+	llist_begin_loop(s->emitters);
+	while(llist_hasnext(s->emitters)){
+		emitter *e = llist_next(s->emitters);
+		if(e->alive == 0) {
+			llist_remove(s->emitters, e);
 			set_emitter_available(e);
-			e = *prev;
-		}else{
+		} else {
 			emitter_update(e);
-			prev = &(e->next);
-			e = e->next;
 		}
 	}
+	llist_end_loop(s->emitters);
 }
 
 void particle_set_gravity_func(particle_system *s, cpVect (*gravity_dir_func)(cpVect p))
@@ -129,6 +103,13 @@ void particle_set_gravity_func(particle_system *s, cpVect (*gravity_dir_func)(cp
     if(gravity_dir_func != NULL){
         s->gravity_dir_func = gravity_dir_func;
     }
+}
+
+void particles_self_draw(emitter *e, int enable)
+{
+	if(e != NULL) {
+		e->self_draw = enable;
+	}
 }
 
 void particles_draw_emitter(emitter *e)
@@ -141,51 +122,41 @@ void particles_draw_emitter(emitter *e)
 void particles_draw(particle_system *s)
 {
 	particles_active = 0;
-	emitter **prev = &(s->emitters_in_use);
-	emitter *e = s->emitters_in_use;
-	while(e){
-		if(e->self_draw == 0){
+	llist_begin_loop(s->emitters);
+	while(llist_hasnext(s->emitters)) {
+		emitter *e = llist_next(s->emitters);
+		if(e->self_draw == 0) {
 			draw_all_particles(e);
 		}
-		prev = &(e->next);
-		e = e->next;
 	}
+	llist_end_loop(s->emitters);
 }
 
 emitter *particles_get_emitter_at(particle_system *s, int type, cpVect p)
 {
 	emitter *e = particles_get_emitter(s, type);
-	if(e){
-		e->p = p;
-		return e;
-	}else{
-		return NULL;
-	}
+	e->p = p;
+	return e;
 }
 
 
 emitter *particles_get_emitter(particle_system *s, int type)
 {
-	emitter *e = get_emitter(s);
-	if(e != NULL){
-		emitter *next = e->next;
-		*e = (emitter_templates[type]);
-		if(e->emit_count_enabled){
-			e->emit_count_set = range_get_random(e->emit_count);
-		}
-		if(e->length_enabled){
-			e->length_set = range_get_random(e->length);
-		}
-
-		e->alive = 1;
-		e->self_draw = 0;
-	    e->ps = s;
-
-		e->next = next;
-		return e;
-	}else{
-		return NULL;
+	emitter *e = get_emitter();
+	llist_add(s->emitters, e);
+	void * l = e->particles;
+	*e = (emitter_templates[type]);
+	e->particles = l;
+	if(e->emit_count_enabled){
+		e->emit_count_set = range_get_random(e->emit_count);
 	}
+	if(e->length_enabled){
+		e->length_set = range_get_random(e->length);
+	}
+	e->alive = 1;
+	e->self_draw = 0;
+	e->ps = s;
+	return e;
 }
 
 /* do not call on emitters that has length or count enabled outside particles.c */
@@ -205,11 +176,13 @@ void particlesystem_free(particle_system *s) {
 		return;
 
 	particles_clear(s);
-	emitter *e = s->emitters_in_use;
-	while(e){
+	llist_begin_loop(s->emitters);
+	while(llist_hasnext(s->emitters)) {
+		emitter *e = llist_next(s->emitters);
 		set_emitter_available(e);
-		e = e->next;
 	}
+	llist_end_loop(s->emitters);
+	llist_destroy(s->emitters);
 	free(s);
 }
 
@@ -218,9 +191,8 @@ void particlesystem_free(particle_system *s) {
  */
 void particles_destroy()
 {
-	free(main_emitter_pool);
-	free(available_emitter_stack);
-	max_emitters = 0;
+	llist_destroy(main_emitter_pool);
+	llist_destroy(main_particle_pool);
 }
 
 /**
@@ -228,21 +200,19 @@ void particles_destroy()
  */
 void particles_clear(particle_system *s)
 {
-	emitter **prev = &(s->emitters_in_use);
-	emitter *e = s->emitters_in_use;
-	while(e){
-		particle **prev_p = &(e->head);
-		particle *p = e->head;
-		while(p){
+	llist_begin_loop(s->emitters);
+	while(llist_hasnext(s->emitters)) {
+		emitter *e = llist_next(s->emitters);
+		llist_begin_loop(e->particles);
+		while(llist_hasnext(e->particles)){
+			particle *p = llist_next(e->particles);
+			llist_remove(e->particles, p);
 			p->alive = 0;
-			*prev_p = p->next;
 			set_particle_available(p);
-			e->list_length--;
-			p = *prev_p;
 		}
-		prev = &(e->next);
-		e = e->next;
+		llist_end_loop(e->particles);
 	}
+	llist_end_loop(s->emitters);
 }
 
 /**
@@ -261,9 +231,7 @@ void particles_clear(particle_system *s)
  */
 static void set_emitter_available(emitter *e)
 {
-	e->next = NULL;
-	++available_emitter_counter;
-	available_emitter_stack[available_emitter_counter] = e;
+	pool_release(main_emitter_pool, e);
 }
 
 static void emitter_interval(emitter *em)
@@ -286,7 +254,7 @@ static void emitter_update(emitter *em)
 			em->time_allive = 0;
 		}
 	}else{
-		if(em->list_length == 0||em->head == NULL){
+		if(llist_size(em->particles) == 0){
 			em->alive = 0;
 		}
 	}
@@ -309,18 +277,14 @@ static void emitter_update(emitter *em)
  */
 static void update_all_particles(emitter *em)
 {
-	particle **prev = &(em->head);
-	particle *p = em->head;
-	while(p){
-		if(p->time_alive >= p->max_time)
-		{
+	llist_begin_loop(em->particles);
+	while(llist_hasnext(em->particles)){
+		particle *p = llist_next(em->particles);
+		if(p->time_alive >= p->max_time) {
 			p->alive = 0;
-			*prev = p->next;
+			llist_remove(em->particles, p);
 			set_particle_available(p);
-			em->list_length--;
-			p = *prev;
-		}else{
-
+		} else {
 		    cpVect g = em->ps->gravity_dir_func(p->p);
 
 		    p->v = cpvadd(p->v, cpvmult(g, em->gravityfactor * 0.0001f * mdt));
@@ -331,13 +295,10 @@ static void update_all_particles(emitter *em)
 		    if(em->rotation){
 		        p->angle += p->rot_speed*dt;
 		    }
-
 			particle_update_pos(p);
-
-			prev = &(p->next);
-			p = p->next;
 		}
 	}
+	llist_end_loop(em->particles);
 }
 
 /**
@@ -345,28 +306,22 @@ static void update_all_particles(emitter *em)
  */
 static void set_particle_available(particle *p)
 {
-	p->next = NULL;
-	++available_particle_counter;
-	available_particle_stack[available_particle_counter] = p;
+	pool_release(main_particle_pool, p);
 }
 
 /**
  * get a particle from the available pool and put it in the in_use list
  * if the pool is empty, then it returns available_pool[0]
  */
-static emitter * get_emitter(particle_system * s)
+static emitter * get_emitter(void)
 {
-	if(available_emitter_counter == -1){
-		return NULL;
+	emitter *e = pool_instance(main_emitter_pool);
+	if(e == NULL) {
+			SDL_Log("Particke get_emiiter ERROR");
 	}
-
-	emitter *e = available_emitter_stack[available_emitter_counter];
-	available_emitter_stack[available_emitter_counter] = NULL;
-	--available_emitter_counter;
-
-	/* puts emitter in inuse list */
-	e->next = s->emitters_in_use;
-	s->emitters_in_use = e;
+	if(e->particles == NULL) {
+		e->particles = llist_create();
+	}
 	return e;
 }
 
@@ -376,14 +331,11 @@ static emitter * get_emitter(particle_system * s)
  */
 static particle * get_particle(void)
 {
-	if(available_particle_counter == 0){
-		return NULL;
-	}else{
-		particle *p = available_particle_stack[available_particle_counter];
-		available_particle_stack[available_particle_counter] = NULL;
-		--available_particle_counter;
-		return p;
+	particle *p = pool_instance(main_emitter_pool);
+	if(p == NULL) {
+		SDL_Log("Particke get_particle ERROR");
 	}
+	return p;
 }
 
 /**
@@ -401,12 +353,7 @@ static void particle_update_pos(particle *p)
 static void add_particle(emitter *em)
 {
 	particle *p = get_particle();
-	if(p == NULL){
-		return;
-	}
-	p->next = em->head;
-	em->head = p;
-	em->list_length++;
+	llist_add(em->particles, p);
 
 	p->alive = 1;
 
@@ -446,8 +393,10 @@ static void draw_all_particles(emitter *em)
 		draw_blend(GL_SRC_ALPHA, GL_ONE);
 	}
 
-	particle *p = em->head;
-	while(p){
+	llist_begin_loop(em->particles);
+	while(llist_hasnext(em->particles)){
+		particle *p = llist_next(em->particles);
+
 		++particles_active;
 		float offset = p->time_alive / p->max_time;
 		offset = offset>1 ? 1 : offset;
@@ -458,7 +407,7 @@ static void draw_all_particles(emitter *em)
 		float colinv;
 		int i;
 		float alpha = (em->startalpha/255.0f)*inv + (em->endalpha/255.0f)*offset;
-		for(i = 0; i<em->color_counter-1; i++){
+		for(i = 0; i<em->color_counter-1; i++) {
 			a = em->colors[i];
 			b = em->colors[i+1];
 			if(offset >= a.offset && offset <= b.offset){
@@ -475,11 +424,11 @@ static void draw_all_particles(emitter *em)
 			}
 		}
 		draw_color4f(c.r,c.g,c.b,alpha);
-		em->draw_particle(em,p);
-
-		p = p->next;
+		em->draw_particle(em, p);
 	}
-	if(em->draw_particle == default_particle_draw){
+	llist_end_loop(em->particles);
+
+	if(em->draw_particle == default_particle_draw) {
 		draw_flush_color();
 	}
 	draw_pop_blend();
@@ -519,8 +468,6 @@ int read_emitter_from_file (char *filename)
 	emi->disable = 0;
 	emi->next_spawn = 0;
 	emi->particle_count = 0;
-	emi->list_length = 0;
-	emi->head = NULL;
 	emi->waiting_to_die = 0;
 	emi->draw_particle = default_particle_draw;
 

@@ -2,6 +2,25 @@
 #include "camera.h"
 #include "../engine.h"
 
+
+camera * camera_new()
+{
+	camera * c = calloc(1, sizeof *c);
+	c->port_height = WINDOW_HEIGHT;
+	c->port_width = WINDOW_WIDTH;
+	c->port_pos = cpvzero;
+	c->p = cpvzero;
+	c->rotation = 0;
+	c->zoom = 1;
+	return c;
+}
+
+void camera_set_port(camera *cam, float port_x, float port_y, float port_w, float port_h)
+{
+	// TODO: this
+}
+
+
 void camera_update(camera *cam, cpVect pos, cpVect rot)
 {
     /* dynamic camera pos */
@@ -12,14 +31,21 @@ void camera_update(camera *cam, cpVect pos, cpVect rot)
     cam_dx = cam_dx * pos_delay + ((rot.x * pos_rel_x - pos_rel_offset_x) * GAME_WIDTH) * (1 - pos_delay) / cam->zoom;
 
     //cam->x = pos.x + cam_dx;
-    cam->x = pos.x;
-    cam->y = pos.y;
+    cam->p = pos;
 
     /* camera constraints */
     cam->width = GAME_WIDTH / (2 * cam->zoom);
 
-    cam->left = cam->x - cam->width;
-    cam->right = cam->x + cam->width;
+    cam->left = cam->p.x - cam->width;
+    cam->right = cam->p.x + cam->width;
+}
+
+void camera_translate(camera *cam)
+{
+	draw_load_identity();
+	draw_rotate(cam->rotation);
+	draw_scale(cam->zoom, cam->zoom);
+	draw_translatev(cpvneg(cam->p));
 }
 
 void camera_update_zoom(camera *cam, cpVect pos, float level_height)
@@ -38,19 +64,19 @@ void camera_update_zoom(camera *cam, cpVect pos, float level_height)
                 /* undefined zoom! Reset/fix player position? */
             } else if ( py < 0.2) {
                 cam->zoom = 2 / zoomlvl + scrlvl;
-                cam->y = GAME_HEIGHT / (2*cam->zoom);
+                cam->p.y = GAME_HEIGHT / (2*cam->zoom);
             } else if (py < 0.4) {
                 cam->zoom = (1 + cos(5*M_PI * (py + 1))) / zoomlvl + scrlvl;
-                cam->y = GAME_HEIGHT / (2*cam->zoom);
+                cam->p.y = GAME_HEIGHT / (2*cam->zoom);
             } else if (py < 0.6) {
                 cam->zoom = scrlvl;
-                cam->y = level_height / (2);
+                cam->p.y = level_height / (2);
             } else if (py < 0.8) {
                 cam->zoom = (1 - cos(5*M_PI * (py - 0.4 + 1))) / zoomlvl + scrlvl;
-                cam->y = level_height - GAME_HEIGHT / (2*(cam->zoom));
+                cam->p.y= level_height - GAME_HEIGHT / (2*(cam->zoom));
             } else if (py <= 1.0) {
                 cam->zoom = 2 / zoomlvl + scrlvl;
-                cam->y = level_height - GAME_HEIGHT / (2*cam->zoom);
+                cam->p.y = level_height - GAME_HEIGHT / (2*cam->zoom);
             } else {
                 /* undefined zoom! Reset/fix player position? */
             }
@@ -63,27 +89,30 @@ void camera_update_zoom(camera *cam, cpVect pos, float level_height)
             }else{
                 cam->zoom = 1.3;
             }
-            cam->y = pos.y;
-            if(cam->y > level_height - GAME_HEIGHT/(2*cam->zoom)){
-                cam->y = level_height - GAME_HEIGHT/(2*cam->zoom);
-            }else if(cam->y <  GAME_HEIGHT/(2*cam->zoom)){
-                cam->y = GAME_HEIGHT/(2*cam->zoom);
+            cam->p.y = pos.y;
+            if(cam->p.y > level_height - GAME_HEIGHT/(2*cam->zoom)){
+            	cam->p.y = level_height - GAME_HEIGHT/(2*cam->zoom);
+            }else if(cam->p.y <  GAME_HEIGHT/(2*cam->zoom)){
+            	cam->p.y = GAME_HEIGHT/(2*cam->zoom);
             }
             break;
         case 5:
             cam->zoom = 1.0f*GAME_HEIGHT/level_height;
-            cam->y = pos.y;
-            cam->x = pos.x;
+            cam->p = cpvadd(cam->p, pos);
             break;
         case 6:
         	cam->zoom = 0.3f*GAME_HEIGHT/(level_height);
-        	cam->y = 0;
-        	cam->x = 0;
+        	cam->p = cpvzero;
         	break;
         default:
             cam->zoom = 1.0f*GAME_HEIGHT/level_height;
-            cam->y = 1.0f*level_height/2;
+            cam->p.y = 1.0f*level_height/2;
             break;
         }
+}
+
+void camera_free(camera *c)
+{
+	free(c);
 }
 

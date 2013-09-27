@@ -9,6 +9,7 @@
 #define STATESYSTEM_H_
 
 #include "SDL_events.h"
+#include "we_graphics.h"
 #include "chipmunk.h"
 #include "../components/object.h"
 #include "../graphics/particles.h"
@@ -16,6 +17,7 @@
 extern cpSpace *current_space;
 extern object_system *current_objects;
 extern particle_system *current_particles;
+extern camera * current_camera;
 
 typedef void * STATE_ID;
 

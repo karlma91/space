@@ -18,6 +18,7 @@ typedef struct range {
 typedef struct particle particle;
 typedef struct emitter emitter;
 typedef struct system particle_system;
+
 struct particle {
 
 	int alive;
@@ -32,8 +33,6 @@ struct particle {
 
 	float time_alive;
 	float max_time;
-
-	particle *next;
 };
 
 struct emitter {
@@ -51,8 +50,7 @@ struct emitter {
 	void (*velocity_func)(emitter *em, particle *p);
 
 	/** particle list **/
-	int list_length;
-	particle *head;
+	LList particles;
 
 	/** boolean values */
 	int alive;
@@ -104,12 +102,10 @@ struct emitter {
 
 	/** data to use in a custom draw function */
 	void *data;
-
-	emitter *next;
 };
 
 struct system {
-	emitter *emitters_in_use;
+	LList emitters;
 	cpVect offset;
 	float offset_rot;
 	cpVect (*gravity_dir_func)(cpVect p);
@@ -125,6 +121,8 @@ void particles_update(particle_system *s);
 void particles_release_emitter(emitter* e);
 particle_system *particlesystem_new();
 void particles_draw_emitter(emitter *e);
+
+void particles_self_draw(emitter *e, int enable);
 
 void particle_set_gravity_func(particle_system *s, cpVect (*gravity_dir_func)(cpVect p));
 

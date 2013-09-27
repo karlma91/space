@@ -15,6 +15,7 @@
 #include "../engine/io/waffle_utils.h"
 #include "../engine/graphics/draw.h"
 #include "../engine/graphics/texture.h"
+#include "we_state.h"
 
 #include "spaceengine.h"
 

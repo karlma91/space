@@ -59,8 +59,6 @@ static cpShape *ceiling;
 /* level data */
 level *currentlvl;
 
-static camera space_cam;
-
 static void input(void);
 
 static layer_system *layersystem;
@@ -262,6 +260,7 @@ static void post_update(void)
 {
 	update_camera_zoom(current_camera->mode);
 	update_camera_position();
+	current_camera->rotation = -se_tangent(current_camera->p);
 }
 
 
@@ -341,18 +340,13 @@ static void draw(void)
 	if(position_time > 1 || position_time < 0){
 		position_dir *= -1;
 	}
-	//position_now = tween_move_f(position_start, position_end, position_time, ExponentialEaseInOut);
 
-	//draw_box(0,position_now, 100, 100, 0, 1);
 	/* translate view */
-	draw_load_identity();
-	current_camera->rotation = -se_tangent(cpv(current_camera->x,current_camera->y));
-	draw_rotate(current_camera->rotation); //TODO move this into a camera method
-	draw_scale(current_camera->zoom,current_camera->zoom); //TODO move this into a camera method
-	draw_translate(-current_camera->x, -current_camera->y); //TODO move this into a camera method
+
+	camera_translate(current_camera);
 
 	draw_color4f(1,1,1,1);
-	layersystem_render(layersystem, cpv(current_camera->x, current_camera->y));
+	layersystem_render(layersystem, current_camera->p);
 
 	//drawStars();
 
@@ -920,7 +914,6 @@ void space_start_demo(int station, int deck) {
 	statesystem_set_state(state_space);
 	//TODO set and reset all per-game variables
 	multiplayer = 0;
-	current_camera = &space_cam;
 	space_init_level(station,deck);
 }
 

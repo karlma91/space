@@ -14,6 +14,8 @@ LList ll_states;
 cpSpace *current_space;
 object_system *current_objects;
 particle_system *current_particles;
+camera * current_camera;
+
 static cpFloat phys_step = 1/60.0f;
 static float accumulator = 0;
 
@@ -28,6 +30,8 @@ struct systemstate {
     int current_inner_state;
     float time_alive;
     float time_in_inner_state;
+
+    LList cameras;
 
     LList touch_objects;
 
@@ -62,6 +66,11 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
 
     state->id = state;
 
+
+    state->cameras = llist_create();
+    llist_set_remove_callback(state->cameras, camera_free);
+    camera *c = camera_new();
+    llist_add(state->cameras, (void *)c);
     state->touch_objects = llist_create();
     state->inner_states = inner_states;
 	if (inner_states > MAX_INNER_STATES) {
@@ -161,6 +170,7 @@ static void update_instances(instance *obj, void *data)
 
 void statesystem_update(void)
 {
+	current_camera = llist_first(stack_head->cameras);
 	/* state pre-update */
 	if (stack_head->call.pre_update) {
 		stack_head->call.pre_update();
@@ -220,27 +230,35 @@ void statesystem_draw(void)
     while(state){
     	/* render current state */
     	state_beeing_rendered = state->id;
-    	state->call.draw();
+    	llist_begin_loop(state->cameras);
+    	while(llist_hasnext(state->cameras)) {
+    		camera * cam = llist_next(state->cameras);
+    		current_camera = cam;
+    		camera_translate(cam);
+    		state->call.draw();
 
-    	/* render inner state */ //FIXME check if working?
-    	if(state->inner_states > 0 &&
-    			state->inner_draw[state->current_inner_state]){
-    		state->inner_draw[state->current_inner_state]();
-    	}
-
-    	//TODO render instances automatically from here
-    	//TODO render debug shapes automatically from here
-
-    	/* render touchables */
-    	LList list = state->touch_objects;
-    	llist_begin_loop(list);
-    	while(llist_hasnext(list)) {
-			touchable *touchy = llist_next(list);
-			if (touchy->visible) {
-    			touchy->calls->render(touchy);
+    		/* render inner state */ //FIXME check if working?
+    		if(state->inner_states > 0 &&
+    				state->inner_draw[state->current_inner_state]){
+    			state->inner_draw[state->current_inner_state]();
     		}
+
+    		//TODO render instances automatically from here
+    		//TODO render debug shapes automatically from here
+
+    		/* render touchables */
+    		LList list = state->touch_objects;
+    		llist_begin_loop(list);
+    		while(llist_hasnext(list)) {
+    			touchable *touchy = llist_next(list);
+    			if (touchy->visible) {
+    				touchy->calls->render(touchy);
+    			}
+    		}
+    		llist_end_loop(list);
+
     	}
-    	llist_end_loop(list);
+    	llist_end_loop(state->cameras);
 
     	state = state->next;
     }
@@ -273,6 +291,9 @@ static void statesystem_free(STATE_ID state_id)
 
 	//free buttons and other touchable objects
 	llist_destroy(state->touch_objects);
+
+	//free cameras
+	llist_destroy(state->cameras);
 }
 
 void statesystem_destroy(void)

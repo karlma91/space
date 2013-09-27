@@ -68,9 +68,6 @@ int GAME_WIDTH;
 float ASPECT_RATIO;
 int WINDOW_WIDTH, WINDOW_HEIGHT;
 
-camera default_camera;
-camera *current_camera = &default_camera;
-
 SDL_Joystick *accelerometer;
 
 float dt = 0;

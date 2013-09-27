@@ -26,7 +26,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	rocket->radar_image = cmp_new_minimap(5, COL_RED);
 
 	rocket->flame = particles_get_emitter(current_particles, EMITTER_ROCKET_FLAME);
-	rocket->flame->self_draw = 1;
+	particles_self_draw(rocket->flame, 1);
 
 	cpFloat height = ROCKET_SIZE/8;
 	cpFloat mass = 2.0f;

@@ -32,7 +32,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	if (factory->param.type == obj_id_tank) {
 		factory->smoke = particles_get_emitter(current_particles, EMITTER_SMOKE);
-		factory->smoke->self_draw = 1;
+		particles_self_draw(factory->smoke, 1);
 		factory->data.spr.sub_index = rand() & 0x7;
 	}
 

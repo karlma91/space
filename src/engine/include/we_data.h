@@ -12,5 +12,6 @@
 #include "../data/highscorelist.h"
 #include "../data/llist.h"
 #include "../data/stack.h"
+#include "../tween/pool.h"
 
 #endif /* WE_DATA_H_ */

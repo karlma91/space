@@ -29,6 +29,7 @@ static int valid_cheat = 0;
 
 static void on_enter(void)
 {
+
 }
 
 static void pre_update(void)
