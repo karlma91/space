@@ -44,7 +44,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	se_tangent_body(factory->data.body);
 	se_velfunc(factory->data.body, 1);
 
-	shape_add_shapes(current_space, factory->param.shape_id, factory->data.body, 400, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
+	shape_add_shapes(current_space, factory->param.shape_id, factory->data.body, 400, cpvzero, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
 	cpBodySetUserData(factory->data.body, factory);
 
 	hpbar_init(&factory->hp_bar, factory->param.max_hp, 200, 35, 0, 180,

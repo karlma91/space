@@ -59,13 +59,13 @@ static int is_valid(struct llist *list) {
 	if (list) {
 		if (list->id != list) {
 			fprintf(stderr, "Error -> LList's ID test failed for list [%p], got %p!\n", list, list->id);
-			raise(SIGKILL);
+			raise(SIGSEGV);
 			exit(-1000);
 			return 0;
 		}
 		else if (list->NULL_TEST) {
 			fprintf(stderr, "Error -> LList's NULL test failed for list [%p], got %p instead of %p!\n", list, list->NULL_TEST, NULL);
-			raise(SIGKILL);
+			raise(SIGSEGV);
 			exit(-1000);
 			return 0;
 		}

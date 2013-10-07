@@ -324,7 +324,7 @@ static void draw_deck()
 	/* draw ceiling */
 	//draw_color4f(0.1,0.1,0.2,1);
 	draw_color4f(0,0,0,1);
-	draw_circle(cpvzero, currentlvl->inner_radius);
+	//draw_circle(cpvzero, currentlvl->inner_radius);
 
 	/* draw floor */
 	draw_donut(cpvzero, currentlvl->outer_radius, currentlvl->outer_radius + 3000);
@@ -728,6 +728,10 @@ void space_init_level(int space_station, int deck)
 	//update_all();
 
 	particles_clear(current_particles);
+
+
+	instance_create(obj_id_staticpolygon, NULL, cpvzero, cpvzero);
+
 }
 
 static void on_enter(void)

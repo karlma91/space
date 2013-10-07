@@ -29,6 +29,7 @@ extern int LAYER_PICKUP;
  */
 OBJECT_DECLARE(template);
 
+OBJECT_DECLARE(staticpolygon);
 OBJECT_DECLARE(player);
 OBJECT_DECLARE(bullet);
 OBJECT_DECLARE(tank);
@@ -57,9 +58,17 @@ PARAM_START(template)
 	int a;
 	int b;
 PARAM_END
-
 OBJ_START(template)
 	float x, y;
+OBJ_END
+
+PARAM_START(staticpolygon)
+	SPRITE_ID sprite_id;
+	char shape_name[32];
+	polyshape shape_id;
+PARAM_END
+OBJ_START(staticpolygon)
+	float texture_scale;
 OBJ_END
 
 PARAM_START(player)
@@ -134,7 +143,7 @@ PARAM_START(factory)
 	void *param;
 	SPRITE_ID sprite_id;
 	char shape_name[32];
-	polyshape *shape_id;
+	polyshape shape_id;
 PARAM_END
 OBJ_START(factory)
 	cpFloat timer;

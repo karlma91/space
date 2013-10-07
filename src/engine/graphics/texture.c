@@ -19,6 +19,7 @@
 int TEX_GLOW_DOT;
 int TEX_GLOW;
 int TEX_LIGHT;
+int TEX_STARS;
 
 /**
  * texture values (GLOBAL)
@@ -139,6 +140,7 @@ int texture_init(void)
 	TEX_GLOW_DOT = texture_load("dot.png"); //TODO move these definitions out of engine
 	TEX_GLOW = texture_load("glow.png");
 	//TEX_LIGHT = texture_load("light2.png");
+	TEX_STARS = texture_load("stars.png");
 
 	return 0;
 }

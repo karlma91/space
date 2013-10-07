@@ -6,11 +6,16 @@
 
 typedef void * POLYSHAPE_ID; /* Peker til konstant sprite data*/
 
+typedef struct {
+	int num;
+	cpVect *shape;
+} shape_instance;
+
 typedef LList polyshape;
 
 void shape_destroy(polyshape p);
 polyshape shape_read(char *filename);
 polyshape shape_link(char *name);
-void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, float friction, float elasticity, cpGroup group, cpCollisionType type, cpLayers layer, unsigned int shapes);
+void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, cpVect offset, float friction, float elasticity, cpGroup group, cpCollisionType type, cpLayers layer, unsigned int shapes);
 
 #endif /* POLYSHAPE_H_ */

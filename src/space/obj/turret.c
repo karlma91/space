@@ -41,7 +41,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetPos(turret->tower, p_start);
 	se_tangent_body(turret->tower);
 	se_velfunc(turret->tower, -1);
-	shape_add_shapes(current_space, POLYSHAPE_TURRET, turret->tower, TURRET_SIZE, 1, 0.7, turret, NULL, LAYER_BUILDING, 2);
+	shape_add_shapes(current_space, POLYSHAPE_TURRET, turret->tower, TURRET_SIZE, cpvzero, 1, 0.7, turret, NULL, LAYER_BUILDING, 2);
 
 	float mass = 14;
 	turret->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0, TURRET_SIZE,cpvzero)));
@@ -49,7 +49,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetPos(turret->data.body, p_start);
 	se_tangent_body(turret->data.body);
 	se_velfunc(turret->data.body, -1);
-	shape_add_shapes(current_space, POLYSHAPE_TURRET, turret->data.body, TURRET_SIZE, 1, 0.7, turret, &this, LAYER_ENEMY, 1);
+	shape_add_shapes(current_space, POLYSHAPE_TURRET, turret->data.body, TURRET_SIZE, cpvzero, 1, 0.7, turret, &this, LAYER_ENEMY, 1);
 
 	cpSpaceAddConstraint(current_space, cpPinJointNew(turret->data.body, turret->tower, cpvzero, cpvzero));
 

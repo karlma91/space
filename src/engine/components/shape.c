@@ -8,11 +8,6 @@
 
 static void rigid_body_remove(void*);
 
-typedef struct {
-	int num;
-	cpVect *shape;
-} shape_instance;
-
 hashmap *names;
 
 polyshape shape_read(char *filename)
@@ -78,7 +73,7 @@ polyshape shape_read(char *filename)
 	return p;
 }
 
-void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, float friction, float elasticity, cpGroup group, cpCollisionType type, cpLayers layer, unsigned int shapes)
+void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, cpVect offset, float friction, float elasticity, cpGroup group, cpCollisionType type, cpLayers layer, unsigned int shapes)
 {
 	if (!p) {
 		SDL_Log("ERROR: polyshape pointer to NULL in add_shapes!");
@@ -99,7 +94,7 @@ void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, floa
 					d[i] = data->shape[i];
 					d[i] = cpvmult(d[i], size);
 				}
-				cpShape *sh = cpPolyShapeNew(body, data->num, d, cpv(0, 0));
+				cpShape *sh = cpPolyShapeNew(body, data->num, d, offset);
 				cpShapeSetFriction(sh, friction);
 				cpShapeSetElasticity(sh, elasticity);
 				cpShapeSetGroup(sh, group);

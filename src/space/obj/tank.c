@@ -69,7 +69,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetUserData(tank->barrel, tank);
 	se_tangent_body(tank->barrel);
 	se_velfunc(tank->barrel, 1);
-	shape_add_shapes(current_space, POLYSHAPE_TANK, tank->barrel, 150, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
+	shape_add_shapes(current_space, POLYSHAPE_TANK, tank->barrel, 150, cpvzero, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
 	cpSpaceAddConstraint(current_space, cpSimpleMotorNew(tank->data.body, tank->barrel, 0));
 	cpSpaceAddConstraint(current_space, cpPinJointNew(tank->data.body, tank->barrel, cpvzero, cpvzero));
 

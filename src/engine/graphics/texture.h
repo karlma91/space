@@ -15,5 +15,6 @@ extern int texture_bind(int);
 extern int TEX_GLOW_DOT;
 extern int TEX_GLOW;
 extern int TEX_LIGHT;
+extern int TEX_STARS;
 
 #endif /* TEXTURE_H_ */

@@ -36,6 +36,7 @@ void object_types_init(void)
 	OBJECT_REGISTER(rocket);
 	OBJECT_REGISTER(robotarm);
 	OBJECT_REGISTER(spikeball);
+	OBJECT_REGISTER(staticpolygon);
 
 	OBJECT_REGISTER(coin);
 }
