@@ -471,7 +471,7 @@ static void main_tick(void *data)
 	frames += dt;
 	fps++;
 
-	draw_load_identity();
+	draw_matrix_clear();
 	draw_color4f(0,0,0,1);
 	draw_box(cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 

@@ -22,6 +22,7 @@ void matrix2d_rotate(float a);
 void matrix2d_scale(float x, float y);
 void matrix2d_setmatrix(float *m);
 
+void matrix2d_clear(void);
 void matrix2d_pushmatrix(void);
 void matrix2d_loadindentity(void);
 void matrix2d_popmatrix(void);

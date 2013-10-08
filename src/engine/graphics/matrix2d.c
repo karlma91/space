@@ -3,13 +3,16 @@
 
 #include "matrix2d.h"
 #include "draw.h"
+#include <signal.h>
 
 typedef struct {
     float x1, y1, z1;
     float x2, y2, z2;
 } matrix;
 
-static matrix stack[50];
+#define STACK_SIZE 1000
+
+static matrix stack[STACK_SIZE];
 
 matrix *cur = &stack[0];
 
@@ -193,15 +196,28 @@ void matrix2d_scale(float x, float y)
     cur->y2 *= y;
 }
 
+void matrix2d_clear(void)
+{
+	current_matrix = 0;
+	cur = &stack[0];
+	matrix2d_loadindentity();
+}
+
 void matrix2d_pushmatrix(void)
 {
-	++current_matrix;
-	matrix *m = cur+1;
+	if (current_matrix < STACK_SIZE - 1) {
+		++current_matrix;
+		matrix *m = cur+1;
 
-	m->x1 = cur->x1; m->y1 = cur->y1; m->z1 = cur->z1;
-	m->x2 = cur->x2; m->y2 = cur->y2; m->z2 = cur->z2;
+		m->x1 = cur->x1; m->y1 = cur->y1; m->z1 = cur->z1;
+		m->x2 = cur->x2; m->y2 = cur->y2; m->z2 = cur->z2;
 
-	cur = m;
+		cur = m;
+	} else {
+		SDL_Log("ERROR: matrix out of bounds!");
+		raise(SIGSEGV);
+		exit(1);
+	}
 }
 
 void matrix2d_popmatrix(void)

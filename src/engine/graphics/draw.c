@@ -597,6 +597,11 @@ void draw_scale(GLfloat x, GLfloat y)
     matrix2d_scale(x,y);
 }
 
+void draw_matrix_clear(void)
+{
+	matrix2d_clear();
+}
+
 void draw_push_matrix(void)
 {
     matrix2d_pushmatrix();

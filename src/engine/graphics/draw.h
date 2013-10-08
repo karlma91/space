@@ -70,6 +70,7 @@ void draw_rotate(GLfloat angle);
 void draw_scalev(cpVect scale);
 void draw_scale(GLfloat x, GLfloat y);
 
+void draw_matrix_clear(void);
 void draw_push_matrix(void);
 void draw_pop_matrix(void);
 void draw_load_identity(void);
