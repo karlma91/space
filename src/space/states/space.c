@@ -116,9 +116,14 @@ static void level_start(void)
 	int p2l = joy_p2_left->pressed;
 	int p2r = joy_p2_right->pressed;
 
+	view_p2->enabled = 0;
 	if (p1_ready && p2l && p2r) {
 		multiplayer = 1;
 		start = 1;
+
+		view_p2->enabled = 1;
+		//TODO support split-screen
+
 	} else {
 		multiplayer = 0;
 		start = (p1_ready && (!(p2l || p2r))) || (!GOT_TOUCH && (state_timer > 1.5));
@@ -860,16 +865,15 @@ void space_start_demo(int station, int deck) {
 	space_init_level(station,deck);
 }
 
+/*
 void space_start_multiplayer(int station, int deck) {
 	statesystem_set_state(state_space);
 	//TODO set and reset all per-game variables
 	multiplayer = 1;
 
-	view_p2->enabled = 1;
-	//TODO support split-screen
-
 	space_init_level(station, deck);
 }
+*/
 
 void space_restart_level(void)
 {
