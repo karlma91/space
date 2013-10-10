@@ -17,7 +17,7 @@
 extern cpSpace *current_space;
 extern object_system *current_objects;
 extern particle_system *current_particles;
-extern camera * current_camera;
+extern view * current_view;
 
 typedef void * STATE_ID;
 
@@ -50,11 +50,15 @@ STATE_ID statesystem_get_render_state(void);
 
 STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs);
 
-void statesystem_enable_objects(STATE_ID state_id, int enabled);
-void statesystem_enable_particles(STATE_ID state_id, int enabled);
+void state_enable_objects(STATE_ID state_id, int enabled);
+void state_enable_particles(STATE_ID state_id, int enabled);
 
-void statesystem_add_inner_state(STATE_ID state, int inner_state, void (*update)(void), void (*draw)(void));
-void statesystem_set_inner_state(STATE_ID state, int inner_state);
+view *state_view_add(STATE_ID state_id);
+view *state_view_get(STATE_ID state_id, int index);
+view *state_view_enable(STATE_ID state_id, int index, int enabled);
+
+void state_add_inner_state(STATE_ID state, int inner_state, void (*update)(void), void (*draw)(void));
+void state_set_inner_state(STATE_ID state, int inner_state);
 
 void statesystem_push_state(STATE_ID state);
 void statesystem_pop_state(void);
@@ -63,7 +67,7 @@ void statesystem_set_state(STATE_ID state);
 void statesystem_call_update(STATE_ID state_id);
 void statesystem_push_event(SDL_Event *event);
 
-void statesystem_register_touchable(STATE_ID state, void *touchable);
+void state_register_touchable(STATE_ID state, void *touchable);
 
 #endif /* STATESYSTEM_H_ */
 

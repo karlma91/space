@@ -68,8 +68,8 @@ void sound_init(void)
 	tracks = llist_create();
 	chunks = llist_create();
 
-	llist_set_remove_callback(tracks, (void (*)(void *)) remove_audio);
-	llist_set_remove_callback(chunks, (void (*)(void *)) remove_audio);
+	llist_set_remove_callback(tracks, (ll_remove_callback) remove_audio);
+	llist_set_remove_callback(chunks, (ll_remove_callback) remove_audio);
 
 	if (Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,2048)<0) {
 		SDL_Log("ERROR: Opening mixer failed");

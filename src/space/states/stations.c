@@ -178,7 +178,7 @@ void stations_init(void)
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
-	statesystem_register_touchable(this, btn_home);
+	state_register_touchable(this, btn_home);
 
 	int i;
 	for (i = 0; i < station_count; i++) {
@@ -193,13 +193,13 @@ void stations_init(void)
 		button_set_hotkeys(btn_stations[i], digit2scancode[(i+1) % 10], 0);
 		btn_stations[i]->visible = 0;
 
-		statesystem_register_touchable(this, btn_stations[i]);
+		state_register_touchable(this, btn_stations[i]);
 	}
 
-	statesystem_register_touchable(this, btn_settings);
+	state_register_touchable(this, btn_settings);
 
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000); // max 4 000 gu / sec
-	statesystem_register_touchable(this, scroller);
+	state_register_touchable(this, scroller);
 
 	tex_stars = texture_load("stars.jpg");
 	tex_stars_2 = texture_load("stars_2.png");

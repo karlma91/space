@@ -11,6 +11,7 @@
 #define LLIST_H_
 
 typedef void* LList;
+typedef void (*ll_remove_callback)(void *);
 
 LList llist_create(void); /* lager en ny lenket liste og returnerer et id-nummer til denne */
 LList llist_create_group(void); /* lager en ny lenket liste av lister */

@@ -26,7 +26,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	float size = 2000;
-	int texture = TEX_STARS; //sprite_get_texture(&staticpolygon->data.spr);
+	int texture = TEX_METAL; //sprite_get_texture(&staticpolygon->data.spr);
 	polyshape p = POLYSHAPE_RAMP;
 	llist_begin_loop(p);
 	while (llist_hasnext(p)) {

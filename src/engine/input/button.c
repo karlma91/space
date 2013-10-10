@@ -91,7 +91,7 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 	return (button) btn;
 }
 
-void button_set_callback(button btn_id, void (*callback)(void *), void *data)
+void button_set_callback(button btn_id, btn_callback callback, void *data)
 {
 	struct button *btn = (struct button *) btn_id;
 	btn->callback = callback;

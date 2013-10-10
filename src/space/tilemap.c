@@ -50,8 +50,8 @@ void tilemap_render(tilemap *map)
 		j_end = map->width;
 	} else {
 	//TODO optimize tilemap rendering for transformed tilemap
-		j_start = (current_camera->left - map->tile_width) / map->tile_width + map->width / 2 - 2; //OLD: 0
-		j_end = (current_camera->right + map->tile_width) / map->tile_width + map->width / 2 + 2; //OLD: map->width
+		j_start = (current_view->left - map->tile_width) / map->tile_width + map->width / 2 - 2; //OLD: 0
+		j_end = (current_view->right + map->tile_width) / map->tile_width + map->width / 2 + 2; //OLD: map->width
 	}
 
 	int map_height = map->height;

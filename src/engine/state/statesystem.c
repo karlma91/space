@@ -14,7 +14,7 @@ LList ll_states;
 cpSpace *current_space;
 object_system *current_objects;
 particle_system *current_particles;
-camera * current_camera;
+view * current_view;
 
 static cpFloat phys_step = 1/60.0f;
 static float accumulator = 0;
@@ -68,9 +68,8 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
 
 
     state->cameras = llist_create();
-    llist_set_remove_callback(state->cameras, camera_free);
-    camera *c = camera_new();
-    llist_add(state->cameras, (void *)c);
+    llist_set_remove_callback(state->cameras, view_free);
+    state_view_add(state);
     state->touch_objects = llist_create();
     state->inner_states = inner_states;
 	if (inner_states > MAX_INNER_STATES) {
@@ -84,7 +83,7 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
     return state->id;
 }
 
-void statesystem_enable_objects(STATE_ID state_id, int enabled)
+void state_enable_objects(STATE_ID state_id, int enabled)
 {
 	State *state = (State *) state_id;
 	if (state->objects == NULL && enabled) {
@@ -94,7 +93,7 @@ void statesystem_enable_objects(STATE_ID state_id, int enabled)
 	state->objects_enabled = enabled;
 }
 
-void statesystem_enable_particles(STATE_ID state_id, int enabled)
+void state_enable_particles(STATE_ID state_id, int enabled)
 {
 	State *state = (State *) state_id;
 	if (state->particles == NULL && enabled) {
@@ -104,7 +103,29 @@ void statesystem_enable_particles(STATE_ID state_id, int enabled)
 	state->particles_enabled = enabled;
 }
 
-void statesystem_add_inner_state(STATE_ID state_id, int inner_state, void (*update)(), void (*draw)())
+
+view *state_view_add(STATE_ID state_id)
+{
+	State *state = (State *) state_id;
+	view *v = view_new();
+	llist_add(state->cameras, (void *)v);
+	return v;
+}
+
+view *state_view_get(STATE_ID state_id, int index)
+{
+	State *state = (State *) state_id;
+	return (view *) llist_at_index(state->cameras, index);
+}
+
+view *state_view_enable(STATE_ID state_id, int index, int enabled)
+{
+	State *state = (State *) state_id;
+	((view *) llist_at_index(state->cameras, index))->enabled = enabled;
+}
+
+
+void state_add_inner_state(STATE_ID state_id, int inner_state, void (*update)(), void (*draw)())
 {
 	State *state = (State *) state_id;
 
@@ -112,7 +133,7 @@ void statesystem_add_inner_state(STATE_ID state_id, int inner_state, void (*upda
     state->inner_draw[inner_state] = draw;
 }
 
-void statesystem_set_inner_state(STATE_ID state_id, int inner_state)
+void state_set_inner_state(STATE_ID state_id, int inner_state)
 {
 	State *state = (State *) state_id;
 
@@ -170,7 +191,7 @@ static void update_instances(instance *obj, void *data)
 
 void statesystem_update(void)
 {
-	current_camera = llist_first(stack_head->cameras);
+	current_view = NULL; //llist_first(stack_head->cameras);
 	/* state pre-update */
 	if (stack_head->call.pre_update) {
 		stack_head->call.pre_update();
@@ -222,6 +243,12 @@ void statesystem_update(void)
 	}
 }
 
+static void render_instances(instance *obj, void *data)
+{
+	instance_render(obj);
+}
+
+void view_set_active(view *cam);
 
 void statesystem_draw(void)
 {
@@ -232,21 +259,37 @@ void statesystem_draw(void)
     	state_beeing_rendered = state->id;
     	llist_begin_loop(state->cameras);
     	while(llist_hasnext(state->cameras)) {
-    		camera * cam = llist_next(state->cameras);
-    		current_camera = cam;
-    		camera_translate(cam);
-    		state->call.draw();
+    		view * cam = llist_next(state->cameras);
+    		if (!cam->enabled)
+    			continue;
 
-    		/* render inner state */ //FIXME check if working?
+    		draw_push_matrix();
+    		view_set_active(cam);
+    		draw_push_matrix();
+
+    		if (state->call.draw) {
+    			state->call.draw();
+    		}
+
+    		draw_pop_matrix();
+    		/* draw all objects */
+    		if (state->objects_enabled) {
+    			instance_iterate(render_instances, NULL);
+    			debugdraw_space(current_space);
+    		}
+
+    		if (state->particles_enabled)  {
+    			particles_draw(state->particles); //TODO render from layers
+    		}
+
+    		/* render inner state */ //TODO check if working?
     		if(state->inner_states > 0 &&
     				state->inner_draw[state->current_inner_state]){
     			state->inner_draw[state->current_inner_state]();
     		}
 
-    		//TODO render instances automatically from here
-    		//TODO render debug shapes automatically from here
-
     		/* render touchables */
+    		draw_load_identity();
     		LList list = state->touch_objects;
     		llist_begin_loop(list);
     		while(llist_hasnext(list)) {
@@ -257,6 +300,7 @@ void statesystem_draw(void)
     		}
     		llist_end_loop(list);
 
+    		draw_pop_matrix();
     	}
     	llist_end_loop(state->cameras);
 
@@ -384,7 +428,7 @@ STATE_ID statesystem_get_render_state(void)
 }
 
 
-void statesystem_register_touchable(STATE_ID state_id, void *touchable)
+void state_register_touchable(STATE_ID state_id, void *touchable)
 {
 	State *state = (State *) state_id;
 

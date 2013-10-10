@@ -139,7 +139,7 @@ static void controls(obj_player *player)
 		}
 		*/
 
-		cpVect player_dir = cpvrotate(cpv(joy_p1_left->axis_x, joy_p1_left->axis_y),cpvforangle(-current_camera->rotation));
+		cpVect player_dir = cpvrotate(cpv(joy_p1_left->axis_x, joy_p1_left->axis_y),cpvforangle(-view_p1->rotation));
 		cpVect j = cpvmult(player_dir, player->force);
 
 		if (player_assisted_steering) {
@@ -176,7 +176,7 @@ static void controls(obj_player *player)
 	float aim_angle_target = 0;
 
 	if (joy_p1_right->amplitude) {
-		aim_angle_target = joy_p1_right->direction -current_camera->rotation;
+		aim_angle_target = joy_p1_right->direction -view_p1->rotation;
 		if (!instant) {
 			dir_step = (player->aim_speed * 2*M_PI) * dt; // 0.5 rps
 			player->aim_angle = turn_toangle(player->aim_angle, aim_angle_target, dir_step);

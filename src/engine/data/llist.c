@@ -331,7 +331,7 @@ void* llist_at_index(LList id, int n)
 	return NULL;
 }
 
-int llist_set_remove_callback(LList id, void (*remove_callback)(void *))
+int llist_set_remove_callback(LList id, ll_remove_callback remove_callback)
 {
 	struct llist *list = (struct llist *) id;
 

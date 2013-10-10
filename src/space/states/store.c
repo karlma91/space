@@ -259,24 +259,24 @@ void upgrades_init(void)
 		btn_next[i] = button_create(SPRITE_GEAR, 0, "", x_next, y, 230, 230);
 		button_set_callback(btn_next[i], next_upgrade, i);
 		button_set_enlargement(btn_next[i], 1.5);
-		statesystem_register_touchable(this, btn_next[i]);
+		state_register_touchable(this, btn_next[i]);
 
 		btn_prev[i] = button_create(SPRITE_GEAR, 0, "", x_prev, y, 230, 230);
 		button_set_callback(btn_prev[i], prev_upgrade, i);
 		button_set_enlargement(btn_prev[i], 1.5);
-		statesystem_register_touchable(this, btn_prev[i]);
+		state_register_touchable(this, btn_prev[i]);
 
 		btn_upgrade[i] = button_create(NULL, 0, "", x_upg, y, 230, 230);
 		button_set_callback(btn_upgrade[i], upgrade_click, i);
 		button_set_enlargement(btn_upgrade[i], 1.5);
-		statesystem_register_touchable(this, btn_upgrade[i]);
+		state_register_touchable(this, btn_upgrade[i]);
 	}
 
 	btn_space = button_create(SPRITE_HOME, 0, "", -GAME_WIDTH/2 + 100, GAME_HEIGHT/2 - 100, 130, 130);
 	button_set_callback(btn_space, statesystem_set_state, state_stations);
 	button_set_enlargement(btn_space, 1.5);
 	button_set_hotkeys(btn_space, KEY_ESCAPE, 0);
-	statesystem_register_touchable(this, btn_space);
+	state_register_touchable(this, btn_space);
 
 	//TODO load balance and bought items/upgrades
 	for (i = 0; i < WEAPON_UPGRADES; i++) {
