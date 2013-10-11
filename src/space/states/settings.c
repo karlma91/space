@@ -177,7 +177,7 @@ void settings_init(void)
 		btn_options[i] = button_create(SPRITE_BUTTON, 1, str_options[i], -1,-1, 800, 115);
 		button_set_callback(btn_options[i], (void (*)(void *))option_click, NULL + i);
 		button_set_hotkeys(btn_options[i], digit2scancode[(i+1) % 10], 0);
-		statesystem_register_touchable(this, btn_options[i]);
+		state_register_touchable(this, btn_options[i]);
 	}
 
 	//TODO load options from file
@@ -194,13 +194,13 @@ void settings_init(void)
 	btn_options[OPT_DELETE]->enabled = 0;
 
 	scroller = scroll_create(0,0,SCROLL_WIDTH,GAME_HEIGHT, 0.95, GAME_HEIGHT);
-	statesystem_register_touchable(state_settings, scroller);
+	state_register_touchable(state_settings, scroller);
 
 	btn_back = button_create(NULL, 0, "", 0,0,GAME_WIDTH,GAME_HEIGHT);
 	button_set_hotkeys(btn_back, KEY_ESCAPE, KEY_RETURN_2);
 
 	button_set_callback(btn_back, statesystem_pop_state, 0);
-	statesystem_register_touchable(this, btn_back);
+	state_register_touchable(this, btn_back);
 	btn_back->visible = 0;
 }
 

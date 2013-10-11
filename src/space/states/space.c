@@ -17,21 +17,12 @@
 #include "../spaceengine.h"
 #include "../level.h"
 
-static float position_start = 50;
-static float position_end = 400;
-static float position_now = 0;
-static float position_time = 0;
-static float position_dir = 1;
-
 STATE_ID state_space;
 
 /**
  * The global space state
 */
 
-static void update_instances(instance *, void *);
-static void render_instances(instance *, void *);
-static void update_camera_zoom(int mode);
 static void update_camera_position(void);
 
 static void sticks_init(void);
@@ -41,16 +32,13 @@ static void radar_draw(float x, float y);
 
 int space_rendering_map = 0;
 
+view *view_p1, *view_p2;
+
 static button btn_pause;
 static int game_paused = 0;
 
 static float game_time;
 
-// Chipmunk
-
-/* camera settings */
-static float cam_left_limit;
-static float cam_right_limit;
 
 /* level boundaries */
 static LList *ll_floor_segs;
@@ -100,7 +88,6 @@ static void level_player_dead(void);
 static void level_cleared(void);
 static void level_transition(void);
 static void change_state(enum game_state state);
-static void update_all(void);
 
 static void draw_gui(void);
 
@@ -117,6 +104,9 @@ static float state_timer = 0;
 
 #define QUICK_ENTER 1
 
+void setup_singleplay(void);
+void setup_multiplay(void);
+
 static void level_start(void)
 {
 	game_time = 0;
@@ -129,9 +119,14 @@ static void level_start(void)
 	int p2l = joy_p2_left->pressed;
 	int p2r = joy_p2_right->pressed;
 
+	view_p2->enabled = 0;
 	if (p1_ready && p2l && p2r) {
 		multiplayer = 1;
 		start = 1;
+
+		view_p2->enabled = 1;
+		//TODO support split-screen
+
 	} else {
 		multiplayer = 0;
 		start = (p1_ready && (!(p2l || p2r))) || (!GOT_TOUCH && (state_timer > 1.5));
@@ -142,6 +137,9 @@ static void level_start(void)
 		player->disable = 0;
 		sticks_init();
 		change_state(LEVEL_RUNNING);
+
+		//TMP test
+		setup_multiplay();
 	}
 }
 static void level_running(void)
@@ -233,7 +231,7 @@ static void level_transition(void)
 static void change_state(enum game_state state)
 {
 	state_timer = 0;
-	statesystem_set_inner_state(state_space,state);
+	state_set_inner_state(state_space,state);
 	gamestate = state;
 
 	btn_pause->enabled = (state == LEVEL_RUNNING);
@@ -258,11 +256,8 @@ static void pre_update(void)
 
 static void post_update(void)
 {
-	update_camera_zoom(current_camera->mode);
 	update_camera_position();
-	current_camera->rotation = -se_tangent(current_camera->p);
 }
-
 
 int nan_check(cpBody *body)
 {
@@ -280,73 +275,44 @@ void nan_check_instance(instance *ins, void *msg)
 	}
 }
 
-
-static void render_instances(instance *obj, void *data)
-{
-	instance_render(obj);
-}
-
-static void update_camera_zoom(int mode) //TODO remove method
-{
-	obj_player *player = ((obj_player*)instance_first(obj_id_player));
-	//camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
-}
-
 static void update_camera_position(void)
 {
-    static int follow_player = 1;
-    if(keys[SDL_SCANCODE_F]){
-        keys[SDL_SCANCODE_F] = 0;
-        follow_player = !follow_player;
-    }
+    cpVect v_pos;
+    float v_rot;
 
     obj_player *player = ((obj_player*)instance_first(obj_id_player));
-    obj_tank *tank = ((obj_tank*)instance_first(obj_id_tank));
-
-    if(tank != NULL && !follow_player){
-        cpVect vel = tank->data.body->v;
-        vel = cpvnormalize(vel);
-        camera_update(current_camera, tank->data.body->p, cpv(0,1));
-    } else if (player) {
-    	cpVect c_pos = player->data.body->p;
-    	cpVect c_rot = player->data.body->rot;
-
-    	camera_update_zoom(current_camera, player->data.body->p, currentlvl->height);
-    	camera_update(current_camera, c_pos, c_rot);
+    if (player) {
+    	v_pos = player->data.body->p;
+    	view_update_zoom(view_p1, player->data.body->p, currentlvl->height);
+    	v_rot = -se_tangent(v_pos);
+    	view_update(view_p1, v_pos, v_rot);
     }
 
-    cam_left_limit = currentlvl->left + current_camera->width;
-    cam_right_limit = currentlvl->right - current_camera->width;
+    obj_tank *tank = ((obj_tank*)instance_first(obj_id_tank));
+    if (tank && multiplayer) {
+        cpVect vel = tank->data.body->v;
+        vel = cpvnormalize(vel);
+    	v_pos = tank->data.body->p;
+    	v_rot = -se_tangent(v_pos);
+    	view_update(view_p2, v_pos, v_rot);
+    }
 }
 
 static void draw_deck()
 {
-	/* draw ceiling */
-	//draw_color4f(0.1,0.1,0.2,1);
-	draw_color4f(0,0,0,1);
-	//draw_circle(cpvzero, currentlvl->inner_radius);
-
-	/* draw floor */
+	/* draw ceiling and floor */
+	draw_color4f(0,0,0,0.6);
+	draw_circle(cpvzero, currentlvl->inner_radius);
 	draw_donut(cpvzero, currentlvl->outer_radius, currentlvl->outer_radius + 3000);
-
-	llist_end_loop(ll_floor_segs);
 }
 
 static void draw(void)
 {
 	space_rendering_map = 1;
 
-	position_time += dt * position_dir * 0.5;
-	if(position_time > 1 || position_time < 0){
-		position_dir *= -1;
-	}
-
-	/* translate view */
-
-	camera_translate(current_camera);
-
 	draw_color4f(1,1,1,1);
-	layersystem_render(layersystem, current_camera->p);
+	//TODO move out to statesystem!
+	layersystem_render(layersystem, view_p1->p);
 
 	//drawStars();
 
@@ -355,13 +321,6 @@ static void draw(void)
 	draw_deck();
 
 	setTextAngle(0);
-	/* draw all objects */
-	instance_iterate(render_instances, NULL);
-
-	/* draw particle effects */
-	particles_draw(current_particles); //TODO render from layers
-
-	debugdraw_space(current_space);
 
 	space_rendering_map = 0;
 	draw_gui();
@@ -439,25 +398,6 @@ void draw_gui(void)
 				instance_count(obj_id_turret)+
 				instance_count(obj_id_tank));
 		font_drawText(-GAME_WIDTH/2+20,-GAME_HEIGHT/2 + 100,goals_left);
-
-		//draw_color4f(1,1,1,1);
-		//setTextSize(20);
-		//char particles_temp[20];
-		//char particles2_temp[20];
-		//char particles3_temp[20];
-		//sprintf(particles_temp,"%d",particles_active);
-		//sprintf(particles2_temp,"%d",available_particle_counter);
-		//sprintf(particles3_temp,"%d",(available_particle_counter + particles_active));
-		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 100,particles_temp);
-		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 140,particles2_temp);
-		//font_drawText(-WIDTH/2+20,HEIGHT/2 - 180,particles3_temp);
-
-		//char pos_temp[20];
-		//sprintf(pos_temp,"X: %4.0f Y: %4.0f",player->data.body->p.x,player->data.body->p.y);
-		//font_drawText(-WIDTH/2+15,-HEIGHT/2+12,pos_temp);
-
-		//setTextAlign(TEXT_RIGHT);
-		//font_drawText(WIDTH/2-25,-HEIGHT/2+15,game_state_names[gamestate]);
 
 		draw_color4f(1,1,1,1);
 		setTextSize(15);
@@ -587,7 +527,7 @@ void drawStars(void)
 
 	static float spaceship_angle;
 	spaceship_angle -= 0.01f * WE_2PI*dt;
-	float cam_angle = spaceship_angle + current_camera->rotation;
+	float cam_angle = spaceship_angle + view_p1->rotation;
 	draw_rotate(cam_angle);
 
 	int i;
@@ -817,24 +757,28 @@ void space_init(void)
 	}
 
 	statesystem_register(state_space,LEVEL_STATE_COUNT);
-    statesystem_add_inner_state(state_space,LEVEL_START,level_start,NULL);
-    statesystem_add_inner_state(state_space,LEVEL_RUNNING,level_running,NULL);
-    statesystem_add_inner_state(state_space,LEVEL_PLAYER_DEAD,level_player_dead,NULL);
-    statesystem_add_inner_state(state_space,LEVEL_CLEARED,level_cleared,NULL);
-    statesystem_add_inner_state(state_space,LEVEL_TRANSITION,level_transition,NULL);
+    state_add_inner_state(state_space,LEVEL_START,level_start,NULL);
+    state_add_inner_state(state_space,LEVEL_RUNNING,level_running,NULL);
+    state_add_inner_state(state_space,LEVEL_PLAYER_DEAD,level_player_dead,NULL);
+    state_add_inner_state(state_space,LEVEL_CLEARED,level_cleared,NULL);
+    state_add_inner_state(state_space,LEVEL_TRANSITION,level_transition,NULL);
 
     btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-85, GAME_HEIGHT/2-77, 80, 80);
-    button_set_callback(btn_pause, statesystem_pause, 0);
+    button_set_callback(btn_pause, (btn_callback) statesystem_pause, 0);
     button_set_enlargement(btn_pause, 2.0f);
     button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);
-    statesystem_register_touchable(this, btn_pause);
+    state_register_touchable(this, btn_pause);
 
     ll_floor_segs = llist_create();
-    llist_set_remove_callback(ll_floor_segs, remove_static);
+    llist_set_remove_callback(ll_floor_segs, (ll_remove_callback) remove_static);
     ceiling = NULL;
 
-    statesystem_enable_objects(state_space, 1);
-    statesystem_enable_particles(state_space, 1);
+    state_enable_objects(state_space, 1);
+    state_enable_particles(state_space, 1);
+
+    view_p1 = state_view_get(state_space, 0);
+    view_p2 = state_view_add(state_space);
+    view_p2->enabled = 0;
 
 	cpSpaceSetGravity(current_space, cpv(GRAVITY,0));
 	cpSpaceSetDamping(current_space, DAMPING);
@@ -854,10 +798,10 @@ void space_init(void)
     joystick_set_hotkeys(joy_p1_left, KEY_LEFT_1,KEY_UP_1,KEY_RIGHT_1,KEY_DOWN_1);
     joystick_set_hotkeys(joy_p1_right, KEY_LEFT_2,KEY_UP_2,KEY_RIGHT_2,KEY_DOWN_2);
 
-    statesystem_register_touchable(this, joy_p1_left);
-    statesystem_register_touchable(this, joy_p1_right);
-    statesystem_register_touchable(this, joy_p2_left);
-    statesystem_register_touchable(this, joy_p2_right);
+    state_register_touchable(this, joy_p1_left);
+    state_register_touchable(this, joy_p1_right);
+    state_register_touchable(this, joy_p2_left);
+    state_register_touchable(this, joy_p2_right);
 
     state_timer = 10;
 	change_state(LEVEL_START);
@@ -885,25 +829,33 @@ void input(void)
 	 * Camera modes + F11 = timeout + F8 = reload particles (broken)
 	 */
 	if (keys[SDL_SCANCODE_F1]) {
-		current_camera->mode = 1;
+		view_p1->mode = 1;
 	} else if (keys[SDL_SCANCODE_F2]) {
-		current_camera->mode = 2;
+		view_p1->mode = 2;
 	} else if (keys[SDL_SCANCODE_F3]) {
-		current_camera->mode = 3;
+		view_p1->mode = 3;
 	} else if (keys[SDL_SCANCODE_F4]) {
-		current_camera->mode = 4;
+		view_p1->mode = 4;
 	} else if (keys[SDL_SCANCODE_F5]) {
-		current_camera->mode = 5;
+		view_p1->mode = 5;
 	} else if (keys[SDL_SCANCODE_F6]) {
-		current_camera->mode = 6;
+		view_p1->mode = 6;
 	} else if (keys[SDL_SCANCODE_F11]) {
 		game_time = currentlvl->timelimit;
 		return;
 	}
 
+	if (keys[SDL_SCANCODE_M]) {
+		keys[SDL_SCANCODE_M] = 0;
+		multiplayer = !multiplayer;
+		if (multiplayer) {
+			setup_multiplay();
+		} else {
+			setup_singleplay();
+		}
+	}
 
 	/* DEBUG KEYS*/
-
 #if !ARCADE_MODE
 	if(keys[SDL_SCANCODE_G]){
 		keys[SDL_SCANCODE_G] = 0;
@@ -914,13 +866,37 @@ void input(void)
 #endif
 }
 
-void space_start_demo(int station, int deck) {
+void setup_singleplay(void)
+{
+	multiplayer = 0;
+	//TODO create two players
+	cpVect size = cpv(WINDOW_WIDTH,WINDOW_HEIGHT);
+	view_set_port(view_p1, cpvzero, size, 0);
+	view_p2->enabled = 0;
+}
+
+void setup_multiplay(void)
+{
+	multiplayer = 1;
+	//TODO create and init two players
+	cpVect size = cpv(WINDOW_WIDTH/2,WINDOW_HEIGHT);
+	view_set_port(view_p1, cpvzero, size, 3);
+	view_set_port(view_p2, cpv(WINDOW_WIDTH/2,0), size, 1);
+	view_p2->enabled = 1;
+}
+
+void space_start_demo(int station, int deck)
+{
 	statesystem_set_state(state_space);
 	//TODO set and reset all per-game variables
 	multiplayer = 0;
+
+	//view_p2->enabled = 0;
+
 	space_init_level(station,deck);
 }
 
+/*
 void space_start_multiplayer(int station, int deck) {
 	statesystem_set_state(state_space);
 	//TODO set and reset all per-game variables
@@ -928,6 +904,7 @@ void space_start_multiplayer(int station, int deck) {
 
 	space_init_level(station, deck);
 }
+*/
 
 void space_restart_level(void)
 {

@@ -20,6 +20,7 @@ int TEX_GLOW_DOT;
 int TEX_GLOW;
 int TEX_LIGHT;
 int TEX_STARS;
+int TEX_METAL;
 
 /**
  * texture values (GLOBAL)
@@ -99,7 +100,7 @@ int texture_load(const char *file)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		if ((strcmp(file,"stars.png") && strcmp(file,"stars.jpg") && strcmp(file,"stars_2.png")) == 0) { //TODO remove tmp code
+		if ((strcmp(file,"stars.png") && strcmp(file,"stars.jpg") && strcmp(file,"stars_2.png") && strcmp(file, "metal_01.png")) == 0) { //TODO remove tmp code
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		} else {
@@ -141,6 +142,7 @@ int texture_init(void)
 	TEX_GLOW = texture_load("glow.png");
 	//TEX_LIGHT = texture_load("light2.png");
 	TEX_STARS = texture_load("stars.png");
+	TEX_METAL = texture_load("metal_01.png");
 
 	return 0;
 }

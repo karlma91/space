@@ -144,10 +144,10 @@ void pause_init(void)
 	button_set_enlargement(btn_space, 1.5);
 	button_set_enlargement(btn_retry, 1.5);
 
-	statesystem_register_touchable(this, btn_space);
-	statesystem_register_touchable(this, btn_retry);
-	statesystem_register_touchable(this, btn_settings);
-	statesystem_register_touchable(this, btn_input);
-	statesystem_register_touchable(this, btn_resume); /* full background button */
+	state_register_touchable(this, btn_space);
+	state_register_touchable(this, btn_retry);
+	state_register_touchable(this, btn_settings);
+	state_register_touchable(this, btn_input);
+	state_register_touchable(this, btn_resume); /* full background button */
 }
 

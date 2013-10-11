@@ -1,54 +1,77 @@
 
 #include "camera.h"
 #include "../engine.h"
+#include "../include/we_state.h"
 
 
-camera * camera_new()
+view * view_new()
 {
-	camera * c = calloc(1, sizeof *c);
-	c->port_height = WINDOW_HEIGHT;
-	c->port_width = WINDOW_WIDTH;
-	c->port_pos = cpvzero;
-	c->p = cpvzero;
+	view * c = calloc(1, sizeof *c);
+	view_set_port(c, cpvzero, cpv(WINDOW_WIDTH, WINDOW_HEIGHT), 0);
 	c->rotation = 0;
+	c->enabled = 1;
 	c->zoom = 1;
+	c->p = cpvzero;
 	return c;
 }
 
-void camera_set_port(camera *cam, float port_x, float port_y, float port_w, float port_h)
+void view_set_port(view *cam, cpVect port_pos, cpVect port_size, int orientation)
 {
-	// TODO: this
+	cam->port_pos = port_pos;
+	cam->port_size = port_size;
+	cam->port_orientation = orientation;
+
+	float pw = cam->port_size.x;
+	float ph = cam->port_size.y;
+	float gw = GAME_WIDTH;
+	float gh = GAME_HEIGHT;
+
+	cam->ratio = (gw * ph ) / (pw * gh);
 }
 
-
-void camera_update(camera *cam, cpVect pos, cpVect rot)
+void view_update(view *cam, cpVect pos, float rot)
 {
     /* dynamic camera pos */
-    static const float pos_delay = 0.99f;  // 1.0 = centered, 0.0 = no delay, <0 = oscillerende, >1 = undefined, default = 0.9
-    static const float pos_rel_x = 0.2f; // 0.0 = centered, 0.5 = screen edge, -0.5 = opposite screen edge, default = 0.2
-    static const float pos_rel_offset_x = 0; // >0 = offset up, <0 offset down, default = 0
-    static float cam_dx;
-    cam_dx = cam_dx * pos_delay + ((rot.x * pos_rel_x - pos_rel_offset_x) * GAME_WIDTH) * (1 - pos_delay) / cam->zoom;
-
-    //cam->x = pos.x + cam_dx;
     cam->p = pos;
+    cam->rotation = rot;
 
     /* camera constraints */
-    cam->width = GAME_WIDTH / (2 * cam->zoom);
-
+    cam->width = cam->port_size.x / (2 * cam->zoom);
+#warning outdated constraints!
     cam->left = cam->p.x - cam->width;
     cam->right = cam->p.x + cam->width;
 }
 
-void camera_translate(camera *cam)
+void view_transform2view(view *cam)
 {
+	current_view = cam;
+
 	draw_load_identity();
-	draw_rotate(cam->rotation);
-	draw_scale(cam->zoom, cam->zoom);
+
+	glViewport(cam->port_pos.x, cam->port_pos.y, cam->port_size.x, cam->port_size.y);
+	glScissor(cam->port_pos.x, cam->port_pos.y, cam->port_size.x, cam->port_size.y);
+
+	draw_scale(cam->zoom * cam->ratio, cam->zoom);
+	float angle = (cam->port_orientation & 0x3) * M_PI_2;
+	draw_rotate(cam->rotation + angle);
 	draw_translatev(cpvneg(cam->p));
 }
 
-void camera_update_zoom(camera *cam, cpVect pos, float level_height)
+void view_transform2port(view *cam)
+{
+	current_view = cam;
+
+	float angle = (cam->port_orientation & 0x3) * M_PI_2;
+
+	draw_load_identity();
+	draw_rotate(angle); // supported angles 0, 90, 180, 270
+	//draw_scale(cam->zoom, cam->zoom);
+	draw_translatev(cpvneg(cam->port_pos));
+
+}
+
+//TODO move out from camera/view
+void view_update_zoom(view *cam, cpVect pos, float level_height)
 {
     /* dynamic camera zoom */
         float py = pos.y / level_height;
@@ -111,7 +134,7 @@ void camera_update_zoom(camera *cam, cpVect pos, float level_height)
         }
 }
 
-void camera_free(camera *c)
+void view_free(view *c)
 {
 	free(c);
 }

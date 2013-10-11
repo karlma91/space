@@ -13,6 +13,8 @@ extern level *currentlvl;
 extern joystick *joy_p1_left, *joy_p1_right;
 extern joystick *joy_p2_left, *joy_p2_right;
 
+extern view *view_p1, *view_p2;
+
 extern int space_rendering_map;
 extern particle_system *current_particles;
 

@@ -50,8 +50,9 @@ static void DrawShape(cpShape *shape, void * unused)
 
 void debugdraw_space(cpSpace *space)
 {
-    if (debug_draw)
+    if (space && debug_draw) {
         cpSpaceEachShape(space, (cpSpaceShapeIteratorFunc)DrawShape, NULL);
+    }
 }
 
 static void circle_line(cpVect p, float r)
