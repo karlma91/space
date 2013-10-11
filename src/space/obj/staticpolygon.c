@@ -65,9 +65,31 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 			draw_pop_matrix();
 		}
 		llist_end_loop(pi->shape);
+
+		llist_begin_loop(pi->outlines);
+		while (llist_hasnext(pi->outlines)) {
+			vertex_array *data = (vertex_array*) llist_next(pi->outlines);
+			draw_push_matrix();
+			draw_translate(700, 100);
+			draw_rotate(0);
+			draw_color(COL_RED);
+			int i = 0;
+			float size = 2000;
+			for(i=0; i< data->num; i++) {
+				if(i < data->num - 1) {
+					draw_quad_line(cpvmult(data->vertices[i],size), cpvmult(data->vertices[i + 1],size), 5);
+				} else {
+					draw_quad_line(cpvmult(data->vertices[i],size), cpvmult(data->vertices[0],size), 5);
+				}
+			}
+			draw_flush_simple();
+			draw_pop_matrix();
+		}
+		llist_end_loop(pi->outlines);
 	}
 	llist_end_loop(p);
 }
+
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
