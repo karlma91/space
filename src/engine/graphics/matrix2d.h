@@ -12,6 +12,11 @@ float * matrix2d_get_vertex_data(void);
 float * matrix2d_get_vertex_pointer(void);
 void matrix2d_vertex_pointer(float *f);
 
+int matrix2d_get_stride(void);
+int matrix2d_get_type(void);
+void matrix2d_set_stride(int stride);
+void matrix2d_set_type(int type);
+
 float *matrix2d_get_color_data(void);
 float *matrix2d_get_color_pointer(void);
 void matrix2d_color_pointer(float *f);

@@ -63,12 +63,20 @@ OBJ_START(template)
 OBJ_END
 
 PARAM_START(staticpolygon)
-	SPRITE_ID sprite_id;
+	int texture;
+	int outline;
+	float scale;
+	float texture_scale;
 	char shape_name[32];
 	polyshape shape_id;
 PARAM_END
 OBJ_START(staticpolygon)
+	int texture;
 	float texture_scale;
+	int outline;
+	float scale;
+	polyshape shape_id;
+	cpBody *body;
 OBJ_END
 
 PARAM_START(player)

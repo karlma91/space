@@ -572,6 +572,14 @@ static void sticks_hide(void) {
 	((touchable *)joy_p2_right)->visible = 0;
 }
 
+// TODO: REMOVE
+static obj_param_staticpolygon polytest = {
+		.texture = 0,
+		.outline = 1,
+		.scale = 700,
+		.texture_scale = 1,
+};
+
 void space_init_level(int space_station, int deck)
 {
 	static obj_player *player;
@@ -669,9 +677,22 @@ void space_init_level(int space_station, int deck)
 
 	particles_clear(current_particles);
 
-
-	instance_create(obj_id_staticpolygon, NULL, cpvzero, cpvzero);
-
+	polytest.texture = TEX_METAL;
+	polytest.shape_id = POLYSHAPE_TURRET;
+	polytest.texture_scale = 0.4;
+	instance_create(obj_id_staticpolygon, &polytest, cpv(0,800), cpvzero);
+	polytest.shape_id = POLYSHAPE_RAMP;
+	polytest.texture_scale = 0.6;
+	instance_create(obj_id_staticpolygon, &polytest, cpv(0,-800), cpvzero);
+	polytest.shape_id = POLYSHAPE_TANK;
+	polytest.texture_scale = 1;
+	instance_create(obj_id_staticpolygon, &polytest, cpv(800,0), cpvzero);
+	polytest.shape_id = POLYSHAPE_TURRET;
+	polytest.texture_scale = 4;
+	polytest.scale = 1000;
+	obj_staticpolygon *sp = instance_create(obj_id_staticpolygon, &polytest, cpv(-800,0), cpvzero);
+	cpBodySetAngle(sp->body, 312);
+	cpSpaceReindexShapesForBody(current_space, sp->body);
 }
 
 static void on_enter(void)

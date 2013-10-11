@@ -499,6 +499,58 @@ void draw_bar(cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2)
 	draw_pop_blend();
 }
 
+void draw_polygon_textured(int count, cpVect *verts, cpVect p, float rotation, float size, float textuer_scale, int texture)
+{
+
+	float vertices[count* 2];
+	float texcoord[count * 2];
+	int i, j = 0;
+	for (i = 0; i < count; i++) {
+		vertices[j] = verts[i].x * 1;
+		texcoord[j] = verts[i].x * textuer_scale;
+		j++;
+		vertices[j] = verts[i].y * 1;
+		texcoord[j] = verts[i].y * textuer_scale;
+		j++;
+	}
+
+	texture_bind(texture);
+	draw_push_matrix();
+	draw_translatev(p);
+	draw_rotate(rotation);
+	draw_scale(size, size);
+	draw_color4f(1,1,1,1);
+	draw_vertex_pointer(2, GL_FLOAT, 0, vertices);
+	draw_tex_pointer(2, GL_FLOAT, 0, texcoord);
+	glEnable(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	draw_draw_arrays(GL_TRIANGLE_FAN, 0, count);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glDisable(GL_TEXTURE_2D);
+	draw_pop_matrix();
+
+}
+void draw_polygon_outline(int count, cpVect *verts, cpVect p, float rotation, float size)
+{
+	draw_push_matrix();
+	draw_translatev(p);
+	draw_rotate(rotation);
+	draw_color(COL_RED);
+	int i = 0;
+	for(i=0; i< count; i++) {
+		if(i < count - 1) {
+			draw_quad_line(cpvmult(verts[i],size), cpvmult(verts[i + 1],size), 5);
+		} else {
+			draw_quad_line(cpvmult(verts[i],size), cpvmult(verts[0],size), 5);
+		}
+	}
+	draw_flush_simple();
+	draw_pop_matrix();
+}
+
+
 void draw_texture(int tex_id, cpVect pos, const float *tex_map, cpVect size, float angle)
 {
 	texture_bind(tex_id);
@@ -552,13 +604,15 @@ void draw_draw_arrays(GLenum mode, GLint first, GLsizei count)
     float * tex = matrix2d_get_tex_pointer();
     float * vertex = matrix2d_get_vertex_data();
 
-    glVertexPointer(2, GL_FLOAT, 0, vertex);
+    glVertexPointer(2, matrix2d_get_type(), matrix2d_get_stride(), vertex);
     glTexCoordPointer(2, GL_FLOAT, 0, tex);
     glDrawArrays(mode, first, count);
 }
 
 void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
 {
+	matrix2d_set_stride(stride);
+	matrix2d_set_type(type);
     matrix2d_vertex_pointer((float*)pointer);
 }
 

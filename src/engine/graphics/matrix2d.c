@@ -16,6 +16,9 @@ static matrix stack[STACK_SIZE];
 
 matrix *cur = &stack[0];
 
+int stride;
+int type;
+
 float *vertex_pointer;
 float *tex_pointer;
 float *color_pointer;
@@ -70,6 +73,25 @@ float * matrix2d_get_vertex_pointer(void)
 void matrix2d_vertex_pointer(float *f)
 {
     vertex_pointer = f;
+}
+
+int matrix2d_get_stride(void)
+{
+    return stride;
+}
+
+int matrix2d_get_type(void)
+{
+    return type;
+}
+
+void matrix2d_set_stride(int stri)
+{
+	stride = stri;
+}
+void matrix2d_set_type(int typ)
+{
+	type = typ;
 }
 
 /*
