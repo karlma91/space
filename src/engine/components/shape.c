@@ -7,6 +7,8 @@
 #include "../data/hashmap.h"
 
 static void rigid_body_remove(void*);
+static void read_vertex_array(vertex_array *va, int size,  cJSON * array);
+static void vertex_array_free(void *data);
 
 hashmap *names;
 
@@ -15,14 +17,14 @@ polyshape shape_read(char *filename)
 	if(names == NULL){
 		names = hm_create();
 	}
-	polyshape p = hm_get(names, filename);
-	if(p != NULL){
+	polyshape polys = hm_get(names, filename);
+	if(polys != NULL){
 		//SDL_Log("FOUND SHAPE IN HASHMAP!");
-		return p;
+		return polys;
 	}
 
-	p = llist_create();
-	llist_set_remove_callback(p, rigid_body_remove);
+	polys = llist_create();
+	llist_set_remove_callback(polys, rigid_body_remove);
 
 	char file_path[100];
 	sprintf(file_path,"shapes/%s", filename);
@@ -44,33 +46,53 @@ polyshape shape_read(char *filename)
 	for (i = 0; i < cJSON_GetArraySize(bodies); i++){
 		cJSON *body = cJSON_GetArrayItem(bodies, i);
 
-		LList rb = llist_create();
+		polygon_ins *pi = calloc(1, sizeof(polygon_ins));
+		pi->shape = llist_create();
+		llist_set_remove_callback(pi->shape, vertex_array_free);
+		pi->outlines = llist_create();
+		llist_set_remove_callback(pi->outlines, vertex_array_free);
 
 		cJSON *polygons = cJSON_GetObjectItem(body, "polygons");
 		int k;
 		for (k=0; k < cJSON_GetArraySize(polygons); k++){
 			cJSON *polygon = cJSON_GetArrayItem(polygons, k);
-			shape_instance *data = calloc(1, sizeof(shape_instance));
+			vertex_array *data = calloc(1, sizeof(vertex_array));
 			int size = cJSON_GetArraySize(polygon);
 			data->num = size;
-			data->shape = calloc(size, sizeof(cpVect));
-			int j;
-			for (j = 0; j <size; j++){
-				cJSON *vertex = cJSON_GetArrayItem(polygon, j);
-				data->shape[j].x = (cJSON_GetObjectItem(vertex, "x")->valuedouble - 0.5);
-				data->shape[j].y = (cJSON_GetObjectItem(vertex, "y")->valuedouble - 0.5);
-			}
-			for (j = 0; j <size/2; j++) {
-				cpVect t = data->shape[j];
-				data->shape[j] = data->shape[size-1-j];
-				data->shape[size-1-j] = t;
-			}
-			llist_add(rb, data);
+			data->vertices = calloc(size, sizeof(cpVect));
+			read_vertex_array(data, size, polygon);
+			llist_add(pi->shape, data);
 		}
-		llist_add(p,rb);
+		cJSON *shapes = cJSON_GetObjectItem(body, "shapes");
+		for (k=0; k < cJSON_GetArraySize(polygons); k++) {
+			cJSON *shape = cJSON_GetArrayItem(shapes, k);
+			cJSON *vertices = cJSON_GetObjectItem(shape, "vertices");
+			vertex_array *data = calloc(1, sizeof(vertex_array));
+			int size = cJSON_GetArraySize(vertices);
+			data->num = size;
+			data->vertices = calloc(size, sizeof(cpVect));
+			read_vertex_array(data, size, vertices);
+			llist_add(pi->outlines, data);
+		}
+		llist_add(polys, pi);
 	}
-	hm_add(names, filename, p);
-	return p;
+	hm_add(names, filename, polys);
+	return polys;
+}
+
+static void read_vertex_array(vertex_array *va, int size,  cJSON * array)
+{
+	int j;
+	for (j = 0; j <size; j++){
+		cJSON *vertex = cJSON_GetArrayItem(array, j);
+		va->vertices[j].x = (cJSON_GetObjectItem(vertex, "x")->valuedouble - 0.5);
+		va->vertices[j].y = (cJSON_GetObjectItem(vertex, "y")->valuedouble - 0.5);
+	}
+	for (j = 0; j <size/2; j++) {
+		cpVect t = va->vertices[j];
+		va->vertices[j] = va->vertices[size-1-j];
+		va->vertices[size-1-j] = t;
+	}
 }
 
 void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, cpVect offset, float friction, float elasticity, cpGroup group, cpCollisionType type, cpLayers layer, unsigned int shapes)
@@ -83,15 +105,15 @@ void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, cpVe
 	int addall = shapes == 0 ? 1 : 0;
 	llist_begin_loop(p);
 	while (llist_hasnext(p)) {
-		LList rb = (LList) llist_next(p);
+		polygon_ins pi = (polygon_ins) llist_next(p);
 		if (addall || (shapes & 0x1)) {
-			llist_begin_loop(rb);
-			while (llist_hasnext(rb)) {
-				shape_instance *data = (shape_instance*) llist_next(rb);
+			llist_begin_loop(pi->shape);
+			while (llist_hasnext(pi->shape)) {
+				vertex_array *data = (vertex_array*) llist_next(pi->shape);
 				cpVect d[data->num];
 				int i;
 				for (i = 0; i < data->num; i++) {
-					d[i] = data->shape[i];
+					d[i] = data->vertices[i];
 					d[i] = cpvmult(d[i], size);
 				}
 				cpShape *sh = cpPolyShapeNew(body, data->num, d, offset);
@@ -102,7 +124,7 @@ void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, cpVe
 				cpShapeSetLayers(sh, layer);
 				cpSpaceAddShape(space, sh);
 			}
-			llist_end_loop(rb);
+			llist_end_loop(pi->shape);
 		}
 		shapes = shapes >> 1;
 	}
@@ -115,21 +137,21 @@ void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, cpVe
 
 static void rigid_body_remove(void *data)
 {
-	LList rb = (LList)data;
-	llist_begin_loop(rb);
-	while(llist_hasnext(rb)){
-		shape_instance *data = (shape_instance*)llist_next(rb);
-		free(data->shape);
-		free(data);
-	}
-	llist_end_loop(rb);
-	llist_destroy(rb);
+	polygon_ins * rb = (polygon_ins*)data;
+	llist_destroy(rb->shape);
+	llist_destroy(rb->outlines);
 	free(rb);
+}
+
+static void vertex_array_free(void *data)
+{
+	vertex_array va = (vertex_array*)data;
+	free(va->vertices);
 }
 
 void shape_destroy(polyshape p)
 {
-	hm_destroy(names);
+	//hm_destroy(names);
 	llist_destroy(p);
 	free(p);
 }

@@ -7,9 +7,14 @@
 typedef void * POLYSHAPE_ID; /* Peker til konstant sprite data*/
 
 typedef struct {
+	LList outlines;
+	LList shape;
+} polygon_ins;
+
+typedef struct {
 	int num;
-	cpVect *shape;
-} shape_instance;
+	cpVect *vertices;
+} vertex_array;
 
 typedef LList polyshape;
 
