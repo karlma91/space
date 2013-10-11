@@ -7,19 +7,20 @@
 view * view_new()
 {
 	view * c = calloc(1, sizeof *c);
-	c->port_height = WINDOW_HEIGHT;
-	c->port_width = WINDOW_WIDTH;
+	c->port_size = cpv(WINDOW_WIDTH, WINDOW_HEIGHT);
 	c->port_pos = cpvzero;
-	c->p = cpvzero;
 	c->rotation = 0;
-	c->zoom = 1;
 	c->enabled = 1;
+	c->zoom = 1;
+	c->p = cpvzero;
 	return c;
 }
 
-void view_set_port(view *cam, float port_x, float port_y, float port_w, float port_h)
+void view_set_port(view *cam, cpVect port_pos, cpVect port_size, int orientation)
 {
-	// TODO: this method
+	cam->port_pos = port_pos;
+	cam->port_size = port_size;
+	cam->port_orientation = orientation;
 }
 
 void view_update(view *cam, cpVect pos, float rot)
@@ -35,16 +36,33 @@ void view_update(view *cam, cpVect pos, float rot)
     cam->right = cam->p.x + cam->width;
 }
 
-void view_set_active(view *cam)
+void view_transform2view(view *cam)
 {
 	current_view = cam;
 
 	draw_load_identity();
+
+	glViewport(cam->port_pos.x, cam->port_pos.y, cam->port_size.x, cam->port_size.y);
+	glScissor(cam->port_pos.x, cam->port_pos.y, cam->port_size.x, cam->port_size.y);
+
 	draw_rotate(cam->rotation);
 	draw_scale(cam->zoom, cam->zoom);
 	draw_translatev(cpvneg(cam->p));
 
 	//TODO set viewport + gl scissor?
+
+}
+
+void view_transform2port(view *cam)
+{
+	current_view = cam;
+
+	float angle = (cam->port_orientation & 0x3) * M_PI_2;
+
+	draw_load_identity();
+	draw_rotate(angle); // supported angles 0, 90, 180, 270
+	//draw_scale(cam->zoom, cam->zoom);
+	draw_translatev(cpvneg(cam->port_pos));
 
 }
 

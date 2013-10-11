@@ -248,7 +248,8 @@ static void render_instances(instance *obj, void *data)
 	instance_render(obj);
 }
 
-void view_set_active(view *cam);
+void view_transform2view(view *cam);
+void view_transform2port(view *cam);
 
 void statesystem_draw(void)
 {
@@ -264,7 +265,7 @@ void statesystem_draw(void)
     			continue;
 
     		draw_push_matrix();
-    		view_set_active(cam);
+    		view_transform2view(cam);
     		draw_push_matrix();
 
     		if (state->call.draw) {

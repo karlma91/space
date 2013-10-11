@@ -5,8 +5,8 @@
 
 typedef struct {
 	cpVect port_pos;
-	float port_width;
-	float port_height;
+	cpVect port_size;
+	int port_orientation;
 
     int mode;
     float left;
@@ -22,7 +22,7 @@ typedef struct {
 
 view * view_new();
 
-void view_port(view *cam, float port_x, float port_y, float port_w, float port_h);
+void view_set_port(view *cam, cpVect port_pos, cpVect port_size, int orientation);
 void view_update(view *cam, cpVect pos, float rot);
 void view_update_zoom(view *cam, cpVect pos, float level_height);
 void view_free(view *c);

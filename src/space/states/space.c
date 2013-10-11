@@ -104,6 +104,9 @@ static float state_timer = 0;
 
 #define QUICK_ENTER 1
 
+void setup_singleplay(void);
+void setup_multiplay(void);
+
 static void level_start(void)
 {
 	game_time = 0;
@@ -134,6 +137,9 @@ static void level_start(void)
 		player->disable = 0;
 		sticks_init();
 		change_state(LEVEL_RUNNING);
+
+		//TMP test
+		setup_multiplay();
 	}
 }
 static void level_running(void)
@@ -271,29 +277,25 @@ void nan_check_instance(instance *ins, void *msg)
 
 static void update_camera_position(void)
 {
-    static int follow_player = 1;
-    if(keys[SDL_SCANCODE_F]){
-        keys[SDL_SCANCODE_F] = 0;
-        follow_player = !follow_player;
-    }
-
-    obj_player *player = ((obj_player*)instance_first(obj_id_player));
-    obj_tank *tank = ((obj_tank*)instance_first(obj_id_tank));
-
     cpVect v_pos;
     float v_rot;
 
-    if(tank != NULL && !follow_player){
+    obj_player *player = ((obj_player*)instance_first(obj_id_player));
+    if (player) {
+    	v_pos = player->data.body->p;
+    	view_update_zoom(view_p1, player->data.body->p, currentlvl->height);
+    	v_rot = -se_tangent(v_pos);
+    	view_update(view_p1, v_pos, v_rot);
+    }
+
+    obj_tank *tank = ((obj_tank*)instance_first(obj_id_tank));
+    if (tank && multiplayer) {
         cpVect vel = tank->data.body->v;
         vel = cpvnormalize(vel);
     	v_pos = tank->data.body->p;
-    } else if (player) {
-    	v_pos = player->data.body->p;
-    	view_update_zoom(view_p1, player->data.body->p, currentlvl->height);
+    	v_rot = -se_tangent(v_pos);
+    	view_update(view_p2, v_pos, v_rot);
     }
-
-    v_rot = -se_tangent(v_pos);
-    view_update(view_p1, v_pos, v_rot);
 }
 
 static void draw_deck()
@@ -843,6 +845,15 @@ void input(void)
 		return;
 	}
 
+	if (keys[SDL_SCANCODE_M]) {
+		keys[SDL_SCANCODE_M] = 0;
+		multiplayer = !multiplayer;
+		if (multiplayer) {
+			setup_multiplay();
+		} else {
+			setup_singleplay();
+		}
+	}
 
 	/* DEBUG KEYS*/
 #if !ARCADE_MODE
@@ -855,12 +866,32 @@ void input(void)
 #endif
 }
 
-void space_start_demo(int station, int deck) {
+void setup_singleplay(void)
+{
+	multiplayer = 0;
+	//TODO create two players
+	cpVect size = cpv(WINDOW_WIDTH,WINDOW_HEIGHT);
+	view_set_port(view_p1, cpvzero, size, 0);
+	view_p2->enabled = 0;
+}
+
+void setup_multiplay(void)
+{
+	multiplayer = 1;
+	//TODO create and init two players
+	cpVect size = cpv(WINDOW_WIDTH/2,WINDOW_HEIGHT);
+	view_set_port(view_p1, cpvzero, size,0);
+	view_set_port(view_p2, cpv(WINDOW_WIDTH/2,0), size,0);
+	view_p2->enabled = 1;
+}
+
+void space_start_demo(int station, int deck)
+{
 	statesystem_set_state(state_space);
 	//TODO set and reset all per-game variables
 	multiplayer = 0;
 
-	view_p2->enabled = 0;
+	//view_p2->enabled = 0;
 
 	space_init_level(station,deck);
 }
