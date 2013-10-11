@@ -30,42 +30,42 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	polyshape p = POLYSHAPE_RAMP;
 	llist_begin_loop(p);
 	while (llist_hasnext(p)) {
-		LList rb = (LList) llist_next(p);
-			llist_begin_loop(rb);
-			while (llist_hasnext(rb)) {
-				shape_instance *data = (shape_instance*) llist_next(rb);
-				cpVect d[data->num];
-				float test[data->num * 2];
-				float testt[data->num * 2];
-				int i, j = 0;
-				for (i = 0; i < data->num; i++) {
-					d[i] = data->shape[i];
-					d[i] = cpvadd(cpvmult(d[i], size), cpv(700,100));
-					test[j] = d[i].x;
-					testt[j] = data->shape[i].x * 1;
-					j++;
-					test[j] = d[i].y;
-					testt[j] = data->shape[i].y * 1;
-					j++;
-				}
-
-				texture_bind(texture);
-				draw_push_matrix();
-				//draw_load_identity();
-				draw_color4f(1,1,1,1);
-				draw_vertex_pointer(2, sizeof(cpFloat), 0, test);
-				draw_tex_pointer(2, GL_FLOAT, 0, testt);
-				glEnable(GL_TEXTURE_2D);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-				draw_draw_arrays(GL_TRIANGLE_FAN, 0, data->num);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glDisable(GL_TEXTURE_2D);
-				draw_pop_matrix();
+		polygon_ins *pi = (polygon_ins*) llist_next(p);
+		llist_begin_loop(pi->shape);
+		while (llist_hasnext(pi->shape)) {
+			vertex_array *data = (vertex_array*) llist_next(pi->shape);
+			cpVect d[data->num];
+			float test[data->num * 2];
+			float testt[data->num * 2];
+			int i, j = 0;
+			for (i = 0; i < data->num; i++) {
+				d[i] = data->vertices[i];
+				d[i] = cpvadd(cpvmult(d[i], size), cpv(700,100));
+				test[j] = d[i].x;
+				testt[j] = data->vertices[i].x * 1;
+				j++;
+				test[j] = d[i].y;
+				testt[j] = data->vertices[i].y * 1;
+				j++;
 			}
-			llist_end_loop(rb);
+
+			texture_bind(texture);
+			draw_push_matrix();
+			//draw_load_identity();
+			draw_color4f(1,1,1,1);
+			draw_vertex_pointer(2, sizeof(cpFloat), 0, test);
+			draw_tex_pointer(2, GL_FLOAT, 0, testt);
+			glEnable(GL_TEXTURE_2D);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			draw_draw_arrays(GL_TRIANGLE_FAN, 0, data->num);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glDisable(GL_TEXTURE_2D);
+			draw_pop_matrix();
 		}
+		llist_end_loop(pi->shape);
+	}
 	llist_end_loop(p);
 }
 
