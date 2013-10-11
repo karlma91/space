@@ -289,7 +289,8 @@ void statesystem_draw(void)
     			state->inner_draw[state->current_inner_state]();
     		}
 
-    		/* render touchables */
+
+    		/* render touchables */ //TODO rendertouchables to cameras instead?
     		draw_load_identity();
     		LList list = state->touch_objects;
     		llist_begin_loop(list);
@@ -300,6 +301,9 @@ void statesystem_draw(void)
     			}
     		}
     		llist_end_loop(list);
+
+    		//TODO render layersystem
+    		//TODO perform all actual rendering exclusively in render tree (layersystem)
 
     		draw_pop_matrix();
     	}

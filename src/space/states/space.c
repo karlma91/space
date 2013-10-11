@@ -880,8 +880,8 @@ void setup_multiplay(void)
 	multiplayer = 1;
 	//TODO create and init two players
 	cpVect size = cpv(WINDOW_WIDTH/2,WINDOW_HEIGHT);
-	view_set_port(view_p1, cpvzero, size,0);
-	view_set_port(view_p2, cpv(WINDOW_WIDTH/2,0), size,0);
+	view_set_port(view_p1, cpvzero, size, 3);
+	view_set_port(view_p2, cpv(WINDOW_WIDTH/2,0), size, 1);
 	view_p2->enabled = 1;
 }
 

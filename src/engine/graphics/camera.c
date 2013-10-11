@@ -7,8 +7,7 @@
 view * view_new()
 {
 	view * c = calloc(1, sizeof *c);
-	c->port_size = cpv(WINDOW_WIDTH, WINDOW_HEIGHT);
-	c->port_pos = cpvzero;
+	view_set_port(c, cpvzero, cpv(WINDOW_WIDTH, WINDOW_HEIGHT), 0);
 	c->rotation = 0;
 	c->enabled = 1;
 	c->zoom = 1;
@@ -21,6 +20,13 @@ void view_set_port(view *cam, cpVect port_pos, cpVect port_size, int orientation
 	cam->port_pos = port_pos;
 	cam->port_size = port_size;
 	cam->port_orientation = orientation;
+
+	float pw = cam->port_size.x;
+	float ph = cam->port_size.y;
+	float gw = GAME_WIDTH;
+	float gh = GAME_HEIGHT;
+
+	cam->ratio = (gw * ph ) / (pw * gh);
 }
 
 void view_update(view *cam, cpVect pos, float rot)
@@ -30,7 +36,7 @@ void view_update(view *cam, cpVect pos, float rot)
     cam->rotation = rot;
 
     /* camera constraints */
-    cam->width = GAME_WIDTH / (2 * cam->zoom);
+    cam->width = cam->port_size.x / (2 * cam->zoom);
 #warning outdated constraints!
     cam->left = cam->p.x - cam->width;
     cam->right = cam->p.x + cam->width;
@@ -45,12 +51,10 @@ void view_transform2view(view *cam)
 	glViewport(cam->port_pos.x, cam->port_pos.y, cam->port_size.x, cam->port_size.y);
 	glScissor(cam->port_pos.x, cam->port_pos.y, cam->port_size.x, cam->port_size.y);
 
-	draw_rotate(cam->rotation);
-	draw_scale(cam->zoom, cam->zoom);
+	draw_scale(cam->zoom * cam->ratio, cam->zoom);
+	float angle = (cam->port_orientation & 0x3) * M_PI_2;
+	draw_rotate(cam->rotation + angle);
 	draw_translatev(cpvneg(cam->p));
-
-	//TODO set viewport + gl scissor?
-
 }
 
 void view_transform2port(view *cam)

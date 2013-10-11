@@ -7,6 +7,7 @@ typedef struct {
 	cpVect port_pos;
 	cpVect port_size;
 	int port_orientation;
+	float ratio;
 
     int mode;
     float left;
