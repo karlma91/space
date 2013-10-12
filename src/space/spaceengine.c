@@ -176,7 +176,7 @@ static inline cpFloat rect2arch_r(cpFloat y)
 float se_rect2arch(cpVect *pos)
 {
 #if EXPERIMENTAL_GRAPHICS
-	if (!space_rendering_map || (statesystem_get_render_state() != state_space))
+	if (statesystem_get_render_state() != state_space)
 		return 0;
 
 	float angle = pos->x / currentlvl->width * WE_2PI;

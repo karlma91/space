@@ -3,10 +3,14 @@
 
 #include "chipmunk.h"
 
-typedef struct {
+typedef struct view view;
+typedef void (*view_render) (struct view *);
+
+struct view {
 	cpVect port_pos;
 	cpVect port_size;
 	int port_orientation;
+	float priv_port_angle;
 	float ratio;
 
     int mode;
@@ -18,8 +22,11 @@ typedef struct {
     float zoom;
     float rotation;
 
+    view_render GUI;
+
     int enabled;
-} view;
+};
+
 
 view * view_new();
 

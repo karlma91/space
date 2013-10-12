@@ -475,7 +475,7 @@ static void main_tick(void *data)
 	draw_matrix_clear();
 	draw_color4f(0,0,0,1);
 	glDisable(GL_SCISSOR_TEST);
-	glViewport(0,0,GAME_WIDTH,GAME_HEIGHT);
+	glViewport(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
 	draw_box(cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 	glEnable(GL_SCISSOR_TEST);
 

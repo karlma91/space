@@ -30,8 +30,6 @@ static void sticks_hide(void);
 
 static void radar_draw(float x, float y);
 
-int space_rendering_map = 0;
-
 view *view_p1, *view_p2;
 
 static button btn_pause;
@@ -308,11 +306,9 @@ static void draw_deck()
 
 static void draw(void)
 {
-	space_rendering_map = 1;
-
 	draw_color4f(1,1,1,1);
 	//TODO move out to statesystem!
-	layersystem_render(layersystem, view_p1->p);
+	layersystem_render(layersystem, current_view->p);
 
 	//drawStars();
 
@@ -322,7 +318,6 @@ static void draw(void)
 
 	setTextAngle(0);
 
-	space_rendering_map = 0;
 	draw_gui();
 
 	//draw_light_map();
@@ -356,6 +351,8 @@ static void radar_draw(float x, float y)
 
 void draw_gui(void)
 {
+	//todo use current view's port size instead of using GAME_WIDTH and GAME_HEIGHT!
+
 	/* reset transform matrix */
 	draw_load_identity();
 	draw_color4f(1,1,1,1);

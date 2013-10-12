@@ -248,6 +248,7 @@ static void render_instances(instance *obj, void *data)
 	instance_render(obj);
 }
 
+void view_clip(view *cam);
 void view_transform2view(view *cam);
 void view_transform2port(view *cam);
 
@@ -263,6 +264,8 @@ void statesystem_draw(void)
     		view * cam = llist_next(state->cameras);
     		if (!cam->enabled)
     			continue;
+
+    		view_clip(cam);
 
     		draw_push_matrix();
     		view_transform2view(cam);
