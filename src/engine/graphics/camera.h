@@ -2,6 +2,7 @@
 #define CAMERA_H_
 
 #include "chipmunk.h"
+#include "../data/llist.h"
 
 typedef struct view view;
 typedef void (*view_render) (struct view *);
@@ -25,6 +26,8 @@ struct view {
     float rotation;
 
     view_render GUI;
+    LList touch_objects; //overlay
+    //LList touch_objects_ingame; //TODO create ingame touchables?
 
     int enabled;
 };

@@ -9,6 +9,7 @@
 /* private struct */
 
 #include "touch.h"
+#include "we_utils.h"
 
 
 static void update_touch_region(touchable *t)
@@ -52,5 +53,5 @@ void touch_margin(touchable *t, float margin)
 
 int touch_is_inside(touchable *t, float x, float y)
 {
-	return (x >= t->get.t1x) && (x <= t->get.t2x) && (y >= t->get.t1y) && (y <= t->get.t2y);
+	return WE_INSIDE_RECT(x,y,t->get.t1x,t->get.t1y,t->get.t2x,t->get.t2y);
 }

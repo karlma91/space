@@ -5,6 +5,7 @@
 #include "../data/llist.h"
 #include "../input/touch.h"
 #include "../engine.h"
+#include "we_utils.h"
 
 #include "SDL.h"
 #define MAX_INNER_STATES 10
@@ -65,7 +66,6 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
 	State *state = calloc(1, sizeof *state);
 
     state->id = state;
-
 
     state->cameras = llist_create();
     llist_set_remove_callback(state->cameras, view_free);
@@ -197,14 +197,31 @@ void statesystem_update(void)
 		stack_head->call.pre_update();
 	}
 
-	/* update touchables  */
-	LList list = stack_head->touch_objects;
-	llist_begin_loop(list);
-	while(llist_hasnext(list)) {
-		void *touchy = llist_next(list);
+	/* UPDATE IN-GAME TOUCHABLES */
+	LList game_touchies = stack_head->touch_objects;
+	llist_begin_loop(game_touchies);
+	while(llist_hasnext(game_touchies)) {
+		void *touchy = llist_next(game_touchies);
 		((touch_calls *) (*(void **)touchy))->update(touchy);
 	}
-	llist_end_loop(list);
+	llist_end_loop(game_touchies);
+
+	/* UPDATE HUD TOUCHABLES */
+	llist_begin_loop(stack_head->cameras);
+	while(llist_hasnext(stack_head->cameras)) {
+		view * cam = llist_next(stack_head->cameras);
+		if (!cam->enabled)
+			continue;
+		LList view_touchies = cam->touch_objects;
+		llist_begin_loop(view_touchies);
+		while(llist_hasnext(view_touchies)) {
+			void *touchy = llist_next(view_touchies);
+			((touch_calls *) (*(void **)touchy))->update(touchy);
+		}
+		llist_end_loop(view_touchies);
+	}
+	llist_end_loop(stack_head->cameras);
+
 
 	/* inner state update */
 	if (stack_head->inner_states > 0
@@ -292,6 +309,18 @@ void statesystem_draw(void)
     			state->inner_draw[state->current_inner_state]();
     		}
 
+    		/* render in-game touchables */
+    		LList state_touchies = state->touch_objects;
+    		llist_begin_loop(state_touchies);
+    		while(llist_hasnext(state_touchies)) {
+    			touchable *touchy = llist_next(state_touchies);
+    			if (touchy->visible) {
+    				touchy->calls->render(touchy);
+    			}
+    		}
+    		llist_end_loop(state_touchies);
+
+    		/* RENDER HUD */
     		view_transform2port(cam);
     		draw_push_matrix();
     		if (cam->GUI) {
@@ -299,17 +328,16 @@ void statesystem_draw(void)
     		}
     		draw_pop_matrix();
 
-    		/* render touchables */ //TODO rendertouchables to cameras instead?
-    		//draw_load_identity();
-    		LList list = state->touch_objects;
-    		llist_begin_loop(list);
-    		while(llist_hasnext(list)) {
-    			touchable *touchy = llist_next(list);
+    		/* RENDER HUD-touchables */
+    		LList cam_touchies = cam->touch_objects;
+    		llist_begin_loop(cam_touchies);
+    		while(llist_hasnext(cam_touchies)) {
+    			touchable *touchy = llist_next(cam_touchies);
     			if (touchy->visible) {
     				touchy->calls->render(touchy);
     			}
     		}
-    		llist_end_loop(list);
+    		llist_end_loop(cam_touchies);
 
     		//TODO render layersystem
     		//TODO perform all actual rendering exclusively in render tree (layersystem)
@@ -359,54 +387,135 @@ void statesystem_destroy(void)
 	llist_destroy(ll_states);
 }
 
-
 void statesystem_push_event(SDL_Event *event)
 {
 	if (stack_head->call.sdl_event) {
 		stack_head->call.sdl_event(event);
 	}
 
-	LList list = stack_head->touch_objects;
-	llist_begin_loop(list);
+	LList game_touchies = stack_head->touch_objects;
+
+	int consumed = 0;
+
+	//TODO CLEAN UP THIS MESS!
+
+	//TODO transform touch to local view coords and in-game coords
+
+	// get the top most view beneath the touch location
+	float px = event->tfinger.x * WINDOW_WIDTH;
+	float py = (1-event->tfinger.y) * WINDOW_HEIGHT;
+
+	LList view_touchies = NULL;
+	llist_begin_loop(stack_head->cameras);
+	if (event->type == SDL_FINGERDOWN || event->type == SDL_FINGERUP || event->type == SDL_FINGERMOTION) {
+		while(llist_hasnext(stack_head->cameras)) {
+			view *cam = llist_next(stack_head->cameras);
+			if (!cam->enabled) {
+				continue;
+			}
+
+			//TODO CHECK IF THIS IS WORKING!
+			if (WE_INSIDE_RECT_DIM(px, py, cam->port_pos.x,cam->port_pos.y,cam->port_width, cam->port_height)) {
+			 	view_touchies = cam->touch_objects;
+			}
+		}
+	}
+	llist_end_loop(stack_head->cameras);
+
+	llist_begin_loop(game_touchies);
 	switch(event->type) {
 	case SDL_KEYDOWN:
-		while(llist_hasnext(list)) {
-			touchable *touchy = llist_next(list);
+
+		llist_begin_loop(stack_head->cameras);
+		while(llist_hasnext(stack_head->cameras)) {
+			view *cam = llist_next(stack_head->cameras);
+			if (!cam->enabled) {
+				continue;
+			}
+
+			LList view_touchies = cam->touch_objects;
+			llist_begin_loop(view_touchies);
+			while (!consumed && llist_hasnext(view_touchies)) {
+				touchable *touchy = llist_next(view_touchies);
+				if (touchy->enabled) {
+					if (touchy->calls->touch_keypress(touchy, event->key.keysym.scancode))
+						consumed = 1;
+				}
+			}
+			llist_end_loop(view_touchies);
+		}
+		llist_end_loop(stack_head->cameras);
+
+		while(!consumed && llist_hasnext(game_touchies)) {
+			touchable *touchy = llist_next(game_touchies);
 			if (touchy->enabled) {
 				if (touchy->calls->touch_keypress(touchy, event->key.keysym.scancode))
-					break;
+					consumed = 1;
 			}
 		}
 		break;
 	case SDL_FINGERDOWN:
-		while(llist_hasnext(list)) {
-			touchable *touchy = llist_next(list);
+		if (view_touchies) {
+			llist_begin_loop(view_touchies);
+			while (!consumed && llist_hasnext(view_touchies)) {
+				touchable *touchy = llist_next(view_touchies);
+				if (touchy->enabled) {
+					if (touchy->calls->touch_down(touchy, &event->tfinger))
+						consumed = 1;
+				}
+			}
+			llist_end_loop(view_touchies);
+		}
+		while(!consumed && llist_hasnext(game_touchies)) {
+			touchable *touchy = llist_next(game_touchies);
 			if (touchy->enabled) {
 				if (touchy->calls->touch_down(touchy, &event->tfinger))
-					break;
+					consumed = 1;
 			}
 		}
 		break;
 	case SDL_FINGERMOTION:
-		while(llist_hasnext(list)) {
-			touchable *touchy = llist_next(list);
+		if (view_touchies) {
+			llist_begin_loop(view_touchies);
+			while (!consumed && llist_hasnext(view_touchies)) {
+				touchable *touchy = llist_next(view_touchies);
+				if (touchy->enabled) {
+					if (touchy->calls->touch_motion(touchy, &event->tfinger))
+						consumed = 1;
+				}
+			}
+			llist_end_loop(view_touchies);
+		}
+		while(!consumed && llist_hasnext(game_touchies)) {
+			touchable *touchy = llist_next(game_touchies);
 			if (touchy->enabled) {
 				if (touchy->calls->touch_motion(touchy, &event->tfinger))
-					break;
+					consumed = 1;
 			}
 		}
 		break;
 	case SDL_FINGERUP:
-		while(llist_hasnext(list)) {
-			touchable *touchy = llist_next(list);
+		if (view_touchies) {
+			llist_begin_loop(view_touchies);
+			while (!consumed && llist_hasnext(view_touchies)) {
+				touchable *touchy = llist_next(view_touchies);
+				if (touchy->enabled) {
+					if (touchy->calls->touch_up(touchy, &event->tfinger))
+						consumed = 1;
+				}
+			}
+			llist_end_loop(view_touchies);
+		}
+		while(!consumed && llist_hasnext(game_touchies)) {
+			touchable *touchy = llist_next(game_touchies);
 			if (touchy->enabled) {
 				if (touchy->calls->touch_up(touchy, &event->tfinger))
-					break;
+					consumed = 1;
 			}
 		}
 		break;
 	}
-	llist_end_loop(list);
+	llist_end_loop(game_touchies);
 }
 
 void statesystem_call_update(STATE_ID state_id)
@@ -442,9 +551,19 @@ STATE_ID statesystem_get_render_state(void)
 }
 
 
+/**
+ * Registers an in-game touchable to state
+ */
 void state_register_touchable(STATE_ID state_id, void *touchable)
 {
 	State *state = (State *) state_id;
-
 	llist_add(state->touch_objects, touchable);
+}
+
+/**
+ * Registers an overlay touchable to view
+ */
+void state_register_touchable_view(view *cam, void *touchable)
+{
+	llist_add(cam->touch_objects, touchable);
 }

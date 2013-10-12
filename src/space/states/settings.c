@@ -183,6 +183,7 @@ void settings_init(void)
 	//TODO load options from file
 	/* set predefined button states */
 	option_click(OPT_SOUND); /* sound on */
+	option_click(OPT_SOUND); /* sound off */
 	option_click(OPT_MUSIC); /* music on */
 	option_click(OPT_MUSIC); /* music off */
 	option_click(OPT_UNLOCK); /* everything unlocked */

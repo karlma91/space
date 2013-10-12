@@ -67,7 +67,8 @@ void statesystem_set_state(STATE_ID state);
 void statesystem_call_update(STATE_ID state_id);
 void statesystem_push_event(SDL_Event *event);
 
-void state_register_touchable(STATE_ID state, void *touchable);
+void state_register_touchable(STATE_ID state_id, void *touchable);
+void state_register_touchable_view(view *cam, void *touchable);
 
 #endif /* STATESYSTEM_H_ */
 

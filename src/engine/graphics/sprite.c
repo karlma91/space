@@ -95,10 +95,14 @@ void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed
 {
 	memset(spr, 0, sizeof *spr);
 	spr->id = id;
-	spr->width = width;
-	spr->height=height;
+	sprite_set_size(spr, width, height);
 	spr->animation_speed = speed;
 	spr->sub_index = 0;
+}
+
+void sprite_set_size(sprite *spr, int width, int height) {
+	spr->width = width;
+	spr->height = height;
 }
 
 

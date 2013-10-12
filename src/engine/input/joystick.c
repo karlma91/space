@@ -11,6 +11,7 @@
 #include "../graphics/draw.h"
 #include "../data/llist.h"
 #include "../engine.h"
+#include "../graphics/sprite.h"
 #include "we_utils.h"
 
 #define THIS_IS_A_TOUCH_OBJECT 1
@@ -72,6 +73,9 @@ void joystick_reposition(joystick *stick, float radius, float min_radius, float 
 	joystick_place(stick, center_x, center_y + (height/2.1 + radius) * (center_y >= GAME_HEIGHT/4 ? 1 : -1));
 	stick->draw_x = stick->pos_x;
 	stick->draw_y = stick->pos_y;
+
+	sprite_set_size(&(stick->spr_back), radius*2, radius*2);
+	sprite_set_size(&(stick->spr_front), radius, radius*2);
 }
 
 void joystick_free(joystick *stick)

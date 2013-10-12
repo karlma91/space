@@ -123,29 +123,28 @@ static void level_start(void)
 
 	view_p2->enabled = 0;
 	if (p1_ready && p2l && p2r) {
-		multiplayer = 1;
 		start = 1;
-
-		view_p2->enabled = 1;
 		//TODO support split-screen
-
 	} else {
 		multiplayer = 0;
 		start = (p1_ready && (!(p2l || p2r))) || (!GOT_TOUCH && (state_timer > 1.5));
 	}
 
 	if (start) {
-		setup_multiplay();
+		if (multiplayer) {
+			setup_multiplay();
+		}
 
-		if(player1){
+		sticks_init();
+
+		if (player1) {
 			player1->disable = 0;
 		}
-		if( multiplayer){
-			if(player2){
-				player2->disable = 0;
-			}
+
+		if (player2) {
+			player2->disable = 0;
 		}
-		sticks_init();
+
 		change_state(LEVEL_RUNNING);
 
 		//TMP test
@@ -366,7 +365,7 @@ void draw_gui(view *cam)
 	setTextSize(35);
 
 	if (gamestate != LEVEL_START) {
-		radar_draw(-cam->port_width/2 + 120, cam->port_height/2 - 175);
+		radar_draw(-cam->game_width/2 + 120, cam->game_height/2 - 175);
 
 		if (player) {
 
@@ -591,6 +590,7 @@ void space_init_level(int space_station, int deck)
 	player2 = NULL;
 
 	player1 = space_create_player(1);
+	setup_singleplay();
 
 	//TODO manage persistent objects(like player) in a better way, instead of removing and then re-adding
 
@@ -761,19 +761,6 @@ void space_init(void)
     state_add_inner_state(state_space,LEVEL_CLEARED,level_cleared,NULL);
     state_add_inner_state(state_space,LEVEL_TRANSITION,level_transition,NULL);
 
-    btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-85, GAME_HEIGHT/2-77, 80, 80);
-    button_set_callback(btn_pause, (btn_callback) statesystem_pause, 0);
-    button_set_enlargement(btn_pause, 2.0f);
-    button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);
-    state_register_touchable(this, btn_pause);
-
-    ll_floor_segs = llist_create();
-    llist_set_remove_callback(ll_floor_segs, (ll_remove_callback) remove_static);
-    ceiling = NULL;
-
-    state_enable_objects(state_space, 1);
-    state_enable_particles(state_space, 1);
-
     view_p1 = state_view_get(state_space, 0);
     view_p2 = state_view_add(state_space);
     view_p2->enabled = 0;
@@ -787,6 +774,19 @@ void space_init(void)
     	v->GUI = draw_gui;
     	v->zoom = 0.2;
     }*/
+
+    btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-85, GAME_HEIGHT/2-77, 80, 80);
+    button_set_callback(btn_pause, (btn_callback) statesystem_pause, 0);
+    button_set_enlargement(btn_pause, 2.0f);
+    button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);
+    state_register_touchable_view(view_p1, btn_pause);
+
+    ll_floor_segs = llist_create();
+    llist_set_remove_callback(ll_floor_segs, (ll_remove_callback) remove_static);
+    ceiling = NULL;
+
+    state_enable_objects(state_space, 1);
+    state_enable_particles(state_space, 1);
 
 	cpSpaceSetGravity(current_space, cpv(GRAVITY,0));
 	cpSpaceSetDamping(current_space, DAMPING);
@@ -803,10 +803,10 @@ void space_init(void)
     joy_p2_left = joystick_create(0, 120, 2, -GAME_WIDTH/2 + 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
     joy_p2_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
 
-    state_register_touchable(this, joy_p1_left);
-    state_register_touchable(this, joy_p1_right);
-    state_register_touchable(this, joy_p2_left);
-    state_register_touchable(this, joy_p2_right);
+    state_register_touchable_view(view_p1, joy_p1_left);
+    state_register_touchable_view(view_p1, joy_p1_right);
+    state_register_touchable_view(view_p2, joy_p2_left);
+    state_register_touchable_view(view_p2, joy_p2_right);
 
     state_timer = 10;
 	change_state(LEVEL_START);
@@ -884,7 +884,7 @@ void setup_singleplay(void)
 	view_p2->enabled = 0;
 
 	if(player2){
-		instance_destroy((instance*)player2);
+		instance_remove((instance*)player2);
 		player2 = NULL;
 	}
 
@@ -894,6 +894,7 @@ void setup_singleplay(void)
     float w = 340;
     float h = GAME_HEIGHT*0.5;
 
+    touch_place((touchable *)btn_pause, view_p1->game_width/2-85, view_p1->game_height/2-77);
     joystick_reposition(joy_p1_left, 120, 2, -view_p1->game_width/2 + 170, -0.25*view_p1->game_height, w, h);
 	joystick_reposition(joy_p1_right, 120, 2, view_p1->game_width/2 - 170, -0.25*view_p1->game_height, w, h);
     joy_p2_left->touch_data.visible = 0;
@@ -924,6 +925,7 @@ void setup_multiplay(void)
     joystick_set_hotkeys(joy_p2_left, KEY_LEFT_2,KEY_UP_2,KEY_RIGHT_2,KEY_DOWN_2);
     joystick_set_hotkeys(joy_p2_right, SDL_SCANCODE_KP_4,SDL_SCANCODE_KP_8,SDL_SCANCODE_KP_6,SDL_SCANCODE_KP_5);
 
+    touch_place((touchable *)btn_pause, view_p1->game_width/2-85, view_p1->game_height/2-77);
 	joystick_place(joy_p1_left, -view_p1->port_width/3, -view_p1->port_height/3);
 	joystick_place(joy_p1_right, +view_p1->port_width/3, -view_p1->port_height/3);
 	joystick_place(joy_p2_left, -view_p1->port_width/3, -view_p1->port_height/3);
@@ -931,15 +933,15 @@ void setup_multiplay(void)
 
     float w = 340;
     float h = GAME_HEIGHT*0.5;
-	joystick_reposition(joy_p1_left, 120, 2, -view_p1->game_width/2 + 170, -0.25*view_p1->game_height, w, h);
-	joystick_reposition(joy_p1_right, 120, 2, view_p1->game_width/2 - 170, -0.25*view_p1->game_height, w, h);
-    joystick_reposition(joy_p2_left, 120, 2, -view_p2->game_width/2 + 170, +0.25*view_p2->game_height, w, h);
-    joystick_reposition(joy_p2_right, 120, 2, view_p2->game_width/2 - 170, +0.25*view_p2->game_height, w, h);
+	joystick_reposition(joy_p1_left, 80, 2, -view_p1->game_width/2 + 170, -0.25*view_p1->game_height, w, h);
+	joystick_reposition(joy_p1_right, 80, 2, view_p1->game_width/2 - 170, -0.25*view_p1->game_height, w, h);
+    joystick_reposition(joy_p2_left, 80, 2, -view_p2->game_width/2 + 170, -0.25*view_p2->game_height, w, h);
+    joystick_reposition(joy_p2_right, 80, 2, view_p2->game_width/2 - 170, -0.25*view_p2->game_height, w, h);
 
     joy_p2_left->touch_data.visible = 1;
     joy_p2_right->touch_data.visible = 1;
 
-    if(player2 == NULL){
+    if (player2 == NULL) {
 		player2 = space_create_player(2);
 	}
 }

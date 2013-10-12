@@ -12,6 +12,9 @@ view * view_new()
 	c->enabled = 1;
 	c->zoom = 1;
 	c->p = cpvzero;
+
+    c->touch_objects = llist_create();
+
 	return c;
 }
 
@@ -142,6 +145,7 @@ void view_update_zoom(view *cam, cpVect pos, float level_height)
 
 void view_free(view *c)
 {
+	llist_destroy(c->touch_objects);
 	free(c);
 }
 
