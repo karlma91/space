@@ -228,6 +228,7 @@ void instance_destroy(instance *ins)
 void instance_revive(instance *ins)
 {
 	*((int *) &ins->destroyed) = 0;
+	*((int *) &ins->alive) = 1;
 }
 
 void instance_remove(instance *ins)

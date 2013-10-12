@@ -82,10 +82,14 @@ OBJ_END
 PARAM_START(player)
 	float max_hp;
 	int tex_id;
+	int player_id; // 1 or 2
 	float gun_cooldown;
 	float cash_radius;
 PARAM_END
 OBJ_START(player)
+	int player_id; // 1 or 2
+	joystick *joy_left;
+	joystick *joy_right;
 	hpbar hp_bar;
 	int lives;
 	float lost_life_timer;

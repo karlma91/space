@@ -30,6 +30,8 @@ static void sticks_hide(void);
 
 static void radar_draw(float x, float y);
 
+static obj_player * space_create_player(int id);
+
 view *view_p1, *view_p2;
 
 static button btn_pause;
@@ -74,6 +76,8 @@ char *game_state_names[] = {
 };
 
 int multiplayer;
+static obj_player *player1;
+static obj_player *player2;
 
 /*
  * the current state of the game
@@ -100,7 +104,7 @@ static float state_timer = 0;
  * Inner state functions
  */
 
-#define QUICK_ENTER 1
+#define QUICK_ENTER 0
 
 void setup_singleplay(void);
 void setup_multiplay(void);
@@ -131,13 +135,20 @@ static void level_start(void)
 	}
 
 	if (start) {
-		obj_player *player = (obj_player*)instance_first(obj_id_player);
-		player->disable = 0;
+		setup_multiplay();
+
+		if(player1){
+			player1->disable = 0;
+		}
+		if( multiplayer){
+			if(player2){
+				player2->disable = 0;
+			}
+		}
 		sticks_init();
 		change_state(LEVEL_RUNNING);
 
 		//TMP test
-		setup_multiplay();
 	}
 }
 static void level_running(void)
@@ -148,9 +159,8 @@ static void level_running(void)
 	input();
 
 	//update_all();
-	obj_player *player = (obj_player*)instance_first(obj_id_player);
-	if(player && player->hp_bar.value <= 0){
-		player->disable = 1;
+	if(player1 && player1->hp_bar.value <= 0 && (player2 == NULL || player2->hp_bar.value <=0 )){
+		//player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
 	}
 
@@ -278,19 +288,16 @@ static void update_camera_position(void)
     cpVect v_pos;
     float v_rot;
 
-    obj_player *player = ((obj_player*)instance_first(obj_id_player));
-    if (player) {
-    	v_pos = player->data.body->p;
-    	view_update_zoom(view_p1, player->data.body->p, currentlvl->height);
+    if (player1) {
+    	v_pos = player1->data.body->p;
+    	view_update_zoom(view_p1, player1->data.body->p, currentlvl->height);
     	v_rot = -se_tangent(v_pos);
     	view_update(view_p1, v_pos, v_rot);
     }
 
-    obj_tank *tank = ((obj_tank*)instance_first(obj_id_tank));
-    if (tank && multiplayer) {
-        cpVect vel = tank->data.body->v;
-        vel = cpvnormalize(vel);
-    	v_pos = tank->data.body->p;
+    if (player2 && multiplayer) {
+    	v_pos = player2->data.body->p;
+    	view_update_zoom(view_p2, player2->data.body->p, currentlvl->height);
     	v_rot = -se_tangent(v_pos);
     	view_update(view_p2, v_pos, v_rot);
     }
@@ -579,42 +586,19 @@ static obj_param_staticpolygon polytest = {
 
 void space_init_level(int space_station, int deck)
 {
-	static obj_player *player;
 
 	multiplayer = -1;
 	sticks_init();
 
-	if(player==NULL){
-		obj_param_player default_player = {
-				.max_hp = 200,
-				.gun_cooldown = 0.2f,
-				.cash_radius = 250
-		};
-		player = (obj_player *)instance_create(obj_id_player, &default_player, cpvzero, cpvzero);
-	} else {
-		player->disable = 1;
-		//player->hp_bar.value = player->param->max_hp;
-
-		player->data.TYPE->call.init((instance*) player);
-		//player->aim_speed += 0.3*deck;
-		//player->rotation_speed += 0.3*deck;
-		if(deck >= 6){
-			player->gun_level = 3;
-		}
-	}
-	//TODO manage persistent objects(like player) in a better way, instead of removing and then re-adding
 	objectsystem_clear();
-	instance_add((instance*)player);
 
-	/* set player specs based on selected upgrades */
-	player->force = engines[engine_index].force;
-	cpBodySetVelLimit(player->data.body, engines[engine_index].max_speed);
-	cpBodySetMass(player->data.body, upg_total_mass);
-	player->param.gun_cooldown = 1 / weapons[weapon_index].lvls[weapons[weapon_index].level].firerate;
-	player->bullet_dmg = weapons[weapon_index].lvls[weapons[weapon_index].level].damage;
-	player->bullet_type = object_by_name(weapons[weapon_index].obj_name);
-	player->hp_bar.max_hp = armors[armor_index].max_hp;
-	player->hp_bar.value = player->hp_bar.max_hp;
+	player1 = NULL;
+	player2 = NULL;
+
+	player1 = space_create_player(1);
+
+	//TODO manage persistent objects(like player) in a better way, instead of removing and then re-adding
+
 
 	if (currentlvl != NULL) {
 		level_unload(currentlvl);
@@ -683,6 +667,7 @@ void space_init_level(int space_station, int deck)
 	instance_create(obj_id_staticpolygon, &polytest, cpv(0,-800), cpvzero);
 	polytest.shape_id = POLYSHAPE_TANK;
 	polytest.texture_scale = 1;
+	polytest.outline = 0;
 	instance_create(obj_id_staticpolygon, &polytest, cpv(800,0), cpvzero);
 	polytest.shape_id = POLYSHAPE_TURRET;
 	polytest.texture_scale = 4;
@@ -873,6 +858,10 @@ void input(void)
 		}
 	}
 
+	if(view_p2){
+		view_p2->mode = view_p1->mode;
+	}
+
 	/* DEBUG KEYS*/
 #if !ARCADE_MODE
 	if(keys[SDL_SCANCODE_G]){
@@ -891,6 +880,21 @@ void setup_singleplay(void)
 	cpVect size = cpv(WINDOW_WIDTH,WINDOW_HEIGHT);
 	view_set_port(view_p1, cpvzero, size, 0);
 	view_p2->enabled = 0;
+	if(player2){
+		instance_destroy((instance*)player2);
+		player2 = NULL;
+	}
+}
+
+static obj_player * space_create_player(int id)
+{
+	obj_param_player default_player = {
+			.max_hp = 200,
+			.gun_cooldown = 0.2f,
+			.cash_radius = 250,
+			.player_id = id
+	};
+	return (obj_player *)instance_create(obj_id_player, &default_player, cpvzero, cpvzero);
 }
 
 void setup_multiplay(void)
@@ -901,6 +905,9 @@ void setup_multiplay(void)
 	view_set_port(view_p1, cpvzero, size, 3);
 	view_set_port(view_p2, cpv(WINDOW_WIDTH/2,0), size, 1);
 	view_p2->enabled = 1;
+	if(player2 == NULL){
+		player2 = space_create_player(2);
+	}
 }
 
 void space_start_demo(int station, int deck)
