@@ -8,14 +8,16 @@ typedef void (*view_render) (struct view *);
 
 struct view {
 	cpVect port_pos;
-	cpVect port_size;
+	float port_width;
+	float port_height;
 	int port_orientation;
 	float priv_port_angle;
 	float ratio;
 
+	float game_width;
+	float game_height;
+
     int mode;
-    float left;
-    float right;
     float width;
     float height;
     cpVect p;

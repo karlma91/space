@@ -537,7 +537,6 @@ void draw_polygon_outline(int count, cpVect *verts, cpVect p, float rotation, fl
 	draw_push_matrix();
 	draw_translatev(p);
 	draw_rotate(rotation);
-	draw_color(COL_RED);
 	int i = 0;
 	for(i=0; i< count; i++) {
 		if(i < count - 1) {

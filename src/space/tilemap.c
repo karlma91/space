@@ -39,20 +39,8 @@ void tilemap_render(tilemap *map)
 	int x,y;
 	int j_start, j_end;
 
-	//DEBUG
-	static int DEBUG_TILEMAP = 1;
-	if (keys[SDL_SCANCODE_Y]) {
-		keys[SDL_SCANCODE_Y] = 0;
-		DEBUG_TILEMAP ^=1;
-	}
-	if (DEBUG_TILEMAP) {
-		j_start = 0;
-		j_end = map->width;
-	} else {
-	//TODO optimize tilemap rendering for transformed tilemap
-		j_start = (current_view->left - map->tile_width) / map->tile_width + map->width / 2 - 2; //OLD: 0
-		j_end = (current_view->right + map->tile_width) / map->tile_width + map->width / 2 + 2; //OLD: map->width
-	}
+	j_start = 0;
+	j_end = map->width;
 
 	int map_height = map->height;
 

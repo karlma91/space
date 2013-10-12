@@ -44,6 +44,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		}
 		llist_end_loop(pi->shape);
 
+		draw_color(COL_WHITE);
 		if(staticpolygon->outline){
 			llist_begin_loop(pi->outlines);
 			while (llist_hasnext(pi->outlines)) {

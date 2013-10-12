@@ -259,6 +259,7 @@ void statesystem_draw(void)
     while(state){
     	/* render current state */
     	state_beeing_rendered = state->id;
+    	draw_push_matrix();
     	llist_begin_loop(state->cameras);
     	while(llist_hasnext(state->cameras)) {
     		view * cam = llist_next(state->cameras);
@@ -267,7 +268,6 @@ void statesystem_draw(void)
 
     		view_clip(cam);
 
-    		draw_push_matrix();
     		view_transform2view(cam);
     		draw_push_matrix();
 
@@ -292,9 +292,15 @@ void statesystem_draw(void)
     			state->inner_draw[state->current_inner_state]();
     		}
 
+    		view_transform2port(cam);
+    		draw_push_matrix();
+    		if (cam->GUI) {
+    			cam->GUI(cam);
+    		}
+    		draw_pop_matrix();
 
     		/* render touchables */ //TODO rendertouchables to cameras instead?
-    		draw_load_identity();
+    		//draw_load_identity();
     		LList list = state->touch_objects;
     		llist_begin_loop(list);
     		while(llist_hasnext(list)) {
@@ -308,10 +314,10 @@ void statesystem_draw(void)
     		//TODO render layersystem
     		//TODO perform all actual rendering exclusively in render tree (layersystem)
 
-    		draw_pop_matrix();
     	}
     	llist_end_loop(state->cameras);
 
+    	draw_pop_matrix();
     	state = state->next;
     }
 

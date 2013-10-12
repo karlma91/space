@@ -87,7 +87,7 @@ static void level_cleared(void);
 static void level_transition(void);
 static void change_state(enum game_state state);
 
-static void draw_gui(void);
+static void draw_gui(view *cam);
 
 #define GRAVITY 600.0f
 #define DAMPING 0.8f
@@ -316,10 +316,6 @@ static void draw(void)
 	tilemap_render(currentlvl->tiles);
 	draw_deck();
 
-	setTextAngle(0);
-
-	draw_gui();
-
 	//draw_light_map();
 }
 
@@ -349,12 +345,11 @@ static void radar_draw(float x, float y)
 	draw_pop_matrix();
 }
 
-void draw_gui(void)
+void draw_gui(view *cam)
 {
-	//todo use current view's port size instead of using GAME_WIDTH and GAME_HEIGHT!
+	setTextAngle(0);
+	//todo use current view's port size instead of using cam->game_width and cam->game_height!
 
-	/* reset transform matrix */
-	draw_load_identity();
 	draw_color4f(1,1,1,1);
 
 	obj_player *player = ((obj_player*)instance_first(obj_id_player));
@@ -364,7 +359,7 @@ void draw_gui(void)
 	setTextSize(35);
 
 	if (gamestate != LEVEL_START) {
-		radar_draw(-GAME_WIDTH/2 + 120, GAME_HEIGHT/2 - 175);
+		radar_draw(-cam->port_width/2 + 120, cam->port_height/2 - 175);
 
 		if (player) {
 
@@ -382,9 +377,9 @@ void draw_gui(void)
 
 		sprintf(score_temp,"%d",score_anim);
 		draw_color4f(0,0,0,1);
-		font_drawText(-GAME_WIDTH/2+20+4,GAME_HEIGHT/2 - 26-4,score_temp);
+		font_drawText(-cam->game_width/2+20+4,cam->game_height/2 - 26-4,score_temp);
 		draw_color4f(1,1,1,1);
-		font_drawText(-GAME_WIDTH/2+20,GAME_HEIGHT/2 - 26,score_temp);
+		font_drawText(-cam->game_width/2+20,cam->game_height/2 - 26,score_temp);
 		}
 
 		draw_color4f(0.5,0.1,0.1,1);
@@ -394,7 +389,7 @@ void draw_gui(void)
 				instance_count(obj_id_factory)+
 				instance_count(obj_id_turret)+
 				instance_count(obj_id_tank));
-		font_drawText(-GAME_WIDTH/2+20,-GAME_HEIGHT/2 + 100,goals_left);
+		font_drawText(-cam->game_width/2+20,-cam->game_height/2 + 100,goals_left);
 
 		draw_color4f(1,1,1,1);
 		setTextSize(15);
@@ -402,12 +397,12 @@ void draw_gui(void)
 		setTextAlign(TEXT_CENTER);
 		//		sprintf(level_temp,"STATION: %d DECK: %d", currentlvl->station, currentlvl->deck);
 		sprintf(level_temp,"LEVEL %d", currentlvl->deck);
-		font_drawText(0, -GAME_HEIGHT/2+24, level_temp);
+		font_drawText(0, -cam->game_height/2+24, level_temp);
 
 		setTextAlign(TEXT_RIGHT);
 
 #if !ARCADE_MODE
-		font_drawText(GAME_WIDTH/2 - 15, GAME_HEIGHT/2 - 20, fps_buf);
+		font_drawText(cam->game_width/2 - 15, cam->game_height/2 - 20, fps_buf);
 #endif
 		char time_temp[20];
 		font_time2str(time_temp, game_time);
@@ -416,9 +411,9 @@ void draw_gui(void)
 		setTextAlign(TEXT_CENTER);
 
 		draw_color4f(0,0,0,1);
-		font_drawText(4, GAME_HEIGHT/2 - 29 - 4, time_temp);
+		font_drawText(4, cam->game_height/2 - 29 - 4, time_temp);
 		draw_color4f(1,1,1,1);
-		font_drawText(0, GAME_HEIGHT/2 - 29, time_temp);
+		font_drawText(0, cam->game_height/2 - 29, time_temp);
 	}
 
 	switch(gamestate) {
@@ -433,17 +428,17 @@ void draw_gui(void)
 		}
 		setTextSize(25);
 		setTextAngle(WE_PI_2);
-		font_drawText(GAME_WIDTH/2-100, 0, "CO-OP PLAYER 2");
+		font_drawText(cam->game_width/2-100, 0, "CO-OP PLAYER 2");
 		setTextAngle(WE_3PI_2);
-		font_drawText(-GAME_WIDTH/2+100, 0, "CO-OP PLAYER 1");
+		font_drawText(-cam->game_width/2+100, 0, "CO-OP PLAYER 1");
 
 #define STR_SPACE_START "STEER - SINGLE PLAY - SHOOT"
 		setTextAngle(0);
 		setTextSize(25);
 		draw_color4f(0,0,0,1);
-		font_drawText(4, -GAME_HEIGHT/2+110-4, STR_SPACE_START);
+		font_drawText(4, -cam->game_height/2+110-4, STR_SPACE_START);
 		draw_color4f(1,1,1,1);
-		font_drawText(0, -GAME_HEIGHT/2+110, STR_SPACE_START);
+		font_drawText(0, -cam->game_height/2+110, STR_SPACE_START);
 #else
 		setTextSize(70);
 		font_drawText(0, 0, "GET READY!");
@@ -477,10 +472,10 @@ void draw_gui(void)
 		}
 		//TODO draw button texture for arcade mode
 		if(button_down){
-			cpVect t = cpv(0,0-GAME_HEIGHT/4);
+			cpVect t = cpv(0,0-cam->game_height/4);
 			//draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
 		}else{
-			cpVect t = cpv(0,-5.5-GAME_HEIGHT/4);
+			cpVect t = cpv(0,-5.5-cam->game_height/4);
 			//draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
 		}
 #endif
@@ -548,17 +543,17 @@ static void sticks_init(void) {
 	((touchable *)joy_p1_left)->visible = 1;
 	((touchable *)joy_p1_right)->visible = 1;
 
-#if GOT_TOUCH
+//#if GOT_TOUCH
 	if (multiplayer) {
 		((touchable *)joy_p2_left)->visible = 1;
 		((touchable *)joy_p2_right)->visible = 1;
-	} else {
-#else
-	multiplayer = 0;
-	{
-#endif
-		((touchable *)joy_p2_left)->visible = 0;
-		((touchable *)joy_p2_right)->visible = 0;
+	//} else {
+//#else
+	//multiplayer = 0;
+	//{
+//#endif
+//		((touchable *)joy_p2_left)->visible = 0;
+//		((touchable *)joy_p2_right)->visible = 0;
 	}
 }
 
@@ -798,6 +793,16 @@ void space_init(void)
     view_p2 = state_view_add(state_space);
     view_p2->enabled = 0;
 
+    view_p1->GUI = draw_gui;
+    view_p2->GUI = draw_gui;
+
+    /*{
+    	view *v = state_view_add(state_space); //TODO REMOVE TEST view
+    	view_set_port(v,cpv(300+(WINDOW_HEIGHT-600)/2,300),cpv(WINDOW_HEIGHT-600,WINDOW_HEIGHT-600),0);
+    	v->GUI = draw_gui;
+    	v->zoom = 0.2;
+    }*/
+
 	cpSpaceSetGravity(current_space, cpv(GRAVITY,0));
 	cpSpaceSetDamping(current_space, DAMPING);
 
@@ -812,9 +817,6 @@ void space_init(void)
     joy_p1_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, -0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
     joy_p2_left = joystick_create(0, 120, 2, -GAME_WIDTH/2 + 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
     joy_p2_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
-
-    joystick_set_hotkeys(joy_p1_left, KEY_LEFT_1,KEY_UP_1,KEY_RIGHT_1,KEY_DOWN_1);
-    joystick_set_hotkeys(joy_p1_right, KEY_LEFT_2,KEY_UP_2,KEY_RIGHT_2,KEY_DOWN_2);
 
     state_register_touchable(this, joy_p1_left);
     state_register_touchable(this, joy_p1_right);
@@ -891,6 +893,17 @@ void setup_singleplay(void)
 	cpVect size = cpv(WINDOW_WIDTH,WINDOW_HEIGHT);
 	view_set_port(view_p1, cpvzero, size, 0);
 	view_p2->enabled = 0;
+
+    joystick_set_hotkeys(joy_p1_left, KEY_LEFT_1,KEY_UP_1,KEY_RIGHT_1,KEY_DOWN_1);
+    joystick_set_hotkeys(joy_p1_right, KEY_LEFT_2,KEY_UP_2,KEY_RIGHT_2,KEY_DOWN_2);
+
+    float w = 340;
+    float h = GAME_HEIGHT*0.5;
+
+    joystick_reposition(joy_p1_left, 120, 2, -view_p1->game_width/2 + 170, -0.25*view_p1->game_height, w, h);
+	joystick_reposition(joy_p1_right, 120, 2, view_p1->game_width/2 - 170, -0.25*view_p1->game_height, w, h);
+    joy_p2_left->touch_data.visible = 0;
+    joy_p2_right->touch_data.visible = 0;
 }
 
 void setup_multiplay(void)
@@ -901,6 +914,26 @@ void setup_multiplay(void)
 	view_set_port(view_p1, cpvzero, size, 3);
 	view_set_port(view_p2, cpv(WINDOW_WIDTH/2,0), size, 1);
 	view_p2->enabled = 1;
+
+    joystick_set_hotkeys(joy_p1_left, KEY_LEFT_1,KEY_UP_1,KEY_RIGHT_1,KEY_DOWN_1);
+    joystick_set_hotkeys(joy_p1_right, KEY_LEFT_2,KEY_UP_2,KEY_RIGHT_2,KEY_DOWN_2);
+    joystick_set_hotkeys(joy_p2_left, KEY_LEFT_1,KEY_UP_1,KEY_RIGHT_1,KEY_DOWN_1);
+    joystick_set_hotkeys(joy_p2_right, KEY_LEFT_2,KEY_UP_2,KEY_RIGHT_2,KEY_DOWN_2);
+
+	joystick_place(joy_p1_left, -view_p1->port_width/3, -view_p1->port_height/3);
+	joystick_place(joy_p1_right, +view_p1->port_width/3, -view_p1->port_height/3);
+	joystick_place(joy_p2_left, -view_p1->port_width/3, -view_p1->port_height/3);
+	joystick_place(joy_p2_right, +view_p1->port_width/3, -view_p1->port_height/3);
+
+    float w = 340;
+    float h = GAME_HEIGHT*0.5;
+	joystick_reposition(joy_p1_left, 120, 2, -view_p1->game_width/2 + 170, -0.25*view_p1->game_height, w, h);
+	joystick_reposition(joy_p1_right, 120, 2, view_p1->game_width/2 - 170, -0.25*view_p1->game_height, w, h);
+    joystick_reposition(joy_p2_left, 120, 2, -view_p2->game_width/2 + 170, +0.25*view_p2->game_height, w, h);
+    joystick_reposition(joy_p2_right, 120, 2, view_p2->game_width/2 - 170, +0.25*view_p2->game_height, w, h);
+
+    joy_p2_left->touch_data.visible = 1;
+    joy_p2_right->touch_data.visible = 1;
 }
 
 void space_start_demo(int station, int deck)

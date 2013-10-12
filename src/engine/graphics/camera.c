@@ -18,17 +18,25 @@ view * view_new()
 void view_set_port(view *cam, cpVect port_pos, cpVect port_size, int orientation)
 {
 	cam->port_pos = port_pos;
-	cam->port_size = port_size;
+
+	cam->port_width = port_size.x;
+	cam->port_height = port_size.y;
+
 	cam->port_orientation = orientation;
 	cam->priv_port_angle = (cam->port_orientation & 0x3) * M_PI_2;
 
-	float pw = cam->port_size.x;
-	float ph = cam->port_size.y;
+	float pw = cam->port_width;
+	float ph = cam->port_height;
 	float gw = GAME_WIDTH;
 	float gh = GAME_HEIGHT;
 
-
 	cam->ratio = (gw * ph ) / (pw * gh);
+
+	float w = gw * cam->port_width / WINDOW_WIDTH;
+	float h = gh * cam->port_height / WINDOW_HEIGHT;
+
+	cam->game_width = (orientation & 1) ? h : w;
+	cam->game_height = (orientation & 1) ? w : h;
 }
 
 void view_update(view *cam, cpVect pos, float rot)
@@ -38,17 +46,14 @@ void view_update(view *cam, cpVect pos, float rot)
     cam->rotation = rot + cam->priv_port_angle;
 
     /* camera constraints */
-    cam->width = cam->port_size.x / (2 * cam->zoom);
-#warning outdated constraints!
-    cam->left = cam->p.x - cam->width;
-    cam->right = cam->p.x + cam->width;
+    cam->width = cam->port_width / (2 * cam->zoom);
 }
 
 void view_clip(view *cam)
 {
 	//TODO create viewport stack in draw?
-	glViewport(cam->port_pos.x, cam->port_pos.y, cam->port_size.x, cam->port_size.y);
-	glScissor(cam->port_pos.x, cam->port_pos.y, cam->port_size.x, cam->port_size.y);
+	glViewport(cam->port_pos.x, cam->port_pos.y, cam->port_width, cam->port_height);
+	glScissor(cam->port_pos.x, cam->port_pos.y, cam->port_width, cam->port_height);
 }
 
 void view_transform2view(view *cam)
@@ -66,9 +71,9 @@ void view_transform2port(view *cam)
 	current_view = cam;
 
 	draw_load_identity();
+	draw_scale(cam->ratio, 1);
 	draw_rotate(cam->priv_port_angle); // supported angles 0, 90, 180, 270
-	//draw_scale(cam->zoom, cam->zoom);
-	draw_translatev(cpvneg(cam->port_pos));
+	//draw_translatev(cpvmult(cpvneg(cam->port_pos),0.5));
 }
 
 //TODO move out from camera/view

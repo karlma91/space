@@ -54,6 +54,26 @@ joystick *joystick_create(int persistent, float radius, float min_radius, float 
 	return stick;
 }
 
+void joystick_reposition(joystick *stick, float radius, float min_radius, float center_x, float center_y, float width, float height)
+{
+	stick->touch_data.type = CTRL_JOYSTICK;
+
+	stick->touch_data.get.width = width;
+	stick->touch_data.get.height = height;
+
+	stick->radius = radius;
+	stick->min_range = min_radius;
+
+	touch_place((touchable *) stick, center_x, center_y);
+
+	joystick_axis(stick,0,0);
+	joystick_release(stick);
+
+	joystick_place(stick, center_x, center_y + (height/2.1 + radius) * (center_y >= GAME_HEIGHT/4 ? 1 : -1));
+	stick->draw_x = stick->pos_x;
+	stick->draw_y = stick->pos_y;
+}
+
 void joystick_free(joystick *stick)
 {
 	free(stick);
