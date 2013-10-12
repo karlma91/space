@@ -124,7 +124,7 @@ static void level_start(void)
 	view_p2->enabled = 0;
 	if (p1_ready && p2l && p2r) {
 		start = 1;
-		//TODO support split-screen
+		multiplayer = 1;
 	} else {
 		multiplayer = 0;
 		start = (p1_ready && (!(p2l || p2r))) || (!GOT_TOUCH && (state_timer > 1.5));
@@ -549,17 +549,16 @@ static void sticks_init(void) {
 	((touchable *)joy_p1_left)->visible = 1;
 	((touchable *)joy_p1_right)->visible = 1;
 
-//#if GOT_TOUCH
+#if GOT_TOUCH
 	if (multiplayer) {
 		((touchable *)joy_p2_left)->visible = 1;
 		((touchable *)joy_p2_right)->visible = 1;
-	//} else {
-//#else
-	//multiplayer = 0;
-	//{
-//#endif
-//		((touchable *)joy_p2_left)->visible = 0;
-//		((touchable *)joy_p2_right)->visible = 0;
+	} else {
+#else
+	{
+#endif
+		((touchable *)joy_p2_left)->visible = 0;
+		((touchable *)joy_p2_right)->visible = 0;
 	}
 }
 
@@ -589,8 +588,6 @@ void space_init_level(int space_station, int deck)
 	player1 = NULL;
 	player2 = NULL;
 
-	player1 = space_create_player(1);
-	setup_singleplay();
 
 	//TODO manage persistent objects(like player) in a better way, instead of removing and then re-adding
 
@@ -605,6 +602,9 @@ void space_init_level(int space_station, int deck)
 		SDL_Log( "space_level_init failed!\n");
 		exit(-1);
 	}
+
+	player1 = space_create_player(1);
+	setup_singleplay();
 
 	change_state(LEVEL_START);
 
@@ -897,8 +897,17 @@ void setup_singleplay(void)
     touch_place((touchable *)btn_pause, view_p1->game_width/2-85, view_p1->game_height/2-77);
     joystick_reposition(joy_p1_left, 120, 2, -view_p1->game_width/2 + 170, -0.25*view_p1->game_height, w, h);
 	joystick_reposition(joy_p1_right, 120, 2, view_p1->game_width/2 - 170, -0.25*view_p1->game_height, w, h);
-    joy_p2_left->touch_data.visible = 0;
-    joy_p2_right->touch_data.visible = 0;
+    joystick_reposition(joy_p2_left, 120, 2, -view_p2->game_width/2 + 170, 0.25*view_p2->game_height, w, h);
+    joystick_reposition(joy_p2_right, 120, 2, view_p2->game_width/2 - 170, 0.25*view_p2->game_height, w, h);
+
+    LList ll_touchies = view_p1->touch_objects;
+    if (!llist_contains(ll_touchies, joy_p2_left)) {
+    	llist_add(ll_touchies, joy_p2_left);
+    	llist_add(ll_touchies, joy_p2_right);
+    }
+
+    joy_p2_left->touch_data.visible = 1;
+    joy_p2_right->touch_data.visible = 1;
 }
 
 static obj_player * space_create_player(int id)
@@ -940,6 +949,10 @@ void setup_multiplay(void)
 
     joy_p2_left->touch_data.visible = 1;
     joy_p2_right->touch_data.visible = 1;
+
+    LList ll_touchies = view_p1->touch_objects;
+    llist_remove(ll_touchies, joy_p2_left);
+    llist_remove(ll_touchies, joy_p2_right);
 
     if (player2 == NULL) {
 		player2 = space_create_player(2);

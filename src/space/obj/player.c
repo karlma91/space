@@ -28,7 +28,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 	player->gun_timer = 0;
 
 	cpBodySetAngle(player->data.body,3*(M_PI/2));
-	player->data.body->p = cpvzero;
+	player->data.body->p = cpv(0,currentlvl->height/2+currentlvl->inner_radius);
 	player->data.body->v = cpvzero;
 
 	player->force = engines[engine_index].force;
