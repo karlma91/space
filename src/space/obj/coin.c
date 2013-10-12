@@ -46,7 +46,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	se_tangent_body(coin->data.body);
 
 	if (coin->pulled) {
-		instance *player = instance_first(obj_id_player);
+		instance *player = instance_nearest(coin->data.body->p, obj_id_player);
 
 		//TODO handle TMP magnet
 		cpVect diff = se_dist_a2b((instance *)coin, player);

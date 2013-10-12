@@ -540,9 +540,9 @@ void draw_polygon_outline(int count, cpVect *verts, cpVect p, float rotation, fl
 	int i = 0;
 	for(i=0; i< count; i++) {
 		if(i < count - 1) {
-			draw_quad_line(cpvmult(verts[i],size), cpvmult(verts[i + 1],size), 5);
+			draw_quad_line(cpvmult(verts[i],size), cpvmult(verts[i + 1],size), 1);
 		} else {
-			draw_quad_line(cpvmult(verts[i],size), cpvmult(verts[0],size), 5);
+			draw_quad_line(cpvmult(verts[i],size), cpvmult(verts[0],size), 1);
 		}
 	}
 	draw_flush_simple();

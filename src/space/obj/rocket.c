@@ -53,9 +53,9 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	rocket->timer +=dt;
 
 	/* gets the player from the list */
-	instance *player = (instance_first(obj_id_player));
+	instance *player = (instance_nearest(rocket->data.body->p ,obj_id_player));
 
-	if (rocket->active) {
+	if (rocket->active && player) {
 		float target_angle = cpvtoangle(se_dist_a2b((instance*)rocket, player));
 		rocket->data.body->a = turn_toangle(rocket->data.body->a, target_angle, 0.4 * (WE_2PI * dt));
 		cpBodySetAngle(rocket->data.body, rocket->data.body->a);

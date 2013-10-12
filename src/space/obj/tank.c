@@ -93,7 +93,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	tank->timer +=dt;
 	/* gets the player from the list */
-	obj_player *player = ((obj_player*)instance_first(obj_id_player));
+	obj_player *player = ((obj_player*)instance_nearest(tank->data.body->p, obj_id_player));
 
 	static float ptx = 0;
 

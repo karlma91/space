@@ -84,8 +84,11 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		robotarm->y[i-1] = robotarm->y[i] + sin(robotarm->angle[i])*robotarm->seg_length;
 	}
 
-	instance *player = instance_first(obj_id_player);
-	cpVect d = se_dist_v(robotarm->saw->p, player->body->p);
+	instance *player = instance_nearest(robotarm->saw->p,obj_id_player);
+	cpVect d = cpvzero;
+	if(player){
+		d = se_dist_v(robotarm->saw->p, player->body->p);
+	}
 
 	cpBodySetForce(robotarm->saw, cpvzero);
 	d = cpvnormalize(d);
