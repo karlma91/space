@@ -387,27 +387,28 @@ void statesystem_destroy(void)
 	llist_destroy(ll_states);
 }
 
+//TODO CLEAN UP THIS MESSY FUNCTION!
 void statesystem_push_event(SDL_Event *event)
 {
+	int consumed = 0;
+	cpVect game_p, port_p, view_p;
+	LList game_touchies = stack_head->touch_objects;
+
 	if (stack_head->call.sdl_event) {
 		stack_head->call.sdl_event(event);
 	}
 
-	LList game_touchies = stack_head->touch_objects;
-
-	int consumed = 0;
-
-	//TODO CLEAN UP THIS MESS!
-
 	//TODO transform touch to local view coords and in-game coords
 
-	// get the top most view beneath the touch location
-	float px = event->tfinger.x * WINDOW_WIDTH;
-	float py = (1-event->tfinger.y) * WINDOW_HEIGHT;
+	// get the top most view beneath the touch location //TODO go through all views as long there is no response?
 
 	LList view_touchies = NULL;
 	llist_begin_loop(stack_head->cameras);
 	if (event->type == SDL_FINGERDOWN || event->type == SDL_FINGERUP || event->type == SDL_FINGERMOTION) {
+		view_p = cpv(event->tfinger.x, event->tfinger.y);
+		port_p = cpv(view_p.x * WINDOW_WIDTH, (1-view_p.y) * WINDOW_HEIGHT);
+		game_p = cpv((view_p.x  - 0.5) * GAME_WIDTH, (0.5 - view_p.y) * GAME_HEIGHT);
+
 		while(llist_hasnext(stack_head->cameras)) {
 			view *cam = llist_next(stack_head->cameras);
 			if (!cam->enabled) {
@@ -415,8 +416,11 @@ void statesystem_push_event(SDL_Event *event)
 			}
 
 			//TODO CHECK IF THIS IS WORKING!
-			if (WE_INSIDE_RECT_DIM(px, py, cam->port_pos.x,cam->port_pos.y,cam->port_width, cam->port_height)) {
+			if (cpBBContainsVect(cam->priv_port_box, port_p)) {
 			 	view_touchies = cam->touch_objects;
+			 	view_p = matrix2d_transform_vect(cam->priv_port_invtransform, view_p);
+			 	event->tfinger.x = view_p.x;
+			 	event->tfinger.y = view_p.y;
 			}
 		}
 	}
@@ -425,7 +429,6 @@ void statesystem_push_event(SDL_Event *event)
 	llist_begin_loop(game_touchies);
 	switch(event->type) {
 	case SDL_KEYDOWN:
-
 		llist_begin_loop(stack_head->cameras);
 		while(llist_hasnext(stack_head->cameras)) {
 			view *cam = llist_next(stack_head->cameras);
@@ -466,6 +469,8 @@ void statesystem_push_event(SDL_Event *event)
 			}
 			llist_end_loop(view_touchies);
 		}
+		event->tfinger.x = game_p.x;
+		event->tfinger.y = game_p.y;
 		while(!consumed && llist_hasnext(game_touchies)) {
 			touchable *touchy = llist_next(game_touchies);
 			if (touchy->enabled) {
@@ -486,6 +491,8 @@ void statesystem_push_event(SDL_Event *event)
 			}
 			llist_end_loop(view_touchies);
 		}
+		event->tfinger.x = game_p.x;
+		event->tfinger.y = game_p.y;
 		while(!consumed && llist_hasnext(game_touchies)) {
 			touchable *touchy = llist_next(game_touchies);
 			if (touchy->enabled) {
@@ -506,6 +513,8 @@ void statesystem_push_event(SDL_Event *event)
 			}
 			llist_end_loop(view_touchies);
 		}
+		event->tfinger.x = game_p.x;
+		event->tfinger.y = game_p.y;
 		while(!consumed && llist_hasnext(game_touchies)) {
 			touchable *touchy = llist_next(game_touchies);
 			if (touchy->enabled) {

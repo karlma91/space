@@ -66,7 +66,7 @@ static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	scroll_priv * scr = (scroll_priv *) scr_id;
 
 	float tx = finger->x, ty = finger->y;
-	normalized2game(&tx, &ty);
+	//normalized2game(&tx, &ty);
 
 	//TODO support dual-touch
 	if (INSIDE(scr, tx, ty)) {

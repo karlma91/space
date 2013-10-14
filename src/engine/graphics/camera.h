@@ -3,6 +3,7 @@
 
 #include "chipmunk.h"
 #include "../data/llist.h"
+#include "../graphics/matrix2d.h"
 
 typedef struct view view;
 typedef void (*view_render) (struct view *);
@@ -11,6 +12,9 @@ struct view {
 	cpVect port_pos;
 	float port_width;
 	float port_height;
+	cpBB priv_port_box;
+    matrix2d priv_port_invtransform;
+
 	int port_orientation;
 	float priv_port_angle;
 	float ratio;
@@ -24,10 +28,10 @@ struct view {
     cpVect p;
     float zoom;
     float rotation;
+    matrix2d priv_view_invtransform;
 
     view_render GUI;
     LList touch_objects; //overlay
-    //LList touch_objects_ingame; //TODO create ingame touchables?
 
     int enabled;
 };

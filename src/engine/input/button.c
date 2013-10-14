@@ -232,7 +232,7 @@ static int touch_down(button btn_id, SDL_TouchFingerEvent *finger)
 	struct button *btn = (struct button *) btn_id;
 
 	float tx = finger->x, ty = finger->y;
-	normalized2game(&tx, &ty);
+	//normalized2game(&tx, &ty);
 
 	if (INSIDE(btn, tx, ty)) {
 		btn->finger_id = finger->fingerId;
@@ -253,7 +253,7 @@ static int touch_motion(button btn_id, SDL_TouchFingerEvent *finger)
 		return 0;
 
 	float tx = finger->x, ty = finger->y;
-	normalized2game(&tx, &ty);
+	//normalized2game(&tx, &ty);
 
 	if (!INSIDE(btn, tx,ty)) {
 		llist_remove(active_fingers, (void *) btn->finger_id); // make finger available to other touchables
@@ -274,7 +274,7 @@ static int touch_up(button btn_id, SDL_TouchFingerEvent *finger)
 	button_clear(btn_id);
 
 	float tx = finger->x, ty = finger->y;
-	normalized2game(&tx, &ty);
+	//normalized2game(&tx, &ty);
 
 	if (INSIDE(btn, tx,ty)) {
 		if (!btn->animated) sprite_set_index(&(btn->spr), BUTTON_UP);

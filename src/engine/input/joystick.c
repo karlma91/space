@@ -199,7 +199,7 @@ static int touch_down(touchable * stick_id, SDL_TouchFingerEvent *finger)
 	}
 
 	float tx = finger->x, ty = finger->y;
-	normalized2game(&tx, &ty);
+	//normalized2game(&tx, &ty);
 
 	//TODO decide whether to allow new finger to ++capture++ active finger or not
 	if (touch_is_inside(stick_id, tx, ty)) {
@@ -222,7 +222,7 @@ static int touch_motion(touchable * stick_id, SDL_TouchFingerEvent *finger)
 	joystick *stick = (joystick *) stick_id;
 
 	float tx = finger->x, ty = finger->y;
-	normalized2game(&tx, &ty);
+	//normalized2game(&tx, &ty);
 
 	if (!stick->pressed) {
 		if (llist_contains(active_fingers, (void *)finger->fingerId)) {

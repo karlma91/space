@@ -2,6 +2,13 @@
 #ifndef MATRIX2D_H_
 #define MATRIX2D_H_
 
+#include "chipmunk.h"
+
+typedef struct {
+    float x1, y1, z1;
+    float x2, y2, z2;
+} matrix2d;
+
 void matrix2d_reset(void);
 
 float * matrix2d_get_tex_data(void);
@@ -26,6 +33,7 @@ void matrix2d_rotatev(float c, float s);
 void matrix2d_rotate(float a);
 void matrix2d_scale(float x, float y);
 void matrix2d_setmatrix(float *m);
+matrix2d matrix2d_getmatrix();
 
 void matrix2d_clear(void);
 void matrix2d_pushmatrix(void);
@@ -35,7 +43,7 @@ void matrix2d_popmatrix(void);
 void matrix2d_multiply_current(int count);
 void matrix2d_multiply_point(float *point);
 void matrix2d_multiply(float *vertices, int count);
-
+cpVect matrix2d_transform_vect(matrix2d m, cpVect v);
 
 void matrix2d_append_strip(int first, int count);
 void matrix2d_append_quad_tex(void);

@@ -40,6 +40,8 @@ void view_set_port(view *cam, cpVect port_pos, cpVect port_size, int orientation
 
 	cam->game_width = (orientation & 1) ? h : w;
 	cam->game_height = (orientation & 1) ? w : h;
+
+	cam->priv_port_box = cpBBNew(cam->port_pos.x, cam->port_pos.y+cam->port_height, cam->port_pos.x+cam->port_width, cam->port_pos.y);
 }
 
 void view_update(view *cam, cpVect pos, float rot)
@@ -63,6 +65,13 @@ void view_transform2view(view *cam)
 {
 	current_view = cam;
 
+	// get inverse transformation matrix
+	draw_load_identity();
+	draw_translatev(cam->p);
+	draw_rotate(-cam->rotation);
+	draw_scale(1/(cam->zoom * cam->ratio), 1/(cam->zoom));
+	cam->priv_view_invtransform = matrix2d_getmatrix();
+
 	draw_load_identity();
 	draw_scale(cam->zoom * cam->ratio, cam->zoom);
 	draw_rotate(cam->rotation);
@@ -73,10 +82,18 @@ void view_transform2port(view *cam)
 {
 	current_view = cam;
 
+	// get inverse transformation matrix
+	draw_load_identity();
+	draw_rotate(-cam->priv_port_angle);
+	draw_scale(1/cam->ratio, 1);
+	cam->priv_port_invtransform = matrix2d_getmatrix();
+
+	// transform view to viewport
 	draw_load_identity();
 	draw_scale(cam->ratio, 1);
 	draw_rotate(cam->priv_port_angle); // supported angles 0, 90, 180, 270
 	//draw_translatev(cpvmult(cpvneg(cam->port_pos),0.5));
+
 }
 
 //TODO move out from camera/view

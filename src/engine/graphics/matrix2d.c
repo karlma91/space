@@ -5,16 +5,10 @@
 #include "draw.h"
 #include <signal.h>
 
-typedef struct {
-    float x1, y1, z1;
-    float x2, y2, z2;
-} matrix;
-
 #define STACK_SIZE 1000
 
-static matrix stack[STACK_SIZE];
-
-matrix *cur = &stack[0];
+static matrix2d stack[STACK_SIZE];
+matrix2d *cur = &stack[0];
 
 int stride;
 int type;
@@ -229,7 +223,7 @@ void matrix2d_pushmatrix(void)
 {
 	if (current_matrix < STACK_SIZE - 1) {
 		++current_matrix;
-		matrix *m = cur+1;
+		matrix2d *m = cur+1;
 
 		m->x1 = cur->x1; m->y1 = cur->y1; m->z1 = cur->z1;
 		m->x2 = cur->x2; m->y2 = cur->y2; m->z2 = cur->z2;
@@ -264,6 +258,11 @@ void matrix2d_setmatrix(float *m)
     cur->x2 = m[3]; cur->y2 = m[4]; cur->z2 = m[5];
 }
 
+matrix2d matrix2d_getmatrix()
+{
+	return *cur;
+}
+
 void matrix2d_multiply_current(int count)
 {
     int i;
@@ -280,6 +279,12 @@ void matrix2d_multiply(float *vertices, int count)
         matrix2d_multiply_point(&vertices[i]);
     }
 }
+
+cpVect matrix2d_transform_vect(matrix2d m, cpVect v)
+{
+    return cpv(m.x1*v.x + m.y1*v.y + m.z1, m.x2*v.x + m.y2*v.y + m.z2);
+}
+
 static float * matrix2d_multiply_to_quad(float *data, float *mesh, int count)
 {
 
