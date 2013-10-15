@@ -92,7 +92,6 @@ void joystick_touch(joystick *stick, float pos_x, float pos_y)
 	} else {
 		float dx = (pos_x - stick->pos_x) / stick->radius;
 		float dy = (pos_y - stick->pos_y) / stick->radius;
-
 		float length = hypotf(dx, dy);
 
 		if (length * stick->radius > stick->min_range) {
@@ -140,6 +139,17 @@ void joystick_set_hotkeys(joystick *stick, SDL_Scancode key_left, SDL_Scancode k
 
 void joystick_axis(joystick *stick, float x, float y)
 {
+	// Rotate joystick to match viewport orientation
+	if (stick->touch_data.container) {
+		float x_ = x, y_ = y;
+		switch(stick->touch_data.container->port_orientation) {
+			case 0: x =  x_; y =  y_; break;
+			case 1: x = -y_; y =  x_; break;
+			case 2: x = -x_; y = -y_; break;
+			case 3: x =  y_; y = -x_; break;
+		}
+	}
+
 	stick->axis_x = x < -1 ? -1 : (x > 1 ? 1 : x);
 	stick->axis_y = y < -1 ? -1 : (y > 1 ? 1 : y);
 
@@ -157,7 +167,7 @@ static void update(touchable * stick_id)
 	if (!stick->pressed) {
 		int axis_x = (stick->key_right && keys[stick->key_right]) - (stick->key_left && keys[stick->key_left]);
 		int axis_y = (stick->key_up && keys[stick->key_up]) - (stick->key_down && keys[stick->key_down]);
-		joystick_axis(stick_id, axis_x, axis_y);
+		joystick_axis(stick, axis_x, axis_y);
 	}
 
 	float x = stick->draw_axx * STCK_FRCT + stick->axis_x * (1-STCK_FRCT);
@@ -181,12 +191,16 @@ static void render(touchable * stick_id)
 	cpVect btn_pos = {stick->draw_x,stick->draw_y};
 
 	draw_color4f(1,1,1,1);
-
 	sprite_render(&(stick->spr_back), btn_pos, 0);
-
 	sprite_set_index_normalized(&(stick->spr_front), stick->draw_amp);
-	sprite_render(&(stick->spr_front), btn_pos, stick->draw_dir - WE_PI_2);
 
+	// Counter viewport orientation
+	float a = stick->draw_dir - WE_PI_2;
+	if (stick->touch_data.container) {
+		a -= stick->touch_data.container->priv_port_angle;
+	}
+
+	sprite_render(&(stick->spr_front), btn_pos, a);
 	//draw_flush_simple();
 }
 

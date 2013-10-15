@@ -339,7 +339,7 @@ static void plot_on_radar(instance *obj, void *unused)
 
 static void radar_draw(float x, float y)
 {
-	obj_player *player = ((obj_player *) instance_first(obj_id_player));
+	obj_player *player = current_view == view_p1 ? player1 : player2;
 	draw_push_matrix();
 	if (player) {
 		draw_translate(x, y);
@@ -358,18 +358,16 @@ void draw_gui(view *cam)
 
 	draw_color4f(1,1,1,1);
 
-	obj_player *player = ((obj_player*)instance_first(obj_id_player));
-
 	setTextAngle(0); // TODO don't use global variables for setting font properties
 	setTextAlign(TEXT_LEFT);
 	setTextSize(35);
 
 	if (gamestate != LEVEL_START) {
-		radar_draw(-cam->game_width/2 + 120, cam->game_height/2 - 175);
-
+		/*
+		obj_player *player = current_view == view_p1 ? player1 : player2;
 		if (player) {
 
-		/* simple score animation */
+		// simple score animation
 		char score_temp[20];
 		static int score_anim = 0;
 		static int score_adder = 1;
@@ -380,13 +378,20 @@ void draw_gui(view *cam)
 			score_anim = player->coins;
 			score_adder = 1;
 		}
+		*/
 
-		sprintf(score_temp,"%d",score_anim);
+		radar_draw(-cam->game_width/2 + 120, cam->game_height/2 - 175);
+
+		int score_anim = 0;
+		obj_player *player = current_view == view_p1 ? player1 : player2;
+		if (player) score_anim = player->coins;
+		char score_temp[20];
+		sprintf(score_temp,"%d",score_anim); //score_anim
 		draw_color4f(0,0,0,1);
 		font_drawText(-cam->game_width/2+20+4,cam->game_height/2 - 26-4,score_temp);
 		draw_color4f(1,1,1,1);
 		font_drawText(-cam->game_width/2+20,cam->game_height/2 - 26,score_temp);
-		}
+		//}
 
 		draw_color4f(0.5,0.1,0.1,1);
 		setTextSize(20);
@@ -768,12 +773,15 @@ void space_init(void)
     view_p1->GUI = draw_gui;
     view_p2->GUI = draw_gui;
 
-    /*{
+    //*
+    {
     	view *v = state_view_add(state_space); //TODO REMOVE TEST view
-    	view_set_port(v,cpv(300+(WINDOW_HEIGHT-600)/2,300),cpv(WINDOW_HEIGHT-600,WINDOW_HEIGHT-600),0);
-    	v->GUI = draw_gui;
+    	cpVect size = cpv(WINDOW_WIDTH/2,WINDOW_HEIGHT/2);
+    	view_set_port(v,cpvadd(size,cpvmult(size,-0.5)),size,1);
+    	//v->GUI = draw_gui;
     	v->zoom = 0.2;
-    }*/
+    }
+    //*/
 
     btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-85, GAME_HEIGHT/2-77, 80, 80);
     button_set_callback(btn_pause, (btn_callback) statesystem_pause, 0);
@@ -897,8 +905,8 @@ void setup_singleplay(void)
     touch_place((touchable *)btn_pause, view_p1->game_width/2-85, view_p1->game_height/2-77);
     joystick_reposition(joy_p1_left, 120, 2, -view_p1->game_width/2 + 170, -0.25*view_p1->game_height, w, h);
 	joystick_reposition(joy_p1_right, 120, 2, view_p1->game_width/2 - 170, -0.25*view_p1->game_height, w, h);
-    joystick_reposition(joy_p2_left, 120, 2, -view_p2->game_width/2 + 170, 0.25*view_p2->game_height, w, h);
-    joystick_reposition(joy_p2_right, 120, 2, view_p2->game_width/2 - 170, 0.25*view_p2->game_height, w, h);
+    joystick_reposition(joy_p2_left, 120, 2, -view_p1->game_width/2 + 170, 0.25*view_p1->game_height, w, h);
+    joystick_reposition(joy_p2_right, 120, 2, view_p1->game_width/2 - 170, 0.25*view_p1->game_height, w, h);
 
     LList ll_touchies = view_p1->touch_objects;
     if (!llist_contains(ll_touchies, joy_p2_left)) {

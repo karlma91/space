@@ -40,6 +40,7 @@ struct view {
 view * view_new();
 
 void view_set_port(view *cam, cpVect port_pos, cpVect port_size, int orientation);
+void view_set_orientation(view *cam, int orientation);
 void view_update(view *cam, cpVect pos, float rot);
 void view_update_zoom(view *cam, cpVect pos, float level_height);
 void view_free(view *c);

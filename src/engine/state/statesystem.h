@@ -13,6 +13,7 @@
 #include "chipmunk.h"
 #include "../components/object.h"
 #include "../graphics/particles.h"
+#include "../input/touch.h"
 
 extern cpSpace *current_space;
 extern object_system *current_objects;
@@ -67,8 +68,8 @@ void statesystem_set_state(STATE_ID state);
 void statesystem_call_update(STATE_ID state_id);
 void statesystem_push_event(SDL_Event *event);
 
-void state_register_touchable(STATE_ID state_id, void *touchable);
-void state_register_touchable_view(view *cam, void *touchable);
+void state_register_touchable(STATE_ID state_id, touchable *touchable);
+void state_register_touchable_view(view *cam, touchable *touchable);
 
 #endif /* STATESYSTEM_H_ */
 

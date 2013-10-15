@@ -12,6 +12,7 @@
 #ifndef TOUCH_H_
 #define TOUCH_H_
 
+#include "../graphics/camera.h"
 #include "SDL_events.h"
 #include "SDL_touch.h"
 
@@ -40,6 +41,8 @@ typedef struct {
 		float t1x, t1y; /* upper left corner of touch region */
 		float t2x, t2y; /* lower right corner of touch region */
 	} get; /* READ ONLY! Use touch_place and touch_area to perform changes */
+
+	view *container;
 } touchable;
 
 typedef struct touch_calls{

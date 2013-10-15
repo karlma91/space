@@ -21,12 +21,16 @@ view * view_new()
 void view_set_port(view *cam, cpVect port_pos, cpVect port_size, int orientation)
 {
 	cam->port_pos = port_pos;
-
 	cam->port_width = port_size.x;
 	cam->port_height = port_size.y;
+	view_set_orientation(cam, orientation);
+}
 
-	cam->port_orientation = orientation;
-	cam->priv_port_angle = (cam->port_orientation & 0x3) * M_PI_2;
+void view_set_orientation(view *cam, int orientation)
+{
+	int landscape = !(orientation & 1);
+	cam->port_orientation = orientation & 0x3;
+	cam->priv_port_angle = cam->port_orientation * M_PI_2;
 
 	float pw = cam->port_width;
 	float ph = cam->port_height;
@@ -38,10 +42,12 @@ void view_set_port(view *cam, cpVect port_pos, cpVect port_size, int orientation
 	float w = gw * cam->port_width / WINDOW_WIDTH;
 	float h = gh * cam->port_height / WINDOW_HEIGHT;
 
-	cam->game_width = (orientation & 1) ? h : w;
-	cam->game_height = (orientation & 1) ? w : h;
+	//cam->game_width = w;
+	//cam->game_height = h;
+	cam->game_width = landscape ? w : h;
+	cam->game_height = landscape ? h : w;
 
-	cam->priv_port_box = cpBBNew(cam->port_pos.x, cam->port_pos.y+cam->port_height, cam->port_pos.x+cam->port_width, cam->port_pos.y);
+	cam->priv_port_box = cpBBNew(cam->port_pos.x, cam->port_pos.y, cam->port_pos.x+cam->port_width, cam->port_pos.y+cam->port_height);
 }
 
 void view_update(view *cam, cpVect pos, float rot)

@@ -402,29 +402,50 @@ void statesystem_push_event(SDL_Event *event)
 
 	// get the top most view beneath the touch location //TODO go through all views as long there is no response?
 
+	view *touched_view = NULL;
+	int view_index = 0x1FED;
 	LList view_touchies = NULL;
 	llist_begin_loop(stack_head->cameras);
 	if (event->type == SDL_FINGERDOWN || event->type == SDL_FINGERUP || event->type == SDL_FINGERMOTION) {
 		view_p = cpv(event->tfinger.x, event->tfinger.y);
 		port_p = cpv(view_p.x * WINDOW_WIDTH, (1-view_p.y) * WINDOW_HEIGHT);
 		game_p = cpv((view_p.x  - 0.5) * GAME_WIDTH, (0.5 - view_p.y) * GAME_HEIGHT);
-
+		int index = 0;
 		while(llist_hasnext(stack_head->cameras)) {
 			view *cam = llist_next(stack_head->cameras);
 			if (!cam->enabled) {
+				++index;
 				continue;
 			}
 
 			//TODO CHECK IF THIS IS WORKING!
 			if (cpBBContainsVect(cam->priv_port_box, port_p)) {
 			 	view_touchies = cam->touch_objects;
-			 	view_p = matrix2d_transform_vect(cam->priv_port_invtransform, view_p);
+			 	//view_p = cpv((view_p.x  - 0.5) * cam->game_width, (0.5 - view_p.y) * cam->game_height);
+			 	//view_p = matrix2d_transform_vect(cam->priv_port_invtransform, view_p);
+			 	view_p = matrix2d_transform_vect(cam->priv_port_invtransform, game_p);
 			 	event->tfinger.x = view_p.x;
 			 	event->tfinger.y = view_p.y;
+			 	view_index = index;
+			 	touched_view = cam;
 			}
+			++index;
+
 		}
 	}
 	llist_end_loop(stack_head->cameras);
+
+
+	//TMP DEBUG
+	// /*
+	if (view_touchies) {
+		fprintf(stderr, "Touch in view_%d    X: %-6.3f Y: %-6.3f\n", view_index, event->tfinger.x,event->tfinger.y);
+		if (keys[SDL_SCANCODE_Q]) {
+			keys[SDL_SCANCODE_Q] = 0;
+			view_set_orientation(touched_view, touched_view->port_orientation + 1);
+		}
+	}
+	//*/
 
 	llist_begin_loop(game_touchies);
 	switch(event->type) {
@@ -563,16 +584,19 @@ STATE_ID statesystem_get_render_state(void)
 /**
  * Registers an in-game touchable to state
  */
-void state_register_touchable(STATE_ID state_id, void *touchable)
+void state_register_touchable(STATE_ID state_id, touchable *touchable)
 {
 	State *state = (State *) state_id;
 	llist_add(state->touch_objects, touchable);
+	touchable->container = NULL;
+
 }
 
 /**
  * Registers an overlay touchable to view
  */
-void state_register_touchable_view(view *cam, void *touchable)
+void state_register_touchable_view(view *cam, touchable *touchable)
 {
 	llist_add(cam->touch_objects, touchable);
+	touchable->container = cam;
 }
