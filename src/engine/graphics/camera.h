@@ -19,12 +19,10 @@ struct view {
 	float priv_port_angle;
 	float ratio;
 
-	float game_width;
-	float game_height;
+	float view_width;
+	float view_height;
 
     int mode;
-    float width;
-    float height;
     cpVect p;
     float zoom;
     float rotation;

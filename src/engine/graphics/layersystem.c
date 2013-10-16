@@ -32,7 +32,7 @@ layer_system * layersystem_new(int num_layers)
 	int i;
 	for(i=0; i < num_layers; i++) {
 		ls->li_layers[i].li_spr = llist_create();
-		ls->li_layers[i].parallax_depth = 1;
+		ls->li_layers[i].parallax_factor = 1;
 		ls->li_layers[i].parallax_zoom = 1;
 		llist_set_remove_callback(ls->li_layers[i].li_spr, free);
 	}
@@ -59,14 +59,14 @@ void layersystem_render(layer_system *ls, cpVect p)
 		return;
 	}
 
-	int i;
-	//for(i=ls->num_layers -1; i >= 0; i--) { //RIKTIG
-	for(i=0; i < ls->num_layers; i++) { //FEIL!
+	int i=ls->num_layers;
+	while (--i) {
 		layer *lay = &(ls->li_layers[i]);
 		llist_begin_loop(lay->li_spr);
 		draw_push_matrix();
 		//camera *cam = current_camera;
-		draw_translate((lay->offset.x + p.x) / lay->parallax_depth, (lay->offset.y + p.y) / lay->parallax_depth);
+
+		draw_translatev(cpvmult(cpvadd(lay->offset,p), lay->parallax_factor));
 		while(llist_hasnext(ls->li_layers[i].li_spr)) {
 			sprite_ext *se = llist_next(lay->li_spr);
 			sprite_render(&(se->spr), se->pos, se->a);
@@ -85,13 +85,13 @@ void layersystem_set_layer_offset(layer_system *ls, int layer, cpVect offset)
 	ls->li_layers[layer].offset = offset;
 }
 
-void layersystem_set_layer_parallax(layer_system *ls, int layer, float depth, float zoom)
+void layersystem_set_layer_parallax(layer_system *ls, int layer, float factor, float zoom_factor)
 {
 	if(check_bounds(ls, layer)){
 		return;
 	}
-	ls->li_layers[layer].parallax_depth = depth;
-	ls->li_layers[layer].parallax_zoom = zoom;
+	ls->li_layers[layer].parallax_factor = factor;
+	ls->li_layers[layer].parallax_zoom = zoom_factor;
 }
 
 

@@ -20,7 +20,6 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	COMPONENT_SET(factory, MINIMAP, &factory->radar_image);
 	factory->radar_image = cmp_new_minimap(20, COL_BLUE);
 
-
 	factory->timer = factory->param.spawn_delay * (we_randf * 0.8f + 0.2f);
 
 	factory->max_distance = 900; //TODO read from object definition

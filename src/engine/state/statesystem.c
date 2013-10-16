@@ -323,6 +323,13 @@ void statesystem_draw(void)
     		/* RENDER HUD */
     		view_transform2port(cam);
     		draw_push_matrix();
+    		extern int debug_draw;
+    		if (debug_draw) {
+    			draw_color4f(1,0,1,0.3);
+    			draw_box(cpvzero, cpv(cam->view_width-10, cam->view_height-10), 0, 1);
+    			draw_color4f(0,1,0,1.0);
+    			draw_box(cpvzero, cpv(10,10), 0, 1);
+    		}
     		if (cam->GUI) {
     			cam->GUI(cam);
     		}
@@ -393,12 +400,13 @@ void statesystem_push_event(SDL_Event *event)
 	int consumed = 0;
 	cpVect game_p, port_p, view_p;
 	LList game_touchies = stack_head->touch_objects;
+	float tx = event->tfinger.x, ty = event->tfinger.y;
 
 	if (stack_head->call.sdl_event) {
 		stack_head->call.sdl_event(event);
 	}
 
-	//TODO transform touch to local view coords and in-game coords
+	//TODO transform touch to in-game coords
 
 	// get the top most view beneath the touch location //TODO go through all views as long there is no response?
 
@@ -407,9 +415,8 @@ void statesystem_push_event(SDL_Event *event)
 	LList view_touchies = NULL;
 	llist_begin_loop(stack_head->cameras);
 	if (event->type == SDL_FINGERDOWN || event->type == SDL_FINGERUP || event->type == SDL_FINGERMOTION) {
-		view_p = cpv(event->tfinger.x, event->tfinger.y);
-		port_p = cpv(view_p.x * WINDOW_WIDTH, (1-view_p.y) * WINDOW_HEIGHT);
-		game_p = cpv((view_p.x  - 0.5) * GAME_WIDTH, (0.5 - view_p.y) * GAME_HEIGHT);
+		port_p = cpv(tx * WINDOW_WIDTH, (1-ty) * WINDOW_HEIGHT);
+		game_p = cpv((tx  - 0.5) * GAME_WIDTH, (0.5 - ty) * GAME_HEIGHT);
 		int index = 0;
 		while(llist_hasnext(stack_head->cameras)) {
 			view *cam = llist_next(stack_head->cameras);
@@ -418,12 +425,18 @@ void statesystem_push_event(SDL_Event *event)
 				continue;
 			}
 
-			//TODO CHECK IF THIS IS WORKING!
 			if (cpBBContainsVect(cam->priv_port_box, port_p)) {
 			 	view_touchies = cam->touch_objects;
-			 	//view_p = cpv((view_p.x  - 0.5) * cam->game_width, (0.5 - view_p.y) * cam->game_height);
-			 	//view_p = matrix2d_transform_vect(cam->priv_port_invtransform, view_p);
-			 	view_p = matrix2d_transform_vect(cam->priv_port_invtransform, game_p);
+
+			 	// get normalized view position and dimension and compute local view touch
+			 	float n_px = cam->port_pos.x / WINDOW_WIDTH;
+			 	float n_py = cam->port_pos.y / WINDOW_HEIGHT;
+			 	float p_pw = cam->port_width / WINDOW_WIDTH;
+			 	float p_ph = cam->port_height / WINDOW_HEIGHT;
+			 	float ptx = ((tx-n_px) / p_pw - 0.5f) * GAME_WIDTH;
+			 	float pty = (0.5f - (ty-n_py) / p_ph) * GAME_HEIGHT;
+
+			 	view_p = matrix2d_transform_vect(cam->priv_port_invtransform, cpv(ptx,pty));
 			 	event->tfinger.x = view_p.x;
 			 	event->tfinger.y = view_p.y;
 			 	view_index = index;

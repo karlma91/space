@@ -171,7 +171,7 @@ void stations_init(void)
 
 	btn_stations = calloc(station_count, sizeof(button));
 
-	Color col_back = {1,1,1,1};
+	Color col_back = {1,0.6,0.5,1};
 	//Color col_text = {1,1,1,1};
 
 	btn_home = button_create(SPRITE_PLAYER, 0, "", 0, 0, 250, 250);
@@ -206,12 +206,14 @@ void stations_init(void)
 
 	la_sys = layersystem_new(100);
 	for(i = 0; i<la_sys->num_layers; i++){
-		float depth =  2 + 10*tan((1.0f*i/la_sys->num_layers)*WE_PI_2);
-		layersystem_set_layer_parallax(la_sys, i, depth, 1);
+		//float depth =  2 + 10*tan((1.0f*i/la_sys->num_layers)*WE_PI_2);
+		float f = (la_sys->num_layers - i * 0.9f) / (la_sys->num_layers);
+		layersystem_set_layer_parallax(la_sys, i, f, 1);
 	}
 	for(i = 0; i<100; i++){
-		float size = 50 + we_randf*150;
-		layersystem_add_sprite(la_sys, roundf(we_randf*(la_sys->num_layers-1)), SPRITE_SPIKEBALL, size, size, cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600), we_randf*WE_2PI);
+		int layer = roundf(we_randf*(la_sys->num_layers-1));
+		float size = 150 + we_randf*70 - layer*1.5;
+		layersystem_add_sprite(la_sys, layer, SPRITE_SPIKEBALL, size, size, cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600), we_randf*WE_2PI);
 	}
 }
 
