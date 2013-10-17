@@ -41,7 +41,7 @@ static int tex_counter = -1;
 
 static int texture_from_name(const char *file);
 static GLenum GL_ENUM_TYPE = GL_UNSIGNED_BYTE;
-
+static GLint gl_tex_id = -1;
 
 int texture_load(const char *file)
 {
@@ -156,9 +156,9 @@ int texture_bind(int tex_id) {
 #if !LOAD_TEXTURES
 	return 0;
 #endif
-	static int last_tex_id = -1;
-	if (tex_id != last_tex_id && tex_id >= 0) {
-		last_tex_id = tex_id;
+	if (tex_id != gl_tex_id && tex_id >= 0) {
+		draw_flush();
+		gl_tex_id = tex_id;
 		glBindTexture(GL_TEXTURE_2D, textures[tex_id]);
 		return 0;
 	}

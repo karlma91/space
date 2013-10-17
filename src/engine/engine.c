@@ -266,28 +266,28 @@ static void initGL(void) {
 
 	SDL_Log("Max texture size = %d", max_size);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY); //GLES1!
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY); //GLES1!
 
-	glMatrixMode(GL_PROJECTION);
+	glMatrixMode(GL_PROJECTION); //GLES1!
 	draw_load_identity();
 	GLfloat W_2 = GAME_WIDTH / 2;
 	GLfloat H_2 = GAME_HEIGHT / 2;
 
 	//TODO change to something like (0,0,GW,GH)
-	glOrtho(-W_2, W_2, -H_2, H_2, 1, -1);
+	glOrtho(-W_2, W_2, -H_2, H_2, 1, -1); //GLES1!
 	//glOrtho(0, GAME_WIDTH, 0, GAME_HEIGHT, 1, -1); //option 1
 	//glOrtho(0, GAME_WIDTH, GAME_HEIGHT, 0, 1, -1); //option 2 (will probably match normalized touch input)
 
-	glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(GL_MODELVIEW); //GLES1!
 	draw_load_identity();
 
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	glClearColor(0,0,0, 1);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY); //GLES1!
 
-	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_MULTISAMPLE); //GLES1!
 	glDisable(GL_DEPTH_TEST);
 
 	glEnable(GL_SCISSOR_TEST);
@@ -370,12 +370,12 @@ static void check_events(void)
 			case SDL_SCANCODE_T:
 				render_outside ^=0x5;
 
-				glMatrixMode(GL_PROJECTION);
+				glMatrixMode(GL_PROJECTION); //GLES1!
 				draw_load_identity();
 				GLfloat W_2 = GAME_WIDTH / 2 * render_outside;
 				GLfloat H_2 = GAME_HEIGHT / 2 * render_outside;
 				glOrtho(-W_2, W_2, -H_2, H_2, 1, -1);
-				glMatrixMode(GL_MODELVIEW);
+				glMatrixMode(GL_MODELVIEW); //GLES1!
 				break;
 			case SDL_SCANCODE_R:
 				glClear(GL_COLOR_BUFFER_BIT);
@@ -524,12 +524,12 @@ static void main_tick(void *data)
 			glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 			setAspectRatio();
 
-			glMatrixMode(GL_PROJECTION);
+			glMatrixMode(GL_PROJECTION); //GLES1!
 			draw_load_identity();
 			GLfloat W_2 = GAME_WIDTH / 2;
 			GLfloat H_2 = GAME_HEIGHT / 2;
 			glOrtho(-W_2, W_2, -H_2, H_2, 1, -1);
-			glMatrixMode(GL_MODELVIEW);
+			glMatrixMode(GL_MODELVIEW); //GLES1!
 
 			SDL_Log("DEBUG: WINDOW FULLSCREEN CHANGED -> %d", config.fullscreen);
 		}

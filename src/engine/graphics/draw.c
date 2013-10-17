@@ -183,18 +183,21 @@ static void draw_render_light_map(void)
 
 void draw_color(Color color)
 {
-#if GLES1
+//#if GLES1
 	draw_color4f(color.r, color.g, color.b, color.a);
-#else
-	glColor4fv((GLfloat *)&color);
-#endif
+//#else
+//	glColor4fv((GLfloat *)&color);
+//#endif
 }
 
 void draw_blend(GLenum src_factor, GLenum dst_factor)
 {
-	glBlendFunc(src_factor, dst_factor);
-	gl_blend_src = src_factor;
-	gl_blend_dst = dst_factor;
+	if (gl_blend_src != src_factor || gl_blend_dst != dst_factor) {
+		draw_flush();
+		glBlendFunc(src_factor, dst_factor);
+		gl_blend_src = src_factor;
+		gl_blend_dst = dst_factor;
+	}
 }
 
 void draw_push_color(void)
@@ -371,16 +374,18 @@ void draw_line_strip(const GLfloat *strip, int l, float w)
 
 void draw_color4f(float r, float g, float b, float a)
 {
-	glColor4f(r,g,b,a);
-	gl_red = r;
-	gl_green = g;
-	gl_blue = b;
-	gl_alpha = a;
+	if (r != gl_red || g != gl_green || b != gl_blue || a != gl_alpha) {
+		glColor4f(r,g,b,a);
+		gl_red = r;
+		gl_green = g;
+		gl_blue = b;
+		gl_alpha = a;
+	}
 }
 
 void draw_color3f(float r, float g, float b)
 {
-	glColor4f(r,g,b,gl_alpha);
+	draw_color4f(r,g,b,gl_alpha);
 }
 
 void draw_destroy(void)
@@ -552,13 +557,17 @@ void draw_polygon_outline(int count, cpVect *verts, cpVect p, float rotation, fl
 
 void draw_texture(int tex_id, cpVect pos, const float *tex_map, cpVect size, float angle)
 {
-	texture_bind(tex_id);
-	draw_current_texture_all(pos, tex_map, size, angle, triangle_quad);
+	if (texture_bind(tex_id)) {
+		draw_current_texture(pos, tex_map, size, angle);
+	} else {
+		draw_current_texture_all(pos, tex_map, size, angle, triangle_quad);
+	}
 }
 
 void draw_current_texture(cpVect pos, const float *tex_map, cpVect size, float angle)
 {
-	draw_current_texture_all(pos, tex_map, size, angle, triangle_quad);
+	draw_current_texture_append(pos, tex_map, size, angle);
+	//draw_current_texture_all(pos, tex_map, size, angle, triangle_quad);
 }
 void draw_current_texture_append(cpVect pos, const float *tex_map, cpVect size, float angle)
 {
@@ -691,7 +700,7 @@ void draw_append_color_tex_quad(void)
 
 void draw_flush_color(void)
 {
-	int size = matrix2d_get_count();
+	//int size = matrix2d_get_count();
 	//fprintf(stderr,"COLOR_FLUSH: %d\n",size/2);
 	glEnableClientState(GL_COLOR_ARRAY);
 	float *color = matrix2d_get_color_data();

@@ -16,7 +16,8 @@
 
 
 #if GLES1
-#include "SDL_opengles.h"
+//#include "SDL_opengles.h"
+#include "SDL_opengles2.h"
 #else
 
 #if __WIN32__
