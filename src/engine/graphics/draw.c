@@ -37,10 +37,10 @@ static void draw_render_light_map();
 #define DEBUG SDL_Log( "line: %d\n", __LINE__);
 
 // GL VARIABLE BUFFER
-static byte gl_red = 1;
-static byte gl_green = 1;
-static byte gl_blue = 1;
-static byte gl_alpha = 1;
+static byte gl_red = 255;
+static byte gl_green = 255;
+static byte gl_blue = 255;
+static byte gl_alpha = 255;
 static int gl_blend_src = 0;
 static int gl_blend_dst = 0;
 static int gl_texture2d = 0;
@@ -126,67 +126,37 @@ int draw_init(){
 	return 0;
 }
 
-/*
-void draw_light_map(void)
+
+void draw_color4b(byte r, byte g, byte b, byte a)
 {
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindFramebufferOES(GL_FRAMEBUFFER_OES, light_buffer);
-	glClearColor(0.1,0.1,0.1,0.1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0,0,0,0);
+	if (r != gl_red || g != gl_green || b != gl_blue || a != gl_alpha) {
+		glColor4ub(r,g,b,a);
 
-
-	//draw_blend(GL_ONE,GL_ONE_MINUS_SRC_COLOR);
-	glLoadIdentity();
-	draw_enable_tex2d();
-	glBindTexture(GL_TEXTURE_2D, TEX_LIGHT);
-	glColor4f(1,1,1,1);
-	int w = WINDOW_WIDTH;
-	int h = WINDOW_HEIGHT;
-	GLfloat temp[8] = {-w, -h,
-			w,  -h,
-			-w, h,
-			w,  h};
-	glVertexPointer(2, GL_FLOAT, 0, temp);
-	glTexCoordPointer(2, GL_FLOAT, 0, TEX_MAP_FULL);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-	draw_disable_tex2d();
-	glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
-	draw_render_light_map();
-}
-*/
-static void draw_render_light_map(void)
-{
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	draw_push_blend();
-	glLoadIdentity();
-	glColor4f(1,1,1,1);
-	draw_enable_tex2d();
-	draw_blend(GL_DST_COLOR,GL_SRC_COLOR);
-	//draw_blend(GL_ONE,GL_ZERO);
-	glBindTexture(GL_TEXTURE_2D, light_texture);
-	int w = 256;
-	int h = 256;
-	GLfloat temp[8] = {-w, -h,
-			w,  -h,
-			-w, h,
-			w,  h};
-	glVertexPointer(2, GL_FLOAT, 0, temp);
-	glTexCoordPointer(2, GL_FLOAT, 0, TEX_MAP_FULL);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	draw_disable_tex2d();
-	draw_pop_blend();
-}
-
-void draw_blend(GLenum src_factor, GLenum dst_factor)
-{
-	if (gl_blend_src != src_factor || gl_blend_dst != dst_factor) {
-		draw_flush();
-		glBlendFunc(src_factor, dst_factor);
-		gl_blend_src = src_factor;
-		gl_blend_dst = dst_factor;
+		gl_red = r;
+		gl_green = g;
+		gl_blue = b;
+		gl_alpha = a;
 	}
+}
+
+void draw_color(Color color)
+{
+#if GLES1
+	draw_color4b(color.r, color.g, color.b, color.a);
+#else
+	//draw_color4b(color.r, color.g, color.b, color.a);
+	glColor4ubv((GLubyte *)&color);
+#endif
+}
+
+void draw_color4f(float r, float g, float b, float a)
+{
+	draw_color4b((byte)(r*0xFF), (byte)(g*0xFF), (byte)(b*0xFF), (byte)(a*0xFF));
+}
+
+void draw_color3f(float r, float g, float b)
+{
+	draw_color4b((byte)(r*0xFF), (byte)(g*0xFF), (byte)(b*0xFF), gl_alpha);
 }
 
 void draw_push_color(void)
@@ -204,6 +174,16 @@ void draw_pop_color(void)
 	byte g = stack_pop_byte();
 	byte r = stack_pop_byte();
 	draw_color4b(r,g,b,a);
+}
+
+void draw_blend(GLenum src_factor, GLenum dst_factor)
+{
+	if (gl_blend_src != src_factor || gl_blend_dst != dst_factor) {
+		draw_flush();
+		glBlendFunc(src_factor, dst_factor);
+		gl_blend_src = src_factor;
+		gl_blend_dst = dst_factor;
+	}
 }
 
 void draw_push_blend(void)
@@ -229,30 +209,30 @@ void draw_enable_tex2d(void)
 void draw_disable_tex2d(void)
 {
 	if (gl_texture2d) {
-		gl_texture2d = 0;
 		//texture_bind(TEX_WHITE);
-		glDisable(GL_TEXTURE_2D);
+		//gl_texture2d = 0;
+		//texture_bind(TEX_WHITE);
+		//glDisable(GL_TEXTURE_2D);
 	}
 }
 
 void draw_push_tex2d(void)
 {
+
 }
 
 void draw_pop_tex2d(void)
 {
+
 }
 
 void draw_line(int tex_id, cpVect a, cpVect b, float w)
 {
-	draw_enable_tex2d();
-
 	float dx = b.x-a.x;
 	float dy = b.y-a.y;
 
 	draw_push_matrix();
 	draw_push_blend();
-	draw_blend(GL_SRC_ALPHA, GL_ONE);
 	draw_translate(a.x, a.y);
 	draw_rotate(atan2f(dy,dx));
 
@@ -287,14 +267,10 @@ void draw_line(int tex_id, cpVect a, cpVect b, float w)
 
 	draw_pop_blend();
 	draw_pop_matrix();
-	draw_disable_tex2d();
-
 }
 
 void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w)
 {
-    draw_enable_tex2d();
-
 #warning Very similair to draw_line!!
 	float dx = b.x-a.x;
 	float dy = b.y-a.y;
@@ -343,8 +319,6 @@ void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w)
     draw_draw_arrays(GL_TRIANGLE_STRIP,0, 8);
 
     draw_pop_matrix();
-    draw_disable_tex2d();
-
 }
 
 void draw_glow_line(cpVect a, cpVect b, float w)
@@ -356,6 +330,7 @@ void draw_glow_line(cpVect a, cpVect b, float w)
 
 void draw_quad_line(cpVect a, cpVect b, float w)
 {
+	texture_bind(TEX_WHITE);
 #warning Very similair to draw_line!
 	float dx = b.x-a.x;
 	float dy = b.y-a.y;
@@ -385,37 +360,6 @@ void draw_line_strip(const GLfloat *strip, int l, float w)
 	}
 }
 
-void draw_color4b(byte r, byte g, byte b, byte a)
-{
-	if (r != gl_red || g != gl_green || b != gl_blue || a != gl_alpha) {
-		glColor4ub(r,g,b,a);
-
-		gl_red = r;
-		gl_green = g;
-		gl_blue = b;
-		gl_alpha = a;
-	}
-}
-
-void draw_color(Color color)
-{
-//#if GLES1
-	draw_color4b(color.r, color.g, color.b, color.a);
-//#else
-//	glColor4fv((GLfloat *)&color);
-//#endif
-}
-
-void draw_color4f(float r, float g, float b, float a)
-{
-	draw_color4b((byte)(r*0xFF), (byte)(g*0xFF), (byte)(b*0xFF), (byte)(a*0xFF));
-}
-
-void draw_color3f(float r, float g, float b)
-{
-	draw_color4f(r,g,b,gl_alpha);
-}
-
 void draw_destroy(void)
 {
 	//TODO! --> release texture resources
@@ -429,6 +373,7 @@ void draw_circle(cpVect pos, GLfloat radius)
 
 void draw_donut(cpVect p, GLfloat inner_r, GLfloat outer_r)
 {
+	texture_bind(TEX_WHITE);
 	int i = 0;
 	static float v[256];
 	int j = 0;
@@ -445,6 +390,7 @@ void draw_donut(cpVect p, GLfloat inner_r, GLfloat outer_r)
 
 static void box_common(cpVect p, cpVect s, GLfloat angle, int centered)
 {
+	texture_bind(TEX_WHITE);
     draw_push_matrix();
     draw_translate(p.x,p.y);
 	draw_rotate(angle);
@@ -555,18 +501,17 @@ void draw_polygon_textured(int count, cpVect *verts, cpVect p, float rotation, f
 	draw_color4f(1,1,1,1);
 	draw_vertex_pointer(2, GL_FLOAT, 0, vertices);
 	draw_tex_pointer(2, GL_FLOAT, 0, texcoord);
-	draw_enable_tex2d();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	draw_draw_arrays(GL_TRIANGLE_FAN, 0, count);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	draw_disable_tex2d();
 	draw_pop_matrix();
 
 }
 void draw_polygon_outline(int count, cpVect *verts, cpVect p, float rotation, float size)
 {
+	texture_bind(TEX_WHITE);
 	draw_push_matrix();
 	draw_translatev(p);
 	draw_rotate(rotation);
@@ -626,10 +571,7 @@ void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei cou
 {
     draw_vertex_pointer(2, GL_FLOAT, 0, mesh);
     draw_tex_pointer(2, GL_FLOAT, 0, tex_map);
-
-	draw_enable_tex2d();
 	draw_draw_arrays(GL_TRIANGLE_STRIP,0, count);
-	draw_disable_tex2d();
 }
 
 void draw_draw_arrays(GLenum mode, GLint first, GLsizei count)
@@ -738,7 +680,6 @@ void draw_flush_color(void)
 }
 void draw_flush(void)
 {
-	draw_enable_tex2d();
 	float *vertex = matrix2d_get_vertex_data();
 	float *tex = matrix2d_get_tex_data();
 	int size = matrix2d_get_count();
@@ -749,16 +690,13 @@ void draw_flush(void)
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2);
 		matrix2d_reset();
 	}
-	draw_disable_tex2d();
 }
 
 void draw_flush_and_multiply(void)
 {
-    draw_enable_tex2d();
     float *vertex = matrix2d_get_vertex_data();
     float *tex = matrix2d_get_tex_data();
     int size = matrix2d_get_count();
-
 
     if (size) {
     	matrix2d_multiply(vertex,size);
@@ -767,7 +705,6 @@ void draw_flush_and_multiply(void)
     	glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2);
     	matrix2d_reset();
     }
-    draw_disable_tex2d();
 }
 void draw_flush_simple(void)
 {

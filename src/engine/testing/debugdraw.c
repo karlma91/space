@@ -22,7 +22,7 @@ static void DrawShape(cpShape *shape, void * unused)
         case CP_SEGMENT_SHAPE: {
             cpSegmentShape *seg = (cpSegmentShape *)shape;
             draw_quad_line(seg->ta, seg->tb, seg->r*2);
-            draw_flush_simple();
+            //draw_flush_simple();
             break;
         }
         case CP_POLY_SHAPE: {
@@ -39,7 +39,7 @@ static void DrawShape(cpShape *shape, void * unused)
             		draw_quad_line(poly->verts[i], poly->verts[0], 2);
             	}
             }
-            draw_flush_simple();
+            //draw_flush_simple();
         	draw_pop_matrix();
 
             break;
@@ -63,6 +63,7 @@ static void circle_line(cpVect p, float r)
 		circle[i] = p.x + sinf( 2*M_PI*i / (128-2)) * r;
 		circle[i+1] = p.y + cosf( 2*M_PI*i / (128-2)) * r;
 	}
+	texture_bind(TEX_WHITE);
 	draw_vertex_pointer(2, GL_FLOAT, 0, circle);
 	draw_draw_arrays(GL_LINE_STRIP, 0, 64);
 }

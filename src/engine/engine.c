@@ -293,6 +293,8 @@ static void initGL(void) {
 	glEnable(GL_SCISSOR_TEST);
 	glScissor(0,0, WINDOW_WIDTH,WINDOW_HEIGHT); //scissor test
 
+	draw_enable_tex2d();
+
 	SDL_Log("DEBUG - initGL done!\n");
 }
 

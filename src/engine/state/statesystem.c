@@ -68,7 +68,7 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
     state->id = state;
 
     state->cameras = llist_create();
-    llist_set_remove_callback(state->cameras, view_free);
+    llist_set_remove_callback(state->cameras, (ll_remove_callback) view_free);
     state_view_add(state);
     state->touch_objects = llist_create();
     state->inner_states = inner_states;

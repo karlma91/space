@@ -86,13 +86,6 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	hpbar_draw(&rocket->hp_bar, cpvtoangle(rocket->data.body->p));
 }
 
-
-static void shape_from_space(cpBody *body, cpShape *shape, void *data)
-{
-    cpSpaceRemoveShape(current_space, shape);
-    cpShapeFree(shape);
-}
-
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	se_spawn_coins((instance *)rocket);
@@ -103,5 +96,5 @@ static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	particles_release_emitter(rocket->flame);
 	we_body_remove(current_space, &rocket->data.body);
-	factory_remove_child(rocket);
+	factory_remove_child((instance *)rocket);
 }
