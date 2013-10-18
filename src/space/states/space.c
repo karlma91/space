@@ -49,7 +49,7 @@ level *currentlvl;
 
 static void input(void);
 
-static layer_system *layersystem;
+layer_system *layersystem;
 
 /*
  * The ingame states for level transition and delays
@@ -756,7 +756,7 @@ void space_init(void)
 	for(i = 0; i < layersystem->num_layers; i++){
 		//float depth =  1 + 10*tan((1.0f*i/layersystem->num_layers)*WE_PI_2);
 		float f = 0.1 + 0.9 * i / (layersystem->num_layers); // -> 0 = nearest, 1 = furthest
-		layersystem_set_layer_parallax(layersystem, i, f, 1);
+		//layersystem_set_layer_parallax(layersystem, i, f, 1);
 	}
 	for(i = 0; i<150; i++){
 		int layer = roundf(we_randf*(layersystem->num_layers-1));

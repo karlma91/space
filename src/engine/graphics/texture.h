@@ -2,10 +2,13 @@
 #define TEXTURE_H_
 
 #include "draw.h"
+#include "we_data.h"
 
 extern int texture_load(const char *file);
 
 extern int texture_init(void);
+
+extern arraylist *textures;
 
 extern const float TEX_MAP_FULL[8];
 

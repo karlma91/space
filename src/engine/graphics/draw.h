@@ -35,10 +35,6 @@
 #include "font.h"
 #include "bmfont.h"
 
-//fra chipmunkDemo.h
-typedef struct Color {
-	byte r, g, b, a;
-} Color;
 
 /* COLOR DECLARATIONS */
 extern const Color COL_WHITE;

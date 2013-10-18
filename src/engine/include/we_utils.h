@@ -42,6 +42,11 @@
 #define WE_INSIDE_RECT_DIM(px, py, x1, y1, w, h) ((px >= x1) && (px <= x1+w) && (py >= y1) && (py <= y1+h))
 
 typedef unsigned char byte;
+typedef struct Color {
+	byte r, g, b, a;
+} Color;
+
+
 static inline void we_error(char * msg)
 {
 	SDL_Log(msg);

@@ -13,15 +13,6 @@
 
 LList constant_sprites;
 
-typedef struct {
-	char name[50];
-	int tex_id;
-	float u;
-	float v;
-	float width;
-	float height;
-	int subimages;
-} sprite_data;
 
 #define FILE_BUFFER_SIZE 8192 /* NB! make sure buffer is large enough */
 static char buffer[FILE_BUFFER_SIZE];
@@ -95,6 +86,7 @@ void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed
 {
 	memset(spr, 0, sizeof *spr);
 	spr->id = id;
+	spr->size = 1;
 	sprite_set_size(spr, width, height);
 	spr->animation_speed = speed;
 	spr->sub_index = 0;
@@ -194,6 +186,14 @@ void sprite_render_scaled(sprite *spr, cpVect pos, float angle, float size)
 {
 	if (!spr) return;
 
+	spr->pos = pos;
+	spr->a = angle;
+	spr->size = size;
+
+}
+
+void sprite_final_render(sprite *spr) {
+
 	int tex_id = 0;
 	sprite_data *data = (sprite_data*)spr->id;
 	if (data) {
@@ -202,6 +202,6 @@ void sprite_render_scaled(sprite *spr, cpVect pos, float angle, float size)
 
 	float sub_map[8];
 	sprite_get_current_image(spr, sub_map);
-	draw_texture(tex_id, pos, sub_map, cpvmult(cpv(spr->width, spr->height), size), angle);
+	draw_texture(tex_id, spr->pos, sub_map, cpvmult(cpv(spr->width, spr->height), spr->size), spr->a);
 }
 

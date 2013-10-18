@@ -25,7 +25,7 @@ arraylist * al_new(void)
 
 int al_size(arraylist *hm)
 {
-	return hm->count;
+	return hm->size;
 }
 
 static void al_resize(arraylist *al)
@@ -45,6 +45,17 @@ int al_add(arraylist *al, void *data)
 	return 1;
 }
 
+
+void al_set_safe(arraylist *al, unsigned int index, void *data)
+{
+	while(index >= al->size) {
+		al_resize(al);
+	}
+	if (index > al->count) {
+		al->count = index;
+	}
+	al_set(al, index, data);
+}
 void al_set(arraylist *al, unsigned int index, void *data)
 {
 	if(index < al->size) {
@@ -56,7 +67,7 @@ void al_set(arraylist *al, unsigned int index, void *data)
 
 void * al_get(arraylist *al, unsigned int index)
 {
-	if ( index < al->count ) {
+	if ( index < al->size ) {
 		return al->data[index];
 	} else{
 		return NULL;

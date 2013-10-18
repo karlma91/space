@@ -213,7 +213,8 @@ void stations_init(void)
 	for(i = 0; i<100; i++){
 		int layer = roundf(we_randf*(la_sys->num_layers-1));
 		float size = 150 + we_randf*70 - layer*1.5;
-		layersystem_add_sprite(la_sys, layer, SPRITE_SPIKEBALL, size, size, cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600), we_randf*WE_2PI);
+		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600);
+		layersystem_add_sprite(la_sys, layer, SPRITE_SPIKEBALL, size, size, pos, we_randf*WE_2PI);
 	}
 }
 
