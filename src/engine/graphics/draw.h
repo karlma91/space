@@ -2,6 +2,7 @@
 #define DRAW_H_
 
 #include "SDL.h"
+#include "we_utils.h"
 
 #define LOAD_TEXTURES 1 //FOR DEBUG PURPOSES
 #define EXPERIMENTAL_GRAPHICS 1
@@ -36,7 +37,7 @@
 
 //fra chipmunkDemo.h
 typedef struct Color {
-	float r, g, b, a;
+	byte r, g, b, a;
 } Color;
 
 /* COLOR DECLARATIONS */
@@ -46,16 +47,25 @@ extern const Color COL_RED;
 extern const Color COL_GREEN;
 extern const Color COL_BLUE;
 
-static inline Color RGBAColor(float r, float g, float b, float a)
+static inline Color RGBAColor4b(byte r, byte g, byte b, byte a)
 {
 	Color color = {r, g, b, a};
 	return color;
 }
 
-static inline Color LAColor(float l, float a)
+static inline Color RGBAColor4f(float r, float g, float b, float a)
 {
-	Color color = {l, l, l, a};
-	return color;
+	return RGBAColor4b((byte)(r*0xff),(byte)(g*0xff),(byte)(b*0xff),(byte)(a*0xff));
+}
+
+static inline Color LAColor2b(byte l, byte a)
+{
+	return RGBAColor4b(l,l,l,a);
+}
+
+static inline Color LAColor2f(float l, float a)
+{
+	return LAColor2b((byte)(l*0xff),(byte)(a*0xff));
 }
 
 extern GLfloat triangle_quad[8];
@@ -76,6 +86,7 @@ void draw_push_matrix(void);
 void draw_pop_matrix(void);
 void draw_load_identity(void);
 
+void draw_color4b(byte r, byte g, byte b, byte a);
 void draw_color4f(float r, float g, float b, float a);
 void draw_color3f(float r, float g, float b);
 void draw_color(Color color);
@@ -86,6 +97,10 @@ void draw_pop_color(void);
 void draw_push_blend(void);
 void draw_pop_blend(void);
 
+void draw_enable_tex2d(void);
+void draw_disable_tex2d(void);
+void draw_push_tex2d(void);
+void draw_pop_tex2d(void);
 
 void draw_draw_arrays(GLenum mode, GLint first, GLsizei count);
 void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);

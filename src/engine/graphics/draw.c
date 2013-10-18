@@ -3,7 +3,6 @@
 #include "matrix2d.h"
 
 #include "../engine.h"
-
 #include "../data/stack.h"
 #include "../io/waffle_utils.h"
 
@@ -20,11 +19,11 @@ GLfloat corner_quad[8] = {0, 0,
 		1,  1};
 
 /* COLOR DEFINITIONS */
-const Color COL_WHITE = {1,1,1,1};
-const Color COL_BLACK = {0,0,0,1};
-const Color COL_RED   = {1,0,0,1};
-const Color COL_GREEN = {0,1,0,1};
-const Color COL_BLUE  = {0,0,1,1};
+const Color COL_WHITE = {255,255,255,255};
+const Color COL_BLACK = {  0,  0,  0,255};
+const Color COL_RED   = {255,  0,  0,255};
+const Color COL_GREEN = {  0,255,  0,255};
+const Color COL_BLUE  = {  0,  0,255,255};
 
 GLuint light_buffer, light_texture;
 
@@ -38,14 +37,13 @@ static void draw_render_light_map();
 #define DEBUG SDL_Log( "line: %d\n", __LINE__);
 
 // GL VARIABLE BUFFER
-static float gl_red = 1;
-static float gl_green = 1;
-static float gl_blue = 1;
-static float gl_alpha = 1;
+static byte gl_red = 1;
+static byte gl_green = 1;
+static byte gl_blue = 1;
+static byte gl_alpha = 1;
 static int gl_blend_src = 0;
 static int gl_blend_dst = 0;
-
-GLfloat color_stack[10];
+static int gl_texture2d = 0;
 
 #if (__MACOSX__ | __WIN32__)
 #define glGenFramebuffersOES glGenFramebuffersEXT
@@ -140,7 +138,7 @@ void draw_light_map(void)
 
 	//draw_blend(GL_ONE,GL_ONE_MINUS_SRC_COLOR);
 	glLoadIdentity();
-	glEnable(GL_TEXTURE_2D);
+	draw_enable_tex2d();
 	glBindTexture(GL_TEXTURE_2D, TEX_LIGHT);
 	glColor4f(1,1,1,1);
 	int w = WINDOW_WIDTH;
@@ -153,7 +151,7 @@ void draw_light_map(void)
 	glTexCoordPointer(2, GL_FLOAT, 0, TEX_MAP_FULL);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-	glDisable(GL_TEXTURE_2D);
+	draw_disable_tex2d();
 	glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
 	draw_render_light_map();
 }
@@ -164,7 +162,7 @@ static void draw_render_light_map(void)
 	draw_push_blend();
 	glLoadIdentity();
 	glColor4f(1,1,1,1);
-	glEnable(GL_TEXTURE_2D);
+	draw_enable_tex2d();
 	draw_blend(GL_DST_COLOR,GL_SRC_COLOR);
 	//draw_blend(GL_ONE,GL_ZERO);
 	glBindTexture(GL_TEXTURE_2D, light_texture);
@@ -177,17 +175,8 @@ static void draw_render_light_map(void)
 	glVertexPointer(2, GL_FLOAT, 0, temp);
 	glTexCoordPointer(2, GL_FLOAT, 0, TEX_MAP_FULL);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glDisable(GL_TEXTURE_2D);
+	draw_disable_tex2d();
 	draw_pop_blend();
-}
-
-void draw_color(Color color)
-{
-//#if GLES1
-	draw_color4f(color.r, color.g, color.b, color.a);
-//#else
-//	glColor4fv((GLfloat *)&color);
-//#endif
 }
 
 void draw_blend(GLenum src_factor, GLenum dst_factor)
@@ -202,19 +191,19 @@ void draw_blend(GLenum src_factor, GLenum dst_factor)
 
 void draw_push_color(void)
 {
-	stack_push_float(gl_red);
-	stack_push_float(gl_green);
-	stack_push_float(gl_blue);
-	stack_push_float(gl_alpha);
+	stack_push_byte(gl_red);
+	stack_push_byte(gl_green);
+	stack_push_byte(gl_blue);
+	stack_push_byte(gl_alpha);
 }
 
 void draw_pop_color(void)
 {
-	GLfloat a = stack_pop_float();
-	GLfloat b = stack_pop_float();
-	GLfloat g = stack_pop_float();
-	GLfloat r = stack_pop_float();
-	draw_color4f(r,g,b,a);
+	byte a = stack_pop_byte();
+	byte b = stack_pop_byte();
+	byte g = stack_pop_byte();
+	byte r = stack_pop_byte();
+	draw_color4b(r,g,b,a);
 }
 
 void draw_push_blend(void)
@@ -230,9 +219,33 @@ void draw_pop_blend(void)
 	draw_blend(src, dst);
 }
 
+void draw_enable_tex2d(void)
+{
+	if (!gl_texture2d) {
+		gl_texture2d = 1;
+		glEnable(GL_TEXTURE_2D);
+	}
+}
+void draw_disable_tex2d(void)
+{
+	if (gl_texture2d) {
+		gl_texture2d = 0;
+		//texture_bind(TEX_WHITE);
+		glDisable(GL_TEXTURE_2D);
+	}
+}
+
+void draw_push_tex2d(void)
+{
+}
+
+void draw_pop_tex2d(void)
+{
+}
+
 void draw_line(int tex_id, cpVect a, cpVect b, float w)
 {
-	glEnable(GL_TEXTURE_2D);
+	draw_enable_tex2d();
 
 	float dx = b.x-a.x;
 	float dy = b.y-a.y;
@@ -274,13 +287,13 @@ void draw_line(int tex_id, cpVect a, cpVect b, float w)
 
 	draw_pop_blend();
 	draw_pop_matrix();
-	glDisable(GL_TEXTURE_2D);
+	draw_disable_tex2d();
 
 }
 
 void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w)
 {
-    glEnable(GL_TEXTURE_2D);
+    draw_enable_tex2d();
 
 #warning Very similair to draw_line!!
 	float dx = b.x-a.x;
@@ -330,7 +343,7 @@ void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w)
     draw_draw_arrays(GL_TRIANGLE_STRIP,0, 8);
 
     draw_pop_matrix();
-    glDisable(GL_TEXTURE_2D);
+    draw_disable_tex2d();
 
 }
 
@@ -372,15 +385,30 @@ void draw_line_strip(const GLfloat *strip, int l, float w)
 	}
 }
 
-void draw_color4f(float r, float g, float b, float a)
+void draw_color4b(byte r, byte g, byte b, byte a)
 {
 	if (r != gl_red || g != gl_green || b != gl_blue || a != gl_alpha) {
-		glColor4f(r,g,b,a);
+		glColor4ub(r,g,b,a);
+
 		gl_red = r;
 		gl_green = g;
 		gl_blue = b;
 		gl_alpha = a;
 	}
+}
+
+void draw_color(Color color)
+{
+//#if GLES1
+	draw_color4b(color.r, color.g, color.b, color.a);
+//#else
+//	glColor4fv((GLfloat *)&color);
+//#endif
+}
+
+void draw_color4f(float r, float g, float b, float a)
+{
+	draw_color4b((byte)(r*0xFF), (byte)(g*0xFF), (byte)(b*0xFF), (byte)(a*0xFF));
 }
 
 void draw_color3f(float r, float g, float b)
@@ -527,13 +555,13 @@ void draw_polygon_textured(int count, cpVect *verts, cpVect p, float rotation, f
 	draw_color4f(1,1,1,1);
 	draw_vertex_pointer(2, GL_FLOAT, 0, vertices);
 	draw_tex_pointer(2, GL_FLOAT, 0, texcoord);
-	glEnable(GL_TEXTURE_2D);
+	draw_enable_tex2d();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	draw_draw_arrays(GL_TRIANGLE_FAN, 0, count);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glDisable(GL_TEXTURE_2D);
+	draw_disable_tex2d();
 	draw_pop_matrix();
 
 }
@@ -599,9 +627,9 @@ void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei cou
     draw_vertex_pointer(2, GL_FLOAT, 0, mesh);
     draw_tex_pointer(2, GL_FLOAT, 0, tex_map);
 
-	glEnable(GL_TEXTURE_2D);
+	draw_enable_tex2d();
 	draw_draw_arrays(GL_TRIANGLE_STRIP,0, count);
-	glDisable(GL_TEXTURE_2D);
+	draw_disable_tex2d();
 }
 
 void draw_draw_arrays(GLenum mode, GLint first, GLsizei count)
@@ -710,32 +738,36 @@ void draw_flush_color(void)
 }
 void draw_flush(void)
 {
-	glEnable(GL_TEXTURE_2D);
+	draw_enable_tex2d();
 	float *vertex = matrix2d_get_vertex_data();
 	float *tex = matrix2d_get_tex_data();
 	int size = matrix2d_get_count();
 
-	glVertexPointer(2, GL_FLOAT, 0, vertex);
-	glTexCoordPointer(2, GL_FLOAT, 0, tex);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2);
-	matrix2d_reset();
-	glDisable(GL_TEXTURE_2D);
+	if (size) {
+		glVertexPointer(2, GL_FLOAT, 0, vertex);
+		glTexCoordPointer(2, GL_FLOAT, 0, tex);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2);
+		matrix2d_reset();
+	}
+	draw_disable_tex2d();
 }
 
 void draw_flush_and_multiply(void)
 {
-    glEnable(GL_TEXTURE_2D);
+    draw_enable_tex2d();
     float *vertex = matrix2d_get_vertex_data();
     float *tex = matrix2d_get_tex_data();
     int size = matrix2d_get_count();
 
-    matrix2d_multiply(vertex,size);
 
-    glVertexPointer(2, GL_FLOAT, 0, vertex);
-    glTexCoordPointer(2, GL_FLOAT, 0, tex);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2);
-    matrix2d_reset();
-    glDisable(GL_TEXTURE_2D);
+    if (size) {
+    	matrix2d_multiply(vertex,size);
+    	glVertexPointer(2, GL_FLOAT, 0, vertex);
+    	glTexCoordPointer(2, GL_FLOAT, 0, tex);
+    	glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2);
+    	matrix2d_reset();
+    }
+    draw_disable_tex2d();
 }
 void draw_flush_simple(void)
 {

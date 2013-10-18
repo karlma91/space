@@ -16,6 +16,7 @@
 
 #define MAX_IMAGE_BUFFER 786432 /* ( 0.7 MiB) NB! make sure it is enough RAM to hold buffer */
 
+int TEX_WHITE;
 int TEX_GLOW_DOT;
 int TEX_GLOW;
 int TEX_LIGHT;
@@ -138,6 +139,7 @@ int texture_init(void)
 {
 	texture_load("error.png"); /* image to be shown for images which fails to load */
 
+	TEX_WHITE = texture_load("pixel.png");
 	TEX_GLOW_DOT = texture_load("dot.png"); //TODO move these definitions out of engine
 	TEX_GLOW = texture_load("glow.png");
 	//TEX_LIGHT = texture_load("light2.png");

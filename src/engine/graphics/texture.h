@@ -12,6 +12,7 @@ extern const float TEX_MAP_FULL[8];
 
 extern int texture_bind(int);
 
+extern int TEX_WHITE;
 extern int TEX_GLOW_DOT;
 extern int TEX_GLOW;
 extern int TEX_LIGHT;

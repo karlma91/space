@@ -40,4 +40,6 @@
 #define WE_INSIDE_RECT(px, py, x1, y1, x2, y2) ((px >= x1) && (px <= x2) && (py >= y1) && (py <= y2))
 #define WE_INSIDE_RECT_DIM(px, py, x1, y1, w, h) ((px >= x1) && (px <= x1+w) && (py >= y1) && (py <= y1+h))
 
+typedef unsigned char byte;
+
 #endif /* WE_UTILS_H_ */

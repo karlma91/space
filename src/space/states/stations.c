@@ -171,7 +171,7 @@ void stations_init(void)
 
 	btn_stations = calloc(station_count, sizeof(button));
 
-	Color col_back = {1,0.6,0.5,1};
+	Color col_back = {255,154,127,255};
 	//Color col_text = {1,1,1,1};
 
 	btn_home = button_create(SPRITE_PLAYER, 0, "", 0, 0, 250, 250);

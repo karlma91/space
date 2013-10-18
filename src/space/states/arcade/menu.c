@@ -39,8 +39,8 @@ static struct menu *curMenu; //current active menu
 static int select_id = 0;
 static int current_menu;
 
-static const Color col_item   = {1,0,0,1};
-static const Color col_select = {0,0,1,1};
+static const Color col_item   = {255,0,  0,255};
+static const Color col_select = {  0,0,255,255};
 
 static void sdl_event(SDL_Event *event)
 {

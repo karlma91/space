@@ -473,10 +473,13 @@ static void main_tick(void *data)
 
 	//TODO detect matrix stack unbalance
 	draw_matrix_clear();
+
+	//clear all
 	draw_color4f(0,0,0,1);
 	glDisable(GL_SCISSOR_TEST);
 	glViewport(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
-	draw_box(cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
+	glClear(GL_COLOR_BUFFER_BIT);
+	//draw_box(cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 	glEnable(GL_SCISSOR_TEST);
 
 	if (!paused) {

@@ -31,7 +31,7 @@ static float uv_buffer[TILEMAP_ARRAY_BUFFER_SIZE];
 
 void tilemap_render(tilemap *map)
 {
-	glEnable(GL_TEXTURE_2D);
+	//draw_enable_tex2d();
 	draw_color4f(1,1,1,1);
 	texture_bind(map->texture_id);
 
@@ -119,7 +119,7 @@ void tilemap_render(tilemap *map)
 		SDL_Log("max tile count rendered: %d",tile_count);
 	}
 
-	glDisable(GL_TEXTURE_2D);
+	//draw_disable_tex2d();
 }
 
 

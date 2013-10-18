@@ -44,8 +44,8 @@ static scroll_p scroller;
 
 int bit_settings;
 
-Color col_btn_checked = {0.2, 1, 0.2, 1};
-Color col_btn_unchecked = {1, 1, 1, 1};
+Color col_btn_checked = {51, 255, 51, 255};
+Color col_btn_unchecked = {255, 255, 255, 255};
 
 /* * * * * * * * * *
  * state functions *

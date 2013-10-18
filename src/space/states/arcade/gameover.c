@@ -186,7 +186,7 @@ static void pre_update(void) {
 #endif
 }
 
-Color color;
+static Color color;
 static void draw(void)
 {
 #if ARCADE_MODE
