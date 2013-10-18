@@ -73,7 +73,6 @@ SDL_Joystick *accelerometer;
 float dt = 0;
 int mdt = 0;
 unsigned char *keys;
-state *currentState;
 
 static SDL_GLContext glcontext;
 

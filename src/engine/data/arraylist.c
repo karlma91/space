@@ -28,6 +28,11 @@ int al_size(arraylist *hm)
 	return hm->size;
 }
 
+int al_counter(arraylist *al)
+{
+	return al->count;
+}
+
 static void al_resize(arraylist *al)
 {
 	int size = al->size * 2;
@@ -41,8 +46,9 @@ int al_add(arraylist *al, void *data)
 		al_resize(al);
 	}
 	al->data[al->count] = data;
+	int index = al->count;
 	al->count += 1;
-	return 1;
+	return index;
 }
 
 
@@ -51,9 +57,7 @@ void al_set_safe(arraylist *al, unsigned int index, void *data)
 	while(index >= al->size) {
 		al_resize(al);
 	}
-	if (index > al->count) {
-		al->count = index;
-	}
+
 	al_set(al, index, data);
 }
 void al_set(arraylist *al, unsigned int index, void *data)
@@ -88,7 +92,8 @@ void * al_get_first(arraylist *al)
 	return al->data[0];
 }
 
-void al_destroy(arraylist *al) {
+void al_destroy(arraylist *al)
+{
 	free(al->data);
 	free(al);
 }

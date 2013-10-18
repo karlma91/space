@@ -10,6 +10,7 @@
 #include "../engine.h"
 #include "texture.h"
 #include "../io/waffle_utils.h"
+#include "../state/statesystem.h"
 
 LList constant_sprites;
 
@@ -189,6 +190,12 @@ void sprite_render_scaled(sprite *spr, cpVect pos, float angle, float size)
 	spr->pos = pos;
 	spr->a = angle;
 	spr->size = size;
+
+	STATE_ID currentState = statesystem_get_render_state();
+
+	if(currentState != NULL){
+		layersystem_register_sprite(currentState, 0, spr);
+	}
 
 }
 

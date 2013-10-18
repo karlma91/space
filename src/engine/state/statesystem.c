@@ -289,6 +289,8 @@ void statesystem_draw(void)
 
     		view_transform2view(cam);
     		draw_push_matrix();
+    		draw_push_matrix();
+    		draw_push_matrix();
 
     		if (state->call.draw) {
     			state->call.draw();
@@ -305,13 +307,15 @@ void statesystem_draw(void)
     			particles_draw(state->particles); //TODO render from layers
     		}
 
+    		draw_pop_matrix();
     		/* render inner state */ //TODO check if working?
     		if(state->inner_states > 0 &&
     				state->inner_draw[state->current_inner_state]){
     			state->inner_draw[state->current_inner_state]();
     		}
 
-    		layersystem_render(state->layersystem, cam);
+    		draw_pop_matrix();
+    		layersystem_render(state, cam);
 
     		/* render in-game touchables */
     		LList state_touchies = state->touch_objects;
@@ -618,3 +622,27 @@ void state_register_touchable_view(view *cam, touchable *touchable)
 	llist_add(cam->touch_objects, touchable);
 	touchable->container = cam;
 }
+
+void state_register_sprite(STATE_ID state_id, int layer, sprite *spr)
+{
+	State *state = (State *) state_id;
+	layersystem_register_sprite(state->layersystem, layer, spr);
+}
+
+int state_add_layer(STATE_ID state_id)
+{
+	State *state = (State *) state_id;
+	return layersystem_add_layer(state->layersystem);
+}
+
+int state_layer_count(STATE_ID state_id)
+{
+	State *state = (State *) state_id;
+	return state->layersystem->num_layers;
+}
+
+layer_system * state_get_layersystem(STATE_ID state_id)
+{
+	return ((State *) state_id)->layersystem;
+}
+

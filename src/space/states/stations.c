@@ -32,9 +32,6 @@ static tween *testr;
 static cpVect a, b;
 static float r;
 
-// TODO: add this in state struct for each state ?
-static layer_system * la_sys;
-
 /* * * * * * * * * *
  * state functions *
  * * * * * * * * * */
@@ -121,7 +118,6 @@ static void draw(void)
 
 
 	draw_color4f(1,1,1,1);
-	layersystem_render(la_sys, current_view);
 	int i;
 	for (i = 0; i < station_count; i++) {
 		touch_place(btn_stations[i], -(station_count - 1) / 2.0 * 650 + 1000 * i + xoffset, yoffset+(i-0.5)*270);
@@ -204,17 +200,23 @@ void stations_init(void)
 	tex_stars = texture_load("stars.jpg");
 	tex_stars_2 = texture_load("stars_2.png");
 
-	la_sys = layersystem_new();
-	for(i = 0; i<la_sys->num_layers; i++){
+	state_add_layer(state_stations);
+	state_add_layer(state_stations);
+	state_add_layer(state_stations);
+	state_add_layer(state_stations);
+
+	int layers = state_layer_count(state_stations);
+
+	for(i = 0; i<layers; i++){
 		//float depth =  2 + 10*tan((1.0f*i/la_sys->num_layers)*WE_PI_2);
-		float f = (la_sys->num_layers - i * 0.9f) / (la_sys->num_layers);
-		layersystem_set_layer_parallax(la_sys, i, f, 1);
+		float f = (layers - i * 0.9f) / (layers);
+		state_set_layer_parallax(state_stations, i, f, 1);
 	}
 	for(i = 0; i<100; i++){
-		int layer = roundf(we_randf*(la_sys->num_layers-1));
+		int layer = roundf(we_randf*(layers-1));
 		float size = 150 + we_randf*70 - layer*1.5;
 		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600);
-		layersystem_add_sprite(la_sys, layer, SPRITE_SPIKEBALL, size, size, pos, we_randf*WE_2PI);
+		state_add_sprite(state_stations, layer, SPRITE_SPIKEBALL, size, size, pos, we_randf*WE_2PI);
 	}
 }
 

@@ -12,6 +12,7 @@ typedef struct arraylist arraylist;
 
 arraylist * al_new();
 int al_size(arraylist *hm);
+int al_counter(arraylist *al);
 int al_add(arraylist *hm, void *data);
 void al_set_safe(arraylist *al, unsigned int index, void *data);
 void al_set(arraylist *hm, unsigned int index, void *data);

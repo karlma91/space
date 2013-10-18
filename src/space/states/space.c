@@ -49,7 +49,6 @@ level *currentlvl;
 
 static void input(void);
 
-layer_system *layersystem;
 
 /*
  * The ingame states for level transition and delays
@@ -750,7 +749,7 @@ static cpVect space_particle_g_func(cpVect pos)
 
 void space_init(void)
 {
-	int i;
+	/*int i;
 	for(i = 0; i < layersystem->num_layers; i++){
 		//float depth =  1 + 10*tan((1.0f*i/layersystem->num_layers)*WE_PI_2);
 		float f = 0.1 + 0.9 * i / (layersystem->num_layers); // -> 0 = nearest, 1 = furthest
@@ -760,7 +759,7 @@ void space_init(void)
 		int layer = roundf(we_randf*(layersystem->num_layers-1));
 		float size = 25 + (400+70) -(we_randf*70 + layer*10);
 		layersystem_add_sprite(layersystem, layer, SPRITE_SPIKEBALL, size, size, cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600), we_randf*WE_2PI);
-	}
+	}*/
 
 	statesystem_register(state_space,LEVEL_STATE_COUNT);
     state_add_inner_state(state_space,LEVEL_START,level_start,NULL);
