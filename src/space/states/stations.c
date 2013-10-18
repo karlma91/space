@@ -121,7 +121,7 @@ static void draw(void)
 
 
 	draw_color4f(1,1,1,1);
-	layersystem_render(la_sys, cpv(xoffset, yoffset));
+	layersystem_render(la_sys, current_view);
 	int i;
 	for (i = 0; i < station_count; i++) {
 		touch_place(btn_stations[i], -(station_count - 1) / 2.0 * 650 + 1000 * i + xoffset, yoffset+(i-0.5)*270);
@@ -204,7 +204,7 @@ void stations_init(void)
 	tex_stars = texture_load("stars.jpg");
 	tex_stars_2 = texture_load("stars_2.png");
 
-	la_sys = layersystem_new(100);
+	la_sys = layersystem_new();
 	for(i = 0; i<la_sys->num_layers; i++){
 		//float depth =  2 + 10*tan((1.0f*i/la_sys->num_layers)*WE_PI_2);
 		float f = (la_sys->num_layers - i * 0.9f) / (la_sys->num_layers);

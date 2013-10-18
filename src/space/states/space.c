@@ -314,7 +314,6 @@ static void draw(void)
 {
 	draw_color4f(1,1,1,1);
 	//TODO move out to statesystem!
-	layersystem_render(layersystem, current_view->p);
 
 	//drawStars();
 
@@ -751,7 +750,6 @@ static cpVect space_particle_g_func(cpVect pos)
 
 void space_init(void)
 {
-	layersystem = layersystem_new(40);
 	int i;
 	for(i = 0; i < layersystem->num_layers; i++){
 		//float depth =  1 + 10*tan((1.0f*i/layersystem->num_layers)*WE_PI_2);

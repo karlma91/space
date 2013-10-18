@@ -41,6 +41,7 @@ struct systemstate {
 
     object_system *objects;
     particle_system *particles;
+    layer_system *layersystem;
 
     void (*inner_update[MAX_INNER_STATES])();
     void (*inner_draw[MAX_INNER_STATES])();
@@ -80,6 +81,7 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
     llist_add(ll_states, (void*)state);
     state->call = *funcs;
     state->particles = NULL;
+    state->layersystem = layersystem_new();
     return state->id;
 }
 
@@ -308,6 +310,8 @@ void statesystem_draw(void)
     				state->inner_draw[state->current_inner_state]){
     			state->inner_draw[state->current_inner_state]();
     		}
+
+    		layersystem_render(state->layersystem, cam);
 
     		/* render in-game touchables */
     		LList state_touchies = state->touch_objects;
