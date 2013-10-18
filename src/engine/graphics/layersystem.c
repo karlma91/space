@@ -34,6 +34,7 @@ layer_system * layersystem_new(int num_layers)
 		ls->li_layers[i].li_spr = llist_create();
 		ls->li_layers[i].parallax_factor = 1;
 		ls->li_layers[i].parallax_zoom = 1;
+		ls->li_layers[i].tex_list = al_new();
 		llist_set_remove_callback(ls->li_layers[i].li_spr, free);
 	}
 
@@ -45,11 +46,34 @@ void layersystem_add_sprite(layer_system *ls, int layer, SPRITE_ID id, float w, 
 	if(check_bounds(ls, layer)){
 		return;
 	}
-	sprite_ext *se = calloc(1, sizeof *se);
-	se->a = a;
-	se->pos = p;
-	sprite_create(&(se->spr), id, w, h, 0);
-	llist_add(ls->li_layers[layer].li_spr, se);
+	sprite *s = calloc(1, sizeof *s);
+	sprite_create(s, id, w, h, 0);
+	s->a = a;
+	s->pos = p;
+	llist_add(ls->li_layers[layer].li_spr, s);
+}
+
+void layersystem_register_sprite(layer_system *ls, int layer, sprite * spr)
+{
+	if(check_bounds(ls, layer)){
+		return;
+	}
+
+	arraylist *al = ls->li_layers[layer].tex_list;
+
+	sprite_data *data = (sprite_data*)spr->id;
+	int tex_id = 0;
+	if (data) {
+		tex_id = data->tex_id;
+	}
+
+	LList l = al_get(al,tex_id);
+	if(l == NULL) {
+		l = llist_create();
+		al_set(al,tex_id,l);
+	}
+	llist_add(l, spr);
+
 }
 
 void layersystem_render(layer_system *ls, cpVect p)
@@ -59,20 +83,39 @@ void layersystem_render(layer_system *ls, cpVect p)
 		return;
 	}
 
-	int i=ls->num_layers;
-	while (--i) {
+	int i=ls->num_layers - 1;
+	while (i--) {
 		layer *lay = &(ls->li_layers[i]);
+
 		llist_begin_loop(lay->li_spr);
 		draw_push_matrix();
-		//camera *cam = current_camera;
-
-		draw_translatev(cpvmult(cpvadd(lay->offset,p), lay->parallax_factor));
-		while(llist_hasnext(ls->li_layers[i].li_spr)) {
-			sprite_ext *se = llist_next(lay->li_spr);
-			sprite_render(&(se->spr), se->pos, se->a);
+		//draw_translatev(cpvmult(cpvadd(lay->offset,p), lay->parallax_factor));
+		while(llist_hasnext(lay->li_spr)) {
+			sprite *s = llist_next(lay->li_spr);
+			sprite_final_render(s);
 		}
-		llist_end_loop(lay->li_spr);
 		draw_pop_matrix();
+		llist_end_loop(lay->li_spr);
+		draw_flush();
+
+		int j;
+		int size = al_size(lay->tex_list);
+		for (j = 0; j < size; j++) {
+			LList l = al_get(lay->tex_list, j);
+			if (l) {
+				llist_begin_loop(l);
+				draw_push_matrix();
+				//camera *cam = current_camera;
+
+				//draw_translatev(cpvmult(cpvadd(lay->offset,p), lay->parallax_factor));
+				while(llist_hasnext(l)) {
+					sprite *s = llist_next(l);
+					sprite_final_render(s);
+				}
+				llist_end_loop(l);
+				draw_pop_matrix();
+			}
+		}
 	}
 }
 

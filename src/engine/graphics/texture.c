@@ -5,7 +5,6 @@
 #include "SDL.h"
 #include "SDL_image.h"
 
-#include "we_data.h"
 
 #include "../io/waffle_utils.h"
 #include "draw.h"
@@ -29,7 +28,7 @@ int TEX_METAL;
  * texture values (GLOBAL)
  */
 
-static arraylist *textures;
+arraylist *textures;
 
 const float TEX_MAP_FULL[8] = {0,1, 1,1, 0,0, 1,0};
 
