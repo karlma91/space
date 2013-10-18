@@ -5,6 +5,8 @@
 #include "SDL.h"
 #include "SDL_image.h"
 
+#include "we_data.h"
+
 #include "../io/waffle_utils.h"
 #include "draw.h"
 
@@ -26,7 +28,8 @@ int TEX_METAL;
 /**
  * texture values (GLOBAL)
  */
-GLuint *textures;
+
+static arraylist *textures;
 
 const float TEX_MAP_FULL[8] = {0,1, 1,1, 0,0, 1,0};
 
@@ -75,21 +78,22 @@ int texture_load(const char *file)
 	}
 
 	rw = SDL_RWFromMem(&buffer[0], filesize);
+	SDL_Surface* img_load = IMG_Load_RW(rw, 0);
+	SDL_FreeRW(rw);
 
-	SDL_Surface* img = IMG_Load_RW(rw, 0);
-
-	if (img) {
+	if (img_load) {
 		unsigned int tex_id;
 		int w, h;
-		w = img->w;
-		h = img->h;
+		w = img_load->w;
+		h = img_load->h;
 
 		++tex_counter;
 		names = realloc(names,(sizeof(char[tex_counter+1][51])));
 		strcpy(names[tex_counter],file);
-		textures = realloc(textures,sizeof(int[(tex_counter + 1)]));
 
-		img = SDL_ConvertSurfaceFormat(img,SDL_PIXELFORMAT_ARGB8888,0);
+		SDL_Surface *img = SDL_ConvertSurfaceFormat(img_load, SDL_PIXELFORMAT_ARGB8888,0);
+		SDL_FreeSurface(img_load);
+
 
 		/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
 		glGenTextures(1, &tex_id);
@@ -112,7 +116,7 @@ int texture_load(const char *file)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
 		SDL_FreeSurface(img);
 
-		textures[tex_counter] = tex_id;
+		al_add(textures, tex_id);
 
 		//SDL_Log("DEBUG: Texture loaded: %s\n", file);
 		return tex_counter;
@@ -137,6 +141,7 @@ static int texture_from_name(const char *file)
 #include "SDL_endian.h"
 int texture_init(void)
 {
+	textures = al_new();
 	texture_load("error.png"); /* image to be shown for images which fails to load */
 
 	TEX_WHITE = texture_load("pixel.png");
@@ -151,6 +156,10 @@ int texture_init(void)
 
 int texture_destroy(void)
 {
+	int i;
+	for (i = 0; i < tex_counter; i++) {
+		glDeleteTextures(1, al_get(textures, i));
+	}
 	return 0;
 }
 
@@ -161,7 +170,7 @@ int texture_bind(int tex_id) {
 	if (tex_id != gl_tex_id && tex_id >= 0) {
 		draw_flush();
 		gl_tex_id = tex_id;
-		glBindTexture(GL_TEXTURE_2D, textures[tex_id]);
+		glBindTexture(GL_TEXTURE_2D, al_get(textures, tex_id));
 		return 0;
 	}
 	return 1;

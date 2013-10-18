@@ -56,7 +56,7 @@ void state_enable_particles(STATE_ID state_id, int enabled);
 
 view *state_view_add(STATE_ID state_id);
 view *state_view_get(STATE_ID state_id, int index);
-view *state_view_enable(STATE_ID state_id, int index, int enabled);
+void state_view_enable(STATE_ID state_id, int index, int enabled);
 
 void state_add_inner_state(STATE_ID state, int inner_state, void (*update)(void), void (*draw)(void));
 void state_set_inner_state(STATE_ID state, int inner_state);

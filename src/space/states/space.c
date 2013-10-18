@@ -583,6 +583,12 @@ static obj_param_staticpolygon polytest = {
 		.texture_scale = 1,
 };
 
+static void remove_static(cpShape *shape)
+{
+	cpSpaceRemoveStaticShape(current_space, shape);
+	cpShapeFree(shape);
+}
+
 void space_init_level(int space_station, int deck)
 {
 
@@ -619,7 +625,7 @@ void space_init_level(int space_station, int deck)
 
 	/* remove floor and ceiling */
 	if(llist_size(ll_floor_segs) > 0 && ceiling != NULL){
-		cpSpaceRemoveStaticShape(current_space,ceiling);
+		remove_static(ceiling);
 		llist_clear(ll_floor_segs);
 	}
 
@@ -728,14 +734,13 @@ static void on_leave(void)
 
 static void destroy(void)
 {
+	if(llist_size(ll_floor_segs) > 0 && ceiling != NULL){
+		remove_static(ceiling);
+	}
 	llist_destroy(ll_floor_segs);
+
 	joystick_free(joy_p1_left);
 	joystick_free(joy_p1_right);
-}
-
-static void remove_static(cpShape *shape)
-{
-	cpSpaceRemoveStaticShape(current_space, shape);
 }
 
 
@@ -746,9 +751,6 @@ static cpVect space_particle_g_func(cpVect pos)
 
 void space_init(void)
 {
-	current_particles = particlesystem_new();
-	particle_set_gravity_func(current_particles, space_particle_g_func );
-
 	layersystem = layersystem_new(40);
 	int i;
 	for(i = 0; i < layersystem->num_layers; i++){
@@ -798,6 +800,7 @@ void space_init(void)
 
     state_enable_objects(state_space, 1);
     state_enable_particles(state_space, 1);
+	particle_set_gravity_func(current_particles, space_particle_g_func );
 
 	cpSpaceSetGravity(current_space, cpv(GRAVITY,0));
 	cpSpaceSetDamping(current_space, DAMPING);

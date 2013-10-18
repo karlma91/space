@@ -579,6 +579,8 @@ static int main_destroy(void) {
 	objectsystem_destroy();
 	object_destroy();
 
+	particles_destroy();
+
 	sound_destroy();
 	draw_destroy();
 	font_destroy();
@@ -595,7 +597,9 @@ static int main_destroy(void) {
 	SDL_GL_DeleteContext(glcontext);
 
 #if !TARGET_OS_IPHONE
+	SDL_DestroyWindow(window);
 	SDL_Quit();
+	SDL_Log("BYE BYE!");
 	exit(0);
 #endif
 
