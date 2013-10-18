@@ -43,41 +43,42 @@ bm_font * bmfont_read_font(char *filename)
         SDL_Log("Could Not Open the File Provided");
         exit(1);
     }
-        if(tree == NULL){
-            SDL_Log("BMFONT: file %s is empty \n", fileread);
-            exit(1);
-        }
-        for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
-                node != NULL;
-                node=mxmlWalkNext (node, NULL, MXML_DESCEND)
-        ){
-           if(TESTNAME("common")){
-                parse_int(node,"lineHeight",&(f->line_height));
-                parse_int(node,"base",&(f->base));
-                parse_int(node,"scaleW",&(f->tex_w));
-                parse_int(node,"scaleH",&(f->tex_h));
-            }else if(TESTNAME("page")){
-                char *(texture[1]);
-                parse_string(node,"file",texture);
-                f->tex_id = texture_load(*texture);
-            }else if(TESTNAME("chars")){
-                int count;
-                parse_int(node,"count",&(count));
-            }else if(TESTNAME("char")){
-                int id = 0;
-                bm_char *c;
-                parse_int(node,"id",&(id));
-                c = &(f->chars[id]);
-                c->id = id;
-                parse_int(node,"x",&(c->x));
-                parse_int(node,"y",&(c->y));
-                parse_int(node,"width",&(c->w));
-                parse_int(node,"height",&(c->h));
-                parse_int(node,"xoffset",&(c->x_offset));
-                parse_int(node,"yoffset",&(c->y_offset));
-                parse_int(node,"xadvance",&(c->x_advance));
-            }
-        }
+    if(tree == NULL){
+    	SDL_Log("BMFONT: file %s is empty \n", fileread);
+    	exit(1);
+    }
+    for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
+    		node != NULL;
+    		node=mxmlWalkNext (node, NULL, MXML_DESCEND)
+    ){
+    	if(TESTNAME("common")){
+    		parse_int(node,"lineHeight",&(f->line_height));
+    		parse_int(node,"base",&(f->base));
+    		parse_int(node,"scaleW",&(f->tex_w));
+    		parse_int(node,"scaleH",&(f->tex_h));
+    	}else if(TESTNAME("page")){
+    		char *(texture[1]);
+    		parse_string(node,"file",texture);
+    		f->tex_id = texture_load(*texture);
+    	}else if(TESTNAME("chars")){
+    		int count;
+    		parse_int(node,"count",&(count));
+    	}else if(TESTNAME("char")){
+    		int id = 0;
+    		bm_char *c;
+    		parse_int(node,"id",&(id));
+    		c = &(f->chars[id]);
+    		c->id = id;
+    		parse_int(node,"x",&(c->x));
+    		parse_int(node,"y",&(c->y));
+    		parse_int(node,"width",&(c->w));
+    		parse_int(node,"height",&(c->h));
+    		parse_int(node,"xoffset",&(c->x_offset));
+    		parse_int(node,"yoffset",&(c->y_offset));
+    		parse_int(node,"xadvance",&(c->x_advance));
+    	}
+    }
+    mxmlDelete(tree);
     return f;
 }
 

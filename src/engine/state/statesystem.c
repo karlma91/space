@@ -79,7 +79,7 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
 
     llist_add(ll_states, (void*)state);
     state->call = *funcs;
-
+    state->particles = NULL;
     return state->id;
 }
 
@@ -118,7 +118,7 @@ view *state_view_get(STATE_ID state_id, int index)
 	return (view *) llist_at_index(state->cameras, index);
 }
 
-view *state_view_enable(STATE_ID state_id, int index, int enabled)
+void state_view_enable(STATE_ID state_id, int index, int enabled)
 {
 	State *state = (State *) state_id;
 	((view *) llist_at_index(state->cameras, index))->enabled = enabled;
@@ -381,6 +381,7 @@ static void statesystem_free(STATE_ID state_id)
 	//free object and particle systems
 	objectsystem_free(state->objects);
 	particlesystem_free(state->particles);
+	state->particles = NULL;
 
 	//free buttons and other touchable objects
 	llist_destroy(state->touch_objects);

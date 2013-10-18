@@ -141,4 +141,5 @@ void leveldone_status(int stars, int score, float time)
 	highscorelist_readfile(&level_scores,level_score_file);
 	highscorelist_addscore(&level_scores, "LVL", level_score, level_time);
 	highscorelist_writefile(&level_scores);
+	highscorelist_destroy(&level_scores);
 }

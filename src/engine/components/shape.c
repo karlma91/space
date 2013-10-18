@@ -68,6 +68,7 @@ polyshape shape_read(char *filename)
 		}
 		llist_add(polys, pi);
 	}
+	cJSON_Delete(root);
 	hm_add(names, filename, polys);
 	return polys;
 }
