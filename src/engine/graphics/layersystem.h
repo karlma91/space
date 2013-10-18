@@ -29,6 +29,13 @@ typedef struct {
 	layer *li_layers;
 }layer_system;
 
+typedef struct {
+	int id;
+	union {
+		sprite *spr;
+	};
+} render_object;
+
 
 void layersystem_init(void);
 layer_system * layersystem_new(int num_layers);
