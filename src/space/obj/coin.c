@@ -60,7 +60,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		} else {
 			((obj_player *) player)->coins += 10;
 			sound_play(SND_COIN);
-			instance_remove(coin);
+			instance_remove((instance *)coin);
 		}
 	}
 }

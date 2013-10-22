@@ -106,13 +106,13 @@ static void destroy(void)
 }
 
 
-static void resume(void)
+static void resume(void *unused)
 {
 	SDL_StopTextInput();
 	statesystem_set_state(state_space);
 }
 
-static void input(void)
+static void input(void *unused)
 {
 	memset(input_buffer,0,1000);
 	SDL_StartTextInput();

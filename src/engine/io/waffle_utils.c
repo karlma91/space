@@ -168,7 +168,7 @@ const static char *waffle_dirs[4] = {
 
 FILE *waffle_internal_fopen(enum WAFFLE_DIR dir_type,const char *filename, const char *opentype)
 {
-	if (dir_type < 0 || dir_type > 3) {
+	if (dir_type > 3) {
 		SDL_Log("ERROR: Invalid directory type: %d", dir_type);
 		exit(-1);
 	}

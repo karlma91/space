@@ -13,7 +13,10 @@
 #include "SDL.h"
 #include "SDL_main.h"
 
+#ifndef SOUND_DISABLED
 #define SOUND_DISABLED 1
+#endif
+
 #if !SOUND_DISABLED
 #include "SDL_mixer.h"
 #endif
@@ -336,6 +339,7 @@ static void main_init(void) {
 	particles_init();   /* load and prepare all particle systems */
 	//font_init();      /* (currently not in use) */
 	statesystem_init(); /* init all states */
+	layersystem_init();
 	object_init();
 	objectsystem_init();
 	game_init();
@@ -357,7 +361,7 @@ static void check_events(void)
 {
 	SDL_Event event;
 	SDL_PumpEvents();
-	keys = SDL_GetKeyboardState(NULL);
+	keys = (unsigned char *)SDL_GetKeyboardState(NULL);
 
 	while (SDL_PollEvent(&event)) {
 		statesystem_push_event(&event);
@@ -579,6 +583,7 @@ static int main_destroy(void) {
 	statesystem_destroy();
 	objectsystem_destroy();
 	object_destroy();
+	layersystem_destroy();
 
 	particles_destroy();
 

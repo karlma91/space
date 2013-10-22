@@ -104,7 +104,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	float alpha = 2;
 	if (turret->data.time_destroyed > 2) {
-		instance_remove(turret);
+		instance_remove((instance *)turret);
 		alpha = 0;
 	} else if (turret->data.destroyed) {
 		alpha = maxf(0, 1 - turret->data.time_destroyed / 2);

@@ -66,57 +66,17 @@ static void sdl_event(SDL_Event *event)
 static void draw(void)
 {
 
-	cpVect full = cpv(GAME_WIDTH, GAME_HEIGHT);
+	//cpVect full = cpv(GAME_WIDTH, GAME_HEIGHT);
 	draw_color4f(1,1,1,1);
 	float xoffset = scroll_get_xoffset(scroller);
 	float yoffset = scroll_get_yoffset(scroller);
 
-	/*{
-	float x1 = - (xoffset / 7) / GAME_WIDTH;
-	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT;
-	float y1 = (yoffset / 7) / GAME_HEIGHT;
-	float y2 = y1 + 1;
-	float map[8] = {x1, y2,
-					x2, y2,
-					x1, y1,
-					x2, y1};
-	draw_texture(tex_stars,cpvzero,map,full,0);
-	}
-	{
-	float x1 = - (xoffset / 4) / GAME_WIDTH;
-	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT * 2;
-	float y1 = (yoffset / 4) / GAME_HEIGHT;
-	float y2 = y1 + 1.0 * 2;
-	float map[8] = {x1, y2,
-					x2, y2,
-					x1, y1,
-					x2, y1};
-	draw_texture(tex_stars_2,cpvzero,map,full,0);
-	}
-	{
-	float x1 = - (xoffset / 3.6) / GAME_WIDTH;
-	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT *1;
-	float y1 = (yoffset / 3.6) / GAME_HEIGHT;
-	float y2 = y1 + 1.0 * 1;
-	float map[8] = {x1, y2,
-					x2, y2,
-					x1, y1,
-					x2, y1};
-	draw_texture(tex_stars_2,cpvzero,map,full,0);
-	}
-	{
-	float x1 = - (xoffset / 3.2) / GAME_WIDTH;
-	float x2 = x1 + (float) GAME_WIDTH / GAME_HEIGHT * 0.5;
-	float y1 = (yoffset / 3.2) / GAME_HEIGHT;
-	float y2 = y1 + 1 * 0.5;
-	float map[8] = {x1, y2,
-					x2, y2,
-					x1, y1,
-					x2, y1};
-	draw_texture(tex_stars_2,cpvzero,map,full,0);
-	}*/
+	cpVect offset = cpv(xoffset, yoffset);
+	float angle = cpvtoangle(offset);
 
+	view_update(current_view, offset, angle);
 
+	/*
 	draw_color4f(1,1,1,1);
 	int i;
 	for (i = 0; i < station_count; i++) {
@@ -125,6 +85,7 @@ static void draw(void)
 		//TODO tegne minste antall stjerner av levlene i romstasjonen under den?
 		//TODO skrive antall levler klart?
 	}
+	*/
 
 
 	draw_box(cpvadd(a,cpv(xoffset,yoffset)), b, r, 1);
@@ -154,7 +115,7 @@ static void destroy(void)
 {
 }
 
-static void open_upgrades(void)
+static void open_upgrades(void *unused)
 {
 	statesystem_push_state(state_store);
 }

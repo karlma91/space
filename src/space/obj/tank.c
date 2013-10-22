@@ -8,7 +8,6 @@
 #include "we_defobj.h"
 
 /* static prototypes */
-static cpBody *addChassis(cpSpace *space, obj_tank *tank, cpVect pos, cpGroup group);
 static cpBody *addWheel(cpSpace *space, cpVect pos, cpGroup group);
 
 #define MASS 4.0f
@@ -188,7 +187,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	float alpha = 2;
 	if (tank->data.time_destroyed > 2) { //TODO automatically? or in its own destroyed_tick?
-		instance_remove(tank);
+		instance_remove((instance *)tank);
 		alpha = 0;
 	} else if (tank->data.destroyed) {
 		alpha = maxf(0, 1 - tank->data.time_destroyed / 2);
@@ -237,5 +236,5 @@ static void on_remove(OBJ_TYPE *OBJ_NAME)
 	we_body_remove(current_space, &tank->barrel);
 	we_body_remove(current_space, &tank->wheel1);
 	we_body_remove(current_space, &tank->wheel2);
-	factory_remove_child(tank);
+	factory_remove_child((instance *)tank);
 }

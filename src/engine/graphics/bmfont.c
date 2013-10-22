@@ -7,7 +7,7 @@
 #include "../engine.h"
 #include "../io/xmlh.h"
 #include "../data/llist.h"
-
+#include "../io/waffle_utils.h"
 
 LList font_list;
 
@@ -161,7 +161,8 @@ static void flush_line(bm_font *font, float text_width, float x, float y)
     draw_translate(x-(text_width/2.0f)*font->scale, y);
     text_width=0;
     draw_scale(font->scale,-font->scale);
-    draw_flush_and_multiply();
+    //draw_flush_and_multiply(); //TODO FIXME
+    draw_flush(); //TODO FIXME multiply removed!
     draw_pop_matrix();
 }
 

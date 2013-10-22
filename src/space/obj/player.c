@@ -62,12 +62,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 		exit(1);
 	}
 
-
 	sprite_create(&(player->gun), SPRITE_PLAYER_GUN, 120, 120, 0);
 	sprite_create(&(player->data.spr), SPRITE_PLAYER, 120, 120, 0);
-
-	state_register_sprite(state_space, 0, &(player->data.spr));
-	state_register_sprite(state_space, 0, &(player->gun));
 
 	player->data.components[CMP_HPBAR] = &player->hp_bar;
 	player->data.components[CMP_MINIMAP] = &player->radar_image;
@@ -259,7 +255,7 @@ static void action_shoot(obj_player *player)
 			if (player->bullet_type == obj_id_bullet) {
 				params = &opb;
 			}
-			instance *instance = instance_create(player->bullet_type, params, shoot_pos, shoot_vel);
+            instance_create(player->bullet_type, params, shoot_pos, shoot_vel);
 		}
 
 		player->gun_timer = 0;

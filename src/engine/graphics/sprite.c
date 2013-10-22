@@ -14,6 +14,15 @@
 
 LList constant_sprites;
 
+typedef struct {
+	char name[50];
+	int tex_id;
+	float u;
+	float v;
+	float width;
+	float height;
+	int subimages;
+} sprite_data;
 
 #define FILE_BUFFER_SIZE 8192 /* NB! make sure buffer is large enough */
 static char buffer[FILE_BUFFER_SIZE];

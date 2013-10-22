@@ -40,7 +40,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	if ((bullet->energy -= mdt) < 0) {
-		instance_destroy(bullet);
+		instance_destroy((instance *)bullet);
 	}
 }
 
@@ -50,7 +50,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	if (bullet->data.destroyed) {
 		alpha = bullet->energy / 250;
 		if ((bullet->energy -= mdt) < 0) {
-			instance_remove(bullet);
+			instance_remove((instance *)bullet);
 		}
 	}
 

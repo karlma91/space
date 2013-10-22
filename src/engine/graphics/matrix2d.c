@@ -15,20 +15,20 @@ int type;
 
 float *vertex_pointer;
 float *tex_pointer;
-float *color_pointer;
+byte *color_pointer;
 
 float vertex[300000];
 float tex[300000];
-float color[300000];
+byte color[300000];
 
 float * vertex_append = vertex;
 float * tex_append = tex;
-float * color_append = color;
+byte * color_append = color;
 
 
 int current_matrix;
 
-static void multiply_current(float *f);
+//static void multiply_current(float *f);
 static float *matrix2d_append_quad(float *data, float *mesh);
 static void append_quad_color();
 static float * matrix2d_multiply_to_quad(float *data, float *mesh, int count);
@@ -91,17 +91,17 @@ void matrix2d_set_type(int typ)
 /*
  * Color
  */
-float *matrix2d_get_color_data(void)
+byte *matrix2d_get_color_data(void)
 {
     return color;
 }
 
-float * matrix2d_get_color_pointer(void)
+byte *matrix2d_get_color_pointer(void)
 {
     return color_pointer;
 }
 
-void matrix2d_color_pointer(float *f)
+void matrix2d_color_pointer(byte *f)
 {
 	color_pointer = f;
 }
@@ -111,9 +111,10 @@ int matrix2d_get_count(void)
 	return (vertex_append - vertex);
 }
 
+//TODO append color for only one vertex per quad (of 6 vertices) using stride = 6
 static void append_quad_color(void)
 {
-	float c[4];
+	byte c[4];
 	draw_get_current_color(c);
 	int i,j;
 	for(i=0; i<6; i++){
@@ -131,20 +132,22 @@ void matrix2d_append_strip(int first, int count)
 
 void matrix2d_append_quad_simple(void)
 {
+	append_quad_color();
 	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer, 4);
 }
 
 void matrix2d_append_quad_tex(void)
 {
+	append_quad_color();
 	tex_append = matrix2d_append_quad(tex_append, tex_pointer);
 	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer,4);
 }
 
-void matrix2d_append_quad_color(void)
-{
-	append_quad_color();
-	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer,4);
-}
+//void matrix2d_append_quad_color(void)
+//{
+//	append_quad_color();
+//	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer,4);
+//}
 void matrix2d_append_quad_tex_color(void)
 {
 	append_quad_color();
@@ -321,6 +324,7 @@ void matrix2d_print(void)
     fprintf(stderr, "[ %f , %f , %f ]\n",cur->x2,cur->y2,cur->z2);
 }
 
+/*
 static void multiply_current(float *f)
 {
     float c0 = cur->x1;
@@ -335,3 +339,5 @@ static void multiply_current(float *f)
     cur->y2 = c3*f[1] + c4*f[4];
     cur->z2 += c3*f[2] + c4*f[5];
 }
+*/
+

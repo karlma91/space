@@ -16,8 +16,8 @@ typedef struct {
 	float parallax_factor;
 	float parallax_zoom;
 	cpVect offset;
-	LList li_spr;
-	arraylist *tex_list;
+	LList ll_spr;
+	LList ll_blend_modes;
 }layer_ins;
 
 typedef struct {
@@ -36,5 +36,6 @@ typedef struct {
 void layersystem_init(void);
 layer_system * layersystem_new(void);
 int layersystem_add_layer(layer_system *ls);
-void layersystem_destroy(layer_system *ls);
+void layersystem_free(layer_system *ls);
+void layersystem_destroy(void);
 #endif /* LAYERSYSTEM_H_ */

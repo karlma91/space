@@ -93,12 +93,11 @@ object_system *objectsystem_new(void)
 
 	llist_add(ll_systems, system);
 
-	LList active;
 	int id;
 	for (id=0; id < object_getcount(); id++) {
 		system->objects_meta[id].active = llist_create();
 		system->objects_meta[id].pool = llist_create();
-		llist_set_remove_callback(system->objects_meta[id].active, (ll_remove_callback)destroy_func);
+		llist_set_remove_callback(system->objects_meta[id].active, (ll_rm_callback)destroy_func);
 	}
 
 	system->space = cpSpaceNew();
@@ -119,8 +118,8 @@ void objectsystem_free(object_system *system)
 
 	int id;
 	for (id=0; id < object_getcount(); id++) {
-		llist_set_remove_callback(system->objects_meta[id].active, (ll_remove_callback)free_active_func);
-		llist_set_remove_callback(system->objects_meta[id].pool, (ll_remove_callback)free_dead_func);
+		llist_set_remove_callback(system->objects_meta[id].active, (ll_rm_callback)free_active_func);
+		llist_set_remove_callback(system->objects_meta[id].pool, (ll_rm_callback)free_dead_func);
 		llist_destroy(system->objects_meta[id].active);
 		llist_destroy(system->objects_meta[id].pool);
 	}

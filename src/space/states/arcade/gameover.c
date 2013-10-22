@@ -16,28 +16,33 @@
 STATE_ID state_gameover;
 
 /* static prototypes */
-static void draw_highscore(int);
 
 #define MAX_NAME_LENGTH 3
 
 /* static variables */
-static char input[MAX_NAME_LENGTH+1] = "A  ";
-static int valid_index[MAX_NAME_LENGTH];
+
 static const char valid_char[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
 static const int char_count = 37; /* valid_char length*/
+static enum gameover_state gameover_state = enter_name;
+
+#if ARCADE_MODE
+static void draw_highscore(int);
+
+static char input[MAX_NAME_LENGTH+1] = "A  ";
+static int valid_index[MAX_NAME_LENGTH];
 static scorelist * list;
 
 static int score_position;
 static int score_value;
 static int score_newly_added;
 
-static enum gameover_state gameover_state = enter_name;
 
 static int cursor = 0;
 static int win = 0; //TMP solution for win screens
 
 static int score_index = 0;
 static int score_page = 0;
+#endif
 
 static void sdl_event(SDL_Event *event)
 {
@@ -186,7 +191,6 @@ static void pre_update(void) {
 #endif
 }
 
-static Color color;
 static void draw(void)
 {
 #if ARCADE_MODE
@@ -267,9 +271,9 @@ static void destroy(void)
 #endif
 }
 
+#if ARCADE_MODE
 static void draw_highscore(int start_index)
 {
-#if ARCADE_MODE
 	scoreelement score = {"---",0,0,0};
 	char temp[100];
 	int i;
@@ -292,8 +296,8 @@ static void draw_highscore(int start_index)
 		}
 		font_drawText(-10*45*1.5f, 300 - i*50*1.5f, temp);
 	}
-#endif
 }
+#endif
 
 void gameover_showhighscores(void) {
 	gameover_setstate(show_highscore);

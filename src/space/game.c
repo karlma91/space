@@ -80,7 +80,7 @@ POLYSHAPE_ID POLYSHAPE_TURRET;
 POLYSHAPE_ID POLYSHAPE_TANK;
 POLYSHAPE_ID POLYSHAPE_POLY;
 
-/* end*
+/* end */
 
 /* global emitter */
 int EMITTER_FLAME;
@@ -262,7 +262,7 @@ void game_audio(void)
 
 
 /* general button callbacks */
-static void open_settings(void)
+static void open_settings(void *unused)
 {
 	statesystem_push_state(state_settings);
 }

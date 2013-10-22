@@ -69,7 +69,7 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
     state->id = state;
 
     state->cameras = llist_create();
-    llist_set_remove_callback(state->cameras, (ll_remove_callback) view_free);
+    llist_set_remove_callback(state->cameras, (ll_rm_callback) view_free);
     state_view_add(state);
     state->touch_objects = llist_create();
     state->inner_states = inner_states;
@@ -155,7 +155,7 @@ void statesystem_push_state(STATE_ID state_id)
     stack_head->call.on_enter();
 }
 
-void statesystem_pop_state(void)
+void statesystem_pop_state(void *unused)
 {
     State *temp = stack_head;
     stack_head = stack_head->prev;
@@ -623,11 +623,11 @@ void state_register_touchable_view(view *cam, touchable *touchable)
 	touchable->container = cam;
 }
 
-void state_register_sprite(STATE_ID state_id, int layer, sprite *spr)
-{
-	State *state = (State *) state_id;
-	layersystem_register_sprite(state->layersystem, layer, spr);
-}
+//void state_register_sprite(STATE_ID state_id, int layer, sprite *spr)
+//{
+//	State *state = (State *) state_id;
+//	layersystem_register_sprite(state->layersystem, layer, spr);
+//}
 
 int state_add_layer(STATE_ID state_id)
 {

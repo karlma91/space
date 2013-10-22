@@ -517,6 +517,7 @@ static void stars_init(void)
 		stars_size[i] = 2 + 5*(rand() % 1000) / 1000.0f;
 	}
 }
+/*
 void drawStars(void)
 {
 	static int tick2death = 1;
@@ -542,6 +543,7 @@ void drawStars(void)
 	draw_flush_simple();
 	draw_pop_matrix();
 }
+*/
 
 
 static void sticks_init(void) {
@@ -677,7 +679,7 @@ void space_init_level(int space_station, int deck)
 	polytest.shape_id = POLYSHAPE_TURRET;
 	polytest.texture_scale = 4;
 	polytest.scale = 1000;
-	obj_staticpolygon *sp = instance_create(obj_id_staticpolygon, &polytest, cpv(-800,0), cpvzero);
+	obj_staticpolygon *sp = (obj_staticpolygon *)instance_create(obj_id_staticpolygon, &polytest, cpv(-800,0), cpvzero);
 	cpBodySetAngle(sp->body, 312);
 	cpSpaceReindexShapesForBody(current_space, sp->body);
 }
@@ -792,7 +794,7 @@ void space_init(void)
     state_register_touchable_view(view_p1, btn_pause);
 
     ll_floor_segs = llist_create();
-    llist_set_remove_callback(ll_floor_segs, (ll_remove_callback) remove_static);
+    llist_set_remove_callback(ll_floor_segs, (ll_rm_callback) remove_static);
     ceiling = NULL;
 
     state_enable_objects(state_space, 1);
@@ -814,10 +816,10 @@ void space_init(void)
     joy_p2_left = joystick_create(0, 120, 2, -GAME_WIDTH/2 + 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
     joy_p2_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
 
-    state_register_touchable_view(view_p1, joy_p1_left);
-    state_register_touchable_view(view_p1, joy_p1_right);
-    state_register_touchable_view(view_p2, joy_p2_left);
-    state_register_touchable_view(view_p2, joy_p2_right);
+    state_register_touchable_view(view_p1, (touchable *)joy_p1_left);
+    state_register_touchable_view(view_p1, (touchable *)joy_p1_right);
+    state_register_touchable_view(view_p2, (touchable *)joy_p2_left);
+    state_register_touchable_view(view_p2, (touchable *)joy_p2_right);
 
     state_timer = 10;
 	change_state(LEVEL_START);
@@ -992,13 +994,13 @@ void space_start_multiplayer(int station, int deck) {
 }
 */
 
-void space_restart_level(void)
+void space_restart_level(void *unused)
 {
 	statesystem_set_state(state_space);
 	space_init_level(currentlvl->station, currentlvl->deck);
 }
 
-void space_next_level(void)
+void space_next_level(void *unused)
 {
 	int station = currentlvl->station;
 	int deck = currentlvl->deck + 1;

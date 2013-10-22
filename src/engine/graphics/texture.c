@@ -62,7 +62,7 @@ int texture_load(const char *file)
 	sprintf(filepath,"textures/%s", file);
 
 	/* append texture resolution suffix */
-	char *file_suffix = &file[strlen(file) - 4];
+	const char *file_suffix = &file[strlen(file) - 4];
 
 	filepath[strlen(filepath) - 4] = 0; // ignore file suffix
 	strcat(filepath, TEXTURE_RESOLUTION);
@@ -104,18 +104,18 @@ int texture_load(const char *file)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		if ((strcmp(file,"stars.png") && strcmp(file,"stars.jpg") && strcmp(file,"stars_2.png") && strcmp(file, "metal_01.png")) == 0) { //TODO remove tmp code
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		} else {
+		//if ((strcmp(file,"stars.png") && strcmp(file,"stars.jpg") && strcmp(file,"stars_2.png") && strcmp(file, "metal_01.png")) == 0) { //TODO remove tmp code
+			//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		//} else {
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		}
+		//}
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
 		SDL_FreeSurface(img);
 
-		al_add(textures, tex_id);
+		alist_add(textures, tex_id);
 
 		//SDL_Log("DEBUG: Texture loaded: %s\n", file);
 		return tex_counter;
@@ -140,7 +140,7 @@ static int texture_from_name(const char *file)
 #include "SDL_endian.h"
 int texture_init(void)
 {
-	textures = al_new();
+	textures = alist_new();
 	texture_load("error.png"); /* image to be shown for images which fails to load */
 
 	TEX_WHITE = texture_load("pixel.png");
@@ -157,7 +157,7 @@ int texture_destroy(void)
 {
 	int i;
 	for (i = 0; i < tex_counter; i++) {
-		glDeleteTextures(1, al_get(textures, i));
+		glDeleteTextures(1, alist_get(textures, i));
 	}
 	return 0;
 }
@@ -169,7 +169,7 @@ int texture_bind(int tex_id) {
 	if (tex_id != gl_tex_id && tex_id >= 0) {
 		draw_flush();
 		gl_tex_id = tex_id;
-		glBindTexture(GL_TEXTURE_2D, al_get(textures, tex_id));
+		glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_id));
 		return 0;
 	}
 	return 1;

@@ -130,7 +130,7 @@ static int touch_up(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	if (scr->finger_1 == finger->fingerId) {
 		scroll_priv * scr = (scroll_priv *) scr_id;
 		scr->scrolling = 0;
-		scr->finger_1 = NULL;
+		scr->finger_1 = -1;
 	}
 	return 0;
 }

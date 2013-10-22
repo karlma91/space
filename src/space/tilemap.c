@@ -26,8 +26,8 @@ static int parse_data(tilemap *map, char *data);
 
 #define TILEMAP_ARRAY_BUFFER_SIZE 1000
 
-static float vertex_buffer[TILEMAP_ARRAY_BUFFER_SIZE];
-static float uv_buffer[TILEMAP_ARRAY_BUFFER_SIZE];
+//static float vertex_buffer[TILEMAP_ARRAY_BUFFER_SIZE];
+//static float uv_buffer[TILEMAP_ARRAY_BUFFER_SIZE];
 
 void tilemap_render(tilemap *map)
 {

@@ -21,12 +21,12 @@ void space_init_level(int space_station, int deck);
 float extern getGameTime(void);
 extern int getPlayerScore(void);
 
-extern void drawStars(void);
+//extern void drawStars(void);
 
 void space_start_demo(int station, int deck);
 void space_start_multiplayer(int station, int deck);
 
-void space_restart_level(void);
-void space_next_level(void);
+void space_restart_level(void *unused);
+void space_next_level(void *unused);
 
 #endif /* SPACE_H_ */

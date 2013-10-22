@@ -62,7 +62,7 @@ void state_add_inner_state(STATE_ID state, int inner_state, void (*update)(void)
 void state_set_inner_state(STATE_ID state, int inner_state);
 
 void statesystem_push_state(STATE_ID state);
-void statesystem_pop_state(void);
+void statesystem_pop_state(void *unused);
 void statesystem_set_state(STATE_ID state);
 
 void statesystem_call_update(STATE_ID state_id);
@@ -71,7 +71,7 @@ void statesystem_push_event(SDL_Event *event);
 void state_register_touchable(STATE_ID state_id, touchable *touchable);
 void state_register_touchable_view(view *cam, touchable *touchable);
 
-void state_register_sprite(STATE_ID state_id, int layer, sprite *spr);
+//void state_register_sprite(STATE_ID state_id, int layer, sprite *spr);
 int state_add_layer(STATE_ID state_id);
 int state_layer_count(STATE_ID state_id);
 void state_set_layer_offset(STATE_ID state_id, int layer, cpVect offset);

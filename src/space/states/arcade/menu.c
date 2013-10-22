@@ -156,7 +156,7 @@ static void draw(void)
 		break;
 	case MENU_MAIN:
 		setTextSize(120);
-		drawStars();
+		//drawStars();
 		draw_color(draw_col_rainbow((int)(timer*1000)));
 		font_drawText(0,0.7f*GAME_HEIGHT/2, "SPACE");
 

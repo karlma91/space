@@ -32,7 +32,7 @@ Color rainbow_col[1536];
 static int TEX_BAR;
 
 static GLfloat unit_circle[128];
-static void draw_render_light_map();
+//static void draw_render_light_map();
 
 #define DEBUG SDL_Log( "line: %d\n", __LINE__);
 
@@ -130,8 +130,7 @@ int draw_init(){
 void draw_color4b(byte r, byte g, byte b, byte a)
 {
 	if (r != gl_red || g != gl_green || b != gl_blue || a != gl_alpha) {
-		glColor4ub(r,g,b,a);
-
+		//glColor4ub(r,g,b,a); //TODO There should be no need to call this anymore
 		gl_red = r;
 		gl_green = g;
 		gl_blue = b;
@@ -144,8 +143,8 @@ void draw_color(Color color)
 #if GLES1
 	draw_color4b(color.r, color.g, color.b, color.a);
 #else
-	//draw_color4b(color.r, color.g, color.b, color.a);
-	glColor4ubv((GLubyte *)&color);
+	draw_color4b(color.r, color.g, color.b, color.a);
+	//glColor4ubv((GLubyte *)&color);
 #endif
 }
 
@@ -179,8 +178,8 @@ void draw_pop_color(void)
 void draw_blend(GLenum src_factor, GLenum dst_factor)
 {
 	if (gl_blend_src != src_factor || gl_blend_dst != dst_factor) {
-		draw_flush();
-		glBlendFunc(src_factor, dst_factor);
+		//draw_flush(); //TODO There should be no need to call this anymore
+		//glBlendFunc(src_factor, dst_factor); //TODO There should be no need to call this anymore
 		gl_blend_src = src_factor;
 		gl_blend_dst = dst_factor;
 	}
@@ -206,24 +205,12 @@ void draw_enable_tex2d(void)
 		glEnable(GL_TEXTURE_2D);
 	}
 }
-void draw_disable_tex2d(void)
+void draw_disable_tex2d(void) // deprecated method!
 {
 	if (gl_texture2d) {
-		//texture_bind(TEX_WHITE);
-		//gl_texture2d = 0;
-		//texture_bind(TEX_WHITE);
-		//glDisable(GL_TEXTURE_2D);
+		gl_texture2d = 0;
+		glDisable(GL_TEXTURE_2D);
 	}
-}
-
-void draw_push_tex2d(void)
-{
-
-}
-
-void draw_pop_tex2d(void)
-{
-
 }
 
 void draw_line(int tex_id, cpVect a, cpVect b, float w)
@@ -271,7 +258,7 @@ void draw_line(int tex_id, cpVect a, cpVect b, float w)
 
 void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w)
 {
-#warning Very similair to draw_line!!
+//#warning Very similair to draw_line!!
 	float dx = b.x-a.x;
 	float dy = b.y-a.y;
 
@@ -331,7 +318,7 @@ void draw_glow_line(cpVect a, cpVect b, float w)
 void draw_quad_line(cpVect a, cpVect b, float w)
 {
 	texture_bind(TEX_WHITE);
-#warning Very similair to draw_line!
+//#warning Very similair to draw_line!
 	float dx = b.x-a.x;
 	float dy = b.y-a.y;
 
@@ -425,12 +412,18 @@ Color draw_col_grad(int hue)
 	return rainbow_col[hue];
 }
 
-void draw_get_current_color(float *c)
+void draw_get_current_color(byte *c)
 {
 	*c = gl_red;
 	*++c = gl_green;
 	*++c = gl_blue;
 	*++c = gl_alpha;
+}
+
+Blend draw_get_current_blend(void)
+{
+	Blend blend = {gl_blend_src, gl_blend_dst};
+	return blend;
 }
 
 //TODO: color customization
@@ -480,7 +473,6 @@ void draw_bar(cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2)
 
 void draw_polygon_textured(int count, cpVect *verts, cpVect p, float rotation, float size, float textuer_scale, int texture)
 {
-
 	float vertices[count* 2];
 	float texcoord[count * 2];
 	int i, j = 0;
@@ -530,11 +522,16 @@ void draw_polygon_outline(int count, cpVect *verts, cpVect p, float rotation, fl
 
 void draw_texture(int tex_id, cpVect pos, const float *tex_map, cpVect size, float angle)
 {
+/*
 	if (texture_bind(tex_id)) {
 		draw_current_texture(pos, tex_map, size, angle);
 	} else {
 		draw_current_texture_all(pos, tex_map, size, angle, triangle_quad);
 	}
+*/
+	texture_bind(tex_id);
+	draw_current_texture(pos, tex_map, size, angle);
+
 }
 
 void draw_current_texture(cpVect pos, const float *tex_map, cpVect size, float angle)
@@ -572,19 +569,6 @@ void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei cou
     draw_vertex_pointer(2, GL_FLOAT, 0, mesh);
     draw_tex_pointer(2, GL_FLOAT, 0, tex_map);
 	draw_draw_arrays(GL_TRIANGLE_STRIP,0, count);
-}
-
-void draw_draw_arrays(GLenum mode, GLint first, GLsizei count)
-{
-
-    matrix2d_multiply_current(count);
-
-    float * tex = matrix2d_get_tex_pointer();
-    float * vertex = matrix2d_get_vertex_data();
-
-    glVertexPointer(2, matrix2d_get_type(), matrix2d_get_stride(), vertex);
-    glTexCoordPointer(2, GL_FLOAT, 0, tex);
-    glDrawArrays(mode, first, count);
 }
 
 void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
@@ -650,7 +634,7 @@ void draw_load_identity(void)
     matrix2d_loadindentity();
 }
 
-// todo combine different gl pointers into an interleaved array
+// todo combine different gl pointers into an interleaved array?
 void draw_append_quad_simple(void)
 {
 	matrix2d_append_quad_simple();
@@ -659,13 +643,36 @@ void draw_append_quad(void)
 {
 	matrix2d_append_quad_tex();
 }
-void draw_append_color_quad(void)
-{
-	matrix2d_append_quad_color();
-}
+//void draw_append_color_quad(void)
+//{
+//	matrix2d_append_quad_color();
+//}
 void draw_append_color_tex_quad(void)
 {
 	matrix2d_append_quad_tex_color();
+}
+
+//TODO only support GL_TRIANGLE_STRIP?
+//TODO merge all flush/draw_arrays methods into one single method
+
+void draw_draw_arrays(GLenum mode, GLint first, GLsizei count)
+{
+    matrix2d_multiply_current(count);
+
+    float *tex = matrix2d_get_tex_pointer();
+    float *vertex = matrix2d_get_vertex_data();
+    //byte *color = matrix2d_get_color_data();
+
+	//int size = matrix2d_get_count();
+
+    //if (size) {
+    	//glEnableClientState(GL_COLOR_ARRAY);
+    	//glColorPointer(4, GL_UNSIGNED_BYTE, 0, color);
+		glVertexPointer(2, matrix2d_get_type(), matrix2d_get_stride(), vertex);
+		glTexCoordPointer(2, GL_FLOAT, 0, tex);
+		glDrawArrays(mode, first, count);
+		//glDisableClientState(GL_COLOR_ARRAY);
+	//}
 }
 
 void draw_flush_color(void)
@@ -673,8 +680,8 @@ void draw_flush_color(void)
 	//int size = matrix2d_get_count();
 	//fprintf(stderr,"COLOR_FLUSH: %d\n",size/2);
 	glEnableClientState(GL_COLOR_ARRAY);
-	float *color = matrix2d_get_color_data();
-	glColorPointer(4, GL_FLOAT, 0, color);
+	byte *color = matrix2d_get_color_data();
+	glColorPointer(4, GL_UNSIGNED_BYTE, 0, color);
 	draw_flush();
 	glDisableClientState(GL_COLOR_ARRAY);
 }
@@ -687,11 +694,12 @@ void draw_flush(void)
 	if (size) {
 		glVertexPointer(2, GL_FLOAT, 0, vertex);
 		glTexCoordPointer(2, GL_FLOAT, 0, tex);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2); //TODO use draw_draw_arrays here instead?
 		matrix2d_reset();
 	}
 }
 
+/*
 void draw_flush_and_multiply(void)
 {
     float *vertex = matrix2d_get_vertex_data();
@@ -706,14 +714,19 @@ void draw_flush_and_multiply(void)
     	matrix2d_reset();
     }
 }
+*/
+
 void draw_flush_simple(void)
 {
 	float *vertex = matrix2d_get_vertex_data();
 	int size = matrix2d_get_count();
 
-	glVertexPointer(2, GL_FLOAT, 0, vertex);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2);
-	matrix2d_reset();
+	if (size) {
+		glVertexPointer(2, GL_FLOAT, 0, vertex);
+#warning not working on mac atm!
+		//glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2); //FIXME not working on mac in state_space
+		matrix2d_reset();
+	}
 }
 
 

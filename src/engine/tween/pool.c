@@ -29,11 +29,15 @@ void * pool_instance(pool *p)
 	return i;
 }
 
-void pool_release(pool *p, void *i)
+void pool_release_rmcall(void *i, pool *p)
 {
 	llist_remove(p->in_use,i);
 	llist_add(p->available, i);
+}
 
+void pool_release(pool *p, void *i)
+{
+	pool_release_rmcall(i,p);
 }
 
 void pool_destroy(pool *p)

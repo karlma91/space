@@ -28,16 +28,6 @@ typedef struct {
 	float height;
 } sprite;
 
-typedef struct {
-	char name[50];
-	int tex_id;
-	float u;
-	float v;
-	float width;
-	float height;
-	int subimages;
-} sprite_data;
-
 void sprite_init(void);
 void sprite_destroy(void);
 

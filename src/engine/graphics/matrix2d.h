@@ -3,6 +3,7 @@
 #define MATRIX2D_H_
 
 #include "chipmunk.h"
+#include "we_utils.h"
 
 typedef struct {
     float x1, y1, z1;
@@ -24,9 +25,9 @@ int matrix2d_get_type(void);
 void matrix2d_set_stride(int stride);
 void matrix2d_set_type(int type);
 
-float *matrix2d_get_color_data(void);
-float *matrix2d_get_color_pointer(void);
-void matrix2d_color_pointer(float *f);
+byte *matrix2d_get_color_data(void);
+byte *matrix2d_get_color_pointer(void);
+void matrix2d_color_pointer(byte *f);
 
 void matrix2d_translate(float x, float y);
 void matrix2d_rotatev(float c, float s);
@@ -47,7 +48,7 @@ cpVect matrix2d_transform_vect(matrix2d m, cpVect v);
 
 void matrix2d_append_strip(int first, int count);
 void matrix2d_append_quad_tex(void);
-void matrix2d_append_quad_color(void);
+//void matrix2d_append_quad_color(void);
 void matrix2d_append_quad_tex_color(void);
 void matrix2d_append_quad_simple(void);
 

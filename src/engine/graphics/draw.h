@@ -17,8 +17,8 @@
 
 
 #if GLES1
-//#include "SDL_opengles.h"
-#include "SDL_opengles2.h"
+#include "SDL_opengles.h"
+//#include "SDL_opengles2.h"
 #else
 
 #if __WIN32__
@@ -35,6 +35,10 @@
 #include "font.h"
 #include "bmfont.h"
 
+typedef struct Blend {
+	GLenum src_factor;
+	GLenum dst_factor;
+} Blend;
 
 /* COLOR DECLARATIONS */
 extern const Color COL_WHITE;
@@ -95,13 +99,12 @@ void draw_pop_blend(void);
 
 void draw_enable_tex2d(void);
 void draw_disable_tex2d(void);
-void draw_push_tex2d(void);
-void draw_pop_tex2d(void);
 
 void draw_draw_arrays(GLenum mode, GLint first, GLsizei count);
 void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 void draw_tex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-void draw_get_current_color(float *c);
+void draw_get_current_color(byte *c);
+Blend draw_get_current_blend(void);
 
 void draw_line(int tex_id, cpVect a, cpVect b, float w);
 void draw_glow_line(cpVect a, cpVect b, float w);

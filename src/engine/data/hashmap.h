@@ -8,10 +8,10 @@
 #ifndef HASHMAP_H_
 #define HASHMAP_H_
 
-typedef struct _hashnode hashnode;
-typedef struct _hashiterator hashiterator;
+typedef struct hashnode hashnode;
+typedef struct hashiterator hashiterator;
 
-typedef struct _hashmap hashmap;
+typedef struct hashmap hashmap;
 
 hashmap * hm_create(void);
 int hm_size(hashmap *hm);

@@ -257,17 +257,17 @@ void upgrades_init(void)
 	for (i = 0; i < UPGRADE_COUNT; i++) {
 		float y = 300 - i*330;
 		btn_next[i] = button_create(SPRITE_GEAR, 0, "", x_next, y, 230, 230);
-		button_set_callback(btn_next[i], next_upgrade, i);
+		button_set_callback(btn_next[i], (btn_callback)next_upgrade, i);
 		button_set_enlargement(btn_next[i], 1.5);
 		state_register_touchable(this, btn_next[i]);
 
 		btn_prev[i] = button_create(SPRITE_GEAR, 0, "", x_prev, y, 230, 230);
-		button_set_callback(btn_prev[i], prev_upgrade, i);
+		button_set_callback(btn_prev[i], (btn_callback)prev_upgrade, i);
 		button_set_enlargement(btn_prev[i], 1.5);
 		state_register_touchable(this, btn_prev[i]);
 
 		btn_upgrade[i] = button_create(NULL, 0, "", x_upg, y, 230, 230);
-		button_set_callback(btn_upgrade[i], upgrade_click, i);
+		button_set_callback(btn_upgrade[i], (btn_callback)upgrade_click, i);
 		button_set_enlargement(btn_upgrade[i], 1.5);
 		state_register_touchable(this, btn_upgrade[i]);
 	}

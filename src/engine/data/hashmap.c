@@ -11,20 +11,20 @@
 #define MAX_KEY_LENGTH 64
 #define INITIAL_SIZE 128
 
-typedef struct _hashmap{
+struct hashmap{
 	int size;
 	int count;
 	hashnode **buckets;
 	hashnode * pool;
 };
 
-struct _hashnode {
+struct hashnode {
 	char key[MAX_KEY_LENGTH];
 	void *data;
 	hashnode *next;
 };
 
-struct _hashiterator {
+struct hashiterator {
 	hashmap *hm;
 	int index;
 	hashnode *node;
@@ -35,7 +35,7 @@ static unsigned long hash(unsigned char *str)
 {
     unsigned long hash = 5381;
     int c;
-    while (c = *str++)
+    while ((c = *str++))
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
     return hash;
 }
