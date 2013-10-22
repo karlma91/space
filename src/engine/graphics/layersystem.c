@@ -61,7 +61,7 @@ int layersystem_add_layer(layer_system *lsys)
 	layer_ins *layer = calloc(1,sizeof(layer_ins));
 	layer->ll_spr = llist_create();
 	llist_set_remove_callback(layer->ll_spr, free);
-	layer->parallax_factor = 1;
+	layer->parallax_factor = 0;
 	layer->parallax_zoom = 1;
 	layer->ll_blend_modes = llist_create();
 	lsys->num_layers += 1;
@@ -144,7 +144,7 @@ void layersystem_register_sprite(STATE_ID state_id, int layer, sprite * spr)
 void layersystem_render(STATE_ID state_id, view *cam)
 {
 	layer_system *ls = state_get_layersystem(state_id);
-//	cpVect p = cam->p; //TODO use for parallax effect (zoom and offset)
+	cpVect p = cam->p; //TODO use for parallax effect (zoom and offset)
 	if(ls == NULL) {
 		SDL_Log("LAYERSYSTEM: rendering NULL");
 		return;
@@ -174,7 +174,7 @@ void layersystem_render(STATE_ID state_id, view *cam)
 				LList ll_atoms = alist_get(blends->al_tex, tex_index);
 				if (ll_atoms) {
 					draw_push_matrix();
-					//draw_translatev(cpvmult(cpvadd(lay->offset,p), lay->parallax_factor));
+					draw_translatev(cpvmult(cpvadd(lay->offset,p), lay->parallax_factor));
 
 					/* iterate atomic draw calls */
 					llist_begin_loop(ll_atoms);
@@ -196,7 +196,7 @@ void layersystem_render(STATE_ID state_id, view *cam)
 					}
 					llist_end_loop(ll_atoms);
 
-					draw_flush();
+					draw_flush_color();
 					draw_pop_matrix();
 				}
 			}

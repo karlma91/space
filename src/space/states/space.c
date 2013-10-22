@@ -749,26 +749,31 @@ static cpVect space_particle_g_func(cpVect pos)
     return cpvnormalize_safe(pos);
 }
 
+layer_system * state_get_layersystem(STATE_ID state_id); //TODO REMOVE ME
 void space_init(void)
 {
-	/*int i;
-	for(i = 0; i < layersystem->num_layers; i++){
-		//float depth =  1 + 10*tan((1.0f*i/layersystem->num_layers)*WE_PI_2);
-		float f = 0.1 + 0.9 * i / (layersystem->num_layers); // -> 0 = nearest, 1 = furthest
-		//layersystem_set_layer_parallax(layersystem, i, f, 1);
-	}
-	for(i = 0; i<150; i++){
-		int layer = roundf(we_randf*(layersystem->num_layers-1));
-		float size = 25 + (400+70) -(we_randf*70 + layer*10);
-		layersystem_add_sprite(layersystem, layer, SPRITE_SPIKEBALL, size, size, cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600), we_randf*WE_2PI);
-	}*/
-
 	statesystem_register(state_space,LEVEL_STATE_COUNT);
     state_add_inner_state(state_space,LEVEL_START,level_start,NULL);
     state_add_inner_state(state_space,LEVEL_RUNNING,level_running,NULL);
     state_add_inner_state(state_space,LEVEL_PLAYER_DEAD,level_player_dead,NULL);
     state_add_inner_state(state_space,LEVEL_CLEARED,level_cleared,NULL);
     state_add_inner_state(state_space,LEVEL_TRANSITION,level_transition,NULL);
+
+	/*
+	int i;
+	layer_system *lsys = state_get_layersystem(state_space); //TODO create getter for layersystem
+	int layer_count = lsys->num_layers;
+	for(i = 0; i <  layer_count; i++){
+		//float depth =  1 + 10*tan((1.0f*i/layersystem->num_layers)*WE_PI_2);
+		float f = 0.1 + 0.9 * i / (layer_count); // -> 0 = nearest, 1 = furthest
+		state_set_layer_parallax(state_space, i, f, 1);
+	}
+	for(i = 10; i<150; i++){
+		int layer = roundf(we_randf*(lsys->num_layers-1));
+		float size = 25 + (400+70) -(we_randf*70 + layer*10);
+		state_add_sprite(state_space, layer, SPRITE_SPIKEBALL, size, size, cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600), we_randf*WE_2PI);
+	}
+	*/
 
     view_p1 = state_view_get(state_space, 0);
     view_p2 = state_view_add(state_space);

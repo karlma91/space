@@ -449,9 +449,6 @@ static void draw_all_particles(emitter *em)
 	}
 	llist_end_loop(em->particles);
 
-	if(em->draw_particle == default_particle_draw) {
-		draw_flush_color();
-	}
 	draw_pop_blend();
 	draw_pop_color();
 

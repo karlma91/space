@@ -724,7 +724,7 @@ void draw_flush_simple(void)
 	if (size) {
 		glVertexPointer(2, GL_FLOAT, 0, vertex);
 #warning not working on mac atm!
-		//glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2); //FIXME not working on mac in state_space
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2); //FIXME not working on mac in state_space
 		matrix2d_reset();
 	}
 }
