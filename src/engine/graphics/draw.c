@@ -308,6 +308,7 @@ void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w)
     draw_pop_matrix();
 }
 
+//TODO be able to set blend layers
 void draw_glow_line(cpVect a, cpVect b, float w)
 {
 	draw_line(TEX_GLOW, a, b, w);
@@ -318,25 +319,9 @@ void draw_glow_line(cpVect a, cpVect b, float w)
 void draw_quad_line(cpVect a, cpVect b, float w)
 {
 	texture_bind(TEX_WHITE);
-//#warning Very similair to draw_line!
-	float dx = b.x-a.x;
-	float dy = b.y-a.y;
+	layersystem_register_quadline(0,a,b,w); //TODO use layer here?
 
-    draw_push_matrix();
-    draw_translate(a.x, a.y);
-	draw_rotate(atan2f(dy,dx));
-	GLfloat length = hypotf(dy, dx);
-	draw_scale(1,w);
-	w /= 2;
-	GLfloat line[8] = { -w, -0.5,
-			-w,  0.5,
-			length + w, -0.5,
-			length + w,  0.5};
-
-	draw_vertex_pointer(2, GL_FLOAT, 0, line);
-	draw_append_quad_simple();
-
-	draw_pop_matrix();
+//#warning Very similair to draw_line...
 }
 
 void draw_line_strip(const GLfloat *strip, int l, float w)
@@ -395,7 +380,7 @@ void draw_box(cpVect p, cpVect s, GLfloat angle, int centered)
 void draw_box_append(cpVect p, cpVect s, GLfloat angle, int centered)
 {
 	box_common(p,s,angle,centered);
-	draw_append_quad_simple();
+	draw_append_color_tex_quad();
 	draw_pop_matrix();
 }
 
@@ -635,14 +620,14 @@ void draw_load_identity(void)
 }
 
 // todo combine different gl pointers into an interleaved array?
-void draw_append_quad_simple(void)
-{
-	matrix2d_append_quad_simple();
-}
-void draw_append_quad(void)
-{
-	matrix2d_append_quad_tex();
-}
+//void draw_append_quad_simple(void)
+//{
+//	matrix2d_append_quad_simple();
+//}
+//void draw_append_quad(void)
+//{
+//	matrix2d_append_quad_tex();
+//}
 //void draw_append_color_quad(void)
 //{
 //	matrix2d_append_quad_color();

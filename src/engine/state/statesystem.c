@@ -461,10 +461,11 @@ void statesystem_push_event(SDL_Event *event)
 	//TMP DEBUG
 	// /*
 	if (view_touchies) {
-		fprintf(stderr, "Touch in view_%d    X: %-6.3f Y: %-6.3f\n", view_index, event->tfinger.x,event->tfinger.y);
 		if (keys[SDL_SCANCODE_Q]) {
 			keys[SDL_SCANCODE_Q] = 0;
 			view_set_orientation(touched_view, touched_view->port_orientation + 1);
+		} else if (keys[SDL_SCANCODE_Z]) {
+			fprintf(stderr, "Touch in view_%d    X: %-6.3f Y: %-6.3f\n", view_index, event->tfinger.x,event->tfinger.y);
 		}
 	}
 	//*/

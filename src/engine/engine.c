@@ -503,6 +503,7 @@ static void main_tick(void *data)
 			fps = 0;
 		}
 
+		/*// rendering is not supported outside of a drawing call
 		draw_load_identity();
 		setTextAlign(TEXT_RIGHT);
 		setTextSize(15);
@@ -511,6 +512,7 @@ static void main_tick(void *data)
 		draw_box(cpv(GAME_WIDTH/2-box_width,-GAME_HEIGHT/2),cpv(box_width,40),0,0);
 		draw_color4f(0.7,0,0,1);
 		font_drawText(GAME_WIDTH/2-5,-GAME_HEIGHT/2+20,FULL_VERSION_STRING);
+		*/
 
 		SDL_GL_SwapWindow(window);
 	}

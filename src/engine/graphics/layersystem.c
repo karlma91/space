@@ -21,7 +21,7 @@ layer_system * state_get_layersystem(STATE_ID state_id);
 typedef enum ATOM_ID {
 	ATOM_ID_SPRITE,
 	ATOM_ID_POLLYGON,
-	ATOM_ID_OUTLINE,
+	ATOM_ID_QUADLINE,
 	ATOM_ID_TEXT
 } ATOM_ID;
 
@@ -31,15 +31,48 @@ typedef struct blend_tree {
 	arraylist *al_tex;
 } blend_tree;
 
+typedef struct Line {
+	cpVect a;
+	cpVect b;
+	float w;
+} Line;
+
 typedef struct atom_draw {
 	ATOM_ID type;
 	Color col;
 	//cpVect pos;
 	//float scale;
+	Line line;
+	matrix2d H;
+
 	void *data;
 } atom_draw;
 
-pool *pool_atom;
+static void atom_render_quadline(atom_draw *atom)
+{
+	Line l = atom->line;
+	float dx = l.b.x-l.a.x;
+	float dy = l.b.y-l.a.y;
+
+    draw_push_matrix();
+    matrix2d_setmatrix(atom->H);
+    draw_translate(l.a.x, l.a.y);
+	draw_rotate(atan2f(dy,dx));
+	GLfloat length = hypotf(dy, dx);
+	draw_scale(1,l.w);
+	l.w /= 2;
+	GLfloat line[8] = { -l.w, -0.5,
+			-l.w,  0.5,
+			length + l.w, -0.5,
+			length + l.w,  0.5};
+
+	draw_vertex_pointer(2, GL_FLOAT, 0, line);
+	draw_append_color_tex_quad();
+	draw_pop_matrix();
+}
+
+
+static pool *pool_atom;
 
 
 void layersystem_init(void)
@@ -89,11 +122,13 @@ static void llrmcall(atom_draw *atom)
 	pool_release(pool_atom, atom);
 }
 
-void layersystem_register_sprite(STATE_ID state_id, int layer, sprite * spr)
+static atom_draw *register_atomic(int layer, int tex_id)
 {
+	STATE_ID state_id = statesystem_get_render_state();
+
 	layer_system *ls =state_get_layersystem(state_id);
 	if(check_bounds(ls, layer)){
-		return;
+		return NULL;
 	}
 
 	/* current layer */
@@ -123,8 +158,6 @@ void layersystem_register_sprite(STATE_ID state_id, int layer, sprite * spr)
 		llist_add(ll_blend, blend_texs);
 	}
 
-
-	int tex_id = sprite_get_texture(spr);
 	arraylist *al = blend_texs->al_tex;
 
 	LList ll_atoms = alist_get(al,tex_id);
@@ -135,10 +168,29 @@ void layersystem_register_sprite(STATE_ID state_id, int layer, sprite * spr)
 	}
 
 	atom_draw *atom = pool_instance(pool_atom);
+	draw_get_current_color((byte *)&atom->col);
+	atom->H = matrix2d_getmatrix();
+	llist_add(ll_atoms, atom);
+
+	return atom;
+}
+
+void layersystem_register_quadline(int layer, cpVect a, cpVect b, float w)
+{
+	atom_draw *atom = register_atomic(layer, texture_get_current());
+	atom->type = ATOM_ID_QUADLINE;
+	//atom->H = matrix2d_getmatrix();
+	atom->line.a = a;
+	atom->line.b = b;
+	atom->line.w = w;
+	atom->data = NULL;
+}
+
+void layersystem_register_sprite(int layer, sprite * spr)
+{
+	atom_draw *atom = register_atomic(layer, sprite_get_texture(spr));
 	atom->type = ATOM_ID_SPRITE;
 	atom->data = spr;
-	draw_get_current_color((byte *)&atom->col);
-	llist_add(ll_atoms, atom);
 }
 
 void layersystem_render(STATE_ID state_id, view *cam)
@@ -157,7 +209,7 @@ void layersystem_render(STATE_ID state_id, view *cam)
 		llist_begin_loop(lay->ll_spr);
 		while(llist_hasnext(lay->ll_spr)) {
 			sprite *s = llist_next(lay->ll_spr);
-			layersystem_register_sprite(state_id, 0, s);
+			//layersystem_register_sprite(0, s);
 		}
 		llist_end_loop(lay->ll_spr);
 
@@ -175,19 +227,22 @@ void layersystem_render(STATE_ID state_id, view *cam)
 				if (ll_atoms) {
 					draw_push_matrix();
 					draw_translatev(cpvmult(cpvadd(lay->offset,p), lay->parallax_factor));
+					glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_index));
 
 					/* iterate atomic draw calls */
 					llist_begin_loop(ll_atoms);
 					while(llist_hasnext(ll_atoms)) {
 						atom_draw *atom = llist_next(ll_atoms);
 						draw_color(atom->col);
+						matrix2d_setmatrix(atom->H);
 						switch (atom->type) {
 						case ATOM_ID_SPRITE:
 							sprite_final_render((sprite *)(atom->data));
 							break;
 						case ATOM_ID_POLLYGON:
 							break;
-						case ATOM_ID_OUTLINE:
+						case ATOM_ID_QUADLINE:
+							atom_render_quadline(atom);
 							break;
 						case ATOM_ID_TEXT:
 							break;

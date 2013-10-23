@@ -200,12 +200,7 @@ void sprite_render_scaled(sprite *spr, cpVect pos, float angle, float size)
 	spr->a = angle;
 	spr->size = size;
 
-	STATE_ID currentState = statesystem_get_render_state();
-
-	if(currentState != NULL){
-		layersystem_register_sprite(currentState, 0, spr);
-	}
-
+	layersystem_register_sprite(0, spr);
 }
 
 void sprite_final_render(sprite *spr) {

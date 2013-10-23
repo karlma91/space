@@ -107,7 +107,7 @@ static void draw_char(bm_font *f, bm_char *c)
     draw_tex_pointer(2,GL_FLOAT,0,tex_map);
    // cpVect pos = cpv(c->x_offset,c->y_offset);
     //cpVect pos = cpv(0,0);
-    draw_append_quad();
+    draw_append_color_tex_quad();
     //draw_current_texture(&pos,tex_map,c->w,c->h,0);
     //draw_current_texture_all(&pos,tex_map,1,1,0,quad);
     draw_translate(c->x_advance - c->x_offset,0);

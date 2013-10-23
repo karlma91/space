@@ -4,14 +4,12 @@
 #include "draw.h"
 #include "we_data.h"
 
-extern int texture_load(const char *file);
-
-extern int texture_init(void);
-
+extern const float TEX_MAP_FULL[8];
 extern arraylist *textures;
 
-extern const float TEX_MAP_FULL[8];
-
+extern int texture_load(const char *file);
+extern int texture_init(void);
+extern GLint texture_get_current(void);
 extern int texture_bind(int);
 
 extern int TEX_WHITE;

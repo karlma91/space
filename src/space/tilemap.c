@@ -106,13 +106,13 @@ void tilemap_render(tilemap *map)
 
 				draw_vertex_pointer(2, GL_FLOAT, 0,vertex_quad);
 				draw_tex_pointer(2,GL_FLOAT,0,sub_map);
-				draw_append_quad();
+				draw_append_color_tex_quad();
 				++tile_count;
 			}
 		}
 	}
 
-	draw_flush();
+	draw_flush_color();
 
 	if (tile_count > tile_count_max) {
 		tile_count_max = tile_count;

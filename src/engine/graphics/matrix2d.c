@@ -125,24 +125,17 @@ static void append_quad_color(void)
 }
 
 
-void matrix2d_append_strip(int first, int count)
-{
-
-}
-
-void matrix2d_append_quad_simple(void)
-{
-	append_quad_color();
-	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer, 4);
-}
-
-void matrix2d_append_quad_tex(void)
-{
-	append_quad_color();
-	tex_append = matrix2d_append_quad(tex_append, tex_pointer);
-	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer,4);
-}
-
+//void matrix2d_append_quad_simple(void)
+//{
+//	append_quad_color();
+//	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer, 4);
+//}
+//void matrix2d_append_quad_tex(void)
+//{
+//	append_quad_color();
+//	tex_append = matrix2d_append_quad(tex_append, tex_pointer);
+//	vertex_append = matrix2d_multiply_to_quad(vertex_append, vertex_pointer,4);
+//}
 //void matrix2d_append_quad_color(void)
 //{
 //	append_quad_color();
@@ -255,10 +248,10 @@ void matrix2d_loadindentity(void)
     cur->x2 = 0; cur->y2 = 1; cur->z2 = 0;
 }
 
-void matrix2d_setmatrix(float *m)
+void matrix2d_setmatrix(matrix2d m)
 {
-    cur->x1 = m[0]; cur->y1 = m[1]; cur->z1 = m[2];
-    cur->x2 = m[3]; cur->y2 = m[4]; cur->z2 = m[5];
+    cur->x1 = m.x1; cur->y1 = m.y1; cur->z1 = m.z1;
+    cur->x2 = m.x2; cur->y2 = m.y2; cur->z2 = m.z2;
 }
 
 matrix2d matrix2d_getmatrix()

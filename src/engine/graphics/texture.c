@@ -153,6 +153,11 @@ int texture_init(void)
 	return 0;
 }
 
+GLint texture_get_current(void)
+{
+	return gl_tex_id;
+}
+
 int texture_destroy(void)
 {
 	int i;
@@ -167,7 +172,7 @@ int texture_bind(int tex_id) {
 	return 0;
 #endif
 	if (tex_id != gl_tex_id && tex_id >= 0) {
-		draw_flush();
+		draw_flush_color();
 		gl_tex_id = tex_id;
 		glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_id));
 		return 0;

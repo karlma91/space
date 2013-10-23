@@ -33,7 +33,7 @@ void matrix2d_translate(float x, float y);
 void matrix2d_rotatev(float c, float s);
 void matrix2d_rotate(float a);
 void matrix2d_scale(float x, float y);
-void matrix2d_setmatrix(float *m);
+void matrix2d_setmatrix(matrix2d m);
 matrix2d matrix2d_getmatrix();
 
 void matrix2d_clear(void);
