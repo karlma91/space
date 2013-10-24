@@ -105,11 +105,11 @@ int texture_load(const char *file)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		//if ((strcmp(file,"stars.png") && strcmp(file,"stars.jpg") && strcmp(file,"stars_2.png") && strcmp(file, "metal_01.png")) == 0) { //TODO remove tmp code
-			//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		//} else {
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		//}
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
@@ -167,13 +167,13 @@ int texture_destroy(void)
 	return 0;
 }
 
-int texture_bind(int tex_id) {
+int texture_bind_virt(int tex_id) {
 #if !LOAD_TEXTURES
 	return 0;
 #endif
 	if (tex_id != gl_tex_id && tex_id >= 0) {
 		gl_tex_id = tex_id;
-		glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_id));
+		//glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_id));
 		return 0;
 	}
 	return 1;

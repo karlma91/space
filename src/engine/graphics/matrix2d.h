@@ -22,7 +22,7 @@ void matrix2d_push(void);
 void matrix2d_setidentity(void);
 void matrix2d_pop(void);
 
-void matrix2d_mult2f(float *point);
+void matrix2d_multp(float *point);
 void matrix2d_multv(float *vertices, int count);
 cpVect matrix2d_multcpv(matrix2d m, cpVect v);
 

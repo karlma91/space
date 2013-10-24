@@ -126,7 +126,7 @@ void layersystem_render(STATE_ID state_id, view *cam)
 					vertex_elem *elems = batch->elems;
 					glVertexPointer(2, GL_FLOAT, sizeof *elems, &elems[0].x);
 					glTexCoordPointer(2, GL_FLOAT, sizeof *elems, &elems[0].tx);
-					glColorPointer(4, GL_UNSIGNED_BYTE, sizeof *elems, &elems[0].col);
+					glColorPointer(4, GL_UNSIGNED_BYTE, sizeof *elems, &(elems[0].col.r));
 					glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_index));
 					glDrawArrays(GL_TRIANGLE_STRIP, 0, batch->count);
 					batch->count = 0;
@@ -196,6 +196,7 @@ static render_batch *current_batch(int layer)
 		blend_texs->type = current_blend;
 		blend_texs->al_tex = alist_new();
 		llist_add(ll_blend, blend_texs);
+		SDL_Log("Did not find current blend in tree, creating new blend...");
 	}
 
 	GLint tex_id = texture_get_current();
@@ -204,22 +205,36 @@ static render_batch *current_batch(int layer)
 
 	if (batch == NULL) {
 		batch = calloc(1, sizeof *batch);
-		alist_set(al, tex_id, batch);
+        if (batch == NULL) {
+            SDL_Log("ERROR: NOT ENOUGH MEMORY!");
+        } else {
+        	SDL_Log("New batch renderer created (state_id=%p, blend=%x, layer=%d, tex_id=%d): %dkB", state_id, current_blend.src_factor, layer, tex_id, (512+sizeof(render_batch))/1024);
+        	alist_set_safe(al, tex_id, batch);
+        }
 	}
 
 	return batch;
 }
 
+int ELEMENT_APPEND_COUNT = 0;
+int ELEMENT_APPEND_ACTUAL_COUNT = 0;
 
 static inline void render_append_elem(render_batch *batch, vertex_elem *elem)
 {
-	int index = batch->count;
-	if (index >= MAX_ELEM_COUNT_BATCH) {
-		SDL_Log("WARNING: render batch index out of bounds!");
-		return;
-	}
-	batch->elems[index] = *elem;
-	batch->count = index + 1;
+	++ELEMENT_APPEND_COUNT;
+    if (batch) {
+        int index = batch->count;
+        if (index >= MAX_ELEM_COUNT_BATCH) {
+            static int notified = 0;
+            if (!notified)
+                SDL_Log("WARNING: render batch index out of bounds!");
+            notified = 1;
+            return;
+        }
+        ++ELEMENT_APPEND_ACTUAL_COUNT;
+        batch->elems[index] = *elem;
+        batch->count = index + 1;
+    }
 }
 
 static inline void render_append_vertex(render_batch *batch, float x, float y, float tx, float ty)
@@ -231,7 +246,7 @@ static inline void render_append_vertex(render_batch *batch, float x, float y, f
 
 static inline void render_append_vertex2fv(render_batch *batch, float **ver_point, float **tex_point)
 {
-	matrix2d_multp(ver_point);
+	matrix2d_multp(*ver_point);
 	float x  = *(*ver_point)++, y  = *(*ver_point)++;
 	float tx = *(*tex_point)++, ty = *(*tex_point)++;
 	Color col = draw_get_current_color();
@@ -241,53 +256,60 @@ static inline void render_append_vertex2fv(render_batch *batch, float **ver_poin
 
 static inline void render_append_repeat(render_batch *batch)
 {
-	int index = batch->count;
-	if (index == 0) {
-		return; //no need to repeat
-	}
-	render_append_elem(batch, &batch->elems[--index]);
+    if (batch) {
+        int index = batch->count;
+        if (index == 0) {
+            return; //no need to repeat
+        }
+        render_append_elem(batch, &batch->elems[--index]);
+    }
 }
 
 
-void draw_quad_new(int layer, float *ver_quad, float *tex_quad) /* appends an independent quad to the current render state */
+void draw_quad_new(int layer, float ver_quad[8], const float tex_quad[8]) /* appends an independent quad to the current render state */
 {
+	float **tex = (float **) &tex_quad;
 	render_batch *batch = current_batch(layer); //TODO remove out of this call?
 	render_append_repeat(batch); // repeat previous point if any
-	render_append_vertex2fv(batch, &ver_quad, &tex_quad); // point A
+	render_append_vertex2fv(batch, &ver_quad, tex); // point A
 	render_append_repeat(batch); // repeat point A
-	render_append_vertex2fv(batch, &ver_quad, &tex_quad); // point B
-	render_append_vertex2fv(batch, &ver_quad, &tex_quad); // point C
-	render_append_vertex2fv(batch, &ver_quad, &tex_quad); // point D
+	render_append_vertex2fv(batch, &ver_quad, tex); // point B
+	render_append_vertex2fv(batch, &ver_quad, tex); // point C
+	render_append_vertex2fv(batch, &ver_quad, tex); // point D
 }
 
-void draw_quad_continue(int layer, float *ver_edge, float *tex_edge) /* extends a previous quad by adding 2 vertices specified by edge */
+void draw_quad_continue(int layer, float ver_edge[4], const float tex_edge[4]) /* extends a previous quad by adding 2 vertices specified by edge */
 {
+	float **tex = (float **) &tex_edge;
 	render_batch *batch = current_batch(layer);
-	render_append_vertex2fv(batch, &ver_edge, &tex_edge); // point A
-	render_append_vertex2fv(batch, &ver_edge, &tex_edge); // point B
+	render_append_vertex2fv(batch, &ver_edge, tex); // point A
+	render_append_vertex2fv(batch, &ver_edge, tex); // point B
 }
 
-void draw_triangle_strip(int layer, float *ver_list, float *tex_list, int count) // appends a triangle strip to current render state
+void draw_triangle_strip(int layer, float *ver_list, const float *tex_list, int count) // appends a triangle strip to current render state
 {
 	if (count <= 0) return;
+	float **tex = (float **) &tex_list;
 	render_batch *batch = current_batch(layer); //TODO move out of this method?
-	do render_append_vertex2fv(batch, &ver_list, &tex_list); while (--count);
+	do render_append_vertex2fv(batch, &ver_list, tex); while (--count);
 }
 
-void draw_triangle_fan(int layer, float *ver_fan, float *tex_fan, int count) /* appends a triangle fan to current render state */
+void draw_triangle_fan(int layer, float *ver_fan, const float *tex_fan, int count) /* appends a triangle fan to current render state */
 {
 	if (count <= 0) return;
+	float **tex = (float **) &tex_fan;
 	render_batch *batch = current_batch(layer);
+    if (!batch) return;
 	vertex_elem *fan_origin;
 
 	render_append_repeat(batch); // repeat previous point
 	fan_origin = &batch->elems[batch->count];
-	render_append_vertex2fv(batch, &ver_fan, &tex_fan); // fan origin
+	render_append_vertex2fv(batch, &ver_fan, tex); // fan origin
 	render_append_elem(batch, fan_origin); // repeat p0
 
 	for (;;) {
-		if (--count > 0) render_append_vertex2fv(batch, &ver_fan, &tex_fan); else break;
-		if (--count > 0) render_append_vertex2fv(batch, &ver_fan, &tex_fan); else break;
+		if (--count > 0) render_append_vertex2fv(batch, &ver_fan, tex); else break;
+		if (--count > 0) render_append_vertex2fv(batch, &ver_fan, tex); else break;
 		if (--count > 0) render_append_elem(batch, fan_origin); else break; // repeat p0
 	}
 }

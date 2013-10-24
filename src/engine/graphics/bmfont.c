@@ -103,11 +103,9 @@ static void draw_char(bm_font *f, bm_char *c)
 
     //SDL_Log("ID: %d X: %d, y: %d, w: %d, h: %d, texh: %d, texw: %d",c->id, c->x, c->y, c->w, c->h, f->tex_h, f->tex_w);
 
-    draw_vertex_pointer(2,GL_FLOAT,0,quad);
-    draw_tex_pointer(2,GL_FLOAT,0,tex_map);
    // cpVect pos = cpv(c->x_offset,c->y_offset);
-    //cpVect pos = cpv(0,0);
-    draw_append_color_tex_quad();
+	//cpVect pos = cpv(0,0);
+	draw_quad_new(TMP_RENDER_LAYER, quad, tex_map);
     //draw_current_texture(&pos,tex_map,c->w,c->h,0);
     //draw_current_texture_all(&pos,tex_map,1,1,0,quad);
     draw_translate(c->x_advance - c->x_offset,0);
@@ -122,7 +120,7 @@ void bmfont_render(bm_font *font, int align, float x, float y, char *format, ...
     va_start(ap, format);
     vsprintf(text, format, ap);
     va_end(ap);
-    texture_bind(font->tex_id);
+    texture_bind_virt(font->tex_id);
     draw_push_matrix();
     draw_load_identity();
     int i = 0;
@@ -163,7 +161,7 @@ static void flush_line(bm_font *font, float text_width, float x, float y)
     draw_scale(font->scale,-font->scale);
     //draw_flush_and_multiply(); //TODO FIXME
     //draw_flush(); //TODO FIXME multiply removed!
-    SDL_Log("bmfont.c render not implemented!");
+    //SDL_Log("bmfont.c render not implemented!");
     draw_pop_matrix();
 }
 

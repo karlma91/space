@@ -33,7 +33,7 @@ void tilemap_render(tilemap *map)
 {
 	//draw_enable_tex2d();
 	draw_color4f(1,1,1,1);
-	texture_bind(map->texture_id);
+	texture_bind_virt(map->texture_id);
 
 	int i,j;
 	int x,y;
@@ -101,12 +101,8 @@ void tilemap_render(tilemap *map)
 				se_rect2arch_from_data(&p3, &data1);
 				se_rect2arch_from_data(&p4, &data2);
 #endif
-
 				GLfloat vertex_quad[8] = {p1.x, p1.y, p2.x,  p2.y, p3.x,  p3.y, p4.x,  p4.y};
-
-				draw_vertex_pointer(2, GL_FLOAT, 0,vertex_quad);
-				draw_tex_pointer(2,GL_FLOAT,0,sub_map);
-				draw_append_color_tex_quad();
+				draw_quad_new(TMP_RENDER_LAYER, vertex_quad, sub_map);
 				++tile_count;
 			}
 		}

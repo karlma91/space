@@ -10,7 +10,7 @@ extern arraylist *textures;
 extern int texture_load(const char *file);
 extern int texture_init(void);
 extern GLint texture_get_current(void);
-extern int texture_bind(int);
+extern int texture_bind_virt(int);
 
 extern int TEX_WHITE;
 extern int TEX_GLOW_DOT;

@@ -8,6 +8,7 @@
 
 #include "../../space/spaceengine.h" //TODO remove dependency?
 
+
 GLfloat triangle_quad[8] = {-0.5, -0.5,
 		0.5,  -0.5,
 		-0.5, 0.5,
@@ -235,11 +236,8 @@ void draw_line(int tex_id, cpVect a, cpVect b, float w)
 			1, 0,
 			1,  1};
 
-	draw_vertex_pointer(2, GL_FLOAT, 0, line_mesh);
-	draw_tex_pointer( 2, GL_FLOAT, 0, line_texture );
-
-	texture_bind(tex_id);
-	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 8);
+	texture_bind_virt(tex_id);
+	draw_triangle_fan(TMP_RENDER_LAYER, line_mesh, line_texture, 8);
 
 	draw_pop_blend();
 	draw_pop_matrix();
@@ -288,11 +286,8 @@ void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w)
             tx_2, ty_1,
             tx_2,  ty_2};
 
-    draw_vertex_pointer(2, GL_FLOAT, 0, line_mesh);
-    draw_tex_pointer( 2, GL_FLOAT, 0, line_texture );
-
-    texture_bind(sprite_get_texture(spr));
-    draw_draw_arrays(GL_TRIANGLE_STRIP,0, 8);
+    texture_bind_virt(sprite_get_texture(spr));
+	draw_triangle_fan(TMP_RENDER_LAYER, line_mesh, line_texture, 8);
 
     draw_pop_matrix();
 }
@@ -307,7 +302,7 @@ void draw_glow_line(cpVect a, cpVect b, float w)
 
 void draw_quad_line(cpVect a, cpVect b, float w)
 {
-	texture_bind(TEX_WHITE);
+	texture_bind_virt(TEX_WHITE);
 	float dx = b.x-a.x;
 	float dy = b.y-a.y;
 
@@ -322,8 +317,7 @@ void draw_quad_line(cpVect a, cpVect b, float w)
 			length + w, -0.5,
 			length + w,  0.5};
 
-	draw_vertex_pointer(2, GL_FLOAT, 0, line);
-	draw_append_color_tex_quad();
+	draw_quad_new(TMP_RENDER_LAYER, line, TEX_MAP_FULL);
 	draw_pop_matrix();
 
 //#warning Very similair to draw_line...
@@ -350,7 +344,7 @@ void draw_circle(cpVect pos, GLfloat radius)
 
 void draw_donut(cpVect p, GLfloat inner_r, GLfloat outer_r)
 {
-	texture_bind(TEX_WHITE);
+	texture_bind_virt(TEX_WHITE);
 	int i = 0;
 	static float v[256];
 	int j = 0;
@@ -360,26 +354,17 @@ void draw_donut(cpVect p, GLfloat inner_r, GLfloat outer_r)
 		v[j++] = (p.x+unit_circle[i]*outer_r);
 		v[j++] = p.y+unit_circle[i+1]*outer_r;
 	}
-	draw_vertex_pointer(2, GL_FLOAT, 0, v);
-	draw_tex_pointer(2, GL_FLOAT, 0, TEX_MAP_FULL);
-	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 128);
-}
-
-static void box_common(cpVect p, cpVect s, GLfloat angle, int centered)
-{
-	texture_bind(TEX_WHITE);
-    draw_push_matrix();
-    draw_translate(p.x,p.y);
-	draw_rotate(angle);
-	draw_scale(s.x, s.y);
-	draw_vertex_pointer(2, GL_FLOAT, 0, centered ? triangle_quad : corner_quad);
-	draw_tex_pointer(2, GL_FLOAT, 0, TEX_MAP_FULL);
+	draw_triangle_strip(TMP_RENDER_LAYER, v, TEX_MAP_FULL, 128);
 }
 
 void draw_box(cpVect p, cpVect s, GLfloat angle, int centered)
 {
-	box_common(p,s,angle,centered);
-	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 4);
+	texture_bind_virt(TEX_WHITE);
+    draw_push_matrix();
+    draw_translate(p.x,p.y);
+	draw_rotate(angle);
+	draw_scale(s.x, s.y);
+	draw_quad_new(TMP_RENDER_LAYER, centered ? triangle_quad : corner_quad, TEX_MAP_FULL);
 	draw_pop_matrix();
 }
 
@@ -467,25 +452,20 @@ void draw_polygon_textured(int count, cpVect *verts, cpVect p, float rotation, f
 		j++;
 	}
 
-	texture_bind(texture);
+	texture_bind_virt(texture);
 	draw_push_matrix();
 	draw_translatev(p);
 	draw_rotate(rotation);
 	draw_scale(size, size);
 	draw_color4f(1,1,1,1);
-	draw_vertex_pointer(2, GL_FLOAT, 0, vertices);
-	draw_tex_pointer(2, GL_FLOAT, 0, texcoord);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	draw_draw_arrays(GL_TRIANGLE_FAN, 0, count);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	draw_triangle_fan(TMP_RENDER_LAYER, vertices, texcoord, count);
+
 	draw_pop_matrix();
 
 }
 void draw_polygon_outline(int count, cpVect *verts, cpVect p, float rotation, float size)
 {
-	texture_bind(TEX_WHITE);
+	texture_bind_virt(TEX_WHITE);
 	draw_push_matrix();
 	draw_translatev(p);
 	draw_rotate(rotation);
@@ -497,14 +477,13 @@ void draw_polygon_outline(int count, cpVect *verts, cpVect p, float rotation, fl
 			draw_quad_line(cpvmult(verts[i],size), cpvmult(verts[0],size), 1);
 		}
 	}
-	draw_flush_simple();
 	draw_pop_matrix();
 }
 
 
 void draw_texture(int tex_id, cpVect pos, const float *tex_map, cpVect size, float angle)
 {
-	texture_bind(tex_id);
+	texture_bind_virt(tex_id);
 	draw_current_texture_append(pos, tex_map, size, angle);
 }
 
@@ -514,9 +493,7 @@ void draw_current_texture_append(cpVect pos, const float *tex_map, cpVect size, 
 	draw_translate(pos.x, pos.y);
 	draw_rotate(angle);
 	draw_scalev(size);
-	draw_vertex_pointer(2, GL_FLOAT, 0, triangle_quad);
-	draw_tex_pointer(2, GL_FLOAT, 0, tex_map);
-	draw_append_color_tex_quad();
+	draw_quad_new(TMP_RENDER_LAYER, triangle_quad, tex_map);
 	draw_pop_matrix();
 }
 

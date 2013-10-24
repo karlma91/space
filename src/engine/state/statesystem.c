@@ -271,8 +271,14 @@ void view_clip(view *cam);
 void view_transform2view(view *cam);
 void view_transform2port(view *cam);
 
+extern int ELEMENT_APPEND_COUNT;
+extern int ELEMENT_APPEND_ACTUAL_COUNT;
+
 void statesystem_draw(void)
 {
+	ELEMENT_APPEND_COUNT = 0;
+	ELEMENT_APPEND_ACTUAL_COUNT = 0;
+
 	/* render all states in stack */
     State *state = stack_tail;
     while(state){
@@ -315,7 +321,6 @@ void statesystem_draw(void)
     		}
 
     		draw_pop_matrix();
-    		layersystem_render(state, cam);
 
     		/* render in-game touchables */
     		LList state_touchies = state->touch_objects;
@@ -331,6 +336,7 @@ void statesystem_draw(void)
     		/* RENDER HUD */
     		view_transform2port(cam);
     		draw_push_matrix();
+    		draw_push_matrix();
     		extern int debug_draw;
     		if (debug_draw) {
     			draw_color4f(1,0,1,0.3);
@@ -338,6 +344,8 @@ void statesystem_draw(void)
     			draw_color4f(0,1,0,1.0);
     			draw_box(cpvzero, cpv(10,10), 0, 1);
     		}
+
+    		draw_pop_matrix();
     		if (cam->GUI) {
     			cam->GUI(cam);
     		}
@@ -354,9 +362,7 @@ void statesystem_draw(void)
     		}
     		llist_end_loop(cam_touchies);
 
-    		//TODO render layersystem
-    		//TODO perform all actual rendering exclusively in render tree (layersystem)
-
+    		layersystem_render(state, cam);
     	}
     	llist_end_loop(state->cameras);
 
@@ -365,6 +371,12 @@ void statesystem_draw(void)
     }
 
     state_beeing_rendered = NULL;
+
+    static int counter = 0;
+    if (++counter >= 60) {
+    	fprintf(stderr, "RENDER_INFO: %d of %d elements rendered\n", ELEMENT_APPEND_ACTUAL_COUNT, ELEMENT_APPEND_COUNT);
+    	counter = 0;
+    }
 }
 
 void statesystem_pause(void)

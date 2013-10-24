@@ -57,13 +57,15 @@ void debugdraw_space(cpSpace *space)
 
 static void circle_line(cpVect p, float r)
 {
-	static GLfloat circle[128];
-	int i=0;
-	for(i = 0; i < 128; i += 2) {
-		circle[i] = p.x + sinf( 2*M_PI*i / (128-2)) * r;
-		circle[i+1] = p.y + cosf( 2*M_PI*i / (128-2)) * r;
-	}
-	texture_bind(TEX_WHITE);
-	draw_vertex_pointer(2, GL_FLOAT, 0, circle);
-	draw_draw_arrays(GL_LINE_STRIP, 0, 64);
+	//static GLfloat circle[128];
+	//int i=0;
+	//for(i = 0; i < 128; i += 2) {
+	//	circle[i] = p.x + sinf( 2*M_PI*i / (128-2)) * r;
+	//	circle[i+1] = p.y + cosf( 2*M_PI*i / (128-2)) * r;
+	//}
+	//texture_bind(TEX_WHITE);
+	//draw_vertex_pointer(2, GL_FLOAT, 0, circle);
+	//draw_draw_arrays(GL_LINE_STRIP, 0, 64);
+//#warning GL_LINE_STRIP not supported by renderer/layer_system!
+	draw_donut(p, r-5,r+5);
 }

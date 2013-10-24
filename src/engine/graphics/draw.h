@@ -4,6 +4,7 @@
 #include "SDL.h"
 #include "we_utils.h"
 
+#define TMP_RENDER_LAYER 0
 #define LOAD_TEXTURES 1 //FOR DEBUG PURPOSES
 #define EXPERIMENTAL_GRAPHICS 1
 #define LIGHT_SYSTEM 0
@@ -102,9 +103,9 @@ void draw_pop_blend(void);
 void draw_enable_tex2d(void);
 void draw_disable_tex2d(void);
 
-	void draw_draw_arrays(GLenum mode, GLint first, GLsizei count); //REMOVEME
-	void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-	void draw_tex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
+	//void draw_draw_arrays(GLenum mode, GLint first, GLsizei count); //REMOVEME
+	//void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
+	//void draw_tex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 
 Color draw_get_current_color(void);
 Blend draw_get_current_blend(void);
@@ -129,9 +130,9 @@ void draw_current_texture_append(cpVect pos, const float *tex_map, cpVect size, 
 Color draw_col_rainbow(int hue);
 Color draw_col_grad(int hue);
 
-void draw_quad_new(int layer, float *ver_quad, float *tex_quad); /* appends a new quad to the current render state (layer, blend, tex) */
-void draw_quad_continue(int layer, float *ver_edge, float *tex_edge); /* extends a quad by adding 2 vertices specified by edge */
-void draw_triangle_strip(int layer, float *ver_list, float *tex_list, int count); /* appends a triangle strip to current render state */
-void draw_triangle_fan(int layer, float *ver_fan, float *tex_fan, int count); /* converts triangle fan to triangle list and appends to current render state */
+void draw_quad_new(int layer, float ver_quad[8], const float tex_quad[8]); /* appends an independent quad to the current render state */
+void draw_quad_continue(int layer, float ver_edge[4], const float tex_edge[4]); /* extends a previous quad by adding 2 vertices specified by edge */
+void draw_triangle_strip(int layer, float *ver_list, const float *tex_list, int count); /* appends a triangle strip to current render state */
+void draw_triangle_fan(int layer, float *ver_fan, const float *tex_fan, int count); /* converts triangle fan to triangle list and appends to current render state */
 
 #endif /* DRAW_H_ */

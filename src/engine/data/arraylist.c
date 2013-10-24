@@ -1,6 +1,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "arraylist.h"
+#include "we_utils.h"
 
 #define INITIAL_SIZE 32
 
@@ -65,7 +66,7 @@ void alist_set(arraylist *al, unsigned int index, void *data)
 	if(index < al->size) {
 		al->data[index] = data;
 	} else {
-		//we_error("INDEX OUT OF BOUNDS");
+		we_error("INDEX OUT OF BOUNDS");
 	}
 }
 
