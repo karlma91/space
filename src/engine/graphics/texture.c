@@ -172,7 +172,6 @@ int texture_bind(int tex_id) {
 	return 0;
 #endif
 	if (tex_id != gl_tex_id && tex_id >= 0) {
-		draw_flush_color();
 		gl_tex_id = tex_id;
 		glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_id));
 		return 0;

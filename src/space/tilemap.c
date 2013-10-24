@@ -112,8 +112,6 @@ void tilemap_render(tilemap *map)
 		}
 	}
 
-	draw_flush_color();
-
 	if (tile_count > tile_count_max) {
 		tile_count_max = tile_count;
 		SDL_Log("max tile count rendered: %d",tile_count);

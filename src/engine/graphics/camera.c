@@ -74,7 +74,7 @@ void view_transform2view(view *cam)
 	draw_translatev(cam->p);
 	draw_rotate(-cam->rotation);
 	draw_scale(1/(cam->zoom * cam->ratio), 1/(cam->zoom));
-	cam->priv_view_invtransform = matrix2d_getmatrix();
+	cam->priv_view_invtransform = matrix2d_get();
 
 	draw_load_identity();
 	draw_scale(cam->zoom * cam->ratio, cam->zoom);
@@ -90,7 +90,7 @@ void view_transform2port(view *cam)
 	draw_load_identity();
 	draw_rotate(-cam->priv_port_angle);
 	draw_scale(1/cam->ratio, 1);
-	cam->priv_port_invtransform = matrix2d_getmatrix();
+	cam->priv_port_invtransform = matrix2d_get();
 
 	// transform view to viewport
 	draw_load_identity();

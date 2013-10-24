@@ -96,7 +96,6 @@ void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed
 {
 	memset(spr, 0, sizeof *spr);
 	spr->id = id;
-	spr->size = 1;
 	sprite_set_size(spr, width, height);
 	spr->animation_speed = speed;
 	spr->sub_index = 0;
@@ -196,15 +195,6 @@ void sprite_render_scaled(sprite *spr, cpVect pos, float angle, float size)
 {
 	if (!spr) return;
 
-	spr->pos = pos;
-	spr->a = angle;
-	spr->size = size;
-
-	layersystem_register_sprite(0, spr);
-}
-
-void sprite_final_render(sprite *spr) {
-
 	int tex_id = 0;
 	sprite_data *data = (sprite_data*)spr->id;
 	if (data) {
@@ -213,6 +203,6 @@ void sprite_final_render(sprite *spr) {
 
 	float sub_map[8];
 	sprite_get_current_image(spr, sub_map);
-	draw_texture(tex_id, spr->pos, sub_map, cpvmult(cpv(spr->width, spr->height), spr->size), spr->a);
+	draw_texture(tex_id, pos, sub_map, cpvmult(cpv(spr->width, spr->height), size), angle);
 }
 

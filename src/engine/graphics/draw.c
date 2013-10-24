@@ -95,17 +95,6 @@ int draw_init(){
 		unit_circle[i+1] = cosf( 2*M_PI*i / (128-2));
 	}
 
-	/* Photoshop Outer glow settings:
-	 * Opacity 50%
-	 * Spread 60%
-	 * Size 32px
-	 * Range 100%
-	 * Jitter 0%
-	 */
-	/*
-	 *
-	 */
-
 	TEX_BAR = texture_load("bar.png");
 
 	/* generate rainbow colors */
@@ -319,7 +308,23 @@ void draw_glow_line(cpVect a, cpVect b, float w)
 void draw_quad_line(cpVect a, cpVect b, float w)
 {
 	texture_bind(TEX_WHITE);
-	layersystem_register_quadline(0,a,b,w); //TODO use layer here?
+	float dx = b.x-a.x;
+	float dy = b.y-a.y;
+
+    draw_push_matrix();
+    draw_translate(a.x, a.y);
+	draw_rotate(atan2f(dy,dx));
+	GLfloat length = hypotf(dy, dx);
+	draw_scale(1,w);
+	w /= 2;
+	GLfloat line[8] = { -w, -0.5,
+			-w,  0.5,
+			length + w, -0.5,
+			length + w,  0.5};
+
+	draw_vertex_pointer(2, GL_FLOAT, 0, line);
+	draw_append_color_tex_quad();
+	draw_pop_matrix();
 
 //#warning Very similair to draw_line...
 }
@@ -377,12 +382,6 @@ void draw_box(cpVect p, cpVect s, GLfloat angle, int centered)
 	draw_draw_arrays(GL_TRIANGLE_STRIP,0, 4);
 	draw_pop_matrix();
 }
-void draw_box_append(cpVect p, cpVect s, GLfloat angle, int centered)
-{
-	box_common(p,s,angle,centered);
-	draw_append_color_tex_quad();
-	draw_pop_matrix();
-}
 
 Color draw_col_rainbow(int hue)
 {
@@ -397,12 +396,10 @@ Color draw_col_grad(int hue)
 	return rainbow_col[hue];
 }
 
-void draw_get_current_color(byte *c)
+Color draw_get_current_color(void)
 {
-	*c = gl_red;
-	*++c = gl_green;
-	*++c = gl_blue;
-	*++c = gl_alpha;
+	Color col = {gl_red, gl_green, gl_blue, gl_alpha};
+	return col;
 }
 
 Blend draw_get_current_blend(void)
@@ -507,23 +504,10 @@ void draw_polygon_outline(int count, cpVect *verts, cpVect p, float rotation, fl
 
 void draw_texture(int tex_id, cpVect pos, const float *tex_map, cpVect size, float angle)
 {
-/*
-	if (texture_bind(tex_id)) {
-		draw_current_texture(pos, tex_map, size, angle);
-	} else {
-		draw_current_texture_all(pos, tex_map, size, angle, triangle_quad);
-	}
-*/
 	texture_bind(tex_id);
-	draw_current_texture(pos, tex_map, size, angle);
-
-}
-
-void draw_current_texture(cpVect pos, const float *tex_map, cpVect size, float angle)
-{
 	draw_current_texture_append(pos, tex_map, size, angle);
-	//draw_current_texture_all(pos, tex_map, size, angle, triangle_quad);
 }
+
 void draw_current_texture_append(cpVect pos, const float *tex_map, cpVect size, float angle)
 {
 	draw_push_matrix();
@@ -534,38 +518,6 @@ void draw_current_texture_append(cpVect pos, const float *tex_map, cpVect size, 
 	draw_tex_pointer(2, GL_FLOAT, 0, tex_map);
 	draw_append_color_tex_quad();
 	draw_pop_matrix();
-}
-
-void draw_current_texture_all(cpVect pos, const float *tex_map, cpVect size, float angle, GLfloat *mesh)
-{
-    draw_push_matrix();
-
-    draw_translate(pos.x, pos.y);
-	draw_rotate(angle);
-	draw_scalev(size);
-
-	draw_current_texture_basic(tex_map, mesh, 4);
-
-	draw_pop_matrix();
-}
-
-void draw_current_texture_basic(const float *tex_map, GLfloat *mesh, GLsizei count)
-{
-    draw_vertex_pointer(2, GL_FLOAT, 0, mesh);
-    draw_tex_pointer(2, GL_FLOAT, 0, tex_map);
-	draw_draw_arrays(GL_TRIANGLE_STRIP,0, count);
-}
-
-void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
-{
-	matrix2d_set_stride(stride);
-	matrix2d_set_type(type);
-    matrix2d_vertex_pointer((float*)pointer);
-}
-
-void draw_tex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
-{
-    matrix2d_tex_pointer((float*)pointer);
 }
 
 void draw_translatev(cpVect offset)
@@ -605,113 +557,16 @@ void draw_matrix_clear(void)
 
 void draw_push_matrix(void)
 {
-    matrix2d_pushmatrix();
+    matrix2d_push();
 }
 
 void draw_pop_matrix(void)
 {
-    matrix2d_popmatrix();
+    matrix2d_pop();
 }
 
 void draw_load_identity(void)
 {
     glLoadIdentity();
-    matrix2d_loadindentity();
+    matrix2d_setidentity();
 }
-
-// todo combine different gl pointers into an interleaved array?
-//void draw_append_quad_simple(void)
-//{
-//	matrix2d_append_quad_simple();
-//}
-//void draw_append_quad(void)
-//{
-//	matrix2d_append_quad_tex();
-//}
-//void draw_append_color_quad(void)
-//{
-//	matrix2d_append_quad_color();
-//}
-void draw_append_color_tex_quad(void)
-{
-	matrix2d_append_quad_tex_color();
-}
-
-//TODO only support GL_TRIANGLE_STRIP?
-//TODO merge all flush/draw_arrays methods into one single method
-
-void draw_draw_arrays(GLenum mode, GLint first, GLsizei count)
-{
-    matrix2d_multiply_current(count);
-
-    float *tex = matrix2d_get_tex_pointer();
-    float *vertex = matrix2d_get_vertex_data();
-    //byte *color = matrix2d_get_color_data();
-
-	//int size = matrix2d_get_count();
-
-    //if (size) {
-    	//glEnableClientState(GL_COLOR_ARRAY);
-    	//glColorPointer(4, GL_UNSIGNED_BYTE, 0, color);
-		glVertexPointer(2, matrix2d_get_type(), matrix2d_get_stride(), vertex);
-		glTexCoordPointer(2, GL_FLOAT, 0, tex);
-		glDrawArrays(mode, first, count);
-		//glDisableClientState(GL_COLOR_ARRAY);
-	//}
-}
-
-void draw_flush_color(void)
-{
-	//int size = matrix2d_get_count();
-	//fprintf(stderr,"COLOR_FLUSH: %d\n",size/2);
-	glEnableClientState(GL_COLOR_ARRAY);
-	byte *color = matrix2d_get_color_data();
-	glColorPointer(4, GL_UNSIGNED_BYTE, 0, color);
-	draw_flush();
-	glDisableClientState(GL_COLOR_ARRAY);
-}
-void draw_flush(void)
-{
-	float *vertex = matrix2d_get_vertex_data();
-	float *tex = matrix2d_get_tex_data();
-	int size = matrix2d_get_count();
-
-	if (size) {
-		glVertexPointer(2, GL_FLOAT, 0, vertex);
-		glTexCoordPointer(2, GL_FLOAT, 0, tex);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2); //TODO use draw_draw_arrays here instead?
-		matrix2d_reset();
-	}
-}
-
-/*
-void draw_flush_and_multiply(void)
-{
-    float *vertex = matrix2d_get_vertex_data();
-    float *tex = matrix2d_get_tex_data();
-    int size = matrix2d_get_count();
-
-    if (size) {
-    	matrix2d_multiply(vertex,size);
-    	glVertexPointer(2, GL_FLOAT, 0, vertex);
-    	glTexCoordPointer(2, GL_FLOAT, 0, tex);
-    	glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2);
-    	matrix2d_reset();
-    }
-}
-*/
-
-void draw_flush_simple(void)
-{
-	float *vertex = matrix2d_get_vertex_data();
-	int size = matrix2d_get_count();
-
-	if (size) {
-		glVertexPointer(2, GL_FLOAT, 0, vertex);
-#warning not working on mac atm!
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, size/2); //FIXME not working on mac in state_space
-		matrix2d_reset();
-	}
-}
-
-

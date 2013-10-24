@@ -162,7 +162,8 @@ static void flush_line(bm_font *font, float text_width, float x, float y)
     text_width=0;
     draw_scale(font->scale,-font->scale);
     //draw_flush_and_multiply(); //TODO FIXME
-    draw_flush(); //TODO FIXME multiply removed!
+    //draw_flush(); //TODO FIXME multiply removed!
+    SDL_Log("bmfont.c render not implemented!");
     draw_pop_matrix();
 }
 

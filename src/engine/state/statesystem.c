@@ -445,7 +445,7 @@ void statesystem_push_event(SDL_Event *event)
 			 	float ptx = ((tx-n_px) / p_pw - 0.5f) * GAME_WIDTH;
 			 	float pty = (0.5f - (ty-n_py) / p_ph) * GAME_HEIGHT;
 
-			 	view_p = matrix2d_transform_vect(cam->priv_port_invtransform, cpv(ptx,pty));
+			 	view_p = matrix2d_multcpv(cam->priv_port_invtransform, cpv(ptx,pty));
 			 	event->tfinger.x = view_p.x;
 			 	event->tfinger.y = view_p.y;
 			 	view_index = index;

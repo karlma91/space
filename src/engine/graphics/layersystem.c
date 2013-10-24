@@ -2,6 +2,7 @@
 #include "we_graphics.h"
 #include "../state/statesystem.h"
 
+#define MAX_ELEM_COUNT_BATCH 1000 // Memory for 1000 elements for each combination of texture, blend, layer and state!
 
 static int check_bounds(layer_system *ls, int layer)
 {
@@ -31,53 +32,23 @@ typedef struct blend_tree {
 	arraylist *al_tex;
 } blend_tree;
 
-typedef struct Line {
-	cpVect a;
-	cpVect b;
-	float w;
-} Line;
-
-typedef struct atom_draw {
-	ATOM_ID type;
+typedef struct vertex_elem { // 1 independent quad = 120 bytes
+	float x, y; //TODO use indices to save memory!
+	float tx, ty; //TODO use short here instead of float!
 	Color col;
-	//cpVect pos;
-	//float scale;
-	Line line;
-	matrix2d H;
+} vertex_elem;
 
-	void *data;
-} atom_draw;
-
-static void atom_render_quadline(atom_draw *atom)
-{
-	Line l = atom->line;
-	float dx = l.b.x-l.a.x;
-	float dy = l.b.y-l.a.y;
-
-    draw_push_matrix();
-    matrix2d_setmatrix(atom->H);
-    draw_translate(l.a.x, l.a.y);
-	draw_rotate(atan2f(dy,dx));
-	GLfloat length = hypotf(dy, dx);
-	draw_scale(1,l.w);
-	l.w /= 2;
-	GLfloat line[8] = { -l.w, -0.5,
-			-l.w,  0.5,
-			length + l.w, -0.5,
-			length + l.w,  0.5};
-
-	draw_vertex_pointer(2, GL_FLOAT, 0, line);
-	draw_append_color_tex_quad();
-	draw_pop_matrix();
-}
-
+typedef struct render_batch {
+	vertex_elem elems[MAX_ELEM_COUNT_BATCH]; //TODO use an expanding array (with all structures stored in-place)
+	int count;
+} render_batch;
 
 static pool *pool_atom;
 
 
 void layersystem_init(void)
 {
-	pool_atom = pool_create(sizeof (atom_draw));
+	pool_atom = pool_create(sizeof (vertex_elem));
 }
 
 layer_system * layersystem_new(void)
@@ -103,6 +74,8 @@ int layersystem_add_layer(layer_system *lsys)
 
 void state_add_sprite(STATE_ID state_id, int layer, SPRITE_ID id, float w, float h, cpVect p, float a)
 {
+	//FIXME: CURRENTLY NOT SUPPORTED
+/*
 	layer_system *ls =state_get_layersystem(state_id);
 	if(check_bounds(ls, layer)){
 		return;
@@ -115,14 +88,81 @@ void state_add_sprite(STATE_ID state_id, int layer, SPRITE_ID id, float w, float
 	s->a = a;
 	s->pos = p;
 	llist_add(lay->ll_spr, s);
+*/
 }
 
-static void llrmcall(atom_draw *atom)
+void layersystem_render(STATE_ID state_id, view *cam)
 {
-	pool_release(pool_atom, atom);
+	layer_system *ls = state_get_layersystem(state_id);
+	cpVect p = cam->p; //TODO use for parallax effect (zoom and offset)
+	if(ls == NULL) {
+		SDL_Log("LAYERSYSTEM: rendering NULL");
+		return;
+	}
+
+	int layer_index = ls->num_layers;
+	while (layer_index--) {
+		/* register layersystem sprites */
+		layer_ins *lay = alist_get(ls->layers, layer_index);
+		llist_begin_loop(lay->ll_spr);
+		while(llist_hasnext(lay->ll_spr)) {
+			sprite *s = llist_next(lay->ll_spr);
+			//layersystem_register_sprite(0, s);
+		}
+		llist_end_loop(lay->ll_spr);
+
+		/* iterate blend modes */
+		llist_begin_loop(lay->ll_blend_modes);
+		while(llist_hasnext(lay->ll_blend_modes)) {
+			blend_tree *blends = llist_next(lay->ll_blend_modes);
+			glBlendFunc(blends->type.src_factor, blends->type.dst_factor);
+
+			/* iterate textures */
+			int tex_index;
+			int tex_count = alist_size(blends->al_tex);
+			for (tex_index = 0; tex_index < tex_count; tex_index++) {
+				render_batch *batch = alist_get(blends->al_tex, tex_index);
+				if (batch) {
+					vertex_elem *elems = batch->elems;
+					glVertexPointer(2, GL_FLOAT, sizeof *elems, &elems[0].x);
+					glTexCoordPointer(2, GL_FLOAT, sizeof *elems, &elems[0].tx);
+					glColPointer(4, GL_UNSIGNED_BYTE, sizeof *elems, &elems[0].col);
+					glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_index));
+					glDrawArrays(GL_TRIANGLE_STRIP, 0, batch->count);
+					batch->count = 0;
+				}
+			}
+		}
+		llist_end_loop(lay->ll_blend_modes);
+	}
 }
 
-static atom_draw *register_atomic(int layer, int tex_id)
+
+void state_set_layer_offset(STATE_ID state_id, int layer, cpVect offset)
+{
+	layer_system *ls =state_get_layersystem(state_id);
+	if(check_bounds(ls, layer)){
+		return;
+	}
+	layer_ins *lay = alist_get(ls->layers, layer);
+	lay->offset = offset;
+}
+
+void state_set_layer_parallax(STATE_ID state_id, int layer, float factor, float zoom_factor)
+{
+	layer_system *ls =state_get_layersystem(state_id);
+	if(check_bounds(ls, layer)){
+		return;
+	}
+	layer_ins *lay = alist_get(ls->layers, layer);
+	lay->parallax_factor = factor;
+	lay->parallax_zoom = zoom_factor;
+}
+
+
+//TODO call this after an actual state change right before appending an element?
+//TODO detect change inside current_batch() method? by storing last values inside layersystem
+static render_batch *current_batch(int layer)
 {
 	STATE_ID state_id = statesystem_get_render_state();
 
@@ -158,128 +198,98 @@ static atom_draw *register_atomic(int layer, int tex_id)
 		llist_add(ll_blend, blend_texs);
 	}
 
+	GLint tex_id = texture_get_current();
 	arraylist *al = blend_texs->al_tex;
+	render_batch *batch = alist_get(al, tex_id);
 
-	LList ll_atoms = alist_get(al,tex_id);
-	if(ll_atoms == NULL) {
-		ll_atoms = llist_create();
-		llist_set_remove_callback(ll_atoms, (ll_rm_callback) llrmcall);
-		alist_set(al,tex_id,ll_atoms);
+	if (batch == NULL) {
+		batch = calloc(1, sizeof *batch);
+		alist_set(al, tex_id, batch);
 	}
 
-	atom_draw *atom = pool_instance(pool_atom);
-	draw_get_current_color((byte *)&atom->col);
-	atom->H = matrix2d_getmatrix();
-	llist_add(ll_atoms, atom);
-
-	return atom;
+	return batch;
 }
 
-void layersystem_register_quadline(int layer, cpVect a, cpVect b, float w)
-{
-	atom_draw *atom = register_atomic(layer, texture_get_current());
-	atom->type = ATOM_ID_QUADLINE;
-	//atom->H = matrix2d_getmatrix();
-	atom->line.a = a;
-	atom->line.b = b;
-	atom->line.w = w;
-	atom->data = NULL;
-}
 
-void layersystem_register_sprite(int layer, sprite * spr)
+static inline void render_append_elem(render_batch *batch, vertex_elem *elem)
 {
-	atom_draw *atom = register_atomic(layer, sprite_get_texture(spr));
-	atom->type = ATOM_ID_SPRITE;
-	atom->data = spr;
-}
-
-void layersystem_render(STATE_ID state_id, view *cam)
-{
-	layer_system *ls = state_get_layersystem(state_id);
-	cpVect p = cam->p; //TODO use for parallax effect (zoom and offset)
-	if(ls == NULL) {
-		SDL_Log("LAYERSYSTEM: rendering NULL");
+	int index = batch->count;
+	if (index >= MAX_ELEM_COUNT_BATCH) {
+		SDL_Log("WARNING: render batch index out of bounds!");
 		return;
 	}
+	batch->elems[index] = *elem;
+	batch->count = index + 1;
+}
 
-	int layer_index = ls->num_layers;
-	while (layer_index--) {
-		/* register layersystem sprites */
-		layer_ins *lay = alist_get(ls->layers, layer_index);
-		llist_begin_loop(lay->ll_spr);
-		while(llist_hasnext(lay->ll_spr)) {
-			sprite *s = llist_next(lay->ll_spr);
-			//layersystem_register_sprite(0, s);
-		}
-		llist_end_loop(lay->ll_spr);
+static inline void render_append_vertex(render_batch *batch, float x, float y, float tx, float ty)
+{
+	vertex_elem elem = {x, y, tx, ty, draw_get_current_color()};
+	matrix2d_multp(&elem.x); // assumes that x and y is of type float and are consecutive
+	render_append_elem(batch, &elem);
+}
 
-		/* iterate blend modes */
-		llist_begin_loop(lay->ll_blend_modes);
-		while(llist_hasnext(lay->ll_blend_modes)) {
-			blend_tree *blends = llist_next(lay->ll_blend_modes);
-			glBlendFunc(blends->type.src_factor, blends->type.dst_factor);
+static inline void render_append_vertex2fv(render_batch *batch, float **ver_point, float **tex_point)
+{
+	matrix2d_multp(ver_point);
+	float x  = *(*ver_point)++, y  = *(*ver_point)++;
+	float tx = *(*tex_point)++, ty = *(*tex_point)++;
+	Color col = draw_get_current_color();
+	vertex_elem elem = {x, y, tx, ty, col};
+	render_append_elem(batch, &elem);
+}
 
-			/* iterate textures */
-			int tex_index;
-			int tex_count = alist_size(blends->al_tex);
-			for (tex_index = 0; tex_index < tex_count; tex_index++) {
-				LList ll_atoms = alist_get(blends->al_tex, tex_index);
-				if (ll_atoms) {
-					draw_push_matrix();
-					draw_translatev(cpvmult(cpvadd(lay->offset,p), lay->parallax_factor));
-					glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_index));
-
-					/* iterate atomic draw calls */
-					llist_begin_loop(ll_atoms);
-					while(llist_hasnext(ll_atoms)) {
-						atom_draw *atom = llist_next(ll_atoms);
-						draw_color(atom->col);
-						matrix2d_setmatrix(atom->H);
-						switch (atom->type) {
-						case ATOM_ID_SPRITE:
-							sprite_final_render((sprite *)(atom->data));
-							break;
-						case ATOM_ID_POLLYGON:
-							break;
-						case ATOM_ID_QUADLINE:
-							atom_render_quadline(atom);
-							break;
-						case ATOM_ID_TEXT:
-							break;
-						}
-						llist_remove(ll_atoms, atom);
-					}
-					llist_end_loop(ll_atoms);
-
-					draw_flush_color();
-					draw_pop_matrix();
-				}
-			}
-		}
-		llist_end_loop(lay->ll_blend_modes);
+static inline void render_append_repeat(render_batch *batch)
+{
+	int index = batch->count;
+	if (index == 0) {
+		return; //no need to repeat
 	}
+	render_append_elem(batch, &batch->elems[--index]);
 }
 
 
-void state_set_layer_offset(STATE_ID state_id, int layer, cpVect offset)
+void draw_quad_new(int layer, float *ver_quad, float *tex_quad) /* appends an independent quad to the current render state */
 {
-	layer_system *ls =state_get_layersystem(state_id);
-	if(check_bounds(ls, layer)){
-		return;
-	}
-	layer_ins *lay = alist_get(ls->layers, layer);
-	lay->offset = offset;
+	render_batch *batch = current_batch(layer); //TODO remove out of this call?
+	render_append_repeat(batch); // repeat previous point if any
+	render_append_vertex2fv(batch, &ver_quad, &tex_quad); // point A
+	render_append_repeat(batch); // repeat point A
+	render_append_vertex2fv(batch, &ver_quad, &tex_quad); // point B
+	render_append_vertex2fv(batch, &ver_quad, &tex_quad); // point C
+	render_append_vertex2fv(batch, &ver_quad, &tex_quad); // point D
 }
 
-void state_set_layer_parallax(STATE_ID state_id, int layer, float factor, float zoom_factor)
+void draw_quad_continue(int layer, float *ver_edge, float *tex_edge) /* extends a previous quad by adding 2 vertices specified by edge */
 {
-	layer_system *ls =state_get_layersystem(state_id);
-	if(check_bounds(ls, layer)){
-		return;
+	render_batch *batch = current_batch(layer);
+	render_append_vertex2fv(batch, &ver_edge, &tex_edge); // point A
+	render_append_vertex2fv(batch, &ver_edge, &tex_edge); // point B
+}
+
+void draw_triangle_strip(int layer, float *ver_list, float *tex_list, int count) // appends a triangle strip to current render state
+{
+	if (count <= 0) return;
+	render_batch *batch = current_batch(layer); //TODO move out of this method?
+	do render_append_vertex2fv(batch, &ver_list, &tex_list); while (--count);
+}
+
+void draw_triangle_fan(int layer, float *ver_fan, float *tex_fan, int count) /* appends a triangle fan to current render state */
+{
+	if (count <= 0) return;
+	render_batch *batch = current_batch(layer);
+	vertex_elem *fan_origin;
+
+	render_append_repeat(batch); // repeat previous point
+	fan_origin = &batch->elems[batch->count];
+	render_append_vertex2fv(batch, &ver_fan, &tex_fan); // fan origin
+	render_append_elem(batch, fan_origin); // repeat p0
+
+	for (;;) {
+		if (--count > 0) render_append_vertex2fv(batch, &ver_fan, &tex_fan); else break;
+		if (--count > 0) render_append_vertex2fv(batch, &ver_fan, &tex_fan); else break;
+		if (--count > 0) render_append_elem(batch, fan_origin); else break; // repeat p0
 	}
-	layer_ins *lay = alist_get(ls->layers, layer);
-	lay->parallax_factor = factor;
-	lay->parallax_zoom = zoom_factor;
 }
 
 
@@ -290,7 +300,7 @@ void layersystem_free(layer_system *ls)
 		layer_ins *lay = alist_get(ls->layers, i);
 		llist_destroy(lay->ll_spr);
 		llist_destroy(lay->ll_blend_modes); //TODO add remove callback to free arraylists and linked lists inside ll_blend!
-#warning SOME ARRAYLISTS AND LINKED LISTS ARE NOT BEEING FREED!
+#warning SEVERAL ARRAYLISTS AND LINKED LISTS ARE NOT BEEING FREED!
 	}
 	alist_destroy(ls->layers);
 	free(ls);

@@ -22,8 +22,9 @@ typedef struct {
 
 typedef struct {
 	int num_layers;
+	int current_layer;
 	arraylist *layers;
-}layer_system;
+} layer_system;
 
 typedef struct {
 	int id;
