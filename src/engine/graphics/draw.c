@@ -458,7 +458,7 @@ void draw_polygon_textured(int count, cpVect *verts, cpVect p, float rotation, f
 	draw_rotate(rotation);
 	draw_scale(size, size);
 	draw_color4f(1,1,1,1);
-	draw_triangle_fan(TMP_RENDER_LAYER, vertices, texcoord, count);
+	draw_triangle_fan(TMP_RENDER_LAYER+1, vertices, texcoord, count);
 
 	draw_pop_matrix();
 

@@ -2,7 +2,7 @@
 #include "we_graphics.h"
 #include "../state/statesystem.h"
 
-#define MAX_ELEM_COUNT_BATCH 1000 // Memory for 1000 elements for each combination of texture, blend, layer and state!
+#define MAX_ELEM_COUNT_BATCH 10000 // Memory for 1000 elements for each combination of texture, blend, layer and state!
 
 static int check_bounds(layer_system *ls, int layer)
 {
@@ -10,7 +10,7 @@ static int check_bounds(layer_system *ls, int layer)
 		SDL_Log("LAYERSYSTEM: Trying access a NULL system");
 		return 1;
 	}
-	if(layer < 0 && layer > ls->num_layers) {
+	if(layer < 0 && layer >= ls->num_layers) {
 		SDL_Log("LAYERSYSTEM: Trying to access layer %d outside range %d", layer, ls->num_layers);
 		return 1;
 	}
@@ -208,7 +208,7 @@ static render_batch *current_batch(int layer)
         if (batch == NULL) {
             SDL_Log("ERROR: NOT ENOUGH MEMORY!");
         } else {
-        	SDL_Log("New batch renderer created (state_id=%p, blend=%x, layer=%d, tex_id=%d): %dkB", state_id, current_blend.src_factor, layer, tex_id, (512+sizeof(render_batch))/1024);
+        	SDL_Log("New batch renderer created (state_id=%p, blend=%x, layer=%d, tex_id=%d): p=%p s=%dkB", state_id, current_blend.src_factor, layer, tex_id, batch, (512+sizeof(render_batch))/1024);
         	alist_set_safe(al, tex_id, batch);
         }
 	}
@@ -291,6 +291,9 @@ void draw_triangle_strip(int layer, float *ver_list, const float *tex_list, int 
 	if (count <= 0) return;
 	float **tex = (float **) &tex_list;
 	render_batch *batch = current_batch(layer); //TODO move out of this method?
+
+	render_append_repeat(batch); // repeat previous point if any
+	render_append_vertex(batch, ver_list[0],ver_list[1],tex_list[0],tex_list[1]); // repeat previous point if any
 	do render_append_vertex2fv(batch, &ver_list, tex); while (--count);
 }
 
@@ -310,7 +313,8 @@ void draw_triangle_fan(int layer, float *ver_fan, const float *tex_fan, int coun
 	for (;;) {
 		if (--count > 0) render_append_vertex2fv(batch, &ver_fan, tex); else break;
 		if (--count > 0) render_append_vertex2fv(batch, &ver_fan, tex); else break;
-		if (--count > 0) render_append_elem(batch, fan_origin); else break; // repeat p0
+		render_append_repeat(batch); // repeat previous point
+		render_append_elem(batch, fan_origin); // repeat p0
 	}
 }
 

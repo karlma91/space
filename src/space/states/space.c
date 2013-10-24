@@ -759,6 +759,7 @@ void space_init(void)
     state_add_inner_state(state_space,LEVEL_CLEARED,level_cleared,NULL);
     state_add_inner_state(state_space,LEVEL_TRANSITION,level_transition,NULL);
 
+    state_add_layer(state_space);
 	/*
 	int i;
 	layer_system *lsys = state_get_layersystem(state_space); //TODO create getter for layersystem

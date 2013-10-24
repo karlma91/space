@@ -295,32 +295,34 @@ void statesystem_draw(void)
 
     		view_transform2view(cam);
     		draw_push_matrix();
-    		draw_push_matrix();
-    		draw_push_matrix();
 
     		if (state->call.draw) {
     			state->call.draw();
     		}
-
     		draw_pop_matrix();
+
+    		draw_push_matrix();
     		/* draw all objects */
     		if (state->objects_enabled) {
     			instance_iterate(render_instances, NULL);
     			debugdraw_space(current_space);
     		}
+    		draw_pop_matrix();
 
+    		draw_push_matrix();
     		if (state->particles_enabled)  {
     			particles_draw(state->particles); //TODO render from layers
     		}
-
     		draw_pop_matrix();
+
+    		draw_push_matrix();
     		/* render inner state */ //TODO check if working?
     		if(state->inner_states > 0 &&
     				state->inner_draw[state->current_inner_state]){
     			state->inner_draw[state->current_inner_state]();
     		}
-
     		draw_pop_matrix();
+
 
     		/* render in-game touchables */
     		LList state_touchies = state->touch_objects;

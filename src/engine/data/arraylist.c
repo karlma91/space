@@ -36,9 +36,11 @@ int alist_counter(arraylist *al)
 
 static void alist_resize(arraylist *al)
 {
-	int size = al->size * 2;
-	al->data = realloc(al->data, size * sizeof(void*));
-	al->size = size;
+	int size = al->size;
+	int new_size = size * 2;
+	al->data = realloc(al->data, new_size * sizeof(void*));
+	memset(&al->data[size], 0, size * sizeof(void*));
+	al->size = new_size;
 }
 
 int alist_add(arraylist *al, void *data)
