@@ -126,7 +126,7 @@ void layersystem_render(STATE_ID state_id, view *cam)
 					vertex_elem *elems = batch->elems;
 					glVertexPointer(2, GL_FLOAT, sizeof *elems, &elems[0].x);
 					glTexCoordPointer(2, GL_FLOAT, sizeof *elems, &elems[0].tx);
-					glColPointer(4, GL_UNSIGNED_BYTE, sizeof *elems, &elems[0].col);
+					glColorPointer(4, GL_UNSIGNED_BYTE, sizeof *elems, &elems[0].col);
 					glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_index));
 					glDrawArrays(GL_TRIANGLE_STRIP, 0, batch->count);
 					batch->count = 0;
