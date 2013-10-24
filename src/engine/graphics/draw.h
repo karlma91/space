@@ -24,7 +24,7 @@
 
 #if __WIN32__
 #define GLEW_STATIC
-#include "GL/glew.h"
+//#include "GL/glew.h"
 #endif
 
 #include "SDL_opengl.h"

@@ -91,6 +91,8 @@ void state_add_sprite(STATE_ID state_id, int layer, SPRITE_ID id, float w, float
 */
 }
 
+int TMP_DRAW_CALLS = 0;
+
 void layersystem_render(STATE_ID state_id, view *cam)
 {
 	layer_system *ls = state_get_layersystem(state_id);
@@ -129,6 +131,7 @@ void layersystem_render(STATE_ID state_id, view *cam)
 					glColorPointer(4, GL_UNSIGNED_BYTE, sizeof *elems, &(elems[0].col.r));
 					glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_index));
 					glDrawArrays(GL_TRIANGLE_STRIP, 0, batch->count);
+					++TMP_DRAW_CALLS;
 					batch->count = 0;
 				}
 			}
@@ -246,11 +249,11 @@ static inline void render_append_vertex(render_batch *batch, float x, float y, f
 
 static inline void render_append_vertex2fv(render_batch *batch, float **ver_point, float **tex_point)
 {
-	matrix2d_multp(*ver_point);
 	float x  = *(*ver_point)++, y  = *(*ver_point)++;
 	float tx = *(*tex_point)++, ty = *(*tex_point)++;
 	Color col = draw_get_current_color();
 	vertex_elem elem = {x, y, tx, ty, col};
+	matrix2d_multp(&elem.x);
 	render_append_elem(batch, &elem);
 }
 

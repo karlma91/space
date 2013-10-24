@@ -270,6 +270,7 @@ static void initGL(void) {
 
 	glEnableClientState(GL_VERTEX_ARRAY); //GLES1!
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY); //GLES1!
+	glEnableClientState(GL_COLOR_ARRAY); //GLES1!
 
 	glMatrixMode(GL_PROJECTION); //GLES1!
 	draw_load_identity();
@@ -314,6 +315,7 @@ static void main_init(void) {
         SDL_Log("Could not open joystick (accelerometer)");
     }
 
+    /*
 #if __WIN32__
 	GLenum glewError = glewInit();
 	if( glewError != GLEW_OK )
@@ -328,7 +330,7 @@ static void main_init(void) {
 		SDL_Log( "Error no extension");
 	}
 #endif
-
+     */
 	cpInitChipmunk();
 
 	sound_init();

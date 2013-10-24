@@ -143,12 +143,12 @@ int texture_init(void)
 	textures = alist_new();
 	texture_load("error.png"); /* image to be shown for images which fails to load */
 
-	TEX_WHITE = texture_load("pixel.png");
 	TEX_GLOW_DOT = texture_load("dot.png"); //TODO move these definitions out of engine
 	TEX_GLOW = texture_load("glow.png");
 	//TEX_LIGHT = texture_load("light2.png");
 	TEX_STARS = texture_load("stars.png");
 	TEX_METAL = texture_load("metal_01.png");
+	TEX_WHITE = texture_load("pixel.png");
 
 	return 0;
 }

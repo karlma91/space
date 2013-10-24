@@ -18,7 +18,7 @@ static void add_sparks_at_contactpoint(cpArbiter *arb)
 	if(cpArbiterGetCount(arb) >0){
 		cpVect force = cpArbiterTotalImpulse(arb);
 		float f = cpvlength(force);
-		if(f>25){
+		if(f>100){
 			cpVect v = cpArbiterGetPoint(arb, 0);
 			cpVect n = cpArbiterGetNormal(arb, 0);
 			float angle = cpvtoangle(n);

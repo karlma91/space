@@ -237,7 +237,7 @@ void draw_line(int tex_id, cpVect a, cpVect b, float w)
 			1,  1};
 
 	texture_bind_virt(tex_id);
-	draw_triangle_fan(TMP_RENDER_LAYER, line_mesh, line_texture, 8);
+	draw_triangle_strip(TMP_RENDER_LAYER, line_mesh, line_texture, 8);
 
 	draw_pop_blend();
 	draw_pop_matrix();
@@ -287,7 +287,7 @@ void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w)
             tx_2,  ty_2};
 
     texture_bind_virt(sprite_get_texture(spr));
-	draw_triangle_fan(TMP_RENDER_LAYER, line_mesh, line_texture, 8);
+	draw_triangle_strip(TMP_RENDER_LAYER, line_mesh, line_texture, 8);
 
     draw_pop_matrix();
 }

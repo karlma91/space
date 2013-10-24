@@ -330,7 +330,7 @@ static void plot_on_radar(instance *obj, void *unused)
 	minimap *m = obj->components[CMP_MINIMAP];
 	if(m != NULL){
 		cpVect p = cpvmult(obj->body->p, 1 / (currentlvl->outer_radius - 5 * 64) * RADAR_SIZE);
-		draw_color4f(m->c.r, m->c.g, m->c.b, 0.5);
+		draw_color(m->c);
 		draw_box(p, cpv(m->size, m->size), cpvtoangle(p), 1);
 	}
 }
@@ -343,7 +343,7 @@ static void radar_draw(float x, float y)
 		draw_translate(x, y);
 		draw_rotate(-se_tangent(player->data.body->p));
 	}
-	draw_color4f(0.7, 0.3, 0.3, 0.6);
+	draw_color4f(0.3, 0.3, 0.7, 0.6);
 	draw_donut(cpvzero, (currentlvl->inner_radius + 2 * 64) / currentlvl->outer_radius * RADAR_SIZE, RADAR_SIZE);
 	instance_iterate_comp(CMP_MINIMAP, (void (*)(instance *, void *))plot_on_radar, NULL);
 	draw_pop_matrix();

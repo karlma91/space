@@ -46,7 +46,7 @@ mac:
 
 windows:
 -lmingw32 -L../lib/SDL2_image/win -lSDL2_image -L../lib/SDL2/win/ -lSDL2main -lSDL2 -lopengl32 -lpng15-15 -L../lib/chipmunk/win -lChipmunk -L../lib/mxml/win -lmxml -L../lib/inih/win -linih -L../lib/zzip/win -lzzip -L../lib/zlib/win -lz
--c -fmessage-length=0 -mwindows -I../lib/chipmunk/include -I../lib/SDL2_image -I../lib/inih/include -I../lib/mxml/include -I../lib/SDL2/include -I../lib/zzip/include/ -I../lib/zlib/include
+-c -std=gnu99 -fmessage-length=0 -mwindows -I../lib/chipmunk/include -I../lib/SDL2_image -I../lib/inih/include -I../lib/mxml/include -I../lib/SDL2/include -I../lib/zzip/include/ -I../lib/zlib/include -I../src/engine/include -I../lib/glew -I../lib/cjson
 
 linux:
 -L../lib/inih/linux -L../lib/mxml/linux -L../lib/chipmunk/linux -L../lib/SDL2/linux -L../lib/SDL2_image/linux -L../lib/zzip/linux -lX11 -lXi -lm -ldl -lXmu -lpthread -lGL -lSDL2 -lchipmunk -lSDL2_image -linih -lz -lzzip -lmxml 

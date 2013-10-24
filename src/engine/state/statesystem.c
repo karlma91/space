@@ -376,8 +376,10 @@ void statesystem_draw(void)
 
     static int counter = 0;
     if (++counter >= 60) {
-    	fprintf(stderr, "RENDER_INFO: %d of %d elements rendered\n", ELEMENT_APPEND_ACTUAL_COUNT, ELEMENT_APPEND_COUNT);
+    	extern int TMP_DRAW_CALLS;
+    	fprintf(stderr, "RENDER_INFO: %d of %d elements rendered in %d draw calls\n", ELEMENT_APPEND_ACTUAL_COUNT, ELEMENT_APPEND_COUNT, (TMP_DRAW_CALLS+30)/60);
     	counter = 0;
+    	TMP_DRAW_CALLS = 0;
     }
 }
 
