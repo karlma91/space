@@ -33,7 +33,7 @@
 
 #include "../space/game.h" //TODO remove dependency
 
-#define GAME_VERSION "PRE-ALPHA 8.8" //TMP placement for this define
+#define GAME_VERSION "PRE-ALPHA 9.0" //TMP placement for this define
 #if TARGET_OS_IPHONE
 #include "hgversion.h"
 #endif
@@ -263,10 +263,11 @@ static void initGL(void) {
 	SDL_Log("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
 
 
-	int max_size;
+	int max_size, max_vert_attribs;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
 
 	SDL_Log("Max texture size = %d", max_size);
+	SDL_Log("Max vertex attribs = %d", max_vert_attribs);
 
 	glEnableClientState(GL_VERTEX_ARRAY); //GLES1!
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY); //GLES1!
