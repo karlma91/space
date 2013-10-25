@@ -10,6 +10,7 @@
 
 #include "../data/hashmap.h"
 #include "../data/arraylist.h"
+#include "../data/array.h"
 #include "../data/highscorelist.h"
 #include "../data/llist.h"
 #include "../data/stack.h"

@@ -17,12 +17,10 @@ typedef struct {
 	float parallax_zoom;
 	cpVect offset;
 	LList ll_spr;
-	LList ll_blend_modes;
 }layer_ins;
 
 typedef struct {
 	int num_layers;
-	int current_layer;
 	arraylist *layers;
 } layer_system;
 

@@ -10,9 +10,9 @@
 
 typedef struct arraylist arraylist;
 
-arraylist * alist_new();
+arraylist * alist_new(void);
 int alist_size(arraylist *hm);
-int alist_counter(arraylist *al);
+int alist_last_index(arraylist *al);
 int alist_add(arraylist *hm, void *data);
 void alist_set_safe(arraylist *al, unsigned int index, void *data);
 void alist_set(arraylist *hm, unsigned int index, void *data);

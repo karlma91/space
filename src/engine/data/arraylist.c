@@ -29,7 +29,7 @@ int alist_size(arraylist *hm)
 	return hm->size;
 }
 
-int alist_counter(arraylist *al)
+int alist_last_index(arraylist *al)
 {
 	return al->count;
 }
