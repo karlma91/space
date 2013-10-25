@@ -35,6 +35,9 @@
 
 #define GAME_VERSION "PRE-ALPHA 9.0" //TMP placement for this define
 #if TARGET_OS_IPHONE
+#define glOrtho glOrthof
+#define glMatrixMode(x)
+
 #include "hgversion.h"
 #endif
 #ifndef HGVERSION
@@ -263,12 +266,9 @@ static void initGL(void)
 
 	SDL_Log("Max texture size = %d", max_size);
 
-
 	glEnableVertexAttribArray(0); // vertex
 	glEnableVertexAttribArray(1); // texture
 	glEnableVertexAttribArray(2); // colors
-
-
 
 	glMatrixMode(GL_PROJECTION); //GLES1!
 	draw_load_identity();
@@ -297,9 +297,82 @@ static void initGL(void)
 	SDL_Log("DEBUG - initGL done!\n");
 }
 
-#define GLSL_CODE(x) { #x }
+#if GLES2
+#define GLSL_CODE(type, x) { \
+	"#version 100\n" \
+	(type == GL_FRAGMENT_SHADER) ? \
+	    "#ifdef GL_FRAGMENT_PRECISION_HIGH\n" \
+	    "precision highp float;           \n" \
+	    "#else                            \n" \
+	    "precision mediump float;         \n" \
+	    "#endif                           \n" \
+	    : "" \
+	#x \
+	}
+
+#else
+#define GLSL_CODE(type, x) { \
+	"#version 120\n" \
+    "#define lowp   \n" \
+    "#define mediump\n" \
+    "#define highp  \n" \
+	#x \
+	}
+
+#endif
+
 
 GLuint gl_program;
+
+void printProgramLog(GLuint program)
+{
+	//Make sure name is shader
+	if (glIsProgram(program)) {
+		//Program log length
+		int infoLogLength = 0;
+		int maxLength = infoLogLength;
+
+		//Get info string length
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+
+		//Allocate string
+		char infoLog[maxLength];
+
+		//Get info log
+		glGetProgramInfoLog(program, maxLength, &infoLogLength, infoLog);
+		if (infoLogLength > 0) {
+			//Print Log
+			printf("%s\n", infoLog);
+		}
+	} else {
+		printf("Name %d is not a program\n", program);
+	}
+}
+void printShaderLog(GLuint shader)
+{
+	//Make sure name is shader
+	if (glIsShader(shader)) {
+		//Shader log length
+		int infoLogLength = 0;
+		int maxLength = infoLogLength;
+
+		//Get info string length
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		//Allocate string
+		char infoLog[maxLength];
+
+		//Get info log
+		glGetShaderInfoLog(shader, maxLength, &infoLogLength, infoLog);
+		if (infoLogLength > 0) {
+			//Print Log
+			printf("%s\n", infoLog);
+		}
+
+	} else {
+		printf("Name %d is not a shader\n", shader);
+	}
+}
 
 static void initGP(void)
 {
@@ -310,6 +383,7 @@ static void initGP(void)
 	http://lazyfoo.net/tutorials/OpenGL/30_loading_text_file_shaders/index.php
 	http://lazyfoo.net/tutorials/OpenGL/31_glsl_matrices_color_and_uniforms/index.php
 	http://lazyfoo.net/tutorials/OpenGL/34_glsl_texturing/index.php
+	http://www.khronos.org/registry/gles/specs/2.0/GLSL_ES_Specification_1.0.17.pdf
 	*/
 
 	GLint programSuccess = GL_FALSE;
@@ -317,12 +391,24 @@ static void initGP(void)
 
 	/* Vertex Shader */
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	const GLchar *vertexShaderCode[] = GLSL_CODE(
-			void main() {
-				gl_Position = gl_Vertex;
-			}
-		);
-	glShaderSource( vertexShader, 1, &vertexShaderCode, NULL);
+	const GLchar *vertexShaderCode[] = GLSL_CODE(GL_VERTEX_SHADER,
+		uniform mat4 projection;
+
+		attribute vec2 aVertex;
+		attribute vec2 aTexCoord;
+		attribute vec4 aColor;
+
+		varying vec2 texCoord;
+		varying vec4 col;
+
+		void main() {
+			gl_Position = gl_ProjectionMatrix * vec4(aVertex.xy, 0, 1);
+			//gl_Position = projection * vec4(aVertex.xy, 0, 1); //TODO create and send in projection matrix
+			texCoord = aTexCoord;
+			col = aColor;
+		}
+	);
+	glShaderSource(vertexShader, 1, vertexShaderCode, NULL);
 	glCompileShader(vertexShader);
 
 	// Check for errors
@@ -330,6 +416,7 @@ static void initGP(void)
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vShaderCompiled);
 	if (vShaderCompiled != GL_TRUE) {
 		printf("Unable to compile vertex shader %d!\n", vertexShader);
+		printShaderLog(vertexShader);
 		we_error("error - vertex shader");
 	}
 	glAttachShader(gl_program, vertexShader);
@@ -338,11 +425,16 @@ static void initGP(void)
 	/* Fragment Shader */
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-	 const GLchar *fragmentShaderCode[] = GLSL_CODE(
-			void main() {
-				gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-			}
-		);
+	const GLchar *fragmentShaderCode[] = GLSL_CODE(GL_FRAGMENT_SHADER,
+		uniform sampler2D texUnit;
+
+		varying vec2 texCoord;
+		varying vec4 col;
+
+		void main() {
+			gl_FragColor = texture2D(texUnit, texCoord) * (col/255.0);
+		}
+	);
 	glShaderSource(fragmentShader, 1, fragmentShaderCode, NULL);
 	glCompileShader(fragmentShader);
 
@@ -351,6 +443,7 @@ static void initGP(void)
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fShaderCompiled);
 	if (fShaderCompiled != GL_TRUE) {
 		printf("Unable to compile fragment shader %d!\n", vertexShader);
+		printShaderLog(fragmentShader);
 		we_error("error - fragment shader");
 	}
 
@@ -365,6 +458,7 @@ static void initGP(void)
 	glGetProgramiv(gl_program, GL_LINK_STATUS, &programSuccess);
 	if (programSuccess != GL_TRUE) {
 		printf("Error linking program %d!\n", gl_program);
+		printShaderLog(gl_program);
 		we_error("error - program shader");
 	}
 }

@@ -224,7 +224,7 @@ static render_batch *current_batch(int layer)
         if (batch == NULL) {
             SDL_Log("ERROR: NOT ENOUGH MEMORY!");
         } else {
-        	SDL_Log("New batch renderer created (state_id=%p, blend=%x, layer=%d, tex_id=%d): p=%p s=%dkB", state_id, current_blend.src_factor, layer, tex_id, batch, (512+sizeof(render_batch))/1024);
+        	SDL_Log("New batch renderer created (state_id=%p, blend=%x, layer=%d, tex_id=%d): p=%p", state_id, current_blend.src_factor, layer, tex_id, batch);
         	alist_set_safe(al, tex_id, batch);
         }
 	}
