@@ -130,12 +130,7 @@ void draw_color4b(byte r, byte g, byte b, byte a)
 
 void draw_color(Color color)
 {
-#if GLES1
 	draw_color4b(color.r, color.g, color.b, color.a);
-#else
-	draw_color4b(color.r, color.g, color.b, color.a);
-	//glColor4ubv((GLubyte *)&color);
-#endif
 }
 
 void draw_color4f(float r, float g, float b, float a)

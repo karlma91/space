@@ -49,14 +49,6 @@
 
 #define FPS_LIMIT 1
 
-#if (GLES1)
-#define glOrtho glOrthof
-
-#define FPS_SLEEP_TIME 16//33
-#else
-#define FPS_SLEEP_TIME 16
-#endif
-
 static Uint32 thisTime = 0;
 static Uint32 lastTime;
 
@@ -64,6 +56,8 @@ static int paused = 0;
 
 static float fps;
 static float frames;
+
+#define FPS_SLEEP_TIME 16
 
 /* definition of external variables */
 char fps_buf[15];
@@ -203,8 +197,8 @@ static void display_init(void)
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0); //AA not supported on Android test device
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GLES1 ? 1 : 2);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GLES2 ? 0 : 1);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
@@ -240,7 +234,8 @@ static void display_init(void)
 	SDL_ShowWindow(window);
 }
 
-static void initGL(void) {
+static void initGL(void)
+{
 	// Create an OpenGL context associated with the window.
 	glcontext = SDL_GL_CreateContext(window);
 
@@ -263,15 +258,17 @@ static void initGL(void) {
 	SDL_Log("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
 
 
-	int max_size, max_vert_attribs;
+	int max_size;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
 
 	SDL_Log("Max texture size = %d", max_size);
-	SDL_Log("Max vertex attribs = %d", max_vert_attribs);
 
-	glEnableClientState(GL_VERTEX_ARRAY); //GLES1!
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY); //GLES1!
-	glEnableClientState(GL_COLOR_ARRAY); //GLES1!
+
+	glEnableVertexAttribArray(0); // vertex
+	glEnableVertexAttribArray(1); // texture
+	glEnableVertexAttribArray(2); // colors
+
+
 
 	glMatrixMode(GL_PROJECTION); //GLES1!
 	draw_load_identity();
@@ -289,20 +286,91 @@ static void initGL(void) {
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	glClearColor(0,0,0, 1);
 
-	glEnableClientState(GL_VERTEX_ARRAY); //GLES1!
-
-	glEnable(GL_MULTISAMPLE); //GLES1!
+	//glEnable(GL_MULTISAMPLE); //GLES1!
 	glDisable(GL_DEPTH_TEST);
-
 	glEnable(GL_SCISSOR_TEST);
 	glScissor(0,0, WINDOW_WIDTH,WINDOW_HEIGHT); //scissor test
+
 
 	draw_enable_tex2d();
 
 	SDL_Log("DEBUG - initGL done!\n");
 }
 
-static void main_init(void) {
+#define GLSL_CODE(x) { #x }
+
+GLuint gl_program;
+
+static void initGP(void)
+{
+	//TODO write and compile shader program here
+
+	/*reference:
+	http://lazyfoo.net/tutorials/OpenGL/29_hello_glsl/index.php
+	http://lazyfoo.net/tutorials/OpenGL/30_loading_text_file_shaders/index.php
+	http://lazyfoo.net/tutorials/OpenGL/31_glsl_matrices_color_and_uniforms/index.php
+	http://lazyfoo.net/tutorials/OpenGL/34_glsl_texturing/index.php
+	*/
+
+	GLint programSuccess = GL_FALSE;
+	gl_program = glCreateProgram();
+
+	/* Vertex Shader */
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	const GLchar *vertexShaderCode[] = GLSL_CODE(
+			void main() {
+				gl_Position = gl_Vertex;
+			}
+		);
+	glShaderSource( vertexShader, 1, &vertexShaderCode, NULL);
+	glCompileShader(vertexShader);
+
+	// Check for errors
+	GLint vShaderCompiled = GL_FALSE;
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vShaderCompiled);
+	if (vShaderCompiled != GL_TRUE) {
+		printf("Unable to compile vertex shader %d!\n", vertexShader);
+		we_error("error - vertex shader");
+	}
+	glAttachShader(gl_program, vertexShader);
+
+
+	/* Fragment Shader */
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+	 const GLchar *fragmentShaderCode[] = GLSL_CODE(
+			void main() {
+				gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+			}
+		);
+	glShaderSource(fragmentShader, 1, fragmentShaderCode, NULL);
+	glCompileShader(fragmentShader);
+
+	// Check for errors
+	GLint fShaderCompiled = GL_FALSE;
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fShaderCompiled);
+	if (fShaderCompiled != GL_TRUE) {
+		printf("Unable to compile fragment shader %d!\n", vertexShader);
+		we_error("error - fragment shader");
+	}
+
+	glAttachShader(gl_program, fragmentShader);
+
+	/* Link program */
+	glLinkProgram(gl_program);
+
+	glUseProgram(gl_program);
+
+	// Check for errors
+	glGetProgramiv(gl_program, GL_LINK_STATUS, &programSuccess);
+	if (programSuccess != GL_TRUE) {
+		printf("Error linking program %d!\n", gl_program);
+		we_error("error - program shader");
+	}
+}
+
+static void main_init(void)
+{
 	srand(time(0)); /* init pseudo-random generator */
 
 	//TODO Make sure faulty inits stops the program from proceeding
@@ -310,6 +378,7 @@ static void main_init(void) {
 	game_config();      /* load default and user-changed settings */
 	display_init();     /* sets attributes and creates windows and renderer*/
 	initGL();           /* setup a gl context */
+	initGP();          /* setup a gl context */
 
     accelerometer = SDL_JoystickOpen(0);
     if (accelerometer == NULL) {

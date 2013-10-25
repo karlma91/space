@@ -10,16 +10,15 @@
 #define LIGHT_SYSTEM 0
 
 #if __IPHONEOS__ || __ANDROID__
-#define GLES1 1
+#define GLES2 1
 #else
 #define GLES1 0
+#define GLES2 0
 #endif
 
 
-
-#if GLES1
-#include "SDL_opengles.h"
-//#include "SDL_opengles2.h"
+#if GLES2
+#include "SDL_opengles2.h"
 #else
 
 #if __WIN32__
@@ -27,6 +26,9 @@
 //#include "GL/glew.h"
 #endif
 
+#define GL_GLEXT_PROTOTYPES 1
+#include "GL/glu.h"
+#include "GL/glext.h"
 #include "SDL_opengl.h"
 #endif
 
@@ -102,10 +104,6 @@ void draw_pop_blend(void);
 
 void draw_enable_tex2d(void);
 void draw_disable_tex2d(void);
-
-	//void draw_draw_arrays(GLenum mode, GLint first, GLsizei count); //REMOVEME
-	//void draw_vertex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
-	//void draw_tex_pointer(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 
 Color draw_get_current_color(void);
 Blend draw_get_current_blend(void);

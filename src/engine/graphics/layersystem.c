@@ -130,14 +130,10 @@ void layersystem_render(STATE_ID state_id, view *cam)
 					vertex_elem *elems = batch->elems;
 
 					//GLES2
-					//glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof *elems, &elems[0].x);
-					//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof *elems, &elems[0].tx);
-					//glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof *elems, &(elems[0].col.r));
+					glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof *elems, &elems[0].x);
+					glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof *elems, &elems[0].tx);
+					glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof *elems, &(elems[0].col.r));
 
-					//GLES1
-					glVertexPointer(2, GL_FLOAT, sizeof *elems, &elems[0].x);
-					glTexCoordPointer(2, GL_FLOAT, sizeof *elems, &elems[0].tx);
-					glColorPointer(4, GL_UNSIGNED_BYTE, sizeof *elems, &(elems[0].col.r));
 					glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_index));
 					glDrawArrays(GL_TRIANGLE_STRIP, 0, batch->count);
 					++TMP_DRAW_CALLS;

@@ -498,11 +498,7 @@ void draw_gui(view *cam)
 }
 
 
-#if GLES1
 #define star_count 50
-#else
-#define star_count 50
-#endif
 
 static int stars_x[star_count];
 static int stars_y[star_count];
