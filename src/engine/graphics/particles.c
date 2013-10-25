@@ -167,6 +167,23 @@ void particles_release_emitter(emitter* e)
 	}
 }
 
+/** set as default emitter->particles remove_callback */
+static void clear_rm_particle(particle *p)
+{
+	p->alive = 0;
+	set_particle_available(p);
+}
+/** set as default system->emitters remove_callback */
+static void clear_emitter_particles(emitter *e)
+{
+	llist_clear(e->particles);
+}
+static void clear_emitter_available(emitter *e)
+{
+	llist_clear(e->particles);
+	set_emitter_available(e);
+}
+
 /**
  * destroys a system, puts all emitters available and frees system
  */
@@ -175,13 +192,7 @@ void particlesystem_free(particle_system *s) {
 	if (!s)
 		return;
 
-	particles_clear(s);
-	llist_begin_loop(s->emitters);
-	while(llist_hasnext(s->emitters)) {
-		emitter *e = llist_next(s->emitters);
-		set_emitter_available(e);
-	}
-	llist_end_loop(s->emitters);
+	llist_set_remove_callback(s->emitters, (ll_rm_callback) clear_emitter_available);
 	llist_destroy(s->emitters);
 	free(s);
 }
@@ -191,25 +202,16 @@ void particlesystem_free(particle_system *s) {
  */
 void particles_destroy()
 {
-	/*llist_begin_loop(main_emitter_pool->available);
+	llist_begin_loop(main_emitter_pool->available);
 	while(llist_hasnext(main_emitter_pool->available)) {
 		emitter *e = llist_next(main_emitter_pool->available);
-		if(e->particles){
+		if(e->particles != NULL) {
 			llist_destroy(e->particles);
 			e->particles = NULL;
 		}
 	}
-	llist_end_loop(main_emitter_pool->in_use);
-	llist_begin_loop(main_emitter_pool->in_use);
-	while(llist_hasnext(main_emitter_pool->in_use)) {
-		emitter *e = llist_next(main_emitter_pool->in_use);
-		if(e->particles){
-			llist_destroy(e->particles);
-			e->particles = NULL;
-		}
-	}
-	llist_end_loop(main_emitter_pool->in_use);
-	*/
+	llist_end_loop(main_emitter_pool->available);
+	// FIXME: fix crash on destroy
 	//pool_destroy(main_emitter_pool);
 	//pool_destroy(main_particle_pool);
 }
@@ -219,22 +221,10 @@ void particles_destroy()
  */
 void particles_clear(particle_system *s)
 {
-	llist_begin_loop(s->emitters);
-	while (llist_hasnext(s->emitters)) {
-		emitter *e = llist_next(s->emitters);
-		if (e != NULL) {
-			llist_begin_loop(e->particles);
-			while(llist_hasnext(e->particles)){
-				particle *p = llist_next(e->particles);
-				llist_remove(e->particles, p);
-				p->alive = 0;
-				set_particle_available(p);
-			}
-			llist_end_loop(e->particles);
-		}
-	}
-	llist_end_loop(s->emitters);
+	llist_set_remove_callback(s->emitters, (ll_rm_callback) clear_emitter_particles);
+	llist_clear(s->emitters);
 }
+
 
 /**
  * ***********************
@@ -342,6 +332,7 @@ static emitter * get_emitter(void)
 	}
 	if(e->particles == NULL) {
 		e->particles = llist_create();
+		llist_set_remove_callback(e->particles, (ll_rm_callback) clear_rm_particle );
 	}
 	return e;
 }

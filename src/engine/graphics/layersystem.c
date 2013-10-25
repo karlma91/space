@@ -1,8 +1,10 @@
 #include "layersystem.h"
 #include "we_graphics.h"
+#include "../data/array.h"
 #include "../state/statesystem.h"
 
-#define MAX_ELEM_COUNT_BATCH 10000 // Memory for 1000 elements for each combination of texture, blend, layer and state!
+#define MAX_ELEM_COUNT_BATCH 100000 // Memory for 1000 elements for each combination of texture, blend, layer and state!
+
 
 static int check_bounds(layer_system *ls, int layer)
 {
@@ -16,6 +18,8 @@ static int check_bounds(layer_system *ls, int layer)
 	}
 	return 0;
 }
+
+static arraylist *render_tree;
 
 layer_system * state_get_layersystem(STATE_ID state_id);
 
@@ -39,18 +43,14 @@ typedef struct vertex_elem { // 1 independent quad = 120 bytes
 } vertex_elem;
 
 typedef struct render_batch {
-	vertex_elem elems[MAX_ELEM_COUNT_BATCH]; //TODO use an expanding array (with all structures stored in-place)
-	//vertex_elem *elems;
+	array *elems;
 	int count;
-	//int max;
 } render_batch;
-
-static pool *pool_atom;
 
 
 void layersystem_init(void)
 {
-	pool_atom = pool_create(sizeof (vertex_elem));
+	render_tree = alist_new();
 }
 
 layer_system * layersystem_new(void)
@@ -69,8 +69,14 @@ int layersystem_add_layer(layer_system *lsys)
 	llist_set_remove_callback(layer->ll_spr, free);
 	layer->parallax_factor = 0;
 	layer->parallax_zoom = 1;
-	layer->ll_blend_modes = llist_create();
 	lsys->num_layers += 1;
+
+	LList *blend_modes = alist_get(render_tree, lsys->num_layers - 1);
+	if(blend_modes == NULL) {
+		blend_modes = llist_create();
+		alist_set_safe(render_tree, lsys->num_layers - 1, blend_modes);
+	}
+
 	return alist_add(lsys->layers, layer);
 }
 
@@ -115,10 +121,12 @@ void layersystem_render(STATE_ID state_id, view *cam)
 		}
 		llist_end_loop(lay->ll_spr);
 
+		LList *layer_blends = alist_get(render_tree, layer_index);
 		/* iterate blend modes */
-		llist_begin_loop(lay->ll_blend_modes);
-		while(llist_hasnext(lay->ll_blend_modes)) {
-			blend_tree *blends = llist_next(lay->ll_blend_modes);
+		llist_begin_loop(layer_blends);
+
+		while(llist_hasnext(layer_blends)) {
+			blend_tree *blends = llist_next(layer_blends);
 			glBlendFunc(blends->type.src_factor, blends->type.dst_factor);
 
 			/* iterate textures */
@@ -127,7 +135,7 @@ void layersystem_render(STATE_ID state_id, view *cam)
 			for (tex_index = 0; tex_index < tex_count; tex_index++) {
 				render_batch *batch = alist_get(blends->al_tex, tex_index);
 				if (batch && batch->count) {
-					vertex_elem *elems = batch->elems;
+					vertex_elem *elems = (vertex_elem*) array_get(batch->elems, 0);
 
 					//GLES2
 					glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof *elems, &elems[0].x);
@@ -141,7 +149,7 @@ void layersystem_render(STATE_ID state_id, view *cam)
 				}
 			}
 		}
-		llist_end_loop(lay->ll_blend_modes);
+		llist_end_loop(layer_blends);
 	}
 }
 
@@ -180,8 +188,7 @@ static render_batch *current_batch(int layer)
 	}
 
 	/* current layer */
-	layer_ins *lay = alist_get(ls->layers, layer);
-	LList ll_blend = lay->ll_blend_modes;
+	LList ll_blend = alist_get(render_tree, layer);
 	Blend current_blend = draw_get_current_blend();
 
 	blend_tree *blend_texs = NULL;
@@ -213,6 +220,7 @@ static render_batch *current_batch(int layer)
 
 	if (batch == NULL) {
 		batch = calloc(1, sizeof *batch);
+		batch->elems = array_new(sizeof(vertex_elem));
         if (batch == NULL) {
             SDL_Log("ERROR: NOT ENOUGH MEMORY!");
         } else {
@@ -240,7 +248,7 @@ static inline void render_append_elem(render_batch *batch, vertex_elem *elem)
             return;
         }
         ++ELEMENT_APPEND_ACTUAL_COUNT;
-        batch->elems[index] = *elem;
+        array_set_safe(batch->elems, index, elem);
         batch->count = index + 1;
     }
 }
@@ -269,7 +277,7 @@ static inline void render_append_repeat(render_batch *batch)
         if (index == 0) {
             return; //no need to repeat
         }
-        render_append_elem(batch, &batch->elems[--index]);
+        render_append_elem(batch, (vertex_elem*) array_get(batch->elems, index - 1));
     }
 }
 
@@ -314,8 +322,8 @@ void draw_triangle_fan(int layer, float *ver_fan, const float *tex_fan, int coun
 	vertex_elem *fan_origin;
 
 	render_append_repeat(batch); // repeat previous point
-	fan_origin = &batch->elems[batch->count];
 	render_append_vertex2fv(batch, &ver_fan, tex); // fan origin
+	fan_origin = array_get(batch->elems,batch->count-1);
 	render_append_elem(batch, fan_origin); // repeat p0
 
 	for (;;) {
@@ -333,14 +341,37 @@ void layersystem_free(layer_system *ls)
 	for(i = 0; i < ls->num_layers; i++) {
 		layer_ins *lay = alist_get(ls->layers, i);
 		llist_destroy(lay->ll_spr);
-		llist_destroy(lay->ll_blend_modes); //TODO add remove callback to free arraylists and linked lists inside ll_blend!
-#warning SEVERAL ARRAYLISTS AND LINKED LISTS ARE NOT BEEING FREED!
+		free(lay);
 	}
-	alist_destroy(ls->layers);
 	free(ls);
 }
 
 void layersystem_destroy()
 {
-	pool_destroy(pool_atom);
+	int i;
+	int num_layers = alist_size(render_tree);
+	for(i = 0; i < num_layers; i++) {
+		LList *layer_blends = alist_get(render_tree, i);
+		/* iterate blend modes */
+		llist_begin_loop(layer_blends);
+		while(llist_hasnext(layer_blends)) {
+			blend_tree *blends = llist_next(layer_blends);
+			/* iterate textures */
+			int tex_index;
+			int tex_count = alist_size(blends->al_tex);
+			for (tex_index = 0; tex_index < tex_count; tex_index++) {
+				render_batch *batch = alist_get(blends->al_tex, tex_index);
+				if (batch) {
+					array_destroy(batch->elems);
+					free(batch);
+				}
+			}
+			alist_destroy(blends->al_tex);
+			free(blends);
+
+		}
+		llist_end_loop(layer_blends);
+		llist_destroy(layer_blends);
+	}
+	alist_destroy(render_tree);
 }

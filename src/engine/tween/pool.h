@@ -6,7 +6,7 @@ typedef struct pool pool;
 struct pool {
 	int element_size;
 	LList available;
-	LList in_use;
+	//LList in_use;
 };
 
 pool * pool_create(int element_size);
