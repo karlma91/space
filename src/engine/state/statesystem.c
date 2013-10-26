@@ -240,9 +240,11 @@ void statesystem_update(void)
 		//TODO check object system
 		accumulator += dt;
 		while (accumulator >= phys_step) {
-			cpSpaceStep(current_space, phys_step);
+			cpSpaceStep(stack_head->objects->space, phys_step);
 			accumulator -= phys_step;
 		}
+	} else if (stack_head->objects){
+		cpSpaceStep(stack_head->objects->space, 0);
 	}
 
 	/* update particle system */
@@ -303,7 +305,7 @@ void statesystem_draw(void)
 
     		draw_push_matrix();
     		/* draw all objects */
-    		if (state->objects_enabled) {
+    		if (state->objects) {
     			instance_iterate(render_instances, NULL);
     			debugdraw_space(current_space);
     		}

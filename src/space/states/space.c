@@ -110,6 +110,7 @@ void setup_multiplay(void);
 
 static void level_start(void)
 {
+	state_enable_objects(state_space, 0);
 	game_time = 0;
 #if QUICK_ENTER
 	state_timer = 1.6;
@@ -156,7 +157,7 @@ static void level_running(void)
 
 	input();
 
-	//update_all();
+	state_enable_objects(state_space, 1);
 	if(player1 && player1->hp_bar.value <= 0 && (player2 == NULL || player2->hp_bar.value <=0 )){
 		//player->disable = 1;
 		change_state(LEVEL_PLAYER_DEAD);
