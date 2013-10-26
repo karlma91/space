@@ -106,7 +106,8 @@ void state_add_sprite(STATE_ID state_id, int layer, SPRITE_ID id, float w, float
 	layer_ins *lay = alist_get(ls->layers, layer);
 
 	sprite_ext *s = calloc(1, sizeof *s);
-	sprite_create(&(s->s), id, w, h, 0);
+	sprite_create(&(s->s), id, w, h, 30);
+	sprite_set_index_normalized(&(s->s),we_randf);
 	s->a = a;
 	s->pos = p;
 	llist_add(lay->ll_spr, s);
@@ -123,14 +124,25 @@ void layersystem_render(STATE_ID state_id, view *cam)
 		return;
 	}
 
+	draw_load_identity();
+
 	int layer_index = ls->num_layers;
 	while (layer_index--) {
 		/* register layersystem sprites */
 		layer_ins *lay = alist_get(ls->layers, layer_index);
 		llist_begin_loop(lay->ll_spr);
+
 		while(llist_hasnext(lay->ll_spr)) {
 			sprite_ext *s = llist_next(lay->ll_spr);
+			sprite_update(&s->s);
+			draw_push_matrix();
+			float zoom = cam->zoom * lay->parallax_zoom;
+			draw_scale(zoom * cam->ratio, zoom);
+			draw_rotate(cam->rotation);
+			draw_translatev(cpvmult(current_view->p, -lay->parallax_factor));
+			//draw_translatev(current_view->p);
 			sprite_render(layer_index, &(s->s), s->pos, s->a);
+			draw_pop_matrix();
 		}
 		llist_end_loop(lay->ll_spr);
 	}

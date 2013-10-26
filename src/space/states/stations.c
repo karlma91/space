@@ -72,9 +72,8 @@ static void draw(void)
 	float yoffset = scroll_get_yoffset(scroller);
 
 	cpVect offset = cpv(xoffset, yoffset);
-	float angle = cpvtoangle(offset);
-
-	view_update(current_view, offset, angle);
+	view_update(current_view, offset, 0);
+	//0.5 - 0.49*cosf(engine_time * WE_2PI/3);
 
 	/*
 	draw_color4f(1,1,1,1);
@@ -88,7 +87,13 @@ static void draw(void)
 	*/
 
 
-	draw_box(1, cpvadd(a,cpv(xoffset,yoffset)), b, r, 1);
+	if(keys[SDL_SCANCODE_PAGEUP]){
+		current_view->zoom += 2 * dt;
+	} else if(keys[SDL_SCANCODE_PAGEDOWN]) {
+		current_view->zoom -= 2 * dt;
+	}
+
+	draw_box(1, a, b, r, 1);
 
 	//cpVect pos = {0,0.7f*GAME_HEIGHT/2};
 	//draw_texture(tex_title, &pos, TEX_MAP_FULL, 1200, 300, 0);
@@ -131,29 +136,30 @@ void stations_init(void)
 	Color col_back = {255,154,127,255};
 	//Color col_text = {1,1,1,1};
 
+	view* main_view = state_view_get(state_stations, 0);
+
 	btn_home = button_create(SPRITE_PLAYER, 0, "", 0, 0, 250, 250);
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
-	state_register_touchable(this, btn_home);
+	state_register_touchable_view(main_view, btn_home);
 
 	int i;
 	for (i = 0; i < station_count; i++) {
 		char stri[10];
 		sprintf(stri, "%d", i+1);
 		float size = 350 + (i ? -50 : 50);
-		btn_stations[i] = button_create(SPRITE_STATION_01, 0, "", -1,-1, size, size);
+		btn_stations[i] = button_create(SPRITE_STATION_01, 0, "", -(station_count - 1) / 2.0 * 650 + 1000 * i , (i-0.5)*270, size, size);
 		button_set_callback(btn_stations[i], button_callback, &stations[i]);
 		button_set_backcolor(btn_stations[i], col_back);
 		button_set_animated(btn_stations[i], 1, (i ? 18 : 15));
 		button_set_enlargement(btn_stations[i], 1.5);
 		button_set_hotkeys(btn_stations[i], digit2scancode[(i+1) % 10], 0);
-		btn_stations[i]->visible = 0;
 
 		state_register_touchable(this, btn_stations[i]);
 	}
 
-	state_register_touchable(this, btn_settings);
+	state_register_touchable_view(main_view, btn_settings);
 
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000); // max 4 000 gu / sec
 	state_register_touchable(this, scroller);
@@ -161,23 +167,29 @@ void stations_init(void)
 	tex_stars = texture_load("stars.jpg");
 	tex_stars_2 = texture_load("stars_2.png");
 
-	state_add_layer(state_stations);
-	state_add_layer(state_stations);
-	state_add_layer(state_stations);
-	state_add_layer(state_stations);
+	state_add_layers(state_stations, 10);
 
 	int layers = state_layer_count(state_stations);
 
-	for(i = 0; i<layers; i++){
+	for(i = 2; i<layers; i++){
 		//float depth =  2 + 10*tan((1.0f*i/la_sys->num_layers)*WE_PI_2);
 		float f = (layers - i * 0.9f) / (layers);
-		state_set_layer_parallax(state_stations, i, f, 1);
+		state_set_layer_parallax(state_stations, i, f, f);
 	}
 	for(i = 0; i<100; i++){
-		int layer = roundf(we_randf*(layers-1));
-		float size = 150 + we_randf*70 - layer*1.5;
+		int layer =  2 + roundf(we_randf*(layers-1-2));
+		float size = 160 + we_randf*90 - layer*4;
 		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600);
-		state_add_sprite(state_stations, layer, SPRITE_SPIKEBALL, size, size, pos, we_randf*WE_2PI);
+		SPRITE_ID spr;
+		int s = rand() & 3;
+		switch(s) {
+		case 0: spr = SPRITE_SPIKEBALL; break;
+		case 1: spr = SPRITE_COIN; break;
+		case 2: spr = SPRITE_GEAR; break;
+		case 3: spr = SPRITE_SAW; break;
+		}
+
+		state_add_sprite(state_stations, layer, spr, size, size, pos, we_randf*WE_2PI);
 	}
 }
 

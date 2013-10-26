@@ -292,7 +292,6 @@ void statesystem_draw(void)
     			continue;
 
     		view_clip(cam);
-
     		view_transform2view(cam);
     		draw_push_matrix();
 
@@ -649,6 +648,17 @@ void state_register_touchable_view(view *cam, touchable *touchable)
 int state_add_layer(STATE_ID state_id)
 {
 	State *state = (State *) state_id;
+	return layersystem_add_layer(state->layersystem);
+}
+
+// returns last state index
+int state_add_layers(STATE_ID state_id, int number)
+{
+	State *state = (State *) state_id;
+	while(number >=1 ) {
+		layersystem_add_layer(state->layersystem);
+		number--;
+	}
 	return layersystem_add_layer(state->layersystem);
 }
 

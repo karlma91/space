@@ -208,13 +208,13 @@ static void render(button btn_id)
 			//draw_glow_line(btn->p1x,btn->p1y,btn->p2x,btn->p2y,btn->height);
 			cpVect a = cpvadd(btn_pos, cpv(-width/2,0));
 			cpVect b = cpvadd(btn_pos, cpv(width/2,0));
-			draw_sprite_line(0, &(btn->spr), a, b, height);
+			draw_sprite_line(1, &(btn->spr), a, b, height);
 		} else {
-			sprite_render_scaled(0, &(btn->spr), btn_pos, 0, scale);
+			sprite_render_scaled(1, &(btn->spr), btn_pos, 0, scale);
 		}
 	}
 
-	if (btn->label) {
+	if (btn->label[0]) {
 		//TODO create font struct with color + size + alignment + angle
 		setTextAlign(TEXT_CENTER);
 		setTextAngle(0);
@@ -222,7 +222,7 @@ static void render(button btn_id)
 		draw_color(btn->frontcol);
 
 		setTextSize(height / 4 * scale);
-		font_drawText(x, y + 12 * scale, btn->label);
+		font_drawText(0, x, y + 12 * scale, btn->label);
 	}
 }
 

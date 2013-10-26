@@ -104,10 +104,10 @@ void font_draw_int(float x, float y, int value)
 {
 	char text[12];
 	sprintf(&text[0], "%d", value);
-	font_drawText(x, y, text);
+	font_drawText(0, x, y, text);
 }
 
-void font_drawText(GLfloat x, GLfloat y, char* text)
+void font_drawText(int layer, GLfloat x, GLfloat y, char* text)
 {
 
 	draw_push_blend();

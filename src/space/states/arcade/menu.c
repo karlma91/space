@@ -153,28 +153,28 @@ static void draw(void)
 		draw_color4f(1,1,1,1);
 		setTextSize(80);
 		setTextAlign(TEXT_CENTER);
-		font_drawText(0,0.6f*GAME_HEIGHT/2, "GAME PAUSED");
+		font_drawText(RLAY_GUI_FRONT, 0,0.6f*GAME_HEIGHT/2, "GAME PAUSED");
 		break;
 	case MENU_MAIN:
 		setTextSize(120);
 		//drawStars();
 		draw_color(draw_col_rainbow((int)(timer*1000)));
-		font_drawText(0,0.7f*GAME_HEIGHT/2, "SPACE");
+		font_drawText(RLAY_GUI_FRONT, 0,0.7f*GAME_HEIGHT/2, "SPACE");
 
 		draw_color4f(1,1,1,1);
 
 		setTextSize(30);
-		font_drawText(-GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2, "STYR");
-		font_drawText(-GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2-50, "VVV");
+		font_drawText(RLAY_GUI_FRONT, -GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2, "STYR");
+		font_drawText(RLAY_GUI_FRONT, -GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2-50, "VVV");
 
-		font_drawText(+GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2, "SKYT");
-		font_drawText(+GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2-50, "VVV");
+		font_drawText(RLAY_GUI_FRONT, +GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2, "SKYT");
+		font_drawText(RLAY_GUI_FRONT, +GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2-50, "VVV");
 
 		setTextAlign(TEXT_CENTER);
 		setTextSize(40);
 
 
-		font_drawText(0,-0.5f*GAME_HEIGHT/2, "START SPILLET");
+		font_drawText(RLAY_GUI_FRONT, 0,-0.5f*GAME_HEIGHT/2, "START SPILLET");
 
 		draw_color4f(0.1,0.9,0.1,1);
 		btn_start_tmp->calls->render(btn_start_tmp);

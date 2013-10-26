@@ -107,7 +107,7 @@ static void draw_specs(void)
 
 	sprintf(&spec_buffer[0], "WEAPON LEVEL %d\nDAMAGE: %6.1f\nFIRERATE: %4.1f\nDPS: %9.1f\n\nHP: %7.0f\nMASS: %5.0f\nFORCE: %4.0f\nSPEED: %4.0f",
 			w->level+1, w->lvls[w->level].damage, w->lvls[w->level].firerate,dps, a->max_hp, upg_total_mass, e->force, e->max_speed);
-	font_drawText(specs_x, -200, spec_buffer);
+	font_drawText(RLAY_GUI_FRONT, specs_x, -200, spec_buffer);
 }
 
 static void draw(void)
@@ -125,19 +125,19 @@ static void draw(void)
 
 	setTextSize(20);
 	y = btn_next[UPGRADE_WEAPON]->get.y;
-	font_drawText(x_upg,y + y_offset,weapons[weapon_selected].name);
+	font_drawText(RLAY_GUI_FRONT, x_upg,y + y_offset,weapons[weapon_selected].name);
 	font_draw_int(x_upg,y - y_offset,weapons[weapon_selected].lvls[weapons[weapon_selected].level].price);
 
 	y = btn_next[UPGRADE_ARMOR]->get.y;
-	font_drawText(x_upg,y + y_offset,armors[armor_selected].name);
+	font_drawText(RLAY_GUI_FRONT, x_upg,y + y_offset,armors[armor_selected].name);
 	font_draw_int(x_upg,y - y_offset,armors[armor_selected].price);
 
 	y = btn_next[UPGRADE_ENGINE]->get.y;
-	font_drawText(x_upg,y + y_offset,engines[engine_selected].name);
+	font_drawText(RLAY_GUI_FRONT, x_upg,y + y_offset,engines[engine_selected].name);
 	font_draw_int(x_upg,y - y_offset,engines[engine_selected].price);
 
 	setTextSize(50);
-	font_drawText(0, box.p.y+box.s.y / 2 - 60, "STORE");
+	font_drawText(RLAY_GUI_FRONT, 0, box.p.y+box.s.y / 2 - 60, "STORE");
 
 	draw_testarea();
 	draw_specs();

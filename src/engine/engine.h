@@ -53,6 +53,7 @@ typedef struct
     unsigned int height;
 } configuration;
 
+extern GLfloat engine_time;
 extern configuration config;
 
 /* State  struct */

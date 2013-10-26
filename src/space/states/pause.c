@@ -50,13 +50,13 @@ static void draw(void)
 	draw_color4f(1,1,1,1);
 	setTextSize(40);
 	setTextAlign(TEXT_CENTER);
-	font_drawText(0, 0, "PAUSED");
+	font_drawText(RLAY_GUI_FRONT, 0, 0, "PAUSED");
 
 	int keyboard_shown = SDL_IsScreenKeyboardShown(window);
 
 	draw_color4f(!valid_cheat,keyboard_shown,valid_cheat ^ keyboard_shown,1);
 	setTextAlign(TEXT_LEFT);
-	font_drawText(btn_input->get.x, btn_input->get.y-150, input_buffer);
+	font_drawText(RLAY_GUI_FRONT, btn_input->get.x, btn_input->get.y-150, input_buffer);
 }
 
 static void cheat(void)

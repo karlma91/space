@@ -38,6 +38,127 @@ static int offset = 0;
 static int offset_add = 0;
 static int filesize = 0;
 
+
+/* TODO: NEW LEVEL FORMAT IN JSON
+ * { objects : [
+ * 		{ 	type : "tank",
+ * 			pos  : {x:100, y:100},
+ * 			rot  : 10,
+ * 			id	 : "1",
+ * 			params: [
+ * 					"float": 123
+ * 					"int"  : 10
+ * 			]
+ * 		},
+ * 		{ 	type : "tank",
+ * 			pos  : {x:0, y:100},
+ * 			rot  : 50,
+ * 			id	 : "2",
+ * 			params: [
+ * 					"float": 321
+ * 					"int"  : 50
+ * 			]
+ * 		},
+ * 		{ 	type : "factory",
+ * 			id	 : "3",
+ * 			pos  : {x:100, y:100},
+ * 			rot  : 10,
+ * 			params: [
+ *					"int"   : 3,
+ *					"float" : 300,
+ *					"float" : 4,
+ *					"int"   : 200,
+ *					"object": 1,
+ *					"sprite": "factory_blue",
+ *					"shape" : "factory_shape",
+ * 			]
+ * 		}
+ * 		]
+ *
+ * 	polygons: [
+ * 		{	"type": "POLYGON_STATIC",
+ *	 		layer: 4
+ *	 		texture : "spikeball",
+ *			"vertices": [
+ *				{
+ *					"x": 0,
+ *					"y": 0
+ *				},
+ *				{
+ *					"x": 1,
+ *					"y": 0
+ *				},
+ *				{
+ *					"x": 1,
+ *					"y": 1
+ *				}
+ *			]
+ *		},
+ *		{	"type": "POLYGON_DYNAMIC",
+ *	 		layer: 4
+ *	 		texture : "spikeball",
+ *			"vertices": [
+ *				{
+ *					"x": 0,
+ *					"y": 0
+ *				},
+ *				{
+ *					"x": 1,
+ *					"y": 0
+ *				},
+ *				{
+ *					"x": 1,
+ *					"y": 1
+ *				}
+ *			]
+ *		},
+ *		{	"type": "POLYGON_BRUSH",
+ *	 		layer: 4
+ *	 		texture : "spikeball",
+ *			"vertices": [
+ *				{
+ *					"x": 0,
+ *					"y": 0
+ *				},
+ *				{
+ *					"x": 1,
+ *					"y": 0
+ *				},
+ *				{
+ *					"x": 1,
+ *					"y": 1
+ *				}
+ *			]
+ *		},
+ *		{	"type": "CIRCLE",
+ *	 		layer: 4,
+ *	 		texture : "spikeball",
+ *			pos:{x:0, y: 0},
+ *			rot:45
+ *		}
+ *	]
+ *	sprites: [
+ * 		{	texture : "spikeball",
+ *	 		layer: 4
+ * 			pos: {0,0},
+ * 			rot: 2.45,
+ * 			color:{255,255,255,255}
+ *		}
+ *	]
+ *
+ *	emitters: [
+ * 	{	particle : "test",
+ * 			pos: {0,0},
+ * 			rot: 2.45,
+ * 			layer: 4
+ *		}
+ *	]
+ *	]
+ *  }
+ */
+
+
+
 /** return sub_name's index in params, or -1 if not found  */
 int get_sub_index(const object_id *obj_id, const char* sub_name) {
 	int sub_id;

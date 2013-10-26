@@ -642,7 +642,7 @@ static void main_sleep(void)
 #endif
 }
 
-GLfloat time_running = 0;
+GLfloat engine_time = 0;
 
 static void main_tick(void *data)
 {
@@ -656,9 +656,9 @@ static void main_tick(void *data)
 	frames += dt;
 	fps++;
 
-    time_running +=dt;
+    engine_time +=dt;
     GLint uTime = glGetUniformLocation(gl_program, "uTime");
-    glUniform1f(uTime, time_running);
+    glUniform1f(uTime, engine_time);
 
 	//TODO detect matrix stack unbalance
 	draw_matrix_clear();

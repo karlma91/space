@@ -55,7 +55,7 @@ static void draw_particle_as_score(emitter *em, particle *p)
     cpVect pos = p->p;
 
     setTextAngle(angle);
-    font_drawText(pos.x,pos.y,temp);
+    font_drawText(em->layer, pos.x,pos.y,temp);
     setTextAngle(0);
 }
 

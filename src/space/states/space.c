@@ -385,9 +385,9 @@ void draw_gui(view *cam)
 		char score_temp[20];
 		sprintf(score_temp,"%d",score_anim); //score_anim
 		draw_color4f(0,0,0,1);
-		font_drawText(-cam->view_width/2+20+4,cam->view_height/2 - 26-4,score_temp);
+		font_drawText(RLAY_GUI_FRONT, -cam->view_width/2+20+4,cam->view_height/2 - 26-4,score_temp);
 		draw_color4f(1,1,1,1);
-		font_drawText(-cam->view_width/2+20,cam->view_height/2 - 26,score_temp);
+		font_drawText(RLAY_GUI_FRONT, -cam->view_width/2+20,cam->view_height/2 - 26,score_temp);
 		//}
 
 		draw_color4f(0.5,0.1,0.1,1);
@@ -397,7 +397,7 @@ void draw_gui(view *cam)
 				instance_count(obj_id_factory)+
 				instance_count(obj_id_turret)+
 				instance_count(obj_id_tank));
-		font_drawText(-cam->view_width/2+20,-cam->view_height/2 + 100,goals_left);
+		font_drawText(RLAY_GUI_FRONT, -cam->view_width/2+20,-cam->view_height/2 + 100,goals_left);
 
 		draw_color4f(1,1,1,1);
 		setTextSize(15);
@@ -405,12 +405,12 @@ void draw_gui(view *cam)
 		setTextAlign(TEXT_CENTER);
 		//		sprintf(level_temp,"STATION: %d DECK: %d", currentlvl->station, currentlvl->deck);
 		sprintf(level_temp,"LEVEL %d", currentlvl->deck);
-		font_drawText(0, -cam->view_height/2+24, level_temp);
+		font_drawText(RLAY_GUI_FRONT, 0, -cam->view_height/2+24, level_temp);
 
 		setTextAlign(TEXT_RIGHT);
 
 #if !ARCADE_MODE
-		font_drawText(cam->view_width/2 - 15, cam->view_height/2 - 20, fps_buf);
+		font_drawText(RLAY_GUI_FRONT, cam->view_width/2 - 15, cam->view_height/2 - 20, fps_buf);
 #endif
 		if (!multiplayer) {
 			char time_temp[20];
@@ -420,9 +420,9 @@ void draw_gui(view *cam)
 			setTextAlign(TEXT_CENTER);
 
 			draw_color4f(0,0,0,1);
-			font_drawText(4, cam->view_height/2 - 29 - 4, time_temp);
+			font_drawText(RLAY_GUI_FRONT, 4, cam->view_height/2 - 29 - 4, time_temp);
 			draw_color4f(1,1,1,1);
-			font_drawText(0, cam->view_height/2 - 29, time_temp);
+			font_drawText(RLAY_GUI_FRONT, 0, cam->view_height/2 - 29, time_temp);
 		}
 	}
 
@@ -451,7 +451,7 @@ void draw_gui(view *cam)
 		font_drawText(0, -cam->view_height/2+110, STR_SPACE_START);
 #else
 		setTextSize(70);
-		font_drawText(0, 0, "GET READY!");
+		font_drawText(RLAY_GUI_FRONT, 0, 0, "GET READY!");
 #endif
 		/* no break */
 	case LEVEL_RUNNING:

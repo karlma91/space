@@ -79,7 +79,7 @@ static void draw(void)
 
 	setTextSize(70);
 	setTextAlign(TEXT_CENTER);
-	font_drawText(0, GAME_HEIGHT/2 - 80 + yoffset, "SETTINGS");
+	font_drawText(RLAY_GUI_FRONT, 0, GAME_HEIGHT/2 - 80 + yoffset, "SETTINGS");
 
 	int i;
 	for (i = 0; i < OPTION_COUNT; i++) {

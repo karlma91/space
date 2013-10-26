@@ -55,17 +55,17 @@ static void draw(void)
 		draw_color4f(1,1,1,1);
 		setTextAlign(TEXT_CENTER);
 		setTextSize(60);
-		font_drawText(0,-100, level_time_buf);
+		font_drawText(RLAY_GUI_FRONT, 0,-100, level_time_buf);
 
 		draw_color4f(1,1,1,1);
 		setTextAlign(TEXT_CENTER);
 		setTextSize(70);
-		font_drawText(0,350, "LEVEL CLEARED");
+		font_drawText(RLAY_GUI_FRONT, 0,350, "LEVEL CLEARED");
 	} else {
 		draw_color4f(1,0,0,1);
 		setTextAlign(TEXT_CENTER);
 		setTextSize(70);
-		font_drawText(0,350, "LEVEL FAILED");
+		font_drawText(RLAY_GUI_FRONT, 0,350, "LEVEL FAILED");
 	}
 
 	draw_color4f(1,1,1,1);

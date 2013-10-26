@@ -73,6 +73,7 @@ void state_register_touchable_view(view *cam, touchable *touchable);
 
 //void state_register_sprite(STATE_ID state_id, int layer, sprite *spr);
 int state_add_layer(STATE_ID state_id);
+int state_add_layers(STATE_ID state_id, int number);
 int state_layer_count(STATE_ID state_id);
 void state_set_layer_offset(STATE_ID state_id, int layer, cpVect offset);
 void state_set_layer_parallax(STATE_ID state_id, int layer, float factor, float zoom_factor);

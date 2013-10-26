@@ -16,8 +16,8 @@ STATE_ID state_levelscreen;
 #define MAX_LEVELS 10
 static button btn_levels[MAX_LEVELS];
 
-static Color col_default = {1,1,1,1};
-static Color col_selected= {0,1,0,1};
+static Color col_default = {255,255,255,255};
+static Color col_selected= {0,255,0,255};
 
 static button btn_disable;
 static button btn_background;
@@ -76,7 +76,7 @@ static void draw(void)
 	draw_color4f(1,1,1,1);
 	setTextAlign(TEXT_CENTER);
 	setTextSize(50);
-	font_drawText(0,box.p.y+box.s.y / 2 - 60,title);
+	font_drawText(RLAY_GUI_FRONT, 0,box.p.y+box.s.y / 2 - 60,title);
 
 	for (i = 0; i < 3; i++) {
 		if (stars_unlocked == i+1) {
@@ -153,7 +153,9 @@ void levelscreen_init(void)
 {
 	statesystem_register(state_levelscreen,0);
 
-	Color col_back = {0,0.2,0.9,1};
+	Color col_back = {0,51,230,255};
+
+	view *main_view = state_view_get(state_levelscreen,0);
 
 	int i;
 	for (i = 0; i < MAX_LEVELS; i++) {
@@ -167,20 +169,20 @@ void levelscreen_init(void)
 		button_set_backcolor(btn, col_back);
 		button_set_frontcolor(btn, col_default);
 		button_set_hotkeys(btn, digit2scancode[(i+1) % 10], 0);
-		state_register_touchable(state_levelscreen, btn);
+		state_register_touchable_view(main_view, btn);
 	}
 
-	state_register_touchable(this, btn_settings);
+	state_register_touchable_view(main_view, btn_settings);
 
 	btn_disable = button_create(NULL, 0, "", box.p.x, box.p.y, box.s.x, box.s.y);
 	btn_disable->visible = 0;
-	state_register_touchable(this, btn_disable);
+	state_register_touchable_view(main_view, btn_disable);
 
 	btn_background = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
 	btn_background->visible = 0;
 	button_set_callback(btn_background, statesystem_set_state, state_stations);
 	button_set_hotkeys(btn_background, KEY_ESCAPE, 0);
-	state_register_touchable(this, btn_background);
+	state_register_touchable_view(main_view, btn_background);
 
 	sprite_create(&spr_star, SPRITE_STAR, 250, 250, 0);
 }
