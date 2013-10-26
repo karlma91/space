@@ -237,11 +237,61 @@ static void display_init(void)
 	SDL_ShowWindow(window);
 }
 
+/*static void load_correct_gl()
+{
+	glEnableVertexAttribArray = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glEnableVertexAttribArray");
+
+	glCreateProgram = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glCreateProgram");
+
+	glCreateShader = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glCreateShader");
+
+	glShaderSource = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glShaderSource");
+
+	glGetShaderiv = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glGetShaderiv");
+
+	glCompileShader = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glCompileShader");
+	glAttachShader = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glAttachShader");
+	glLinkProgram = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glLinkProgram");
+	glUseProgram = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glUseProgram");
+	glGetProgramiv = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glGetProgramiv");
+	glGetUniformLocation = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glGetUniformLocation");
+	glUniformMatrix4fv = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glUniformMatrix4fv");
+	glUniform1f = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glUniform1f");
+	glVertexAttribPointer = (void(*)(GLenum))
+		wglGetProcAddress ((GLubyte*)"glVertexAttribPointer");
+}*/
+
 static void initGL(void)
 {
 	// Create an OpenGL context associated with the window.
 	glcontext = SDL_GL_CreateContext(window);
-
+	#if __WIN32__
+		GLenum glewError = glewInit();
+		if( glewError != GLEW_OK )
+		{
+			SDL_Log( "Error initializing GLEW! %s\n", glewGetErrorString( glewError ) );
+			exit(-1);
+		}
+		if (glewGetExtension("GL_EXT_framebuffer_object"))
+		{
+			SDL_Log( "Have extension" );
+		}else{
+			SDL_Log( "Error no extension");
+		}
+	#endif
 	if (!glcontext) {
 		SDL_Log("SDL ERROR: %s", SDL_GetError());
 	}
@@ -265,7 +315,6 @@ static void initGL(void)
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
 
 	SDL_Log("Max texture size = %d", max_size);
-
 	glEnableVertexAttribArray(0); // vertex
 	glEnableVertexAttribArray(1); // texture
 	glEnableVertexAttribArray(2); // colors
@@ -283,21 +332,6 @@ static void initGL(void)
 
 	SDL_Log("DEBUG - initGL done!\n");
 
-
-#if __WIN32__
-	GLenum glewError = glewInit();
-	if( glewError != GLEW_OK )
-	{
-		SDL_Log( "Error initializing GLEW! %s\n", glewGetErrorString( glewError ) );
-		exit(-1);
-	}
-	if (glewGetExtension("GL_EXT_framebuffer_object"))
-	{
-		SDL_Log( "Have extension" );
-	}else{
-		SDL_Log( "Error no extension");
-	}
-#endif
 }
 
 #if GLES2
@@ -497,7 +531,7 @@ static void initGP(void)
 static void main_init(void)
 {
 	srand(time(0)); /* init pseudo-random generator */
-
+	glewInit();
 	//TODO Make sure faulty inits stops the program from proceeding
 	waffle_init();      /* prepare game resources and general methods*/
 	game_config();      /* load default and user-changed settings */
