@@ -196,9 +196,9 @@ static void display_init(void)
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 	SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING,1);
 
-	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0); //AA not supported on Android test device
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1 );
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //AA not supported on Android test device
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GLES2 ? 0 : 1);
@@ -531,7 +531,6 @@ static void initGP(void)
 static void main_init(void)
 {
 	srand(time(0)); /* init pseudo-random generator */
-	glewInit();
 	//TODO Make sure faulty inits stops the program from proceeding
 	waffle_init();      /* prepare game resources and general methods*/
 	game_config();      /* load default and user-changed settings */

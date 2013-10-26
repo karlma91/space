@@ -344,7 +344,7 @@ static void radar_draw(float x, float y)
 		draw_translate(x, y);
 		draw_rotate(-se_tangent(player->data.body->p));
 	}
-	draw_color4f(0.3, 0.3, 0.7, 0.6);
+	draw_color4b(50,130,210,150);
 	draw_donut(0, cpvzero, (currentlvl->inner_radius + 2 * 64) / currentlvl->outer_radius * RADAR_SIZE, RADAR_SIZE);
 	instance_iterate_comp(CMP_MINIMAP, (void (*)(instance *, void *))plot_on_radar, NULL);
 	draw_pop_matrix();
@@ -814,10 +814,10 @@ void space_init(void)
 
     float h = GAME_HEIGHT*0.5;
 
-    joy_p1_left = joystick_create(0, 120, 2, -GAME_WIDTH/2 + 170, -0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
-    joy_p1_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, -0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
-    joy_p2_left = joystick_create(0, 120, 2, -GAME_WIDTH/2 + 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
-    joy_p2_right = joystick_create(0, 120, 2, GAME_WIDTH/2 - 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p1_left = joystick_create(0, 80, 2, -GAME_WIDTH/2 + 170, -0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p1_right = joystick_create(0, 80, 2, GAME_WIDTH/2 - 170, -0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p2_left = joystick_create(0, 80, 2, -GAME_WIDTH/2 + 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p2_right = joystick_create(0, 80, 2, GAME_WIDTH/2 - 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
 
     state_register_touchable_view(view_p1, (touchable *)joy_p1_left);
     state_register_touchable_view(view_p1, (touchable *)joy_p1_right);
@@ -911,10 +911,10 @@ void setup_singleplay(void)
     float h = view_p1->view_height*0.5;
 
     touch_place((touchable *)btn_pause, view_p1->view_width/2-85, view_p1->view_height/2-77);
-    joystick_reposition(joy_p1_left, 120, 2, -view_p1->view_width/2 + 170, -0.25*view_p1->view_height, w, h);
-	joystick_reposition(joy_p1_right, 120, 2, view_p1->view_width/2 - 170, -0.25*view_p1->view_height, w, h);
-    joystick_reposition(joy_p2_left, 120, 2, -view_p1->view_width/2 + 170, 0.25*view_p1->view_height, w, h);
-    joystick_reposition(joy_p2_right, 120, 2, view_p1->view_width/2 - 170, 0.25*view_p1->view_height, w, h);
+    joystick_reposition(joy_p1_left, 80, 2, -view_p1->view_width/2 + 170, -0.25*view_p1->view_height, w, h);
+	joystick_reposition(joy_p1_right, 80, 2, view_p1->view_width/2 - 170, -0.25*view_p1->view_height, w, h);
+    joystick_reposition(joy_p2_left, 80, 2, -view_p1->view_width/2 + 170, 0.25*view_p1->view_height, w, h);
+    joystick_reposition(joy_p2_right, 80, 2, view_p1->view_width/2 - 170, 0.25*view_p1->view_height, w, h);
 
     LList ll_touchies = view_p1->touch_objects;
     if (!llist_contains(ll_touchies, joy_p2_left)) {

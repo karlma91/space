@@ -133,7 +133,7 @@ void stations_init(void)
 
 	btn_stations = calloc(station_count, sizeof(button));
 
-	Color col_back = {255,154,127,255};
+	Color col_back = {255,255,255,255};
 	//Color col_text = {1,1,1,1};
 
 	view* main_view = state_view_get(state_stations, 0);
@@ -173,20 +173,24 @@ void stations_init(void)
 
 	for(i = 2; i<layers; i++){
 		//float depth =  2 + 10*tan((1.0f*i/la_sys->num_layers)*WE_PI_2);
-		float f = (layers - i * 0.9f) / (layers);
+		float f = (layers - i * 0.99f) / (layers);
 		state_set_layer_parallax(state_stations, i, f, f);
 	}
-	for(i = 0; i<100; i++){
+	for(i = 0; i<2000; i++){
 		int layer =  2 + roundf(we_randf*(layers-1-2));
-		float size = 160 + we_randf*90 - layer*4;
-		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600);
+		float size = 150 + we_randf*90 - layer*4;
+		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),6600);
 		SPRITE_ID spr;
-		int s = rand() & 3;
+		int s = rand() & 7;
 		switch(s) {
 		case 0: spr = SPRITE_SPIKEBALL; break;
 		case 1: spr = SPRITE_COIN; break;
 		case 2: spr = SPRITE_GEAR; break;
 		case 3: spr = SPRITE_SAW; break;
+		case 4: spr = SPRITE_PLAYER; break;
+		case 5: spr = SPRITE_TANK_WHEEL; break;
+		case 6: spr = SPRITE_TANK_TURRET; break;
+		case 7: spr = SPRITE_PLAYER_GUN; break;
 		}
 
 		state_add_sprite(state_stations, layer, spr, size, size, pos, we_randf*WE_2PI);
