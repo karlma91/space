@@ -446,7 +446,7 @@ static void initGP(void)
 		varying vec4 col;
 
 		void main() {
-			light = 1;
+			float light = 1;
 			gl_FragColor = texture2D(texUnit, texCoord) * (col/255.0) * (vec4(light,light,light,1));
 		}
 	);
