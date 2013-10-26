@@ -25,7 +25,7 @@ static void drawDigit(int d)
 {
 	for (j = 0; d && j < 7; d >>= 1, j++)
 		if (d & 0x1)
-			draw_quad_line(cpv(digits_x[j], digits_y[j]), cpv(digits_x[(j+1)], digits_y[(j+1)]), 0.125f);
+			draw_quad_line(0, cpv(digits_x[j], digits_y[j]), cpv(digits_x[(j+1)], digits_y[(j+1)]), 0.125f);
 }
 
 const GLfloat letters[26][14] = {

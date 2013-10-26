@@ -193,7 +193,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		alpha = maxf(0, 1 - tank->data.time_destroyed / 2);
 	}
 
-	hpbar_draw(&tank->hp_bar,cpvtoangle(tank->data.body->p));
+	hpbar_draw(RLAY_GAME_FRONT, &tank->hp_bar,cpvtoangle(tank->data.body->p));
 
 	draw_color4f(1,1,1,alpha);
 	if (1) { //TODO REMOVE TMP TEST
@@ -201,12 +201,12 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		cpFloat left_dist, right_dist;
 		instance_get2nearest((instance *)tank, obj_id_tank, &left, &right, &left_dist, &right_dist);
 		draw_color4f(1,(left_dist > 300),(left_dist > 300),alpha);
-		sprite_render_body(&(tank->wheel_sprite), tank->wheel1);
+		sprite_render_body(RLAY_GAME_MID, &(tank->wheel_sprite), tank->wheel1);
 		draw_color4f(1,(right_dist > 300),(right_dist > 300),alpha);
-		sprite_render_body(&(tank->wheel_sprite), tank->wheel2);
+		sprite_render_body(RLAY_GAME_MID, &(tank->wheel_sprite), tank->wheel2);
 	} else {
-	sprite_render_body(&(tank->wheel_sprite), tank->wheel1);
-	sprite_render_body(&(tank->wheel_sprite), tank->wheel2);
+	sprite_render_body(RLAY_GAME_MID, &(tank->wheel_sprite), tank->wheel1);
+	sprite_render_body(RLAY_GAME_MID, &(tank->wheel_sprite), tank->wheel2);
 	}
 
 	if (tank->param.max_hp >= 100) {//TODO add color into param
@@ -215,13 +215,13 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		draw_color4f(1,1,1,alpha);
 	}
 
-	sprite_render_body(&(tank->data.spr), tank->data.body);
-	sprite_render_body(&(tank->turret_sprite), tank->barrel);
+	sprite_render_body(RLAY_GAME_MID, &(tank->data.spr), tank->data.body);
+	sprite_render_body(RLAY_GAME_MID, &(tank->turret_sprite), tank->barrel);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(current_particles, EMITTER_FRAGMENTS, tank->data.body->p);
+	particles_get_emitter_at(current_particles,RLAY_GAME_FRONT, EMITTER_FRAGMENTS, tank->data.body->p);
 	se_spawn_coins((instance *)tank);
 	we_body_remove_constraints(current_space, tank->data.body);
 	cpBodySetTorque(tank->wheel1, 0);

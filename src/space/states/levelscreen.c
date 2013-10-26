@@ -68,10 +68,10 @@ static void draw(void)
 	}
 
 	draw_color4f(0,0,0,alpha);
-	draw_box(cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
+	draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 
 	draw_color4f(0.1,0.2,0.4,0.6);
-	draw_box(box.p,box.s,0,1);
+	draw_box(3, box.p,box.s,0,1);
 
 	draw_color4f(1,1,1,1);
 	setTextAlign(TEXT_CENTER);
@@ -82,7 +82,7 @@ static void draw(void)
 		if (stars_unlocked == i+1) {
 			draw_color4f(0,0,0,1);
 		}
-		sprite_render(&spr_star, star_pos[i], 0);
+		sprite_render(RLAY_GUI_FRONT, &spr_star, star_pos[i], 0);
 	}
 }
 

@@ -40,7 +40,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		llist_begin_loop(pi->shape);
 		while (llist_hasnext(pi->shape)) {
 			vertex_array *data = (vertex_array*) llist_next(pi->shape);
-			draw_polygon_textured(data->num, data->vertices, staticpolygon->body->p, staticpolygon->body->a, size, staticpolygon->texture_scale, staticpolygon->texture);
+			draw_polygon_textured(3, data->num, data->vertices, staticpolygon->body->p, staticpolygon->body->a, size, staticpolygon->texture_scale, staticpolygon->texture);
 		}
 		llist_end_loop(pi->shape);
 

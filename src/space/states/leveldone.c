@@ -48,7 +48,7 @@ static void post_update(void)
 static void draw(void)
 {
 	draw_color4f(0,0,0,0.8);
-	draw_box(cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
+	draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 
 	//TODO finn ut om spiller d�de eller ikke, istedenfor � bruke level_star_count
 	if (level_star_count) {
@@ -70,11 +70,11 @@ static void draw(void)
 
 	draw_color4f(1,1,1,1);
 	if (level_star_count == 0) draw_color4f(0.1,0.1,0.1,1);
-	sprite_render(&spr_star, star_1, 0);
+	sprite_render(RLAY_GUI_FRONT, &spr_star, star_1, 0);
 	if (level_star_count == 1) draw_color4f(0.1,0.1,0.1,1);
-	sprite_render(&spr_star, star_2, 0);
+	sprite_render(RLAY_GUI_FRONT, &spr_star, star_2, 0);
 	if (level_star_count == 2) draw_color4f(0.1,0.1,0.1,1);
-	sprite_render(&spr_star, star_3, 0);
+	sprite_render(RLAY_GUI_FRONT, &spr_star, star_3, 0);
 }
 
 static void sdl_event(SDL_Event *event)

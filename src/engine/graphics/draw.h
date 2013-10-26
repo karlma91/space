@@ -4,7 +4,6 @@
 #include "SDL.h"
 #include "we_utils.h"
 
-#define TMP_RENDER_LAYER 0
 #define LOAD_TEXTURES 1 //FOR DEBUG PURPOSES
 #define EXPERIMENTAL_GRAPHICS 1
 #define LIGHT_SYSTEM 0
@@ -108,22 +107,22 @@ void draw_disable_tex2d(void);
 Color draw_get_current_color(void);
 Blend draw_get_current_blend(void);
 
-void draw_line(int tex_id, cpVect a, cpVect b, float w);
+void draw_line(int layer, int tex_id, cpVect a, cpVect b, float w);
 void draw_glow_line(cpVect a, cpVect b, float w);
 void draw_line_strip(const GLfloat *strip, int l, float w);
 void draw_velocity_line(cpShape *shape);
-void draw_quad_line(cpVect a, cpVect b, float w);
-void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w);
+void draw_quad_line(int layer, cpVect a, cpVect b, float w);
+void draw_sprite_line(int layer, sprite *spr, cpVect a, cpVect b, float w);
 
-void draw_box(cpVect p, cpVect size, GLfloat angle, int centered);
-void draw_bar(cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2);
-void draw_circle(cpVect p, GLfloat radius);
-void draw_donut(cpVect p, GLfloat inner_r, GLfloat outer_r);
-void draw_polygon_textured(int count, cpVect *verts, cpVect p, float rotation, float size, float textuer_scale, int texture);
+void draw_box(int layer, cpVect p, cpVect size, GLfloat angle, int centered);
+void draw_bar(int layer, cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2);
+void draw_circle(int layer, cpVect p, GLfloat radius);
+void draw_donut(int layer, cpVect p, GLfloat inner_r, GLfloat outer_r);
+void draw_polygon_textured(int layer, int count, cpVect *verts, cpVect p, float rotation, float size, float textuer_scale, int texture);
 void draw_polygon_outline(int count, cpVect *verts, cpVect p, float rotation, float size);
 
-void draw_texture(int tex_id, cpVect pos, const float *tex_map, cpVect size, float angle);
-void draw_current_texture_append(cpVect pos, const float *tex_map, cpVect size, float angle);
+void draw_texture(int layer, int tex_id, cpVect pos, const float *tex_map, cpVect size, float angle);
+void draw_current_texture_append(int layer, cpVect pos, const float *tex_map, cpVect size, float angle);
 
 Color draw_col_rainbow(int hue);
 Color draw_col_grad(int hue);

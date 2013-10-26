@@ -81,7 +81,7 @@ static void draw_testarea(void)
 
 	draw_color4f(0,0,0,1);
 	draw_load_identity();
-	draw_box(cpv(350,180),cpv(550,550),0,1);
+	draw_box(2, cpv(350,180),cpv(550,550),0,1);
 
 
 	/*TODO gj�re om test area til en egen state? som viser player som kj�rer og skyter
@@ -115,7 +115,7 @@ static void draw(void)
 	float y;
 	float y_offset = 140;
 	draw_color4f(0.1,0.2,0.4,1);
-	draw_box(box.p,box.s,0,1);
+	draw_box(4, box.p,box.s,0,1);
 
 	//draw_color4f(1,1,1,1);
 	//draw_texture(tex_sketch, &cpvzero,TEX_MAP_FULL, box.w,box.h,0);

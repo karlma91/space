@@ -45,7 +45,7 @@ static void draw(void)
 	draw_load_identity();
 
 	draw_color4f(0,0,0,0.5f);
-	draw_box(cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
+	draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 
 	draw_color4f(1,1,1,1);
 	setTextSize(40);

@@ -66,7 +66,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	cpVect b = spikeball->dolly->p;
 
 	draw_glow_line(a, b, 50);
-	sprite_render_body(&(spikeball->data.spr), spikeball->data.body);
+	sprite_render_body(RLAY_GAME_MID, &(spikeball->data.spr), spikeball->data.body);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)

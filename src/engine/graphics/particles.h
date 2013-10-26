@@ -38,6 +38,7 @@ struct particle {
 struct emitter {
 
 	int type;
+	int layer;
 
 	particle_system * ps;
 
@@ -126,12 +127,12 @@ void particles_self_draw(emitter *e, int enable);
 
 void particle_set_gravity_func(particle_system *s, cpVect (*gravity_dir_func)(cpVect p));
 
-emitter *particles_add_score_popup(particle_system *s, cpVect p, int score);
-emitter *particles_add_sparks(particle_system *s, cpVect p, float angle, float force);
+emitter *particles_add_score_popup(particle_system *s, int layer, cpVect p, int score);
+emitter *particles_add_sparks(particle_system *s, int layer, cpVect p, float angle, float force);
 
 void particles_clear(particle_system *s);
-emitter *particles_get_emitter(particle_system *s, int type);
-emitter *particles_get_emitter_at(particle_system *s, int type,cpVect p);
+emitter *particles_get_emitter(particle_system *s, int layer, int type);
+emitter *particles_get_emitter_at(particle_system *s, int layer, int type,cpVect p);
 
 void particles_reload_particles(void);
 

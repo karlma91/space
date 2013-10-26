@@ -117,8 +117,8 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		draw_glow_line(v1, v2, 200);
 	}
 
-	sprite_render_body(&(robotarm->saw_sprite), robotarm->saw);
-	sprite_render_body(&(robotarm->data.spr), robotarm->data.body);
+	sprite_render_body(RLAY_GAME_MID, &(robotarm->saw_sprite), robotarm->saw);
+	sprite_render_body(RLAY_GAME_MID, &(robotarm->data.spr), robotarm->data.body);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)

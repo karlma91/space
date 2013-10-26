@@ -12,6 +12,17 @@
 
 #define SPACE_BODIES_MAX 5
 
+// RLAYS
+#define RLAY_GUI_FRONT 0
+#define RLAY_GUI_MID 1
+#define RLAY_GUI_BACK 2
+#define RLAY_GAME_FRONT 4
+#define RLAY_GAME_MID 5
+#define RLAY_GAME_BACK 6
+#define RLAY_BACK_FRONT 8
+#define RLAY_BACK_MID 9
+#define RLAY_BACK_BACK 10
+
 /* COMPONENTS */
 extern int CMP_HPBAR;
 extern int CMP_COINS;

@@ -36,7 +36,7 @@ typedef struct tilemap {
 }tilemap;
 
 
-void tilemap_render(tilemap *map);
+void tilemap_render(int layer, tilemap *map);
 int tilemap_create (tilemap *map, char *filename);
 void tilemap_destroy(tilemap *map);
 

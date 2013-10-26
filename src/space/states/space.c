@@ -305,8 +305,8 @@ static void draw_deck()
 {
 	/* draw ceiling and floor */
 	draw_color4f(0,0,0,0.6);
-	draw_circle(cpvzero, currentlvl->inner_radius);
-	draw_donut(cpvzero, currentlvl->outer_radius, currentlvl->outer_radius + 3000);
+	draw_circle(RLAY_BACK_BACK, cpvzero, currentlvl->inner_radius);
+	draw_donut(RLAY_BACK_BACK, cpvzero, currentlvl->outer_radius, currentlvl->outer_radius + 3000);
 }
 
 static void draw(void)
@@ -317,7 +317,7 @@ static void draw(void)
 	//drawStars();
 
 	/* draw tilemap */
-	tilemap_render(currentlvl->tiles);
+	tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
 	draw_deck();
 
 	//draw_light_map();
@@ -331,7 +331,7 @@ static void plot_on_radar(instance *obj, void *unused)
 	if(m != NULL){
 		cpVect p = cpvmult(obj->body->p, 1 / (currentlvl->outer_radius - 5 * 64) * RADAR_SIZE);
 		draw_color(m->c);
-		draw_box(p, cpv(m->size, m->size), cpvtoangle(p), 1);
+		draw_box(0, p, cpv(m->size, m->size), cpvtoangle(p), 1);
 	}
 }
 
@@ -344,7 +344,7 @@ static void radar_draw(float x, float y)
 		draw_rotate(-se_tangent(player->data.body->p));
 	}
 	draw_color4f(0.3, 0.3, 0.7, 0.6);
-	draw_donut(cpvzero, (currentlvl->inner_radius + 2 * 64) / currentlvl->outer_radius * RADAR_SIZE, RADAR_SIZE);
+	draw_donut(0, cpvzero, (currentlvl->inner_radius + 2 * 64) / currentlvl->outer_radius * RADAR_SIZE, RADAR_SIZE);
 	instance_iterate_comp(CMP_MINIMAP, (void (*)(instance *, void *))plot_on_radar, NULL);
 	draw_pop_matrix();
 }

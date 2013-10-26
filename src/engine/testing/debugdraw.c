@@ -21,7 +21,7 @@ static void DrawShape(cpShape *shape, void * unused)
         }
         case CP_SEGMENT_SHAPE: {
             cpSegmentShape *seg = (cpSegmentShape *)shape;
-            draw_quad_line(seg->ta, seg->tb, seg->r*2);
+            draw_quad_line(0, seg->ta, seg->tb, seg->r*2);
             //draw_flush_simple();
             break;
         }
@@ -34,9 +34,9 @@ static void DrawShape(cpShape *shape, void * unused)
             int i = 0;
             for(i=0; i< poly->numVerts; i++) {
             	if(i < poly->numVerts - 1) {
-            		draw_quad_line(poly->verts[i], poly->verts[i + 1], 2);
+            		draw_quad_line(0, poly->verts[i], poly->verts[i + 1], 2);
             	} else {
-            		draw_quad_line(poly->verts[i], poly->verts[0], 2);
+            		draw_quad_line(0, poly->verts[i], poly->verts[0], 2);
             	}
             }
             //draw_flush_simple();
@@ -67,5 +67,5 @@ static void circle_line(cpVect p, float r)
 	//draw_vertex_pointer(2, GL_FLOAT, 0, circle);
 	//draw_draw_arrays(GL_LINE_STRIP, 0, 64);
 //#warning GL_LINE_STRIP not supported by renderer/layer_system!
-	draw_donut(p, r-5,r+5);
+	draw_donut(0, p, r-5,r+5);
 }

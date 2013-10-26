@@ -88,7 +88,7 @@ static void draw(void)
 	*/
 
 
-	draw_box(cpvadd(a,cpv(xoffset,yoffset)), b, r, 1);
+	draw_box(1, cpvadd(a,cpv(xoffset,yoffset)), b, r, 1);
 
 	//cpVect pos = {0,0.7f*GAME_HEIGHT/2};
 	//draw_texture(tex_title, &pos, TEX_MAP_FULL, 1200, 300, 0);

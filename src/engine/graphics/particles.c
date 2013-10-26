@@ -34,7 +34,7 @@ static void default_particle_draw(emitter *em, particle *p);
 
 static void particle_update_pos(particle *p);
 
-static emitter * get_emitter(void);
+static emitter * get_emitter(int layer);
 static void set_emitter_available(emitter *e);
 
 static cpVect default_gravity_func(cpVect pos) {
@@ -132,21 +132,23 @@ void particles_draw(particle_system *s)
 	llist_end_loop(s->emitters);
 }
 
-emitter *particles_get_emitter_at(particle_system *s, int type, cpVect p)
+emitter *particles_get_emitter_at(particle_system *s, int layer, int type, cpVect p)
 {
-	emitter *e = particles_get_emitter(s, type);
+	emitter *e = particles_get_emitter(s, layer, type);
 	e->p = p;
 	return e;
 }
 
 
-emitter *particles_get_emitter(particle_system *s, int type)
+emitter *particles_get_emitter(particle_system *s, int layer, int type)
 {
-	emitter *e = get_emitter();
+	emitter *e = get_emitter(layer);
 	llist_add(s->emitters, e);
 	void * l = e->particles;
+	int lay = e->layer;
 	*e = (emitter_templates[type]);
 	e->particles = l;
+	e->layer = lay;
 	if(e->emit_count_enabled){
 		e->emit_count_set = range_get_random(e->emit_count);
 	}
@@ -221,8 +223,8 @@ void particles_destroy()
  */
 void particles_clear(particle_system *s)
 {
-	llist_set_remove_callback(s->emitters, (ll_rm_callback) clear_emitter_particles);
-	llist_clear(s->emitters);
+	//llist_set_remove_callback(s->emitters, (ll_rm_callback) clear_emitter_particles);
+	//llist_clear(s->emitters);
 }
 
 
@@ -324,7 +326,7 @@ static void set_particle_available(particle *p)
  * get a particle from the available pool and put it in the in_use list
  * if the pool is empty, then it returns available_pool[0]
  */
-static emitter * get_emitter(void)
+static emitter * get_emitter(int layer)
 {
 	emitter *e = pool_instance(main_emitter_pool);
 	if(e == NULL) {
@@ -334,6 +336,7 @@ static emitter * get_emitter(void)
 		e->particles = llist_create();
 		llist_set_remove_callback(e->particles, (ll_rm_callback) clear_rm_particle );
 	}
+	e->layer = layer;
 	return e;
 }
 
@@ -448,7 +451,7 @@ static void draw_all_particles(emitter *em)
 static void default_particle_draw(emitter *em, particle *p)
 {
 	float angle = 0;
-	sprite_render(&p->spr, p->p, p->angle + angle);
+	sprite_render(em->layer, &p->spr, p->p, p->angle + angle);
 }
 
 

@@ -68,7 +68,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	draw_color4f(1,1,1,1);
-	sprite_render_body(&(coin->data.spr), coin->data.body);
+	sprite_render_body(RLAY_GAME_FRONT, &(coin->data.spr), coin->data.body);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)

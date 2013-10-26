@@ -22,7 +22,7 @@ static void add_sparks_at_contactpoint(cpArbiter *arb)
 			cpVect v = cpArbiterGetPoint(arb, 0);
 			cpVect n = cpArbiterGetNormal(arb, 0);
 			float angle = cpvtoangle(n);
-			particles_add_sparks(current_particles, v,angle,f);
+			particles_add_sparks(current_particles,RLAY_GAME_FRONT, v,angle,f);
 		}
 	}
 }
@@ -31,7 +31,7 @@ static void se_add_explotion_at_contact_point(cpArbiter *arb)
 {
 	if(cpArbiterGetCount(arb) >0){
 		cpVect v = cpArbiterGetPoint(arb, 0);
-		particles_get_emitter_at(current_particles, EMITTER_EXPLOSION, v);
+		particles_get_emitter_at(current_particles,RLAY_GAME_FRONT, EMITTER_EXPLOSION, v);
 	}
 }
 
@@ -54,7 +54,7 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 		if (object->alive) {
 			instance_remove(bullet);
 
-			particles_get_emitter_at(current_particles, EMITTER_EXPLOSION, b->body->p);
+			particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, b->body->p);
 			//se_add_score_and_popup(b->body->p, *COMPONENT(object, SCORE, int*));
 		}
 	} else {
@@ -80,7 +80,7 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 	se_add_explotion_at_contact_point(arb);
 
 	if (se_damage_object(object, bullet)) {
-		particles_get_emitter_at(current_particles, EMITTER_EXPLOSION, b->body->p);
+		particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, b->body->p);
 	} else {
 		sound_play(SND_HIT_2);
 	}

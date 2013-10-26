@@ -25,7 +25,7 @@ static void space_vel_func_zero_g(cpBody *body, cpVect gravity, cpFloat damping,
 
 void se_add_score_and_popup(cpVect p, int score)
 {
-    particles_add_score_popup(current_particles, p, score);
+    particles_add_score_popup(current_particles,RLAY_GAME_FRONT, p, score);
 	((obj_player *) instance_first(obj_id_player))->coins += score;
 }
 

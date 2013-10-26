@@ -5,7 +5,7 @@
 #include "we_data.h"
 
 extern const float TEX_MAP_FULL[8];
-extern arraylist *textures;
+extern array *textures;
 
 extern int texture_load(const char *file);
 extern int texture_init(void);

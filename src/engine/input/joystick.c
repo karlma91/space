@@ -191,7 +191,7 @@ static void render(touchable * stick_id)
 	cpVect btn_pos = {stick->draw_x,stick->draw_y};
 
 	draw_color4f(1,1,1,1);
-	sprite_render(&(stick->spr_back), btn_pos, 0);
+	sprite_render(1, &(stick->spr_back), btn_pos, 0);
 	sprite_set_index_normalized(&(stick->spr_front), stick->draw_amp);
 
 	// Counter viewport orientation
@@ -200,7 +200,7 @@ static void render(touchable * stick_id)
 		a -= stick->touch_data.container->priv_port_angle;
 	}
 
-	sprite_render(&(stick->spr_front), btn_pos, a);
+	sprite_render(0, &(stick->spr_front), btn_pos, a);
 	//draw_flush_simple();
 }
 

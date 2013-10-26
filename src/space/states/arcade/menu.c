@@ -9,6 +9,7 @@ STATE_ID state_menu;
 static button btn_start_tmp;
 
 #define MAX_MENU_ITEMS 5
+#define MENU_LAYERS 4
 
 static void inner_main(void);
 static void inner_ingame(void);
@@ -140,7 +141,7 @@ static void draw(void)
 	draw_load_identity();
 
 	draw_color4f(0,0,0,0.5f);
-	draw_box(cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
+	draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 
 	static float timer;
 	timer +=dt;

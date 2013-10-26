@@ -198,7 +198,7 @@ void draw_disable_tex2d(void) // deprecated method!
 	}
 }
 
-void draw_line(int tex_id, cpVect a, cpVect b, float w)
+void draw_line(int layer, int tex_id, cpVect a, cpVect b, float w)
 {
 	float dx = b.x-a.x;
 	float dy = b.y-a.y;
@@ -232,13 +232,13 @@ void draw_line(int tex_id, cpVect a, cpVect b, float w)
 			1,  1};
 
 	texture_bind_virt(tex_id);
-	draw_triangle_strip(TMP_RENDER_LAYER, line_mesh, line_texture, 8);
+	draw_triangle_strip(layer, line_mesh, line_texture, 8);
 
 	draw_pop_blend();
 	draw_pop_matrix();
 }
 
-void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w)
+void draw_sprite_line(int layer, sprite *spr, cpVect a, cpVect b, float w)
 {
 //#warning Very similair to draw_line!!
 	float dx = b.x-a.x;
@@ -282,7 +282,7 @@ void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w)
             tx_2,  ty_2};
 
     texture_bind_virt(sprite_get_texture(spr));
-	draw_triangle_strip(TMP_RENDER_LAYER, line_mesh, line_texture, 8);
+	draw_triangle_strip(layer, line_mesh, line_texture, 8);
 
     draw_pop_matrix();
 }
@@ -290,12 +290,12 @@ void draw_sprite_line(sprite *spr, cpVect a, cpVect b, float w)
 //TODO be able to set blend layers
 void draw_glow_line(cpVect a, cpVect b, float w)
 {
-	draw_line(TEX_GLOW, a, b, w);
+	draw_line(0, TEX_GLOW, a, b, w);
 	draw_color3f(1,1,1);
-	draw_line(TEX_GLOW_DOT, a, b, w);
+	draw_line(0, TEX_GLOW_DOT, a, b, w);
 }
 
-void draw_quad_line(cpVect a, cpVect b, float w)
+void draw_quad_line(int layer, cpVect a, cpVect b, float w)
 {
 	texture_bind_virt(TEX_WHITE);
 	float dx = b.x-a.x;
@@ -312,7 +312,7 @@ void draw_quad_line(cpVect a, cpVect b, float w)
 			length + w, -0.5,
 			length + w,  0.5};
 
-	draw_quad_new(TMP_RENDER_LAYER, line, TEX_MAP_FULL);
+	draw_quad_new(layer, line, TEX_MAP_FULL);
 	draw_pop_matrix();
 
 //#warning Very similair to draw_line...
@@ -322,7 +322,7 @@ void draw_line_strip(const GLfloat *strip, int l, float w)
 {
 	int i;
 	for(i = 0; i<l-2; i+=2) {
-		draw_quad_line(cpv(strip[i],strip[i+1]),cpv(strip[i+2],strip[i+3]),w/4);
+		draw_quad_line(0, cpv(strip[i],strip[i+1]),cpv(strip[i+2],strip[i+3]),w/4);
 	}
 }
 
@@ -332,12 +332,12 @@ void draw_destroy(void)
 	//...
 }
 
-void draw_circle(cpVect pos, GLfloat radius)
+void draw_circle(int layer, cpVect pos, GLfloat radius)
 {
-	draw_donut(pos, 0, radius);
+	draw_donut(0, pos, 0, radius);
 }
 
-void draw_donut(cpVect p, GLfloat inner_r, GLfloat outer_r)
+void draw_donut(int layer, cpVect p, GLfloat inner_r, GLfloat outer_r)
 {
 	texture_bind_virt(TEX_WHITE);
 	int i = 0;
@@ -349,17 +349,17 @@ void draw_donut(cpVect p, GLfloat inner_r, GLfloat outer_r)
 		v[j++] = (p.x+unit_circle[i]*outer_r);
 		v[j++] = p.y+unit_circle[i+1]*outer_r;
 	}
-	draw_triangle_strip(TMP_RENDER_LAYER, v, TEX_MAP_FULL, 128);
+	draw_triangle_strip(layer, v, TEX_MAP_FULL, 128);
 }
 
-void draw_box(cpVect p, cpVect s, GLfloat angle, int centered)
+void draw_box(int layer, cpVect p, cpVect s, GLfloat angle, int centered)
 {
 	texture_bind_virt(TEX_WHITE);
     draw_push_matrix();
     draw_translate(p.x,p.y);
 	draw_rotate(angle);
 	draw_scale(s.x, s.y);
-	draw_quad_new(TMP_RENDER_LAYER, centered ? triangle_quad : corner_quad, TEX_MAP_FULL);
+	draw_quad_new(layer, centered ? triangle_quad : corner_quad, TEX_MAP_FULL);
 	draw_pop_matrix();
 }
 
@@ -389,7 +389,7 @@ Blend draw_get_current_blend(void)
 }
 
 //TODO: color customization
-void draw_bar(cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2)
+void draw_bar(int layer, cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2)
 {
 	cpVect pos_org = pos;
 
@@ -412,7 +412,7 @@ void draw_bar(cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2)
 
 		draw_color4f(1,0,0, 1);
 		//draw_box(x + border, y + border, width_red, height, angle, 0);
-		draw_texture(TEX_BAR, pos_red, TEX_MAP_FULL, size_red, angle);
+		draw_texture(layer, TEX_BAR, pos_red, TEX_MAP_FULL, size_red, angle);
 
 		cpFloat pp = p*p;
 		cpFloat pppp = pp*pp;
@@ -420,20 +420,20 @@ void draw_bar(cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2)
 
 		draw_color4f(1-pppp*pppp, 0.8-p_1*p_1*0.8 + 0.1, 0.1, 1);
 		//draw_box(x + border, y + border, width_bar, height, angle, 0);
-		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, size_bar, angle);
+		draw_texture(layer, TEX_BAR, pos_bar, TEX_MAP_FULL, size_bar, angle);
 
 	} else {
 		cpVect size_bar = {size.y * p, size.x};
 		cpVect pos_bar = pos_org;//cpvadd(pos_org, cpvmult(size, 0.5));
 		draw_color4f(1-p,1-p,1,1);
-		draw_texture(TEX_BAR, pos_bar, TEX_MAP_FULL, size_bar, angle + M_PI_2);
+		draw_texture(layer, TEX_BAR, pos_bar, TEX_MAP_FULL, size_bar, angle + M_PI_2);
 	}
 
 	draw_pop_color();
 	draw_pop_blend();
 }
 
-void draw_polygon_textured(int count, cpVect *verts, cpVect p, float rotation, float size, float textuer_scale, int texture)
+void draw_polygon_textured(int layer, int count, cpVect *verts, cpVect p, float rotation, float size, float textuer_scale, int texture)
 {
 	float vertices[count* 2];
 	float texcoord[count * 2];
@@ -453,7 +453,7 @@ void draw_polygon_textured(int count, cpVect *verts, cpVect p, float rotation, f
 	draw_rotate(rotation);
 	draw_scale(size, size);
 	draw_color4f(1,1,1,1);
-	draw_triangle_fan(TMP_RENDER_LAYER+1, vertices, texcoord, count);
+	draw_triangle_fan(layer, vertices, texcoord, count);
 
 	draw_pop_matrix();
 
@@ -467,28 +467,28 @@ void draw_polygon_outline(int count, cpVect *verts, cpVect p, float rotation, fl
 	int i = 0;
 	for(i=0; i< count; i++) {
 		if(i < count - 1) {
-			draw_quad_line(cpvmult(verts[i],size), cpvmult(verts[i + 1],size), 1);
+			draw_quad_line(0, cpvmult(verts[i],size), cpvmult(verts[i + 1],size), 1);
 		} else {
-			draw_quad_line(cpvmult(verts[i],size), cpvmult(verts[0],size), 1);
+			draw_quad_line(0, cpvmult(verts[i],size), cpvmult(verts[0],size), 1);
 		}
 	}
 	draw_pop_matrix();
 }
 
 
-void draw_texture(int tex_id, cpVect pos, const float *tex_map, cpVect size, float angle)
+void draw_texture(int layer, int tex_id, cpVect pos, const float *tex_map, cpVect size, float angle)
 {
 	texture_bind_virt(tex_id);
-	draw_current_texture_append(pos, tex_map, size, angle);
+	draw_current_texture_append(layer, pos, tex_map, size, angle);
 }
 
-void draw_current_texture_append(cpVect pos, const float *tex_map, cpVect size, float angle)
+void draw_current_texture_append(int layer, cpVect pos, const float *tex_map, cpVect size, float angle)
 {
 	draw_push_matrix();
 	draw_translate(pos.x, pos.y);
 	draw_rotate(angle);
 	draw_scalev(size);
-	draw_quad_new(TMP_RENDER_LAYER, triangle_quad, tex_map);
+	draw_quad_new(layer, triangle_quad, tex_map);
 	draw_pop_matrix();
 }
 

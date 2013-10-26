@@ -342,9 +342,9 @@ void statesystem_draw(void)
     		extern int debug_draw;
     		if (debug_draw) {
     			draw_color4f(1,0,1,0.3);
-    			draw_box(cpvzero, cpv(cam->view_width-10, cam->view_height-10), 0, 1);
+    			draw_box(0, cpvzero, cpv(cam->view_width-10, cam->view_height-10), 0, 1);
     			draw_color4f(0,1,0,1.0);
-    			draw_box(cpvzero, cpv(10,10), 0, 1);
+    			draw_box(0, cpvzero, cpv(10,10), 0, 1);
     		}
 
     		draw_pop_matrix();

@@ -28,7 +28,7 @@ int TEX_METAL;
  * texture values (GLOBAL)
  */
 
-arraylist *textures;
+array *textures;
 
 const float TEX_MAP_FULL[8] = {0,1, 1,1, 0,0, 1,0};
 
@@ -115,7 +115,7 @@ int texture_load(const char *file)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
 		SDL_FreeSurface(img);
 
-		alist_add(textures, tex_id);
+		array_set_safe(textures, tex_counter, &tex_id);
 
 		//SDL_Log("DEBUG: Texture loaded: %s\n", file);
 		return tex_counter;
@@ -140,7 +140,7 @@ static int texture_from_name(const char *file)
 #include "SDL_endian.h"
 int texture_init(void)
 {
-	textures = alist_new();
+	textures = array_new(sizeof(int));
 	texture_load("error.png"); /* image to be shown for images which fails to load */
 
 	texture_load("tiles.png"); //TMP
@@ -163,8 +163,9 @@ int texture_destroy(void)
 {
 	int i;
 	for (i = 0; i < tex_counter; i++) {
-		glDeleteTextures(1, alist_get(textures, i));
+		glDeleteTextures(1, array_get(textures, i));
 	}
+	array_destroy(textures);
 	return 0;
 }
 

@@ -181,17 +181,17 @@ void sprite_set_index_normalized(sprite *spr, float p)
 	}
 }
 
-void sprite_render(sprite *spr, cpVect pos, float angle)
+void sprite_render(int layer, sprite *spr, cpVect pos, float angle)
 {
-	sprite_render_scaled(spr, pos, angle, 1);
+	sprite_render_scaled(layer, spr, pos, angle, 1);
 }
 
-void sprite_render_body(sprite *spr, cpBody *body)
+void sprite_render_body(int layer, sprite *spr, cpBody *body)
 {
-	sprite_render_scaled(spr, body->p, body->a, 1);
+	sprite_render_scaled(layer, spr, body->p, body->a, 1);
 }
 
-void sprite_render_scaled(sprite *spr, cpVect pos, float angle, float size)
+void sprite_render_scaled(int layer, sprite *spr, cpVect pos, float angle, float size)
 {
 	if (!spr) return;
 
@@ -203,6 +203,6 @@ void sprite_render_scaled(sprite *spr, cpVect pos, float angle, float size)
 
 	float sub_map[8];
 	sprite_get_current_image(spr, sub_map);
-	draw_texture(tex_id, pos, sub_map, cpvmult(cpv(spr->width, spr->height), size), angle);
+	draw_texture(layer, tex_id, pos, sub_map, cpvmult(cpv(spr->width, spr->height), size), angle);
 }
 

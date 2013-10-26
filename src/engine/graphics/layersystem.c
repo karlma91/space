@@ -4,7 +4,28 @@
 #include "../state/statesystem.h"
 
 #define MAX_ELEM_COUNT_BATCH 100000 // Memory for 1000 elements for each combination of texture, blend, layer and state!
+#define MAX_LAYERS 100
+static arraylist *render_tree;
+static int max_layers = 0;
 
+layer_system * state_get_layersystem(STATE_ID state_id);
+
+typedef struct sprite_ext {
+	cpVect pos;
+	float a;
+	sprite s;
+}sprite_ext;
+
+static LList get_blend_modes(int layer)
+{
+	LList *blend_modes = alist_get(render_tree, layer);
+	if(blend_modes == NULL) {
+		SDL_Log("LAYERSYSTEM: CREATING LAYER: %d", layer);
+		blend_modes = llist_create();
+		alist_set_safe(render_tree, layer, blend_modes);
+	}
+	return blend_modes;
+}
 
 static int check_bounds(layer_system *ls, int layer)
 {
@@ -19,9 +40,6 @@ static int check_bounds(layer_system *ls, int layer)
 	return 0;
 }
 
-static arraylist *render_tree;
-
-layer_system * state_get_layersystem(STATE_ID state_id);
 
 typedef enum ATOM_ID {
 	ATOM_ID_SPRITE,
@@ -71,11 +89,7 @@ int layersystem_add_layer(layer_system *lsys)
 	layer->parallax_zoom = 1;
 	lsys->num_layers += 1;
 
-	LList *blend_modes = alist_get(render_tree, lsys->num_layers - 1);
-	if(blend_modes == NULL) {
-		blend_modes = llist_create();
-		alist_set_safe(render_tree, lsys->num_layers - 1, blend_modes);
-	}
+	LList *blend_modes = get_blend_modes(lsys->num_layers - 1);
 
 	return alist_add(lsys->layers, layer);
 }
@@ -83,7 +97,7 @@ int layersystem_add_layer(layer_system *lsys)
 void state_add_sprite(STATE_ID state_id, int layer, SPRITE_ID id, float w, float h, cpVect p, float a)
 {
 	//FIXME: CURRENTLY NOT SUPPORTED
-/*
+
 	layer_system *ls =state_get_layersystem(state_id);
 	if(check_bounds(ls, layer)){
 		return;
@@ -91,12 +105,11 @@ void state_add_sprite(STATE_ID state_id, int layer, SPRITE_ID id, float w, float
 
 	layer_ins *lay = alist_get(ls->layers, layer);
 
-	sprite *s = calloc(1, sizeof *s);
-	sprite_create(s, id, w, h, 0);
+	sprite_ext *s = calloc(1, sizeof *s);
+	sprite_create(&(s->s), id, w, h, 0);
 	s->a = a;
 	s->pos = p;
 	llist_add(lay->ll_spr, s);
-*/
 }
 
 int TMP_DRAW_CALLS = 0;
@@ -116,12 +129,15 @@ void layersystem_render(STATE_ID state_id, view *cam)
 		layer_ins *lay = alist_get(ls->layers, layer_index);
 		llist_begin_loop(lay->ll_spr);
 		while(llist_hasnext(lay->ll_spr)) {
-			sprite *s = llist_next(lay->ll_spr);
-			//layersystem_register_sprite(0, s);
+			sprite_ext *s = llist_next(lay->ll_spr);
+			sprite_render(layer_index, &(s->s), s->pos, s->a);
 		}
 		llist_end_loop(lay->ll_spr);
+	}
 
-		LList *layer_blends = alist_get(render_tree, layer_index);
+	while (max_layers--) {
+
+		LList *layer_blends = alist_get(render_tree, max_layers);
 		/* iterate blend modes */
 		llist_begin_loop(layer_blends);
 
@@ -142,7 +158,7 @@ void layersystem_render(STATE_ID state_id, view *cam)
 					glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof *elems, &elems[0].tx);
 					glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof *elems, &(elems[0].col.r));
 
-					glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_index));
+					glBindTexture(GL_TEXTURE_2D, *((int*)array_get(textures, tex_index)));
 					glDrawArrays(GL_TRIANGLE_STRIP, 0, batch->count);
 					++TMP_DRAW_CALLS;
 					batch->count = 0;
@@ -151,6 +167,7 @@ void layersystem_render(STATE_ID state_id, view *cam)
 		}
 		llist_end_loop(layer_blends);
 	}
+	max_layers = 0;
 }
 
 
@@ -182,14 +199,22 @@ static render_batch *current_batch(int layer)
 {
 	STATE_ID state_id = statesystem_get_render_state();
 
-	layer_system *ls =state_get_layersystem(state_id);
-	if(check_bounds(ls, layer)){
+	if (layer >= MAX_LAYERS ){
+		SDL_Log("to many layers");
 		return NULL;
 	}
 
+	//layer_system *ls =state_get_layersystem(state_id);
+	//if(check_bounds(ls, layer)){
+	//	return NULL;
+	//}
+
 	/* current layer */
-	LList ll_blend = alist_get(render_tree, layer);
+	LList ll_blend = get_blend_modes(layer);
+
 	Blend current_blend = draw_get_current_blend();
+
+	max_layers = layer >= max_layers ? layer + 1 : max_layers;
 
 	blend_tree *blend_texs = NULL;
 

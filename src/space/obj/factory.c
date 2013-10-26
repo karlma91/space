@@ -30,7 +30,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&factory->data.spr, factory->param.sprite_id, 400, 400, 30);
 
 	if (factory->param.type == obj_id_tank) {
-		factory->smoke = particles_get_emitter(current_particles, EMITTER_SMOKE);
+		factory->smoke = particles_get_emitter(current_particles, RLAY_GAME_BACK, EMITTER_SMOKE);
 		particles_self_draw(factory->smoke, 1);
 		factory->data.spr.sub_index = rand() & 0x7;
 	}
@@ -85,12 +85,12 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	draw_color4f(1,1,1,1);
 	factory->rot += 381 * dt;
 	particles_draw_emitter(factory->smoke);
-	sprite_render_body(&(factory->data.spr), factory->data.body);
+	sprite_render_body(RLAY_GAME_MID, &(factory->data.spr), factory->data.body);
 
 	cpVect pos = cpvadd(factory->data.body->p, cpvrotate(cpv(160, -150), factory->data.body->rot));
 	cpVect size = cpv(25, 100);
-	draw_bar(pos, size, se_tangent(factory->data.body->p), factory->timer / factory->param.spawn_delay, 0);
-	hpbar_draw(&factory->hp_bar, cpvtoangle(cpvperp(factory->data.body->p)));
+	draw_bar(RLAY_GAME_FRONT, pos, size, se_tangent(factory->data.body->p), factory->timer / factory->param.spawn_delay, 0);
+	hpbar_draw(RLAY_GAME_FRONT, &factory->hp_bar, cpvtoangle(cpvperp(factory->data.body->p)));
 }
 
 static void remove_factory_from_child(instance *child, void *factory)
@@ -110,7 +110,7 @@ void factory_remove_child(instance *child)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(current_particles, EMITTER_FRAGMENTS, factory->data.body->p);
+	particles_get_emitter_at(current_particles,RLAY_GAME_FRONT, EMITTER_FRAGMENTS, factory->data.body->p);
 	sound_play(SND_FACTORY_EXPLODE);
 	se_spawn_coins((instance *)factory);
 	instance_remove((instance *)factory);

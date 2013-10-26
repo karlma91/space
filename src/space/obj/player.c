@@ -69,7 +69,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->data.components[CMP_MINIMAP] = &player->radar_image;
 	player->radar_image = cmp_new_minimap(10, COL_GREEN);
 
-	player->flame = particles_get_emitter(current_particles, EMITTER_FLAME);
+	player->flame = particles_get_emitter(current_particles,RLAY_BACK_MID, EMITTER_FLAME);
 	player->flame->self_draw = 1;
 	player->disable=0;
 
@@ -111,13 +111,13 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	particles_draw_emitter(player->flame);
 
 	draw_color4f(1,1,1,1);
-	sprite_render(&(player->gun), player->gunwheel->p, player->gunwheel->a); //TODO use render body
+	sprite_render(RLAY_GAME_BACK, &(player->gun), player->gunwheel->p, player->gunwheel->a); //TODO use render body
 	if (player->joy_left->amplitude) {
-		sprite_render(&(player->data.spr), player->data.body->p, player->direction); //TODO use render body
+		sprite_render(RLAY_GAME_BACK,&(player->data.spr), player->data.body->p, player->direction); //TODO use render body
 	} else {
-		sprite_render(&(player->data.spr), player->data.body->p, player->data.body->a); //TODO use render body
+		sprite_render(RLAY_GAME_BACK,&(player->data.spr), player->data.body->p, player->data.body->a); //TODO use render body
 	}
-	hpbar_draw(&player->hp_bar, cpvtoangle(player->data.body->p));
+	hpbar_draw(RLAY_GAME_FRONT, &player->hp_bar, cpvtoangle(player->data.body->p));
 }
 
 #include <time.h>
