@@ -435,21 +435,21 @@ void draw_gui(view *cam)
 #if GOT_TOUCH
 		setTextSize(40);
 		if (((int)state_timer)%2) {
-			font_drawText(0, 0, "TOUCH JOYSTICKS");
+			font_drawText(RLAY_GUI_FRONT, 0, 0, "TOUCH JOYSTICKS");
 		}
 		setTextSize(25);
 		setTextAngle(WE_PI_2);
-		font_drawText(cam->view_width/2-100, 0, "CO-OP PLAYER 2");
+		font_drawText(RLAY_GUI_FRONT,cam->view_width/2-100, 0, "CO-OP PLAYER 2");
 		setTextAngle(WE_3PI_2);
-		font_drawText(-cam->view_width/2+100, 0, "CO-OP PLAYER 1");
+		font_drawText(0,-cam->view_width/2+100, 0, "CO-OP PLAYER 1");
 
 #define STR_SPACE_START "STEER - SINGLE PLAY - SHOOT"
 		setTextAngle(0);
 		setTextSize(25);
 		draw_color4f(0,0,0,1);
-		font_drawText(4, -cam->view_height/2+110-4, STR_SPACE_START);
+		font_drawText(RLAY_GUI_FRONT, 4, -cam->view_height/2+110-4, STR_SPACE_START);
 		draw_color4f(1,1,1,1);
-		font_drawText(0, -cam->view_height/2+110, STR_SPACE_START);
+		font_drawText(RLAY_GUI_FRONT, 0, -cam->view_height/2+110, STR_SPACE_START);
 #else
 		setTextSize(70);
 		font_drawText(RLAY_GUI_FRONT, 0, 0, "GET READY!");

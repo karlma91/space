@@ -539,6 +539,5 @@ void draw_pop_matrix(void)
 
 void draw_load_identity(void)
 {
-    glLoadIdentity();
     matrix2d_setidentity();
 }

@@ -287,13 +287,11 @@ static void initGL(void)
 #if GLES2
 #define GLSL_CODE(type, x) { \
 	"#version 100\n" \
-	(type == GL_FRAGMENT_SHADER) ? \
-	    "#ifdef GL_FRAGMENT_PRECISION_HIGH\n" \
-	    "precision highp float;           \n" \
-	    "#else                            \n" \
-	    "precision mediump float;         \n" \
-	    "#endif                           \n" \
-	    : "" \
+    "#ifdef GL_FRAGMENT_PRECISION_HIGH\n" \
+    "precision highp float;           \n" \
+    "#else                            \n" \
+    "precision mediump float;         \n" \
+    "#endif                           \n" \
 	#x \
 	}
 
@@ -446,8 +444,8 @@ static void initGP(void)
 		varying vec4 col;
 
 		void main() {
-			float light = 1;
-			gl_FragColor = texture2D(texUnit, texCoord) * (col/255.0) * vec4(light,light,light,1);
+			float light = 1.0;
+			gl_FragColor = texture2D(texUnit, texCoord) * (col/255.0) * vec4(light,light,light,1.0);
 			//gl_FragColor = texture2D(texUnit, texCoord) * (col/255.0) * vec4(light,light,light,1) - 0.3*abs(vec4(cos(verCoord.x/68-uTime*3.5)/2,sin(verCoord.y/50-uTime*1.5),cos(verCoord.y/130+uTime/2)*sin(verCoord.x/120+uTime*2),0));
 		}
 	);
