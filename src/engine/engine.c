@@ -282,6 +282,22 @@ static void initGL(void)
 	draw_enable_tex2d();
 
 	SDL_Log("DEBUG - initGL done!\n");
+
+
+#if __WIN32__
+	GLenum glewError = glewInit();
+	if( glewError != GLEW_OK )
+	{
+		SDL_Log( "Error initializing GLEW! %s\n", glewGetErrorString( glewError ) );
+		exit(-1);
+	}
+	if (glewGetExtension("GL_EXT_framebuffer_object"))
+	{
+		SDL_Log( "Have extension" );
+	}else{
+		SDL_Log( "Error no extension");
+	}
+#endif
 }
 
 #if GLES2
@@ -494,22 +510,6 @@ static void main_init(void)
         SDL_Log("Could not open joystick (accelerometer)");
     }
 
-    /*
-#if __WIN32__
-	GLenum glewError = glewInit();
-	if( glewError != GLEW_OK )
-	{
-		SDL_Log( "Error initializing GLEW! %s\n", glewGetErrorString( glewError ) );
-		exit(-1);
-	}
-	if (glewGetExtension("GL_EXT_framebuffer_object"))
-	{
-		SDL_Log( "Have extension" );
-	}else{
-		SDL_Log( "Error no extension");
-	}
-#endif
-     */
 	cpInitChipmunk();
 
 	sound_init();
