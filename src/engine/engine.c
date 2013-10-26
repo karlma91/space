@@ -401,16 +401,21 @@ static void initGP(void)
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	const GLchar *vertexShaderCode[] = GLSL_CODE(GL_VERTEX_SHADER,
 		uniform mat4 uProjection;
+		uniform float uTime;
 
 		attribute vec2 aVertex;
 		attribute vec2 aTexCoord;
 		attribute vec4 aColor;
 
+		varying vec2 verCoord;
 		varying vec2 texCoord;
 		varying vec4 col;
 
+		const float PI = 3.141592;
+
 		void main() {
 			gl_Position = uProjection * vec4(aVertex.xy, 0, 1); //TODO create and send in projection matrix
+			verCoord = gl_Position.xy;
 			texCoord = aTexCoord;
 			col = aColor;
 		}
@@ -434,12 +439,15 @@ static void initGP(void)
 
 	const GLchar *fragmentShaderCode[] = GLSL_CODE(GL_FRAGMENT_SHADER,
 		uniform sampler2D texUnit;
+		uniform float uTime;
 
+		varying vec2 verCoord;
 		varying vec2 texCoord;
 		varying vec4 col;
 
 		void main() {
-			gl_FragColor = texture2D(texUnit, texCoord) * (col/255.0);
+			light = 1;
+			gl_FragColor = texture2D(texUnit, texCoord) * (col/255.0) * (vec4(light,light,light,1));
 		}
 	);
 	glShaderSource(fragmentShader, 1, fragmentShaderCode, NULL);
@@ -634,6 +642,8 @@ static void main_sleep(void)
 #endif
 }
 
+GLfloat time_running = 0;
+
 static void main_tick(void *data)
 {
 	thisTime = SDL_GetTicks();
@@ -645,6 +655,10 @@ static void main_tick(void *data)
 
 	frames += dt;
 	fps++;
+
+    time_running +=dt;
+    GLint uTime = glGetUniformLocation(gl_program, "uTime");
+    glUniform1f(uTime, time_running);
 
 	//TODO detect matrix stack unbalance
 	draw_matrix_clear();

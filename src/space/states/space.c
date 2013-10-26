@@ -306,7 +306,7 @@ static void draw_deck()
 	/* draw ceiling and floor */
 	draw_color4f(0,0,0,0.6);
 	draw_circle(cpvzero, currentlvl->inner_radius);
-	draw_donut(cpvzero, currentlvl->outer_radius, currentlvl->outer_radius + 3000);
+	//draw_donut(cpvzero, currentlvl->outer_radius, currentlvl->outer_radius + 3000);
 }
 
 static void draw(void)
