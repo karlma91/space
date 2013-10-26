@@ -270,19 +270,7 @@ static void initGL(void)
 	glEnableVertexAttribArray(1); // texture
 	glEnableVertexAttribArray(2); // colors
 
-	glMatrixMode(GL_PROJECTION); //GLES1!
 	draw_load_identity();
-	GLfloat W_2 = GAME_WIDTH / 2;
-	GLfloat H_2 = GAME_HEIGHT / 2;
-
-	//TODO change to something like (0,0,GW,GH)
-	glOrtho(-W_2, W_2, -H_2, H_2, 1, -1); //GLES1!
-	//glOrtho(0, GAME_WIDTH, 0, GAME_HEIGHT, 1, -1); //option 1
-	//glOrtho(0, GAME_WIDTH, GAME_HEIGHT, 0, 1, -1); //option 2 (will probably match normalized touch input)
-
-	glMatrixMode(GL_MODELVIEW); //GLES1!
-	draw_load_identity();
-
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	glClearColor(0,0,0, 1);
 
@@ -290,7 +278,6 @@ static void initGL(void)
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_SCISSOR_TEST);
 	glScissor(0,0, WINDOW_WIDTH,WINDOW_HEIGHT); //scissor test
-
 
 	draw_enable_tex2d();
 
@@ -323,6 +310,27 @@ static void initGL(void)
 
 
 GLuint gl_program;
+void we_ortho(float W_2, float H_2)
+{
+	float left=-W_2, right=W_2, bottom=-H_2, top=H_2;
+
+    float a =  2.0f / (right - left);
+    float b =  2.0f / (top   - bottom);
+
+    float tx = -(right + left)   / (right - left);
+    float ty = -(top   + bottom) / (top   - bottom);
+
+    //TODO use matrix.c instead;
+    float ortho[16] = {
+        a, 0, 0, tx,
+        0, b, 0, ty,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    };
+
+    GLint projectionUniform = glGetUniformLocation(gl_program, "uProjection");
+    glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, &ortho[0]);
+}
 
 void printProgramLog(GLuint program)
 {
@@ -392,7 +400,7 @@ static void initGP(void)
 	/* Vertex Shader */
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	const GLchar *vertexShaderCode[] = GLSL_CODE(GL_VERTEX_SHADER,
-		uniform mat4 projection;
+		uniform mat4 uProjection;
 
 		attribute vec2 aVertex;
 		attribute vec2 aTexCoord;
@@ -402,8 +410,7 @@ static void initGP(void)
 		varying vec4 col;
 
 		void main() {
-			gl_Position = gl_ProjectionMatrix * vec4(aVertex.xy, 0, 1);
-			//gl_Position = projection * vec4(aVertex.xy, 0, 1); //TODO create and send in projection matrix
+			gl_Position = uProjection * vec4(aVertex.xy, 0, 1); //TODO create and send in projection matrix
 			texCoord = aTexCoord;
 			col = aColor;
 		}
@@ -451,7 +458,6 @@ static void initGP(void)
 
 	/* Link program */
 	glLinkProgram(gl_program);
-
 	glUseProgram(gl_program);
 
 	// Check for errors
@@ -461,6 +467,8 @@ static void initGP(void)
 		printShaderLog(gl_program);
 		we_error("error - program shader");
 	}
+
+	we_ortho(GAME_WIDTH / 2, GAME_HEIGHT / 2); //GLES1!
 }
 
 static void main_init(void)
@@ -540,13 +548,9 @@ static void check_events(void)
 			switch (event.key.keysym.scancode) {
 			case SDL_SCANCODE_T:
 				render_outside ^=0x5;
-
-				glMatrixMode(GL_PROJECTION); //GLES1!
-				draw_load_identity();
 				GLfloat W_2 = GAME_WIDTH / 2 * render_outside;
 				GLfloat H_2 = GAME_HEIGHT / 2 * render_outside;
-				glOrtho(-W_2, W_2, -H_2, H_2, 1, -1);
-				glMatrixMode(GL_MODELVIEW); //GLES1!
+				we_ortho(W_2, H_2);
 				break;
 			case SDL_SCANCODE_R:
 				glClear(GL_COLOR_BUFFER_BIT);
@@ -697,15 +701,9 @@ static void main_tick(void *data)
 			SDL_Log(SDL_GetError());
 			config.fullscreen ^= 1; // Re-toggle
 		} else {
-			glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 			setAspectRatio();
-
-			glMatrixMode(GL_PROJECTION); //GLES1!
-			draw_load_identity();
-			GLfloat W_2 = GAME_WIDTH / 2;
-			GLfloat H_2 = GAME_HEIGHT / 2;
-			glOrtho(-W_2, W_2, -H_2, H_2, 1, -1);
-			glMatrixMode(GL_MODELVIEW); //GLES1!
+			glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+			we_ortho(GAME_WIDTH / 2, GAME_HEIGHT / 2);
 
 			SDL_Log("DEBUG: WINDOW FULLSCREEN CHANGED -> %d", config.fullscreen);
 		}
