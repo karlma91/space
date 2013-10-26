@@ -214,8 +214,8 @@ void particles_destroy()
 	}
 	llist_end_loop(main_emitter_pool->available);
 	// FIXME: fix crash on destroy
-	//pool_destroy(main_emitter_pool);
-	//pool_destroy(main_particle_pool);
+	pool_destroy(main_emitter_pool);
+	pool_destroy(main_particle_pool);
 }
 
 /**
