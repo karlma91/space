@@ -756,22 +756,39 @@ void space_init(void)
     state_add_inner_state(state_space,LEVEL_CLEARED,level_cleared,NULL);
     state_add_inner_state(state_space,LEVEL_TRANSITION,level_transition,NULL);
 
-    state_add_layer(state_space);
-	/*
 	int i;
-	layer_system *lsys = state_get_layersystem(state_space); //TODO create getter for layersystem
-	int layer_count = lsys->num_layers;
-	for(i = 0; i <  layer_count; i++){
-		//float depth =  1 + 10*tan((1.0f*i/layersystem->num_layers)*WE_PI_2);
-		float f = 0.1 + 0.9 * i / (layer_count); // -> 0 = nearest, 1 = furthest
-		state_set_layer_parallax(state_space, i, f, 1);
+    state_add_layers(state_space, 21);
+	int layers = state_layer_count(state_space);
+	for(i = 11; i<layers; i++){
+		//float depth =  2 + 10*tan((1.0f*i/la_sys->num_layers)*WE_PI_2);
+		float f = (layers - i * 0.99f) / (layers);
+		state_set_layer_parallax(state_space, i, f, f);
 	}
-	for(i = 10; i<150; i++){
-		int layer = roundf(we_randf*(lsys->num_layers-1));
-		float size = 25 + (400+70) -(we_randf*70 + layer*10);
-		state_add_sprite(state_space, layer, SPRITE_SPIKEBALL, size, size, cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600), we_randf*WE_2PI);
+	for(i = 0; i<2000; i++){
+		int layer =  11 + roundf(we_randf*(layers-1-11));
+		float size = 150 + we_randf*90 - layer*4;
+		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),6600);
+		SPRITE_ID spr;
+		int s = rand() & 7;
+		switch(s) {
+		case 0: spr = SPRITE_SPIKEBALL; break;
+		case 1: /* no break */
+		case 2: spr = SPRITE_GEAR; break;
+		case 3: spr = SPRITE_SAW; break;
+		case 4: /* no break */
+		case 5: spr = SPRITE_TANK_WHEEL; break;
+		case 6: spr = SPRITE_TANK_TURRET; break;
+		case 7: spr = SPRITE_PLAYER_GUN; break;
+		}
+
+		state_add_sprite(state_space, layer, spr, size, size, pos, we_randf*WE_2PI);
 	}
-	*/
+
+	//for(i = 10; i<150; i++){
+	//	int layer = roundf(we_randf*(lsys->num_layers-1));
+	//	float size = 25 + (400+70) -(we_randf*70 + layer*10);
+	//	state_add_sprite(state_space, layer, SPRITE_SPIKEBALL, size, size, cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600), we_randf*WE_2PI);
+	//}
 
     view_p1 = state_view_get(state_space, 0);
     view_p2 = state_view_add(state_space);
