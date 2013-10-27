@@ -290,9 +290,12 @@ void draw_sprite_line(int layer, sprite *spr, cpVect a, cpVect b, float w)
 //TODO be able to set blend layers
 void draw_glow_line(cpVect a, cpVect b, float w)
 {
+	draw_push_blend();
+	draw_blend(GL_SRC_ALPHA, GL_ONE);
 	draw_line(0, TEX_GLOW, a, b, w);
 	draw_color3f(1,1,1);
 	draw_line(0, TEX_GLOW_DOT, a, b, w);
+	draw_pop_blend();
 }
 
 void draw_quad_line(int layer, cpVect a, cpVect b, float w)

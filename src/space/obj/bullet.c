@@ -55,9 +55,9 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	}
 
 	if (bullet->param.friendly) {
-		draw_color4f(0.3, 0.3, 0.9, alpha);
+		draw_color4f(0, 1, 1, alpha);
 	} else {
-		draw_color4f(0.9, 0.3, 0.3, alpha);
+		draw_color4f(1, 0.4, 0.4, alpha);
 	}
 
 	cpVect p1 = bullet->data.body->p;

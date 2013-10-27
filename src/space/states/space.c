@@ -784,12 +784,6 @@ void space_init(void)
 		state_add_sprite(state_space, layer, spr, size, size, pos, we_randf*WE_2PI);
 	}
 
-	//for(i = 10; i<150; i++){
-	//	int layer = roundf(we_randf*(lsys->num_layers-1));
-	//	float size = 25 + (400+70) -(we_randf*70 + layer*10);
-	//	state_add_sprite(state_space, layer, SPRITE_SPIKEBALL, size, size, cpvmult(cpv(we_randf-0.5,we_randf-0.5),2600), we_randf*WE_2PI);
-	//}
-
     view_p1 = state_view_get(state_space, 0);
     view_p2 = state_view_add(state_space);
     view_p2->enabled = 0;
