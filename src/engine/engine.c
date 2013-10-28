@@ -198,7 +198,7 @@ static void display_init(void)
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1 );
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //AA not supported on Android test device
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GLES2 ? 0 : 1);
@@ -754,7 +754,10 @@ static void main_tick(void *data)
 			SDL_Log("DEBUG: WINDOW FULLSCREEN CHANGED -> %d", config.fullscreen);
 		}
 		keys[SDL_SCANCODE_F] = 0;
+	}
 
+	if (keys[SDL_SCANCODE_Z]) {
+		SDL_Delay(40);
 	}
 
 	if (!main_running) {

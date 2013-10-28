@@ -21,8 +21,8 @@ typedef enum {
 
 #define MAX_WEAPON_LEVEL 3
 #define WEAPON_UPGRADES 3
-#define ARMOR_UPGRADES 2
-#define ENGINE_UPGRADES 2
+#define ARMOR_UPGRADES 3
+#define ENGINE_UPGRADES 3
 
 typedef struct {
 	char name[50];

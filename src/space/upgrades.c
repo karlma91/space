@@ -50,12 +50,14 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 
 upg_armor armors[ARMOR_UPGRADES] = {
 	{.name = "BASIC ARMOR", .max_hp = 200, .mass = 1, .shield = 0, .shield_regen = 0, .price = 0, .spr_id = &SPRITE_PLAYER},
-	{.name = "ELEPHANT ARMOR", .max_hp = 750, .mass = 3, .shield = 0, .shield_regen = 0, .price = 13200, .spr_id = &SPRITE_PLAYER}
+	{.name = "ELEPHANT ARMOR", .max_hp = 750, .mass = 3, .shield = 0, .shield_regen = 0, .price = 13200, .spr_id = &SPRITE_PLAYER},
+	{.name = "T-REX SKIN", .max_hp = 100000, .mass = 10, .shield = 0, .shield_regen = 0, .price = 9999990, .spr_id = &SPRITE_SPIKEBALL}
 };
 
 upg_engine engines[ENGINE_UPGRADES] = {
-	{.name = "TURTLE POWER", .force = 160, .max_speed = 435, .price = 0, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_PLAYER},
-	{.name = "LIGHTNING JET", .force = 550, .max_speed = 475, .price = 9500, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_PLAYER}
+	{.name = "TURTLE POWER", .force = 80, .max_speed = 435, .price = 0, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_PLAYER},
+	{.name = "LIGHTNING JET", .force = 350, .max_speed = 475, .price = 9500, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_PLAYER},
+	{.name = "UBERSPEED", .force = 500, .max_speed = 9999, .price = 999500, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_STATION_01}
 };
 
 void test_me(void)
