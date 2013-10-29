@@ -40,7 +40,21 @@ static int filesize = 0;
 
 
 /* TODO: NEW LEVEL FORMAT IN JSON
- * { objects : [
+ * {
+ * level : { name : "tutorial",
+ * 			 type : { "circle",
+ * 			 		  inner_radius : 100,
+ * 			 		  outer_radius : 4000,
+ * 			 		  gravity	   : 20
+ * 			 		}
+ * 			type : { "box",
+ * 			 		  size : 2000,
+ * 			 		  gravity	   : 20
+ * 			 		}
+ * 			},
+ *
+ *
+ * objects : [
  * 		{ 	type : "tank",
  * 			pos  : {x:100, y:100},
  * 			rot  : 10,

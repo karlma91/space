@@ -262,23 +262,23 @@ static void emitter_interval(emitter *em)
 
 static void emitter_update(emitter *em)
 {
-	if(!em->waiting_to_die){
-		if(em->time_allive >= em->next_spawn && !em->disable){
+	if (!em->waiting_to_die) {
+		if (em->time_allive >= em->next_spawn && !em->disable) {
 			emitter_interval(em);
 			em->time_allive = 0;
 		}
 	}else{
-		if(llist_size(em->particles) == 0){
+		if (llist_size(em->particles) == 0) {
 			fprintf(stderr, "Emitter shall die! %p\n", em);
 			em->alive = 0;
 		}
 	}
 
-	if(em->length_enabled && em->total_time_allive >= em->length_set){
+	if (em->length_enabled && em->total_time_allive >= em->length_set) {
 		em->waiting_to_die = 1;
 	}
 
-	if(em->emit_count_enabled && em->particle_count >= em->emit_count_set){
+	if (em->emit_count_enabled && em->particle_count >= em->emit_count_set) {
 		em->waiting_to_die = 1;
 	}
 
@@ -295,10 +295,9 @@ static void update_all_particles(emitter *em)
 	llist_begin_loop(em->particles);
 	while(llist_hasnext(em->particles)){
 		particle *p = llist_next(em->particles);
-		if(p->time_alive >= p->max_time) {
+		if (p->time_alive >= p->max_time) {
 			p->alive = 0;
-			llist_remove(em->particles, p);
-			set_particle_available(p);
+			llist_remove(em->particles, p); // Sets particle available with remove callback
 		} else {
 		    cpVect g = em->ps->gravity_dir_func(p->p);
 
