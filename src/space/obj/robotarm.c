@@ -21,9 +21,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	robotarm->segments = 4;
 	robotarm->seg_length = currentlvl->height / (2*robotarm->segments);
 
-	robotarm->x = 	  malloc(sizeof(int)*robotarm->segments);
-	robotarm->y =	  malloc(sizeof(int)*robotarm->segments);
-	robotarm->angle = malloc(sizeof(int)*robotarm->segments);
+	robotarm->x = 	  calloc(robotarm->segments, sizeof(float));
+	robotarm->y =	  calloc(robotarm->segments, sizeof(float));
+	robotarm->angle = calloc(robotarm->segments, sizeof(float));
 	int i;
 	for(i=0; i<robotarm->segments; i++){
 		robotarm->x[i] = robotarm->data.p_start.x;

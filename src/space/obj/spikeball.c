@@ -15,7 +15,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	sprite_create(&spikeball->data.spr, SPRITE_SPIKEBALL, 400, 400, 30);
 	float radius = spikeball->param.radius;
-	radius = 100;
+	if (radius == 0) {
+        radius = 100;
+        spikeball->param.radius = radius;
+    }
 	float mass = 100;
 
 	spikeball->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));

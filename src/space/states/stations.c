@@ -183,7 +183,7 @@ void stations_init(void)
 		SPRITE_ID spr;
 		int s = rand() & 7;
 		switch(s) {
-		case 0: spr = SPRITE_SPIKEBALL; break;
+        default: spr = SPRITE_SPIKEBALL; break;
 		case 1: spr = SPRITE_COIN; break;
 		case 2: spr = SPRITE_GEAR; break;
 		case 3: spr = SPRITE_SAW; break;

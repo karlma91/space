@@ -89,7 +89,6 @@ void particles_update(particle_system *s)
 	while(llist_hasnext(s->emitters)){
 		emitter *e = llist_next(s->emitters);
 		if(e->alive == 0) {
-			fprintf(stderr, "Emitter DID DIE! %p\n", e);
 			llist_remove(s->emitters, e);
 			set_emitter_available(e);
 		} else {
@@ -269,7 +268,6 @@ static void emitter_update(emitter *em)
 		}
 	}else{
 		if (llist_size(em->particles) == 0) {
-			fprintf(stderr, "Emitter shall die! %p\n", em);
 			em->alive = 0;
 		}
 	}
@@ -331,14 +329,14 @@ static emitter * get_emitter(int layer)
 {
 	emitter *e = pool_instance(main_emitter_pool);
 	if(e == NULL) {
-			SDL_Log("Particke get_emiiter ERROR");
-	}
-	if(e->particles == NULL) {
-		fprintf(stderr, "Created new llist for emitter: %p\n", e);
-		e->particles = llist_create();
-		llist_set_remove_callback(e->particles, (ll_rm_callback) clear_rm_particle );
-	}
-	e->layer = layer;
+        SDL_Log("Particke get_emiiter ERROR");
+	} else {
+        if(e->particles == NULL) {
+            e->particles = llist_create();
+            llist_set_remove_callback(e->particles, (ll_rm_callback) clear_rm_particle );
+        }
+        e->layer = layer;
+    }
 	return e;
 }
 
@@ -419,7 +417,7 @@ static void draw_all_particles(emitter *em)
 		offset = offset>1 ? 1 : offset;
 		float inv = 1-offset;
 
-		p_color a,b,c;
+		p_color a,b,c = {0,0,0,0};
 		float coloffset;
 		float colinv;
 		int i;

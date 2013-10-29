@@ -703,6 +703,7 @@ static void sdl_event(SDL_Event *event)
 	SDL_Scancode key;
 	switch(event->type) {
 	case SDL_KEYDOWN:
+        key = event->key.keysym.scancode;
 		switch (gamestate) {
 		case LEVEL_PLAYER_DEAD:
 			//TODO implement button for this:
@@ -771,7 +772,7 @@ void space_init(void)
 		SPRITE_ID spr;
 		int s = rand() & 7;
 		switch(s) {
-		case 0: spr = SPRITE_SPIKEBALL; break;
+        default: spr = SPRITE_SPIKEBALL; break;
 		case 1: /* no break */
 		case 2: spr = SPRITE_GEAR; break;
 		case 3: spr = SPRITE_SAW; break;

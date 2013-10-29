@@ -67,11 +67,11 @@ int hm_size(hashmap *hm)
 
 static int hm_add_internal(hashnode **buckets, hashnode *node, int size)
 {
-	int inedx = hash((unsigned char*)node->key) % size;
-	if( buckets[inedx] == NULL){
-		buckets[inedx] = node;
+	int index = hash((unsigned char*)node->key) % size;
+	if( buckets[index] == NULL){
+		buckets[index] = node;
 	}else{
-		hashnode *temp = buckets[inedx];
+		hashnode *temp = buckets[index];
 		while(temp != NULL){
 			if(strcmp(temp->key, node->key) == 0){
 				return 1;
@@ -89,8 +89,7 @@ static int hm_add_internal(hashnode **buckets, hashnode *node, int size)
 static void hm_resize(hashmap *hm)
 {
 	int size = hm->size * 2;
-	hashnode **buckets = malloc(size * sizeof(hashnode));
-	memset(buckets, 0, size * sizeof(hashnode));
+	hashnode **buckets = calloc(size, sizeof(hashnode *));
 	int i;
 	for(i=0; i < hm->size; i++){
 		hashnode *node;

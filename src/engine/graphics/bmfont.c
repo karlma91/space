@@ -157,7 +157,6 @@ static void flush_line(bm_font *font, float text_width, float x, float y)
     draw_push_matrix();
     draw_load_identity();
     draw_translate(x-(text_width/2.0f)*font->scale, y);
-    text_width=0;
     draw_scale(font->scale,-font->scale);
     //draw_flush_and_multiply(); //TODO FIXME
     //draw_flush(); //TODO FIXME multiply removed!

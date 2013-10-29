@@ -390,7 +390,7 @@ level *level_load(int space_station, int deck)
 	offset_add = 0;
 
 	char tilemap_name[100];
-	ret = sscanf(&buffer[offset],"%s%n\n", tilemap_name, &offset_add);
+	sscanf(&buffer[offset],"%s%n\n", tilemap_name, &offset_add);
 	offset += offset_add;
 
 	int retExp = 0;

@@ -89,8 +89,6 @@ int layersystem_add_layer(layer_system *lsys)
 	layer->parallax_zoom = 1;
 	lsys->num_layers += 1;
 
-	LList *blend_modes = get_blend_modes(lsys->num_layers - 1);
-
 	return alist_add(lsys->layers, layer);
 }
 
@@ -118,7 +116,6 @@ int TMP_DRAW_CALLS = 0;
 void layersystem_render(STATE_ID state_id, view *cam)
 {
 	layer_system *ls = state_get_layersystem(state_id);
-	cpVect p = cam->p; //TODO use for parallax effect (zoom and offset)
 	if(ls == NULL) {
 		SDL_Log("LAYERSYSTEM: rendering NULL");
 		return;
@@ -140,7 +137,6 @@ void layersystem_render(STATE_ID state_id, view *cam)
 			draw_scale(zoom * cam->ratio, zoom);
 			draw_rotate(cam->rotation);
 			draw_translatev(cpvmult(current_view->p, -lay->parallax_factor));
-			//draw_translatev(current_view->p);
 			sprite_render(layer_index, &(s->s), s->pos, s->a);
 			draw_pop_matrix();
 		}
