@@ -19,14 +19,16 @@ pool * pool_create(int element_size)
 
 void * pool_instance(pool *p)
 {
-	void * i;
-	if(llist_size(p->available)){
-		i = llist_pop(p->available);
-	}else{
-		i = calloc(1, p->element_size);
+	void *elem = NULL;
+	int size = llist_size(p->available);
+	if (size == 0) {
+		elem = calloc(1, p->element_size);
+	} else if (size > 0) {
+		elem = llist_pop(p->available);
+	} else {
+		SDL_Log("Error: reading pool's llist");
 	}
-	//llist_add(p->in_use, i);
-	return i;
+	return elem;
 }
 
 void pool_release_rmcall(void *i, pool *p)

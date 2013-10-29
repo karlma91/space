@@ -89,6 +89,7 @@ void particles_update(particle_system *s)
 	while(llist_hasnext(s->emitters)){
 		emitter *e = llist_next(s->emitters);
 		if(e->alive == 0) {
+			fprintf(stderr, "Emitter DID DIE! %p\n", e);
 			llist_remove(s->emitters, e);
 			set_emitter_available(e);
 		} else {
@@ -144,7 +145,7 @@ emitter *particles_get_emitter(particle_system *s, int layer, int type)
 {
 	emitter *e = get_emitter(layer);
 	llist_add(s->emitters, e);
-	void * l = e->particles;
+	LList l = e->particles;
 	int lay = e->layer;
 	*e = (emitter_templates[type]);
 	e->particles = l;
@@ -268,6 +269,7 @@ static void emitter_update(emitter *em)
 		}
 	}else{
 		if(llist_size(em->particles) == 0){
+			fprintf(stderr, "Emitter shall die! %p\n", em);
 			em->alive = 0;
 		}
 	}
@@ -333,6 +335,7 @@ static emitter * get_emitter(int layer)
 			SDL_Log("Particke get_emiiter ERROR");
 	}
 	if(e->particles == NULL) {
+		fprintf(stderr, "Created new llist for emitter: %p\n", e);
 		e->particles = llist_create();
 		llist_set_remove_callback(e->particles, (ll_rm_callback) clear_rm_particle );
 	}
@@ -346,7 +349,7 @@ static emitter * get_emitter(int layer)
  */
 static particle * get_particle(void)
 {
-	particle *p = pool_instance(main_emitter_pool);
+	particle *p = pool_instance(main_particle_pool);
 	if(p == NULL) {
 		SDL_Log("Particke get_particle ERROR");
 	}

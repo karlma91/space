@@ -237,43 +237,6 @@ static void display_init(void)
 	SDL_ShowWindow(window);
 }
 
-/*static void load_correct_gl()
-{
-	glEnableVertexAttribArray = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glEnableVertexAttribArray");
-
-	glCreateProgram = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glCreateProgram");
-
-	glCreateShader = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glCreateShader");
-
-	glShaderSource = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glShaderSource");
-
-	glGetShaderiv = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glGetShaderiv");
-
-	glCompileShader = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glCompileShader");
-	glAttachShader = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glAttachShader");
-	glLinkProgram = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glLinkProgram");
-	glUseProgram = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glUseProgram");
-	glGetProgramiv = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glGetProgramiv");
-	glGetUniformLocation = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glGetUniformLocation");
-	glUniformMatrix4fv = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glUniformMatrix4fv");
-	glUniform1f = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glUniform1f");
-	glVertexAttribPointer = (void(*)(GLenum))
-		wglGetProcAddress ((GLubyte*)"glVertexAttribPointer");
-}*/
-
 static void initGL(void)
 {
 	// Create an OpenGL context associated with the window.
@@ -357,7 +320,8 @@ static void initGL(void)
 #endif
 
 
-GLuint gl_program;
+GLuint gl_program, gl_vertshader, gl_fragshader;
+
 void we_ortho(float W_2, float H_2)
 {
 	float left=-W_2, right=W_2, bottom=-H_2, top=H_2;
@@ -446,7 +410,7 @@ static void initGP(void)
 	gl_program = glCreateProgram();
 
 	/* Vertex Shader */
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	gl_vertshader = glCreateShader(GL_VERTEX_SHADER);
 	const GLchar *vertexShaderCode[] = GLSL_CODE(GL_VERTEX_SHADER,
 		uniform mat4 uProjection;
 		uniform float uTime;
@@ -468,22 +432,22 @@ static void initGP(void)
 			col = aColor;
 		}
 	);
-	glShaderSource(vertexShader, 1, vertexShaderCode, NULL);
-	glCompileShader(vertexShader);
+	glShaderSource(gl_vertshader, 1, vertexShaderCode, NULL);
+	glCompileShader(gl_vertshader);
 
 	// Check for errors
 	GLint vShaderCompiled = GL_FALSE;
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vShaderCompiled);
+	glGetShaderiv(gl_vertshader, GL_COMPILE_STATUS, &vShaderCompiled);
 	if (vShaderCompiled != GL_TRUE) {
-		printf("Unable to compile vertex shader %d!\n", vertexShader);
-		printShaderLog(vertexShader);
+		printf("Unable to compile vertex shader %d!\n", gl_vertshader);
+		printShaderLog(gl_vertshader);
 		we_error("error - vertex shader");
 	}
-	glAttachShader(gl_program, vertexShader);
+	glAttachShader(gl_program, gl_vertshader);
 
 
 	/* Fragment Shader */
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	gl_fragshader = glCreateShader(GL_FRAGMENT_SHADER);
 
 	const GLchar *fragmentShaderCode[] = GLSL_CODE(GL_FRAGMENT_SHADER,
 		uniform sampler2D texUnit;
@@ -499,19 +463,19 @@ static void initGP(void)
 			//gl_FragColor = texture2D(texUnit, texCoord) * (col/255.0) * vec4(light,light,light,1) - 0.3*abs(vec4(cos(verCoord.x/68-uTime*3.5)/2,sin(verCoord.y/50-uTime*1.5),cos(verCoord.y/130+uTime/2)*sin(verCoord.x/120+uTime*2),0));
 		}
 	);
-	glShaderSource(fragmentShader, 1, fragmentShaderCode, NULL);
-	glCompileShader(fragmentShader);
+	glShaderSource(gl_fragshader, 1, fragmentShaderCode, NULL);
+	glCompileShader(gl_fragshader);
 
 	// Check for errors
 	GLint fShaderCompiled = GL_FALSE;
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fShaderCompiled);
+	glGetShaderiv(gl_fragshader, GL_COMPILE_STATUS, &fShaderCompiled);
 	if (fShaderCompiled != GL_TRUE) {
-		printf("Unable to compile fragment shader %d!\n", vertexShader);
-		printShaderLog(fragmentShader);
+		printf("Unable to compile fragment shader %d!\n", gl_vertshader);
+		printShaderLog(gl_fragshader);
 		we_error("error - fragment shader");
 	}
 
-	glAttachShader(gl_program, fragmentShader);
+	glAttachShader(gl_program, gl_fragshader);
 
 	/* Link program */
 	glLinkProgram(gl_program);
@@ -815,6 +779,10 @@ static int main_destroy(void) {
 
 	// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
 	//SDL_GL_MakeCurrent(NULL, NULL);
+
+	glDeleteShader(gl_fragshader);
+	glDeleteShader(gl_vertshader);
+	glDeleteProgram(gl_program);
 	SDL_GL_DeleteContext(glcontext);
 
 #if !TARGET_OS_IPHONE

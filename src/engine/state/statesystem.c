@@ -150,6 +150,7 @@ void statesystem_push_state(STATE_ID state_id)
     state->time_alive = 0;
     stack_head->next = state;
     stack_head->next->prev = stack_head;
+    stack_head->call.on_leave();
     stack_head = stack_head->next;
 
     stack_head->call.on_enter();
@@ -158,19 +159,23 @@ void statesystem_push_state(STATE_ID state_id)
 void statesystem_pop_state(void *unused)
 {
     State *temp = stack_head;
+    stack_head->call.on_leave();
     stack_head = stack_head->prev;
     temp->prev = NULL;
     stack_head->next = NULL;
+    stack_head->call.on_enter();
 }
 
 void statesystem_set_state(STATE_ID state_id)
 {
 	State *stack_next, *state = stack_tail;
 
+
 	while (state) {
 		state->prev = NULL;
 		stack_next = state->next;
 		state->next = NULL;
+	    state->call.on_leave();
 		state = stack_next;
 	}
 
