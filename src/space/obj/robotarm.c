@@ -112,6 +112,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 
+	draw_color4f(1,1,1,1);
 	if (robotarm->data.time_destroyed > 3) { //TODO automatically? or in its own destroyed_tick?
 		particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, robotarm->saw->p);
 		instance_remove((instance *)robotarm);
@@ -148,6 +149,7 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, robotarm->data.body->p);
 	se_spawn_coins((instance *)robotarm);
+	cpBodySetForce(robotarm->saw, cpvzero);
 	we_body_remove_constraints(current_space, robotarm->data.body);
 }
 
