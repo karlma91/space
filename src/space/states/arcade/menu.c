@@ -6,7 +6,7 @@
 
 STATE_ID state_menu;
 
-static button btn_start_tmp;
+static sprite spr_startbtn;
 
 #define MAX_MENU_ITEMS 5
 #define MENU_LAYERS 4
@@ -42,6 +42,8 @@ static int current_menu;
 
 static const Color col_item   = {255,0,  0,255};
 static const Color col_select = {  0,0,255,255};
+
+static view *view_main;
 
 static void sdl_event(SDL_Event *event)
 {
@@ -112,6 +114,8 @@ void menu_change_current_menu(int menu)
 	}
 }
 
+static cpVect p_cam = {0,0};
+
 static void pre_update(void)
 {
 	if (keys[KEY_RETURN_2] || keys[KEY_RETURN_1]) {
@@ -132,6 +136,12 @@ static void pre_update(void)
 		statesystem_set_state(state_menu);
 		keys[KEY_ESCAPE] = 0;
 	}
+
+
+	float angle = engine_time*WE_2PI;
+	p_cam = cpv(cosf(angle/6)*120, sinf(angle/7)*57);
+	view_update(view_main, p_cam, 0);
+	view_main->zoom = 1 + cosf(angle/11)/5;
 }
 
 static void post_update(){}
@@ -148,39 +158,28 @@ static void draw(void)
 
 	setTextAngle(0);
 	setTextAlign(TEXT_CENTER);
-	switch(current_menu){
-	case MENU_INGAME:
-		draw_color4f(1,1,1,1);
-		setTextSize(80);
-		setTextAlign(TEXT_CENTER);
-		font_drawText(RLAY_GUI_FRONT, 0,0.6f*GAME_HEIGHT/2, "GAME PAUSED");
-		break;
-	case MENU_MAIN:
-		setTextSize(120);
-		//drawStars();
-		draw_color(draw_col_rainbow((int)(timer*1000)));
-		font_drawText(RLAY_GUI_FRONT, 0,0.7f*GAME_HEIGHT/2, "SPACE");
+	setTextSize(120);
+	//drawStars();
+	draw_color(draw_col_rainbow((int)(timer*1000)));
+	font_drawText(RLAY_GUI_FRONT, 0,0.7f*GAME_HEIGHT/2, "SPACE");
 
-		draw_color4f(1,1,1,1);
+	draw_color4f(1,1,1,1);
 
-		setTextSize(30);
-		font_drawText(RLAY_GUI_FRONT, -GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2, "STYR");
-		font_drawText(RLAY_GUI_FRONT, -GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2-50, "VVV");
+	setTextSize(30);
+	font_drawText(RLAY_GUI_FRONT, -GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2, "STYR");
+	font_drawText(RLAY_GUI_FRONT, -GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2-50, "VVV");
 
-		font_drawText(RLAY_GUI_FRONT, +GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2, "SKYT");
-		font_drawText(RLAY_GUI_FRONT, +GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2-50, "VVV");
+	font_drawText(RLAY_GUI_FRONT, +GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2, "SKYT");
+	font_drawText(RLAY_GUI_FRONT, +GAME_WIDTH*0.4,-0.8f*GAME_HEIGHT/2-50, "VVV");
 
-		setTextAlign(TEXT_CENTER);
-		setTextSize(40);
+	setTextAlign(TEXT_CENTER);
+	setTextSize(40);
 
+	font_drawText(RLAY_GUI_FRONT, 0,-0.5f*GAME_HEIGHT/2, "START SPILLET");
 
-		font_drawText(RLAY_GUI_FRONT, 0,-0.5f*GAME_HEIGHT/2, "START SPILLET");
-
-		draw_color4f(0.1,0.9,0.1,1);
-		btn_start_tmp->calls->render(btn_start_tmp);
-
-		break;
-	}
+	draw_color4f(0.1,0.9,0.1,1);
+	sprite_update(&spr_startbtn);
+	sprite_render(RLAY_GUI_MID, &spr_startbtn, cpvzero, 0);
 }
 
 static void inner_main(void)
@@ -232,6 +231,32 @@ void menu_init(void)
 {
 	curMenu = &mainMenuTest;
 	statesystem_register(state_menu, 0);
+	sprite_create(&spr_startbtn, SPRITE_BUTTON, 192*2, 128*2, 2);
 
-	btn_start_tmp = button_create(SPRITE_BUTTON, 0, "TXT", 0, 0, 192*2, 128*2);
+	view_main = state_view_get(state_menu, 0);
+
+	state_add_layers(state_menu, 100);
+	int layers = state_layer_count(state_menu);
+
+	int i;
+	for(i = 2; i<layers; i++){
+		//float depth =  2 + 10*tan((1.0f*i/la_sys->num_layers)*WE_PI_2);
+		float f = (layers - i * 0.99f) / (layers);
+		state_set_layer_parallax(state_menu, i, f, f);
+	}
+	for(i = 0; i<2000; i++){
+		int layer =  2 + roundf(we_randf*(layers-1-2));
+		float size = 150 + we_randf*90 - layer*4;
+		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),6600);
+		SPRITE_ID spr;
+		int s = rand() & 3;
+		switch(s) {
+        default: spr = SPRITE_SPIKEBALL; break;
+		case 1: spr = SPRITE_GEAR; break;
+		//case 2: spr = SPRITE_SAW; break;
+		case 3: spr = SPRITE_TANK_WHEEL; break;
+		}
+
+		state_add_sprite(state_menu, layer, spr, size, size, pos, we_randf*WE_2PI);
+	}
 }

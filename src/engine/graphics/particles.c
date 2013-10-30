@@ -54,13 +54,12 @@ static void set_particle_available(particle *p);
 static int current_emitter = -1;
 
 static struct pool * main_emitter_pool;
+static struct pool *main_particle_pool;
 
 //TODO: make emitter_templates dynamic size
 static emitter emitter_templates[40];
 
 unsigned int particles_active = 0;
-
-static struct pool *main_particle_pool;
 
 /**
  * GLOABL FUNCTIONS

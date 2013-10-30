@@ -102,17 +102,17 @@ int draw_init(){
 	float min_col = 0.2f;
 	Color *c = &rainbow_col[j];
 	for(i=0; i <= 255; i++, c++)
-		c->r = 1, c->g = i/255.0f, c->b = min_col, c->a = 1;
+		c->r = 255, c->g = i, c->b = min_col, c->a = 255;
 	for(i=0; i <= 255; i++, c++)
-		c->r = 1 - i/255.0f, c->g = 1, c->b = min_col, c->a = 1;
+		c->r = 255 - i, c->g = 255, c->b = min_col, c->a = 255;
 	for(i=0; i <= 255; i++, c++)
-		c->r = min_col, c->g = 1, c->b = i/255.0f, c->a = 1;
+		c->r = min_col, c->g = 255, c->b = i, c->a = 255;
 	for(i=0; i <= 255; i++, c++)
-		c->r = min_col, c->g = 1 - i/255.0f, c->b = 1, c->a = 1;
+		c->r = min_col, c->g = 255 - i, c->b = 255, c->a = 255;
 	for(i=0; i <= 255; i++, c++)
-		c->r = i/255.0f, c->g = min_col, c->b = 1, c->a = 1;
+		c->r = i, c->g = min_col, c->b = 255, c->a = 255;
 	for(i=0; i <= 255; i++, c++)
-		c->r = 1, c->g = min_col, c->b = 1 - i/255.0f, c->a = 1;
+		c->r = 255, c->g = min_col, c->b = 255 - i, c->a = 255;
 	return 0;
 }
 

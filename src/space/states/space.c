@@ -181,7 +181,9 @@ static void level_player_dead(void)
 		sticks_hide();
 
 		leveldone_status(0, player->coins, game_time);
+#if !ARCADE_MODE
 		statesystem_push_state(state_leveldone);
+#endif
 	} else {
 		tmp_atom = 0;
 	}
@@ -202,7 +204,9 @@ static void level_cleared(void)
 		//TODO set star rating based on missions
 		leveldone_status(1 + player->coins / (4000.0 + 1000 * currentlvl->deck), player->coins, game_time);
 
+#if !ARCADE_MODE
 		statesystem_push_state(state_leveldone);
+#endif
 		tmp_atom = 1;
 	} else {
 		tmp_atom = 0;
@@ -472,7 +476,7 @@ void draw_gui(view *cam)
 
 #if ARCADE_MODE
 		setTextSize(80);
-		font_drawText(0, 0, "GAME OVER");
+		font_drawText(RLAY_GUI_FRONT, 0, 0, "GAME OVER");
 		draw_color4f(0.1,0.9,0.1,1);
 		static float button_timer = 0;
 		static int button_down;
@@ -514,34 +518,6 @@ static void stars_init(void)
 		stars_size[i] = 2 + 5*(rand() % 1000) / 1000.0f;
 	}
 }
-/*
-void drawStars(void)
-{
-	static int tick2death = 1;
-
-	if (tick2death > 0) {
-		tick2death--;
-		return;
-	}
-	draw_push_matrix();
-
-	static float spaceship_angle;
-	spaceship_angle -= 0.01f * WE_2PI*dt;
-	float cam_angle = spaceship_angle + view_p1->rotation;
-	draw_rotate(cam_angle);
-
-	int i;
-	draw_color4f(1,1,1,1);
-	for (i = 0; i < star_count; i++) {
-		cpVect p = {stars_x[i], stars_y[i]};
-		cpVect s = {stars_size[i],stars_size[i]};
-		draw_box_append(p,s,0,1);
-	}
-	draw_flush_simple();
-	draw_pop_matrix();
-}
-*/
-
 
 static void sticks_init(void) {
 	joystick_release(joy_p1_left);
@@ -688,8 +664,12 @@ static void on_enter(void)
 
 static void game_over(void)
 {
+#if ARCADE_MODE
+	statesystem_set_state(state_gameover);
+#else
 	lvl_cleared=0;
 	statesystem_push_state(state_leveldone);
+#endif
 }
 
 static void pause_game(void)
@@ -806,7 +786,9 @@ void space_init(void)
     button_set_callback(btn_pause, (btn_callback) statesystem_pause, 0);
     button_set_enlargement(btn_pause, 2.0f);
     button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);
+#if !ARCADE_MODE
     state_register_touchable_view(view_p1, btn_pause);
+#endif
 
     ll_floor_segs = llist_create();
     llist_set_remove_callback(ll_floor_segs, (ll_rm_callback) remove_static);
@@ -835,7 +817,6 @@ void space_init(void)
     state_register_touchable_view(view_p1, (touchable *)joy_p1_right);
     state_register_touchable_view(view_p2, (touchable *)joy_p2_left);
     state_register_touchable_view(view_p2, (touchable *)joy_p2_right);
-
     state_timer = 10;
 	change_state(LEVEL_START);
 }

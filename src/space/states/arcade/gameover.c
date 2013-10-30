@@ -74,14 +74,14 @@ static void sdl_event(SDL_Event *event)
 				level_scores.head = NULL;
 
 				char level_score_file[50];
-				sprintf(&level_score_file[0], "arcade.score", currentlvl->station, currentlvl->deck);
+				sprintf(&level_score_file[0], "arcade.score");
 				highscorelist_readfile(&level_scores,level_score_file);
 
 
 				gameover_state = show_highscore;
 				win = 0;
 				score_value = getPlayerScore();
-				score_position = highscorelist_addscore(&level_scores,list,&input[0], score_value);
+				score_position = highscorelist_addscore(list,&input[0], score_value, -1);
 				score_newly_added = 1;
 			}
 			break;
@@ -190,6 +190,7 @@ static void pre_update(void) {
 	}
 #endif
 }
+static Color color;
 
 static void draw(void)
 {
@@ -205,9 +206,9 @@ static void draw(void)
 
 	if (gameover_state != show_highscore) {
 		if (win)
-			font_drawText(0,0.4f*GAME_HEIGHT, "YOU WON");
+			font_drawText(RLAY_GUI_FRONT, 0,0.4f*GAME_HEIGHT, "YOU WON");
 		else
-			font_drawText(0,0.4f*GAME_HEIGHT, "GAME OVER");
+			font_drawText(RLAY_GUI_FRONT, 0,0.4f*GAME_HEIGHT, "GAME OVER");
 	}
 	setTextSize(60);
 
@@ -215,8 +216,8 @@ static void draw(void)
 	case GAMEOVER_WIN:
 		/*no break*/
 	case enter_name:
-		font_drawText(0,0, &input[0]);
-		font_drawText(1.5f*60*(cursor - 1),-60/4, "_");
+		font_drawText(RLAY_GUI_FRONT, 0,0, &input[0]);
+		font_drawText(RLAY_GUI_FRONT, 1.5f*60*(cursor - 1),-60/4, "_");
 
 		char tmp[2];
 		tmp[1] = '\0';
@@ -229,22 +230,22 @@ static void draw(void)
 		for(j=from; j<=to; j++,k++){
 			tmp[0] = valid_char[j < 0 ? j + char_count : j % char_count];
 			if(k){
-				font_drawText(1.5f*60*(cursor - 1),-k*100,tmp);
+				font_drawText(RLAY_GUI_FRONT, 1.5f*60*(cursor - 1),-k*100,tmp);
 			}
 		}
 		break;
 	case confirm_name:
-		font_drawText(0,0, &input[0]);
+		font_drawText(RLAY_GUI_FRONT, 0,0, &input[0]);
 		setTextSize(25);
 		if (timer<1) {
-			font_drawText(200,-100,"MOVE RIGHT TO CONFIRM");
-			font_drawText(-200,-150,"MOVE LEFT TO RENAME");
+			font_drawText(RLAY_GUI_FRONT, 200,-100,"MOVE RIGHT TO CONFIRM");
+			font_drawText(RLAY_GUI_FRONT, -200,-150,"MOVE LEFT TO RENAME");
 		} else if(timer>=2) timer=0;
 		break;
 	case show_highscore:
 		setTextSize(80);
 		setTextAlign(TEXT_CENTER);
-		font_drawText(0,0.4f*GAME_HEIGHT, "HIGHSCORES");
+		font_drawText(RLAY_GUI_FRONT, 0,0.4f*GAME_HEIGHT, "HIGHSCORES");
 
 		draw_highscore(list);
 
@@ -255,7 +256,7 @@ static void draw(void)
 			draw_color(color);
 			sprintf(&current_score_buffer[0], "%s FIKK %d. PLASS MED %d POENG!", &input[0], score_position, score_value);
 			draw_color4f(1,1,1,1);
-			font_drawText(0,-0.4f*GAME_HEIGHT, &current_score_buffer[0]);
+			font_drawText(RLAY_GUI_FRONT, 0,-0.4f*GAME_HEIGHT, &current_score_buffer[0]);
 		}
 		break;
 	}
@@ -294,7 +295,7 @@ static void draw_highscore(int start_index)
 		} else {
 			draw_color4f(1,1,1,1);
 		}
-		font_drawText(-10*45*1.5f, 300 - i*50*1.5f, temp);
+		font_drawText(RLAY_GUI_FRONT, -10*45*1.5f, 300 - i*50*1.5f, temp);
 	}
 }
 #endif
