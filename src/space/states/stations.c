@@ -164,9 +164,6 @@ void stations_init(void)
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000); // max 4 000 gu / sec
 	state_register_touchable(this, scroller);
 
-	tex_stars = texture_load("stars.jpg");
-	tex_stars_2 = texture_load("stars_2.png");
-
 	state_add_layers(state_stations, 10);
 
 	int layers = state_layer_count(state_stations);

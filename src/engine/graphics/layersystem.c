@@ -4,7 +4,11 @@
 #include "../state/statesystem.h"
 
 #define MAX_ELEM_COUNT_BATCH 100000 // Memory for 1000 elements for each combination of texture, blend, layer and state!
-#define MAX_LAYERS 100
+
+#ifndef MAX_LAYERS
+#define MAX_LAYERS 500
+#endif
+
 static arraylist *render_tree;
 static int max_layers = 0;
 
@@ -125,6 +129,8 @@ void layersystem_render(STATE_ID state_id, view *cam)
 
 	int layer_index = ls->num_layers;
 	while (layer_index--) {
+		byte l = 255 - 200 * layer_index / ls->num_layers;
+		draw_color4b(l,l,l,255);
 		/* register layersystem sprites */
 		layer_ins *lay = alist_get(ls->layers, layer_index);
 		llist_begin_loop(lay->ll_spr);
@@ -208,7 +214,7 @@ static render_batch *current_batch(int layer)
 	STATE_ID state_id = statesystem_get_render_state();
 
 	if (layer >= MAX_LAYERS ){
-		SDL_Log("to many layers");
+		SDL_Log("too_many_layers");
 		return NULL;
 	}
 
