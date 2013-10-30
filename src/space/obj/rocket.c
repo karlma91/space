@@ -93,6 +93,7 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
+	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, rocket->data.body->p);
 	particles_release_emitter(rocket->flame);
 	we_body_remove(current_space, &rocket->data.body);
 	factory_remove_child((instance *)rocket);

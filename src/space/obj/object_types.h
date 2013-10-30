@@ -208,6 +208,7 @@ OBJ_END
 
 PARAM_START(robotarm)
 	float max_hp;
+	int coins;
 PARAM_END
 OBJ_START(robotarm)
 	cpBody *saw;
@@ -220,6 +221,7 @@ OBJ_START(robotarm)
 	float *y;
 	float *angle;
 	hpbar hp_bar;
+	minimap radar_image;
 OBJ_END
 
 

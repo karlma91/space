@@ -295,6 +295,7 @@ int level_init(void)
 			obj_param_rocket rocket;
 			obj_param_turret turret;
 			obj_param_factory factory;
+			obj_param_robotarm robotarm;
 		} arg;
 
 		const int paramsize = obj_id->P_SIZE;
@@ -338,6 +339,10 @@ int level_init(void)
 			}
 
 			arg.factory.param = params[arg.factory.type->ID] + arg.factory.type->P_SIZE * sub_id;
+		}else if (obj_id == obj_id_robotarm) {
+			expected = 3;
+			ret = sscanf(&buffer[offset], "%f %d %s%n\n", &arg.robotarm.max_hp, &arg.robotarm.coins, &fname[0], &offset_add);
+			offset += offset_add;
 		}
 
 		/* check if all expected parameters were defined */

@@ -73,6 +73,7 @@ void particles_init(void)
 {
 	main_emitter_pool = pool_create(sizeof(emitter));
 	main_particle_pool = pool_create(sizeof(particle));
+	SDL_Log("EMITTER SIZE: %d, PARTICLE SIZE: %d", sizeof(emitter), sizeof(particle));
 }
 
 particle_system *particlesystem_new()

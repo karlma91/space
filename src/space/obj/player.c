@@ -236,6 +236,7 @@ static void action_shoot(obj_player *player)
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	sound_play(SND_FACTORY_EXPLODE);
+	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, player->data.body->p);
 	player->disable = 1;
 }
 

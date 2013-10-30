@@ -47,14 +47,12 @@ static int collision_object_bullet_with_score(cpArbiter *arb, cpSpace *space, vo
 
 	instance_remove(bullet);
 
-	se_add_explotion_at_contact_point(arb);
+	//se_add_explotion_at_contact_point(arb);
 
 	//FIXME how to deal with objects already killed?
 	if (se_damage_object(object, bullet)) {
 		if (object->alive) {
 			instance_remove(bullet);
-
-			particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, b->body->p);
 			//se_add_score_and_popup(b->body->p, *COMPONENT(object, SCORE, int*));
 		}
 	} else {
@@ -77,10 +75,8 @@ static int collision_object_bullet(cpArbiter *arb, cpSpace *space, void *unused)
 
 	instance_remove(bullet);
 
-	se_add_explotion_at_contact_point(arb);
-
 	if (se_damage_object(object, bullet)) {
-		particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, b->body->p);
+		//se_add_explotion_at_contact_point(arb);
 	} else {
 		sound_play(SND_HIT_2);
 	}
@@ -126,7 +122,7 @@ static void callback_rocket_ground(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b; cpArbiterGetShapes(arb, &a, &b);
 	instance *object = ((instance *)(a->body->data));
-	se_add_explotion_at_contact_point(arb);
+	//se_add_explotion_at_contact_point(arb);
 	instance_remove(object);
 }
 
@@ -152,6 +148,7 @@ void collisioncallbacks_init(void)
 	cpSpaceAddCollisionHandler(current_space, obj_id_tank, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_rocket, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_factory, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_robotarm, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_turret, obj_id_bullet, collision_object_bullet_with_score, NULL, NULL, NULL, NULL);
 
 	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, ID_GROUND, NULL, NULL, callback_bullet_ground, NULL, NULL);
@@ -162,6 +159,7 @@ void collisioncallbacks_init(void)
 	cpSpaceAddCollisionHandler(current_space, obj_id_player, ID_GROUND, NULL, NULL, collision_player_object, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_player, obj_id_robotarm, NULL, NULL, collision_player_object, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_player, obj_id_factory, NULL, NULL, collision_player_object, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_player, obj_id_robotarm, NULL, NULL, collision_player_object, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_player, obj_id_rocket, collision_object_bullet, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_player, obj_id_coin, sensor_pickup, NULL, NULL, NULL, NULL);
 }

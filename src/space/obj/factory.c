@@ -111,6 +111,7 @@ void factory_remove_child(instance *child)
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(current_particles,RLAY_GAME_FRONT, EMITTER_FRAGMENTS, factory->data.body->p);
+	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, factory->data.body->p);
 	sound_play(SND_FACTORY_EXPLODE);
 	se_spawn_coins((instance *)factory);
 	instance_remove((instance *)factory);

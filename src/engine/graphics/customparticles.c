@@ -35,8 +35,8 @@ emitter *particles_add_sparks(particle_system *s, int layer, cpVect p, float ang
         e->angular_offset = angle + WE_PI_2;
         e->speed.min = 0;
         e->speed.max = intensity*3000;
-        e->init_life.min = 0;
-        e->init_life.max = intensity*120;
+        e->init_life.min = 50;
+        e->init_life.max = intensity*300;
         return e;
     }else{
         return NULL;
