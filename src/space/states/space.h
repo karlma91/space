@@ -19,7 +19,7 @@ extern view *view_p1, *view_p2;
 void space_init_level(int space_station, int deck);
 
 float extern getGameTime(void);
-extern int getPlayerScore(void);
+extern int getArcadeScore(void);
 
 //extern void drawStars(void);
 

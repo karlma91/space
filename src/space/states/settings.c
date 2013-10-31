@@ -74,9 +74,7 @@ static void draw(void)
 	draw_color4f(0.1,0.1,0.3,1);
 	draw_box(3, cpvzero,cpv(SCROLL_WIDTH,GAME_HEIGHT),0,1);
 
-
 	draw_color4f(1,1,1,1);
-
 	setTextSize(70);
 	setTextAlign(TEXT_CENTER);
 	font_drawText(RLAY_GUI_FRONT, 0, GAME_HEIGHT/2 - 80 + yoffset, "SETTINGS");
@@ -117,8 +115,9 @@ static int bit_get_status(int bit_index)
 extern int debug_draw;
 static void option_click(settings_option option)
 {
+#if !ARCADE_MODE
 	SDL_Log("Option button #%d clicked :D (%s)", option, str_options[option]);
-
+#endif
 
 	switch (option)
 	{
@@ -183,7 +182,6 @@ void settings_init(void)
 	//TODO load options from file
 	/* set predefined button states */
 	option_click(OPT_SOUND); /* sound on */
-	option_click(OPT_SOUND); /* sound off */
 	option_click(OPT_MUSIC); /* music on */
 	option_click(OPT_MUSIC); /* music off */
 	option_click(OPT_UNLOCK); /* everything unlocked */

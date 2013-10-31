@@ -182,12 +182,10 @@ static void setAspectRatio(void) {
 
 static void display_init(void)
 {
-	SDL_Log("DEBUG - SDL_init\n");
 	if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
 		SDL_Log("ERROR: SDL_INIT_VIDEO: %s", SDL_GetError());
 		exit(-1);
 	}
-	SDL_Log("DEBUG - SDL_init done!\n");
 
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -222,9 +220,10 @@ static void display_init(void)
 	SDL_GetDesktopDisplayMode(0, &mode);
 	SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask, &Bmask, &Amask);
 
+#if !ARCADE_MODE
 	SDL_Log("Current mode: %dx%d@%dHz, %d bits-per-pixel (%s)", mode.w, mode.h, mode.refresh_rate, bpp,
 			SDL_GetPixelFormatName(mode.format));
-
+#endif
 
 	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, flags);
 
@@ -268,16 +267,16 @@ static void initGL(void)
 	//	glClearColor(0, 0.08, 0.15, 1);
 
 	/* print gl info */
+#if !ARCADE_MODE
 	SDL_Log("GL_VENDOR: %s\n", glGetString(GL_VENDOR));
 	SDL_Log("GL_RENDERER: %s\n", glGetString(GL_RENDERER));
 	SDL_Log("GL_VERSION: %s\n", glGetString(GL_VERSION));
 	SDL_Log("GL_EXTENSIONS: %s\n", glGetString(GL_EXTENSIONS));
-
-
 	int max_size;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
-
 	SDL_Log("Max texture size = %d", max_size);
+#endif
+
 	glEnableVertexAttribArray(0); // vertex
 	glEnableVertexAttribArray(1); // texture
 	glEnableVertexAttribArray(2); // colors
@@ -292,9 +291,6 @@ static void initGL(void)
 	glScissor(0,0, WINDOW_WIDTH,WINDOW_HEIGHT); //scissor test
 
 	draw_enable_tex2d();
-
-	SDL_Log("DEBUG - initGL done!\n");
-
 }
 
 #if GLES2
@@ -503,12 +499,13 @@ static void main_init(void)
 	initGP();          /* setup a gl context */
 
     accelerometer = SDL_JoystickOpen(0);
+#if !ARCADE_MODE
     if (accelerometer == NULL) {
         SDL_Log("Could not open joystick (accelerometer)");
     }
+#endif
 
-	cpInitChipmunk();
-
+	//cpInitChipmunk();
 	sound_init();
 	texture_init();     /* preload textures */
 	sprite_init();
@@ -678,7 +675,9 @@ static void main_tick(void *data)
 
 		if (frames >= 1) {
 			sprintf(&fps_buf[0], "%.2f FPS ", fps);
+#if !ARCADE_MODE
 			SDL_Log("%s frame: %d ms", fps_buf, SDL_GetTicks() - thisTime);
+#endif
 			frames = 0;
 			fps = 0;
 		}
@@ -741,7 +740,7 @@ static int main_run(void)
 #else
 	//START GAME
 #if ARCADE_MODE
-		SDL_Log("start %s\n", "999");
+		printf("start %s\n", "999");
 #endif
 
 	while (main_running) {
@@ -753,7 +752,9 @@ static int main_run(void)
 }
 
 static int main_destroy(void) {
+#if !ARCADE_MODE
 	SDL_Log("DEBUG - SDL_destroy\n");
+#endif
 	//cpSpaceFreeChildren(space);
 
 	game_destroy();
@@ -788,7 +789,7 @@ static int main_destroy(void) {
 #if !TARGET_OS_IPHONE
 	SDL_DestroyWindow(window);
 	SDL_Quit();
-	SDL_Log("BYE BYE!");
+	SDL_Log("exit 0");
 	exit(0);
 #endif
 

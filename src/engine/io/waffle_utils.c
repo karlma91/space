@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "waffle_utils.h"
 
-#define RESOURCE_VERSION 6 // changed: 16.09.13
+#define RESOURCE_VERSION 7 // changed: 30.10.13
 
 #if __ANDROID__
 
@@ -36,7 +36,7 @@ static ZZIP_DIR *game_data = NULL;
 void waffle_init(void)
 {
 	zzip_error_t zzip_err;
-	SDL_Log("Loading game resources...");
+	//SDL_Log("DEBUG: Loading game resources...");
 #if __ANDROID__
 	game_data = zzip_dir_open(APK_PATH, &zzip_err); // NB! is actually .apk, not game_data
 	strcpy(&INTERNAL_PATH[0], SDL_AndroidGetInternalStoragePath());
@@ -49,7 +49,7 @@ void waffle_init(void)
 	}
 #endif
 
-	SDL_Log("Checking if game resources are up to date...");
+	//SDL_Log("Checking if game resources are up to date...");
 	ZZIP_FILE *zf = waffle_open("ver");
 	if (zf) {
 		char buffer[4096];
@@ -61,8 +61,7 @@ void waffle_init(void)
 		sscanf(buffer, "%d", &version);
 
 		if (version != RESOURCE_VERSION) {
-			SDL_Log("ERROR: you need to update game_data.zip, found version %d, but expected version %d.\n"
-					"Run ./zip_res.sh to compress current game data", version, RESOURCE_VERSION);
+			SDL_Log("ERROR: you need to update game_data.zip, found version %d, but expected version %d", version, RESOURCE_VERSION);
 			exit(-1);
 		}
 
@@ -71,7 +70,6 @@ void waffle_init(void)
 				"Run ./zip_res.sh to compress current game data");
 		exit(-1);
 	}
-	SDL_Log("Game resources OK!");
 }
 
 void waffle_destroy(void)
@@ -128,7 +126,9 @@ int waffle_read_file(char *filename, char *buffer, int len)
 	if (fp) {
 		int filesize = waffle_read(fp, buffer, len);
 		if (filesize) {
+#if !ARCADE_MODE
 			SDL_Log("DEBUG: File loaded: #%08x\tsize: %5.3fkB\tname: '%s'", checksum(buffer, filesize), filesize / 1024.0f, filename);
+#endif
 			return filesize;
 		} else {
 			SDL_Log("ERROR: could not read file '%s' - error code: %d", filename, game_data->errcode);
@@ -161,9 +161,15 @@ const static char *waffle_dirs[4] = {
 	"../Documents/","../Library/Preferences/","../Library/","../tmp/"
 };
 #else // win, linux, mac
+#if ARCADE_MODE
+const static char *waffle_dirs[4] = {
+	"", "", "",""
+};
+#else
 const static char *waffle_dirs[4] = {
 	"bin/user_files/", "bin/user_data/settings/", "bin/user_data/","bin/tmp/"
 };
+#endif
 #endif
 
 FILE *waffle_internal_fopen(enum WAFFLE_DIR dir_type,const char *filename, const char *opentype)

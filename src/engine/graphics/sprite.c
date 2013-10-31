@@ -30,7 +30,6 @@ static char buffer[FILE_BUFFER_SIZE];
 //TODO use hashmap and drop public use of SPRITE_ID!!
 void sprite_init(void)
 {
-	SDL_Log("SPRITE INIT:");
 	constant_sprites = llist_create();
 	llist_set_remove_callback(constant_sprites,free);
 
@@ -42,7 +41,7 @@ void sprite_init(void)
 	/* read space station data */
 	int filesize = waffle_read_file("textures/sprites.csv", &buffer[0], FILE_BUFFER_SIZE);
 	if (!filesize) {
-		SDL_Log("Could not load SPRITE data!");
+		SDL_Log("ERROR: Could not load SPRITE data!");
 		exit(1);
 	}
 
@@ -57,7 +56,9 @@ void sprite_init(void)
 			SDL_Log("SPRITE: file format error. Expected 7 arguments got: %d\n",ret);
 			exit(5);
 		}
+#if !ARCADE_MODE
 		SDL_Log("SPRITE: %s %s %f %f %f %f %d", name, file_name, u, v, width, height, subimages);
+#endif
 		sprite_data *data = (sprite_data*)calloc(1, sizeof(sprite_data));
 		strcpy(data->name, name);
 		data->height = height;

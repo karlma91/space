@@ -17,9 +17,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	COMPONENT_SET(robotarm, HPBAR, &robotarm->hp_bar);
 	COMPONENT_SET(robotarm, COINS, &robotarm->param.coins);
 	COMPONENT_SET(robotarm, MINIMAP, &robotarm->radar_image);
+	robotarm->radar_image = cmp_new_minimap(12, COL_BLUE);
+
 	cpShape *shape;
 	robotarm->timer = 0;
-
 
 	sprite_create(&(robotarm->saw_sprite), SPRITE_SAW, 300, 300, 30);
 	sprite_create(&(robotarm->data.spr), SPRITE_TANK_BODY, 200, 100, 0);
@@ -40,7 +41,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 		robotarm->angle[i] = 0;
 	}
 
-	cpFloat radius = 100.0f;
+	cpFloat radius = 130.0f;
 	cpFloat mass = 2.0f;
 
 
@@ -111,14 +112,17 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-
-	draw_color4f(1,1,1,1);
-	if (robotarm->data.time_destroyed > 3) { //TODO automatically? or in its own destroyed_tick?
-		particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, robotarm->saw->p);
+	float redfade = (1.5 - robotarm->data.time_destroyed) / 1.5;
+	redfade = redfade < 0 ? 0 : redfade;
+	if (robotarm->data.time_destroyed >= 1.5) { //TODO automatically? or in its own destroyed_tick?
+		particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION_BIG, robotarm->saw->p);
+		sound_play(SND_FACTORY_EXPLODE);
 		instance_remove((instance *)robotarm);
 	} else if (robotarm->data.destroyed) {
 
 	}
+	draw_color4f(1,redfade,redfade,1);
+
 	if (!robotarm->data.destroyed) {
 		draw_color4f(1,0,0,1);
 		cpVect v1 = cpv(0,0);
@@ -148,6 +152,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, robotarm->data.body->p);
+	sound_play(SND_TANK_EXPLODE);
 	se_spawn_coins((instance *)robotarm);
 	cpBodySetForce(robotarm->saw, cpvzero);
 	we_body_remove_constraints(current_space, robotarm->data.body);

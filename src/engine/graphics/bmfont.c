@@ -24,7 +24,9 @@ void bmfont_init(void)
 
 bm_font * bmfont_read_font(char *filename)
 {
+#if !ARCADE_MODE
     SDL_Log("Loading font: %s",filename);
+#endif
 
     char fileread[50];
     sprintf(fileread,"bmfont/%s",filename);

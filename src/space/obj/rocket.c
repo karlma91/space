@@ -29,7 +29,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	particles_self_draw(rocket->flame, 1);
 
 	cpFloat height = ROCKET_SIZE/8;
-	cpFloat mass = 2.0f;
+	cpFloat mass = 4.0f;
 	cpFloat width = ROCKET_SIZE/2;
 
 	rocket->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForBox(mass, width, height)));
@@ -67,7 +67,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		rocket->param.force = 0;
 	}
 
-	cpBodySetForce(rocket->data.body, cpvmult(rocket->data.body->rot, rocket->param.force));
+	cpBodySetForce(rocket->data.body, cpvmult(rocket->data.body->rot, rocket->param.force*2));
 
 	if (rocket->flame) {
 		rocket->flame->p = rocket->data.body->p;

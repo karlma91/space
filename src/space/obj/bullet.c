@@ -16,9 +16,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	sprite_create(&(bullet->data.spr), SPRITE_GLOW_DOT, 30, 30, 0);
 
-	cpFloat moment = cpMomentForCircle(1, 0, 5, cpvzero);
-
-	bullet->data.body = cpSpaceAddBody(current_space, cpBodyNew(1, moment));
+	float mass = 0.4f;
+	cpFloat moment = cpMomentForCircle(mass, 0, 5, cpvzero);
+	bullet->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, moment));
 	cpBodySetPos(bullet->data.body, bullet->data.p_start); //FIXME
 	cpBodySetUserData(bullet->data.body, (instance*) bullet);
 	cpBodySetVel(bullet->data.body, bullet->data.v_start); //3000 //FIXME
@@ -68,6 +68,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
+	//TODO add sparks
 	bullet->param.damage = 0; // TODO remove collision for this body's shapes
 	//TODO add fade tween/animation here?
 	bullet->energy = 250; //TMP 250 ms fade

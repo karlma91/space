@@ -110,7 +110,9 @@ void tilemap_render(int layer, tilemap *map)
 
 	if (tile_count > tile_count_max) {
 		tile_count_max = tile_count;
+#if !ARCADE_MODE
 		SDL_Log("max tile count rendered: %d",tile_count);
+#endif
 	}
 
 	//draw_disable_tex2d();

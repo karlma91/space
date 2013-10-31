@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <emitter spriteName="particle" name="spark" renderType="inherit" useAdditive="true" useOriented="true">
 <spawnInterval enabled="true" max="10.0" min="1.0"/>
-<spawnCount enabled="false" max="50.0" min="5.0"/>
-<initialLife enabled="true" max="60" min="10"/>
-<initialSize enabled="true" max="100" min="5"/>
+<spawnCount enabled="false" max="7.0" min="3.0"/>
+<initialLife enabled="true" max="120" min="50"/>
+<initialSize enabled="true" max="30" min="20"/>
 <xOffset enabled="true" max="0.0" min="0.0"/>
 <yOffset enabled="true" max="0.0" min="0.0"/>
 <initialDistance enabled="false" max="0.0" min="0.0"/>
-<speed enabled="true" max="2000.0" min="1200.0"/>
+<speed enabled="true" max="1500.0" min="1000.0"/>
 <length enabled="false" max="1000.0" min="1000.0"/>
 <emitCount enabled="true" max="10.0" min="5.0"/>
 <spread type="random" value="190.0"/>

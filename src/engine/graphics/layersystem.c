@@ -24,7 +24,7 @@ static LList get_blend_modes(int layer)
 {
 	LList *blend_modes = alist_get(render_tree, layer);
 	if(blend_modes == NULL) {
-		SDL_Log("LAYERSYSTEM: CREATING LAYER: %d", layer);
+		//SDL_Log("LAYERSYSTEM: CREATING LAYER: %d", layer);
 		blend_modes = llist_create();
 		alist_set_safe(render_tree, layer, blend_modes);
 	}
@@ -250,7 +250,7 @@ static render_batch *current_batch(int layer)
 		blend_texs->type = current_blend;
 		blend_texs->al_tex = alist_new();
 		llist_add(ll_blend, blend_texs);
-		SDL_Log("Did not find current blend in tree, creating new blend...");
+		//SDL_Log("Did not find current blend in tree, creating new blend...");
 	}
 
 	GLint tex_id = texture_get_current();
@@ -263,7 +263,7 @@ static render_batch *current_batch(int layer)
         if (batch == NULL) {
             SDL_Log("ERROR: NOT ENOUGH MEMORY!");
         } else {
-        	SDL_Log("New batch renderer created (state_id=%p, blend=%x, layer=%d, tex_id=%d): p=%p", state_id, current_blend.src_factor, layer, tex_id, batch);
+        	//SDL_Log("New batch renderer created (state_id=%p, blend=%x, layer=%d, tex_id=%d): p=%p", state_id, current_blend.src_factor, layer, tex_id, batch);
         	alist_set_safe(al, tex_id, batch);
         }
 	}

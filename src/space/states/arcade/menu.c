@@ -6,7 +6,7 @@
 
 STATE_ID state_menu;
 
-static sprite spr_startbtn;
+sprite spr_startbtn;
 
 #define MAX_MENU_ITEMS 5
 #define MENU_LAYERS 4
@@ -137,11 +137,11 @@ static void pre_update(void)
 		keys[KEY_ESCAPE] = 0;
 	}
 
-
 	float angle = engine_time*WE_2PI;
-	p_cam = cpv(cosf(angle/6)*120, sinf(angle/7)*57);
+	p_cam = cpv(cosf(angle/16)*220, sinf(angle/17)*97);
+	//p_cam = cpvadd(p_cam,cpvmult(cpvforangle(angle/31),200));
 	view_update(view_main, p_cam, 0);
-	view_main->zoom = 1 + cosf(angle/11)/5;
+	view_main->zoom = 1 - cosf(angle/22)/3;
 }
 
 static void post_update(){}
@@ -149,9 +149,6 @@ static void post_update(){}
 static void draw(void)
 {
 	draw_load_identity();
-
-	draw_color4f(0,0,0,0.5f);
-	draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 
 	static float timer;
 	timer +=dt;
@@ -175,11 +172,11 @@ static void draw(void)
 	setTextAlign(TEXT_CENTER);
 	setTextSize(40);
 
-	font_drawText(RLAY_GUI_FRONT, 0,-0.5f*GAME_HEIGHT/2, "START SPILLET");
+	font_drawText(RLAY_GUI_FRONT, 0,0, "START SPILLET");
 
 	draw_color4f(0.1,0.9,0.1,1);
 	sprite_update(&spr_startbtn);
-	sprite_render(RLAY_GUI_MID, &spr_startbtn, cpvzero, 0);
+	sprite_render(RLAY_GUI_MID, &spr_startbtn, cpv(0,-0.5f*GAME_HEIGHT/2), 0);
 }
 
 static void inner_main(void)
@@ -231,7 +228,7 @@ void menu_init(void)
 {
 	curMenu = &mainMenuTest;
 	statesystem_register(state_menu, 0);
-	sprite_create(&spr_startbtn, SPRITE_BUTTON, 192*2, 128*2, 2);
+	sprite_create(&spr_startbtn, SPRITE_BUTTON, 300,250, 2);
 
 	view_main = state_view_get(state_menu, 0);
 
@@ -244,19 +241,19 @@ void menu_init(void)
 		float f = (layers - i * 0.99f) / (layers);
 		state_set_layer_parallax(state_menu, i, f, f);
 	}
-	for(i = 0; i<2000; i++){
+	for(i = 0; i<1000; i++){
 		int layer =  2 + roundf(we_randf*(layers-1-2));
 		float size = 150 + we_randf*90 - layer*4;
 		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),6600);
 		SPRITE_ID spr;
-		int s = rand() & 3;
+		int s = rand() & 7;
 		switch(s) {
         default: spr = SPRITE_SPIKEBALL; break;
 		case 1: spr = SPRITE_GEAR; break;
-		//case 2: spr = SPRITE_SAW; break;
+		case 2: spr = SPRITE_STATION_01; break;
 		case 3: spr = SPRITE_TANK_WHEEL; break;
 		}
 
-		state_add_sprite(state_menu, layer, spr, size, size, pos, we_randf*WE_2PI);
+		state_add_sprite(state_menu, layer, spr, size, size, pos, we_randf*WE_2PI * (spr != SPRITE_STATION_01));
 	}
 }

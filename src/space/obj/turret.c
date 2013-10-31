@@ -48,10 +48,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetUserData(turret->data.body, turret);
 	cpBodySetPos(turret->data.body, p_start);
 	se_tangent_body(turret->data.body);
-	se_velfunc(turret->data.body, -1);
+	se_velfunc(turret->data.body, 1);
 	shape_add_shapes(current_space, POLYSHAPE_TURRET, turret->data.body, TURRET_SIZE, cpvzero, 1, 0.7, turret, &this, LAYER_ENEMY, 1);
 
-	cpSpaceAddConstraint(current_space, cpPinJointNew(turret->data.body, turret->tower, cpvzero, cpvzero));
+	cpSpaceAddConstraint(current_space, cpPivotJointNew(turret->data.body, turret->tower, p_start));
 
 	hpbar_init(&turret->hp_bar,turret->param.max_hp,80,20,0,60,&(turret->data.body->p));
 	sprite_create(&turret->data.spr, SPRITE_TURRET, TURRET_SIZE, TURRET_SIZE, 0);
@@ -86,7 +86,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		cpVect shoot_vel = cpvmult(turret->data.body->rot, SHOOT_VEL);
 		cpVect shoot_pos = cpvadd(turret->data.body->p, cpvmult(turret->data.body->rot, 40));
 
-		obj_param_bullet opb = { .friendly = 0, .damage = 10 };
+		obj_param_bullet opb = { .friendly = 0, .damage = 5};
 		instance_create(obj_id_bullet, &opb, shoot_pos, shoot_vel);
 
 		if (turret->bullets > turret->param.burst_number) {
@@ -124,8 +124,6 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	sound_play(SND_FACTORY_EXPLODE);
 	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, turret->data.body->p);
 	se_spawn_coins((instance *)turret);
-	//instance_remove((instance *)turret);
-	se_velfunc(turret->data.body, 1);
 	we_body_remove_constraints(current_space, turret->data.body);
 }
 

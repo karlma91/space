@@ -15,9 +15,9 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 		.level = 1,
 		.lvls = {
 			/* dmg, rate, mass, range, price */
-			{58, 1.1, 1.0, 600, 0},
-			{64, 2.4, 1.5, 620, 3200},
-			{78, 3.7, 2.0, 650, 4500}
+			{50, 1.5, 1.0, 600, 0}, //58
+			{25, 2.4, 1.5, 620, 3200}, // 64
+			{17, 3.7, 2.0, 650, 4500}  // 78
 		},
 		.spr_id = &SPRITE_PLAYER_GUN,
 		.obj_name = "BULLET"
@@ -27,9 +27,9 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 		.level = 1,
 		.lvls = {
 			/* dmg, rate, mass, range, price */
-			{7.6, 18.0, 1.8, 550, 12900},
-			{8.4, 23.0, 2.3, 560, 4900},
-			{9.4, 26.0, 2.6, 570, 5950}
+			{7.5, 18.0, 1.8, 550, 12900}, // 7.6
+			{5.0, 23.0, 2.3, 560, 4900},  // 8.4
+			{3.0, 26.0, 2.6, 570, 5950}   // 9.4
 		},
 		.spr_id = &SPRITE_PLAYER_GUN,
 		.obj_name = "BULLET"
@@ -50,13 +50,14 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 
 upg_armor armors[ARMOR_UPGRADES] = {
 	{.name = "BASIC ARMOR", .max_hp = 200, .mass = 1, .shield = 0, .shield_regen = 0, .price = 0, .spr_id = &SPRITE_PLAYER},
-	{.name = "ELEPHANT ARMOR", .max_hp = 750, .mass = 3, .shield = 0, .shield_regen = 0, .price = 13200, .spr_id = &SPRITE_PLAYER},
+	{.name = "MIDDLE ARMOR", .max_hp = 500, .mass = 2, .shield = 0, .shield_regen = 0, .price = 13200, .spr_id = &SPRITE_PLAYER},
+	{.name = "ELEPHANT ARMOR", .max_hp = 800, .mass = 3, .shield = 0, .shield_regen = 0, .price = 13200, .spr_id = &SPRITE_PLAYER},
 	{.name = "T-REX SKIN", .max_hp = 100000, .mass = 10, .shield = 0, .shield_regen = 0, .price = 9999990, .spr_id = &SPRITE_SPIKEBALL}
 };
 
 upg_engine engines[ENGINE_UPGRADES] = {
 	{.name = "TURTLE POWER", .force = 80, .max_speed = 435, .price = 0, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_PLAYER},
-	{.name = "LIGHTNING JET", .force = 350, .max_speed = 475, .price = 9500, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_PLAYER},
+	{.name = "CHEAP JET", .force = 160, .max_speed = 475, .price = 9500, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_PLAYER},
 	{.name = "UBERSPEED", .force = 500, .max_speed = 9999, .price = 999500, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_STATION_01}
 };
 

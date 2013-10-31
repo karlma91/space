@@ -86,6 +86,7 @@ POLYSHAPE_ID POLYSHAPE_POLY;
 int EMITTER_FLAME;
 int EMITTER_ROCKET_FLAME;
 int EMITTER_EXPLOSION;
+int EMITTER_EXPLOSION_BIG;
 int EMITTER_SPARKS;
 int EMITTER_SMOKE;
 int EMITTER_SCORE;
@@ -230,6 +231,7 @@ void game_particles(void)
 #endif
     EMITTER_ROCKET_FLAME =  read_emitter_from_file("rocket_flame.xml");
     EMITTER_EXPLOSION =     read_emitter_from_file("explosion_ground.xml");
+    EMITTER_EXPLOSION_BIG = read_emitter_from_file("explosion_building.xml");
     EMITTER_SPARKS =        read_emitter_from_file("sparks.xml");
     EMITTER_SMOKE =         read_emitter_from_file("smoke.xml");
     EMITTER_SCORE =         read_emitter_from_file("score.xml");

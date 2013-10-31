@@ -225,7 +225,9 @@ int level_init(void)
 			exit(2);
 		}
 
+#if !ARCADE_MODE
 		SDL_Log("Data read: %d %d %d %d %f\n", x, y, count, radius, spd);
+#endif
 		worlds[i].x = x;
 		worlds[i].y = y;
 		worlds[i].count = count;
@@ -249,9 +251,9 @@ int level_init(void)
 	/* read file contents into buffer */
 	offset = 0;
 	offset_add = 0;
-
+#if !ARCADE_MODE
 	SDL_Log("DEBUG: read_buffer:\n%s", buffer);
-
+#endif
 	for (;offset < filesize;) {
 		ret = sscanf(&buffer[offset], "%s %s %n", &group[0], &subtype[0], &offset_add);
 		offset += offset_add;
@@ -260,7 +262,7 @@ int level_init(void)
 			break;
 		}
 
-		SDL_Log("DEBUG: %5.1f %% - Parsing %s %s - characters left: %d\n", FILE_PERCENT, group, subtype, filesize - offset); //DEBUG
+		//SDL_Log("DEBUG: %5.1f %% - Parsing %s %s - characters left: %d\n", FILE_PERCENT, group, subtype, filesize - offset); //DEBUG
 
 		/* find object type id */
 		object_id *obj_id =  object_by_name(group);
@@ -358,23 +360,26 @@ int level_init(void)
 		char *to = params[group_id] + paramsize * obj_index;
 		memcpy(to, &arg, paramsize);
 	}
-
+#if !ARCADE_MODE
 	SDL_Log("DEBUG: Finished parsing Game Object Definitions");
+#endif
 
 	return 0;
 }
 
 level *level_load(int space_station, int deck)
 {
+#if !ARCADE_MODE
 	SDL_Log("DEBUG: Starting to load level %d.%d", space_station, deck);
+#endif
 	int ret;
 	if (space_station < 1 || space_station > station_count) {
-		SDL_Log("Space station no. %d does not exist!\n", space_station);
+		SDL_Log("ERROR: Space station no. %d does not exist!\n", space_station);
 		return NULL;
 	}
 
 	if (deck < 1 || deck > worlds[space_station - 1].count) {
-		SDL_Log("Deck no. %d on space station no. %d does not exist!\n", deck, space_station);
+		SDL_Log("ERROR: Deck no. %d on space station no. %d does not exist!\n", deck, space_station);
 		return NULL;
 	}
 
@@ -387,7 +392,7 @@ level *level_load(int space_station, int deck)
 	/* open and read level data */
 	filesize = waffle_read_file(levelpath, &buffer[0], FILE_BUFFER_SIZE);
 	if (!filesize) {
-		SDL_Log("Could not find level %d.%d\n",space_station,deck);
+		SDL_Log("ERROR: Could not find level %d.%d\n",space_station,deck);
 		return NULL;
 	}
 
@@ -430,15 +435,19 @@ level *level_load(int space_station, int deck)
 		SDL_Log("Error while parsing level header. Wrong number of arguments. Got %d, expected %d.\n", ret, retExp);
 		return NULL;
 	}
-
+#if !ARCADE_MODE
 	SDL_Log("DEBUG: Starting to add objects to level");
+#endif
 	int x;
 	/* add objects */
 	while (offset < filesize) {
+#if !ARCADE_MODE
 		SDL_Log("DEBUG: Adding objects - %5.1f %% - characters left: %d", FILE_PERCENT, filesize - offset);
-
+#endif
 		ret = sscanf(&buffer[offset], "%s %s %d%n\n", &group[0], &subtype[0], &x, &offset_add);
+#if !ARCADE_MODE
 		SDL_Log("DEBUG: Characters read: %d", offset_add);
+#endif
 		offset += offset_add;
 
 
@@ -455,7 +464,9 @@ level *level_load(int space_station, int deck)
 
 		object_id *obj_id = object_by_name(group);
 		int sub_id = get_sub_index(obj_id, subtype);
+#if !ARCADE_MODE
 		SDL_Log("Adding object: %s_%s x=%d\n", group, subtype, x);
+#endif
 
 		void* args = params[obj_id->ID] + obj_id->P_SIZE * sub_id;
 
@@ -463,9 +474,9 @@ level *level_load(int space_station, int deck)
 		float a = (WE_2PI * x / lvl->width);
 		instance_create(obj_id, args, WE_P2C(r,a), cpvzero);
 	}
-
+#if !ARCADE_MODE
 	SDL_Log("DEBUG: Finished adding objects to level");
-
+#endif
 	return lvl;
 }
 

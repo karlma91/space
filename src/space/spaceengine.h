@@ -8,6 +8,7 @@ cpFloat get_angle(cpVect a, cpVect b);
 float se_cart2pol_angle(cpVect p);
 void se_add_score_and_popup(cpVect p, int score);
 int se_damage_object(instance *object, instance *dmg_dealer);
+int se_damage_deal(instance *object, float damage);
 float turn_toangle(float from_angle, float to_angle, float step_size);
 
 float se_arcdist2player(cpVect p);

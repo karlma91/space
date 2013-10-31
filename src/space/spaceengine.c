@@ -71,19 +71,28 @@ cpVect se_dist_v(cpVect a, cpVect b)
 
 
 /**
- * return 1 if object is killed
+ * returns 1 if object gets destroyed (returns 0 if already destroyed)
  */
 int se_damage_object(instance *object, instance *dmg_dealer)
 {
 	float *damage = COMPONENT(dmg_dealer, DAMAGE, float*);
 	if (damage) {
-		hpbar *hp = COMPONENT(object, HPBAR, hpbar*);
-		hp->value -= *damage;
+		return se_damage_deal(object, *damage);
+	}
+	return 0;
+}
+
+int se_damage_deal(instance *object, float damage)
+{
+	hpbar *hp = COMPONENT(object, HPBAR, hpbar*);
+	if (hp->value > 0) {
+		hp->value -= damage;
 		if (hp->value <= 0) {
 			instance_destroy(object);
 			return 1;
 		}
 	}
+
 	return 0;
 }
 

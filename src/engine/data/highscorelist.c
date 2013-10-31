@@ -33,11 +33,11 @@ int highscorelist_addscore(scorelist *list, char *name, int score, int time_used
 	return read_addscore(list,name,score,time_used,t,0);
 }
 
-//FIXME hva er poenget med highscorelist_addscore, nŒr den omtrent bare kaller read_addscore?
+//FIXME hva er poenget med highscorelist_addscore, nï¿½r den omtrent bare kaller read_addscore?
 static int read_addscore(scorelist *list, char *name, int score, int time_used, long time,int from_file)
 {
 	if(score < 0){
-		SDL_Log("negative score %d\n",score);
+		SDL_Log("ERROR: negative score %d\n",score);
 		return -1;
 	}
 	scoreelement **cur = &(list->head);

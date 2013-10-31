@@ -77,6 +77,7 @@ struct instance {
 	sprite spr;
 
 	float time_destroyed;
+	float time_alive;
 }; /* per-instance variables */
 
 int component_register(int pointer_count);

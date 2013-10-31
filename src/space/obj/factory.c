@@ -36,7 +36,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	}
 
 	/* make and add new body */
-	float m = 20; //500
+	float m = 50; //500
 	factory->data.body = cpSpaceAddBody(current_space,
 			cpBodyNew(m, cpMomentForBox(m, size, size)));
 	cpBodySetPos(factory->data.body, factory->data.p_start);
@@ -61,7 +61,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		if(se_arcdist2player(factory->data.body->p) < factory->max_distance) {
 			cpVect pos = factory->data.body->p;
 			pos = we_cart2pol(pos);
-			pos.x += 150;
+			pos.x += 100;
 			pos = we_pol2cart(pos);
 
 			instance * ins = instance_create(factory->param.type, factory->param.param, pos, cpvzero);
@@ -111,7 +111,7 @@ void factory_remove_child(instance *child)
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	particles_get_emitter_at(current_particles,RLAY_GAME_FRONT, EMITTER_FRAGMENTS, factory->data.body->p);
-	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, factory->data.body->p);
+	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION_BIG, factory->data.body->p);
 	sound_play(SND_FACTORY_EXPLODE);
 	se_spawn_coins((instance *)factory);
 	instance_remove((instance *)factory);

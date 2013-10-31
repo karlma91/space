@@ -12,6 +12,9 @@
 #define COIN_MASS 0.1f
 #define COIN_FPS 15
 
+#define COIN_TIME_ALIVE 10.0
+#define COIN_TIME_FADEOUT 3.0
+
 static void init(OBJ_TYPE *OBJ_NAME)
 {
 }
@@ -62,17 +65,25 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 			sound_play(SND_COIN);
 			instance_remove((instance *)coin);
 		}
+	} else if (coin->data.time_alive > COIN_TIME_ALIVE) {
+		instance_destroy((instance *)coin);
 	}
 }
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	draw_color4f(1,1,1,1);
+	byte alpha = 255;
+	float time = coin->data.time_alive - (COIN_TIME_ALIVE - COIN_TIME_FADEOUT);
+	if (time > 0) {
+		alpha = 255 * (COIN_TIME_FADEOUT - time) / COIN_TIME_FADEOUT;
+	}
+	draw_color4b(255,255,255,alpha);
 	sprite_render_body(RLAY_GAME_FRONT, &(coin->data.spr), coin->data.body);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
+	instance_remove((instance *)coin);
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)

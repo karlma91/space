@@ -82,7 +82,9 @@ void objectsystem_destroy(void)
 {
 	objsys_terminating = 1;
 	llist_destroy(ll_systems);
+#if !ARCADE_MODE
 	SDL_Log("INFO: %d of %d instances freed!", debug_frees, debug_allocs);
+#endif
 }
 
 

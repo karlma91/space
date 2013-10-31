@@ -383,7 +383,9 @@ void statesystem_draw(void)
     static int counter = 0;
     if (++counter >= 60) {
     	extern int TMP_DRAW_CALLS;
+#if !ARCADE_MODE
     	fprintf(stderr, "RENDER_INFO: %d of %d elements rendered in %d draw calls\n", ELEMENT_APPEND_ACTUAL_COUNT, ELEMENT_APPEND_COUNT, (TMP_DRAW_CALLS+30)/60);
+#endif
     	counter = 0;
     	TMP_DRAW_CALLS = 0;
     }
@@ -399,6 +401,8 @@ void statesystem_pause(void)
 static void statesystem_free(STATE_ID state_id)
 {
 	State *state = (State *) state_id;
+	current_objects = state->objects;
+	current_particles = state->particles;
 
 	if(state->call.destroy){
 		state->call.destroy();

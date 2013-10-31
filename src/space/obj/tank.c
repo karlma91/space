@@ -70,7 +70,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	se_velfunc(tank->barrel, 1);
 	shape_add_shapes(current_space, POLYSHAPE_TANK, tank->barrel, 150, cpvzero, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
 	cpSpaceAddConstraint(current_space, cpSimpleMotorNew(tank->data.body, tank->barrel, 0));
-	cpSpaceAddConstraint(current_space, cpPinJointNew(tank->data.body, tank->barrel, cpvzero, cpvzero));
+	//cpSpaceAddConstraint(current_space, cpPinJointNew(tank->data.body, tank->barrel, cpvzero, cpvzero));
+	cpSpaceAddConstraint(current_space, cpPivotJointNew(tank->data.body, tank->barrel, tank->data.body->p));
 
 	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,0,60,&(tank->data.body->p));
 }
@@ -193,7 +194,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		alpha = maxf(0, 1 - tank->data.time_destroyed / 2);
 	}
 
-	hpbar_draw(RLAY_GAME_FRONT, &tank->hp_bar,cpvtoangle(tank->data.body->p));
+	hpbar_draw(RLAY_GUI_BACK, &tank->hp_bar,cpvtoangle(tank->data.body->p));
 
 	draw_color4f(1,1,1,alpha);
 	if (1) { //TODO REMOVE TMP TEST
@@ -201,12 +202,12 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		cpFloat left_dist, right_dist;
 		instance_get2nearest((instance *)tank, obj_id_tank, &left, &right, &left_dist, &right_dist);
 		draw_color4f(1,(left_dist > 300),(left_dist > 300),alpha);
-		sprite_render_body(RLAY_GAME_MID, &(tank->wheel_sprite), tank->wheel1);
+		sprite_render_body(RLAY_GAME_FRONT, &(tank->wheel_sprite), tank->wheel1);
 		draw_color4f(1,(right_dist > 300),(right_dist > 300),alpha);
-		sprite_render_body(RLAY_GAME_MID, &(tank->wheel_sprite), tank->wheel2);
+		sprite_render_body(RLAY_GAME_FRONT, &(tank->wheel_sprite), tank->wheel2);
 	} else {
-	sprite_render_body(RLAY_GAME_MID, &(tank->wheel_sprite), tank->wheel1);
-	sprite_render_body(RLAY_GAME_MID, &(tank->wheel_sprite), tank->wheel2);
+	sprite_render_body(RLAY_GAME_FRONT, &(tank->wheel_sprite), tank->wheel1);
+	sprite_render_body(RLAY_GAME_FRONT, &(tank->wheel_sprite), tank->wheel2);
 	}
 
 	if (tank->param.max_hp >= 100) {//TODO add color into param
@@ -215,8 +216,8 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		draw_color4f(1,1,1,alpha);
 	}
 
-	sprite_render_body(RLAY_GAME_MID, &(tank->data.spr), tank->data.body);
-	sprite_render_body(RLAY_GAME_MID, &(tank->turret_sprite), tank->barrel);
+	sprite_render_body(RLAY_GAME_FRONT, &(tank->data.spr), tank->data.body);
+	sprite_render_body(RLAY_GAME_FRONT, &(tank->turret_sprite), tank->barrel);
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)

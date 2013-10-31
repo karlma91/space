@@ -140,6 +140,7 @@ void instance_iterate_comp(int comp_index, void (*f)(instance *, void *data), vo
 void instance_update(instance *ins) {
 	if (!ins->destroyed) { //TODO avgjøre om destroyed skal bestemme on update skal kalles eller ikke
 		ins->TYPE->call.on_update(ins);
+		ins->time_alive += dt;
 	} else {
 		ins->time_destroyed += dt;
 	}
@@ -179,49 +180,68 @@ instance *instance_nearest(cpVect pos, object_id *type)
 instance *instance_first(object_id *type)
 {
 	//TODO error check obj_id
-	return (instance *) llist_first(current_objects->objects_meta[type->ID].active);
+	if (current_objects) {
+		return (instance *) llist_first(current_objects->objects_meta[type->ID].active);
+	} else {
+		return NULL;
+	}
 }
 
 instance *instance_n(object_id *type, int n)
 {
+	if (current_objects) {
 	//TODO error check obj_id
-	return (instance *) llist_at_index(current_objects->objects_meta[type->ID].active, n);
+		return (instance *) llist_at_index(current_objects->objects_meta[type->ID].active, n);
+	} else {
+		return NULL;
+	}
 }
 
 instance *instance_last(object_id *type)
 {
+	if (current_objects) {
 	//TODO error check obj_id
-	return (instance *) llist_last(current_objects->objects_meta[type->ID].active);
+		return (instance *) llist_last(current_objects->objects_meta[type->ID].active);
+	} else {
+		return NULL;
+	}
 }
 
 instance *instance_by_id(object_id *type, int instance_id)
 {
-	//TODO error check obj_id
-	LList list = current_objects->objects_meta[type->ID].active;
+	if (current_objects) {
+		//TODO error check obj_id
+		LList list = current_objects->objects_meta[type->ID].active;
 
-	llist_begin_loop(list);
-	while(llist_hasnext(list)) {
-		instance *obj = (instance *) llist_next(list);
-		if (obj->instance_id == instance_id) {
-			return obj;
+		llist_begin_loop(list);
+		while(llist_hasnext(list)) {
+			instance *obj = (instance *) llist_next(list);
+			if (obj->instance_id == instance_id) {
+				return obj;
+			}
 		}
+		llist_end_loop(list);
 	}
-	llist_end_loop(list);
 
 	return NULL;
 }
 
 int instance_count(object_id *type)
 {
-	//TODO error check obj_id
-	return llist_size(current_objects->objects_meta[type->ID].active);
+	if (current_objects) {
+		//TODO error check obj_id
+		return llist_size(current_objects->objects_meta[type->ID].active);
+	}
+	return 0;
 }
 
 void instance_destroy(instance *ins)
 {
-	if (!ins->destroyed) {
-		*((int *) &ins->destroyed) = 1;
-		llist_add(current_objects->ins2destroy, ins);
+	if (current_objects) {
+		if (!ins->destroyed) {
+			*((int *) &ins->destroyed) = 1;
+			llist_add(current_objects->ins2destroy, ins);
+		}
 	}
 }
 

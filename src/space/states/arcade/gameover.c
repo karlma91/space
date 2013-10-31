@@ -15,6 +15,8 @@
 
 STATE_ID state_gameover;
 
+#define ARCADE_SCOREDATA "arcade.score"
+
 /* static prototypes */
 
 #define MAX_NAME_LENGTH 3
@@ -73,14 +75,11 @@ static void sdl_event(SDL_Event *event)
 				level_scores.filename[0] = '0';
 				level_scores.head = NULL;
 
-				char level_score_file[50];
-				sprintf(&level_score_file[0], "arcade.score");
-				highscorelist_readfile(&level_scores,level_score_file);
-
+				highscorelist_readfile(&level_scores,ARCADE_SCOREDATA);
 
 				gameover_state = show_highscore;
 				win = 0;
-				score_value = getPlayerScore();
+				score_value = getArcadeScore();
 				score_position = highscorelist_addscore(list,&input[0], score_value, -1);
 				score_newly_added = 1;
 			}
@@ -97,7 +96,7 @@ static void sdl_event(SDL_Event *event)
 				score_index = 0;
 				score_page = 0;
 #if ARCADE_MODE
-				printf("exit %d\n", getPlayerScore());
+				printf("exit %d\n", getArcadeScore());
 				main_stop();
 				return;
 #else
@@ -121,7 +120,7 @@ void gameover_init(void)
 #if ARCADE_MODE
 	list = malloc(sizeof(scorelist));
 	highscorelist_create(list);
-	highscorelist_readfile(list,"highscores2"); // NB! moved from bin/data/highscores
+	highscorelist_readfile(list,ARCADE_SCOREDATA); // NB! moved from bin/data/highscores
 #endif
 
 	statesystem_register(state_gameover,0);

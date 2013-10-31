@@ -95,6 +95,9 @@ static void draw_gui(view *cam);
 #define GRAVITY 600.0f
 #define DAMPING 0.8f
 
+#define ARCADE_LVL_COUNT 7
+#define ARCADE_SCORE_LVL (60 * 5 * 10) // in decisec
+static int arcade_lvl_score = ARCADE_LVL_COUNT * ARCADE_SCORE_LVL;
 
 /* The state timer */
 static float state_timer = 0;
@@ -150,6 +153,7 @@ static void level_start(void)
 		//TMP test
 	}
 }
+
 static void level_running(void)
 {
 	/* update game time */
@@ -163,7 +167,7 @@ static void level_running(void)
 		change_state(LEVEL_PLAYER_DEAD);
 	}
 
-	if ((instance_count(obj_id_factory) + instance_count(obj_id_tank) + instance_count(obj_id_turret)) == 0) {
+	if ((instance_count(obj_id_factory) + instance_count(obj_id_tank) + instance_count(obj_id_turret) + instance_count(obj_id_robotarm)) == 0) {
 		change_state(LEVEL_CLEARED);
 	}
 }
@@ -180,8 +184,8 @@ static void level_player_dead(void)
 		lvl_cleared=0;
 		sticks_hide();
 
-		leveldone_status(0, player->coins, game_time);
 #if !ARCADE_MODE
+		leveldone_status(0, player->coins, game_time);
 		statesystem_push_state(state_leveldone);
 #endif
 	} else {
@@ -192,26 +196,28 @@ static void level_cleared(void)
 {
 	obj_player *player = (obj_player *)instance_first(obj_id_player);
 	//update_all();
-
+//TODO split player1 and player2 coin amount
 	static int tmp_atom = 0;
 	if (state_timer > 2 && !tmp_atom) {
-		float p = (player->hp_bar.value / player->hp_bar.max_hp);
-		player->coins += (int)(p*p * 4)*4 * 25;
+		//float p = (player->hp_bar.value / player->hp_bar.max_hp);
+		//player->coins += (int)(p*p * 4)*4 * 25;
 
 		lvl_cleared=1;
 		sticks_hide();
 
+#if !ARCADE_MODE
 		//TODO set star rating based on missions
 		leveldone_status(1 + player->coins / (4000.0 + 1000 * currentlvl->deck), player->coins, game_time);
-
-#if !ARCADE_MODE
 		statesystem_push_state(state_leveldone);
+#else
+		space_next_level(NULL);
 #endif
 		tmp_atom = 1;
 	} else {
 		tmp_atom = 0;
 	}
 }
+
 static void level_transition(void)
 {
 #if ARCADE_MODE
@@ -268,6 +274,14 @@ static void pre_update(void)
 static void post_update(void)
 {
 	update_camera_position();
+	if (keys[SDL_SCANCODE_F9]) {
+		space_next_level(NULL);
+		keys[SDL_SCANCODE_F9] = 0;
+	} else if (keys[SDL_SCANCODE_F8]) {
+		if (player1) instance_destroy(player1);
+		if (player2) instance_destroy(player2);
+		keys[SDL_SCANCODE_F8] = 0;
+	}
 }
 
 int nan_check(cpBody *body)
@@ -353,6 +367,9 @@ static void radar_draw(float x, float y)
 	instance_iterate_comp(CMP_MINIMAP, (void (*)(instance *, void *))plot_on_radar, NULL);
 	draw_pop_matrix();
 }
+#if ARCADE_MODE
+#include "arcade/menu.h"
+#endif
 
 void draw_gui(view *cam)
 {
@@ -365,23 +382,6 @@ void draw_gui(view *cam)
 	setTextSize(35);
 
 	if (gamestate != LEVEL_START) {
-		/*
-		obj_player *player = current_view == view_p1 ? player1 : player2;
-		if (player) {
-
-		// simple score animation
-		char score_temp[20];
-		static int score_anim = 0;
-		static int score_adder = 1;
-		if (score_anim + score_adder < player->coins) {
-			score_anim += score_adder;
-			score_adder += 11;
-		} else {
-			score_anim = player->coins;
-			score_adder = 1;
-		}
-		*/
-
 		radar_draw(-cam->view_width/2 + 120, cam->view_height/2 - 175);
 
 		int score_anim = 0;
@@ -462,6 +462,10 @@ void draw_gui(view *cam)
 	case LEVEL_RUNNING:
 		break;
 	case LEVEL_CLEARED:
+#if ARCADE_MODE
+		setTextSize(80);
+		font_drawText(RLAY_GUI_FRONT, 0, 0, "LEVEL CLEARED");
+#endif
 		break;
 	case LEVEL_TRANSITION:
 		setTextSize(60);
@@ -478,21 +482,8 @@ void draw_gui(view *cam)
 		setTextSize(80);
 		font_drawText(RLAY_GUI_FRONT, 0, 0, "GAME OVER");
 		draw_color4f(0.1,0.9,0.1,1);
-		static float button_timer = 0;
-		static int button_down;
-		button_timer+=dt;
-		if(button_timer > 0.5){
-			button_down = !button_down;
-			button_timer = 0;
-		}
-		//TODO draw button texture for arcade mode
-		if(button_down){
-			cpVect t = cpv(0,0-cam->view_height/4);
-			//draw_texture(TEX_BUTTON_DOWN,&t,TEX_MAP_FULL,300,300,0);
-		}else{
-			cpVect t = cpv(0,-5.5-cam->view_height/4);
-			//draw_texture(TEX_BUTTON,&t,TEX_MAP_FULL,300,300,0);
-		}
+		sprite_update(&spr_startbtn);
+		sprite_render(RLAY_GUI_MID, &spr_startbtn, cpv(0,-0.5f*GAME_HEIGHT/2), 0);
 #endif
 		setTextSize(120);
 		break;
@@ -524,10 +515,13 @@ static void sticks_init(void) {
 	joystick_release(joy_p1_right);
 	joystick_release(joy_p2_left);
 	joystick_release(joy_p2_right);
-
+#if !ARCADE_MODE
 	((touchable *)joy_p1_left)->visible = 1;
 	((touchable *)joy_p1_right)->visible = 1;
-
+#else
+	((touchable *)joy_p1_left)->visible = 0;
+	((touchable *)joy_p1_right)->visible = 0;
+#endif
 #if GOT_TOUCH
 	if (multiplayer) {
 		((touchable *)joy_p2_left)->visible = 1;
@@ -573,9 +567,54 @@ void space_init_level(int space_station, int deck)
 	player1 = NULL;
 	player2 = NULL;
 
-
-	//TODO manage persistent objects(like player) in a better way, instead of removing and then re-adding
-
+#if ARCADE_MODE
+	switch(deck) {
+	case 1:
+		weapon_index = 0;
+		weapons[weapon_index].level = 1;
+		armor_index = 0;
+		engine_index = 0;
+		break;
+	case 2:
+		weapon_index = 0;
+		weapons[weapon_index].level = 2;
+		armor_index = 0;
+		engine_index = 0;
+		break;
+	case 3:
+		weapon_index = 1;
+		weapons[weapon_index].level = 0;
+		armor_index = 0;
+		engine_index = 0;
+		break;
+	case 4:
+		weapon_index = 1;
+		weapons[weapon_index].level = 1;
+		armor_index = 0;
+		engine_index = 0;
+		break;
+	case 5:
+		weapon_index = 1;
+		weapons[weapon_index].level = 1;
+		armor_index = 1;
+		engine_index = 0;
+		break;
+	case 6:
+		weapon_index = 1;
+		weapons[weapon_index].level = 2;
+		armor_index = 2;
+		engine_index = 1;
+		break;
+	case 7:
+		weapon_index = 1;
+		weapons[weapon_index].level = 2;
+		armor_index = 2;
+		engine_index = 1;
+		break;
+	default:
+		break;
+	}
+#endif
 
 	if (currentlvl != NULL) {
 		level_unload(currentlvl);
@@ -665,6 +704,8 @@ static void on_enter(void)
 static void game_over(void)
 {
 #if ARCADE_MODE
+	arcade_lvl_score -= player1->coins/10;
+	gameover_setstate(enter_name);
 	statesystem_set_state(state_gameover);
 #else
 	lvl_cleared=0;
@@ -827,13 +868,9 @@ float getGameTime(void)
 	return game_time;
 }
 
-int getPlayerScore(void)
+int getArcadeScore(void)
 {
-	obj_player *player = ((obj_player*)instance_first(obj_id_player));
-	if (player != NULL)
-		return player->coins;
-	else
-		return -1;
+	return ARCADE_LVL_COUNT * (ARCADE_SCORE_LVL + 1000) - arcade_lvl_score;
 }
 
 void input(void)
@@ -915,8 +952,10 @@ void setup_singleplay(void)
     	llist_add(ll_touchies, joy_p2_right);
     }
 
+#if !ARCADE_MODE
     joy_p2_left->touch_data.visible = 1;
     joy_p2_right->touch_data.visible = 1;
+#endif
 }
 
 static obj_player * space_create_player(int id)
@@ -957,8 +996,10 @@ void setup_multiplay(void)
     joystick_reposition(joy_p2_left, 80, 2, -view_p2->view_width/2 + 170, -0.25*view_p2->view_height, w, h2);
     joystick_reposition(joy_p2_right, 80, 2, view_p2->view_width/2 - 170, -0.25*view_p2->view_height, w, h2);
 
+    #if !ARCADE_MODE
     joy_p2_left->touch_data.visible = 1;
     joy_p2_right->touch_data.visible = 1;
+#endif
 
     LList ll_touchies = view_p1->touch_objects;
     llist_remove(ll_touchies, joy_p2_left);
@@ -1001,13 +1042,20 @@ void space_next_level(void *unused)
 	int station = currentlvl->station;
 	int deck = currentlvl->deck + 1;
 
+#if ARCADE_MODE
+	arcade_lvl_score += (int)(game_time*10) - (ARCADE_SCORE_LVL + player1->coins/10);
+#endif
+
 	if (deck <= level_get_level_count(station)) {
 		statesystem_set_state(state_space);
 		space_init_level(station, deck);
 	} else {
+#if ARCADE_MODE
+		gameover_setstate(GAMEOVER_WIN);
+		statesystem_set_state(state_gameover);
+#else
 		//TODO decide what happens when last level on current station is cleared
 		statesystem_set_state(state_stations);
+#endif
 	}
-
-
 }

@@ -21,7 +21,7 @@ typedef enum {
 
 #define MAX_WEAPON_LEVEL 3
 #define WEAPON_UPGRADES 3
-#define ARMOR_UPGRADES 3
+#define ARMOR_UPGRADES 4
 #define ENGINE_UPGRADES 3
 
 typedef struct {
