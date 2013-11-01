@@ -200,6 +200,7 @@ float se_rect2arch(cpVect *pos)
 #endif
 }
 
+
 void se_rect2arch_column(float x, cpVect *polar)
 {
 #if EXPERIMENTAL_GRAPHICS

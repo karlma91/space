@@ -50,6 +50,7 @@ extern STATE_ID state_store;
 extern STATE_ID state_leveldone;
 extern STATE_ID state_stations;
 extern STATE_ID state_levelscreen;
+extern STATE_ID state_editor;
 
 /* SPRITES */
 extern SPRITE_ID SPRITE_PLAYER;
@@ -61,6 +62,7 @@ extern SPRITE_ID SPRITE_TANK_BODY;
 extern SPRITE_ID SPRITE_TANK_WHEEL;
 extern SPRITE_ID SPRITE_TANK_TURRET;
 extern SPRITE_ID SPRITE_STATION_01;
+extern SPRITE_ID SPRITE_WRENCH;
 extern SPRITE_ID SPRITE_STAR;
 extern SPRITE_ID SPRITE_GEAR;
 extern SPRITE_ID SPRITE_RETRY;

@@ -85,6 +85,12 @@ static const touch_calls calls = {update,render,touch_down,touch_motion,touch_up
 
 #define REGISTER_CALLS( t ) \
 		((touchable *)t)->calls = &calls; \
+		((touchable *)t)->visible=1; \
+		((touchable *)t)->enabled=1; \
+		((touchable *)t)->get.margin=0;
+
+#define REGISTER_BUTTON_CALLS( t ) \
+		((touchable *)t)->calls = &calls; \
 		if (t->touch_data.calls != &calls) { \
 			SDL_Log("ERROR: touch listener registration failed"); \
 			exit(-1);\
