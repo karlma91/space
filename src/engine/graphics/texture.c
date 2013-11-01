@@ -15,7 +15,7 @@
 #define TEXTURE_RESOLUTION ""
 #endif
 
-#define MAX_IMAGE_BUFFER 786432 /* ( 0.7 MiB) NB! make sure it is enough RAM to hold buffer */
+#define MAX_IMAGE_BUFFER 7864320 /* ( 0.7 MiB) NB! make sure it is enough RAM to hold buffer */
 
 int TEX_WHITE;
 int TEX_GLOW_DOT;
@@ -87,12 +87,11 @@ int texture_load(const char *file)
 		h = img_load->h;
 
 		++tex_counter;
-		names = realloc(names,(sizeof(char[tex_counter+1][51])));
+		names = realloc(names,(sizeof(char[tex_counter+1][51]))); // any need for this anymore?
 		strcpy(names[tex_counter],file);
 
 		SDL_Surface *img = SDL_ConvertSurfaceFormat(img_load, SDL_PIXELFORMAT_ARGB8888,0);
 		SDL_FreeSurface(img_load);
-
 
 		/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
 		glGenTextures(1, &tex_id);
@@ -112,6 +111,18 @@ int texture_load(const char *file)
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		/* pre-multiply alpha */
+		int i;
+		int size = img->w * img->h;
+		for (i=0 ; i < size; i++) {
+			unsigned char *pixel = (unsigned char *)((int *)img->pixels + i);
+			int b = pixel[0], g = pixel[1], r = pixel[2], a = pixel[3];
+			pixel[0] = b * a / 255;
+			pixel[1] = g * a / 255;
+			pixel[2] = r * a / 255;
+			//any undefined endianess problems here?
+		}
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
 		glGenerateMipmap(GL_TEXTURE_2D);

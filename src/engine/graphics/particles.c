@@ -15,6 +15,7 @@
  */
 int read_emitter_from_file (char *filename);
 static int parse_range(mxml_node_t *node, range *r);
+static int parse_point(mxml_node_t *node, p_point *point);
 static int parse_color_step(mxml_node_t *node, emitter *e);
 
 /**
@@ -402,10 +403,6 @@ static float range_get_random(range r)
 static void draw_all_particles(emitter *em)
 {
 	draw_push_color();
-	draw_push_blend();
-	if(em->additive){
-		draw_blend(GL_SRC_ALPHA, GL_ONE);
-	}
 
 	llist_begin_loop(em->particles);
 	while(llist_hasnext(em->particles)){
@@ -414,37 +411,39 @@ static void draw_all_particles(emitter *em)
 		++particles_active;
 		float offset = p->time_alive / p->max_time;
 		offset = offset>1 ? 1 : offset;
-		float inv = 1-offset;
 
-		p_color a,b,c = {0,0,0,0};
-		float coloffset;
-		float colinv;
+		Color col = {0,0,0,0};
 		int i;
-		float alpha = (em->startalpha/255.0f)*inv + (em->endalpha/255.0f)*offset;
-		for(i = 0; i<em->color_counter-1; i++) {
-			a = em->colors[i];
-			b = em->colors[i+1];
-			if(offset >= a.offset && offset <= b.offset){
 
-				float step = b.offset - a.offset;
-
-				coloffset = (offset - a.offset) / step;
-				colinv = coloffset;
-				coloffset = 1 - coloffset;
-
-				c.r = (a.r * coloffset) + (b.r * colinv);
-				c.g = (a.g * coloffset) + (b.g * colinv);
-				c.b = (a.b * coloffset) + (b.b * colinv);
+		p_point p1 = em->alpha[0];
+		for(i = 0; i<em->alpha_count-1; i++) {
+			p_point p0 = p1; p1 = em->alpha[i+1];
+			if (offset >= p0.x && offset <= p1.x) {
+				float alpha_offset = (offset - p0.x) / (p1.x - p0.x);
+				float alpha_inv =  1 - alpha_offset;
+				col.a = p0.y * alpha_inv + p1.y * alpha_offset;
 			}
 		}
-		draw_color4f(c.r,c.g,c.b,alpha);
+
+		p_color b = em->colors[0];
+		for(i = 0; i<em->color_count-1; i++) {
+			p_color a = b; b = em->colors[i+1];
+			if(offset >= a.offset && offset <= b.offset){
+				float step = b.offset - a.offset;
+				float coloffset = (offset - a.offset) / step;
+				float colinv = 1 - coloffset;
+
+				col.r = 0xFF * (a.r * colinv + b.r * coloffset);
+				col.g = 0xFF * (a.g * colinv + b.g * coloffset);
+				col.b = 0xFF * (a.b * colinv + b.b * coloffset);
+			}
+		}
+		draw_color(col);
 		em->draw_particle(em, p);
 	}
 	llist_end_loop(em->particles);
 
-	draw_pop_blend();
 	draw_pop_color();
-
 }
 
 static void default_particle_draw(emitter *em, particle *p)
@@ -474,7 +473,8 @@ int read_emitter_from_file (char *filename)
 	current_emitter += 1;
 	emitter *emi = &(emitter_templates[current_emitter]);
 	emi->type = current_emitter;
-	emi->color_counter = 0;
+	emi->alpha_count = 0;
+	emi->color_count = 0;
 	emi->alive = 1;
 	emi->disable = 0;
 	emi->next_spawn = 0;
@@ -502,11 +502,25 @@ int read_emitter_from_file (char *filename)
 		return 1;
 
 	}
+
+	int alpha_last = 0;
+
 	for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
 			node != NULL;
 			node=mxmlWalkNext (node, NULL, MXML_DESCEND)
 	){
 		if (node->type  == MXML_ELEMENT) {
+			if (alpha_last) {
+				int index = emi->alpha_count;
+				if (index < PARTICLE_ALPHA_MAX && (parse_point(node, emi->alpha + index) == 0)) {
+					++emi->alpha_count;
+					fprintf(stderr, "DEBUG: added point = {%f, %f}\n", (emi->alpha+index)->x, (emi->alpha+index)->y);
+				} else {
+					alpha_last = 0;
+					fprintf(stderr, "DEBUG: alpha_last = 0\n");
+				}
+			}
+
 			if(TESTNAME("system")){
 				parse_bool(node,"additive",&(emi->additive));
 			}else if(TESTNAME("emitter")){
@@ -516,7 +530,7 @@ int read_emitter_from_file (char *filename)
 				if(*spint != NULL){
 					emi->sprite_id = sprite_link(*spint);
 				}
-				parse_bool(node,"useAdditive",&(emi->additive));
+				//parse_bool(node,"useAdditive",&(emi->additive));
 				parse_bool(node,"useOriented",&(emi->rotation));
 			}else if(TESTNAME("spawnInterval")){
 				parse_range(node,&(emi->spawn_interval));
@@ -556,12 +570,10 @@ int read_emitter_from_file (char *filename)
 				parse_float(node,"value",&(emi->gravityfactor));
 			}else if(TESTNAME("windFactor")){
 				parse_float(node,"value",&(emi->windfactor));
-			}else if(TESTNAME("startAlpha")){
-				parse_float(node,"value",&(emi->startalpha));
-			}else if(TESTNAME("endAlpha")){
-				parse_float(node,"value",&(emi->endalpha));
+			}else if(TESTNAME("alpha")){
+				alpha_last = 1;
+				fprintf(stderr, "DEBUG: alpha_last = 1\n");
 			}else if(TESTNAME("color")){
-
 			}else if(TESTNAME("step")){
 				parse_color_step(node,emi);
 			}else{
@@ -592,16 +604,33 @@ static int parse_range(mxml_node_t *node, range *r)
 
 
 /**
+ * Parses the atributes of a point
+ * return 0 on ok, else -1
+ */
+static int parse_point(mxml_node_t *node, p_point *point)
+{
+	if (TESTNAME("point")) {
+		return parse_float(node,"x", &(point->x)) || parse_float(node,"y", &(point->y));
+	} else {
+		return -1;
+	}
+}
+
+/**
  * Parses the atributes of a node to a value v
  * return 0 on ok, else -1
  */
 static int parse_color_step(mxml_node_t *node, emitter *e)
 {
-	int index = e->color_counter;
-	(e->color_counter)++;
-	parse_float(node,"r", &(e->colors[index].r));
-	parse_float(node,"g", &(e->colors[index].g));
-	parse_float(node,"b", &(e->colors[index].b));
-	parse_float(node,"offset", &(e->colors[index].offset));
-	return 0;
+	int index = e->color_count;
+	if (index < PARTICLE_COLOR_MAX) {
+		parse_float(node,"r", &(e->colors[index].r));
+		parse_float(node,"g", &(e->colors[index].g));
+		parse_float(node,"b", &(e->colors[index].b));
+		parse_float(node,"offset", &(e->colors[index].offset));
+		(e->color_count)++;
+		return 0;
+	} else {
+		return -1;
+	}
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <emitter spriteName="particle" name="Default" renderType="inherit"
-	useAdditive="true" useOriented="false">
+	useAdditive="false" useOriented="false">
 	<spawnInterval enabled="true" max="32" min="16" ></spawnInterval>
 	<spawnCount enabled="true" max="4" min="1" />
 	<initialLife enabled="false" max="500" min="200" />
@@ -16,11 +16,13 @@
 	<growthFactor type="simple" value="100.0" />
 	<gravityFactor type="simple" value="0" />
 	<windFactor type="simple" value="0" />
-	<startAlpha type="simple" value="255.0" />
+	<startAlpha type="simple" value="0.0" />
 	<endAlpha type="simple" value="0.0" />
-	<alpha active="true" max="255" min="0" type="linear">
+	<alpha active="true" max="0" min="0" type="linear">
 		<point x="0.0" y="0.0" />
-		<point x="1.0" y="255.0" />
+		<point x="0.4" y="0.0" />
+		<point x="0.6" y="128.0" />
+		<point x="1.0" y="0.0" />
 	</alpha>
 	<size active="false" max="255" min="0" type="linear">
 		<point x="0.0" y="0.0" />

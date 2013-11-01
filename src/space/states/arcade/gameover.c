@@ -246,7 +246,7 @@ static void draw(void)
 		setTextAlign(TEXT_CENTER);
 		font_drawText(RLAY_GUI_FRONT, 0,0.4f*GAME_HEIGHT, "HIGHSCORES");
 
-		draw_highscore(list);
+		draw_highscore(list); //FIXME sketchy argument
 
 		if (score_newly_added) {
 			char current_score_buffer[100];

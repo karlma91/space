@@ -735,6 +735,15 @@ static void sdl_event(SDL_Event *event)
 		default:
 			break;
 		}
+		switch(key) {
+		case SDL_SCANCODE_1: particles_get_emitter_at(current_particles, RLAY_GUI_FRONT, EMITTER_EXPLOSION, player1->data.body->p); break;
+		case SDL_SCANCODE_2: particles_get_emitter_at(current_particles, RLAY_GUI_FRONT, EMITTER_EXPLOSION_BIG, player1->data.body->p); break;
+		case SDL_SCANCODE_3: particles_get_emitter_at(current_particles, RLAY_GUI_FRONT, EMITTER_FRAGMENTS, player1->data.body->p); break;
+		case SDL_SCANCODE_4: particles_get_emitter_at(current_particles, RLAY_GUI_FRONT, EMITTER_SMOKE, player1->data.body->p); break;
+		case SDL_SCANCODE_5: particles_get_emitter_at(current_particles, RLAY_GUI_FRONT, EMITTER_SPARKS, player1->data.body->p); break;
+		case SDL_SCANCODE_6: particles_get_emitter_at(current_particles, RLAY_GUI_FRONT, EMITTER_ROCKET_FLAME, player1->data.body->p); break;
+		default: break;
+		}
 		break;
 	}
 }

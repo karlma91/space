@@ -143,6 +143,21 @@ void draw_color3f(float r, float g, float b)
 	draw_color4b((byte)(r*0xFF), (byte)(g*0xFF), (byte)(b*0xFF), gl_alpha);
 }
 
+void draw_color_rgbmulta4b(byte r, byte g, byte b, byte a) {
+	draw_color4b(r*a/255, g*a/255, b*a/255, a);
+}
+
+void draw_color_rgbmulta(Color color)
+{
+	draw_color_rgbmulta4b(color.r, color.g, color.b, color.a);
+}
+
+void draw_color_rgbmulta4f(float r, float g, float b, float a)
+{
+	draw_color_rgbmulta4b((byte)(r*0xFF), (byte)(g*0xFF), (byte)(b*0xFF), (byte)(a*0xFF));
+}
+
+
 void draw_push_color(void)
 {
 	stack_push_byte(gl_red);
@@ -290,12 +305,11 @@ void draw_sprite_line(int layer, sprite *spr, cpVect a, cpVect b, float w)
 //TODO be able to set blend layers
 void draw_glow_line(cpVect a, cpVect b, float w)
 {
-	draw_push_blend();
-	draw_blend(GL_SRC_ALPHA, GL_ONE);
-	draw_line(0, TEX_GLOW, a, b, w);
-	draw_color3f(1,1,1);
-	draw_line(0, TEX_GLOW_DOT, a, b, w);
-	draw_pop_blend();
+	draw_push_color();
+	Color col = draw_get_current_color(); col.a = 0;
+	draw_color(col); draw_line(0, TEX_GLOW, a, b, w);
+	draw_color4b(255,255,255,0); draw_line(0, TEX_GLOW_DOT, a, b, w);
+	draw_pop_color();
 }
 
 void draw_quad_line(int layer, cpVect a, cpVect b, float w)

@@ -110,8 +110,8 @@ void font_draw_int(float x, float y, int value)
 void font_drawText(int layer, GLfloat x, GLfloat y, char* text)
 {
 
-	draw_push_blend();
-	draw_blend(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	//draw_push_blend();
+	//draw_blend(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	draw_push_matrix();
 	draw_translate(x, y);
 	draw_rotate(font_text_angle);
@@ -151,7 +151,7 @@ void font_drawText(int layer, GLfloat x, GLfloat y, char* text)
 		draw_pop_matrix();
 
 	draw_pop_matrix();
-	draw_pop_blend();
+	//draw_pop_blend();
 }
 
 void font_time2str(char *str, float seconds)

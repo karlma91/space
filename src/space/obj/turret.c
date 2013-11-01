@@ -110,7 +110,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		alpha = maxf(0, 1 - turret->data.time_destroyed / 2);
 	}
 
-	draw_color4f(1,1,1,alpha);
+	draw_color_rgbmulta4f(1,1,1,alpha);
 	sprite_set_index(&turret->data.spr, 0);
 	sprite_render_body(RLAY_GAME_MID, &turret->data.spr, turret->tower);
 	sprite_set_index(&turret->data.spr, 1);

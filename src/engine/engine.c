@@ -261,7 +261,7 @@ static void initGL(void)
 	SDL_GL_SetSwapInterval(FPS_LIMIT); // 1 = v-sync on
 
 	glEnable(GL_BLEND);
-	draw_blend(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	draw_blend(GL_ONE,GL_ONE_MINUS_SRC_ALPHA);
 
 	/* set the clear color to dark blue */
 	//	glClearColor(0, 0.08, 0.15, 1);

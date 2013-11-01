@@ -6,10 +6,17 @@
 #include "../data/llist.h"
 
 
+#define PARTICLE_COLOR_MAX 10
+#define PARTICLE_ALPHA_MAX 10
+
 typedef struct particle_color {
 	float r,g,b;
 	float offset;
 } p_color;
+
+typedef struct p_point {
+	float x,y;
+} p_point;
 
 typedef struct range {
 	float min,max;
@@ -95,11 +102,10 @@ struct emitter {
 	float growthfactor;   /* particles size = size*growthfactor * 0.001 */
 	float gravityfactor;        /* gravity for emitter */
 	float windfactor;           /* wind */
-	float startalpha;
-	float endalpha; /* alpha start and end value */
-
-	p_color colors[10]; /* a list of colors that the particles get the color from */
-	int color_counter;
+	p_point alpha[PARTICLE_ALPHA_MAX]; /* a list of alpha values determing how much it obscures what is behind */
+	int alpha_count;
+	p_color colors[PARTICLE_COLOR_MAX]; /* a list of colors that the particles get the color from */
+	int color_count;
 
 	/** data to use in a custom draw function */
 	void *data;

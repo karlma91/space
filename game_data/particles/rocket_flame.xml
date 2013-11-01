@@ -20,7 +20,7 @@
 	<endAlpha type="simple" value="0.0" />
 	<alpha active="true" max="255" min="0" type="linear">
 		<point x="0.0" y="0.0" />
-		<point x="1.0" y="255.0" />
+		<point x="1.0" y="0.0" />
 	</alpha>
 	<size active="false" max="255" min="0" type="linear">
 		<point x="0.0" y="0.0" />

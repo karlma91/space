@@ -94,6 +94,11 @@ void draw_color4b(byte r, byte g, byte b, byte a);
 void draw_color4f(float r, float g, float b, float a);
 void draw_color3f(float r, float g, float b);
 void draw_color(Color color);
+
+void draw_color_rgbmulta4b(byte r, byte g, byte b, byte a);
+void draw_color_rgbmulta4f(float r, float g, float b, float a);
+void draw_color_rgbmulta(Color color);
+
 void draw_blend(GLenum src_factor, GLenum dst_factor);
 
 void draw_push_color(void);

@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <emitter spriteName="cloud" name="Default" renderType="inherit" useAdditive="false" useOriented="false">
-<spawnInterval enabled="true" max="10.0" min="1.0"/>
-<spawnCount enabled="true" max="8" min="5"/>
-<initialLife enabled="true" max="500" min="300"/>
-<initialSize enabled="true" max="250" min="50"/>
+<spawnInterval enabled="true" max="16.0" min="16.0"/>
+<spawnCount enabled="true" max="13" min="4"/>
+<initialLife enabled="true" max="400" min="150"/>
+<initialSize enabled="true" max="460" min="150"/>
 <xOffset enabled="false" max="0.0" min="0.0"/>
 <yOffset enabled="false" max="0.0" min="0.0"/>
-<initialDistance enabled="false" max="40.0" min="0.0"/>
-<speed enabled="true" max="300" min="50"/>
-<length enabled="false" max="1000.0" min="1000.0"/>
-<emitCount enabled="true" max="20" min="10"/>
+<initialDistance enabled="false" max="170.0" min="0.0"/>
+<speed enabled="true" max="350" min="50"/>
+<length enabled="false" max="5200.0" min="5000.0"/>
+<emitCount enabled="true" max="30" min="20"/>
 <spread type="random" value="360.0"/>
 <angularOffset type="simple" value="0.0"/>
 <growthFactor type="simple" value="20.0"/>
 <gravityFactor type="simple" value="1.0"/>
 <windFactor type="simple" value="0.0"/>
-<startAlpha type="simple" value="255.0"/>
-<endAlpha type="simple" value="255.0"/>
-<alpha active="false" max="255" min="0" type="linear">
+<startAlpha type="simple" value="0.0"/>
+<endAlpha type="simple" value="0.0"/>
+<alpha active="false" max="0" min="255" type="linear">
 <point x="0.0" y="0.0"/>
 <point x="0.7" y="0.0"/>
 <point x="0.9" y="255.0"/>
@@ -36,9 +36,9 @@
 <point x="1.0" y="1.0"/>
 </scaleY>
 <color>
-<step b="1.0" g="1.0" offset="0.0" r="1.0"/>
-<step b="0.2" g="0.5" offset="0.8" r="0.9"/>
-<step b="0.2" g="0.2" offset="0.9" r="0.2"/>
+<step b="0.9" g="0.7" offset="0.0" r="0.9"/>
+<step b="0.0" g="0.4" offset="0.6" r="0.8"/>
+<step b="0.2" g="0.2" offset="0.8" r="0.2"/>
 <step b="0.0" g="0.0" offset="1.0" r="0.0"/>
 </color>
 </emitter>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<emitter spriteName="particle" name="spark" renderType="inherit" useAdditive="true" useOriented="true">
+<emitter spriteName="particle" name="spark" renderType="inherit" useAdditive="false" useOriented="true">
 <spawnInterval enabled="true" max="10.0" min="1.0"/>
 <spawnCount enabled="false" max="7.0" min="3.0"/>
 <initialLife enabled="true" max="120" min="50"/>
@@ -19,7 +19,7 @@
 <endAlpha type="simple" value="0.0"/>
 <alpha active="false" max="255" min="0" type="linear">
 <point x="0.0" y="0.0"/>
-<point x="1.0" y="255.0"/>
+<point x="1.0" y="0.0"/>
 </alpha>
 <size active="false" max="255" min="0" type="linear">
 <point x="0.0" y="0.0"/>
@@ -34,7 +34,7 @@
 <point x="1.0" y="1.0"/>
 </scaleY>
 <color>
-<step b="1.0" g="1.0" offset="0.0" r="1.0"/>
-<step b="0.0" g="1.0" offset="1.0" r="1.0"/>
+<step b="1.0" g="1.0" r="1.0" offset="0.0"/>
+<step b="0.0" g="1.0" r="1.0" offset="0.0"/>
 </color>
 </emitter>

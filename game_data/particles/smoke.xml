@@ -3,9 +3,9 @@
 <spawnInterval enabled="true" max="60.0" min="40.0"/>
 <spawnCount enabled="true" max="2.0" min="1.0"/>
 <initialLife enabled="true" max="3300.0" min="1500.0"/>
-<initialSize enabled="true" max="150.0" min="100.0"/>
+<initialSize enabled="true" max="250.0" min="100.0"/>
 <initialRotation enabled="true" max="0.0" min="180.0"/>
-<rotationSpeed enabled="true" max="0.0" min="10.0"/>
+<rotationSpeed enabled="true" max="2.0" min="-2.0"/>
 <xOffset enabled="false" max="0.0" min="0.0"/>
 <yOffset enabled="false" max="0.0" min="0.0"/>
 <initialDistance enabled="false" max="0.0" min="0.0"/>
@@ -17,11 +17,13 @@
 <growthFactor type="simple" value="0.0"/>
 <gravityFactor type="simple" value="-0.9"/>
 <windFactor type="simple" value="0.15"/>
-<startAlpha type="simple" value="255.0"/>
-<endAlpha type="simple" value="0.0"/>
+<startAlpha type="simple" value="130"/>
+<endAlpha type="simple" value="200.0"/>
 <alpha active="false" max="255" min="0" type="linear">
 <point x="0.0" y="0.0"/>
-<point x="1.0" y="255.0"/>
+<point x="0.1" y="255.0"/>
+<point x="0.7" y="255.0"/>
+<point x="1.0" y="0.0"/>
 </alpha>
 <size active="false" max="255" min="0" type="linear">
 <point x="0.0" y="0.0"/>
@@ -36,8 +38,9 @@
 <point x="1.0" y="1.0"/>
 </scaleY>
 <color>
-<step b="0.7" g="0.7" offset="0.0" r="0.7"/>
-<step b="0.8" g="0.8" offset="0.5" r="0.8"/>
-<step b="0.9" g="0.9" offset="1.0" r="0.9"/>
+<step b="0.0" g="0.0" offset="0.0" r="0.0"/>
+<step b="0.5" g="0.5" offset="0.1" r="0.5"/>
+<step b="0.2" g="0.2" offset="0.7" r="0.2"/>
+<step b="0.0" g="0.0" offset="1.0" r="0.0"/>
 </color>
 </emitter>
