@@ -19,6 +19,8 @@ float se_rect2arch(cpVect *pos);
 void se_rect2arch_column(float x, cpVect *polar);
 void se_rect2arch_from_data(cpVect *pos, cpVect *polar);
 
+cpVect se_vect_view2world(view *cam, cpVect p);
+
 void se_spawn_coins(instance *ins);
 
 cpFloat se_tangent(cpVect p);

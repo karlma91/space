@@ -15,6 +15,7 @@ char *txt_buttons[30];
 
 static button *btn_stations;
 static button btn_home;
+static button btn_editor;
 
 static level_ship *stations;
 static int station_count = 2;
@@ -88,9 +89,9 @@ static void draw(void)
 
 
 	if(keys[SDL_SCANCODE_PAGEUP]){
-		current_view->zoom += 2 * dt;
+		current_view->zoom *= 1 + 1 * dt;
 	} else if(keys[SDL_SCANCODE_PAGEDOWN]) {
-		current_view->zoom -= 2 * dt;
+		current_view->zoom *= 1/(1 + 1 * dt);
 	}
 
 	draw_box(1, a, b, r, 1);
@@ -124,6 +125,10 @@ static void open_upgrades(void *unused)
 {
 	statesystem_push_state(state_store);
 }
+static void open_editor(void *unused)
+{
+	statesystem_set_state(state_editor);
+}
 
 void stations_init(void)
 {
@@ -143,6 +148,12 @@ void stations_init(void)
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
 	state_register_touchable_view(main_view, btn_home);
+
+	btn_editor = button_create(SPRITE_WRENCH, 0, "", 0, -600, 873/2, 247/2);
+	button_set_callback(btn_editor, open_editor, 0);
+	button_set_enlargement(btn_editor, 2);
+	button_set_hotkeys(btn_editor, KEY_RETURN_1, KEY_RETURN_2);
+	state_register_touchable(this, btn_editor);
 
 	int i;
 	for (i = 0; i < station_count; i++) {
@@ -189,7 +200,6 @@ void stations_init(void)
 		case 6: spr = SPRITE_TANK_TURRET; break;
 		case 7: spr = SPRITE_PLAYER_GUN; break;
 		}
-
 		state_add_sprite(state_stations, layer, spr, size, size, pos, we_randf*WE_2PI);
 	}
 }

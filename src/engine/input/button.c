@@ -62,7 +62,7 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 {
 	struct button *btn = calloc(1, sizeof *btn);
 
-	REGISTER_CALLS(btn);
+	REGISTER_BUTTON_CALLS(btn);
 
 	btn->touch_data.type = CTRL_BUTTON;
 

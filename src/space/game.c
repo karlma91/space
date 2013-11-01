@@ -7,6 +7,7 @@
 //#include "states/stations.h"
 #include "states/leveldone.h"
 #include "states/levelscreen.h"
+#include "states/editor.h"
 #include "obj/object_types.h"
 //#include "states/pause.h"
 //#include "states/upgrades.h"
@@ -61,6 +62,7 @@ SPRITE_ID SPRITE_TANK_WHEEL;
 SPRITE_ID SPRITE_TANK_TURRET;
 SPRITE_ID SPRITE_BUTTON_PAUSE;
 SPRITE_ID SPRITE_STATION_01;
+SPRITE_ID SPRITE_WRENCH;
 SPRITE_ID SPRITE_STAR;
 SPRITE_ID SPRITE_GEAR;
 SPRITE_ID SPRITE_RETRY;
@@ -200,6 +202,7 @@ void game_sprites(void)
 	REGISTER_SPRITE( TANK_WHEEL );
 	REGISTER_SPRITE( TANK_TURRET );
 	REGISTER_SPRITE( STATION_01 );
+	REGISTER_SPRITE( WRENCH );
 	REGISTER_SPRITE( STAR );
 	REGISTER_SPRITE( GEAR );
 	REGISTER_SPRITE( HOME );
@@ -305,6 +308,7 @@ void game_init(void)
     gameover_init();
     levelscreen_init();
     leveldone_init();
+    editor_init();
 
 #if ARCADE_MODE
     statesystem_set_state(state_menu);
