@@ -495,6 +495,7 @@ void statesystem_push_event(SDL_Event *event)
 		}
 	}
 	//*/
+	game_p = camera_vect_view2world(touched_view, game_p);
 
 	llist_begin_loop(game_touchies);
 	switch(event->type) {

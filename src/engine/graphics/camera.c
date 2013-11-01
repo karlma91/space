@@ -168,3 +168,14 @@ void view_free(view *c)
 	free(c);
 }
 
+cpVect camera_vect_view2world(view* cam, cpVect p)
+{
+	if(cam == NULL){
+		return p;
+	}
+	float zoom = cam->zoom;
+	p = cpvmult(p, 1/zoom);
+	p = cpvadd(p, current_view->p);
+	return p;
+}
+

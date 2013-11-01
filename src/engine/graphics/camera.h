@@ -42,5 +42,5 @@ void view_set_orientation(view *cam, int orientation);
 void view_update(view *cam, cpVect pos, float rot);
 void view_update_zoom(view *cam, cpVect pos, float level_height);
 void view_free(view *c);
-
+cpVect camera_vect_view2world(view* cam, cpVect p);
 #endif
