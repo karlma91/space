@@ -152,7 +152,7 @@ void stations_init(void)
 	btn_editor = button_create(SPRITE_WRENCH, 0, "", 0, -600, 873/2, 247/2);
 	button_set_callback(btn_editor, open_editor, 0);
 	button_set_enlargement(btn_editor, 2);
-	button_set_hotkeys(btn_editor, KEY_RETURN_1, KEY_RETURN_2);
+	button_set_hotkeys(btn_editor, SDL_SCANCODE_E, -1);
 	state_register_touchable(this, btn_editor);
 
 	int i;

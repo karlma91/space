@@ -49,6 +49,7 @@ void editor_init()
 	}
 
 	state_enable_objects(state_editor, 1);
+	state_enable_objects(state_editor, 0);
 	state_enable_particles(state_editor, 1);
 
 	cpSpaceSetGravity(current_space, cpv(0, 0));

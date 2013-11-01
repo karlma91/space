@@ -18,6 +18,7 @@ particle_system *current_particles;
 view * current_view;
 
 static cpFloat phys_step = 1/60.0f;
+//#define phys_step 0.01666666667f
 static float accumulator = 0;
 
 typedef struct systemstate State;
@@ -62,6 +63,22 @@ void statesystem_init()
 	llist_set_remove_callback(ll_states, statesystem_free);
 }
 
+static void update_global_current_var(State *state)
+{
+	if (state->id != state) {
+		fprintf(stderr, "ERROR, state invalid\n");
+		exit(-1);
+	}
+
+	current_particles = state->particles;
+    current_objects = state->objects;
+	if (current_objects)
+		current_space = current_objects->space;
+	else
+		current_space = NULL;
+	//fprintf(stderr, "DEBUG: par=%p, obj=%p, spc=%p\n",current_particles, current_objects, current_space);
+}
+
 STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
 {
 	State *state = calloc(1, sizeof *state);
@@ -80,6 +97,7 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
 
     llist_add(ll_states, (void*)state);
     state->call = *funcs;
+    state->objects = NULL;
     state->particles = NULL;
     state->layersystem = layersystem_new();
     return state->id;
@@ -91,6 +109,7 @@ void state_enable_objects(STATE_ID state_id, int enabled)
 	if (state->objects == NULL && enabled) {
 		state->objects = objectsystem_new();
 		current_objects = state->objects;
+		current_space = state->objects->space;
 	}
 	state->objects_enabled = enabled;
 }
@@ -150,19 +169,22 @@ void statesystem_push_state(STATE_ID state_id)
     state->time_alive = 0;
     stack_head->next = state;
     stack_head->next->prev = stack_head;
+	update_global_current_var(stack_head);
     stack_head->call.on_leave();
     stack_head = stack_head->next;
-
+	update_global_current_var(stack_head);
     stack_head->call.on_enter();
 }
 
 void statesystem_pop_state(void *unused)
 {
     State *temp = stack_head;
+	update_global_current_var(stack_head);
     stack_head->call.on_leave();
     stack_head = stack_head->prev;
     temp->prev = NULL;
     stack_head->next = NULL;
+	update_global_current_var(stack_head);
     stack_head->call.on_enter();
 }
 
@@ -170,23 +192,21 @@ void statesystem_set_state(STATE_ID state_id)
 {
 	State *stack_next, *state = stack_tail;
 
-
 	while (state) {
 		state->prev = NULL;
 		stack_next = state->next;
 		state->next = NULL;
+		update_global_current_var(state);
 	    state->call.on_leave();
 		state = stack_next;
 	}
 
 	state = (State *) state_id;
-
-	current_objects = state->objects;
-	current_particles = state->particles;
-    state->call.on_enter();
     state->time_alive = 0;
     stack_head = state;
     stack_tail = state;
+    update_global_current_var(state);
+    state->call.on_enter();
 }
 
 static void update_instances(instance *obj, void *data)
@@ -198,14 +218,17 @@ static void update_instances(instance *obj, void *data)
 
 void statesystem_update(void)
 {
-	current_view = NULL; //llist_first(stack_head->cameras);
+	current_view = NULL;
 	/* state pre-update */
-	if (stack_head->call.pre_update) {
-		stack_head->call.pre_update();
+	State *state = stack_head;
+
+	update_global_current_var(state);
+	if (state->call.pre_update) {
+		state->call.pre_update();
 	}
 
 	/* UPDATE IN-GAME TOUCHABLES */
-	LList game_touchies = stack_head->touch_objects;
+	LList game_touchies = state->touch_objects;
 	llist_begin_loop(game_touchies);
 	while(llist_hasnext(game_touchies)) {
 		void *touchy = llist_next(game_touchies);
@@ -214,9 +237,9 @@ void statesystem_update(void)
 	llist_end_loop(game_touchies);
 
 	/* UPDATE HUD TOUCHABLES */
-	llist_begin_loop(stack_head->cameras);
-	while(llist_hasnext(stack_head->cameras)) {
-		view * cam = llist_next(stack_head->cameras);
+	llist_begin_loop(state->cameras);
+	while(llist_hasnext(state->cameras)) {
+		view * cam = llist_next(state->cameras);
 		if (!cam->enabled)
 			continue;
 		LList view_touchies = cam->touch_objects;
@@ -227,43 +250,44 @@ void statesystem_update(void)
 		}
 		llist_end_loop(view_touchies);
 	}
-	llist_end_loop(stack_head->cameras);
+	llist_end_loop(state->cameras);
 
 
 	/* inner state update */
-	if (stack_head->inner_states > 0
-			&& stack_head->inner_update[stack_head->current_inner_state]) {
-		stack_head->inner_update[stack_head->current_inner_state]();
+	if (state->inner_states > 0
+			&& state->inner_update[state->current_inner_state]) {
+		state->inner_update[state->current_inner_state]();
 	}
 
 	/* update objects */
-	//TODO check object system
-	if (stack_head->objects_enabled) {
-		instance_iterate(update_instances, NULL);
+	if (current_objects && current_space) {
+		if (state->objects_enabled) {
+			instance_iterate(update_instances, NULL);
 
-		/* update Chipmunk */
-		//TODO check object system
-		accumulator += dt;
-		while (accumulator >= phys_step) {
-			cpSpaceStep(stack_head->objects->space, phys_step);
-			accumulator -= phys_step;
+			/* update Chipmunk */
+			//TODO check object system
+			accumulator += dt;
+			while (accumulator >= phys_step) {
+				cpSpaceStep(current_space, phys_step);
+				accumulator -= phys_step;
+			}
+		} else {
+			cpSpaceStep(current_space, 0);
 		}
-	} else if (stack_head->objects){
-		cpSpaceStep(stack_head->objects->space, 0);
 	}
 
 	/* update particle system */
-	if (stack_head->particles_enabled) {
+	if (state->particles_enabled && current_particles) {
 		particles_update(current_particles);
 	}
 
 	/* state post update */
-	if (stack_head->call.post_update) {
-		stack_head->call.post_update();
+	if (state->call.post_update) {
+		state->call.post_update();
 	}
 
 	/* update all lists and remove all dead objects */
-	if (stack_head->objects_enabled) {
+	if (state->objects_enabled && current_objects) {
 		void instance_poststep(void);
 		instance_poststep();
 	}
@@ -289,6 +313,7 @@ void statesystem_draw(void)
 	/* render all states in stack */
     State *state = stack_tail;
     while(state){
+    	update_global_current_var(state);
     	/* render current state */
     	state_beeing_rendered = state->id;
     	draw_push_matrix();
@@ -309,15 +334,15 @@ void statesystem_draw(void)
 
     		draw_push_matrix();
     		/* draw all objects */
-    		if (state->objects) {
+    		if (current_objects) {
     			instance_iterate(render_instances, NULL);
     			debugdraw_space(current_space);
     		}
     		draw_pop_matrix();
 
     		draw_push_matrix();
-    		if (state->particles_enabled)  {
-    			particles_draw(state->particles); //TODO render from layers
+    		if (state->particles_enabled && current_particles)  {
+    			particles_draw(current_particles); //TODO render from layers
     		}
     		draw_pop_matrix();
 
@@ -401,8 +426,7 @@ void statesystem_pause(void)
 static void statesystem_free(STATE_ID state_id)
 {
 	State *state = (State *) state_id;
-	current_objects = state->objects;
-	current_particles = state->particles;
+	update_global_current_var(state);
 
 	if(state->call.destroy){
 		state->call.destroy();
@@ -416,6 +440,8 @@ static void statesystem_free(STATE_ID state_id)
 	objectsystem_free(state->objects);
 	particlesystem_free(state->particles);
 	state->particles = NULL;
+	state->objects = NULL;
+	update_global_current_var(state);
 
 	//free buttons and other touchable objects
 	llist_destroy(state->touch_objects);

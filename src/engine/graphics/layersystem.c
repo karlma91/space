@@ -211,29 +211,20 @@ void state_set_layer_parallax(STATE_ID state_id, int layer, float factor, float 
 //TODO detect change inside current_batch() method? by storing last values inside layersystem
 static render_batch *current_batch(int layer)
 {
-	STATE_ID state_id = statesystem_get_render_state();
-
 	if (layer >= MAX_LAYERS ){
 		SDL_Log("too_many_layers");
 		return NULL;
 	}
 
-	//layer_system *ls =state_get_layersystem(state_id);
-	//if(check_bounds(ls, layer)){
-	//	return NULL;
-	//}
-
 	/* current layer */
 	LList ll_blend = get_blend_modes(layer);
-
 	Blend current_blend = draw_get_current_blend();
-
 	max_layers = layer >= max_layers ? layer + 1 : max_layers;
 
 	blend_tree *blend_texs = NULL;
 
 	/* search for existing blend mode */
-	llist_begin_loop(ll_blend);
+	llist_begin_loop(ll_blend); //TODO use array instead of llist?
 	while(llist_hasnext(ll_blend)) {
 		blend_tree *blend_mode = llist_next(ll_blend);
 		if (blend_mode->type.dst_factor == current_blend.dst_factor &&

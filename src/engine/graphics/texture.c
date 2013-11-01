@@ -15,7 +15,7 @@
 #define TEXTURE_RESOLUTION ""
 #endif
 
-#define MAX_IMAGE_BUFFER 7864320 /* ( 0.7 MiB) NB! make sure it is enough RAM to hold buffer */
+#define MAX_IMAGE_BUFFER 786432 /* ( 0.7 MiB) NB! make sure it is enough RAM to hold buffer */
 
 int TEX_WHITE;
 int TEX_GLOW_DOT;

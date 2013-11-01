@@ -278,8 +278,8 @@ static void post_update(void)
 		space_next_level(NULL);
 		keys[SDL_SCANCODE_F9] = 0;
 	} else if (keys[SDL_SCANCODE_F8]) {
-		if (player1) instance_destroy(player1);
-		if (player2) instance_destroy(player2);
+		if (player1) instance_destroy((instance *)player1);
+		if (player2) instance_destroy((instance *)player2);
 		keys[SDL_SCANCODE_F8] = 0;
 	}
 }
