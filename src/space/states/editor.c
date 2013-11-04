@@ -49,7 +49,6 @@ void editor_init()
 	}
 
 	state_enable_objects(state_editor, 1);
-	state_enable_objects(state_editor, 0);
 	state_enable_particles(state_editor, 1);
 
 	cpSpaceSetGravity(current_space, cpv(0, 0));
@@ -130,14 +129,16 @@ static int dragged;
 static int touch_down(touchable *t, SDL_TouchFingerEvent *finger)
 {
 	float zoom = current_view->zoom;
-	prev = cpvmult(cpv(finger->x, finger->y), 1/zoom);
+	prev = camera_inv_vect_view2world(current_view, cpv(finger->x, finger->y));
+	prev = cpvmult(prev, 1/zoom);
 	dragged = 0;
 }
 
 static int touch_motion(touchable *t, SDL_TouchFingerEvent *finger)
 {
 	float zoom = current_view->zoom;
-	cpVect pos = cpvmult(cpv(finger->x, finger->y), 1/zoom);
+	cpVect pos = camera_inv_vect_view2world(current_view, cpv(finger->x, finger->y));
+	pos = cpvmult(pos, 1/zoom);
 	cpVect delta = cpvsub(prev, pos);
 	prev = pos;
 	cpVect vpos = current_view->p;
@@ -147,8 +148,7 @@ static int touch_motion(touchable *t, SDL_TouchFingerEvent *finger)
 
 static int touch_up(touchable *t, SDL_TouchFingerEvent *finger)
 {
-	cpVect pos;
-	pos = camera_vect_view2world(current_view, cpv(finger->x, finger->y));
+	cpVect pos = cpv(finger->x, finger->y);
 	if(!dragged) {
 		instance_create(obj_id_tank, &tmp_tank_param,pos, cpvzero);
 	}

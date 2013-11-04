@@ -80,6 +80,7 @@ void view_transform2view(view *cam)
 	draw_scale(cam->zoom * cam->ratio, cam->zoom);
 	draw_rotate(cam->rotation);
 	draw_translatev(cpvneg(cam->p));
+	cam->priv_view_transform = matrix2d_get();
 }
 
 void view_transform2port(view *cam)
@@ -173,9 +174,15 @@ cpVect camera_vect_view2world(view* cam, cpVect p)
 	if(cam == NULL){
 		return p;
 	}
-	float zoom = cam->zoom;
-	p = cpvmult(p, 1/zoom);
-	p = cpvadd(p, current_view->p);
+	p = matrix2d_multcpv(cam->priv_view_invtransform, p);
+	return p;
+}
+cpVect camera_inv_vect_view2world(view* cam, cpVect p)
+{
+	if(cam == NULL){
+		return p;
+	}
+	p = matrix2d_multcpv(cam->priv_view_transform, p);
 	return p;
 }
 

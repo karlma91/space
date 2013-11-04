@@ -96,6 +96,11 @@ static void draw(void)
 
 	draw_box(1, a, b, r, 1);
 
+	bmfont_center(FONT_NORMAL, cpv(0,0),1,"Middle\nCentererer\nadl\n%d", 123);
+	bmfont_left(FONT_NORMAL, cpv(500,0),10,"Left\nleftileft\ntest\n");
+	bmfont_right(FONT_NORMAL, cpv(0,-300),1,"Right\nrightirigthi\nsuplado\n");
+	bmfont_right(FONT_BIG, cpv(0,300),1,"the quick brown fox jumps over the lazy dog\nthe Quick brown fox JumPed over the lazY doG");
+
 	//cpVect pos = {0,0.7f*GAME_HEIGHT/2};
 	//draw_texture(tex_title, &pos, TEX_MAP_FULL, 1200, 300, 0);
 
@@ -143,7 +148,7 @@ void stations_init(void)
 
 	view* main_view = state_view_get(state_stations, 0);
 
-	btn_home = button_create(SPRITE_PLAYER, 0, "", 0, 0, 250, 250);
+	btn_home = button_create(SPRITE_GEAR, 0, "", 0, 0, 250, 250);
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
