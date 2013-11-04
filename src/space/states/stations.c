@@ -33,6 +33,8 @@ static tween *testr;
 static cpVect a, b;
 static float r;
 
+view *main_view;
+
 /* * * * * * * * * *
  * state functions *
  * * * * * * * * * */
@@ -54,6 +56,12 @@ static void pre_update(void)
     test = tween_cpv_is_done_remove(test, &a);
     tests = tween_cpv_is_done_remove(tests, &b);
     testr = tween_float_is_done_remove(testr, &r);
+
+	if(keys[SDL_SCANCODE_PAGEUP]){
+		main_view->zoom *= 1 + 1 * dt;
+	} else if(keys[SDL_SCANCODE_PAGEDOWN]) {
+		main_view->zoom *= 1/(1 + 1 * dt);
+	}
 }
 
 static void post_update(void)
@@ -86,13 +94,6 @@ static void draw(void)
 		//TODO skrive antall levler klart?
 	}
 	*/
-
-
-	if(keys[SDL_SCANCODE_PAGEUP]){
-		current_view->zoom *= 1 + 1 * dt;
-	} else if(keys[SDL_SCANCODE_PAGEDOWN]) {
-		current_view->zoom *= 1/(1 + 1 * dt);
-	}
 
 	draw_box(1, a, b, r, 1);
 
@@ -146,7 +147,7 @@ void stations_init(void)
 	Color col_back = {255,255,255,255};
 	//Color col_text = {1,1,1,1};
 
-	view* main_view = state_view_get(state_stations, 0);
+	main_view = state_view_get(state_stations, 0);
 
 	btn_home = button_create(SPRITE_GEAR, 0, "", 0, 0, 250, 250);
 	button_set_callback(btn_home, open_upgrades, 0);
