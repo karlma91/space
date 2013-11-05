@@ -11,6 +11,8 @@
 #include "../engine.h"
 #include "../data/llist.h"
 #include "../graphics/draw.h"
+#include "../graphics/bmfont.h"
+#include "../../space/game.h"
 #include "we_utils.h"
 
 #define THIS_IS_A_TOUCH_OBJECT 1
@@ -222,7 +224,8 @@ static void render(button btn_id)
 		draw_color(btn->frontcol);
 
 		setTextSize(height / 4 * scale);
-		font_drawText(0, x, y + 12 * scale, btn->label);
+		//font_drawText(0, x, y + 12 * scale, btn->label);
+		bmfont_center(FONT_NORMAL, cpv(x, y), 1, "%s", btn->label);
 	}
 }
 

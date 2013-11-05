@@ -64,10 +64,12 @@ void sprite_init(void)
 	readln(); //filter: Mag,Min
 	readln(); //repeat: x/y/xy
 
+#if TARGET_OS_IPHONE //TODO check ext if current gpu supports pvrt1_4bpp
 	char *suffix = memchr(texname, '.', line_size);
 	if (strcmp(suffix, ".png") == 0) {
 		strcpy(suffix, ".pvr");
 	}
+#endif
 
 	//TODO get texture id
 	int tex_id = texture_load(texname);

@@ -26,6 +26,7 @@ struct view {
     cpVect p;
     float zoom;
     float rotation;
+    matrix2d priv_view_transform;
     matrix2d priv_view_invtransform;
 
     view_render GUI;
@@ -43,4 +44,6 @@ void view_update(view *cam, cpVect pos, float rot);
 void view_update_zoom(view *cam, cpVect pos, float level_height);
 void view_free(view *c);
 cpVect camera_vect_view2world(view* cam, cpVect p);
+cpVect camera_inv_vect_view2world(view* cam, cpVect p);
+
 #endif

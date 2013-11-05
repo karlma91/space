@@ -9,6 +9,9 @@
 #include "../data/llist.h"
 #include "../io/waffle_utils.h"
 
+#include "../graphics/draw.h"
+#include "../graphics/texture.h"
+
 LList font_list;
 
 #define FILE_BUFFER_SIZE 16384
@@ -32,7 +35,6 @@ bm_font * bmfont_read_font(char *filename)
     sprintf(fileread,"bmfont/%s",filename);
 
     bm_font *f = (bm_font*)calloc(1,sizeof *f);
-    f->scale = 1;
 
     int filesize = waffle_read_file(fileread, &buffer[0], FILE_BUFFER_SIZE);
 
@@ -85,84 +87,119 @@ bm_font * bmfont_read_font(char *filename)
 }
 
 
+static int get_line_width(bm_font *font, char * text) {
+	int width = 0;
+	while(*text != '\n' && *text != '\0') {
+		if(*text == ' ') {
+			width += 16;
+		} else {
+			bm_char * c = &(font->chars[*text]);
+			width += (c->x_advance);
+		}
+		text++;
+	}
+	return width;
+}
+
+
 static void draw_char(bm_font *f, bm_char *c)
 {
 
-    GLfloat quad[8] = {c->x_offset, c->y_offset,
-            c->x_offset+c->w,   c->y_offset,
-            c->x_offset,  c->y_offset+c->h,
-            c->x_offset+c->w,  c->y_offset+c->h};
+	float quad[8] = {0, 0,
+					   c->w, 0,
+					   0, c->h,
+					   c->w, c->h};
+
     float ty = 1.0f*c->y / f->tex_h;
     float ty2 = 1.0f*(c->y+ c->h) / f->tex_h;
 
-
     float tx = 1.0f*c->x / f->tex_w;
     float tx2 = 1.0f*(c->x + c->w) / f->tex_w;
-    GLfloat tex_map[8] = {tx,                  ty,
-                         tx2,          ty,
-                          tx,                 ty2,
-                         tx2,         ty2};
+    GLfloat tex_map[8] = {tx,         ty2,
+                         tx2,         ty2,
+                          tx,         ty,
+                         tx2,         ty};
 
     //SDL_Log("ID: %d X: %d, y: %d, w: %d, h: %d, texh: %d, texw: %d",c->id, c->x, c->y, c->w, c->h, f->tex_h, f->tex_w);
 
-   // cpVect pos = cpv(c->x_offset,c->y_offset);
-	//cpVect pos = cpv(0,0);
-	draw_quad_new(0, quad, tex_map);
-    //draw_current_texture(&pos,tex_map,c->w,c->h,0);
-    //draw_current_texture_all(&pos,tex_map,1,1,0,quad);
-    draw_translate(c->x_advance - c->x_offset,0);
+    cpVect pos = cpv(c->x_offset,(f->line_height - c->h)-c->y_offset);
+    draw_push_matrix();
+    draw_translatev(pos);
+    draw_quad_new(0, quad, tex_map);
+    draw_pop_matrix();
+    draw_translate(c->x_advance,0);
+   // draw_translate(c->x_advance - c->x_offset,0);
 }
 
-void bmfont_render(bm_font *font, int align, float x, float y, char *format, ...)
+void bmfont_left(bm_font *font, cpVect pos, float scale, char *format, ...)
 {
-    va_list     ap;
-    char text[100];
-    if (!strlen(format)) return;
+    if (!format || format[0] == '\0') return;
+    char text[BMFONT_MAXLEN];
+    va_list ap; va_start(ap, format); vsnprintf(text, BMFONT_MAXLEN, format, ap); va_end(ap);
+    bmfont_render(font, BMFONT_LEFT,pos.x,pos.y,scale,text);
+}
 
-    va_start(ap, format);
-    vsprintf(text, format, ap);
-    va_end(ap);
-    texture_bind_virt(font->tex_id);
+void bmfont_center(bm_font *font, cpVect pos, float scale, char *format, ...)
+{
+    if (!format || format[0] == '\0') return;
+    char text[BMFONT_MAXLEN];
+    va_list ap; va_start(ap, format); vsnprintf(text, BMFONT_MAXLEN, format, ap); va_end(ap);
+    bmfont_render(font, BMFONT_CENTER,pos.x,pos.y,scale,text);
+}
+
+void bmfont_right(bm_font *font, cpVect pos, float scale, char *format, ...)
+{
+    if (!format || format[0] == '\0') return;
+    char text[BMFONT_MAXLEN];
+    va_list ap; va_start(ap, format); vsnprintf(text, BMFONT_MAXLEN, format, ap); va_end(ap);
+    bmfont_render(font, BMFONT_RIGHT,pos.x,pos.y,scale,text);
+}
+
+void bmfont_render(bm_font *font, int align, float x, float y, float scale, char *text)
+{
+    int line_width = get_line_width(font, text);
+
     draw_push_matrix();
-    draw_load_identity();
+    draw_translate(x,y);
+    draw_scale(scale, scale);
+    draw_translate(0,font->base-font->line_height);
+
+    texture_bind_virt(font->tex_id);
+
+	if (align == BMFONT_CENTER) {
+		draw_translate(-(line_width/2.0f), 0);
+	}else if(align == BMFONT_RIGHT) {
+		draw_translate(-(line_width), 0);
+	}
     int i = 0;
-    int text_width = 0;;
     while(1){
-        if(text[i] == '\n' || text[i] == '\0'){
-            if(align == 0){
-                flush_line(font, text_width, x, y);
-                text_width = 0;
-            }else{
-                flush_line(font, 0, x, y);
-            }
-            draw_load_identity();
-            if(text[i] == '\0'){
-                break;
-            }else{
-                draw_translate(0, font->line_height);
-            }
-        }else if(text[i] != ' '){
-            bm_char * c = &(font->chars[text[i]]);
+    	if(text[i] == '\n'){
+    		switch(align) {
+    		case BMFONT_LEFT:
+    			draw_translate(-(line_width), 0);
+    			line_width = get_line_width(font, &text[i+1]);
+    			break;
+    		case BMFONT_CENTER:
+    			draw_translate(-(line_width/2), 0);
+    			line_width = get_line_width(font, &text[i+1]);
+    			draw_translate(-(line_width/2), 0);
+    			break;
+    		case BMFONT_RIGHT:
+    			line_width = get_line_width(font, &text[i+1]);
+    			draw_translate(-(line_width), 0);
+    			break;
+    		}
+            draw_translate(0, -font->line_height);
+        } else if (text[i] == '\0') {
+        	break;
+        } else if (text[i] != ' ') {
+            bm_char * c = &(font->chars[(int)text[i]]);
             draw_char(font, c);
-            text_width+= (c->x_advance - c->x_offset);
-        }else{
+        } else {
             draw_translate(16,0);
-            text_width+=16;
         }
         i++;
     }
-    draw_pop_matrix();
-}
-
-static void flush_line(bm_font *font, float text_width, float x, float y)
-{
-    draw_push_matrix();
-    draw_load_identity();
-    draw_translate(x-(text_width/2.0f)*font->scale, y);
-    draw_scale(font->scale,-font->scale);
-    //draw_flush_and_multiply(); //TODO FIXME
-    //draw_flush(); //TODO FIXME multiply removed!
-    //SDL_Log("bmfont.c render not implemented!");
     draw_pop_matrix();
 }
 
