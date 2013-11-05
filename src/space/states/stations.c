@@ -77,10 +77,7 @@ static void draw(void)
 
 	//cpVect full = cpv(GAME_WIDTH, GAME_HEIGHT);
 	draw_color4f(1,1,1,1);
-	float xoffset = scroll_get_xoffset(scroller);
-	float yoffset = scroll_get_yoffset(scroller);
-
-	cpVect offset = cpv(xoffset, yoffset);
+	cpVect offset = scroll_get_offset(scroller);
 	view_update(current_view, offset, 0);
 	//0.5 - 0.49*cosf(engine_time * WE_2PI/3);
 
@@ -179,6 +176,7 @@ void stations_init(void)
 	state_register_touchable_view(main_view, btn_settings);
 
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000); // max 4 000 gu / sec
+	scroll_set_bounds(scroller, cpBBNew(-GAME_WIDTH, -GAME_HEIGHT, GAME_WIDTH, GAME_HEIGHT));
 	state_register_touchable(this, scroller);
 
 	state_add_layers(state_stations, 10);

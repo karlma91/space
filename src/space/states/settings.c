@@ -65,19 +65,17 @@ static void post_update(void)
 
 static void draw(void)
 {
-	float yoffset = scroll_get_yoffset(scroller);
-
-	draw_load_identity();
+	float yoffset = -scroll_get_yoffset(scroller);
 
 	draw_color4f(0,0,0,0.5f);
-	draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
+	draw_box(1, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 	draw_color4f(0.1,0.1,0.3,1);
-	draw_box(3, cpvzero,cpv(SCROLL_WIDTH,GAME_HEIGHT),0,1);
+	draw_box(2, cpvzero,cpv(SCROLL_WIDTH,GAME_HEIGHT),0,1);
 
 	draw_color4f(1,1,1,1);
 	setTextSize(70);
 	setTextAlign(TEXT_CENTER);
-	font_drawText(RLAY_GUI_FRONT, 0, GAME_HEIGHT/2 - 80 + yoffset, "SETTINGS");
+	font_drawText(0, 0, GAME_HEIGHT/2 - 80 + yoffset, "SETTINGS");
 
 	int i;
 	for (i = 0; i < OPTION_COUNT; i++) {
@@ -173,7 +171,7 @@ void settings_init(void)
 
 	int i;
 	for (i = 0; i < OPTION_COUNT; i++) {
-		btn_options[i] = button_create(SPRITE_BTN_PUSH, 1, str_options[i], -1,-1, 800, 115);
+		btn_options[i] = button_create(SPRITE_BTN_PUSH, 1, str_options[i], 0, 0, 800, 115);
 		button_set_callback(btn_options[i], (void (*)(void *))option_click, NULL + i);
 		button_set_hotkeys(btn_options[i], digit2scancode[(i+1) % 10], 0);
 		state_register_touchable(this, btn_options[i]);
@@ -195,6 +193,7 @@ void settings_init(void)
 	btn_options[OPT_DELETE]->enabled = 0;
 
 	scroller = scroll_create(0,0,SCROLL_WIDTH,GAME_HEIGHT, 0.95, GAME_HEIGHT);
+	scroll_set_bounds(scroller, cpBBNew(0, -GAME_HEIGHT/2, 0, 0));
 	state_register_touchable(state_settings, scroller);
 
 	btn_back = button_create(NULL, 0, "", 0,0,GAME_WIDTH,GAME_HEIGHT);

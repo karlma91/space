@@ -63,7 +63,12 @@ bm_font * bmfont_read_font(char *filename)
     	}else if(TESTNAME("page")){
     		char *(texture[1]);
     		parse_string(node,"file",texture);
-    		f->tex_id = texture_load(*texture);
+    		char temp[40];
+    		sscanf(*texture, "%s_0.png", temp);
+    		SPRITE_ID S_ID = sprite_link("arial");
+    		if(S_ID) {
+    			sprite_create(&f->s,S_ID,f->tex_w, f->tex_w,1);
+    		}
     	}else if(TESTNAME("chars")){
     		int count;
     		parse_int(node,"count",&(count));
@@ -101,20 +106,33 @@ static int get_line_width(bm_font *font, char * text) {
 	return width;
 }
 
+static float map(float s, float b1, float b2)
+{
+    return b1 + s*(b2 - b1);
+}
 
 static void draw_char(bm_font *f, bm_char *c)
 {
+	float sub_map[8];
+	sprite_get_current_image(&f->s, sub_map);
 
 	float quad[8] = {0, 0,
 					   c->w, 0,
 					   0, c->h,
 					   c->w, c->h};
 
-    float ty = 1.0f*c->y / f->tex_h;
-    float ty2 = 1.0f*(c->y+ c->h) / f->tex_h;
+	float sx_1 = sub_map[0];
+	float sx_2 = sub_map[2];
+	float sy_1 = sub_map[5];
+	float sy_2 = sub_map[1];
 
-    float tx = 1.0f*c->x / f->tex_w;
-    float tx2 = 1.0f*(c->x + c->w) / f->tex_w;
+    float tx = map(1.0f*c->x / f->tex_w, sx_1, sx_2);
+    float tx2 = map(1.0f*(c->x + c->w) / f->tex_w, sx_1, sx_2);
+    float ty = map(1.0f*c->y / f->tex_h,  sy_1, sy_2);
+    float ty2 = map(1.0f*(c->y+ c->h) / f->tex_h,   sy_1, sy_2);
+
+
+
     GLfloat tex_map[8] = {tx,         ty2,
                          tx2,         ty2,
                           tx,         ty,
@@ -164,7 +182,7 @@ void bmfont_render(bm_font *font, int align, float x, float y, float scale, char
     draw_scale(scale, scale);
     draw_translate(0,font->base-font->line_height);
 
-    texture_bind_virt(font->tex_id);
+    //texture_bind_virt(font->tex_id);
 
 	if (align == BMFONT_CENTER) {
 		draw_translate(-(line_width/2.0f), 0);
