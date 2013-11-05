@@ -232,8 +232,6 @@ void draw_line_tex(int layer, int tex_id, float *tex_map, cpVect a, cpVect b, fl
 	float dy = b.y-a.y;
 
     draw_push_matrix();
-    draw_push_matrix();
-
     draw_translate(a.x, a.y);
 	draw_rotate(atan2f(dy,dx));
 	GLfloat length = hypotf(dy, dx);

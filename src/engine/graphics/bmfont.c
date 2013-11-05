@@ -61,14 +61,12 @@ bm_font * bmfont_read_font(char *filename)
     		parse_int(node,"scaleW",&(f->tex_w));
     		parse_int(node,"scaleH",&(f->tex_h));
     	}else if(TESTNAME("page")){
-    		char *(texture[1]);
-    		parse_string(node,"file",texture);
-    		char temp[40];
-    		sscanf(*texture, "%s_0.png", temp);
-    		SPRITE_ID S_ID = sprite_link("arial");
-    		if(S_ID) {
-    			sprite_create(&f->s,S_ID,f->tex_w, f->tex_w,1);
-    		}
+    		char *texture[1];
+    		parse_string(node,"file", texture);
+    		char *suffix = strchr(texture[0], '.');
+    		if (suffix) *suffix = '\0'; /* removes suffix */
+    		fprintf(stderr, "DEUBUG: font name loading: %s\n", texture[0]);
+    		f->spr_id = sprite_link(texture[0]);
     	}else if(TESTNAME("chars")){
     		int count;
     		parse_int(node,"count",&(count));
@@ -113,32 +111,15 @@ static float map(float s, float b1, float b2)
 
 static void draw_char(bm_font *f, bm_char *c)
 {
-	float sub_map[8];
-	sprite_get_current_image(&f->s, sub_map);
+	sprite_subimg subimg = sprite_get_subimg(f->spr_id);
+	float quad[8] = {0, 0, c->w, 0, 0, c->h, c->w, c->h};
 
-	float quad[8] = {0, 0,
-					   c->w, 0,
-					   0, c->h,
-					   c->w, c->h};
+    float tx0 = map(1.0f*c->x / f->tex_w, subimg.x1, subimg.x2);
+    float tx1 = map(1.0f*(c->x + c->w) / f->tex_w, subimg.x1, subimg.x2);
+    float ty0 = map(1.0f*c->y / f->tex_h,  subimg.y1, subimg.y2);
+    float ty1 = map(1.0f*(c->y+ c->h) / f->tex_h,   subimg.y1, subimg.y2);
 
-	float sx_1 = sub_map[0];
-	float sx_2 = sub_map[2];
-	float sy_1 = sub_map[5];
-	float sy_2 = sub_map[1];
-
-    float tx = map(1.0f*c->x / f->tex_w, sx_1, sx_2);
-    float tx2 = map(1.0f*(c->x + c->w) / f->tex_w, sx_1, sx_2);
-    float ty = map(1.0f*c->y / f->tex_h,  sy_1, sy_2);
-    float ty2 = map(1.0f*(c->y+ c->h) / f->tex_h,   sy_1, sy_2);
-
-
-
-    GLfloat tex_map[8] = {tx,         ty2,
-                         tx2,         ty2,
-                          tx,         ty,
-                         tx2,         ty};
-
-    //SDL_Log("ID: %d X: %d, y: %d, w: %d, h: %d, texh: %d, texw: %d",c->id, c->x, c->y, c->w, c->h, f->tex_h, f->tex_w);
+    GLfloat tex_map[8] = {tx0, ty1, tx1, ty1, tx0, ty0, tx1, ty0};
 
     cpVect pos = cpv(c->x_offset,(f->line_height - c->h)-c->y_offset);
     draw_push_matrix();
@@ -146,7 +127,6 @@ static void draw_char(bm_font *f, bm_char *c)
     draw_quad_new(0, quad, tex_map);
     draw_pop_matrix();
     draw_translate(c->x_advance,0);
-   // draw_translate(c->x_advance - c->x_offset,0);
 }
 
 void bmfont_left(bm_font *font, cpVect pos, float scale, char *format, ...)

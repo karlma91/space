@@ -26,7 +26,7 @@ typedef struct _bm_font{
     int         tex_w;
     int         tex_h;
     int         tex_id;
-    sprite s;
+    SPRITE_ID   spr_id;
     bm_char     chars[256];
     float       mmat[16];
 } bm_font;
