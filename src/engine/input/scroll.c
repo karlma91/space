@@ -5,6 +5,7 @@
  *      Author: Mathias
  */
 #include "scroll.h"
+#include "../state/statesystem.h"
 #include "../engine.h"
 #include "../data/llist.h"
 
@@ -15,17 +16,17 @@
 typedef struct {
 	touchable touch_data;
 
+	int have_bounds;
+	cpBB bounds;
+
 	float friction;
 	int scrolling;
 	float max_speed;
 
 	SDL_FingerID finger_1, finger_2;
 
-	float hs;
-	float vs;
-
-	float x_offset;
-	float y_offset;
+	cpVect speed;
+	cpVect offset;
 
 	SDL_Scancode key_left, key_up, key_right, key_down;
 
@@ -41,20 +42,21 @@ static void update(touchable * scr_id)
 {
 	scroll_priv * scr = (scroll_priv *) scr_id;
 
-	float spd = scr->max_speed * 0.8*dt;
+	float spd = scr->max_speed * 0.8 * dt;
 
-	scr->x_offset +=  (keys[scr->key_left] - keys[scr->key_right]) * spd;
-	scr->y_offset +=  (keys[scr->key_down] - keys[scr->key_up]) * spd;
+	scr->offset.x +=  (keys[scr->key_left] - keys[scr->key_right]) * spd;
+	scr->offset.y +=  (keys[scr->key_down] - keys[scr->key_up]) * spd;
 
 	if (!scr->scrolling) {
-		scr->x_offset += scr->hs;
-		scr->y_offset += scr->vs;
+		scr->offset = cpvadd(scr->offset, scr->speed);
 	} else {
-		scr->hs *= scr->friction;
-		scr->vs *= scr->friction;
+		scr->speed = cpvmult(scr->speed, scr->friction);
 	}
-	scr->hs *= scr->friction;
-	scr->vs *= scr->friction;
+	scr->speed = cpvmult(scr->speed, scr->friction);
+	if (scr->have_bounds) {
+		scr->offset = cpBBClampVect(scr->bounds, scr->offset);
+	}
+
 }
 
 static void render(touchable * scr_id)
@@ -72,8 +74,7 @@ static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	if (INSIDE(scr, tx, ty)) {
 		scr->finger_1 = finger->fingerId;
 
-		scr->hs = 0;
-		scr->vs = 0;
+		scr->speed = cpvzero;
 
 		llist_add(active_fingers, (void *)finger->fingerId);
 
@@ -92,8 +93,7 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	if (!llist_contains(active_fingers, finger->fingerId)) {
 		scr->finger_1 = finger->fingerId;
 
-		scr->hs = 0;
-		scr->vs = 0;
+		scr->speed = cpvzero;
 
 		llist_add(active_fingers, (void *)finger->fingerId);
 	} else if (scr->finger_1 != finger->fingerId) {
@@ -101,24 +101,12 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	}
 
 	scr->scrolling = 1;
-
 	//TODO get actual width and height (TODO ta hensyn til kameraviews)
-	float dx = finger->dx * scr_id->get.width;
-	float dy = -finger->dy * scr_id->get.height;
+	float zoom = current_view->zoom;
+	cpVect delta = cpv(-finger->dx*scr_id->get.width / zoom, finger->dy*scr_id->get.height / zoom);
 
-	scr->x_offset += dx;
-	scr->y_offset += dy;
-
-	scr->hs = scr->hs * 0.5 + 0.5 * dx;
-	scr->vs = scr->vs * 0.5 + 0.5 * dy;
-
-	/* limit speed */
-	float speed = hypotf(scr->hs, scr->vs);
-	if (speed > scr->max_speed * dt) {
-		float k = (scr->max_speed * dt) / speed;
-		scr->hs = scr->hs*(k * 0.7 + 0.3);
-		scr->vs = scr->vs*(k * 0.7 + 0.3);
-	}
+	scr->offset = cpvadd(scr->offset, delta);
+	scr->speed = cpvadd(cpvmult(scr->speed, 0.5), cpvmult(delta, 0.5));
 
 	return 1;
 }
@@ -164,10 +152,8 @@ scroll_p scroll_create(float pos_x, float pos_y, float width, float height, floa
 	scr->friction = friction;
 	scr->max_speed = max_speed;
 
-	scr->x_offset = 0;
-	scr->y_offset = 0;
-	scr->hs = 0;
-	scr->vs = 0;
+	scr->offset = cpvzero;
+	scr->speed = cpvzero;
 	scr->scrolling = 0;
 
 	return scr_id;
@@ -176,11 +162,30 @@ scroll_p scroll_create(float pos_x, float pos_y, float width, float height, floa
 float scroll_get_xoffset(scroll_p scr_id)
 {
 	scroll_priv * scr = (scroll_priv *) scr_id;
-	return scr->x_offset;
+	return scr->offset.x;
 }
 
 float scroll_get_yoffset(scroll_p scr_id)
 {
 	scroll_priv * scr = (scroll_priv *) scr_id;
-	return scr->y_offset;
+	return scr->offset.y;
+}
+
+cpVect scroll_get_offset(scroll_p scr_id)
+{
+	scroll_priv * scr = (scroll_priv *) scr_id;
+	return scr->offset;
+}
+
+void scroll_set_offset(scroll_p scr_id, cpVect offset)
+{
+	scroll_priv * scr = (scroll_priv *) scr_id;
+	scr->offset = offset;
+}
+
+void scroll_set_bounds(scroll_p scr_id, cpBB bounds)
+{
+	scroll_priv * scr = (scroll_priv *) scr_id;
+	scr->have_bounds = 1;
+	scr->bounds = bounds;
 }

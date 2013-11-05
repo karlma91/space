@@ -124,26 +124,23 @@ static void render(touchable *t)
 
 }
 
-static cpVect prev;
+static cpVect start;
 static int dragged;
 static int touch_down(touchable *t, SDL_TouchFingerEvent *finger)
 {
-	float zoom = current_view->zoom;
-	prev = camera_inv_vect_view2world(current_view, cpv(finger->x, finger->y));
-	prev = cpvmult(prev, 1/zoom);
+	start = current_view->p;
 	dragged = 0;
 }
 
 static int touch_motion(touchable *t, SDL_TouchFingerEvent *finger)
 {
 	float zoom = current_view->zoom;
-	cpVect pos = camera_inv_vect_view2world(current_view, cpv(finger->x, finger->y));
-	pos = cpvmult(pos, 1/zoom);
-	cpVect delta = cpvsub(prev, pos);
-	prev = pos;
-	cpVect vpos = current_view->p;
-	view_update(current_view, cpvadd(vpos, delta), 0);
-	dragged = 1;
+	cpVect delta = cpv(-finger->dx*GAME_WIDTH / zoom, finger->dy*GAME_HEIGHT / zoom);
+	view_update(current_view, cpvadd(current_view->p, delta), 0);
+
+	if(cpvlength(cpvsub(current_view->p, start)) > 50 / zoom){
+		dragged = 1;
+	}
 }
 
 static int touch_up(touchable *t, SDL_TouchFingerEvent *finger)

@@ -151,6 +151,13 @@ void layersystem_render(STATE_ID state_id, view *cam)
 
 	while (max_layers--) {
 
+		float paralax = 1;
+		float zoom  = 1;
+		layer_ins *lay = alist_get(ls->layers, layer_index);
+		if(lay) {
+			paralax = lay->parallax_factor;
+			zoom = lay->parallax_zoom;
+		}
 		LList *layer_blends = alist_get(render_tree, max_layers);
 		/* iterate blend modes */
 		llist_begin_loop(layer_blends);
@@ -166,6 +173,8 @@ void layersystem_render(STATE_ID state_id, view *cam)
 				render_batch *batch = alist_get(blends->al_tex, tex_index);
 				if (batch && batch->count) {
 					vertex_elem *elems = (vertex_elem*) array_get(batch->elems, 0);
+
+
 
 					//GLES2
 					glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof *elems, &elems[0].x);
