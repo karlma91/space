@@ -544,7 +544,7 @@ static void sticks_hide(void) {
 
 // TODO: REMOVE
 static obj_param_staticpolygon polytest = {
-		.texture = 0,
+		.spr_name = "metal01",
 		.outline = 1,
 		.scale = 700,
 		.texture_scale = 1,
@@ -677,7 +677,6 @@ void space_init_level(int space_station, int deck)
 
 	particles_clear(current_particles);
 
-	polytest.texture = TEX_METAL;
 	polytest.shape_id = POLYSHAPE_TURRET;
 	polytest.texture_scale = 0.4;
 	instance_create(obj_id_staticpolygon, &polytest, cpv(0,800), cpvzero);

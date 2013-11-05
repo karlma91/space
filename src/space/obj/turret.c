@@ -55,6 +55,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	hpbar_init(&turret->hp_bar,turret->param.max_hp,80,20,0,60,&(turret->data.body->p));
 	sprite_create(&turret->data.spr, SPRITE_TURRETBODY001, TURRET_SIZE, TURRET_SIZE, 0);
+	sprite_create(&turret->spr_gun, SPRITE_TURRETGUN001, TURRET_SIZE, TURRET_SIZE, 0);
 }
 
 
@@ -111,10 +112,8 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	}
 
 	draw_color_rgbmulta4f(1,1,1,alpha);
-	sprite_set_index(&turret->data.spr, 0);
 	sprite_render_body(RLAY_GAME_MID, &turret->data.spr, turret->tower);
-	sprite_set_index(&turret->data.spr, 1);
-	sprite_render_body(RLAY_GAME_MID, &turret->data.spr, turret->data.body);
+	sprite_render_body(RLAY_GAME_MID, &turret->spr_gun, turret->data.body);
 
 	hpbar_draw(RLAY_GAME_FRONT, &turret->hp_bar, cpvtoangle(turret->data.body->p));
 }

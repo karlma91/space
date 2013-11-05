@@ -49,8 +49,9 @@ joystick *joystick_create(int persistent, float radius, float min_radius, float 
 	stick->draw_x = stick->pos_x;
 	stick->draw_y = stick->pos_y;
 
+	float ratio = sprite_get_aspect_ratio(spr_front);
 	sprite_create(&(stick->spr_back), spr_back, radius*2, radius*2, 0);
-	sprite_create(&(stick->spr_front), spr_front, radius, radius*2, 0);
+	sprite_create(&(stick->spr_front), spr_front, radius, radius*ratio, 0);
 
 	return stick;
 }
@@ -74,8 +75,9 @@ void joystick_reposition(joystick *stick, float radius, float min_radius, float 
 	stick->draw_x = stick->pos_x;
 	stick->draw_y = stick->pos_y;
 
+	float ratio = sprite_get_aspect_ratio(stick->spr_front.id);
 	sprite_set_size(&(stick->spr_back), radius*2, radius*2);
-	sprite_set_size(&(stick->spr_front), radius, radius*2);
+	sprite_set_size(&(stick->spr_front), radius, radius*ratio);
 }
 
 void joystick_free(joystick *stick)
@@ -200,8 +202,8 @@ static void render(touchable * stick_id)
 		a -= stick->touch_data.container->priv_port_angle;
 	}
 
+	btn_pos = cpvadd(btn_pos, cpvmult(cpvforangle(a+WE_PI_2), stick->spr_front.width * 30/128.0)); //x_offset / sprite_tex_width
 	sprite_render(0, &(stick->spr_front), btn_pos, a);
-	//draw_flush_simple();
 }
 
 static int touch_down(touchable * stick_id, SDL_TouchFingerEvent *finger)

@@ -63,5 +63,5 @@ static void draw_particle_as_score(emitter *em, particle *p)
 static void draw_particle_as_spark(emitter *em, particle *p)
 {
     cpVect pos = p->p;
-    draw_glow_line(pos,cpvadd(pos, cpvmult(p->v, p->size)), p->size);
+    draw_glow_line(pos,cpvadd(pos, cpvmult(p->v, p->size+16)), p->size);
 }

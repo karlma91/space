@@ -30,9 +30,8 @@ GLuint light_buffer, light_texture;
 
 Color rainbow_col[1536];
 
-static int TEX_BAR;
-
-static GLfloat unit_circle[128];
+#define UNIT_CIRCLE_RES 128
+static GLfloat unit_circle[UNIT_CIRCLE_RES];
 //static void draw_render_light_map();
 
 #define DEBUG SDL_Log( "line: %d\n", __LINE__);
@@ -90,17 +89,15 @@ int draw_init(){
 	glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, light_texture, 0);
 #endif
 
-	int i=0,j=0;
-	for(i = 0; i < 128; i += 2) {
-		unit_circle[i] = sinf( 2*M_PI*i / (128-2));
-		unit_circle[i+1] = cosf( 2*M_PI*i / (128-2));
+	int i;
+	for (i=0; i < UNIT_CIRCLE_RES; i+=2) {
+		unit_circle[i] = sinf( WE_2PI*i / (UNIT_CIRCLE_RES-2));
+		unit_circle[i+1] = cosf( WE_2PI*i / (UNIT_CIRCLE_RES-2));
 	}
-
-	TEX_BAR = texture_load("bar.png");
 
 	/* generate rainbow colors */
 	float min_col = 0.2f;
-	Color *c = &rainbow_col[j];
+	Color *c = rainbow_col;
 	for(i=0; i <= 255; i++, c++)
 		c->r = 255, c->g = i, c->b = min_col, c->a = 255;
 	for(i=0; i <= 255; i++, c++)
@@ -120,7 +117,6 @@ int draw_init(){
 void draw_color4b(byte r, byte g, byte b, byte a)
 {
 	if (r != gl_red || g != gl_green || b != gl_blue || a != gl_alpha) {
-		//glColor4ub(r,g,b,a); //TODO There should be no need to call this anymore
 		gl_red = r;
 		gl_green = g;
 		gl_blue = b;
@@ -178,8 +174,6 @@ void draw_pop_color(void)
 void draw_blend(GLenum src_factor, GLenum dst_factor)
 {
 	if (gl_blend_src != src_factor || gl_blend_dst != dst_factor) {
-		//draw_flush(); //TODO There should be no need to call this anymore
-		//glBlendFunc(src_factor, dst_factor); //TODO There should be no need to call this anymore
 		gl_blend_src = src_factor;
 		gl_blend_dst = dst_factor;
 	}
@@ -213,49 +207,27 @@ void draw_disable_tex2d(void) // deprecated method!
 	}
 }
 
-void draw_line(int layer, int tex_id, cpVect a, cpVect b, float w)
+//TODO create stretched sprite polyline render
+
+
+void draw_line_spr_id(int layer, SPRITE_ID id, cpVect a, cpVect b, float w)
 {
-	float dx = b.x-a.x;
-	float dy = b.y-a.y;
-
-	draw_push_matrix();
-	draw_push_blend();
-	draw_translate(a.x, a.y);
-	draw_rotate(atan2f(dy,dx));
-
-	GLfloat length = hypotf(dx,dy);
-	draw_scale(1,w);
-
-	w /=2; // tmp-fix
-
-	GLfloat line_mesh[16] = {-w, -0.5,
-			-w,  0.5,
-			0, -0.5,
-			0,  0.5,
-			length, -0.5,
-			length,  0.5,
-			length+w, -0.5,
-			length+w,  0.5};
-
-	GLfloat line_texture[16] = {0, 0,
-			0,  1,
-			0.5, 0,
-			0.5,  1,
-			0.5, 0,
-			0.5,  1,
-			1, 0,
-			1,  1};
-
-	texture_bind_virt(tex_id);
-	draw_triangle_strip(layer, line_mesh, line_texture, 8);
-
-	draw_pop_blend();
-	draw_pop_matrix();
+	float tex_map[8];
+	sprite_get_first_image(id,tex_map);
+    int tex_id = sprite_get_texture(id);
+	draw_line_tex(layer, tex_id, tex_map, a, b, w);
 }
 
-void draw_sprite_line(int layer, sprite *spr, cpVect a, cpVect b, float w)
+void draw_line_spr(int layer, sprite *spr, cpVect a, cpVect b, float w)
 {
-//#warning Very similair to draw_line!!
+	float tex_map[8];
+	sprite_get_current_image(spr,tex_map);
+    int tex_id = sprite_get_texture(spr->id);
+	draw_line_tex(layer, tex_id, tex_map, a, b, w);
+}
+
+void draw_line_tex(int layer, int tex_id, float *tex_map, cpVect a, cpVect b, float w)
+{
 	float dx = b.x-a.x;
 	float dy = b.y-a.y;
 
@@ -265,22 +237,28 @@ void draw_sprite_line(int layer, sprite *spr, cpVect a, cpVect b, float w)
     draw_translate(a.x, a.y);
 	draw_rotate(atan2f(dy,dx));
 	GLfloat length = hypotf(dy, dx);
-    draw_scale(1,w);
 
     w /=2; // tmp-fix
+    float x0 = 0;
+    float x1 = w;
+    float x2 = length - w;
+    float x3 = length;
 
-    GLfloat line_mesh[16] = {-w, -0.5,
-            -w,  0.5,
-            0, -0.5,
-            0,  0.5,
-            length, -0.5,
-            length,  0.5,
-            length+w, -0.5,
-            length+w,  0.5};
+    if (x1 > x2) {
+    	x1 = length / 2;
+    	x2 = x1;
+    }
 
-    GLfloat tex_map[8];
-    sprite_get_current_image(spr,tex_map);
+    float y0 = -w;
+    float y1 = w;
 
+    GLfloat line_mesh[16] = {
+    		x0, y0, x0, y1,
+            x1, y0, x1, y1,
+            x2, y0, x2, y1,
+            x3, y0, x3, y1};
+
+    //TODO clip inner edges if length < w --> (|||), (||), (|), (), <>, ..
     float tx_1 = tex_map[0];
     float tx_2 = tex_map[2];
     float tx_h = tx_1 + (tx_2-tx_1)/2;
@@ -296,25 +274,29 @@ void draw_sprite_line(int layer, sprite *spr, cpVect a, cpVect b, float w)
             tx_2, ty_1,
             tx_2,  ty_2};
 
-    texture_bind_virt(sprite_get_texture(spr));
+    texture_bind_virt(tex_id);
 	draw_triangle_strip(layer, line_mesh, line_texture, 8);
 
     draw_pop_matrix();
 }
 
-//TODO be able to set blend layers
 void draw_glow_line(cpVect a, cpVect b, float w)
 {
 	draw_push_color();
-	Color col = draw_get_current_color(); col.a = 0;
-	draw_color(col); draw_line(0, TEX_GLOW, a, b, w);
-	draw_color4b(255,255,255,0); draw_line(0, TEX_GLOW_DOT, a, b, w);
+	Color col = draw_get_current_color();
+	col.a = 0;
+	draw_color(col);
+	draw_line_spr_id(0, SPRITE_GLOW, a, b, w);
+	draw_color4b(255,255,255,0);
+	draw_line_spr_id(0, SPRITE_DOT, a, b, w);
 	draw_pop_color();
 }
 
 void draw_quad_line(int layer, cpVect a, cpVect b, float w)
 {
-	texture_bind_virt(TEX_WHITE);
+	float subimg[8];
+	texture_bind_virt(sprite_get_texture(SPRITE_WHITE));
+	sprite_get_first_image(SPRITE_WHITE,subimg);
 	float dx = b.x-a.x;
 	float dy = b.y-a.y;
 
@@ -329,10 +311,8 @@ void draw_quad_line(int layer, cpVect a, cpVect b, float w)
 			length + w, -0.5,
 			length + w,  0.5};
 
-	draw_quad_new(layer, line, TEX_MAP_FULL);
+	draw_quad_new(layer, line, subimg);
 	draw_pop_matrix();
-
-//#warning Very similair to draw_line...
 }
 
 void draw_line_strip(const GLfloat *strip, int l, float w)
@@ -356,27 +336,39 @@ void draw_circle(int layer, cpVect pos, GLfloat radius)
 
 void draw_donut(int layer, cpVect p, GLfloat inner_r, GLfloat outer_r)
 {
-	texture_bind_virt(TEX_WHITE);
+	texture_bind_virt(sprite_get_texture(SPRITE_WHITE));
 	int i = 0;
-	static float v[256];
+	static float v[UNIT_CIRCLE_RES*2];
 	int j = 0;
-	for(i = 0;i<128; i+=2){
+	for(i = 0;i<UNIT_CIRCLE_RES; i+=2){
 		v[j++] = (p.x+unit_circle[i]*inner_r);
 		v[j++] = p.y+unit_circle[i+1]*inner_r;
 		v[j++] = (p.x+unit_circle[i]*outer_r);
 		v[j++] = p.y+unit_circle[i+1]*outer_r;
 	}
-	draw_triangle_strip(layer, v, TEX_MAP_FULL, 128);
+
+	i = 0;
+	static float t[UNIT_CIRCLE_RES*2];
+	sprite_subimg subimg = sprite_get_subimg(SPRITE_WHITE);
+	float tx = (subimg.x1 + subimg.x2) / 2;
+	float ty = (subimg.y1 + subimg.y2) / 2;
+	while (i<UNIT_CIRCLE_RES*2) {
+		t[i++] = tx;
+		t[i++] = ty;
+	}
+	draw_triangle_strip(layer, v, t, UNIT_CIRCLE_RES);
 }
 
 void draw_box(int layer, cpVect p, cpVect s, GLfloat angle, int centered)
 {
-	texture_bind_virt(TEX_WHITE);
+	float subimg[8];
+	texture_bind_virt(sprite_get_texture(SPRITE_WHITE));
+	sprite_get_first_image(SPRITE_WHITE,subimg);
     draw_push_matrix();
     draw_translate(p.x,p.y);
 	draw_rotate(angle);
 	draw_scale(s.x, s.y);
-	draw_quad_new(layer, centered ? triangle_quad : corner_quad, TEX_MAP_FULL);
+	draw_quad_new(layer, centered ? triangle_quad : corner_quad, subimg);
 	draw_pop_matrix();
 }
 
@@ -419,48 +411,52 @@ void draw_bar(int layer, cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFl
 
 	//draw_blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	cpVect rot = cpvforangle(angle);
 	/* hp bar */
 	if (size.x > size.y) {
-		cpVect size_red = {size.x * p, size.y};
-		cpVect size_bar = {size.x * p2, size.y};
+		float width = size.y;
+		float size_red = size.x * p;
+		float size_bar = size.x * p2;
+		pos_org = cpvadd(pos_org, cpvmult(rot, -size.x/2));
 
-		cpVect pos_red = pos_org;//cpvadd(pos_org, cpv(border + width_red/2, border + height/2));
-		cpVect pos_bar = pos_org;//cpvadd(pos_org, cpv(border + width_bar/2, border + height/2));
+		cpVect pos_red = cpvadd(pos_org, cpvmult(rot, size_red));
+		cpVect pos_bar = cpvadd(pos_org, cpvmult(rot, size_bar));
 
-		draw_color4f(1,0,0, 1);
-		//draw_box(x + border, y + border, width_red, height, angle, 0);
-		draw_texture(layer, TEX_BAR, pos_red, TEX_MAP_FULL, size_red, angle);
+		draw_color(COL_RED);
+		draw_line_spr_id(layer, SPRITE_BAR, pos_org, pos_red, width);
 
 		cpFloat pp = p*p;
 		cpFloat pppp = pp*pp;
 		cpFloat p_1 = 1-p;
 
 		draw_color4f(1-pppp*pppp, 0.8-p_1*p_1*0.8 + 0.1, 0.1, 1);
-		//draw_box(x + border, y + border, width_bar, height, angle, 0);
-		draw_texture(layer, TEX_BAR, pos_bar, TEX_MAP_FULL, size_bar, angle);
+		draw_line_spr_id(layer, SPRITE_BAR, pos_org, pos_bar, width);
 
 	} else {
-		cpVect size_bar = {size.y * p, size.x};
-		cpVect pos_bar = pos_org;//cpvadd(pos_org, cpvmult(size, 0.5));
+		rot = cpvperp(rot);
+		float width = size.x;
+		float size_bar = size.y * p;
+		pos_org = cpvadd(pos_org, cpvmult(rot, -size.y/2));
+		cpVect pos_bar = cpvadd(pos_org, cpvmult(rot, size_bar));
 		draw_color4f(1-p,1-p,1,1);
-		draw_texture(layer, TEX_BAR, pos_bar, TEX_MAP_FULL, size_bar, angle + M_PI_2);
+		draw_line_spr_id(layer, SPRITE_BAR, pos_org, pos_bar, width);
 	}
 
 	draw_pop_color();
 	draw_pop_blend();
 }
 
-void draw_polygon_textured(int layer, int count, cpVect *verts, cpVect p, float rotation, float size, float textuer_scale, int texture)
+void draw_polygon_textured(int layer, int count, cpVect *verts, cpVect p, float rotation, float size, float texture_scale, int texture)
 {
 	float vertices[count* 2];
 	float texcoord[count * 2];
 	int i, j = 0;
 	for (i = 0; i < count; i++) {
 		vertices[j] = verts[i].x * 1;
-		texcoord[j] = verts[i].x * textuer_scale;
+		texcoord[j] = verts[i].x * texture_scale;
 		j++;
 		vertices[j] = verts[i].y * 1;
-		texcoord[j] = verts[i].y * textuer_scale;
+		texcoord[j] = verts[i].y * texture_scale;
 		j++;
 	}
 
@@ -477,16 +473,15 @@ void draw_polygon_textured(int layer, int count, cpVect *verts, cpVect p, float 
 }
 void draw_polygon_outline(int count, cpVect *verts, cpVect p, float rotation, float size)
 {
-	texture_bind_virt(TEX_WHITE);
 	draw_push_matrix();
 	draw_translatev(p);
 	draw_rotate(rotation);
 	int i = 0;
 	for(i=0; i< count; i++) {
 		if(i < count - 1) {
-			draw_quad_line(0, cpvmult(verts[i],size), cpvmult(verts[i + 1],size), 1);
+			draw_quad_line(0, cpvmult(verts[i],size), cpvmult(verts[i + 1],size), 4);
 		} else {
-			draw_quad_line(0, cpvmult(verts[i],size), cpvmult(verts[0],size), 1);
+			draw_quad_line(0, cpvmult(verts[i],size), cpvmult(verts[0],size), 4);
 		}
 	}
 	draw_pop_matrix();

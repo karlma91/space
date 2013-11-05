@@ -44,7 +44,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	we_shape_collision(shape, &this, LAYER_ENEMY, CP_NO_GROUP);
 
 	hpbar_init(&rocket->hp_bar, rocket->param.max_hp, 80, 18, 0, 60, &(rocket->data.body->p));
-	sprite_create(&rocket->data.spr, sprite_link("rocket"), ROCKET_SIZE, ROCKET_SIZE, 1);
+	SPRITE_ID spr_rocket = sprite_link("rocket");
+	float ratio = sprite_get_aspect_ratio(spr_rocket);
+	sprite_create(&rocket->data.spr, spr_rocket, ROCKET_SIZE, ROCKET_SIZE*ratio, 1);
 }
 
 
@@ -88,12 +90,13 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	se_spawn_coins((instance *)rocket);
+	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, rocket->data.body->p);
+	sound_play(SND_TANK_EXPLODE);
 	instance_remove((instance *)rocket);
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, rocket->data.body->p);
 	particles_release_emitter(rocket->flame);
 	we_body_remove(current_space, &rocket->data.body);
 	factory_remove_child((instance *)rocket);

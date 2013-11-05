@@ -17,13 +17,6 @@ extern int texture_bind(int);
 
 extern sprite_subimg texture_normalize_uv(int tex_id, sprite_subimg subimg);
 
-extern int TEX_WHITE;
-extern int TEX_GLOW_DOT;
-extern int TEX_GLOW;
-extern int TEX_LIGHT;
-extern int TEX_STARS;
-extern int TEX_METAL;
-
 typedef struct tex_unit {
 	char name[MAX_TEXNAME_LEN];
 	GLuint gl_tex;

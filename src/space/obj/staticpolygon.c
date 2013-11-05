@@ -16,7 +16,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	staticpolygon->outline = staticpolygon->param.outline;
 	staticpolygon->texture_scale = staticpolygon->param.texture_scale;
 	staticpolygon->scale = staticpolygon->param.scale;
-	staticpolygon->texture = staticpolygon->param.texture;
+	staticpolygon->spr_id = sprite_link(staticpolygon->param.spr_name);
 	staticpolygon->shape_id = staticpolygon->param.shape_id;
 
 	staticpolygon->body = cpBodyNewStatic();
@@ -40,7 +40,8 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		llist_begin_loop(pi->shape);
 		while (llist_hasnext(pi->shape)) {
 			vertex_array *data = (vertex_array*) llist_next(pi->shape);
-			draw_polygon_textured(3, data->num, data->vertices, staticpolygon->body->p, staticpolygon->body->a, size, staticpolygon->texture_scale, staticpolygon->texture);
+			int tex_id = sprite_get_texture(staticpolygon->spr_id);
+			draw_polygon_textured(3, data->num, data->vertices, staticpolygon->body->p, staticpolygon->body->a, size, staticpolygon->texture_scale, tex_id);
 		}
 		llist_end_loop(pi->shape);
 

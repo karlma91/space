@@ -16,6 +16,7 @@ typedef struct {
 	char name[SPRITE_MAX_LEN];
 	int tex_id;
 	array *sub_images; /* <sprite_subimg> */
+	float aspect_ratio;
 } sprite_data;
 
 #define FILE_BUFFER_SIZE (1024*256)
@@ -23,6 +24,12 @@ static char buffer[FILE_BUFFER_SIZE];
 
 hashmap *hm_sprites;
 
+/* sprites used by engine */
+SPRITE_ID SPRITE_ERROR;
+SPRITE_ID SPRITE_DOT;
+SPRITE_ID SPRITE_GLOW;
+SPRITE_ID SPRITE_WHITE;
+SPRITE_ID SPRITE_BAR;
 
 static int chr_unread, line_size;
 static char *cur, *next;
@@ -88,9 +95,15 @@ void sprite_init(void)
 		//TODO normalize uv-pos and size
 
 		sprite_subimg subimg = {x,y,x+w,y+h};
-		subimg = texture_normalize_uv(tex_id, subimg);
 		sprite_add_subimg(tex_id, sprname, subimg, i);
 	}
+
+//TODO use error sprite when using null-sprites
+	SPRITE_ERROR = sprite_link("error"); /* image to be shown for images which fails to load */
+	SPRITE_DOT = sprite_link("dot");
+	SPRITE_GLOW = sprite_link("glow");
+	SPRITE_WHITE = sprite_link("pixel");
+	SPRITE_BAR = sprite_link("bar");
 }
 
 void strtolower(char *to, const char *from)
@@ -104,12 +117,16 @@ void strtolower(char *to, const char *from)
 
 SPRITE_ID sprite_add_subimg(int tex_id, const char *spr_name, sprite_subimg subimg, int index)
 {
+	float ratio = (subimg.y2-subimg.y1) / (subimg.x2-subimg.x1);
+	subimg = texture_normalize_uv(tex_id, subimg);
+
 	sprite_data *spr_id = hm_get(hm_sprites, spr_name);
 	if (!spr_id) {
 		spr_id = (sprite_data *) calloc(1, sizeof(sprite_data));
 		strtolower(spr_id->name, spr_name);
 		spr_id->tex_id = tex_id;
 		spr_id->sub_images = array_new(sizeof(sprite_subimg));
+		spr_id->aspect_ratio = ratio;
 		hm_add(hm_sprites, spr_id->name, spr_id);
 	}
 	index = index < 1 ? 0 : index - 1; // NB! Forces external index to start at 1 (for easier Blender import (blender starts at frame 1 as default))
@@ -125,6 +142,11 @@ SPRITE_ID sprite_link(const char *name)
 	sprite_data *spr_id = hm_get(hm_sprites, name_lower);
 	if (!spr_id) SDL_Log("SPRITE: %s does not exist",name_lower);
 	return spr_id;
+}
+
+float sprite_get_aspect_ratio(SPRITE_ID id) /* returns sprite_height/sprite_width */
+{
+	return ((sprite_data *)id)->aspect_ratio;
 }
 
 void sprite_destroy(void)
@@ -171,24 +193,29 @@ void sprite_update(sprite *spr)
 void sprite_get_current_image(sprite *spr, float *sub_map)
 {
 	if (!spr || !spr->id) return;
-
 	sprite_data *data = (sprite_data*)spr->id;
 	int index = floor(spr->sub_index);
 	sprite_subimg *subimg = (sprite_subimg *)array_get(data->sub_images, index);
+	sprite_subimg2submap(*subimg, sub_map);
+}
 
-	float tx_1 = subimg->x1;
-	float tx_2 = subimg->x2;
-	float ty_2 = subimg->y1; // vertical flip
-	float ty_1 = subimg->y2;
+void sprite_get_first_image(SPRITE_ID id, float *sub_map)
+{
+	if (!id) return;
+	sprite_subimg *subimg = (sprite_subimg *)array_get(((sprite_data*)id)->sub_images, 0);
+	sprite_subimg2submap(*subimg, sub_map);
+}
 
-	sub_map[0] = tx_1;
-	sub_map[1] = ty_1;
-	sub_map[2] = tx_2;
-	sub_map[3] = ty_1;
-	sub_map[4] = tx_1;
-	sub_map[5] = ty_2;
-	sub_map[6] = tx_2;
-	sub_map[7] = ty_2;
+void sprite_subimg2submap(sprite_subimg img, float *sub_map)
+{
+	*sub_map = img.x1;
+	*++sub_map = img.y2;
+	*++sub_map = img.x2;
+	*++sub_map = img.y2;
+	*++sub_map = img.x1;
+	*++sub_map = img.y1;
+	*++sub_map = img.x2;
+	*++sub_map = img.y1;
 }
 
 void sprite_set_length(sprite *spr, float length)
@@ -198,9 +225,14 @@ void sprite_set_length(sprite *spr, float length)
 	spr->animation_speed = subimages/length;
 }
 
-int sprite_get_texture(sprite *spr)
+int sprite_get_texture(SPRITE_ID *id)
 {
-	return ((sprite_data*)spr->id)->tex_id;
+	return ((sprite_data*)id)->tex_id;
+}
+
+sprite_subimg sprite_get_subimg(SPRITE_ID id)
+{
+	return *(sprite_subimg *)(array_get(((sprite_data *)id)->sub_images,0));
 }
 
 void sprite_set_sprite_id(sprite *spr, SPRITE_ID id)

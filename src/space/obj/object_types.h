@@ -63,7 +63,7 @@ OBJ_START(template)
 OBJ_END
 
 PARAM_START(staticpolygon)
-	int texture;
+	char spr_name[SPRITE_MAX_LEN];
 	int outline;
 	float scale;
 	float texture_scale;
@@ -71,7 +71,7 @@ PARAM_START(staticpolygon)
 	polyshape shape_id;
 PARAM_END
 OBJ_START(staticpolygon)
-	int texture;
+	SPRITE_ID spr_id;
 	float texture_scale;
 	int outline;
 	float scale;
@@ -187,6 +187,7 @@ OBJ_START(turret)
 	hpbar hp_bar;
 	minimap radar_image;
 	cpBody *tower;
+	sprite spr_gun;
 OBJ_END
 
 PARAM_START(rocket)

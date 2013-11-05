@@ -210,7 +210,7 @@ static void render(button btn_id)
 			//draw_glow_line(btn->p1x,btn->p1y,btn->p2x,btn->p2y,btn->height);
 			cpVect a = cpvadd(btn_pos, cpv(-width/2,0));
 			cpVect b = cpvadd(btn_pos, cpv(width/2,0));
-			draw_sprite_line(1, &(btn->spr), a, b, height);
+			draw_line_spr(1, &(btn->spr), a, b, height);
 		} else {
 			sprite_render_scaled(1, &(btn->spr), btn_pos, 0, scale);
 		}

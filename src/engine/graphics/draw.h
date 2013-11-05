@@ -112,12 +112,13 @@ void draw_disable_tex2d(void);
 Color draw_get_current_color(void);
 Blend draw_get_current_blend(void);
 
-void draw_line(int layer, int tex_id, cpVect a, cpVect b, float w);
 void draw_glow_line(cpVect a, cpVect b, float w);
 void draw_line_strip(const GLfloat *strip, int l, float w);
 void draw_velocity_line(cpShape *shape);
 void draw_quad_line(int layer, cpVect a, cpVect b, float w);
-void draw_sprite_line(int layer, sprite *spr, cpVect a, cpVect b, float w);
+void draw_line_spr_id(int layer, SPRITE_ID id, cpVect a, cpVect b, float w);
+void draw_line_spr(int layer, sprite *spr, cpVect a, cpVect b, float w);
+void draw_line_tex(int layer, int tex_id, float *tex_map, cpVect a, cpVect b, float w);
 
 void draw_box(int layer, cpVect p, cpVect size, GLfloat angle, int centered);
 void draw_bar(int layer, cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2);

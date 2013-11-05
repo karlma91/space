@@ -33,13 +33,6 @@ typedef struct PVRTextureHeaderV3 { /* Reference: PVRTTexture.h from ImgTec's PV
 } PVRTextureHeaderV3;
 
 
-int TEX_WHITE;
-int TEX_GLOW_DOT;
-int TEX_GLOW;
-int TEX_LIGHT;
-int TEX_STARS;
-int TEX_METAL;
-
 const float TEX_MAP_FULL[8] = {0,1, 1,1, 0,0, 1,0};
 
 array *tex_units; /* <tex_unit> */
@@ -147,7 +140,7 @@ int texture_load(const char *file)
 
 	if (img_load) {
 		tex_unit tex;
-		int premult_alpha = 1;
+		int premult_alpha = 0;
 		int mipmaps = 0;
 		tex.w = img_load->w;
 		tex.h = img_load->h;
@@ -183,7 +176,6 @@ int texture_load(const char *file)
 				pixel[0] = b * a / 255;
 				pixel[1] = g * a / 255;
 				pixel[2] = r * a / 255;
-				//any undefined endianess problems here?
 			}
 		}
 
@@ -194,6 +186,7 @@ int texture_load(const char *file)
 
 		SDL_FreeSurface(img);
 		array_set_safe(tex_units, tex_counter, &tex);
+		//TODO create combined hashmap/array data structure for storing data directly
 		//hm_add(hm_name2tex, file, (void *)(*((int **)&tex_counter)));
 		hm_add(hm_name2tex, file, tex_counter);
 		tex.load_time = (SDL_GetTicks() - time_start) / 1000.0;
@@ -213,17 +206,6 @@ int texture_init(void)
 	buffer = calloc(1, MAX_IMAGE_BUFFER);
 	tex_units = array_new(sizeof(tex_unit));
 	hm_name2tex = hm_create();
-
-	texture_load("error.png"); /* image to be shown for images which fails to load */
-
-	TEX_GLOW_DOT = texture_load("dot.png"); //TODO move these definitions out of engine
-	TEX_GLOW = texture_load("glow.png");
-	TEX_METAL = texture_load("metal_01.png");
-	TEX_WHITE = texture_load("pixel.png");
-	texture_load("atlas01.png");
-	texture_load("atlas01.bmp");
-	texture_load("atlas01.jpg");
-	texture_load("atlas01.pvr");
 
 	return 0;
 }

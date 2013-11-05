@@ -30,6 +30,15 @@ typedef struct {
 	float height;
 } sprite;
 
+
+/* sprites used by engine */
+extern SPRITE_ID SPRITE_ERROR;
+extern SPRITE_ID SPRITE_DOT;
+extern SPRITE_ID SPRITE_GLOW;
+extern SPRITE_ID SPRITE_WHITE;
+extern SPRITE_ID SPRITE_BAR;
+
+
 void sprite_init(void);
 void sprite_destroy(void);
 
@@ -45,9 +54,13 @@ SPRITE_ID sprite_add_subimg(int tex_id, const char *spr_name, sprite_subimg subi
 
 #define REGISTER_SPRITE( NAME ) SPRITE_##NAME = sprite_link(#NAME);
 SPRITE_ID sprite_link(const char *name);
+float sprite_get_aspect_ratio(SPRITE_ID id); /* returns sprite_height/sprite_width */
 void sprite_get_current_image(sprite *spr, float *sub_map);
-int sprite_get_texture(sprite *spr);
+void sprite_get_first_image(SPRITE_ID id, float *sub_map);
+void sprite_subimg2submap(sprite_subimg img, float *sub_map);
+int sprite_get_texture(SPRITE_ID *id);
 void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed);
+sprite_subimg sprite_get_subimg(SPRITE_ID id);
 
 void sprite_set_size(sprite *spr, int width, int height);
 void sprite_set_length(sprite *spr, float length);

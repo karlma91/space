@@ -14,7 +14,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	COMPONENT_SET(bullet, DAMAGE, &(bullet->param.damage));
 
-	sprite_create(&(bullet->data.spr), SPRITE_GLOW_DOT, 30, 30, 0);
+	sprite_create(&(bullet->data.spr), SPRITE_GLOWDOT, 30, 30, 0);
 
 	float mass = 0.4f;
 	cpFloat moment = cpMomentForCircle(mass, 0, 5, cpvzero);
@@ -61,8 +61,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	}
 
 	cpVect p1 = bullet->data.body->p;
-	cpVect p2 = cpvadd(p1, cpvmult(bullet->data.body->v, 1.0/128));
-
+	cpVect p2 = cpvadd(p1, cpvmult(bullet->data.body->v, 1.0/32));
 	draw_glow_line(p1, p2, 32);
 }
 
