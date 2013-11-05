@@ -272,7 +272,7 @@ void upgrades_init(void)
 		state_register_touchable(this, btn_upgrade[i]);
 	}
 
-	btn_space = button_create(SPRITE_HOME, 0, "", -GAME_WIDTH/2 + 100, GAME_HEIGHT/2 - 100, 130, 130);
+	btn_space = button_create(SPRITE_BTN_HOME, 0, "", -GAME_WIDTH/2 + 100, GAME_HEIGHT/2 - 100, 130, 130);
 	button_set_callback(btn_space, statesystem_set_state, state_stations);
 	button_set_enlargement(btn_space, 1.5);
 	button_set_hotkeys(btn_space, KEY_ESCAPE, 0);

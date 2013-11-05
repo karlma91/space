@@ -807,9 +807,9 @@ void space_init(void)
 		case 2: spr = SPRITE_GEAR; break;
 		case 3: spr = SPRITE_SAW; break;
 		case 4: /* no break */
-		case 5: spr = SPRITE_TANK_WHEEL; break;
-		case 6: spr = SPRITE_TANK_TURRET; break;
-		case 7: spr = SPRITE_PLAYER_GUN; break;
+		case 5: spr = SPRITE_TANKWHEEL001; break;
+		case 6: spr = SPRITE_TANKGUN001; break;
+		case 7: spr = SPRITE_PLAYERGUN001; break;
 		}
 
 		state_add_sprite(state_space, layer, spr, size, size, pos, we_randf*WE_2PI);
@@ -832,7 +832,7 @@ void space_init(void)
     }
     */
 
-    btn_pause = button_create(SPRITE_BUTTON_PAUSE, 0, "", GAME_WIDTH/2-85, GAME_HEIGHT/2-77, 80, 80);
+    btn_pause = button_create(SPRITE_BTN_PAUSE, 0, "", GAME_WIDTH/2-85, GAME_HEIGHT/2-77, 80, 80);
     button_set_callback(btn_pause, (btn_callback) statesystem_pause, 0);
     button_set_enlargement(btn_pause, 2.0f);
     button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);

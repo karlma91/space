@@ -3,8 +3,8 @@ TANK HEAVY 100 25 tank_00.png
 ROCKET NORMAL 10 5 rocket.png 2000
 ROCKET HARD 10 5 rocket.png 3000
 TURRET TURE 250 50 2 2 12 turret.png
-FACTORY SMALL 2 250 3 50 TANK LIGHT tank_factory_blue factory.shape
-FACTORY BIG 2 450 10 125 TANK HEAVY tank_factory_red factory.shape
+FACTORY SMALL 2 250 3 50 TANK LIGHT factoryblue factory.shape
+FACTORY BIG 2 450 10 125 TANK HEAVY factoryred factory.shape
 FACTORY FROCK 3 400 5 75 ROCKET NORMAL ramp ramp.shape
 FACTORY FHAR 10 600 2 165 ROCKET HARD ramp ramp.shape
 ROBOTARM RA 200 100 tank_00.png

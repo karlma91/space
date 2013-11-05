@@ -14,6 +14,12 @@
 
 typedef void * SPRITE_ID; /* Peker til konstant sprite_data (ikke sprite!)*/
 
+#define SPRITE_MAX_LEN 50
+
+typedef struct sprite_subimg {
+	float x1,y1,x2,y2;
+} sprite_subimg;
+
 /* public instance sprite */
 typedef struct {
 	SPRITE_ID id;
@@ -27,17 +33,7 @@ typedef struct {
 void sprite_init(void);
 void sprite_destroy(void);
 
-/*
- * sprite_load brukes for å koble og loade en sprite-fil til en SPRITE_ID, f.eks:
- *
- * //game_foo.h
- * extern int SPRITE_BAR;
- * //game_foo.c
- * foo_init(void) {
- * 	SPRITE_BAR = sprite_load("bar.sprite");
- * }
- */
-SPRITE_ID sprite_load(const char *sprite); /* for loading av sprite data */
+SPRITE_ID sprite_add_subimg(int tex_id, const char *spr_name, sprite_subimg subimg, int index);
 
 /*
  * allokerer og returnerer en ny enhet av sprite. Kalleren er selv ansvarlig for å frigjøre sprite (eller evt. kall sprite_free)

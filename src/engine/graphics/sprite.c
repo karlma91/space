@@ -12,84 +12,123 @@
 #include "../io/waffle_utils.h"
 #include "../state/statesystem.h"
 
-LList constant_sprites;
-
 typedef struct {
-	char name[50];
+	char name[SPRITE_MAX_LEN];
 	int tex_id;
-	float u;
-	float v;
-	float width;
-	float height;
-	int subimages;
+	array *sub_images; /* <sprite_subimg> */
 } sprite_data;
 
-#define FILE_BUFFER_SIZE 8192 /* NB! make sure buffer is large enough */
+#define FILE_BUFFER_SIZE (1024*256)
 static char buffer[FILE_BUFFER_SIZE];
 
-//TODO use hashmap and drop public use of SPRITE_ID!!
+hashmap *hm_sprites;
+
+
+static int chr_unread, line_size;
+static char *cur, *next;
+
+static inline void *readln(void)
+{
+	cur = next;
+	next = memchr(cur, '\n', chr_unread);
+	if (next) {
+		*next++ = '\0';
+		line_size = (int)(next - cur);
+		chr_unread -= line_size;
+	} else {
+		line_size = chr_unread;
+		cur[chr_unread] = '\0';
+		chr_unread = 0;
+	}
+	return cur;
+}
+
+
 void sprite_init(void)
 {
-	constant_sprites = llist_create();
-	llist_set_remove_callback(constant_sprites,free);
+	hm_sprites = hm_create();
 
-	char name[100];
-	char file_name[100];
-	float u,v,width,height;
-	int subimages, counter=0, count=0;
-
-	/* read space station data */
-	int filesize = waffle_read_file("textures/sprites.csv", &buffer[0], FILE_BUFFER_SIZE);
+	/* read texture package file */
+	int filesize = waffle_read_file("textures/spacetex.pack", &buffer[0], FILE_BUFFER_SIZE);
 	if (!filesize) {
-		SDL_Log("ERROR: Could not load SPRITE data!");
+		SDL_Log("ERROR: Could not load texpack data!");
 		exit(1);
 	}
 
-	int ret = 0;
-	while(counter <= filesize){
-		ret = sscanf(&buffer[counter], "%s %s %f %f %f %f %d%n\n", name, file_name, &u, &v, &width, &height, &subimages, &count);
-		counter += count;
-		if(ret==-1){
-			break;
-		}
-		if(ret != 7){
-			SDL_Log("SPRITE: file format error. Expected 7 arguments got: %d\n",ret);
-			exit(5);
-		}
-#if !ARCADE_MODE
-		SDL_Log("SPRITE: %s %s %f %f %f %f %d", name, file_name, u, v, width, height, subimages);
-#endif
-		sprite_data *data = (sprite_data*)calloc(1, sizeof(sprite_data));
-		strcpy(data->name, name);
-		data->height = height;
-		data->width = width;
-		data->u = u;
-		data->v = v;
-		data->subimages = subimages;
-		data->tex_id = texture_load(file_name);
-		llist_add(constant_sprites,data);
+	chr_unread = filesize;
+	next = buffer;
+
+	readln();
+	char *texname = readln();
+	readln(); //format: format
+	readln(); //filter: Mag,Min
+	readln(); //repeat: x/y/xy
+
+	char *suffix = memchr(texname, '.', line_size);
+	if (strcmp(suffix, ".png") == 0) {
+		strcpy(suffix, ".pvr");
 	}
+
+	//TODO get texture id
+	int tex_id = texture_load(texname);
+
+	int i;
+	float x, y, w, h;
+	while(chr_unread > 0) {
+		char *sprname = readln();           // "sprname"
+		readln();                           // "  rotate: true/false"
+		char *pos  = readln();    sscanf(pos,  "  xy: %f, %f", &x, &y);
+		char *size = readln();    sscanf(size, "  size: %f, %f", &w, &h);
+		readln();                           // "  orig: w, h"
+		readln();                           // "  offset: x, y"
+		char *index = readln();   sscanf(index,"  index: %d", &i);
+
+		//TODO normalize uv-pos and size
+
+		sprite_subimg subimg = {x,y,x+w,y+h};
+		subimg = texture_normalize_uv(tex_id, subimg);
+		sprite_add_subimg(tex_id, sprname, subimg, i);
+	}
+}
+
+void strtolower(char *to, const char *from)
+{
+	int i;
+	for (i=0; from[i]; i++) {
+		to[i] = tolower(from[i]);
+	}
+	to[i] = '\0';
+}
+
+SPRITE_ID sprite_add_subimg(int tex_id, const char *spr_name, sprite_subimg subimg, int index)
+{
+	sprite_data *spr_id = hm_get(hm_sprites, spr_name);
+	if (!spr_id) {
+		spr_id = (sprite_data *) calloc(1, sizeof(sprite_data));
+		strtolower(spr_id->name, spr_name);
+		spr_id->tex_id = tex_id;
+		spr_id->sub_images = array_new(sizeof(sprite_subimg));
+		hm_add(hm_sprites, spr_id->name, spr_id);
+	}
+	index = index < 1 ? 0 : index - 1; // NB! Forces external index to start at 1 (for easier Blender import (blender starts at frame 1 as default))
+	array_set_safe(spr_id->sub_images, index, &subimg);
+	fprintf(stderr, "SPRITE: %16s[%d] = {%f, %f, %f, %f}\n", spr_id->name, index, subimg.x1, subimg.y1, subimg.x2, subimg.y2);
+	return spr_id;
 }
 
 SPRITE_ID sprite_link(const char *name)
 {
-	llist_begin_loop(constant_sprites);
-	while(llist_hasnext(constant_sprites)){
-		sprite_data *spr = llist_next(constant_sprites);
-		if(strcasecmp(spr->name, name) == 0){
-			llist_end_loop(constant_sprites); // <- missing end loop!
-			return (SPRITE_ID)spr;
-		}
-	}
-	SDL_Log("SPRITE: %s does not exist",name);
-	llist_end_loop(constant_sprites);
-	return NULL;
+	char name_lower[SPRITE_MAX_LEN];
+	strtolower(name_lower, name);
+	sprite_data *spr_id = hm_get(hm_sprites, name_lower);
+	if (!spr_id) SDL_Log("SPRITE: %s does not exist",name_lower);
+	return spr_id;
 }
 
 void sprite_destroy(void)
 {
-	llist_destroy(constant_sprites);
 	//TODO go through and release all sprite data
+	hm_destroy(hm_sprites);
 }
 
 
@@ -111,16 +150,16 @@ void sprite_set_size(sprite *spr, int width, int height) {
 void sprite_update(sprite *spr)
 {
 	if (!spr || !spr->id) return;
-
 	sprite_data *data = (sprite_data*)spr->id;
+	int subimages = array_count(data->sub_images);
 	spr->sub_index += spr->animation_speed*dt;
-	if (spr->sub_index >= data->subimages){
-		spr->sub_index -= data->subimages;
-		if (spr->sub_index >= data->subimages){
+	if (spr->sub_index >= subimages){
+		spr->sub_index -= subimages;
+		if (spr->sub_index >= subimages){
 			spr->sub_index = 0;
 		}
 	} else if (spr->sub_index < 0){
-		spr->sub_index -= data->subimages;
+		spr->sub_index -= subimages;
 		if (spr->sub_index < 0){
 			spr->sub_index = 0;
 		}
@@ -133,16 +172,12 @@ void sprite_get_current_image(sprite *spr, float *sub_map)
 
 	sprite_data *data = (sprite_data*)spr->id;
 	int index = floor(spr->sub_index);
+	sprite_subimg *subimg = (sprite_subimg *)array_get(data->sub_images, index);
 
-	int sprites_x = 1/data->width;
-
-	int index_x = index % sprites_x;
-	int index_y = index / sprites_x;
-
-	float tx_1 = data->u + index_x * data->width;
-	float tx_2 = data->u + (index_x + 1) * data->width;
-	float ty_2 = data->v + (index_y * data->height);
-	float ty_1 = data->v + (index_y + 1) * data->height;
+	float tx_1 = subimg->x1;
+	float tx_2 = subimg->x2;
+	float ty_2 = subimg->y1; // vertical flip
+	float ty_1 = subimg->y2;
 
 	sub_map[0] = tx_1;
 	sub_map[1] = ty_1;
@@ -156,7 +191,9 @@ void sprite_get_current_image(sprite *spr, float *sub_map)
 
 void sprite_set_length(sprite *spr, float length)
 {
-	spr->animation_speed = ((sprite_data*)spr->id)->subimages/length;
+	sprite_data *data = (sprite_data*)spr->id;
+	int subimages = array_count(data->sub_images);
+	spr->animation_speed = subimages/length;
 }
 
 int sprite_get_texture(sprite *spr)
@@ -171,14 +208,19 @@ void sprite_set_sprite_id(sprite *spr, SPRITE_ID id)
 
 void sprite_set_index(sprite *spr, int index)
 {
-	if (spr->id)
-		spr->sub_index = index >= ((sprite_data *)spr->id)->subimages ? 0 : index < 0 ? 0 : index;
+	if (spr->id) {
+		sprite_data *data = (sprite_data*)spr->id;
+		int subimages = array_count(data->sub_images);
+		spr->sub_index = index >= subimages ? 0 : index < 0 ? 0 : index;
+	}
 }
 
 void sprite_set_index_normalized(sprite *spr, float p)
 {
 	if (spr->id) {
-		spr->sub_index = (p > 1 ? 1 : (p < 0 ? 0 : p)) * (((sprite_data *)spr->id)->subimages-1);
+		sprite_data *data = (sprite_data*)spr->id;
+		int subimages = array_count(data->sub_images);
+		spr->sub_index = (p > 1 ? 1 : (p < 0 ? 0 : p)) * (subimages-1);
 	}
 }
 

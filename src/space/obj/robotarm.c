@@ -23,7 +23,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	robotarm->timer = 0;
 
 	sprite_create(&(robotarm->saw_sprite), SPRITE_SAW, 300, 300, 30);
-	sprite_create(&(robotarm->data.spr), SPRITE_TANK_BODY, 200, 100, 0);
+	sprite_create(&(robotarm->data.spr), SPRITE_TANKBODY001, 200, 100, 0);
 	robotarm->segments = 4;
 	robotarm->seg_length = currentlvl->height / (2*robotarm->segments);
 	cpVect pos = robotarm->data.p_start;
@@ -121,7 +121,6 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	} else if (robotarm->data.destroyed) {
 
 	}
-	draw_color4f(1,redfade,redfade,1);
 
 	if (!robotarm->data.destroyed) {
 		draw_color4f(1,0,0,1);
@@ -144,6 +143,8 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 			draw_glow_line(v1, v2, 200);
 		}
 	}
+    
+	draw_color4f(1,redfade,redfade,1);
 	sprite_render_body(RLAY_GAME_MID, &(robotarm->saw_sprite), robotarm->saw);
 	sprite_render_body(RLAY_GAME_MID, &(robotarm->data.spr), robotarm->data.body);
 	hpbar_draw(RLAY_GAME_FRONT, &robotarm->hp_bar,cpvtoangle(robotarm->data.body->p));

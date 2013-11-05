@@ -5,7 +5,6 @@
 #include "SDL.h"
 #include "SDL_image.h"
 
-
 #include "../io/waffle_utils.h"
 #include "draw.h"
 
@@ -15,7 +14,24 @@
 #define TEXTURE_RESOLUTION ""
 #endif
 
-#define MAX_IMAGE_BUFFER 786432 /* ( 0.7 MiB) NB! make sure it is enough RAM to hold buffer */
+#define MAX_IMAGE_BUFFER (1024*1024*80)
+
+
+typedef struct PVRTextureHeaderV3 { /* Reference: PVRTTexture.h from ImgTec's PVR SDK */
+	Uint32	u32Version;			//Version of the file header, used to identify it.
+	Uint32	u32Flags;			//Various format flags.
+	Uint64	u64PixelFormat;		//The pixel format, 8cc value storing the 4 channel identifiers and their respective sizes.
+	Uint32	u32ColourSpace;		//The Colour Space of the texture, currently either linear RGB or sRGB.
+	Uint32	u32ChannelType;		//Variable type that the channel is stored in. Supports signed/unsigned int/short/byte or float for now.
+	Uint32	u32Height;			//Height of the texture.
+	Uint32	u32Width;			//Width of the texture.
+	Uint32	u32Depth;			//Depth of the texture. (Z-slices)
+	Uint32	u32NumSurfaces;		//Number of members in a Texture Array.
+	Uint32	u32NumFaces;		//Number of faces in a Cube Map. Maybe be a value other than 6.
+	Uint32	u32MIPMapCount;		//Number of MIP Maps in the texture - NB: Includes top level.
+	Uint32	u32MetaDataSize;	//Size of the accompanying meta data.
+} PVRTextureHeaderV3;
+
 
 int TEX_WHITE;
 int TEX_GLOW_DOT;
@@ -24,38 +40,81 @@ int TEX_LIGHT;
 int TEX_STARS;
 int TEX_METAL;
 
-/**
- * texture values (GLOBAL)
- */
-
-array *textures;
-
 const float TEX_MAP_FULL[8] = {0,1, 1,1, 0,0, 1,0};
 
-/**
- * Texture names
- */
-static char (*names)[51];
+array *tex_units; /* <tex_unit> */
+hashmap *hm_name2tex = NULL;
+static int tex_counter = 0; //textures goes from 1 and up
 
-/**
- * number of textures
- */
-static int tex_counter = -1;
+char *buffer = NULL;
 
-static int texture_from_name(const char *file);
 static GLenum GL_ENUM_TYPE = GL_UNSIGNED_BYTE;
 static GLint gl_tex_id = -1;
+
+Uint32 time_start;
+
+static int pvr_load(const char *file, PVRTextureHeaderV3 *pvr)
+{
+#if TARGET_OS_IPHONE
+	if (pvr->u32Version == 0x03525650) {
+		SDL_Log("Loading pvr texture...");
+
+		tex_unit tex;
+		int mipmaps = pvr->u32MIPMapCount;
+		int w = pvr->u32Width;
+		int h = pvr->u32Height;
+		tex.w = w; tex.h = h;
+		strncpy(tex.name,file, MAX_TEXNAME_LEN);
+
+		++tex_counter;
+		glGenTextures(1, &tex.gl_tex);
+		glBindTexture(GL_TEXTURE_2D, tex.gl_tex);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+
+#define max(a,b) (a>b?a:b)
+        int m;
+		char *buffer = ((char *)pvr);
+		int pre_size = pvr->u32MetaDataSize + sizeof *pvr;
+		buffer += pre_size;
+        for (m = 0; m < mipmaps; m++, w /=2, h /=2) {
+        	int size = ( max(w, 8) * max(h, 8) * 4 + 7) / 8;
+        	glCompressedTexImage2D(GL_TEXTURE_2D, m, GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, w, h, 0, size, buffer);
+        	buffer += size;
+        }
+		array_set_safe(tex_units, tex_counter, &tex);
+		//hm_add(hm_name2tex, file, (void *)(*((int **)&tex_counter)));
+		hm_add(hm_name2tex, file, tex_counter);
+		tex.load_time = (SDL_GetTicks() - time_start) / 1000.0;
+		SDL_Log("DEBUG: PVR texture loaded: %s, metasize: %d, loading time: %.3f", file, pre_size, tex.load_time);
+		return tex_counter;
+	}
+#endif
+	return 0;
+}
 
 int texture_load(const char *file)
 {
 #if !LOAD_TEXTURES
 	return 0;
 #endif
+	{
+#if TARGET_OS_IPHONE
+	const char *file = "spacetex.pvr"; // TMP
+#else
+	const char *file = "spacetex.png"; // TMP
+#endif
 
-	int have_texture = texture_from_name(file);
-	if(have_texture >=0){
+	if (!buffer) SDL_Log("ERROR: tried to load texture before initializing texture loader!");
+
+	int tex_id_ext = (int) hm_get(hm_name2tex, file);
+	if (tex_id_ext) {
 		//SDL_Log("have texture: %s\n", file);
-		return have_texture;
+		return tex_id_ext;
 	}
 
 	char filepath[64];
@@ -68,104 +127,117 @@ int texture_load(const char *file)
 	strcat(filepath, TEXTURE_RESOLUTION);
 	strcat(filepath, file_suffix);
 
-	SDL_RWops *rw;
+	time_start = SDL_GetTicks();
 
-	char buffer[MAX_IMAGE_BUFFER];
+	SDL_RWops *rw;
 	int filesize = waffle_read_file(filepath, buffer, MAX_IMAGE_BUFFER);
 	if (!filesize) {
 		SDL_Log("ERROR: Unable to find texture: %s", file);
 	}
 
 	rw = SDL_RWFromMem(&buffer[0], filesize);
+
+	if (pvr_load(file, (PVRTextureHeaderV3 *)buffer)) {
+		SDL_FreeRW(rw);
+		return 1;
+	}
+
 	SDL_Surface* img_load = IMG_Load_RW(rw, 0);
 	SDL_FreeRW(rw);
 
 	if (img_load) {
-		unsigned int tex_id;
-		int w, h;
-		w = img_load->w;
-		h = img_load->h;
-
+		tex_unit tex;
+		int premult_alpha = 1;
+		int mipmaps = 0;
+		tex.w = img_load->w;
+		tex.h = img_load->h;
 		++tex_counter;
-		names = realloc(names,(sizeof(char[tex_counter+1][51]))); // any need for this anymore?
-		strcpy(names[tex_counter],file);
+
+		strncpy(tex.name,file, MAX_TEXNAME_LEN);
 
 		SDL_Surface *img = SDL_ConvertSurfaceFormat(img_load, SDL_PIXELFORMAT_ARGB8888,0);
 		SDL_FreeSurface(img_load);
 
 		/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
-		glGenTextures(1, &tex_id);
-		glBindTexture(GL_TEXTURE_2D, tex_id);
+		glGenTextures(1, &tex.gl_tex);
+		glBindTexture(GL_TEXTURE_2D, tex.gl_tex);
 
 		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glHint(GL_GENERATE_MIPMAP_HINT, GL_FASTEST);
-
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glHint(GL_GENERATE_MIPMAP_HINT, GL_FASTEST);
 
 		/* pre-multiply alpha */
-		int i;
-		int size = img->w * img->h;
-		for (i=0 ; i < size; i++) {
-			unsigned char *pixel = (unsigned char *)((int *)img->pixels + i);
-			int b = pixel[0], g = pixel[1], r = pixel[2], a = pixel[3];
-			pixel[0] = b * a / 255;
-			pixel[1] = g * a / 255;
-			pixel[2] = r * a / 255;
-			//any undefined endianess problems here?
+		if (premult_alpha) {
+			int i;
+			int size = img->w * img->h;
+			for (i=0 ; i < size; i++) {
+				unsigned char *pixel = (unsigned char *)((int *)img->pixels + i);
+				int b = pixel[0], g = pixel[1], r = pixel[2], a = pixel[3];
+				pixel[0] = b * a / 255;
+				pixel[1] = g * a / 255;
+				pixel[2] = r * a / 255;
+				//any undefined endianess problems here?
+			}
 		}
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexImage2D(GL_TEXTURE_2D, mipmaps, GL_RGBA, tex.w, tex.h, 0, GL_BGRA, GL_ENUM_TYPE, img->pixels);
+		if (mipmaps == 0) {
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
 
 		SDL_FreeSurface(img);
-
-		array_set_safe(textures, tex_counter, &tex_id);
-
-		//SDL_Log("DEBUG: Texture loaded: %s\n", file);
+		array_set_safe(tex_units, tex_counter, &tex);
+		//hm_add(hm_name2tex, file, (void *)(*((int **)&tex_counter)));
+		hm_add(hm_name2tex, file, tex_counter);
+		tex.load_time = (SDL_GetTicks() - time_start) / 1000.0;
+		SDL_Log("DEBUG: Texture loaded: %s, loading time: %.3f", file, tex.load_time);
 		return tex_counter;
 
 	} else {
 		SDL_Log("ERROR: Unable to load texture: %s\n IMG_ERROR: %s\n", filepath, IMG_GetError());
 		return 0;
 	}
-}
-
-static int texture_from_name(const char *file)
-{
-	int i;
-	for(i=0;i<=tex_counter; i++){
-		if(strcmp(names[i],file) == 0){
-			return i;
-		}
-	}
-	return -1;
+	} // TMP
 }
 
 #include "SDL_endian.h"
 int texture_init(void)
 {
-	textures = array_new(sizeof(int));
+	buffer = calloc(1, MAX_IMAGE_BUFFER);
+	tex_units = array_new(sizeof(tex_unit));
+	hm_name2tex = hm_create();
+
 	texture_load("error.png"); /* image to be shown for images which fails to load */
 
-	texture_load("tiles.png"); //TMP
 	TEX_GLOW_DOT = texture_load("dot.png"); //TODO move these definitions out of engine
 	TEX_GLOW = texture_load("glow.png");
-	//TEX_LIGHT = texture_load("light2.png");
-	TEX_STARS = texture_load("stars.png");
 	TEX_METAL = texture_load("metal_01.png");
 	TEX_WHITE = texture_load("pixel.png");
+	texture_load("atlas01.png");
+	texture_load("atlas01.bmp");
+	texture_load("atlas01.jpg");
+	texture_load("atlas01.pvr");
 
 	return 0;
+}
+
+sprite_subimg texture_normalize_uv(int tex_id, sprite_subimg subimg)
+{
+	tex_unit *tex = array_get(tex_units, tex_id);
+	int w = tex->w;
+	int h = tex->h;
+	subimg.x1 /=w;
+	subimg.y1 /=h;
+	subimg.x2 /=w;
+	subimg.y2 /=h;
+	return subimg;
 }
 
 GLint texture_get_current(void)
@@ -177,19 +249,28 @@ int texture_destroy(void)
 {
 	int i;
 	for (i = 0; i < tex_counter; i++) {
-		glDeleteTextures(1, array_get(textures, i));
+		glDeleteTextures(1, array_get(tex_units, i));
 	}
-	array_destroy(textures);
+	array_destroy(tex_units);
+	hm_destroy(hm_name2tex);
+	free(buffer);
 	return 0;
 }
 
 int texture_bind_virt(int tex_id) {
 #if !LOAD_TEXTURES
-	return 0;
+	return 1;
 #endif
 	if (tex_id != gl_tex_id && tex_id >= 0) {
 		gl_tex_id = tex_id;
-		//glBindTexture(GL_TEXTURE_2D, alist_get(textures, tex_id));
+		return 0;
+	}
+	return 1;
+}
+
+int texture_bind(int tex_id) {
+	if (texture_bind_virt(tex_id) == 0) {
+		glBindTexture(GL_TEXTURE_2D, ((tex_unit *)array_get(tex_units, tex_id))->gl_tex);
 		return 0;
 	}
 	return 1;

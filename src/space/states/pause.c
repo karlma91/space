@@ -126,8 +126,8 @@ void pause_init(void)
 
 	input_buffer = calloc(sizeof (char), 1000);
 
-	btn_space = button_create(SPRITE_HOME, 0, "", -GAME_WIDTH/2 + 500, -GAME_HEIGHT/2 + 200, 250, 250);
-	btn_retry = button_create(SPRITE_RETRY, 0, "", GAME_WIDTH/2 - 500, -GAME_HEIGHT/2 + 200, 250, 250);
+	btn_space = button_create(SPRITE_BTN_HOME, 0, "", -GAME_WIDTH/2 + 500, -GAME_HEIGHT/2 + 200, 250, 250);
+	btn_retry = button_create(SPRITE_BTN_RETRY, 0, "", GAME_WIDTH/2 - 500, -GAME_HEIGHT/2 + 200, 250, 250);
 	btn_input = button_create(NULL, 0, "", -GAME_WIDTH/2+50, GAME_HEIGHT/2-50, 100, 100);
 	btn_resume = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
 

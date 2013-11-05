@@ -172,7 +172,7 @@ void layersystem_render(STATE_ID state_id, view *cam)
 					glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof *elems, &elems[0].tx);
 					glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof *elems, &(elems[0].col.r));
 
-					glBindTexture(GL_TEXTURE_2D, *((int*)array_get(textures, tex_index)));
+					texture_bind(tex_index);
 					glDrawArrays(GL_TRIANGLE_STRIP, 0, batch->count);
 					++TMP_DRAW_CALLS;
 					batch->count = 0;

@@ -54,7 +54,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpSpaceAddConstraint(current_space, cpPivotJointNew(turret->data.body, turret->tower, p_start));
 
 	hpbar_init(&turret->hp_bar,turret->param.max_hp,80,20,0,60,&(turret->data.body->p));
-	sprite_create(&turret->data.spr, SPRITE_TURRET, TURRET_SIZE, TURRET_SIZE, 0);
+	sprite_create(&turret->data.spr, SPRITE_TURRETBODY001, TURRET_SIZE, TURRET_SIZE, 0);
 }
 
 

@@ -228,7 +228,7 @@ void menu_init(void)
 {
 	curMenu = &mainMenuTest;
 	statesystem_register(state_menu, 0);
-	sprite_create(&spr_startbtn, SPRITE_BUTTON, 300,250, 2);
+	sprite_create(&spr_startbtn, SPRITE_BTN_PUSH, 300,250, 2);
 
 	view_main = state_view_get(state_menu, 0);
 
@@ -250,10 +250,10 @@ void menu_init(void)
 		switch(s) {
         default: spr = SPRITE_SPIKEBALL; break;
 		case 1: spr = SPRITE_GEAR; break;
-		case 2: spr = SPRITE_STATION_01; break;
-		case 3: spr = SPRITE_TANK_WHEEL; break;
+		case 2: spr = SPRITE_STATION001; break;
+		case 3: spr = SPRITE_TANKWHEEL001; break;
 		}
 
-		state_add_sprite(state_menu, layer, spr, size, size, pos, we_randf*WE_2PI * (spr != SPRITE_STATION_01));
+		state_add_sprite(state_menu, layer, spr, size, size, pos, we_randf*WE_2PI * (spr != SPRITE_STATION001));
 	}
 }

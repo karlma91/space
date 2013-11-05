@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "waffle_utils.h"
+#include "SDL.h"
 
 #define RESOURCE_VERSION 7 // changed: 30.10.13
 
@@ -120,6 +121,7 @@ int waffle_read(ZZIP_FILE *zf, char *buffer, int len)
 
 int waffle_read_file(char *filename, char *buffer, int len)
 {
+	Uint32 time_used = SDL_GetTicks();
 	//SDL_Log("Reading file: '%s'",filename); //verbose
 	ZZIP_FILE *fp = waffle_open(filename);
 
@@ -127,7 +129,8 @@ int waffle_read_file(char *filename, char *buffer, int len)
 		int filesize = waffle_read(fp, buffer, len);
 		if (filesize) {
 #if !ARCADE_MODE
-			SDL_Log("DEBUG: File loaded: #%08x\tsize: %5.3fkB\tname: '%s'", checksum(buffer, filesize), filesize / 1024.0f, filename);
+			time_used = SDL_GetTicks() - time_used;
+			SDL_Log("DEBUG: File loaded: #%08x\tsize: %5.3fkB\tname: '%s\ttime: %.3f'", checksum(buffer, filesize), filesize / 1024.0f, filename, time_used / 1000.0);
 #endif
 			return filesize;
 		} else {

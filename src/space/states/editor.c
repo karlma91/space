@@ -40,10 +40,10 @@ void editor_init()
 		case 1: spr = SPRITE_COIN; break;
 		case 2: spr = SPRITE_GEAR; break;
 		case 3: spr = SPRITE_SAW; break;
-		case 4: spr = SPRITE_PLAYER; break;
-		case 5: spr = SPRITE_TANK_WHEEL; break;
-		case 6: spr = SPRITE_TANK_TURRET; break;
-		case 7: spr = SPRITE_PLAYER_GUN; break;
+		case 4: spr = SPRITE_PLAYERBODY001; break;
+		case 5: spr = SPRITE_TANKWHEEL001; break;
+		case 6: spr = SPRITE_TANKGUN001; break;
+		case 7: spr = SPRITE_PLAYERGUN001; break;
 		}
 		state_add_sprite(state_editor, layer, spr, size, size, pos, we_randf*WE_2PI);
 	}

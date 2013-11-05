@@ -143,7 +143,7 @@ void stations_init(void)
 
 	view* main_view = state_view_get(state_stations, 0);
 
-	btn_home = button_create(SPRITE_PLAYER, 0, "", 0, 0, 250, 250);
+	btn_home = button_create(SPRITE_PLAYERBODY001, 0, "", 0, 0, 250, 250);
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
@@ -160,7 +160,7 @@ void stations_init(void)
 		char stri[10];
 		sprintf(stri, "%d", i+1);
 		float size = 350 + (i ? -50 : 50);
-		btn_stations[i] = button_create(SPRITE_STATION_01, 0, "", -(station_count - 1) / 2.0 * 650 + 1000 * i , (i-0.5)*270, size, size);
+		btn_stations[i] = button_create(SPRITE_STATION001, 0, "", -(station_count - 1) / 2.0 * 650 + 1000 * i , (i-0.5)*270, size, size);
 		button_set_callback(btn_stations[i], button_callback, &stations[i]);
 		button_set_backcolor(btn_stations[i], col_back);
 		button_set_animated(btn_stations[i], 1, (i ? 18 : 15));
@@ -195,10 +195,10 @@ void stations_init(void)
 		case 1: spr = SPRITE_COIN; break;
 		case 2: spr = SPRITE_GEAR; break;
 		case 3: spr = SPRITE_SAW; break;
-		case 4: spr = SPRITE_PLAYER; break;
-		case 5: spr = SPRITE_TANK_WHEEL; break;
-		case 6: spr = SPRITE_TANK_TURRET; break;
-		case 7: spr = SPRITE_PLAYER_GUN; break;
+		case 4: spr = SPRITE_PLAYERBODY001; break;
+		case 5: spr = SPRITE_TANKWHEEL001; break;
+		case 6: spr = SPRITE_TANKGUN001; break;
+		case 7: spr = SPRITE_PLAYERGUN001; break;
 		}
 		state_add_sprite(state_stations, layer, spr, size, size, pos, we_randf*WE_2PI);
 	}

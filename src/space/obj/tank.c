@@ -26,9 +26,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	COMPONENT_SET(tank, MINIMAP, &tank->radar_image);
 	tank->radar_image = cmp_new_minimap(10, COL_RED);
 
-	sprite_create(&(tank->wheel_sprite), SPRITE_TANK_WHEEL, 120, 120, 0);
-	sprite_create(&(tank->data.spr), SPRITE_TANK_BODY, 200, 100, 0);
-	sprite_create(&(tank->turret_sprite), SPRITE_TANK_TURRET, 150, 150, 0);
+	sprite_create(&(tank->wheel_sprite), SPRITE_TANKWHEEL001, 120, 120, 0);
+	sprite_create(&(tank->data.spr), SPRITE_TANKBODY001, 200, 100, 0);
+	sprite_create(&(tank->turret_sprite), SPRITE_TANKGUN001, 150, 150, 0);
 
 	tank->max_distance = 800;
 	tank->rot_speed = M_PI/2;

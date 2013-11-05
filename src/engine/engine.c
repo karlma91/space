@@ -275,6 +275,8 @@ static void initGL(void)
 	int max_size;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
 	SDL_Log("Max texture size = %d", max_size);
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_size);
+	SDL_Log("Max texture units = %d", max_size);
 #endif
 
 	glEnableVertexAttribArray(0); // vertex
@@ -290,7 +292,7 @@ static void initGL(void)
 	glEnable(GL_SCISSOR_TEST);
 	glScissor(0,0, WINDOW_WIDTH,WINDOW_HEIGHT); //scissor test
 
-	draw_enable_tex2d();
+	//draw_enable_tex2d();
 }
 
 #if GLES2
@@ -488,15 +490,22 @@ static void initGP(void)
 	we_ortho(GAME_WIDTH / 2, GAME_HEIGHT / 2); //GLES1!
 }
 
+
 static void main_init(void)
 {
+	Uint32 startTime = SDL_GetTicks();
 	srand(time(0)); /* init pseudo-random generator */
 	//TODO Make sure faulty inits stops the program from proceeding
 	waffle_init();      /* prepare game resources and general methods*/
+	SDL_Log("DEBUG: waffle_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	game_config();      /* load default and user-changed settings */
+	SDL_Log("DEBUG: game_config done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	display_init();     /* sets attributes and creates windows and renderer*/
+	SDL_Log("DEBUG: display_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	initGL();           /* setup a gl context */
+	SDL_Log("DEBUG: GL_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	initGP();          /* setup a gl context */
+	SDL_Log("DEBUG: GP_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 
     accelerometer = SDL_JoystickOpen(0);
 #if !ARCADE_MODE
@@ -507,17 +516,28 @@ static void main_init(void)
 
 	//cpInitChipmunk();
 	sound_init();
+	SDL_Log("DEBUG: sound_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	texture_init();     /* preload textures */
+	SDL_Log("DEBUG: texture_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	sprite_init();
+	SDL_Log("DEBUG: sprite_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
     bmfont_init();
+	SDL_Log("DEBUG: bmfont_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	draw_init();        /* initializes circular shapes and rainbow colors */
+	SDL_Log("DEBUG: draw_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	particles_init();   /* load and prepare all particle systems */
+	SDL_Log("DEBUG: particles_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	//font_init();      /* (currently not in use) */
 	statesystem_init(); /* init all states */
+	SDL_Log("DEBUG: statesystem_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	layersystem_init();
+	SDL_Log("DEBUG: layersystem_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	object_init();
+	SDL_Log("DEBUG: object_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	objectsystem_init();
+	SDL_Log("DEBUG: objectsystem_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	game_init();
+	SDL_Log("DEBUG: game_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 
 	// Handle iOS app-events (pause, low-memory, terminating, etc...) and SDL_QUIT
 	SDL_SetEventFilter(HandleAppEvents, NULL);
@@ -528,6 +548,7 @@ static void main_init(void)
 #endif
 
 	lastTime = SDL_GetTicks();
+	SDL_Log("DEBUG: ALL INIT DONE time: %.3f", (lastTime-startTime) / 1000.0);
 
 	active_fingers = llist_create();
 }

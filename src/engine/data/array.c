@@ -26,14 +26,14 @@ array * array_new(unsigned int element_size)
 	}
 }
 
-int array_size(array *hm)
+int array_size(array *a)
 {
-	return hm->size;
+	return a->size;
 }
 
-int array_last_index(array *al)
+int array_count(array *a)
 {
-	return al->last_elem;
+	return a->last_elem + 1;
 }
 
 static void array_resize(array *al)
@@ -57,6 +57,9 @@ void array_set(array *al, unsigned int index, void *data)
 {
 	if(index < al->size) {
 		memcpy(((void*)(al->data + index * al->elem_size)), data, al->elem_size);
+		if (index > al->last_elem) {
+			al->last_elem = index;
+		}
 	} else {
 		we_error("INDEX OUT OF BOUNDS");
 	}
