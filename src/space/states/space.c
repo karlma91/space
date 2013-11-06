@@ -429,7 +429,7 @@ void draw_gui(view *cam)
 		font_drawText(0,-cam->view_width/2+100, 0, "CO-OP PLAYER 1");
 		setTextAngle(0);
 
-		bmfont_center(FONT_SANS, cpv(vcenter, vbot+110), 0.5, "<-Move - Single player - Fire->");
+		bmfont_center(FONT_SANS, cpv(vcenter, vbot+60), 1, "- Move - Single player - Fire -");
 #else
 		bmfont_center(FONT_SANS, cpv(vcenter, vcenter), 2, "GET READY!");
 #endif

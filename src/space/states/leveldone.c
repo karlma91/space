@@ -47,25 +47,18 @@ static void post_update(void)
 
 static void draw(void)
 {
-	draw_color4f(0,0,0,0.8);
-	draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
-
 	//TODO finn ut om spiller d�de eller ikke, istedenfor � bruke level_star_count
 	if (level_star_count) {
-		draw_color4f(1,1,1,1);
-		setTextAlign(TEXT_CENTER);
-		setTextSize(60);
-		font_drawText(RLAY_GUI_FRONT, 0,-100, level_time_buf);
-
-		draw_color4f(1,1,1,1);
-		setTextAlign(TEXT_CENTER);
-		setTextSize(70);
-		font_drawText(RLAY_GUI_FRONT, 0,350, "LEVEL CLEARED");
+		draw_color4f(0.3,0.4,0.5,0.5); //draw_color4f(0,0,0,0.8);
+		draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
+		draw_color(COL_WHITE);
+		bmfont_center(FONT_SANS, cpv(0, -100),0.8,level_time_buf);
+		bmfont_center(FONT_SANS, cpv(0, 350),1.5,"Level %d.%d cleared!", currentlvl->station,currentlvl->deck);
 	} else {
-		draw_color4f(1,0,0,1);
-		setTextAlign(TEXT_CENTER);
-		setTextSize(70);
-		font_drawText(RLAY_GUI_FRONT, 0,350, "LEVEL FAILED");
+		draw_color4f(0.3,0.1,0.1,0.7); //draw_color4f(0,0,0,0.8);
+		draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
+		draw_color(COL_RED);
+		bmfont_center(FONT_SANS, cpv(0, 350),1.5,"Level failed!", currentlvl->station,currentlvl->deck);
 	}
 
 	draw_color4f(1,1,1,1);

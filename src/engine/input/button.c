@@ -207,7 +207,6 @@ static void render(button btn_id)
 	} else if (btn->spr.id) {
 		draw_color(btn->backcol);
 		if (btn->stretch) {
-			//draw_glow_line(btn->p1x,btn->p1y,btn->p2x,btn->p2y,btn->height);
 			cpVect a = cpvadd(btn_pos, cpv(-width/2,0));
 			cpVect b = cpvadd(btn_pos, cpv(width/2,0));
 			draw_line_spr(1, &(btn->spr), a, b, height);
@@ -225,7 +224,7 @@ static void render(button btn_id)
 
 		setTextSize(height / 4 * scale);
 		//font_drawText(0, x, y + 12 * scale, btn->label);
-		bmfont_center(FONT_NORMAL, cpv(x, y), 1, "%s", btn->label);
+		bmfont_center(FONT_NORMAL, cpv(x, y), scale, "%s", btn->label);
 	}
 }
 

@@ -44,19 +44,18 @@ static void draw(void)
 {
 	draw_load_identity();
 
-	draw_color4f(0,0,0,0.5f);
+	draw_color4f(0.3,0.3,0.3,0.1);
 	draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 
-	draw_color4f(1,1,1,1);
-	setTextSize(40);
-	setTextAlign(TEXT_CENTER);
-	font_drawText(RLAY_GUI_FRONT, 0, 0, "PAUSED");
+	if ((int)engine_time & 0x3) {
+		draw_color(COL_WHITE);
+		bmfont_center(FONT_SANS, cpv(0, 0), 1, "Tap to resume");
+	}
 
 	int keyboard_shown = SDL_IsScreenKeyboardShown(window);
-
 	draw_color4f(!valid_cheat,keyboard_shown,valid_cheat ^ keyboard_shown,1);
 	setTextAlign(TEXT_LEFT);
-	font_drawText(RLAY_GUI_FRONT, btn_input->get.x, btn_input->get.y-150, input_buffer);
+	bmfont_left(FONT_SANS, cpv(btn_input->get.x+30, btn_input->get.y-150), 0.5, input_buffer);
 }
 
 static void cheat(void)

@@ -69,14 +69,13 @@ static void draw(void)
 
 	draw_color4f(0,0,0,0.5f);
 	draw_box(1, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
-	draw_color4f(0.1,0.1,0.3,1);
+	draw_color4f(0.1,0.2,0.5,0.3);
 	draw_box(2, cpvzero,cpv(SCROLL_WIDTH,GAME_HEIGHT),0,1);
 
-	draw_color4f(1,1,1,1);
-	setTextSize(70);
-	setTextAlign(TEXT_CENTER);
-	font_drawText(0, 0, GAME_HEIGHT/2 - 80 + yoffset, "SETTINGS");
+	draw_color(COL_WHITE);
+	bmfont_center(FONT_SANS, cpv(0, GAME_HEIGHT/2 - 180 + yoffset),1.5,"Settings");
 
+	//TODO move view around instead of buttons
 	int i;
 	for (i = 0; i < OPTION_COUNT; i++) {
 		touch_place(btn_options[i], 0, -i * 160 + GAME_HEIGHT/5 + yoffset);
@@ -193,7 +192,7 @@ void settings_init(void)
 	btn_options[OPT_DELETE]->enabled = 0;
 
 	scroller = scroll_create(0,0,SCROLL_WIDTH,GAME_HEIGHT, 0.95, GAME_HEIGHT);
-	scroll_set_bounds(scroller, cpBBNew(0, -GAME_HEIGHT/2, 0, 0));
+	scroll_set_bounds(scroller, cpBBNew(0, -GAME_HEIGHT/2, 0, 100));
 	state_register_touchable(state_settings, scroller);
 
 	btn_back = button_create(NULL, 0, "", 0,0,GAME_WIDTH,GAME_HEIGHT);
