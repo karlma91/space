@@ -70,6 +70,7 @@ void sprite_set_index(sprite *spr, int index);
 void sprite_set_index_normalized(sprite *spr, float p);
 
 void sprite_update(sprite *spr);
+void sprite_render_by_id(int layer, SPRITE_ID id, cpVect pos, cpVect size, float angle);
 void sprite_render(int layer, sprite *spr, cpVect pos, float angle);
 void sprite_render_body(int layer, sprite *spr, cpBody *body);
 void sprite_render_scaled(int layer, sprite *spr, cpVect pos, float angle, float size);

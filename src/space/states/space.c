@@ -28,8 +28,6 @@ static void update_camera_position(void);
 static void sticks_init(void);
 static void sticks_hide(void);
 
-static void radar_draw(float x, float y);
-
 static obj_player * space_create_player(int id);
 
 view *view_p1, *view_p2;
@@ -354,12 +352,12 @@ static void plot_on_radar(instance *obj, void *unused)
 	}
 }
 
-static void radar_draw(float x, float y)
+static void radar_draw(cpVect pos)
 {
 	obj_player *player = current_view == view_p1 ? player1 : player2;
 	draw_push_matrix();
 	if (player) {
-		draw_translate(x, y);
+		draw_translatev(pos);
 		draw_rotate(-se_tangent(player->data.body->p));
 	}
 	draw_color4b(50,130,210,150);
@@ -380,103 +378,80 @@ void draw_gui(view *cam)
 	setTextAngle(0); // TODO don't use global variables for setting font properties
 	setTextAlign(TEXT_LEFT);
 	setTextSize(35);
+	float vleft = -cam->view_width/2;
+	float vtop = cam->view_height/2;
+	float vright = cam->view_width/2;
+	float vbot = -cam->view_height/2;
+	float vcenter = 0;
 
 	if (gamestate != LEVEL_START) {
-		radar_draw(-cam->view_width/2 + 120, cam->view_height/2 - 175);
+		radar_draw(cpv(vleft+130,vtop-190));
 
 		draw_color(COL_WHITE);
-		int score_anim = 0;
+		int score = 0;
 		obj_player *player = current_view == view_p1 ? player1 : player2;
-		if (player) score_anim = player->coins;
-		bmfont_left(FONT_SANS, cpv(-cam->view_width/2+20,cam->view_height/2 - 26), 1, "%d", score_anim);
-
-		bmfont_center(FONT_SANS, cpv(0, -cam->view_height/2+24),1,"Level %d.%d", currentlvl->station,currentlvl->deck);
+		if (player) score = player->coins;
+		sprite_render_by_id(RLAY_GUI_FRONT, SPRITE_COIN, cpv(vleft+40,vtop-35),cpv(60,60),0);
+		bmfont_left(FONT_SANS, cpv(vleft+70,vtop-60), 1, "%d", score);
+		bmfont_center(FONT_SANS, cpv(vcenter, vbot+24),0.7,"Level %d.%d", currentlvl->station,currentlvl->deck);
 
 		//DEBUG INSTANCE COUNT
 		draw_color4f(0.5,0.1,0.1,1);
-		setTextSize(20);
-		char goals_left[100];
-		sprintf(goals_left, "%d",
+		bmfont_left(FONT_SANS, cpv(vleft+70,vbot+100), 0.5, "%d",
 				instance_count(obj_id_factory)+
 				instance_count(obj_id_turret)+
 				instance_count(obj_id_tank));
-		font_drawText(RLAY_GUI_FRONT, -cam->view_width/2+20,-cam->view_height/2 + 100,goals_left);
-
-
-		setTextAlign(TEXT_RIGHT);
 
 #if !ARCADE_MODE
-		font_drawText(RLAY_GUI_FRONT, cam->view_width/2 - 15, cam->view_height/2 - 20, fps_buf);
+		bmfont_right(FONT_SANS, cpv(vright-15, vtop+20), 0.5, fps_buf);
 #endif
 		if (!multiplayer) {
-			char time_temp[20];
-			font_time2str(time_temp, game_time);
-
-			setTextSize(40);
-			setTextAlign(TEXT_CENTER);
-
-			draw_color4f(0,0,0,1);
-			font_drawText(RLAY_GUI_FRONT, 4, cam->view_height/2 - 29 - 4, time_temp);
-			draw_color4f(1,1,1,1);
-			font_drawText(RLAY_GUI_FRONT, 0, cam->view_height/2 - 29, time_temp);
+			char str_time[20];
+			font_time2str(str_time, game_time);
+			draw_color(COL_WHITE);
+			bmfont_left(FONT_SANS, cpv(vcenter-150, vtop-60),1,"%s",str_time);
 		}
 	}
 
 	switch(gamestate) {
 	case LEVEL_START:
-		draw_color4f(1,1,1,1);
+		draw_color(COL_WHITE);
 		setTextAlign(TEXT_CENTER);
 
 #if GOT_TOUCH
-		setTextSize(40);
 		if (((int)state_timer)%2) {
-			font_drawText(RLAY_GUI_FRONT, 0, 0, "TOUCH JOYSTICKS");
+			bmfont_center(FONT_SANS, cpv(vcenter, vcenter),1.5,"TOUCH JOYSTICKS");
 		}
 		setTextSize(25);
 		setTextAngle(WE_PI_2);
 		font_drawText(RLAY_GUI_FRONT,cam->view_width/2-100, 0, "CO-OP PLAYER 2");
 		setTextAngle(WE_3PI_2);
 		font_drawText(0,-cam->view_width/2+100, 0, "CO-OP PLAYER 1");
-
-#define STR_SPACE_START "STEER - SINGLE PLAY - SHOOT"
 		setTextAngle(0);
-		setTextSize(25);
-		draw_color4f(0,0,0,1);
-		font_drawText(RLAY_GUI_FRONT, 4, -cam->view_height/2+110-4, STR_SPACE_START);
-		draw_color4f(1,1,1,1);
-		font_drawText(RLAY_GUI_FRONT, 0, -cam->view_height/2+110, STR_SPACE_START);
+
+		bmfont_center(FONT_SANS, cpv(vcenter, vbot+110), 0.5, "<-Move - Single player - Fire->");
 #else
-		setTextSize(70);
-		font_drawText(RLAY_GUI_FRONT, 0, 0, "GET READY!");
+		bmfont_center(FONT_SANS, cpv(vcenter, vcenter), 2, "GET READY!");
 #endif
 		/* no break */
 	case LEVEL_RUNNING:
 		break;
 	case LEVEL_CLEARED:
 #if ARCADE_MODE
-		setTextSize(80);
-		font_drawText(RLAY_GUI_FRONT, 0, 0, "LEVEL CLEARED");
+		bmfont_center(FONT_SANS, cpv(vcenter, vcenter), 2, "LEVEL CLEARED!");
 #endif
 		break;
 	case LEVEL_TRANSITION:
-		setTextSize(60);
-		draw_color4f(0.8f,0.8f,0.8f,1);
-		setTextAlign(TEXT_CENTER);
-		//font_drawText(0, 0, "LOADING LEVEL...");
 		break;
 	case LEVEL_PLAYER_DEAD:
-		setTextSize(60);
-		draw_color4f(1,0,0,1);
-		setTextAlign(TEXT_CENTER);
 
 #if ARCADE_MODE
-		setTextSize(80);
-		font_drawText(RLAY_GUI_FRONT, 0, 0, "GAME OVER");
+		draw_color(COL_RED);
+		bmfont_center(FONT_SANS, cpv(vcenter, vcenter), 2, "GAME OVER!");
 		draw_color4f(0.1,0.9,0.1,1);
 		sprite_update(&spr_startbtn);
 		sprite_render(RLAY_GUI_MID, &spr_startbtn, cpv(0,-0.5f*GAME_HEIGHT/2), 0);
 #endif
-		setTextSize(120);
 		break;
 	case LEVEL_STATE_COUNT:
 		/* invalid value */
@@ -785,7 +760,7 @@ void space_init(void)
 		float f = (layers - i * 0.99f) / (layers);
 		state_set_layer_parallax(state_space, i, f, f);
 	}
-	for(i = 0; i<2000; i++){
+	for(i = 0; i<500; i++){
 		int layer =  11 + roundf(we_randf*(layers-1-11));
 		float size = 150 + we_randf*90 - layer*4;
 		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),6600);
@@ -793,13 +768,9 @@ void space_init(void)
 		int s = rand() & 7;
 		switch(s) {
         default: spr = SPRITE_SPIKEBALL; break;
-		case 1: /* no break */
-		case 2: spr = SPRITE_GEAR; break;
-		case 3: spr = SPRITE_SAW; break;
-		case 4: /* no break */
-		case 5: spr = SPRITE_TANKWHEEL001; break;
-		case 6: spr = SPRITE_TANKGUN001; break;
-		case 7: spr = SPRITE_PLAYERGUN001; break;
+		case 1: spr = SPRITE_GEAR; break;
+		case 2: spr = SPRITE_STATION001; break;
+		case 3: spr = SPRITE_TANKWHEEL001; break;
 		}
 
 		state_add_sprite(state_space, layer, spr, size, size, pos, we_randf*WE_2PI);
@@ -939,7 +910,7 @@ void setup_singleplay(void)
     float w = 340;
     float h = view_p1->view_height*0.5;
 
-    touch_place((touchable *)btn_pause, view_p1->view_width/2-85, view_p1->view_height/2-77);
+    touch_place((touchable *)btn_pause, view_p1->view_width/2-80, view_p1->view_height/2-70);
     joystick_reposition(joy_p1_left, 80, 2, -view_p1->view_width/2 + 170, -0.25*view_p1->view_height, w, h);
 	joystick_reposition(joy_p1_right, 80, 2, view_p1->view_width/2 - 170, -0.25*view_p1->view_height, w, h);
     joystick_reposition(joy_p2_left, 80, 2, -view_p1->view_width/2 + 170, 0.25*view_p1->view_height, w, h);
@@ -981,7 +952,7 @@ void setup_multiplay(void)
     joystick_set_hotkeys(joy_p2_left, KEY_LEFT_2,KEY_UP_2,KEY_RIGHT_2,KEY_DOWN_2);
     joystick_set_hotkeys(joy_p2_right, SDL_SCANCODE_KP_4,SDL_SCANCODE_KP_8,SDL_SCANCODE_KP_6,SDL_SCANCODE_KP_5);
 
-    touch_place((touchable *)btn_pause, view_p1->view_width/2-85, view_p1->view_height/2-77);
+    touch_place((touchable *)btn_pause, view_p1->view_width/2-80, view_p1->view_height/2-70);
 	joystick_place(joy_p1_left, -view_p1->port_width/3, -view_p1->port_height/3);
 	joystick_place(joy_p1_right, +view_p1->port_width/3, -view_p1->port_height/3);
 	joystick_place(joy_p2_left, -view_p1->port_width/3, -view_p1->port_height/3);

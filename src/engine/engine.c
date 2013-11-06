@@ -262,6 +262,8 @@ static void initGL(void)
 
 	glEnable(GL_BLEND);
 	draw_blend(GL_ONE,GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+	glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
 	/* set the clear color to dark blue */
 	//	glClearColor(0, 0.08, 0.15, 1);

@@ -276,6 +276,17 @@ void sprite_set_index_normalized(sprite *spr, float p)
 	}
 }
 
+void sprite_render_by_id(int layer, SPRITE_ID id, cpVect pos, cpVect size, float angle)
+{
+	int tex_id = 0;
+	sprite_data *data = (sprite_data*)id;
+	if (data) tex_id = data->tex_id;
+
+	float sub_map[8];
+	sprite_get_first_image(id, sub_map);
+	draw_texture(layer, tex_id, pos, sub_map, size, angle);
+}
+
 void sprite_render(int layer, sprite *spr, cpVect pos, float angle)
 {
 	sprite_render_scaled(layer, spr, pos, angle, 1);
