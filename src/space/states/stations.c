@@ -94,10 +94,12 @@ static void draw(void)
 
 	draw_box(1, a, b, r, 1);
 
-	bmfont_center(FONT_NORMAL, cpv(0,0),1,"Middle\nCentererer\nadl\n%d", 123);
-	bmfont_left(FONT_NORMAL, cpv(500,0),10,"Left\nleftileft\ntest\n");
-	bmfont_right(FONT_NORMAL, cpv(0,-300),1,"Right\nrightirigthi\nsuplado\n");
-	bmfont_right(FONT_BIG, cpv(0,300),1,"the quick brown fox jumps over the lazy dog\nthe Quick brown fox JumPed over the lazY doG");
+	bmfont_center(FONT_SANS, cpv(0,500),1.5,"SPACE");
+	bmfont_center(FONT_SANS, cpv(700,-100),1,"2");
+	bmfont_center(FONT_SANS, cpv(-300,-400),1,"1");
+	bmfont_center(FONT_SANS, cpv(1400,-1150),1,"CREDTIS:\nMathias Wilhelmsen\nKarl Magnus Kalvik");
+	draw_color4b(200,210,230,255);
+	bmfont_right(FONT_SANS, cpv(-600,300),1,"the quick brown fox jumps over the lazy dog\nTHE QUICK BROWN FOX JUMPS OVER THE LAZY DOG");
 
 	//cpVect pos = {0,0.7f*GAME_HEIGHT/2};
 	//draw_texture(tex_title, &pos, TEX_MAP_FULL, 1200, 300, 0);
@@ -188,7 +190,8 @@ void stations_init(void)
 		float f = (layers - i * 0.99f) / (layers);
 		state_set_layer_parallax(state_stations, i, f, f);
 	}
-	for(i = 0; i<2000; i++){
+
+	for(i = 0; i<1000; i++){
 		int layer =  2 + roundf(we_randf*(layers-1-2));
 		float size = 150 + we_randf*90 - layer*4;
 		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),6600);
@@ -196,15 +199,12 @@ void stations_init(void)
 		int s = rand() & 7;
 		switch(s) {
         default: spr = SPRITE_SPIKEBALL; break;
-		case 1: spr = SPRITE_COIN; break;
-		case 2: spr = SPRITE_GEAR; break;
-		case 3: spr = SPRITE_SAW; break;
-		case 4: spr = SPRITE_PLAYERBODY001; break;
-		case 5: spr = SPRITE_TANKWHEEL001; break;
-		case 6: spr = SPRITE_TANKGUN001; break;
-		case 7: spr = SPRITE_PLAYERGUN001; break;
+		case 1: spr = SPRITE_GEAR; break;
+		case 2: spr = SPRITE_STATION001; break;
+		case 3: spr = SPRITE_TANKWHEEL001; break;
 		}
-		state_add_sprite(state_stations, layer, spr, size, size, pos, we_randf*WE_2PI);
+
+		state_add_sprite(state_stations, layer, spr, size, size, pos, we_randf*WE_2PI * (spr != SPRITE_STATION001));
 	}
 }
 

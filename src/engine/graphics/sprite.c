@@ -26,6 +26,7 @@ hashmap *hm_sprites;
 
 /* sprites used by engine */
 SPRITE_ID SPRITE_ERROR;
+SPRITE_ID SPRITE_GLOWDOT;
 SPRITE_ID SPRITE_DOT;
 SPRITE_ID SPRITE_GLOW;
 SPRITE_ID SPRITE_WHITE;
@@ -100,6 +101,7 @@ void sprite_init(void)
 
 //TODO use error sprite when using null-sprites
 	SPRITE_ERROR = sprite_link("error"); /* image to be shown for images which fails to load */
+	SPRITE_GLOWDOT = sprite_link("glowdot");
 	SPRITE_DOT = sprite_link("dot");
 	SPRITE_GLOW = sprite_link("glow");
 	SPRITE_WHITE = sprite_link("pixel");
@@ -132,6 +134,7 @@ SPRITE_ID sprite_add_subimg(int tex_id, const char *spr_name, sprite_subimg subi
 	index = index < 1 ? 0 : index - 1; // NB! Forces external index to start at 1 (for easier Blender import (blender starts at frame 1 as default))
 	array_set_safe(spr_id->sub_images, index, &subimg);
 	fprintf(stderr, "SPRITE: %16s[%d] = {%f, %f, %f, %f}\n", spr_id->name, index, subimg.x1, subimg.y1, subimg.x2, subimg.y2);
+	sprite_link(spr_id->name); //check if added
 	return spr_id;
 }
 
@@ -206,6 +209,21 @@ void sprite_get_first_image(SPRITE_ID id, float *sub_map)
 	sprite_subimg2submap(*subimg, sub_map);
 }
 
+static float map(float normalized, float min, float max)
+{
+	return min + normalized*(max - min);
+}
+
+void sprite_get_subimg_mapped(SPRITE_ID id, sprite_subimg subimg, float *sub_map)
+{
+	sprite_subimg *tex = (sprite_subimg *)array_get(((sprite_data*)id)->sub_images, 0);
+	subimg.x1 = map(subimg.x1, tex->x1, tex->x2);
+	subimg.x2 = map(subimg.x2, tex->x1, tex->x2);
+	subimg.y1 = map(subimg.y1, tex->y1, tex->y2);
+	subimg.y2 = map(subimg.y2, tex->y1, tex->y2);
+	sprite_subimg2submap(subimg, sub_map);
+}
+
 void sprite_subimg2submap(sprite_subimg img, float *sub_map)
 {
 	*sub_map = img.x1;
@@ -225,7 +243,7 @@ void sprite_set_length(sprite *spr, float length)
 	spr->animation_speed = subimages/length;
 }
 
-int sprite_get_texture(SPRITE_ID *id)
+int sprite_get_texture(SPRITE_ID id)
 {
 	return ((sprite_data*)id)->tex_id;
 }

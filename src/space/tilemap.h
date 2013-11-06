@@ -8,7 +8,10 @@
 #ifndef TILEMAP_H_
 #define TILEMAP_H_
 
+#include "we_graphics.h"
+
 #define MAX_SINGLE_TILE_COUNT 64
+
 
 typedef struct tilemap {
 
@@ -20,16 +23,13 @@ typedef struct tilemap {
 
     int image_width;
     int image_height;
-    int texture_id;
+    SPRITE_ID spr_id;
 
     int width; /* number of tiles in level */
     int height;
 
     float x2tc[MAX_SINGLE_TILE_COUNT];
     float y2tc[MAX_SINGLE_TILE_COUNT];
-
-    //GLfloat **vertex;
-    //GLfloat **textco;
 
     int *data; /* tilmap data array */
 

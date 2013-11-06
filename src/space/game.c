@@ -55,7 +55,6 @@ int CMP_CREATOR;
 /* global sprite definitions */
 SPRITE_ID SPRITE_PLAYERBODY001;
 SPRITE_ID SPRITE_PLAYERGUN001;
-SPRITE_ID SPRITE_GLOWDOT;
 SPRITE_ID SPRITE_BTN_PUSH;
 SPRITE_ID SPRITE_TANKBODY001;
 SPRITE_ID SPRITE_TANKWHEEL001;
@@ -101,6 +100,7 @@ int EMITTER_COUNT;
 //extern fonts
 bm_font * FONT_NORMAL;
 bm_font * FONT_BIG;
+bm_font * FONT_SANS;
 
 /* GLOBAL SOUND CHUNKS */
 Mix_Chunk *SND_LASER_1;
@@ -197,7 +197,6 @@ void game_sprites(void)
 {
 	REGISTER_SPRITE( PLAYERBODY001 );
 	REGISTER_SPRITE( PLAYERGUN001 );
-	REGISTER_SPRITE( GLOWDOT );
 	REGISTER_SPRITE( BTN_PUSH );
 	REGISTER_SPRITE( TANKBODY001 );
 	REGISTER_SPRITE( TANKWHEEL001 );
@@ -249,6 +248,7 @@ void game_font(void)
 {
    FONT_NORMAL = bmfont_read_font("Arial.fnt");
    FONT_BIG = bmfont_read_font("bigariel.fnt");
+   FONT_SANS = bmfont_read_font("sans.fnt");
 }
 
 void game_audio(void)

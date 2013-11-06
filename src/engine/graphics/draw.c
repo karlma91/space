@@ -284,7 +284,7 @@ void draw_glow_line(cpVect a, cpVect b, float w)
 	Color col = draw_get_current_color();
 	col.a = 0;
 	draw_color(col);
-	draw_line_spr_id(0, SPRITE_GLOW, a, b, w);
+	draw_line_spr_id(0, SPRITE_GLOWDOT, a, b, w);
 	draw_color4b(255,255,255,0);
 	draw_line_spr_id(0, SPRITE_DOT, a, b, w);
 	draw_pop_color();

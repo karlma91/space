@@ -55,7 +55,6 @@ extern STATE_ID state_editor;
 /* SPRITES */
 extern SPRITE_ID SPRITE_PLAYERBODY001;
 extern SPRITE_ID SPRITE_PLAYERGUN001;
-extern SPRITE_ID SPRITE_GLOWDOT;
 extern SPRITE_ID SPRITE_BTN_PUSH;
 extern SPRITE_ID SPRITE_BTN_PAUSE;
 extern SPRITE_ID SPRITE_TANKBODY001;
@@ -97,6 +96,7 @@ extern int EMITTER_COUNT;
 
 extern bm_font * FONT_NORMAL;
 extern bm_font * FONT_BIG;
+extern bm_font * FONT_SANS;
 
 /* GLOBAL SOUND CHUNKS */
 extern Mix_Chunk *SND_LASER_1;

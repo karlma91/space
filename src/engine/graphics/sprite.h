@@ -33,6 +33,7 @@ typedef struct {
 
 /* sprites used by engine */
 extern SPRITE_ID SPRITE_ERROR;
+extern SPRITE_ID SPRITE_GLOWDOT;
 extern SPRITE_ID SPRITE_DOT;
 extern SPRITE_ID SPRITE_GLOW;
 extern SPRITE_ID SPRITE_WHITE;
@@ -57,8 +58,9 @@ SPRITE_ID sprite_link(const char *name);
 float sprite_get_aspect_ratio(SPRITE_ID id); /* returns sprite_height/sprite_width */
 void sprite_get_current_image(sprite *spr, float *sub_map);
 void sprite_get_first_image(SPRITE_ID id, float *sub_map);
+void sprite_get_subimg_mapped(SPRITE_ID id, sprite_subimg subimg, float *sub_map);
 void sprite_subimg2submap(sprite_subimg img, float *sub_map);
-int sprite_get_texture(SPRITE_ID *id);
+int sprite_get_texture(SPRITE_ID id);
 void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed);
 sprite_subimg sprite_get_subimg(SPRITE_ID id);
 

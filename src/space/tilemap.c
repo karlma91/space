@@ -24,16 +24,10 @@
 
 static int parse_data(tilemap *map, char *data);
 
-#define TILEMAP_ARRAY_BUFFER_SIZE 1000
-
-//static float vertex_buffer[TILEMAP_ARRAY_BUFFER_SIZE];
-//static float uv_buffer[TILEMAP_ARRAY_BUFFER_SIZE];
-
 void tilemap_render(int layer, tilemap *map)
 {
-	//draw_enable_tex2d();
-	draw_color4f(1,1,1,1);
-	texture_bind_virt(map->texture_id);
+	draw_color(COL_WHITE);
+	texture_bind_virt(sprite_get_texture(map->spr_id));
 
 	int i,j;
 	int x,y;
@@ -48,7 +42,6 @@ void tilemap_render(int layer, tilemap *map)
 	int tile_count = 0;
 
 	// prepare vertex and uv buffers
-
 	cpVect data2;
 	se_rect2arch_column(j_start*map->tile_width - (map->width*map->tile_width)/2, &data2);
 
@@ -77,17 +70,9 @@ void tilemap_render(int layer, tilemap *map)
 			y = map->data[k + i * map->width] / (map->image_height / map->tile_height);
 
 			if(map->data[k + i*map->width] > 0){
-				float tx_1 = map->x2tc[x];
-				float tx_2 = map->x2tc[x+1];
-				float ty_2 = map->y2tc[y];
-				float ty_1 = map->y2tc[y+1];
-
-				float sub_map[8] = {
-						tx_1, ty_1,
-						tx_2, ty_1,
-						tx_1, ty_2,
-						tx_2, ty_2,
-				};
+				float sub_map[8];
+				sprite_subimg subimg = {map->x2tc[x], map->x2tc[x+1], map->y2tc[y], map->y2tc[y+1]};
+				sprite_get_subimg_mapped(map->spr_id,subimg,sub_map);
 
 				cpVect
 				p1 = {lvl_x, lvl_y},
@@ -114,10 +99,7 @@ void tilemap_render(int layer, tilemap *map)
 		SDL_Log("max tile count rendered: %d",tile_count);
 #endif
 	}
-
-	//draw_disable_tex2d();
 }
-
 
 
 /**
@@ -161,8 +143,9 @@ int tilemap_create (tilemap *map, char *filename)
 				char name[40];
 				parse_string(node,"source",temp);
 				sscanf(*temp,"../textures/%s", name);
-
-				map->texture_id = texture_load(name);
+	    		char *suffix = strchr(name, '.');
+	    		if (suffix) *suffix = '\0'; /* removes suffix */
+				map->spr_id = sprite_link(name);
 
 				parse_int(node,"width",&(map->image_width));
 				parse_int(node,"height",&(map->image_height));

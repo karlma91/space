@@ -3,7 +3,7 @@
 #include "waffle_utils.h"
 #include "SDL.h"
 
-#define RESOURCE_VERSION 8 // changed: 05.11.13
+#define RESOURCE_VERSION 9 // changed: 05.11.13
 
 #if __ANDROID__
 

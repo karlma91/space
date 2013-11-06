@@ -375,7 +375,7 @@ void draw_gui(view *cam)
 {
 	setTextAngle(0);
 	//todo use current view's port size instead of using cam->game_width and cam->game_height! (?or not)
-	draw_color4f(1,1,1,1);
+	draw_color(COL_WHITE);
 
 	setTextAngle(0); // TODO don't use global variables for setting font properties
 	setTextAlign(TEXT_LEFT);
@@ -384,17 +384,15 @@ void draw_gui(view *cam)
 	if (gamestate != LEVEL_START) {
 		radar_draw(-cam->view_width/2 + 120, cam->view_height/2 - 175);
 
+		draw_color(COL_WHITE);
 		int score_anim = 0;
 		obj_player *player = current_view == view_p1 ? player1 : player2;
 		if (player) score_anim = player->coins;
-		char score_temp[20];
-		sprintf(score_temp,"%d",score_anim); //score_anim
-		draw_color4f(0,0,0,1);
-		font_drawText(RLAY_GUI_FRONT, -cam->view_width/2+20+4,cam->view_height/2 - 26-4,score_temp);
-		draw_color4f(1,1,1,1);
-		font_drawText(RLAY_GUI_FRONT, -cam->view_width/2+20,cam->view_height/2 - 26,score_temp);
-		//}
+		bmfont_left(FONT_SANS, cpv(-cam->view_width/2+20,cam->view_height/2 - 26), 1, "%d", score_anim);
 
+		bmfont_center(FONT_SANS, cpv(0, -cam->view_height/2+24),1,"Level %d.%d", currentlvl->station,currentlvl->deck);
+
+		//DEBUG INSTANCE COUNT
 		draw_color4f(0.5,0.1,0.1,1);
 		setTextSize(20);
 		char goals_left[100];
@@ -404,13 +402,6 @@ void draw_gui(view *cam)
 				instance_count(obj_id_tank));
 		font_drawText(RLAY_GUI_FRONT, -cam->view_width/2+20,-cam->view_height/2 + 100,goals_left);
 
-		draw_color4f(1,1,1,1);
-		setTextSize(15);
-		char level_temp[20];
-		setTextAlign(TEXT_CENTER);
-		//		sprintf(level_temp,"STATION: %d DECK: %d", currentlvl->station, currentlvl->deck);
-		sprintf(level_temp,"LEVEL %d", currentlvl->deck);
-		font_drawText(RLAY_GUI_FRONT, 0, -cam->view_height/2+24, level_temp);
 
 		setTextAlign(TEXT_RIGHT);
 

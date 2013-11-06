@@ -65,7 +65,6 @@ bm_font * bmfont_read_font(char *filename)
     		parse_string(node,"file", texture);
     		char *suffix = strchr(texture[0], '.');
     		if (suffix) *suffix = '\0'; /* removes suffix */
-    		fprintf(stderr, "DEUBUG: font name loading: %s\n", texture[0]);
     		f->spr_id = sprite_link(texture[0]);
     	}else if(TESTNAME("chars")){
     		int count;
@@ -104,22 +103,16 @@ static int get_line_width(bm_font *font, char * text) {
 	return width;
 }
 
-static float map(float s, float b1, float b2)
-{
-    return b1 + s*(b2 - b1);
-}
-
 static void draw_char(bm_font *f, bm_char *c)
 {
-	sprite_subimg subimg = sprite_get_subimg(f->spr_id);
+	//sprite_subimg subimg = sprite_get_subimg(f->spr_id);
 	float quad[8] = {0, 0, c->w, 0, 0, c->h, c->w, c->h};
 
-    float tx0 = map(1.0f*c->x / f->tex_w, subimg.x1, subimg.x2);
-    float tx1 = map(1.0f*(c->x + c->w) / f->tex_w, subimg.x1, subimg.x2);
-    float ty0 = map(1.0f*c->y / f->tex_h,  subimg.y1, subimg.y2);
-    float ty1 = map(1.0f*(c->y+ c->h) / f->tex_h,   subimg.y1, subimg.y2);
+	sprite_subimg subimg = {1.0f*c->x / f->tex_w,          1.0f*c->y / f->tex_h,
+		                    1.0f*(c->x + c->w) / f->tex_w, 1.0f*(c->y+ c->h) / f->tex_h};
 
-    GLfloat tex_map[8] = {tx0, ty1, tx1, ty1, tx0, ty0, tx1, ty0};
+    GLfloat tex_map[8];
+	sprite_get_subimg_mapped(f->spr_id, subimg, tex_map);
 
     cpVect pos = cpv(c->x_offset,(f->line_height - c->h)-c->y_offset);
     draw_push_matrix();
