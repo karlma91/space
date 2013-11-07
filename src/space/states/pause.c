@@ -44,7 +44,7 @@ static void draw(void)
 {
 	draw_load_identity();
 
-	draw_color4f(0.3,0.3,0.3,0.1);
+	draw_color_rgbmulta4b(0,0,0,156);
 	draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 
 	if ((int)engine_time & 0x3) {

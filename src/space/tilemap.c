@@ -71,7 +71,7 @@ void tilemap_render(int layer, tilemap *map)
 
 			if(map->data[k + i*map->width] > 0){
 				float sub_map[8];
-				sprite_subimg subimg = {map->x2tc[x], map->x2tc[x+1], map->y2tc[y], map->y2tc[y+1]};
+				sprite_subimg subimg = {map->x2tc[x], map->y2tc[y], map->x2tc[x+1], map->y2tc[y+1]};
 				sprite_get_subimg_mapped(map->spr_id,subimg,sub_map);
 
 				cpVect
