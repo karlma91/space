@@ -523,9 +523,20 @@ static void remove_static(cpShape *shape)
 	cpShapeFree(shape);
 }
 
+
 void space_init_level(char *name)
 {
+	if(currentlvl == NULL || strcmp(currentlvl->name, name) != 0 ) {
+		currentlvl = level_load(name);
+	}
+	space_init_level_from_level(currentlvl);
 
+}
+
+void space_init_level_from_level(level * lvl)
+{
+
+	currentlvl = lvl;
 	multiplayer = -1;
 	sticks_init();
 
@@ -582,10 +593,6 @@ void space_init_level(char *name)
 		break;
 	}
 #endif
-
-	if(currentlvl == NULL || strcmp(currentlvl->name, name) != 0 ) {
-		currentlvl = level_load(name);
-	}
 
 	level_start_level(currentlvl);
 

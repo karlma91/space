@@ -21,6 +21,8 @@ void* hm_remove(hashmap *hm, const char *key);
 void * hm_get(hashmap *hm, const char *key);
 hashiterator * hm_get_iterator(hashmap *hm);
 void * hm_iterator_next(hashiterator *iterator);
+int hm_iterator_hasnext(hashiterator *it);
+char * hm_iterator_get_key(hashiterator *it);
 void hm_destroy_iterator(hashiterator *iterator);
 
 #endif /* HASHMAP_H_ */

@@ -38,6 +38,7 @@ struct systemstate {
     LList touch_objects;
 
     int objects_enabled;
+    int disable_physics;
     int particles_enabled;
 
     object_system *objects;
@@ -262,7 +263,7 @@ void statesystem_update(void)
 	/* update objects */
 	if (current_objects && current_space) {
 		if (state->objects_enabled) {
-			instance_iterate(update_instances, NULL);
+				instance_iterate(update_instances, NULL);
 
 			/* update Chipmunk */
 			//TODO check object system

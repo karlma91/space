@@ -26,6 +26,7 @@ struct hashnode {
 
 struct hashiterator {
 	hashmap *hm;
+	char * key;
 	int index;
 	hashnode *node;
 };
@@ -193,6 +194,7 @@ void * hm_iterator_next(hashiterator *it)
 	hashnode *data = NULL;
 	if(it->index < it->hm->size){
 		data = it->node;
+		it->key = data->key;
 		it->node = it->node->next;
 		while(it->node == NULL && it->index < it->hm->size){
 			it->index++;
@@ -204,6 +206,15 @@ void * hm_iterator_next(hashiterator *it)
 		return NULL;
 	}
 	return data->data;
+}
+
+int hm_iterator_hasnext(hashiterator *it)
+{
+	return (it->index < it->hm->size);
+}
+char * hm_iterator_get_key(hashiterator *it)
+{
+ return it->key;
 }
 
 void hm_destroy_iterator(hashiterator *it)

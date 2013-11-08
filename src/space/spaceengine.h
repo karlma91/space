@@ -5,7 +5,7 @@
 
 cpFloat se_get_best_shoot_angle(cpBody *body1, cpBody *body2, cpFloat bullet_speed);
 cpFloat get_angle(cpVect a, cpVect b);
-float se_cart2pol_angle(cpVect p);
+void se_str_to_upper(char * str);
 void se_add_score_and_popup(cpVect p, int score);
 int se_damage_object(instance *object, instance *dmg_dealer);
 int se_damage_deal(instance *object, float damage);

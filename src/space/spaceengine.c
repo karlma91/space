@@ -29,6 +29,7 @@ void se_add_score_and_popup(cpVect p, int score)
 	((obj_player *) instance_first(obj_id_player))->coins += score;
 }
 
+
 float se_arcdist2player(cpVect a)
 {
 	instance *player = instance_nearest(a, obj_id_player);

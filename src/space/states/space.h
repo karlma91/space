@@ -18,6 +18,7 @@ extern view *view_p1, *view_p2;
 
 /* init new level */
 void space_init_level(char *name);
+void space_init_level_from_level(level * lvl);
 
 float extern getGameTime(void);
 extern int getArcadeScore(void);

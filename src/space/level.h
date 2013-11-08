@@ -7,7 +7,6 @@
 typedef struct level_ship {
 	int id;
 	cpVect pos;
-	int count;
 	float radius;
 	float rotation;
 	float rotation_speed;
@@ -16,6 +15,7 @@ typedef struct level_ship {
 
 typedef struct object_recipe {
 	object_id * obj_type;
+	char param_name[32];
 	void * param;
 	cpVect pos;
 	cpVect vel;
@@ -47,6 +47,9 @@ extern void level_get_ships(level_ship **,int *);
 
 extern int level_get_station_count(void);
 extern int level_get_level_count(int station);
+
+void level_add_object_recipe_name(level * lvl, char * obj_type, char * param_name, cpVect pos, float rotation);
+void level_add_object_recipe(level * lvl, object_id *obj_id,char * param_name,  void * param, cpVect pos, float rotation);
 
 void * level_get_param(hashmap * h, char *type, char * name);
 level *level_load(char * filename);

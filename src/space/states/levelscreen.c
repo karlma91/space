@@ -100,7 +100,6 @@ static void destroy(void)
 void levelscreen_change_to(level_ship * ship)
 {
 	current_ship = ship;
-	level_count = ship->count;
 	statesystem_push_state(state_levelscreen);
 }
 

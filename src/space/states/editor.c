@@ -10,6 +10,7 @@ static touchable *scroller;
 
 static button btn_space;
 static button btn_next;
+static button btn_save;
 
 static obj_param_tank tmp_tank_param = {
 	500,
@@ -17,13 +18,30 @@ static obj_param_tank tmp_tank_param = {
 };
 static level *lvl;
 
+static char object_type[32];
+static char object_name[32];
+static char level_name[32];
+
 static cpVect start;
 static int dragged;
 
 static view *main_view;
 
+static void start_editor_level(void *data) {
+	statesystem_set_state(state_space);
+	space_init_level_from_level(lvl);
+}
+
+static void save_level_to_file(void *data) {
+	level_write_to_file(lvl);
+}
+
+
 void editor_init()
 {
+	sprintf(object_name, "%s", "DEF");
+	sprintf(object_type, "%s", "TURRET");
+	sprintf(level_name, "%s", "TESTING");
 	int i;
 	statesystem_register(state_editor,0);
 	main_view = state_view_get(state_editor, 0);
@@ -63,25 +81,32 @@ void editor_init()
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 0); // max 4 000 gu / sec
 
 	btn_space = button_create(SPRITE_BTN_HOME, 0, "", -GAME_WIDTH/2 + 100, GAME_HEIGHT/2 - 100, 125, 125);
-	btn_next = button_create(SPRITE_BTN_NEXT, 0, "",0, GAME_HEIGHT/2 - 100, 125, 125);
-
 	button_set_callback(btn_space, statesystem_set_state, state_stations);
-	//button_set_callback(btn_next, NULL, 0); // TODO test level with this button
+
+	btn_next = button_create(SPRITE_BTN_NEXT, 0, "",0, GAME_HEIGHT/2 - 100, 125, 125);
+	button_set_callback(btn_next, start_editor_level, 0); // TODO test level with this button
+
+	btn_save = button_create(SPRITE_COIN, 0, "",300, GAME_HEIGHT/2 -100, 125, 125);
+	button_set_callback(btn_save, save_level_to_file, 0); // TODO test level with this button
 
 	button_set_hotkeys(btn_next, KEY_RETURN_1, KEY_RETURN_2);
 	button_set_hotkeys(btn_space, KEY_ESCAPE, 0);
 
 	button_set_enlargement(btn_space, 1.5);
 	button_set_enlargement(btn_next, 1.5);
+	button_set_enlargement(btn_save, 1.5);
 
 	state_register_touchable_view(main_view, btn_space);
 	state_register_touchable_view(main_view, btn_next);
+	state_register_touchable_view(main_view, btn_save);
 	state_register_touchable_view(main_view, scroller);
 	state_register_touchable_view(main_view, btn_settings);
 
 
-	lvl = level_load("test");
+	lvl = level_load("object_defaults");
 	currentlvl = lvl;
+
+	state_enable_objects(state_editor, 0);
 }
 
 /* * * * * * * * * *
@@ -98,6 +123,9 @@ static void pre_update(void)
 {
 	main_view->zoom = scroll_get_zoom(scroller);
 	view_update(main_view, scroll_get_offset(scroller), scroll_get_rotation(scroller));
+
+
+
 }
 
 static void post_update(void)
@@ -113,9 +141,13 @@ static void sdl_event(SDL_Event *event)
 {
 	SDL_TouchFingerEvent *finger = &event->tfinger;
 	float zoom;
+	SDL_Scancode key;
 	cpVect pos;
 
 	switch(event->type) {
+	case SDL_KEYDOWN:
+		key = event->key.keysym.scancode;
+		break;
 	case SDL_FINGERDOWN:
 		start = main_view->p;
 		dragged = 0;
@@ -128,11 +160,26 @@ static void sdl_event(SDL_Event *event)
 		}
 		break;
 	case SDL_FINGERUP:
-		pos = cpv(finger->x, finger->y);
+		pos = camera_vect_view2world(main_view, cpv(finger->x, finger->y));
+
 		if(!dragged) {
-			instance_create(obj_id_tank, &tmp_tank_param,pos, cpvzero);
+			level_add_object_recipe_name(lvl, object_type, object_name, pos,0);
+			instance_create(object_by_name(object_type),
+					level_get_param(lvl->param_list, object_type, object_name)
+					,pos, cpvzero);
 		}
 		break;
+	}
+
+
+	switch(key) {
+	case SDL_SCANCODE_1: sprintf(object_type, "%s", "TURRET"); break;
+	case SDL_SCANCODE_2: sprintf(object_type, "%s", "TANK"); break;
+	case SDL_SCANCODE_3: sprintf(object_type, "%s", "FACTORY"); break;
+	case SDL_SCANCODE_4: sprintf(object_type, "%s", "ROCKET"); break;
+	case SDL_SCANCODE_5: sprintf(object_type, "%s", "ROBOTARM"); break;
+	default: break;
+
 	}
 }
 

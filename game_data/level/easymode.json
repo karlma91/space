@@ -13,6 +13,6 @@
 		  "sprite": "factoryblue", "shape": "factory.shape"}
 	],
 	"objects" : [
-		{"type":"FACTORY", "param": "SMALL", "pos": {"x":1200, "y":560, "r": 100}}
+		{"type":"FACTORY", "name": "SMALL", "pos": {"x":1200, "y":560, "r": 100}}
 	]
 }
