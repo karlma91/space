@@ -586,7 +586,8 @@ void space_init_level(int space_station, int deck)
 		level_unload(currentlvl);
 	}
 
-	currentlvl = level_load(space_station,deck);
+	currentlvl = level_load("test");
+	level_start_level(currentlvl);
 
 	if (currentlvl == NULL) {
 		SDL_Log( "space_level_init failed!\n");
@@ -1016,7 +1017,7 @@ void space_next_level(void *unused)
 	arcade_lvl_score += (int)(game_time*10) - (ARCADE_SCORE_LVL + player1->coins/10);
 #endif
 
-	if (deck <= level_get_level_count(station)) {
+	if (deck <= 1) {
 		statesystem_set_state(state_space);
 		space_init_level(station, deck);
 	} else {
