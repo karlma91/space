@@ -40,6 +40,9 @@ struct button {
 	int animated;
 	float down_size, current_size;
 
+	float font_size;
+	bm_font *font;
+
 	Color backcol;
 	Color frontcol;
 
@@ -83,6 +86,8 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 
 	btn->animated = 0;
 	btn->down_size = 1;
+	btn->font_size = 1;
+	btn->font = FONT_SANS;
 	btn->current_size = btn->down_size;
 
 	sprite_create(&(btn->spr), spr_id, width, height, 0);
@@ -143,6 +148,13 @@ void button_set_sprite(button btn_id, SPRITE_ID spr_id)
 {
 	struct button *btn = (struct button *) btn_id;
 	btn->spr.id = spr_id;
+}
+
+void button_set_font(button btn_id, bm_font *f, float size)
+{
+	struct button *btn = (struct button *) btn_id;
+	btn->font = f;
+	btn->font_size = size;
 }
 
 void button_free(button btn_id)
@@ -224,7 +236,7 @@ static void render(button btn_id)
 
 		setTextSize(height / 4 * scale);
 		//font_drawText(0, x, y + 12 * scale, btn->label);
-		bmfont_center(FONT_NORMAL, cpv(x, y), scale, "%s", btn->label);
+		bmfont_center(btn->font, cpv(x, y), btn->font_size * scale, "%s", btn->label);
 	}
 }
 

@@ -74,14 +74,17 @@ bm_font * bmfont_read_font(char *filename)
     		bm_char *c;
     		parse_int(node,"id",&(id));
     		c = &(f->chars[id]);
-    		c->id = id;
-    		parse_int(node,"x",&(c->x));
-    		parse_int(node,"y",&(c->y));
-    		parse_int(node,"width",&(c->w));
-    		parse_int(node,"height",&(c->h));
-    		parse_int(node,"xoffset",&(c->x_offset));
-    		parse_int(node,"yoffset",&(c->y_offset));
-    		parse_int(node,"xadvance",&(c->x_advance));
+    		if(id < 256){
+    			c->id = id;
+    			parse_int(node,"x",&(c->x));
+    			parse_int(node,"y",&(c->y));
+    			parse_int(node,"width",&(c->w));
+    			parse_int(node,"height",&(c->h));
+    			parse_int(node,"xoffset",&(c->x_offset));
+    			parse_int(node,"yoffset",&(c->y_offset));
+    			parse_int(node,"xadvance",&(c->x_advance));
+    		}
+
     	}
     }
     mxmlDelete(tree);

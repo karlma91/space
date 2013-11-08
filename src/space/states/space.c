@@ -585,8 +585,8 @@ void space_init_level(char *name)
 	if (currentlvl != NULL) {
 		level_unload(currentlvl);
 	}
-
 	currentlvl = level_load(name);
+
 	level_start_level(currentlvl);
 
 	if (currentlvl == NULL) {
@@ -743,7 +743,6 @@ static cpVect space_particle_g_func(cpVect pos)
     return cpvnormalize_safe(pos);
 }
 
-layer_system * state_get_layersystem(STATE_ID state_id); //TODO REMOVE ME
 void space_init(void)
 {
 	statesystem_register(state_space,LEVEL_STATE_COUNT);
@@ -1010,16 +1009,17 @@ void space_restart_level(void *unused)
 
 void space_next_level(void *unused)
 {
-	int station = currentlvl->station;
-	int deck = currentlvl->deck + 1;
+	int station = currentlvl->station + 1;
+	level_ship * world = level_get_world();
+	int count = level_get_station_count();
 
 #if ARCADE_MODE
 	arcade_lvl_score += (int)(game_time*10) - (ARCADE_SCORE_LVL + player1->coins/10);
 #endif
 
-	if (deck <= 1) {
+	if (station < count) {
 		statesystem_set_state(state_space);
-		//space_init_level(station, deck);
+		space_init_level(world[station].level_name);
 	} else {
 #if ARCADE_MODE
 		gameover_setstate(GAMEOVER_WIN);

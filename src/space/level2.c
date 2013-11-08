@@ -23,7 +23,7 @@
 #include "states/space.h"
 
 static int station_count;
-static level_ship *worlds;
+static level_ship *world;
 
 int level_init(void)
 {
@@ -44,18 +44,18 @@ int level_init(void)
 		}
 		cJSON *station_array = cJSON_GetObjectItem(root,"stations");
 		station_count = cJSON_GetArraySize(station_array);
-		worlds = calloc(station_count,sizeof(level_ship));
+		world = calloc(station_count,sizeof(level_ship));
 
 		for (i = 0; i < cJSON_GetArraySize(station_array); i++){
 			cJSON *station = cJSON_GetArrayItem(station_array, i);
-			worlds[i].count = 1;
-			worlds[i].id = i+1;
-			worlds[i].radius = 100;
-			worlds[i].rotation = 1;
-			worlds[i].rotation_speed = 1;
-			worlds[i].pos.x = cJSON_GetObjectItem(station,"x")->valuedouble;
-			worlds[i].pos.y = cJSON_GetObjectItem(station,"y")->valuedouble;
-			strcpy(worlds[i].level_name, cJSON_GetObjectItem(station,"level")->valuestring);
+			world[i].count = 1;
+			world[i].id = i+1;
+			world[i].radius = 100;
+			world[i].rotation = 1;
+			world[i].rotation_speed = 1;
+			world[i].pos.x = cJSON_GetObjectItem(station,"x")->valuedouble;
+			world[i].pos.y = cJSON_GetObjectItem(station,"y")->valuedouble;
+			strcpy(world[i].level_name, cJSON_GetObjectItem(station,"level")->valuestring);
 		}
 
 		if (i != station_count || i <= 0) {
@@ -259,8 +259,13 @@ void level_unload(level *lvl)
 
 void level_get_ships(level_ship **ship, int *count)
 {
-	*ship = worlds;
+	*ship = world;
 	*count = station_count;
+}
+
+level_ship* level_get_world()
+{
+	return world;
 }
 
 int level_get_station_count(void)
@@ -270,11 +275,11 @@ int level_get_station_count(void)
 
 int level_get_level_count(int station)
 {
-	return (station > 0 && station <= station_count) ? worlds[station-1].count : 0;
+	return (station > 0 && station <= station_count) ? world[station-1].count : 0;
 }
 
 void level_destroy(void)
 {
 	station_count = 0;
-	free(worlds);
+	free(world);
 }

@@ -30,6 +30,7 @@ void button_set_frontcolor(button btn_id, Color col);
 void button_set_animated(button btn_id, int animated, float fps);
 void button_set_enlargement(button btn_id, float size);
 void button_set_sprite(button btn_id, SPRITE_ID spr_id);
+void button_set_font(button btn_id, bm_font *f, float size);
 
 void button_clear(button btn);
 

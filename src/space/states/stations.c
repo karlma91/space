@@ -11,8 +11,6 @@
 
 STATE_ID state_stations;
 
-static char *txt_buttons[30];
-
 static button *btn_stations;
 static button btn_home;
 static button btn_editor;
@@ -71,20 +69,8 @@ static void sdl_event(SDL_Event *event)
 static void draw(void)
 {
 
-	//cpVect full = cpv(GAME_WIDTH, GAME_HEIGHT);
 	draw_color4f(1,1,1,1);
-	//0.5 - 0.49*cosf(engine_time * WE_2PI/3);
 
-	/*
-	draw_color4f(1,1,1,1);
-	int i;
-	for (i = 0; i < station_count; i++) {
-		touch_place(btn_stations[i], -(station_count - 1) / 2.0 * 650 + 1000 * i + xoffset, yoffset+(i-0.5)*270);
-		btn_stations[i]->calls->render(btn_stations[i]);
-		//TODO tegne minste antall stjerner av levlene i romstasjonen under den?
-		//TODO skrive antall levler klart?
-	}
-	*/
 
 	draw_box(1, a, b, r, 1);
 
@@ -99,8 +85,6 @@ static void draw(void)
 	draw_color4b(200,210,230,255);
 	bmfont_right(FONT_SANS, cpv(-600,300),1,"the quick brown fox jumps over the lazy dog\nTHE QUICK BROWN FOX JUMPS OVER THE LAZY DOG");
 
-	//cpVect pos = {0,0.7f*GAME_HEIGHT/2};
-	//draw_texture(tex_title, &pos, TEX_MAP_FULL, 1200, 300, 0);
 
 }
 

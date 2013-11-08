@@ -13,8 +13,9 @@
 
 STATE_ID state_levelscreen;
 
-#define MAX_LEVELS 10
-static button btn_levels[MAX_LEVELS];
+//#define MAX_LEVELS 10
+//static button btn_levels[MAX_LEVELS];
+static button start_level;
 
 static Color col_default = {255,255,255,255};
 static Color col_selected= {0,255,0,255};
@@ -22,7 +23,6 @@ static Color col_selected= {0,255,0,255};
 static button btn_disable;
 static button btn_background;
 
-static int selected_level = 0;
 static int level_count = 0;
 static level_ship *current_ship;
 
@@ -30,8 +30,6 @@ static rect box = {{0,0}, {1000,800}};
 
 static float w = 150;
 static float h = 150;
-
-static char title[40];
 
 static sprite spr_star;
 static cpVect star_pos[3] = {{-350,100}, {0,100}, {350,100}};
@@ -74,9 +72,7 @@ static void draw(void)
 	draw_box(3, box.p,box.s,0,1);
 
 	draw_color4f(1,1,1,1);
-	setTextAlign(TEXT_CENTER);
-	setTextSize(50);
-	font_drawText(RLAY_GUI_FRONT, 0,box.p.y+box.s.y / 2 - 60,title);
+	bmfont_center(FONT_SANS, cpv(0,box.p.y+box.s.y / 2 - 100), 1.5, current_ship->level_name);
 
 	for (i = 0; i < 3; i++) {
 		if (stars_unlocked == i+1) {
@@ -101,52 +97,17 @@ static void destroy(void)
 {
 }
 
-static void set_selected_level(int level)
-{
-	if (selected_level > 0 && selected_level <= MAX_LEVELS) {
-		button_set_frontcolor(btn_levels[selected_level-1], col_default);
-	}
-	selected_level = level;
-	button_set_frontcolor(btn_levels[selected_level-1], col_selected);
-
-	sprintf(&title[0], "LEVEL %d", level);
-	//TODO update star score info + best time
-	stars_unlocked = 3 - ((level & 3) ^ 0x1);//TMP TODO store stars unlocked in level/station struct
-}
 
 void levelscreen_change_to(level_ship * ship)
 {
 	current_ship = ship;
 	level_count = ship->count;
-
-	set_selected_level(1); //TODO select last unlocked level
-
-	float margin = 30;
-	float y = box.p.y - box.s.y/2 + h / 2 + margin;
-	int i;
-	for (i = 0; i < level_count; i++) {
-		float x = box.p.x - box.s.x/2 + (box.s.x-margin*2) * (i+0.5) / level_count;
-		btn_levels[i]->visible = 1;
-		btn_levels[i]->enabled = 1;
-		touch_place(btn_levels[i], x, y);
-	}
-	for (;i < MAX_LEVELS; i++) {
-		btn_levels[i]->visible = 0;
-		btn_levels[i]->enabled = 0;
-	}
-
 	statesystem_push_state(state_levelscreen);
 }
 
 static void button_callback(void *data)
 {
-	int level = *((int *) &data);
-
-	if (level == selected_level) {
-		space_start_demo(current_ship->level_name);
-	} else {
-		set_selected_level(level);
-	}
+	space_start_demo(current_ship->level_name);
 }
 
 void levelscreen_init(void)
@@ -157,22 +118,15 @@ void levelscreen_init(void)
 
 	view *main_view = state_view_get(state_levelscreen,0);
 
-
-	int i;
-	for (i = 0; i < MAX_LEVELS; i++) {
-		char stri[MAX_LEVELS];
-		sprintf(stri, "%d", i+1);
-
-		button btn = button_create(0, 0, stri, 0, 0, w, h);
-		btn_levels[i] = btn;
-		button_set_callback(btn, button_callback, (NULL + i+1));
-		button_set_enlargement(btn, 2);
-		button_set_backcolor(btn, col_back);
-		button_set_frontcolor(btn, col_default);
-		button_set_hotkeys(btn, digit2scancode[(i+1) % 10], 0);
-		state_register_touchable_view(main_view, btn);
-	}
-
+	float y = box.p.y - box.s.y/2 + h / 2 + 20;
+	start_level =  button_create(0, 0, "Start", 0, y, 300, 200);
+	button_set_callback(start_level, button_callback, NULL);
+	button_set_enlargement(start_level, 2);
+	button_set_backcolor(start_level, col_back);
+	button_set_frontcolor(start_level, col_default);
+	button_set_hotkeys(start_level, SDL_SCANCODE_SPACE, 0);
+	button_set_font(start_level, FONT_SANS, 2);
+	state_register_touchable_view(main_view, start_level);
 	state_register_touchable_view(main_view, btn_settings);
 
 	btn_disable = button_create(NULL, 0, "", box.p.x, box.p.y, box.s.x, box.s.y);
