@@ -49,8 +49,8 @@ static void update(touchable * scr_id)
 
 	float spd = scr->max_speed * 0.8 * dt;
 
-	scr->offset.x +=  (keys[scr->key_left] - keys[scr->key_right]) * spd;
-	scr->offset.y +=  (keys[scr->key_down] - keys[scr->key_up]) * spd;
+	scr->offset.x +=  (keys[scr->key_right] - keys[scr->key_left]) * spd;
+	scr->offset.y +=  (keys[scr->key_up] - keys[scr->key_down]) * spd;
 
 	if(keys[scr->key_in]){
 		scr->zoom *= 1 + 1 * dt;
@@ -71,7 +71,7 @@ static void update(touchable * scr_id)
 	}
 	scr->speed = cpvmult(scr->speed, scr->friction);
 	if (scr->have_bounds) {
-		scr->offset = cpBBClampVect(scr->bounds, scr->offset);
+		scr->offset = cpvadd(cpvmult(cpBBClampVect(scr->bounds, scr->offset),0.05),cpvmult(scr->offset,0.95));
 	}
 
 }
@@ -130,13 +130,15 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 
 	if (llist_contains(active_fingers, scr->finger_1)) {
 		cpVect last_diff = cpvsub(scr->pf2, scr->pf1);
-        float last_dist, new_dist;
-        float add_rot = 0;
+		float last_dist, new_dist;
+		float add_rot = 0;
 
 		if (scr->finger_1 == finger->fingerId) {
 			scr->pf1 = cpv(finger->x,finger->y);
 		} else if (scr->finger_2 == finger->fingerId) {
 			scr->pf2 = cpv(finger->x,finger->y);
+		} else {
+			return 0;
 		}
 
 		cpVect new_diff = cpvsub(scr->pf2, scr->pf1);
@@ -145,9 +147,9 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 			new_dist = cpvlength(new_diff);
 			float product = last_dist * new_dist;
 			if (product > 0) {
-                float cos_alpha = cpvdot(last_diff, new_diff) / (product);
-                float sin_alpha = cpvdot(cpvperp(last_diff), new_diff) / (product);
-                cos_alpha = cos_alpha > 1 ? 1 : cos_alpha < -1 ? -1 : cos_alpha;
+				float cos_alpha = cpvdot(last_diff, new_diff) / (product);
+				float sin_alpha = cpvdot(cpvperp(last_diff), new_diff) / (product);
+				cos_alpha = cos_alpha > 1 ? 1 : cos_alpha < -1 ? -1 : cos_alpha;
 				add_rot = acosf(cos_alpha) * (sin_alpha > 0 ? 1 : -1);
 			}
 		} else {
@@ -171,6 +173,18 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 			scr->speed = cpvadd(cpvmult(scr->speed, 0.5), cpvmult(delta, 0.5));
 
 			return 1;
+		}
+	} else if (!llist_contains(active_fingers, finger->fingerId)) {
+		if (llist_contains(active_fingers, scr->finger_2)) {
+			scr->finger_1 = scr->finger_2;
+			scr->pf1 = scr->pf2;
+			scr->finger_2 = finger->fingerId;
+			scr->pf2 = cpv(finger->x,finger->y);
+		} else  {
+			scr->finger_1 = finger->fingerId;
+			scr->pf1 = cpv(finger->x,finger->y);
+			scr->speed = cpvzero;
+			llist_add(active_fingers, (void *)finger->fingerId);
 		}
 	}
 	return 0;

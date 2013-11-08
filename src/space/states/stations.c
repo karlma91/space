@@ -177,7 +177,7 @@ void stations_init(void)
 
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000); // max 4 000 gu / sec
 	scroll_set_bounds(scroller, cpBBNew(-GAME_WIDTH-200, -GAME_HEIGHT-200, GAME_WIDTH+200, GAME_HEIGHT+200));
-	state_register_touchable(this, scroller);
+	state_register_touchable_view(main_view, scroller);
 
 	state_add_layers(state_stations, 10);
 
