@@ -44,6 +44,7 @@ static cpShape *ceiling;
 
 /* level data */
 level *currentlvl;
+level_ship *current_ship;
 
 static void input(void);
 
@@ -128,7 +129,7 @@ static void level_start(void)
 		multiplayer = 1;
 	} else {
 		multiplayer = 0;
-		start = (p1_ready && (!(p2l || p2r))) || (!GOT_TOUCH && (state_timer > 1.5));
+		start = (p1_ready && (!(p2l || p2r))) || (!GOT_TOUCH && (state_timer > 0.8));
 	}
 
 	if (start) {
@@ -582,10 +583,9 @@ void space_init_level(char *name)
 	}
 #endif
 
-	if (currentlvl != NULL) {
-		level_unload(currentlvl);
+	if(currentlvl == NULL || strcmp(currentlvl->name, name) != 0 ) {
+		currentlvl = level_load(name);
 	}
-	currentlvl = level_load(name);
 
 	level_start_level(currentlvl);
 

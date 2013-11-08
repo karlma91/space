@@ -1,5 +1,5 @@
 {
-	"name" : "test",
+	"name" : "easymode",
 	"tilemap" : "level02_01.tmx",
 	"timelimit": 100,
 	

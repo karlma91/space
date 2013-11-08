@@ -24,7 +24,6 @@ static button btn_disable;
 static button btn_background;
 
 static int level_count = 0;
-static level_ship *current_ship;
 
 static rect box = {{0,0}, {1000,800}};
 
