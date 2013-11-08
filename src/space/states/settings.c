@@ -191,7 +191,7 @@ void settings_init(void)
 	btn_options[OPT_UNLOCK]->enabled = 0;
 	btn_options[OPT_DELETE]->enabled = 0;
 
-	scroller = scroll_create(0,0,SCROLL_WIDTH,GAME_HEIGHT, 0.95, GAME_HEIGHT);
+	scroller = scroll_create(0,0,SCROLL_WIDTH,GAME_HEIGHT, 0.95, GAME_HEIGHT, 0, 1);
 	scroll_set_bounds(scroller, cpBBNew(0, -GAME_HEIGHT/2, 0, 100));
 	state_register_touchable(state_settings, scroller);
 

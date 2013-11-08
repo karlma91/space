@@ -4,12 +4,12 @@
 #include "space.h"
 #include "../level.h"
 
-#define THIS_IS_A_TOUCH_OBJECT 1
-#include "../../engine/input/touch.h"
-
 STATE_ID state_editor;
 
-touchable touch_window;
+static touchable *scroller;
+
+static button btn_space;
+static button btn_next;
 
 static obj_param_tank tmp_tank_param = {
 	500,
@@ -17,16 +17,19 @@ static obj_param_tank tmp_tank_param = {
 };
 static level *lvl;
 
+static cpVect start;
+static int dragged;
+
+static view *main_view;
+
 void editor_init()
 {
-	statesystem_register(state_editor,0);
 	int i;
+	statesystem_register(state_editor,0);
+	main_view = state_view_get(state_editor, 0);
 	state_add_layers(state_editor, 20);
 
-	view * main_view = state_view_get(state_editor, 0);
-
 	int layers = state_layer_count(state_editor);
-
 	for(i = 11; i<layers; i++){
 		//float depth =  2 + 10*tan((1.0f*i/la_sys->num_layers)*WE_PI_2);
 		float f = (layers - i * 0.99f) / (layers);
@@ -57,13 +60,25 @@ void editor_init()
 	cpSpaceSetGravity(current_space, cpv(0, 0));
 	cpSpaceSetDamping(current_space, 0.8f);
 
-	touchable * tp = &touch_window;
-	REGISTER_CALLS(tp);
+	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 0); // max 4 000 gu / sec
 
-	touch_place(&touch_window, 0, 0);
-	state_register_touchable(state_editor, &touch_window);
+	btn_space = button_create(SPRITE_BTN_HOME, 0, "", -GAME_WIDTH/2 + 100, GAME_HEIGHT/2 - 100, 125, 125);
+	btn_next = button_create(SPRITE_BTN_NEXT, 0, "",0, GAME_HEIGHT/2 - 100, 125, 125);
 
+	button_set_callback(btn_space, statesystem_set_state, state_stations);
+	//button_set_callback(btn_next, NULL, 0); // TODO test level with this button
+
+	button_set_hotkeys(btn_next, KEY_RETURN_1, KEY_RETURN_2);
+	button_set_hotkeys(btn_space, KEY_ESCAPE, 0);
+
+	button_set_enlargement(btn_space, 1.5);
+	button_set_enlargement(btn_next, 1.5);
+
+	state_register_touchable_view(main_view, btn_space);
+	state_register_touchable_view(main_view, btn_next);
+	state_register_touchable_view(main_view, scroller);
 	state_register_touchable_view(main_view, btn_settings);
+
 
 	lvl = level_load("test");
 	currentlvl = lvl;
@@ -81,6 +96,8 @@ static void on_enter(void)
 
 static void pre_update(void)
 {
+	main_view->zoom = scroll_get_zoom(scroller);
+	view_update(main_view, scroll_get_offset(scroller), scroll_get_rotation(scroller));
 }
 
 static void post_update(void)
@@ -90,26 +107,33 @@ static void post_update(void)
 
 static void draw(void)
 {
-	if(keys[SDL_SCANCODE_UP]){
-		current_view->p.y -= 100*dt;
-	}else if(keys[SDL_SCANCODE_DOWN]){
-		current_view->p.y += 100*dt;
-	}
-	if(keys[SDL_SCANCODE_LEFT]){
-		current_view->p.x -= 100*dt;
-	}else if(keys[SDL_SCANCODE_RIGHT]){
-		current_view->p.x += 100*dt;
-	}
-
-	if(keys[SDL_SCANCODE_PAGEUP]){
-		current_view->zoom *= 1 + 1 * dt;
-	} else if(keys[SDL_SCANCODE_PAGEDOWN]) {
-		current_view->zoom *= 1/(1 + 1 * dt);
-	}
 }
 
 static void sdl_event(SDL_Event *event)
 {
+	SDL_TouchFingerEvent *finger = &event->tfinger;
+	float zoom;
+	cpVect pos;
+
+	switch(event->type) {
+	case SDL_FINGERDOWN:
+		start = main_view->p;
+		dragged = 0;
+		break;
+	case SDL_FINGERMOTION:
+		zoom = main_view->zoom;
+
+		if(cpvlength(cpvsub(main_view->p, start)) > 50 / zoom){
+			dragged = 1;
+		}
+		break;
+	case SDL_FINGERUP:
+		pos = cpv(finger->x, finger->y);
+		if(!dragged) {
+			instance_create(obj_id_tank, &tmp_tank_param,pos, cpvzero);
+		}
+		break;
+	}
 }
 
 static void on_pause(void)
@@ -129,38 +153,6 @@ static void update(touchable *t)
 
 }
 static void render(touchable *t)
-{
-
-}
-
-static cpVect start;
-static int dragged;
-static int touch_down(touchable *t, SDL_TouchFingerEvent *finger)
-{
-	start = current_view->p;
-	dragged = 0;
-}
-
-static int touch_motion(touchable *t, SDL_TouchFingerEvent *finger)
-{
-	float zoom = current_view->zoom;
-	cpVect delta = cpv(-finger->dx*GAME_WIDTH / zoom, finger->dy*GAME_HEIGHT / zoom);
-	view_update(current_view, cpvadd(current_view->p, delta), 0);
-
-	if(cpvlength(cpvsub(current_view->p, start)) > 50 / zoom){
-		dragged = 1;
-	}
-}
-
-static int touch_up(touchable *t, SDL_TouchFingerEvent *finger)
-{
-	cpVect pos = cpv(finger->x, finger->y);
-	if(!dragged) {
-		instance_create(obj_id_tank, &tmp_tank_param,pos, cpvzero);
-	}
-}
-
-static int keypress_down(touchable *t, SDL_Scancode key)
 {
 
 }

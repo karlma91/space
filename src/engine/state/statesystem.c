@@ -396,6 +396,7 @@ void statesystem_draw(void)
     		llist_end_loop(cam_touchies);
 
     		layersystem_render(state, cam);
+    		current_view = NULL;
     	}
     	llist_end_loop(state->cameras);
 

@@ -25,6 +25,7 @@ typedef struct {
 
 	float zoom, z_min, z_max;
 	float rot;
+	float rotate_delta;
 
 	SDL_FingerID finger_1, finger_2;
 
@@ -34,6 +35,8 @@ typedef struct {
 	cpVect offset;
 
 	SDL_Scancode key_left, key_up, key_right, key_down, key_in, key_out, key_rotcw, key_rotcc;
+
+	int consume_events;
 
 } scroll_priv;
 
@@ -49,8 +52,13 @@ static void update(touchable * scr_id)
 
 	float spd = scr->max_speed * 0.8 * dt;
 
-	scr->offset.x +=  (keys[scr->key_right] - keys[scr->key_left]) * spd;
-	scr->offset.y +=  (keys[scr->key_up] - keys[scr->key_down]) * spd;
+	cpVect delta = {(keys[scr->key_right] - keys[scr->key_left]) * spd,
+					(keys[scr->key_up] - keys[scr->key_down]) * spd};
+	delta = cpvrotate(delta, cpvforangle(-scr->rot));
+	if (scr->rotate_delta) {
+		delta = cpvrotate(delta, cpvforangle(-scr->rot));
+	}
+	scr->offset = cpvadd(scr->offset, delta);
 
 	if(keys[scr->key_in]){
 		scr->zoom *= 1 + 1 * dt;
@@ -71,7 +79,7 @@ static void update(touchable * scr_id)
 	}
 	scr->speed = cpvmult(scr->speed, scr->friction);
 	if (scr->have_bounds) {
-		scr->offset = cpvadd(cpvmult(cpBBClampVect(scr->bounds, scr->offset),0.05),cpvmult(scr->offset,0.95));
+		scr->offset = cpvadd(cpvmult(cpBBClampVect(scr->bounds, scr->offset),0.1),cpvmult(scr->offset,0.9));
 	}
 
 }
@@ -93,7 +101,6 @@ static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	float tx = finger->x, ty = finger->y;
 	//normalized2game(&tx, &ty);
 
-	//TODO support dual-touch
 	if (INSIDE(scr, tx, ty)) {
 		if (llist_contains(active_fingers, scr->finger_1)) {
 			if (scr->finger_1 != finger->fingerId) {
@@ -101,7 +108,7 @@ static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
 				scr->pf2 = cpv(finger->x,finger->y);
 				scr->speed = cpvzero;
 				llist_add(active_fingers, (void *)finger->fingerId);
-				return 1;
+				return scr->consume_events;
 			}
 		} else {
 			scr->finger_1 = finger->fingerId;
@@ -109,7 +116,7 @@ static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
 			scr->speed = cpvzero;
 			llist_add(active_fingers, (void *)finger->fingerId);
 			scr->scrolling = 1;
-			//return 1; //TMP FIXME
+			return scr->consume_events;
 		}
 	}
 
@@ -119,14 +126,6 @@ static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
 static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 {
 	scroll_priv * scr = (scroll_priv *) scr_id;
-
-	/* add finger to this scroll if not active*/
-	/*if (!llist_contains(active_fingers, finger->fingerId)) {
-		scr->finger_1 = finger->fingerId;
-		scr->speed = cpvzero;
-
-		llist_add(active_fingers, (void *)finger->fingerId);
-	} else*/
 
 	if (llist_contains(active_fingers, scr->finger_1)) {
 		cpVect last_diff = cpvsub(scr->pf2, scr->pf1);
@@ -165,14 +164,18 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 			//return 1;
 			scr->scrolling = 1;
 			//TODO get actual width and height (TODO ta hensyn til kameraviews)
-			float zoom = current_view->zoom;
-#warning current_view skal ikke være tilgjengelig i scroll motion!
+			float zoom = 1;
+			if (scr->touch_data.container) {
+				zoom = scr->touch_data.container->zoom;
+			}
 			cpVect delta = cpv(-finger->dx*scr_id->get.width / zoom, finger->dy*scr_id->get.height / zoom);
-
+			if (scr->rotate_delta) {
+				delta = cpvrotate(delta, cpvforangle(-scr->rot));
+			}
 			scr->offset = cpvadd(scr->offset, delta);
 			scr->speed = cpvadd(cpvmult(scr->speed, 0.5), cpvmult(delta, 0.5));
 
-			return 1;
+			return scr->consume_events;
 		}
 	} else if (!llist_contains(active_fingers, finger->fingerId)) {
 		if (llist_contains(active_fingers, scr->finger_2)) {
@@ -183,9 +186,10 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 		} else  {
 			scr->finger_1 = finger->fingerId;
 			scr->pf1 = cpv(finger->x,finger->y);
-			scr->speed = cpvzero;
-			llist_add(active_fingers, (void *)finger->fingerId);
 		}
+		scr->speed = cpvzero;
+		llist_add(active_fingers, (void *)finger->fingerId);
+		return scr->consume_events;
 	}
 	return 0;
 }
@@ -198,6 +202,7 @@ static int touch_up(touchable * scr_id, SDL_TouchFingerEvent * finger)
 		scroll_priv * scr = (scroll_priv *) scr_id;
 		scr->scrolling = 0;
 		scr->finger_1 = -1;
+		//return scr->consume_events;
 	}
 	return 0;
 }
@@ -215,7 +220,7 @@ void scroll_set_hotkeys(touchable * scr_id, SDL_Scancode key_left, SDL_Scancode 
 	scr->key_rotcc = key_rot_cc;
 }
 
-scroll_p scroll_create(float pos_x, float pos_y, float width, float height, float friction, float max_speed)
+scroll_p scroll_create(float pos_x, float pos_y, float width, float height, float friction, float max_speed, int rotate_delta, int consume_events)
 {
 	scroll_priv *scr = calloc(1, sizeof *scr);
 
@@ -241,12 +246,14 @@ scroll_p scroll_create(float pos_x, float pos_y, float width, float height, floa
 	scr->speed = cpvzero;
 	scr->scrolling = 0;
 
+	scr->rotate_delta = rotate_delta;
 	scr->rot = 0;
 
 	scr->zoom = 1;
 	scr->z_min= 0.01;
 	scr->z_max= 1000;
 
+	scr->consume_events = consume_events;
 	return scr_id;
 }
 
