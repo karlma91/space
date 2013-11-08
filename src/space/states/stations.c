@@ -56,12 +56,7 @@ static void pre_update(void)
     test = tween_cpv_is_done_remove(test, &a);
     tests = tween_cpv_is_done_remove(tests, &b);
     testr = tween_float_is_done_remove(testr, &r);
-
-	if(keys[SDL_SCANCODE_PAGEUP]){
-		main_view->zoom *= 1 + 1 * dt;
-	} else if(keys[SDL_SCANCODE_PAGEDOWN]) {
-		main_view->zoom *= 1/(1 + 1 * dt);
-	}
+    main_view->zoom = scroll_get_zoom(scroller);
 }
 
 static void post_update(void)
@@ -97,7 +92,7 @@ static void draw(void)
 	bmfont_center(FONT_SANS, cpv(0,500),1.5,"SPACE");
 	bmfont_center(FONT_SANS, cpv(700,-100),1,"2");
 	bmfont_center(FONT_SANS, cpv(-300,-400),1,"1");
-	bmfont_center(FONT_SANS, cpv(1400,-1150),1,"CREDTIS:\nMathias Wilhelmsen\nKarl Magnus Kalvik");
+	bmfont_center(FONT_SANS, cpv(1400,-1150),1,"CREDITS:\nMathias Wilhelmsen\nKarl Magnus Kalvik");
 	draw_color4b(200,210,230,255);
 	bmfont_right(FONT_SANS, cpv(-600,300),1,"the quick brown fox jumps over the lazy dog\nTHE QUICK BROWN FOX JUMPS OVER THE LAZY DOG");
 
@@ -148,7 +143,7 @@ void stations_init(void)
 
 	main_view = state_view_get(state_stations, 0);
 
-	btn_home = button_create(SPRITE_GEAR, 0, "", 0, 0, 250, 250);
+	btn_home = button_create(SPRITE_PLAYERGUN001, 0, "", 0, 0, 250, 250);
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
@@ -179,7 +174,7 @@ void stations_init(void)
 
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000); // max 4 000 gu / sec
 	scroll_set_bounds(scroller, cpBBNew(-GAME_WIDTH-200, -GAME_HEIGHT-200, GAME_WIDTH+200, GAME_HEIGHT+200));
-	state_register_touchable(this, scroller);
+	state_register_touchable_view(main_view, scroller);
 
 	state_add_layers(state_stations, 10);
 

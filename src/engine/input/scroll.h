@@ -15,12 +15,16 @@ typedef touchable *scroll_p;
 
 scroll_p scroll_create(float pos_x, float pos_y, float width, float height, float friction, float max_speed);
 
-void scroll_set_hotkeys(touchable * scr_id, SDL_Scancode key_left, SDL_Scancode key_up, SDL_Scancode key_right, SDL_Scancode key_down);
+void scroll_set_hotkeys(touchable * scr_id, SDL_Scancode key_left, SDL_Scancode key_up, SDL_Scancode key_right, SDL_Scancode key_down, SDL_Scancode key_zoomin, SDL_Scancode key_zoomout);
 
 float scroll_get_xoffset(scroll_p);
 float scroll_get_yoffset(scroll_p);
 cpVect scroll_get_offset(scroll_p scr_id);
 void scroll_set_offset(scroll_p scr_id, cpVect offset);
 void scroll_set_bounds(scroll_p scr_id, cpBB bounds);
+
+float scroll_get_zoom(scroll_p);
+void scroll_set_zoom(scroll_p, float zoom);
+void scroll_set_zoomlimit(scroll_p scr_id, float min, float max);
 
 #endif /* SCROLL_H_ */
