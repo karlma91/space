@@ -1,0 +1,18 @@
+{
+	"name" : "test",
+	"tilemap" : "level02_01.tmx",
+	"timelimit": 100,
+	
+	"params" : [
+		{ "type": "TANK", "name":"LIGHT", 
+		  "max_hp":250, "coins":50,
+		  "texture_name": "tank_00.png" },
+		{ "type": "FACTORY", "name": "SMALL",
+		  "max_tanks": 1, "max_hp": 250, "spawn_delay": 5, "coins": 50, 
+		  "object_spawn": {"type":"TANK", "name":"LIGHT"},
+		  "sprite": "factoryblue", "shape": "factory.shape"}
+	],
+	"objects" : [
+		{"type":"FACTORY", "param": "SMALL", "pos": {"x":1200, "y":560, "r": 100}}
+	]
+}

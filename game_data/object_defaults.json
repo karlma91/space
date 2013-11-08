@@ -1,0 +1,24 @@
+{
+	"params" : [
+		{ "type": "TURRET", "name":"DEF", 
+		  "max_hp":250, "coins":50, "shoot_interval": 2, "burst_number": 2,
+		  "texture_name": "turret.png" },
+		  
+		{ "type": "TANK", "name":"DEF", 
+		  "max_hp":250, "coins":50,
+		  "texture_name": "tank_00.png" },
+		  
+		{ "type": "FACTORY, "name": "DEF",
+		  "max_tanks": 2, "max_hp": 250, "spawn_delay": 3, "coins": 50, 
+		  "object_spawn": {"type":"TANK", "name":"LIGHT"},
+		  "sprite": "factoryblue", "shape": "factory"},
+		  
+		{ "type": "ROCKET, "name": "DEF",
+		  "max_hp": 250,"coins": 50,
+		  "texture_name": "rocket.png"},
+		  
+		{ "type": "ROBOTARM, "name": "DEF",
+		  "max_hp": 250, "coins": 50, 
+		  "texture_name": "tank_00.png"},
+	]
+}

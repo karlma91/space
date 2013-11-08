@@ -152,13 +152,14 @@ PARAM_START(factory)
 	float spawn_delay;
 	int coins;
 	object_id *type;
-	void *param;
-	SPRITE_ID sprite_id;
+	char param_name[32];
+	char type_name[32];
+	char sprite_name[32];
 	char shape_name[32];
-	polyshape shape_id;
 PARAM_END
 OBJ_START(factory)
 	cpFloat timer;
+	void *spawn_param;
 	int cur;
 	hpbar hp_bar;
 	float max_distance;

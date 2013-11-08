@@ -6,6 +6,7 @@
 #include "we_tween.h"
 #define OBJ_NAME factory
 #include "we_defobj.h"
+#include "../../engine/components/shape.h"
 
 
 
@@ -25,9 +26,12 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	factory->max_distance = 900; //TODO read from object definition
 	//fac->hp = fac->param.max_hp; //TODO FIXME
 
-	cpFloat size = 375;
+	factory->spawn_param = level_get_param(currentlvl->param_list, factory->param.type_name, factory->param.param_name);
 
-	sprite_create(&factory->data.spr, factory->param.sprite_id, 400, 400, 30);
+	cpFloat size = 375;
+	SPRITE_ID sprite_id = sprite_link(factory->param.sprite_name);
+
+	sprite_create(&factory->data.spr, sprite_id, 400, 400, 30);
 
 	if (factory->param.type == obj_id_tank) {
 		factory->smoke = particles_get_emitter(current_particles, RLAY_GAME_BACK, EMITTER_SMOKE);
@@ -43,14 +47,13 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	se_tangent_body(factory->data.body);
 	se_velfunc(factory->data.body, 1);
 
-	shape_add_shapes(current_space, factory->param.shape_id, factory->data.body, 400, cpvzero, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
+	polyshape shape = shape_read(factory->param.shape_name);
+
+	shape_add_shapes(current_space, shape, factory->data.body, 400, cpvzero, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
 	cpBodySetUserData(factory->data.body, factory);
 
 	hpbar_init(&factory->hp_bar, factory->param.max_hp, 200, 35, 0, 180,
 			&(factory->data.body->p));
-
-
-
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)
@@ -64,7 +67,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 			pos.x += 100;
 			pos = we_pol2cart(pos);
 
-			instance * ins = instance_create(factory->param.type, factory->param.param, pos, cpvzero);
+			instance * ins = instance_create(factory->param.type, factory->spawn_param, pos, cpvzero);
 			COMPONENT_SET(ins, CREATOR, factory);
 			factory->timer = 0;
 			factory->cur += 1;

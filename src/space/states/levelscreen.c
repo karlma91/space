@@ -143,7 +143,7 @@ static void button_callback(void *data)
 	int level = *((int *) &data);
 
 	if (level == selected_level) {
-		space_start_demo(current_ship->id, level);
+		space_start_demo(current_ship->level_name);
 	} else {
 		set_selected_level(level);
 	}
@@ -156,6 +156,7 @@ void levelscreen_init(void)
 	Color col_back = {0,51,230,255};
 
 	view *main_view = state_view_get(state_levelscreen,0);
+
 
 	int i;
 	for (i = 0; i < MAX_LEVELS; i++) {

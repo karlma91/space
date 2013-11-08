@@ -2,6 +2,7 @@
 #include "../spaceengine.h"
 #include "we_defstate.h"
 #include "space.h"
+#include "../level.h"
 
 #define THIS_IS_A_TOUCH_OBJECT 1
 #include "../../engine/input/touch.h"
@@ -14,13 +15,15 @@ static obj_param_tank tmp_tank_param = {
 	500,
 	50
 };
-
+static level *lvl;
 
 void editor_init()
 {
 	statesystem_register(state_editor,0);
 	int i;
 	state_add_layers(state_editor, 20);
+
+	view * main_view = state_view_get(state_editor, 0);
 
 	int layers = state_layer_count(state_editor);
 
@@ -60,6 +63,10 @@ void editor_init()
 	touch_place(&touch_window, 0, 0);
 	state_register_touchable(state_editor, &touch_window);
 
+	state_register_touchable_view(main_view, btn_settings);
+
+	lvl = level_load("test");
+	currentlvl = lvl;
 }
 
 /* * * * * * * * * *
@@ -68,6 +75,8 @@ void editor_init()
 
 static void on_enter(void)
 {
+	currentlvl = lvl;
+	level_start_level(lvl);
 }
 
 static void pre_update(void)

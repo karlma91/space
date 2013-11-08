@@ -53,12 +53,11 @@ static void pre_update(void)
     test = tween_cpv_is_done_remove(test, &a);
     tests = tween_cpv_is_done_remove(tests, &b);
     testr = tween_float_is_done_remove(testr, &r);
-    main_view->zoom = scroll_get_zoom(scroller);
 
+    main_view->zoom = scroll_get_zoom(scroller);
     float rot = scroll_get_rotation(scroller);
 	cpVect offset = scroll_get_offset(scroller);
 	view_update(main_view, offset, rot);
-
 }
 
 static void post_update(void)
@@ -89,10 +88,14 @@ static void draw(void)
 
 	draw_box(1, a, b, r, 1);
 
+
 	bmfont_center(FONT_SANS, cpv(0,500),1.5,"SPACE");
-	bmfont_center(FONT_SANS, cpv(700,-100),1,"2");
-	bmfont_center(FONT_SANS, cpv(-300,-400),1,"1");
-	bmfont_center(FONT_SANS, cpv(1400,-1150),1,"CREDITS:\nMathias Wilhelmsen\nKarl Magnus Kalvik");
+	int i;
+	for(i = 0; i<station_count; i++) {
+		bmfont_center(FONT_SANS, stations[i].pos,1, stations[i].level_name);
+	}
+
+	bmfont_center(FONT_SANS, cpv(1400,-1150),1,"CREDTIS:\nMathias Wilhelmsen\nKarl Magnus Kalvik");
 	draw_color4b(200,210,230,255);
 	bmfont_right(FONT_SANS, cpv(-600,300),1,"the quick brown fox jumps over the lazy dog\nTHE QUICK BROWN FOX JUMPS OVER THE LAZY DOG");
 
@@ -143,7 +146,7 @@ void stations_init(void)
 
 	main_view = state_view_get(state_stations, 0);
 
-	btn_home = button_create(SPRITE_PLAYERGUN001, 0, "", 0, 0, 250, 250);
+	btn_home = button_create(SPRITE_GEAR, 0, "", 0, 0, 250, 250);
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
@@ -160,7 +163,7 @@ void stations_init(void)
 		char stri[10];
 		sprintf(stri, "%d", i+1);
 		float size = 350 + (i ? -50 : 50);
-		btn_stations[i] = button_create(SPRITE_STATION001, 0, "", -(station_count - 1) / 2.0 * 650 + 1000 * i , (i-0.5)*270, size, size);
+		btn_stations[i] = button_create(SPRITE_STATION001, 0, "", stations[i].pos.x,stations[i].pos.y, size, size);
 		button_set_callback(btn_stations[i], button_callback, &stations[i]);
 		button_set_backcolor(btn_stations[i], col_back);
 		button_set_animated(btn_stations[i], 1, (i ? 18 : 15));
@@ -174,7 +177,7 @@ void stations_init(void)
 
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000); // max 4 000 gu / sec
 	scroll_set_bounds(scroller, cpBBNew(-GAME_WIDTH-200, -GAME_HEIGHT-200, GAME_WIDTH+200, GAME_HEIGHT+200));
-	state_register_touchable_view(main_view, scroller);
+	state_register_touchable(this, scroller);
 
 	state_add_layers(state_stations, 10);
 

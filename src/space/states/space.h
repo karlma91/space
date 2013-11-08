@@ -16,14 +16,14 @@ extern joystick *joy_p2_left, *joy_p2_right;
 extern view *view_p1, *view_p2;
 
 /* init new level */
-void space_init_level(int space_station, int deck);
+void space_init_level(char *name);
 
 float extern getGameTime(void);
 extern int getArcadeScore(void);
 
 //extern void drawStars(void);
 
-void space_start_demo(int station, int deck);
+void space_start_demo(char *name);
 void space_start_multiplayer(int station, int deck);
 
 void space_restart_level(void *unused);
