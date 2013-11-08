@@ -522,7 +522,7 @@ static void remove_static(cpShape *shape)
 	cpShapeFree(shape);
 }
 
-void space_init_level(int space_station, int deck)
+void space_init_level(char *name)
 {
 
 	multiplayer = -1;
@@ -586,7 +586,7 @@ void space_init_level(int space_station, int deck)
 		level_unload(currentlvl);
 	}
 
-	currentlvl = level_load("test");
+	currentlvl = level_load(name);
 	level_start_level(currentlvl);
 
 	if (currentlvl == NULL) {
@@ -981,7 +981,7 @@ void setup_multiplay(void)
 	}
 }
 
-void space_start_demo(int station, int deck)
+void space_start_demo(char *name)
 {
 	statesystem_set_state(state_space);
 	//TODO set and reset all per-game variables
@@ -989,7 +989,7 @@ void space_start_demo(int station, int deck)
 
 	//view_p2->enabled = 0;
 
-	space_init_level(station,deck);
+	space_init_level(name);
 }
 
 /*
@@ -1005,7 +1005,7 @@ void space_start_multiplayer(int station, int deck) {
 void space_restart_level(void *unused)
 {
 	statesystem_set_state(state_space);
-	space_init_level(currentlvl->station, currentlvl->deck);
+	space_init_level(currentlvl->name);
 }
 
 void space_next_level(void *unused)
@@ -1019,7 +1019,7 @@ void space_next_level(void *unused)
 
 	if (deck <= 1) {
 		statesystem_set_state(state_space);
-		space_init_level(station, deck);
+		//space_init_level(station, deck);
 	} else {
 #if ARCADE_MODE
 		gameover_setstate(GAMEOVER_WIN);

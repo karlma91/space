@@ -6,13 +6,12 @@
 
 typedef struct level_ship {
 	int id;
-	float x;
-	float y;
+	cpVect pos;
 	int count;
 	float radius;
 	float rotation;
 	float rotation_speed;
-	char * level_name;
+	char  level_name[32];
 } level_ship;
 
 typedef struct object_recipe {
