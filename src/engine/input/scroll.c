@@ -24,6 +24,7 @@ typedef struct {
 	float max_speed;
 
 	float zoom, z_min, z_max;
+	float rot;
 
 	SDL_FingerID finger_1, finger_2;
 
@@ -32,7 +33,7 @@ typedef struct {
 	cpVect speed;
 	cpVect offset;
 
-	SDL_Scancode key_left, key_up, key_right, key_down, key_in, key_out;
+	SDL_Scancode key_left, key_up, key_right, key_down, key_in, key_out, key_rotcw, key_rotcc;
 
 } scroll_priv;
 
@@ -57,6 +58,12 @@ static void update(touchable * scr_id)
 		scr->zoom *= 1/(1 + 1 * dt);
 	}
 
+	if(keys[scr->key_rotcc]){
+		scr->rot += WE_2PI * dt / 4;
+	} else if(keys[scr->key_rotcw]) {
+		scr->rot -= WE_2PI * dt / 4;
+	}
+
 	if (!scr->scrolling) {
 		scr->offset = cpvadd(scr->offset, scr->speed);
 	} else {
@@ -71,9 +78,12 @@ static void update(touchable * scr_id)
 
 static void render(touchable * scr_id)
 {
-	scroll_priv * scr = (scroll_priv *) scr_id;
-	draw_color4b(50,80,50,20);
-	draw_box(0, cpv(scr->touch_data.get.t1x,scr->touch_data.get.t1y),cpv(scr->touch_data.get.width, scr->touch_data.get.height),0,0);
+	extern int debug_draw;
+	if (debug_draw) {
+		scroll_priv * scr = (scroll_priv *) scr_id;
+		draw_color4b(20,40,20,10);
+		draw_box(0, cpv(scr->touch_data.get.t1x,scr->touch_data.get.t1y),cpv(scr->touch_data.get.width, scr->touch_data.get.height),0,0);
+	}
 }
 
 static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
@@ -119,8 +129,9 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	} else*/
 
 	if (llist_contains(active_fingers, scr->finger_1)) {
-        float last_dist = cpvdist(scr->pf1, scr->pf2);
-        float new_dist = last_dist;
+		cpVect last_diff = cpvsub(scr->pf2, scr->pf1);
+        float last_dist, new_dist;
+        float add_rot = 0;
 
 		if (scr->finger_1 == finger->fingerId) {
 			scr->pf1 = cpv(finger->x,finger->y);
@@ -128,14 +139,27 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 			scr->pf2 = cpv(finger->x,finger->y);
 		}
 
+		cpVect new_diff = cpvsub(scr->pf2, scr->pf1);
 		if (llist_contains(active_fingers, scr->finger_2)) {
-			new_dist = cpvdist(scr->pf1, scr->pf2);
+			last_dist = cpvlength(last_diff);
+			new_dist = cpvlength(new_diff);
+			float product = last_dist * new_dist;
+			if (product > 0) {
+                float cos_alpha = cpvdot(last_diff, new_diff) / (product);
+                float sin_alpha = cpvdot(cpvperp(last_diff), new_diff) / (product);
+                cos_alpha = cos_alpha > 1 ? 1 : cos_alpha < -1 ? -1 : cos_alpha;
+				add_rot = acosf(cos_alpha) * (sin_alpha > 0 ? 1 : -1);
+			}
+		} else {
+			last_dist = 1;
+			new_dist = 1;
 		}
 
 		if (llist_contains(active_fingers, finger->fingerId)) {
 			scr->zoom = scr->zoom * new_dist / last_dist;
 			if (scr->zoom < scr->z_min) scr->zoom = scr->z_min;
 			if (scr->zoom > scr->z_max) scr->zoom = scr->z_max;
+			scr->rot += add_rot;
 			//return 1;
 			scr->scrolling = 1;
 			//TODO get actual width and height (TODO ta hensyn til kameraviews)
@@ -164,7 +188,7 @@ static int touch_up(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	return 0;
 }
 
-void scroll_set_hotkeys(touchable * scr_id, SDL_Scancode key_left, SDL_Scancode key_up, SDL_Scancode key_right, SDL_Scancode key_down, SDL_Scancode key_zoomin, SDL_Scancode key_zoomout)
+void scroll_set_hotkeys(touchable * scr_id, SDL_Scancode key_left, SDL_Scancode key_up, SDL_Scancode key_right, SDL_Scancode key_down, SDL_Scancode key_zoomin, SDL_Scancode key_zoomout, SDL_Scancode key_rot_cw, SDL_Scancode key_rot_cc)
 {
 	scroll_priv * scr = (scroll_priv *) scr_id;
 	scr->key_left = key_left;
@@ -173,6 +197,8 @@ void scroll_set_hotkeys(touchable * scr_id, SDL_Scancode key_left, SDL_Scancode 
 	scr->key_down = key_down;
 	scr->key_in = key_zoomin;
 	scr->key_out = key_zoomout;
+	scr->key_rotcw = key_rot_cw;
+	scr->key_rotcc = key_rot_cc;
 }
 
 scroll_p scroll_create(float pos_x, float pos_y, float width, float height, float friction, float max_speed)
@@ -184,7 +210,9 @@ scroll_p scroll_create(float pos_x, float pos_y, float width, float height, floa
 	scroll_p scr_id = (scroll_p) scr;
 
 	/* default keybindings */
-	scroll_set_hotkeys(scr_id, SDL_SCANCODE_LEFT,SDL_SCANCODE_UP,SDL_SCANCODE_RIGHT,SDL_SCANCODE_DOWN,SDL_SCANCODE_PAGEUP,SDL_SCANCODE_PAGEDOWN);
+	scroll_set_hotkeys(scr_id, SDL_SCANCODE_LEFT, SDL_SCANCODE_UP,
+			SDL_SCANCODE_RIGHT, SDL_SCANCODE_DOWN, SDL_SCANCODE_PAGEUP,
+			SDL_SCANCODE_PAGEDOWN, SDL_SCANCODE_END, SDL_SCANCODE_HOME);
 
 	scr_id->type = CTRL_SCROLL;
 
@@ -198,6 +226,8 @@ scroll_p scroll_create(float pos_x, float pos_y, float width, float height, floa
 	scr->offset = cpvzero;
 	scr->speed = cpvzero;
 	scr->scrolling = 0;
+
+	scr->rot = 0;
 
 	scr->zoom = 1;
 	scr->z_min= 0.01;
@@ -254,4 +284,10 @@ void scroll_set_zoom(scroll_p scr_id, float zoom)
 {
 	scroll_priv * scr = (scroll_priv *) scr_id;
 	scr->zoom = zoom;
+}
+
+float scroll_get_rotation(scroll_p scr_id)
+{
+	scroll_priv * scr = (scroll_priv *) scr_id;
+	return scr->rot;
 }

@@ -721,7 +721,7 @@ static void main_tick(void *data)
 
 	//input handler
 	if (keys[SDL_SCANCODE_F12]) {
-		main_stop();    
+		main_stop();
 	}
 	if (keys[SDL_SCANCODE_R]) {
 		glClear(GL_COLOR_BUFFER_BIT);

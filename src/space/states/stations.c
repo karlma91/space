@@ -22,9 +22,6 @@ static int station_count = 2;
 
 static scroll_p scroller;
 
-static int tex_stars;
-static int tex_stars_2;
-
 // TODO: cooler system
 //tween test
 static tween *test;
@@ -57,6 +54,11 @@ static void pre_update(void)
     tests = tween_cpv_is_done_remove(tests, &b);
     testr = tween_float_is_done_remove(testr, &r);
     main_view->zoom = scroll_get_zoom(scroller);
+
+    float rot = scroll_get_rotation(scroller);
+	cpVect offset = scroll_get_offset(scroller);
+	view_update(main_view, offset, rot);
+
 }
 
 static void post_update(void)
@@ -72,8 +74,6 @@ static void draw(void)
 
 	//cpVect full = cpv(GAME_WIDTH, GAME_HEIGHT);
 	draw_color4f(1,1,1,1);
-	cpVect offset = scroll_get_offset(scroller);
-	view_update(current_view, offset, 0);
 	//0.5 - 0.49*cosf(engine_time * WE_2PI/3);
 
 	/*
