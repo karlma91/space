@@ -319,10 +319,10 @@ static void update_camera_position(void)
     }
 }
 
-static void draw_deck()
+void space_draw_deck(void)
 {
 	/* draw ceiling and floor */
-	draw_color4f(0,0,0,0.6);
+	draw_color4f(0.1,0.1,0.1,0.6);
 	draw_circle(RLAY_BACK_BACK, cpvzero, currentlvl->inner_radius);
 	draw_donut(RLAY_BACK_BACK, cpvzero, currentlvl->outer_radius, currentlvl->outer_radius + 3000);
 }
@@ -330,13 +330,12 @@ static void draw_deck()
 static void draw(void)
 {
 	draw_color4f(1,1,1,1);
-	//TODO move out to statesystem!
 
 	//drawStars();
 
 	/* draw tilemap */
 	tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
-	draw_deck();
+	space_draw_deck();
 
 	//draw_light_map();
 }
@@ -370,7 +369,7 @@ static void radar_draw(cpVect pos)
 #include "arcade/menu.h"
 #endif
 
-void draw_gui(view *cam)
+static void draw_gui(view *cam)
 {
 	setTextAngle(0);
 	//todo use current view's port size instead of using cam->game_width and cam->game_height! (?or not)

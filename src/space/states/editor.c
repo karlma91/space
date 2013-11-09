@@ -208,8 +208,12 @@ static void post_update(void)
 
 }
 
+void space_draw_deck(void);
 static void draw(void)
 {
+	draw_color4f(1,1,1,1);
+	tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
+	space_draw_deck();
 }
 
 static void sdl_event(SDL_Event *event)
