@@ -10,6 +10,7 @@ static touchable *scr_world;
 static touchable *scr_objects;
 
 static button btn_space;
+static button btn_clear;
 static button btn_test;
 static button btn_save;
 
@@ -77,13 +78,13 @@ static int dragged;
 
 static view *main_view;
 
-static void start_editor_level(void *data)
+static void start_editor_level(void *unused)
 {
 	statesystem_set_state(state_space);
 	space_init_level_from_level(lvl);
 }
 
-static void save_level_to_file(void *data)
+static void save_level_to_file(void *unused)
 {
 	level_write_to_file(lvl);
 }
@@ -92,6 +93,12 @@ static void select_object_type(void *index)
 {
 	int i = *((int *)&index);
 	strncpy(object_type, object_names[i], 32);
+}
+
+static void clear_editor(void *unused)
+{
+	llist_clear(lvl->level_data);
+	objectsystem_clear();
 }
 
 void editor_init()
@@ -132,21 +139,25 @@ void editor_init()
 	cpSpaceSetGravity(current_space, cpv(0, 0));
 	cpSpaceSetDamping(current_space, 0.8f);
 
-	btn_space = button_create(SPRITE_BTN_HOME, 0, "", -GAME_WIDTH/2 + 100, GAME_HEIGHT/2 - 100, 125, 125);
+	btn_space = button_create(SPRITE_BTN_HOME, 0, "", -GAME_WIDTH/2 + 250, GAME_HEIGHT/2 - 100, 125, 125);
+	btn_clear = button_create(SPRITE_BTN_RETRY, 0, "", -250, GAME_HEIGHT/2-100, 125, 125);
 	btn_test = button_create(SPRITE_BTN_NEXT, 0, "",0, GAME_HEIGHT/2 - 100, 125, 125);
 	btn_save = button_create(SPRITE_COIN, 0, "",300, GAME_HEIGHT/2 -100, 125, 125);
 
 	button_set_callback(btn_space, statesystem_set_state, state_stations);
+	button_set_callback(btn_clear, clear_editor, 0);
 	button_set_callback(btn_test, start_editor_level, 0); // TODO test level with this button
-	button_set_callback(btn_save, save_level_to_file, 0); // TODO test level with this button
+	button_set_callback(btn_save, save_level_to_file, 0);
 	button_set_hotkeys(btn_test, KEY_RETURN_1, KEY_RETURN_2);
 	button_set_hotkeys(btn_space, KEY_ESCAPE, 0);
 
 	button_set_enlargement(btn_space, 1.5);
+	button_set_enlargement(btn_clear, 1.5);
 	button_set_enlargement(btn_test, 1.5);
 	button_set_enlargement(btn_save, 1.5);
 
 	state_register_touchable_view(main_view, btn_space);
+	state_register_touchable_view(main_view, btn_clear);
 	state_register_touchable_view(main_view, btn_test);
 	state_register_touchable_view(main_view, btn_save);
 	state_register_touchable_view(main_view, btn_settings);
@@ -175,6 +186,10 @@ void editor_init()
 	currentlvl = lvl;
 
 	state_enable_objects(state_editor, 0);
+
+	extern obj_player * space_create_player(int id);
+
+	space_create_player(1);;
 }
 
 /* * * * * * * * * *

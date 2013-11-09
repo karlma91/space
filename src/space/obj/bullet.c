@@ -61,7 +61,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	}
 
 	cpVect p1 = bullet->data.body->p;
-	cpVect p2 = cpvadd(p1, cpvmult(bullet->data.body->v, 1.0/32));
+	cpVect p2 = cpvadd(p1, cpvmult(bullet->data.body->v, 1.0/64));
 	draw_glow_line(p1, p2, 32);
 }
 

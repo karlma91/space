@@ -210,23 +210,23 @@ void draw_disable_tex2d(void) // deprecated method!
 //TODO create stretched sprite polyline render
 
 
-void draw_line_spr_id(int layer, SPRITE_ID id, cpVect a, cpVect b, float w)
+void draw_line_spr_id(int layer, SPRITE_ID id, cpVect a, cpVect b, float w, int append_edge)
 {
 	float tex_map[8];
 	sprite_get_first_image(id,tex_map);
     int tex_id = sprite_get_texture(id);
-	draw_line_tex(layer, tex_id, tex_map, a, b, w);
+	draw_line_tex(layer, tex_id, tex_map, a, b, w, append_edge);
 }
 
-void draw_line_spr(int layer, sprite *spr, cpVect a, cpVect b, float w)
+void draw_line_spr(int layer, sprite *spr, cpVect a, cpVect b, float w, int append_edge)
 {
 	float tex_map[8];
 	sprite_get_current_image(spr,tex_map);
     int tex_id = sprite_get_texture(spr->id);
-	draw_line_tex(layer, tex_id, tex_map, a, b, w);
+	draw_line_tex(layer, tex_id, tex_map, a, b, w, append_edge);
 }
 
-void draw_line_tex(int layer, int tex_id, float *tex_map, cpVect a, cpVect b, float w)
+void draw_line_tex(int layer, int tex_id, float *tex_map, cpVect a, cpVect b, float w, int append_edge)
 {
 	float dx = b.x-a.x;
 	float dy = b.y-a.y;
@@ -237,10 +237,10 @@ void draw_line_tex(int layer, int tex_id, float *tex_map, cpVect a, cpVect b, fl
 	GLfloat length = hypotf(dy, dx);
 
     w /=2; // tmp-fix
-    float x0 = 0;
-    float x1 = w;
-    float x2 = length - w;
-    float x3 = length;
+    float x0 = append_edge ? -w       : 0;
+    float x1 = append_edge ? 0        : w;
+    float x2 = append_edge ? length   : length-w;
+    float x3 = append_edge ? length+w : length;
 
     if (x1 > x2) {
     	x1 = length / 2;
@@ -284,9 +284,9 @@ void draw_glow_line(cpVect a, cpVect b, float w)
 	Color col = draw_get_current_color();
 	col.a = 0;
 	draw_color(col);
-	draw_line_spr_id(0, SPRITE_GLOWDOT, a, b, w);
+	draw_line_spr_id(0, SPRITE_GLOWDOT, a, b, w, 1);
 	draw_color4b(255,255,255,0);
-	draw_line_spr_id(0, SPRITE_DOT, a, b, w);
+	draw_line_spr_id(0, SPRITE_DOT, a, b, w, 1);
 	draw_pop_color();
 }
 
@@ -421,14 +421,14 @@ void draw_bar(int layer, cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFl
 		cpVect pos_bar = cpvadd(pos_org, cpvmult(rot, size_bar));
 
 		draw_color(COL_RED);
-		draw_line_spr_id(layer, SPRITE_BAR, pos_org, pos_red, width);
+		draw_line_spr_id(layer, SPRITE_BAR, pos_org, pos_red, width, 0);
 
 		cpFloat pp = p*p;
 		cpFloat pppp = pp*pp;
 		cpFloat p_1 = 1-p;
 
 		draw_color4f(1-pppp*pppp, 0.8-p_1*p_1*0.8 + 0.1, 0.1, 1);
-		draw_line_spr_id(layer, SPRITE_BAR, pos_org, pos_bar, width);
+		draw_line_spr_id(layer, SPRITE_BAR, pos_org, pos_bar, width, 0);
 
 	} else {
 		rot = cpvperp(rot);
@@ -437,7 +437,7 @@ void draw_bar(int layer, cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFl
 		pos_org = cpvadd(pos_org, cpvmult(rot, -size.y/2));
 		cpVect pos_bar = cpvadd(pos_org, cpvmult(rot, size_bar));
 		draw_color4f(1-p,1-p,1,1);
-		draw_line_spr_id(layer, SPRITE_BAR, pos_org, pos_bar, width);
+		draw_line_spr_id(layer, SPRITE_BAR, pos_org, pos_bar, width, 0);
 	}
 
 	draw_pop_color();

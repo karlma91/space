@@ -28,7 +28,7 @@ static void update_camera_position(void);
 static void sticks_init(void);
 static void sticks_hide(void);
 
-static obj_player * space_create_player(int id);
+obj_player * space_create_player(int id);
 
 view *view_p1, *view_p2;
 
@@ -650,6 +650,7 @@ void space_init_level_from_level(level * lvl)
 
 	particles_clear(current_particles);
 
+	/*
 	polytest.shape_id = POLYSHAPE_TURRET;
 	polytest.texture_scale = 0.4;
 	instance_create(obj_id_staticpolygon, &polytest, cpv(0,800), cpvzero);
@@ -666,6 +667,7 @@ void space_init_level_from_level(level * lvl)
 	obj_staticpolygon *sp = (obj_staticpolygon *)instance_create(obj_id_staticpolygon, &polytest, cpv(-800,0), cpvzero);
 	cpBodySetAngle(sp->body, 312);
 	cpSpaceReindexShapesForBody(current_space, sp->body);
+	*/
 }
 
 static void on_enter(void)
@@ -934,7 +936,7 @@ void setup_singleplay(void)
 #endif
 }
 
-static obj_player * space_create_player(int id)
+obj_player * space_create_player(int id)
 {
 	obj_param_player default_player = {
 			.max_hp = 200,

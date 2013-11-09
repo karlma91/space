@@ -27,9 +27,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	robotarm->segments = 4;
 	robotarm->seg_length = currentlvl->height / (2*robotarm->segments);
 	cpVect pos = robotarm->data.p_start;
-	pos = we_cart2pol(pos);
-	pos.x += 180;
-	pos = we_pol2cart(pos);
+	//pos = we_cart2pol(pos);
+	//pos.x += 180;
+	//pos = we_pol2cart(pos);
 
 	robotarm->x = 	  calloc(robotarm->segments, sizeof(float));
 	robotarm->y =	  calloc(robotarm->segments, sizeof(float));
@@ -143,7 +143,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 			draw_glow_line(v1, v2, 200);
 		}
 	}
-    
+
 	draw_color4f(1,redfade,redfade,1);
 	sprite_render_body(RLAY_GAME_MID, &(robotarm->saw_sprite), robotarm->saw);
 	sprite_render_body(RLAY_GAME_MID, &(robotarm->data.spr), robotarm->data.body);

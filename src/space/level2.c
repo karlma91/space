@@ -241,6 +241,7 @@ void level_add_object_recipe_name(level * lvl, char * obj_type, char * param_nam
 	strcpy(rec->param_name, param_name);
 	rec->pos = pos;
 	rec->rotation = rotation;
+	llist_set_remove_callback(lvl->level_data, free);
 	llist_add(lvl->level_data, rec);
 }
 

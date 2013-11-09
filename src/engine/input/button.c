@@ -221,7 +221,7 @@ static void render(button btn_id)
 		if (btn->stretch) {
 			cpVect a = cpvadd(btn_pos, cpv(-width/2,0));
 			cpVect b = cpvadd(btn_pos, cpv(width/2,0));
-			draw_line_spr(1, &(btn->spr), a, b, height);
+			draw_line_spr(1, &(btn->spr), a, b, height, 0);
 		} else {
 			sprite_render_scaled(1, &(btn->spr), btn_pos, 0, scale);
 		}
