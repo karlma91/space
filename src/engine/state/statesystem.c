@@ -465,10 +465,6 @@ void statesystem_push_event(SDL_Event *event)
 	LList game_touchies = stack_head->touch_objects;
 	float tx = event->tfinger.x, ty = event->tfinger.y;
 
-	if (stack_head->call.sdl_event) {
-		stack_head->call.sdl_event(event);
-	}
-
 	//TODO transform touch to in-game coords
 
 	// get the top most view beneath the touch location //TODO go through all views as long there is no response?
@@ -523,7 +519,7 @@ void statesystem_push_event(SDL_Event *event)
 		}
 	}
 	//*/
-	game_p = camera_vect_view2world(touched_view, game_p);
+	game_p = view_view2world(touched_view, game_p);
 
 	llist_begin_loop(game_touchies);
 	switch(event->type) {
@@ -624,6 +620,15 @@ void statesystem_push_event(SDL_Event *event)
 		break;
 	}
 	llist_end_loop(game_touchies);
+
+	if (!consumed) { //send event to state
+		event->tfinger.x = tx;
+		event->tfinger.y = ty;
+
+		if (stack_head->call.sdl_event) {
+			stack_head->call.sdl_event(event);
+		}
+	}
 }
 
 void statesystem_call_update(STATE_ID state_id)

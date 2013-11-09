@@ -79,7 +79,7 @@ static void update(touchable * scr_id)
 	}
 	scr->speed = cpvmult(scr->speed, scr->friction);
 	if (scr->have_bounds) {
-		scr->offset = cpvadd(cpvmult(cpBBClampVect(scr->bounds, scr->offset),0.1),cpvmult(scr->offset,0.9));
+		scr->offset = cpvadd(cpvmult(cpBBClampVect(scr->bounds, scr->offset),0.2),cpvmult(scr->offset,0.8));
 	}
 
 }
@@ -202,7 +202,7 @@ static int touch_up(touchable * scr_id, SDL_TouchFingerEvent * finger)
 		scroll_priv * scr = (scroll_priv *) scr_id;
 		scr->scrolling = 0;
 		scr->finger_1 = -1;
-		//return scr->consume_events;
+		return scr->consume_events;
 	}
 	return 0;
 }

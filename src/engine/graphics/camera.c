@@ -169,20 +169,29 @@ void view_free(view *c)
 	free(c);
 }
 
-cpVect camera_vect_view2world(view* cam, cpVect p)
+cpVect view_touch2view(view *cam, cpVect p)
 {
-	if(cam == NULL){
-		return p;
-	}
-	p = matrix2d_multcpv(cam->priv_view_invtransform, p);
+	if (cam)
+		p = cpv((p.x-0.5)*cam->view_width, (0.5-p.y)*cam->view_height);
 	return p;
 }
-cpVect camera_inv_vect_view2world(view* cam, cpVect p)
+cpVect view_touch2world(view *cam, cpVect p)
 {
-	if(cam == NULL){
-		return p;
-	}
-	p = matrix2d_multcpv(cam->priv_view_transform, p);
+	if (cam)
+		p = view_view2world(cam, view_touch2view(cam, p));
+	return p;
+}
+
+cpVect view_view2world(view* cam, cpVect p)
+{
+	if (cam)
+		p = matrix2d_multcpv(cam->priv_view_invtransform, p);
+	return p;
+}
+cpVect view_world2view(view* cam, cpVect p)
+{
+	if (cam)
+		p = matrix2d_multcpv(cam->priv_view_transform, p);
 	return p;
 }
 
