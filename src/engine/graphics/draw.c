@@ -329,7 +329,7 @@ void draw_destroy(void)
 
 void draw_circle(int layer, cpVect pos, GLfloat radius)
 {
-	draw_donut(0, pos, 0, radius);
+	draw_donut(layer, pos, 0, radius);
 }
 
 void draw_donut(int layer, cpVect p, GLfloat inner_r, GLfloat outer_r)
