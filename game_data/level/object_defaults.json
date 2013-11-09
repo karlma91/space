@@ -5,7 +5,7 @@
 	"params" : [
 		{ "type": "TURRET", "name":"DEF", 
 		  "max_hp":250, "coins":50, "shoot_interval": 2, "burst_number": 2,
-		  "texture_name": "turret.png" },
+		  "texture_name": "turret.png", "rot_speed": 0.2},
 		  
 		{ "type": "TANK", "name":"DEF", 
 		  "max_hp":250, "coins":50,

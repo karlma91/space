@@ -69,7 +69,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	cpFloat best_angle = se_get_best_shoot_angle(turret->data.body, player->data.body, SHOOT_VEL);
 
-	turret->data.body->a = turn_toangle(turret->data.body->a, best_angle, turret->param.rot_speed * dt);
+	turret->data.body->a = turn_toangle(turret->data.body->a, best_angle,  WE_2PI*dt*turret->param.rot_speed);
 	cpVect turret_angle = cpvforangle(turret->data.body->a - turret->tower->a);
 	turret->data.body->a = cpvdot(turret_angle, cpv(0,1)) > WE_PI_6/2 ? (turret->tower->a
 					+ (cpvdot(turret_angle, cpv(1,0)) > 0 ? WE_PI_6/2 : WE_PI-WE_PI_6/2))  : turret->data.body->a;

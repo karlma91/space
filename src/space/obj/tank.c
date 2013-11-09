@@ -33,7 +33,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	tank->max_distance = 800;
 	tank->rot_speed = M_PI/2;
 
-	cpFloat start_height = tank->data.p_start.y - 50;
+	cpVect polar_start = we_cart2pol(tank->data.p_start);
+	//cpFloat start_height = polar_start. - 50;
 
 	cpFloat width = 80;
 	cpFloat height = 30;
@@ -47,9 +48,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	we_shape_collision(shape, &this, LAYER_ENEMY, tank);
 
 	// Make a car with some nice soft suspension
-	float wheel_offset = 40;
-	cpVect posA = cpv(tank->data.body->p.x - wheel_offset, start_height);
-	cpVect posB = cpv(tank->data.body->p.x + wheel_offset, start_height);
+	float wheel_offset = 30;
+
+	cpVect posA = cpvadd(tank->data.body->p, cpvrotate(cpv(-wheel_offset, -30),tank->data.body->rot));
+	cpVect posB = cpvadd(tank->data.body->p, cpvrotate(cpv(wheel_offset, -30), tank->data.body->rot));
 
 	tank->wheel1 = addWheel(current_space, posA, tank);
 	tank->wheel2 = addWheel(current_space, posB, tank);
@@ -70,7 +72,6 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	se_velfunc(tank->barrel, 1);
 	shape_add_shapes(current_space, POLYSHAPE_TANK, tank->barrel, 150, cpvzero, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
 	cpSpaceAddConstraint(current_space, cpSimpleMotorNew(tank->data.body, tank->barrel, 0));
-	//cpSpaceAddConstraint(current_space, cpPinJointNew(tank->data.body, tank->barrel, cpvzero, cpvzero));
 	cpSpaceAddConstraint(current_space, cpPivotJointNew(tank->data.body, tank->barrel, tank->data.body->p));
 
 	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,0,60,&(tank->data.body->p));

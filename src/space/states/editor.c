@@ -139,10 +139,10 @@ void editor_init()
 	cpSpaceSetGravity(current_space, cpv(0, 0));
 	cpSpaceSetDamping(current_space, 0.8f);
 
-	btn_space = button_create(SPRITE_BTN_HOME, 0, "", -GAME_WIDTH/2 + 250, GAME_HEIGHT/2 - 100, 125, 125);
-	btn_clear = button_create(SPRITE_BTN_RETRY, 0, "", -250, GAME_HEIGHT/2-100, 125, 125);
+	btn_space = button_create(SPRITE_BTN_HOME, 0, "", -400, GAME_HEIGHT/2 - 100, 125, 125);
+	btn_clear = button_create(SPRITE_BTN_RETRY, 0, "", -200, GAME_HEIGHT/2-100, 125, 125);
 	btn_test = button_create(SPRITE_BTN_NEXT, 0, "",0, GAME_HEIGHT/2 - 100, 125, 125);
-	btn_save = button_create(SPRITE_COIN, 0, "",300, GAME_HEIGHT/2 -100, 125, 125);
+	btn_save = button_create(SPRITE_COIN, 0, "",200, GAME_HEIGHT/2 -100, 125, 125);
 
 	button_set_callback(btn_space, statesystem_set_state, state_stations);
 	button_set_callback(btn_clear, clear_editor, 0);
@@ -162,13 +162,12 @@ void editor_init()
 	state_register_touchable_view(main_view, btn_save);
 	state_register_touchable_view(main_view, btn_settings);
 
-	float size = 100;
+	float size = 200;
 	float x = -GAME_WIDTH/2+size*2;
-	float y = GAME_HEIGHT/2+size*2;
+	float y = GAME_HEIGHT/2-size*2;
 	SDL_Scancode key = SDL_SCANCODE_1;
 	for (i = 0; i < EDITOR_OBJECT_COUNT; i++, y -= 250, key++) {
 		SPRITE_ID spr_id = sprite_link(sprite_names[i]);
-		//button btn = button_create(spr_id, 0, object_names[i], x, y, size, size);
 		button btn = button_create(spr_id, 0, "", x, y, size, size);
 		button_set_callback(btn, select_object_type, i);
 		button_set_hotkeys(btn, key <= SDL_SCANCODE_0 ? key : 0, 0);
@@ -178,7 +177,7 @@ void editor_init()
 	}
 	scr_world = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 0); // max 4 000 gu / sec
 	scr_objects = scroll_create(-GAME_WIDTH/2+150,0,300,GAME_HEIGHT,0.9,50,0,1);
-	scroll_set_bounds(scr_objects, cpBBNew(0,-GAME_HEIGHT/2,0,0));
+	scroll_set_bounds(scr_objects, cpBBNew(0,-GAME_HEIGHT/2,0,GAME_HEIGHT/2));
 	state_register_touchable_view(main_view, scr_objects);
 	state_register_touchable_view(main_view, scr_world);
 
@@ -211,8 +210,8 @@ static void pre_update(void)
 	cpVect obj_offset = scroll_get_offset(scr_objects);
 	//TODO use another view for objects_scroller
 	int i;
-	float x = -GAME_WIDTH/2+100;
-	float y = GAME_HEIGHT/2+100 + obj_offset.y;
+	float x = -GAME_WIDTH/2+150;
+	float y = GAME_HEIGHT/2-200 - obj_offset.y; //TODO reverse internal offset back?
 	for (i = 0; i < EDITOR_OBJECT_COUNT; i++, y -= 250) {
 		touch_place(btn_objects[i], x, y);
 	}
@@ -257,6 +256,7 @@ static void sdl_event(SDL_Event *event)
 		pos = view_touch2world(main_view, cpv(finger->x, finger->y));
 
 		if(!dragged) {
+			//TODO make sure there are no other instances beneath pos!
 			level_add_object_recipe_name(lvl, object_type, param_name, pos,0);
 			instance_create(object_by_name(object_type),
 					level_get_param(lvl->param_list, object_type, param_name)

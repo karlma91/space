@@ -54,7 +54,6 @@ static void update(touchable * scr_id)
 
 	cpVect delta = {(keys[scr->key_right] - keys[scr->key_left]) * spd,
 					(keys[scr->key_up] - keys[scr->key_down]) * spd};
-	delta = cpvrotate(delta, cpvforangle(-scr->rot));
 	if (scr->rotate_delta) {
 		delta = cpvrotate(delta, cpvforangle(-scr->rot));
 	}

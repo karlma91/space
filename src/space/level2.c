@@ -124,6 +124,7 @@ static void parse_param_object(cJSON *param, hashmap * param_list)
 		arg.turret.coins =          cJSON_GetObjectItem(param,"coins")->valueint;
 		arg.turret.shoot_interval = cJSON_GetObjectItem(param,"shoot_interval")->valuedouble;
 		arg.turret.burst_number =   cJSON_GetObjectItem(param,"burst_number")->valuedouble;
+		arg.turret.rot_speed =      cJSON_GetObjectItem(param,"rot_speed")->valuedouble;
 	} else if (obj_id == obj_id_rocket) {
 		arg.rocket.max_hp =       cJSON_GetObjectItem(param,"max_hp")->valueint;
 		arg.rocket.coins =        cJSON_GetObjectItem(param,"coins")->valueint;
@@ -323,6 +324,7 @@ void level_write_to_file(level *lvl)
 				cJSON_AddNumberToObject(param, "coins",turret->coins);
 				cJSON_AddNumberToObject(param, "shoot_interval", turret->shoot_interval);
 				cJSON_AddNumberToObject(param, "burst_number",turret->burst_number);
+				cJSON_AddNumberToObject(param, "rot_speed",turret->rot_speed);
 				//cJSON_AddItemToObject(param, "texture_name", cJSON_CreateString(turret->)); TODO: ADD sprite to turret
 			} else if (obj_id == obj_id_rocket) {
 				obj_param_rocket *rocket = (obj_param_rocket*) data;

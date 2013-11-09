@@ -130,7 +130,7 @@ void stations_init(void)
 
 	main_view = state_view_get(state_stations, 0);
 
-	btn_home = button_create(SPRITE_GEAR, 0, "", 0, 0, 250, 250);
+	btn_home = button_create(SPRITE_PLAYERGUN001, 0, "", 0, 0, 250, 250);
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
