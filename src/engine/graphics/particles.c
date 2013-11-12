@@ -85,6 +85,7 @@ particle_system *particlesystem_new()
 
 void particles_update(particle_system *s)
 {
+	if (!s) return;
 	llist_begin_loop(s->emitters);
 	while(llist_hasnext(s->emitters)){
 		emitter *e = llist_next(s->emitters);
@@ -100,6 +101,7 @@ void particles_update(particle_system *s)
 
 void particle_set_gravity_func(particle_system *s, cpVect (*gravity_dir_func)(cpVect p))
 {
+	if (!s) return;
     if(gravity_dir_func != NULL){
         s->gravity_dir_func = gravity_dir_func;
     }
@@ -121,6 +123,7 @@ void particles_draw_emitter(emitter *e)
 
 void particles_draw(particle_system *s)
 {
+	if (!s) return;
 	particles_active = 0;
 	llist_begin_loop(s->emitters);
 	while(llist_hasnext(s->emitters)) {
@@ -134,6 +137,7 @@ void particles_draw(particle_system *s)
 
 emitter *particles_get_emitter_at(particle_system *s, int layer, int type, cpVect p)
 {
+	if (!s) return NULL;
 	emitter *e = particles_get_emitter(s, layer, type);
 	e->p = p;
 	return e;
@@ -142,6 +146,7 @@ emitter *particles_get_emitter_at(particle_system *s, int layer, int type, cpVec
 
 emitter *particles_get_emitter(particle_system *s, int layer, int type)
 {
+	if (!s) return NULL;
 	emitter *e = get_emitter(layer);
 	llist_add(s->emitters, e);
 	LList l = e->particles;

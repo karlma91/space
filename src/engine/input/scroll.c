@@ -26,6 +26,7 @@ typedef struct {
 	float zoom, z_min, z_max;
 	float rot;
 	float rotate_delta;
+	float zoom_delta;
 
 	SDL_FingerID finger_1, finger_2;
 
@@ -50,10 +51,17 @@ static void update(touchable * scr_id)
 {
 	scroll_priv * scr = (scroll_priv *) scr_id;
 
-	float spd = scr->max_speed * 0.8 * dt;
+	float zoom = 1;
+	if (scr->touch_data.container) {
+		zoom = scr->touch_data.container->zoom;
+	}
+	float spd = scr->max_speed * 0.8 * dt / zoom;
+	cpVect delta = {(keys[scr->key_left] - keys[scr->key_right]) * spd,
+					(keys[scr->key_down] - keys[scr->key_up]) * spd};
+	if (scr->rotate_delta) {
+		delta = cpvrotate(delta, cpvforangle(-scr->rot));
+	}
 
-	cpVect delta = {(keys[scr->key_right] - keys[scr->key_left]) * spd,
-					(keys[scr->key_up] - keys[scr->key_down]) * spd};
 	if (scr->rotate_delta) {
 		delta = cpvrotate(delta, cpvforangle(-scr->rot));
 	}
@@ -167,11 +175,16 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 			if (scr->touch_data.container) {
 				zoom = scr->touch_data.container->zoom;
 			}
-			cpVect delta = cpv(-finger->dx*scr_id->get.width / zoom, finger->dy*scr_id->get.height / zoom);
+			//cpVect delta = cpv(finger->dx*scr_id->get.width, -finger->dy*scr_id->get.height);
+			cpVect delta = cpv(finger->dx*scr_id->get.width, -finger->dy*scr_id->get.height);
+			if (scr->zoom_delta) {
+				delta = cpvmult(delta, 1  / zoom);
+			}
 			if (scr->rotate_delta) {
 				delta = cpvrotate(delta, cpvforangle(-scr->rot));
 			}
 			scr->offset = cpvadd(scr->offset, delta);
+			fprintf(stderr, "scr_offset = [%f, %f]\n", scr->offset.x, scr->offset.y);
 			scr->speed = cpvadd(cpvmult(scr->speed, 0.5), cpvmult(delta, 0.5));
 
 			return scr->consume_events;
@@ -219,7 +232,7 @@ void scroll_set_hotkeys(touchable * scr_id, SDL_Scancode key_left, SDL_Scancode 
 	scr->key_rotcc = key_rot_cc;
 }
 
-scroll_p scroll_create(float pos_x, float pos_y, float width, float height, float friction, float max_speed, int rotate_delta, int consume_events)
+scroll_p scroll_create(float pos_x, float pos_y, float width, float height, float friction, float max_speed, int rotate_delta, int zoom_delta, int consume_events)
 {
 	scroll_priv *scr = calloc(1, sizeof *scr);
 
@@ -251,6 +264,7 @@ scroll_p scroll_create(float pos_x, float pos_y, float width, float height, floa
 	scr->zoom = 1;
 	scr->z_min= 0.01;
 	scr->z_max= 1000;
+	scr->zoom_delta = zoom_delta;
 
 	scr->consume_events = consume_events;
 	return scr_id;

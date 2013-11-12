@@ -17,7 +17,8 @@ static void init(OBJ_TYPE *OBJ_NAME)
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	rocket->param.damage = 50; // TODO parse damage from file
-	rocket->fuel = 7;
+	rocket->param.force = 3000; //TODO parse force;
+	rocket->fuel = 7; //TODO add and parse fuel from params
 
 	COMPONENT_SET(rocket, HPBAR, &rocket->hp_bar);
 	COMPONENT_SET(rocket, COINS, &rocket->param.coins);

@@ -54,7 +54,7 @@ static void pre_update(void)
 
     main_view->zoom = scroll_get_zoom(scroller);
     float rot = scroll_get_rotation(scroller);
-	cpVect offset = scroll_get_offset(scroller);
+	cpVect offset = cpvneg(scroll_get_offset(scroller));
 	view_update(main_view, offset, rot);
 }
 
@@ -159,7 +159,7 @@ void stations_init(void)
 
 	state_register_touchable_view(main_view, btn_settings);
 
-	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 0); // max 4 000 gu / sec
+	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 1, 0); // max 4 000 gu / sec
 	scroll_set_bounds(scroller, cpBBNew(-GAME_WIDTH-200, -GAME_HEIGHT-200, GAME_WIDTH+200, GAME_HEIGHT+200));
 	state_register_touchable_view(main_view, scroller);
 

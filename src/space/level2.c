@@ -201,6 +201,7 @@ level *level_load(char * filename)
 	lvl->width = (lvl->tiles->width*lvl->tiles->tile_width);
 
 	lvl->inner_radius = lvl->width/(WE_2PI);
+	//lvl->outer_radius = lvl->inner_radius + lvl->height;
 	lvl->outer_radius = lvl->inner_radius + lvl->height;
 
 	cJSON *param_array = cJSON_GetObjectItem(root,"params");
@@ -258,12 +259,14 @@ void level_add_object_recipe(level * lvl, object_id *obj_id, char * param_name, 
 
 void level_start_level(level *lvl)
 {
+	cpResetShapeIdCounter();
 	llist_begin_loop(lvl->level_data);
 	while(llist_hasnext(lvl->level_data)) {
 		object_recipe * data = llist_next(lvl->level_data);
-		SDL_Log("INSTANCIATING TYPE: %s at: %f ", data->obj_type->NAME, data->pos.x);
+		SDL_Log("INSTANTIATING TYPE: %s at: %f ", data->obj_type->NAME, data->pos.x);
 		instance_create(data->obj_type, data->param, data->pos, cpvzero);
 	}
+	llist_end_loop(lvl->level_data);
 }
 
 void level_unload(level *lvl)

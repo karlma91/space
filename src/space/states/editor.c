@@ -134,7 +134,7 @@ void editor_init()
 	}
 
 	state_enable_objects(state_editor, 1);
-	state_enable_particles(state_editor, 1);
+	//state_enable_particles(state_editor, 1);
 
 	cpSpaceSetGravity(current_space, cpv(0, 0));
 	cpSpaceSetDamping(current_space, 0.8f);
@@ -175,8 +175,8 @@ void editor_init()
 		state_register_touchable_view(main_view, btn); //TODO use another view for these buttons
 		btn_objects[i] = btn;
 	}
-	scr_world = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 0); // max 4 000 gu / sec
-	scr_objects = scroll_create(-GAME_WIDTH/2+150,0,300,GAME_HEIGHT,0.9,50,0,1);
+	scr_world = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 1, 0); // max 4 000 gu / sec
+	scr_objects = scroll_create(-GAME_WIDTH/2+150,0,300,GAME_HEIGHT,0.9,50,0,0,1);
 	scroll_set_bounds(scr_objects, cpBBNew(0,-GAME_HEIGHT/2,0,GAME_HEIGHT/2));
 	state_register_touchable_view(main_view, scr_objects);
 	state_register_touchable_view(main_view, scr_world);
@@ -204,14 +204,14 @@ static void on_enter(void)
 static void pre_update(void)
 {
 	main_view->zoom = scroll_get_zoom(scr_world);
-	view_update(main_view, scroll_get_offset(scr_world), scroll_get_rotation(scr_world));
+	view_update(main_view, cpvneg(scroll_get_offset(scr_world)), scroll_get_rotation(scr_world));
 
 
 	cpVect obj_offset = scroll_get_offset(scr_objects);
 	//TODO use another view for objects_scroller
 	int i;
 	float x = -GAME_WIDTH/2+150;
-	float y = GAME_HEIGHT/2-200 - obj_offset.y; //TODO reverse internal offset back?
+	float y = GAME_HEIGHT/2-200 + obj_offset.y;
 	for (i = 0; i < EDITOR_OBJECT_COUNT; i++, y -= 250) {
 		touch_place(btn_objects[i], x, y);
 	}
