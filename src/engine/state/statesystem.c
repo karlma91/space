@@ -460,6 +460,7 @@ void statesystem_destroy(void)
 //TODO CLEAN UP THIS MESSY FUNCTION!
 void statesystem_push_event(SDL_Event *event)
 {
+	static Uint32 latest_motion_event = 0;
 	int consumed = 0;
 	cpVect game_p, port_p, view_p;
 	LList game_touchies = stack_head->touch_objects;
@@ -575,6 +576,11 @@ void statesystem_push_event(SDL_Event *event)
 		}
 		break;
 	case SDL_FINGERMOTION:
+		if (event->tfinger.timestamp < latest_motion_event) {
+			fprintf(stderr, "WARNING: skipping motion event\n");
+			break;
+		}
+		latest_motion_event = event->tfinger.timestamp;
 		if (view_touchies) {
 			llist_begin_loop(view_touchies);
 			while (!consumed && llist_hasnext(view_touchies)) {
