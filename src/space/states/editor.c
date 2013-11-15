@@ -78,7 +78,7 @@ static button btn_objects[EDITOR_OBJECT_COUNT];
 static cpVect start;
 
 static view *main_view;
-
+extern obj_player * space_create_player(int id);
 struct instance_dummy {
 	instance ins;
 	struct {
@@ -117,6 +117,7 @@ static void clear_editor(void *unused)
 {
 	llist_clear(lvl->level_data);
 	objectsystem_clear();
+	space_create_player(1);;
 }
 
 
@@ -125,6 +126,7 @@ static int touch_down(cpVect pos_view)
 	//TODO map finger-id til et evt. objekt, ellers, returner null
 	//TODO detect double tap for delete? eller bruke en state for sletting av objekter (ved trykk på knapp)
 	//TODO create a system for registration of finger_id with an void* data, returning a unique id for touch (incrementing int)
+	//FIXME vanskelig å zoome ut (evt. umulig) om man zoomer helt inn på et objekt (kan evt. fikses ved bruk av relativ flytting, og/eller minske største forstørring)
 	start = pos_view;
 	return 1;
 }
@@ -134,7 +136,7 @@ static int touch_motion(cpVect pos_view)
 	cpVect pos = view_view2world(main_view, pos_view);
 	//TODO lage hjelpemetode for å hente objekt på posisjon
 	cpNearestPointQueryInfo info;
-	cpShape *shape = cpSpaceNearestPointQueryNearest(current_space, pos, 100, CP_ALL_LAYERS, CP_NO_GROUP, &info);
+	cpShape *shape = cpSpaceNearestPointQueryNearest(current_space, pos, 20, CP_ALL_LAYERS, CP_NO_GROUP, &info);
 	if (shape) {
 		instance *ins = shape->body->data;
 		if (ins && ((ins->INS_IDENTIFIER ^ INS_MAGIC_COOKIE) == 0)) {
@@ -155,7 +157,7 @@ static int touch_up(cpVect pos_view)
 {
 	cpVect pos = view_view2world(main_view, pos_view);
 	//TODO lage hjelpemetode for å hente objekt på posisjon
-	cpShape *shape = cpSpaceNearestPointQueryNearest(current_space, pos, 100, CP_ALL_LAYERS, CP_NO_GROUP, NULL);
+	cpShape *shape = cpSpaceNearestPointQueryNearest(current_space, pos, 20, CP_ALL_LAYERS, CP_NO_GROUP, NULL);
 	if (!shape) {
 		//TODO make sure there are no other instances beneath pos!
 		//level_add_object_recipe_name(lvl, object_type, param_name, pos,0);
@@ -252,8 +254,6 @@ void editor_init()
 	currentlvl = lvl;
 
 	state_enable_objects(state_editor, 0);
-
-	extern obj_player * space_create_player(int id);
 
 	space_create_player(1);;
 }

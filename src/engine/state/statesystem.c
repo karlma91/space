@@ -101,6 +101,10 @@ STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
     state->objects = NULL;
     state->particles = NULL;
     state->layersystem = layersystem_new();
+
+
+    update_global_current_var(state);
+
     return state->id;
 }
 

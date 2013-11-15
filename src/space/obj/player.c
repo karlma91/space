@@ -27,9 +27,9 @@ static void init(OBJ_TYPE *OBJ_NAME)
 	player->aim_speed = 4;
 	player->gun_timer = 0;
 
+	cpBodySetPos(player->data.body, player->data.p_start);
+	cpBodySetPos(player->gunwheel, player->data.p_start);
 	cpBodySetAngle(player->data.body,3*(M_PI/2));
-	player->data.body->p = cpv(0,-(currentlvl->height/2+currentlvl->inner_radius)); //TODO use p_start to be able to change player's start position
-	player->gunwheel->p = player->data.body->p;
 	player->data.body->v = cpvzero;
 	player->gunwheel->v = cpvzero;
 
@@ -42,6 +42,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 	player->hp_bar.max_hp = armors[armor_index].max_hp;
 	player->hp_bar.value = player->hp_bar.max_hp;
 
+	cpSpaceReindexShapesForBody(current_space, player->gunwheel);
 	cpSpaceReindexShapesForBody(current_space, player->data.body);
 }
 
@@ -71,15 +72,17 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->radar_image = cmp_new_minimap(10, COL_GREEN);
 
 	player->flame = particles_get_emitter(current_particles,RLAY_BACK_MID, EMITTER_FLAME);
-	player->flame->self_draw = 1;
-	player->flame->disable = 1;
+    if (player->flame) {
+        player->flame->self_draw = 1;
+        player->flame->disable = 1;
+    }
 	player->disable=0;
 
-	cpVect player_pos = cpv(0,990);
+	//cpVect player_pos = cpv(0,990);
 
 	/* make and add new body */
 	player->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
-	cpBodySetPos(player->data.body, player_pos);
+	cpBodySetPos(player->data.body, player->data.p_start);
 	cpBodySetVelLimit(player->data.body,2000); //450 //700
 	cpBodySetUserData(player->data.body, (void*)player);
 	se_velfunc(player->data.body, 1);
@@ -96,22 +99,24 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	//FIXME cleanup
 	player->gunwheel = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
-	cpBodySetPos(player->gunwheel, player_pos);
+	cpBodySetPos(player->gunwheel, player->data.p_start);
 	cpBodySetUserData(player->gunwheel, (void*)player);
 	se_velfunc(player->gunwheel, 1);
 
 	shape = we_add_circle_shape(current_space, player->gunwheel,radius-2,0.9,0.8);
 	we_shape_collision(shape, &this, LAYER_PLAYER, player);
-	cpSpaceAddConstraint(current_space, cpPivotJointNew(player->data.body, player->gunwheel, player_pos));
+	cpSpaceAddConstraint(current_space, cpPivotJointNew(player->data.body, player->gunwheel, player->data.p_start));
 
 	init(player);
 }
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	player->flame->p = player->data.body->p;
-	player->flame->angular_offset = player->direction + WE_PI_2;
-	particles_draw_emitter(player->flame);
+	if (player->flame) {
+		player->flame->p = player->data.body->p;
+		player->flame->angular_offset = player->direction + WE_PI_2;
+		particles_draw_emitter(player->flame);
+	}
 
 	draw_color4f(1,1,1,1);
 	sprite_render_body(RLAY_GAME_BACK, &(player->gun), player->gunwheel);
@@ -236,12 +241,15 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	sound_play(SND_FACTORY_EXPLODE);
 	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, player->data.body->p);
 	player->disable = 1;
-	player->flame->disable = 1;
+    if (player->flame) {
+    	player->flame->disable = 1;
+    }
 	we_body_remove_constraints(current_space, player->data.body);
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
+	particles_release_emitter(player->flame);
 	we_body_remove(current_space, &player->gunwheel);
 	we_body_remove(current_space, &player->data.body);
 }
