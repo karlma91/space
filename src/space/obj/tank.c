@@ -80,6 +80,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	tank->barrel = cpSpaceAddBody(current_space, cpBodyNew(MASS_BARREL, cpMomentForBox(MASS_BARREL, width/2,height/2)));
 	cpBodySetPos(tank->barrel, tank->data.p_start);
 	cpBodySetUserData(tank->barrel, tank);
+	cpBodySetUserData(tank->wheel1, tank);
+	cpBodySetUserData(tank->wheel2, tank);
 	se_tangent_body(tank->barrel);
 	se_velfunc(tank->barrel, 1);
 	shape_add_shapes(current_space, POLYSHAPE_TANK, tank->barrel, 150, cpvzero, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
@@ -225,8 +227,8 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	sprite_render_body(RLAY_GAME_FRONT, &(tank->wheel_sprite), tank->wheel2);
 	}
 
-	if (tank->param.max_hp >= 100) {//TODO add color into param
-		draw_color_rgbmulta4f(1,0.2,0,alpha);
+	if (tank->param.max_hp >= 300) {//TODO add color into param
+		draw_color_rgbmulta4f(1,0.2,0.3,alpha);
 	} else {
 		draw_color_rgbmulta4f(1,1,1,alpha);
 	}
