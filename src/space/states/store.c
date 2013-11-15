@@ -143,8 +143,9 @@ static void draw(void)
 	draw_specs();
 }
 
-static void sdl_event(SDL_Event *event)
+static int sdl_event(SDL_Event *event)
 {
+	return 0;
 }
 
 static void on_pause(void)

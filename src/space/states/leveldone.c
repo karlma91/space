@@ -70,8 +70,9 @@ static void draw(void)
 	sprite_render(RLAY_GUI_FRONT, &spr_star, star_3, 0);
 }
 
-static void sdl_event(SDL_Event *event)
+static int sdl_event(SDL_Event *event)
 {
+	return 0;
 }
 
 static void on_pause(void)

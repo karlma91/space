@@ -19,7 +19,7 @@ static void on_enter(void);
 static void pre_update(void);
 static void post_update(void);
 static void draw(void);
-static void sdl_event(SDL_Event *event);
+static int sdl_event(SDL_Event *event);
 static void on_pause(void);
 static void on_leave(void);
 static void destroy(void);

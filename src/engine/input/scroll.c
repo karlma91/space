@@ -28,6 +28,11 @@ typedef struct {
 	float rotate_delta;
 	float zoom_delta;
 
+	/* external touch_down, touch_motion, and touch_up should return 1 if touch is consumed */
+	pre_touch_callback pre_touch_down;
+	pre_touch_callback pre_touch_motion;
+	pre_touch_callback pre_touch_up;
+
 	SDL_FingerID finger_1, finger_2;
 
 	cpVect pf1, pf2;
@@ -56,6 +61,7 @@ static void update(touchable * scr_id)
 		zoom = scr->touch_data.container->zoom;
 	}
 	float spd = scr->max_speed * 0.8 * dt / zoom;
+	//TODO check if mouse is inside touch area
 	cpVect delta = {(keys[scr->key_left] - keys[scr->key_right]) * spd,
 					(keys[scr->key_down] - keys[scr->key_up]) * spd};
 	if (scr->rotate_delta) {
@@ -82,7 +88,7 @@ static void update(touchable * scr_id)
 	if (!scr->scrolling) {
 		scr->offset = cpvadd(scr->offset, scr->speed);
 	} else {
-		scr->speed = cpvmult(scr->speed, scr->friction);
+		scr->speed = cpvmult(scr->speed, scr->friction * 0.9);
 	}
 	scr->speed = cpvmult(scr->speed, scr->friction);
 	if (scr->have_bounds) {
@@ -115,11 +121,13 @@ static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	if (INSIDE(scr, tx, ty)) {
 		int id = (scr->finger_1 == finger->fingerId) | ((scr->finger_2 == finger->fingerId) << 1);
 		int active = (llist_contains(active_fingers, scr->finger_1)) | (llist_contains(active_fingers, scr->finger_2) << 1);
-		active |= id ? FINGER_ID : (llist_contains(active_fingers, finger->fingerId) << 2);
+		active |= id ? (active != 0) << 2 : (llist_contains(active_fingers, finger->fingerId) << 2);
 
 		if (active & FINGER_ID) {
 			return 0;
 		}
+
+		if (scr->pre_touch_down && scr->pre_touch_down(cpv(finger->x,finger->y))) return 1;
 
 		if (active & FINGER_1) {
 			if (!(id & FINGER_1) && !(active & FINGER_2)) {
@@ -132,8 +140,8 @@ static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
 		} else {
 			scr->finger_1 = finger->fingerId;
 			scr->pf1 = cpv(finger->x,finger->y);
-			scr->speed = cpvzero;
 			llist_add(active_fingers, (void *)finger->fingerId);
+			scr->speed = cpvzero;
 			scr->scrolling = 1;
 			return scr->consume_events;
 		}
@@ -150,87 +158,103 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	int active = (llist_contains(active_fingers, scr->finger_1)) | (llist_contains(active_fingers, scr->finger_2) << 1);
 	active |= id ? FINGER_ID : (llist_contains(active_fingers, finger->fingerId) << 2);
 
-	if (active & FINGER_1) {
-		cpVect last_diff = cpvsub(scr->pf2, scr->pf1);
-		cpVect last_zcenter = cpvmult(cpvadd(scr->pf1, scr->pf2), 0.5);
-		cpVect dim = cpv(scr_id->get.width, scr_id->get.height);
-		float last_dist, new_dist;
-		float add_rot = 0;
+	if (INSIDE(scr, finger->x, finger->y)) {
+		if ((active & FINGER_ID) == 0) {
+			if (scr->pre_touch_motion && scr->pre_touch_motion(cpv(finger->x,finger->y))) return 1;
+		}
 
-		if (id & FINGER_1) {
-			scr->pf1 = cpv(finger->x,finger->y);
-		} else if (id & FINGER_2) {
-			scr->pf2 = cpv(finger->x,finger->y);
-		} else {
-			if (active & FINGER_ID) {
-				return 0;
-			} else {
-				scr->finger_2 = finger->fingerId;
+		if (active & FINGER_1) {
+			cpVect last_diff = cpvsub(scr->pf2, scr->pf1);
+			cpVect last_zcenter = cpvmult(cpvadd(scr->pf1, scr->pf2), 0.5);
+			cpVect dim = cpv(scr_id->get.width, scr_id->get.height);
+			float last_dist, new_dist;
+			float add_rot = 0;
+
+			if (id & FINGER_1) {
+				scr->pf1 = cpv(finger->x,finger->y);
+			} else if (id & FINGER_2) {
 				scr->pf2 = cpv(finger->x,finger->y);
-				scr->speed = cpvzero;
-				llist_add(active_fingers, (void *)finger->fingerId);
-			}
-		}
-
-		cpVect new_diff = cpvsub(scr->pf2, scr->pf1);
-		if (active & FINGER_2) {
-			last_dist = cpvlength(last_diff);
-			new_dist = cpvlength(new_diff);
-			float product = last_dist * new_dist;
-			if (product > 0) {
-				float cos_alpha = cpvdot(last_diff, new_diff) / (product);
-				float sin_alpha = cpvdot(cpvperp(last_diff), new_diff) / (product);
-				cos_alpha = cos_alpha > 1 ? 1 : cos_alpha < -1 ? -1 : cos_alpha;
-				add_rot = acosf(cos_alpha) * (sin_alpha > 0 ? 1 : -1);
-			}
-		} else {
-			last_dist = 1;
-			new_dist = 1;
-		}
-
-		if (active & FINGER_ID) {
-			float last_zoom = scr->zoom;
-			scr->zoom = scr->zoom * new_dist / last_dist;
-			if (scr->zoom < scr->z_min) scr->zoom = scr->z_min;
-			if (scr->zoom > scr->z_max) scr->zoom = scr->z_max;
-			scr->rot += add_rot * scr->rotate_delta;
-			//return 1;
-			scr->scrolling = 1;
-			float zoom = 1;
-			if (scr->touch_data.container) {
-				zoom = scr->touch_data.container->zoom;
-			}
-			//TODO get actual width and height (TODO ta hensyn til kameraviews)
-			//cpVect delta = cpv(finger->dx*scr_id->get.width, -finger->dy*scr_id->get.height);
-			cpVect delta = cpv(finger->dx*dim.x, -finger->dy*dim.y);
-			if (scr->zoom_delta) {
-				//TODO translate delta for correct in-place zoom
-				if (active & FINGER_2) {
-					cpVect zcenter = cpvmult(cpvadd(scr->pf1, scr->pf2), 0.5);
-					delta = cpvsub(zcenter, last_zcenter);
+			} else {
+				if (active & FINGER_ID) {
+					return 0;
+				} else {
+					scr->finger_2 = finger->fingerId;
+					scr->pf2 = cpv(finger->x,finger->y);
+					scr->speed = cpvzero;
+					llist_add(active_fingers, (void *)finger->fingerId);
 				}
-				delta = cpvmult(delta, 1  / zoom);
 			}
-			if (scr->rotate_delta) {
-				delta = cpvrotate(delta, cpvforangle(-scr->rot));
-			}
-			scr->offset = cpvadd(scr->offset, delta);
-			scr->speed = cpvadd(cpvmult(scr->speed, 0.5), cpvmult(delta, 0.5));
 
-			return scr->consume_events;
+			cpVect new_diff = cpvsub(scr->pf2, scr->pf1);
+			if (active & FINGER_2) {
+				last_dist = cpvlength(last_diff);
+				new_dist = cpvlength(new_diff);
+				float product = last_dist * new_dist;
+				if (product > 0) {
+					float cos_alpha = cpvdot(last_diff, new_diff) / (product);
+					float sin_alpha = cpvdot(cpvperp(last_diff), new_diff) / (product);
+					cos_alpha = cos_alpha > 1 ? 1 : cos_alpha < -1 ? -1 : cos_alpha;
+					add_rot = acosf(cos_alpha) * (sin_alpha > 0 ? 1 : -1);
+				}
+			} else {
+				last_dist = 1;
+				new_dist = 1;
+			}
+
+			if (active & FINGER_ID) {
+				//float last_zoom = scr->zoom;
+				scr->zoom = scr->zoom * new_dist / last_dist;
+				if (scr->zoom < scr->z_min) scr->zoom = scr->z_min;
+				if (scr->zoom > scr->z_max) scr->zoom = scr->z_max;
+				scr->rot += add_rot * scr->rotate_delta;
+				//return 1;
+				float zoom = 1;
+				if (scr->touch_data.container) {
+					zoom = scr->touch_data.container->zoom;
+				}
+				//TODO get actual width and height (TODO ta hensyn til kameraviews)
+				//cpVect delta = cpv(finger->dx*scr_id->get.width, -finger->dy*scr_id->get.height);
+				cpVect delta = cpv(finger->dx*dim.x, -finger->dy*dim.y);
+				if (scr->zoom_delta) {
+					//TODO translate delta for correct in-place zoom
+					if (active & FINGER_2) {
+						cpVect zcenter = cpvmult(cpvadd(scr->pf1, scr->pf2), 0.5);
+						delta = cpvsub(zcenter, last_zcenter);
+					}
+					delta = cpvmult(delta, 1  / zoom);
+				}
+				if (scr->rotate_delta) {
+					delta = cpvrotate(delta, cpvforangle(-scr->rot));
+				}
+				scr->offset = cpvadd(scr->offset, delta);
+				scr->speed = cpvadd(cpvmult(scr->speed, 0.5), cpvmult(delta, 0.5));
+
+				return scr->consume_events;
+			}
+		} else { /* finger_1 inactive */
+			if (!(active & FINGER_ID)) {  /* finger available */
+				scr->finger_1 = finger->fingerId;
+				scr->pf1 = cpv(finger->x,finger->y);
+				scr->speed = cpvzero;
+				scr->scrolling = 1;
+				llist_add(active_fingers, (void *)finger->fingerId);
+				return scr->consume_events;
+			} else if (id & FINGER_2) { /* transfer finger_2 to finger_1 */
+				scr->finger_1 = scr->finger_2;
+				scr->pf1 = scr->pf2;
+				scr->finger_2 = -1;
+				return scr->consume_events;
+			}
 		}
-	} else { /* finger_1 inactive */
-		if (!(active & FINGER_ID)) {  /* finger available */
-			scr->finger_1 = finger->fingerId;
-			scr->pf1 = cpv(finger->x,finger->y);
-			scr->speed = cpvzero;
-			llist_add(active_fingers, (void *)finger->fingerId);
-			return scr->consume_events;
-		} else if (id & FINGER_2) { /* transfer finger_2 to finger_1 */
-			scr->finger_1 = scr->finger_2;
-			scr->pf1 = scr->pf2;
+	} else { /* remove finger if not inside scroll */
+		if (id && (active & FINGER_ID)) {
+			llist_remove(active_fingers, finger->fingerId);
+			if (id & FINGER_1) {
+				scr->finger_1 = scr->finger_2;
+				scr->pf1 = scr->pf2;
+				if ((id & FINGER_2) == 0) scr->scrolling = 0;
+			}
 			scr->finger_2 = -1;
-			return scr->consume_events;
 		}
 	}
 	return 0;
@@ -241,18 +265,22 @@ static int touch_up(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	scroll_priv * scr = (scroll_priv *) scr_id;
 
 	int id = (scr->finger_1 == finger->fingerId) | ((scr->finger_2 == finger->fingerId) << 1);
+	int active = (llist_contains(active_fingers, scr->finger_1)) | (llist_contains(active_fingers, scr->finger_2) << 1);
+	active |= id ? FINGER_ID : (llist_contains(active_fingers, finger->fingerId) << 2);
 
-	if (id) {
-		scroll_priv * scr = (scroll_priv *) scr_id;
-		scr->scrolling = 0;
-		if (id & 0x1) {
-			scr->finger_1 = -1;
+	if (id && (active & FINGER_ID)) {
+		llist_remove(active_fingers, finger->fingerId);
+		if (id & FINGER_1) {
+			scr->finger_1 = scr->finger_2;
+			scr->pf1 = scr->pf2;
 		}
-		if (id & 0x2)  {
-			scr->finger_2 = -1;
-		}
+		if ((id & FINGER_2) == 0) scr->scrolling = 0;
+		scr->finger_2 = -1;
 		return scr->consume_events;
+	} else {
+		if (scr->pre_touch_up && scr->pre_touch_up(cpv(finger->x,finger->y))) return 1;
 	}
+
 	return 0;
 }
 
@@ -336,6 +364,14 @@ void scroll_set_bounds(scroll_p scr_id, cpBB bounds)
 	scroll_priv * scr = (scroll_priv *) scr_id;
 	scr->have_bounds = 1;
 	scr->bounds = bounds;
+}
+
+void scroll_set_callback(scroll_p scr_id, pre_touch_callback touch_down, pre_touch_callback touch_motion, pre_touch_callback touch_up)
+{
+	scroll_priv * scr = (scroll_priv *) scr_id;
+	scr->pre_touch_down = touch_down;
+	scr->pre_touch_motion = touch_motion;
+	scr->pre_touch_up = touch_up;
 }
 
 void scroll_set_zoomlimit(scroll_p scr_id, float min, float max)

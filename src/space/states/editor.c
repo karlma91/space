@@ -101,6 +101,51 @@ static void clear_editor(void *unused)
 	objectsystem_clear();
 }
 
+
+static int touch_down(cpVect pos_view)
+{
+	//TODO map finger-id til et evt. objekt, ellers, returner null
+	//TODO detect double tap for delete? eller bruke en state for sletting av objekter (ved trykk på knapp)
+	//TODO create a system for registration of finger_id with an void* data, returning a unique id for touch (incrementing int)
+	start = pos_view;
+	return 1;
+}
+
+static int touch_motion(cpVect pos_view)
+{
+	cpVect pos = view_view2world(main_view, pos_view);
+	//TODO lage hjelpemetode for å hente objekt på posisjon
+	cpNearestPointQueryInfo info;
+	cpShape *shape = cpSpaceNearestPointQueryNearest(current_space, pos, 100, CP_ALL_LAYERS, CP_NO_GROUP, &info);
+	if (shape) {
+		instance *ins = shape->body->data;
+		if (ins && ((ins->INS_IDENTIFIER ^ INS_MAGIC_COOKIE) == 0)) {
+			ins->p_start = pos;
+			ins->TYPE->call.init(ins);
+		}
+		start = pos_view;
+		return 1; /* consume event: no zoom/pan/rotate of scroller*/
+	} else if (cpvlength(cpvsub(pos_view, start)) > 50) {
+		return 0;
+	}
+}
+
+static int touch_up(cpVect pos_view)
+{
+	cpVect pos = view_view2world(main_view, pos_view);
+	//TODO lage hjelpemetode for å hente objekt på posisjon
+	cpShape *shape = cpSpaceNearestPointQueryNearest(current_space, pos, 100, CP_ALL_LAYERS, CP_NO_GROUP, NULL);
+	if (!shape) {
+		//TODO make sure there are no other instances beneath pos!
+		level_add_object_recipe_name(lvl, object_type, param_name, pos,0);
+		instance_create(object_by_name(object_type),
+				level_get_param(lvl->param_list, object_type, param_name)
+				,pos, cpvzero);
+		return 1;
+	}
+	return 0;
+}
+
 void editor_init()
 {
 	sprintf(param_name, "%s", "DEF");
@@ -175,8 +220,9 @@ void editor_init()
 		state_register_touchable_view(main_view, btn); //TODO use another view for these buttons
 		btn_objects[i] = btn;
 	}
-	scr_world = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 1, 0); // max 4 000 gu / sec
+	scr_world = scroll_create(150,0,GAME_WIDTH-300,GAME_HEIGHT, 0.98, 3000, 1, 1, 0); // max 4 000 gu / sec
 	scr_objects = scroll_create(-GAME_WIDTH/2+150,0,300,GAME_HEIGHT,0.9,50,0,0,1);
+	scroll_set_callback(scr_world, touch_down, touch_motion, touch_up);
 	scroll_set_bounds(scr_objects, cpBBNew(0,-GAME_HEIGHT/2,0,GAME_HEIGHT/2));
 	state_register_touchable_view(main_view, scr_objects);
 	state_register_touchable_view(main_view, scr_world);
@@ -230,40 +276,20 @@ static void draw(void)
 	space_draw_deck();
 }
 
-static void sdl_event(SDL_Event *event)
+static int sdl_event(SDL_Event *event)
 {
 	SDL_TouchFingerEvent *finger = &event->tfinger;
 	float zoom;
 	SDL_Scancode key;
 	cpVect pos;
+	pos = view_touch2world(main_view, cpv(finger->x, finger->y));
 
 	switch(event->type) {
 	case SDL_KEYDOWN:
 		key = event->key.keysym.scancode;
 		break;
-	case SDL_FINGERDOWN:
-		start = main_view->p;
-		dragged = 0;
-		break;
-	case SDL_FINGERMOTION:
-		zoom = main_view->zoom;
-
-		if(cpvlength(cpvsub(main_view->p, start)) > 50 / zoom){
-			dragged = 1;
-		}
-		break;
-	case SDL_FINGERUP:
-		pos = view_touch2world(main_view, cpv(finger->x, finger->y));
-
-		if(!dragged) {
-			//TODO make sure there are no other instances beneath pos!
-			level_add_object_recipe_name(lvl, object_type, param_name, pos,0);
-			instance_create(object_by_name(object_type),
-					level_get_param(lvl->param_list, object_type, param_name)
-					,pos, cpvzero);
-		}
-		break;
 	}
+	return 0;
 }
 
 static void on_pause(void)

@@ -12,6 +12,11 @@
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
+	cpBodySetPos(rocket->data.body, rocket->data.p_start);
+	se_tangent_body(rocket->data.body);
+	cpBodySetAngle(rocket->data.body, rocket->data.body->a + WE_PI_2);
+
+	cpSpaceReindexShapesForBody(current_space, rocket->data.body);
 }
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
@@ -35,11 +40,11 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	rocket->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForBox(mass, width, height)));
 	cpBodySetPos(rocket->data.body, rocket->data.p_start);
+	se_tangent_body(rocket->data.body);
+	cpBodySetAngle(rocket->data.body, rocket->data.body->a + WE_PI_2);
 	cpBodySetVelLimit(rocket->data.body, ROCKET_VEL_LIMIT);
 	cpBodySetUserData(rocket->data.body, rocket);
 	se_velfunc(rocket->data.body, 1);
-	se_tangent_body(rocket->data.body);
-	cpBodySetAngle(rocket->data.body, rocket->data.body->a + WE_PI_2);
 
 	cpShape *shape = we_add_box_shape(current_space, rocket->data.body,width,height,0.7,0.0);
 	we_shape_collision(shape, &this, LAYER_ENEMY, CP_NO_GROUP);
@@ -48,6 +53,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	SPRITE_ID spr_rocket = sprite_link("rocket");
 	float ratio = sprite_get_aspect_ratio(spr_rocket);
 	sprite_create(&rocket->data.spr, spr_rocket, ROCKET_SIZE, ROCKET_SIZE*ratio, 1);
+
+	init(rocket);
 }
 
 

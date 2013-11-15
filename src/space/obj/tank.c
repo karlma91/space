@@ -17,6 +17,21 @@ static cpBody *addWheel(cpSpace *space, cpVect pos, cpGroup group);
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
+	cpBodySetPos(tank->data.body, tank->data.p_start);
+	se_tangent_body(tank->data.body);
+	cpBodySetPos(tank->barrel, tank->data.p_start);
+	se_tangent_body(tank->barrel);
+
+	float wheel_offset = 30;
+	cpVect posA = cpvadd(tank->data.body->p, cpvrotate(cpv(-wheel_offset, -30),tank->data.body->rot));
+	cpVect posB = cpvadd(tank->data.body->p, cpvrotate(cpv(wheel_offset, -30), tank->data.body->rot));
+	cpBodySetPos(tank->wheel1, posA);
+	cpBodySetPos(tank->wheel2, posB);
+
+	cpSpaceReindexShapesForBody(current_space, tank->data.body);
+	cpSpaceReindexShapesForBody(current_space, tank->wheel1);
+	cpSpaceReindexShapesForBody(current_space, tank->wheel2);
+	cpSpaceReindexShapesForBody(current_space, tank->barrel);
 }
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
@@ -33,16 +48,13 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	tank->max_distance = 800;
 	tank->rot_speed = M_PI/2;
 
-	cpVect polar_start = we_cart2pol(tank->data.p_start);
-	//cpFloat start_height = polar_start. - 50;
-
 	cpFloat width = 80;
 	cpFloat height = 30;
 	tank->data.body = cpSpaceAddBody(current_space, cpBodyNew(MASS, cpMomentForBox(MASS, width, height)));
-	cpBodySetPos(tank->data.body, tank->data.p_start);
 	cpBodySetUserData(tank->data.body, tank);
-	se_tangent_body(tank->data.body);
 	se_velfunc(tank->data.body, 1);
+	cpBodySetPos(tank->data.body, tank->data.p_start);
+	se_tangent_body(tank->data.body);
 
 	cpShape *shape = we_add_box_shape(current_space, tank->data.body, width, height, 0.6, 0.0);
 	we_shape_collision(shape, &this, LAYER_ENEMY, tank);
@@ -75,6 +87,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpSpaceAddConstraint(current_space, cpPivotJointNew(tank->data.body, tank->barrel, tank->data.body->p));
 
 	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,0,60,&(tank->data.body->p));
+
+	init(tank);
 }
 
 static void set_wheel_torque(obj_tank *tank, float torque)

@@ -9,6 +9,21 @@
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
+	cpVect pos = robotarm->data.p_start;
+
+	cpBodySetPos(((instance *) robotarm)->body, pos);
+	se_tangent_body(robotarm->data.body);
+	cpBodySetPos(robotarm->saw, pos);
+
+	int i;
+	for(i=0; i<robotarm->segments; i++){
+		robotarm->x[i] = pos.x;
+		robotarm->y[i] = pos.y;
+		robotarm->angle[i] = 0;
+	}
+
+	cpSpaceReindexShapesForBody(current_space, robotarm->saw);
+	cpSpaceReindexShapesForBody(current_space, robotarm->data.body);
 }
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
@@ -27,10 +42,6 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	robotarm->segments = 4;
 	robotarm->seg_length = currentlvl->height / (2*robotarm->segments);
 	cpVect pos = robotarm->data.p_start;
-	//pos = we_cart2pol(pos);
-	//pos.x += 180;
-	//pos = we_pol2cart(pos);
-
 	robotarm->x = 	  calloc(robotarm->segments, sizeof(float));
 	robotarm->y =	  calloc(robotarm->segments, sizeof(float));
 	robotarm->angle = calloc(robotarm->segments, sizeof(float));
@@ -40,11 +51,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 		robotarm->y[i] = pos.y;
 		robotarm->angle[i] = 0;
 	}
-
 	cpFloat radius = 130.0f;
 	cpFloat mass = 2.0f;
-
-
 	robotarm->saw = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(robotarm->saw, pos);
 	cpBodySetVelLimit(robotarm->saw, 300);
@@ -57,7 +65,6 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	/* make and add new static body */
 	robotarm->data.body = cpBodyNew(200, cpMomentForBox(20.0f, size, size));
 	cpBodySetUserData(((instance *) robotarm)->body, (instance*)robotarm);
-
 
 	cpBodySetPos(((instance *) robotarm)->body, pos);
 	se_tangent_body(robotarm->data.body);
@@ -72,6 +79,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpSpaceAddConstraint(current_space, cpSlideJointNew(robotarm->saw, robotarm->data.body, cpv(0,0), cpv(0,0), 1.0f, (robotarm->segments)*robotarm->seg_length));
 
 	hpbar_init(&robotarm->hp_bar, robotarm->param.max_hp,80,16,0,60,&(robotarm->data.body->p));
+
+	init(robotarm);
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)

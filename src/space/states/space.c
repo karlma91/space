@@ -693,7 +693,7 @@ static void pause_game(void)
 	game_paused = 1;
 }
 
-static void sdl_event(SDL_Event *event)
+static int sdl_event(SDL_Event *event)
 {
 	SDL_Scancode key;
 	switch(event->type) {
@@ -720,6 +720,7 @@ static void sdl_event(SDL_Event *event)
 		}
 		break;
 	}
+	return 0;
 }
 
 static void on_pause(void)

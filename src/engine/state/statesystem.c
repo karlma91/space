@@ -467,6 +467,10 @@ void statesystem_push_event(SDL_Event *event)
 	float tx = event->tfinger.x, ty = event->tfinger.y;
 
 	//TODO transform touch to in-game coords
+	if (stack_head->call.sdl_event) {
+		consumed |= stack_head->call.sdl_event(event); //todo add touch callback to scroll(or all touch events, through general functions) with the possibility to ignore ordinary touch event?
+	}
+	if (consumed) return;
 
 	// get the top most view beneath the touch location //TODO go through all views as long there is no response?
 
@@ -626,15 +630,6 @@ void statesystem_push_event(SDL_Event *event)
 		break;
 	}
 	llist_end_loop(game_touchies);
-
-	if (!consumed) { //send event to state
-		event->tfinger.x = tx;
-		event->tfinger.y = ty;
-
-		if (stack_head->call.sdl_event) {
-			stack_head->call.sdl_event(event);
-		}
-	}
 }
 
 void statesystem_call_update(STATE_ID state_id)

@@ -68,7 +68,7 @@ static void cheat(void)
 	player->bullet_type = obj ? obj : object_by_name(weapons[weapon_index].obj_name); /* override player's bullet object */
 }
 
-static void sdl_event(SDL_Event *event)
+static int sdl_event(SDL_Event *event)
 {
 	switch(event->type) {
 	case SDL_TEXTINPUT:
@@ -90,6 +90,7 @@ static void sdl_event(SDL_Event *event)
         */
 		break;
 	}
+	return 0;
 }
 
 static void on_pause(void)

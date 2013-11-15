@@ -28,7 +28,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 	player->gun_timer = 0;
 
 	cpBodySetAngle(player->data.body,3*(M_PI/2));
-	player->data.body->p = cpv(0,-(currentlvl->height/2+currentlvl->inner_radius));
+	player->data.body->p = cpv(0,-(currentlvl->height/2+currentlvl->inner_radius)); //TODO use p_start to be able to change player's start position
 	player->gunwheel->p = player->data.body->p;
 	player->data.body->v = cpvzero;
 	player->gunwheel->v = cpvzero;
@@ -41,6 +41,8 @@ static void init(OBJ_TYPE *OBJ_NAME)
 	player->bullet_type = object_by_name(weapons[weapon_index].obj_name);
 	player->hp_bar.max_hp = armors[armor_index].max_hp;
 	player->hp_bar.value = player->hp_bar.max_hp;
+
+	cpSpaceReindexShapesForBody(current_space, player->data.body);
 }
 
 static void on_create(OBJ_TYPE *OBJ_NAME)

@@ -17,6 +17,18 @@ static const float tex_map[2][8] = {
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
+	cpVect p_start = turret->data.p_start;
+	p_start = we_cart2pol(p_start);
+	p_start.x = currentlvl->inner_radius + TURRET_SIZE/2;
+	p_start = we_pol2cart(p_start);
+
+	cpBodySetPos(turret->tower, p_start);
+	se_tangent_body(turret->tower);
+	cpBodySetPos(turret->data.body, p_start);
+	se_tangent_body(turret->data.body);
+
+	cpSpaceReindexShapesForBody(current_space, turret->tower);
+	cpSpaceReindexShapesForBody(current_space, turret->data.body);
 }
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
@@ -56,6 +68,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	hpbar_init(&turret->hp_bar,turret->param.max_hp,80,20,0,60,&(turret->data.body->p));
 	sprite_create(&turret->data.spr, SPRITE_TURRETBODY001, TURRET_SIZE, TURRET_SIZE, 0);
 	sprite_create(&turret->spr_gun, SPRITE_TURRETGUN001, TURRET_SIZE, TURRET_SIZE, 0);
+
+	init(turret);
 }
 
 

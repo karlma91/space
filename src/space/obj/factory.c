@@ -12,6 +12,9 @@
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
+	cpBodySetPos(factory->data.body, factory->data.p_start);
+	se_tangent_body(factory->data.body);
+	cpSpaceReindexShapesForBody(current_space, factory->data.body);
 }
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
@@ -43,14 +46,14 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	float m = 50; //500
 	factory->data.body = cpSpaceAddBody(current_space,
 			cpBodyNew(m, cpMomentForBox(m, size, size)));
-	cpBodySetPos(factory->data.body, factory->data.p_start);
-	se_tangent_body(factory->data.body);
-	se_velfunc(factory->data.body, 1);
 
+	se_velfunc(factory->data.body, 1);
 	polyshape shape = shape_read(factory->param.shape_name);
 
 	shape_add_shapes(current_space, shape, factory->data.body, 400, cpvzero, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
 	cpBodySetUserData(factory->data.body, factory);
+
+	init(factory);
 
 	hpbar_init(&factory->hp_bar, factory->param.max_hp, 200, 35, 0, 180,
 			&(factory->data.body->p));

@@ -62,8 +62,9 @@ static void post_update(void)
 {
 }
 
-static void sdl_event(SDL_Event *event)
+static int sdl_event(SDL_Event *event)
 {
+	return 0;
 }
 
 static void draw(void)

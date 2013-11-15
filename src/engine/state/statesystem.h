@@ -27,7 +27,7 @@ typedef struct {
     void (*pre_update)(void);
     void (*post_update)(void);
     void (*draw)(void);
-    void (*sdl_event)(SDL_Event *event);
+    int (*sdl_event)(SDL_Event *event);
     void (*on_pause)(void);
     void (*on_leave)(void);
     void (*destroy)(void);

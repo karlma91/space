@@ -46,7 +46,7 @@ static int score_index = 0;
 static int score_page = 0;
 #endif
 
-static void sdl_event(SDL_Event *event)
+static int sdl_event(SDL_Event *event)
 {
 #if ARCADE_MODE
 	SDL_Scancode key;
@@ -112,6 +112,7 @@ static void sdl_event(SDL_Event *event)
 		}
 		break;
 	}
+	return 0;
 #endif
 }
 

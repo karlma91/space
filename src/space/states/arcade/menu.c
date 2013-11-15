@@ -45,7 +45,7 @@ static const Color col_select = {  0,0,255,255};
 
 static view *view_main;
 
-static void sdl_event(SDL_Event *event)
+static int sdl_event(SDL_Event *event)
 {
 	SDL_Scancode key;
 	switch (event->type) {
@@ -85,6 +85,7 @@ static void sdl_event(SDL_Event *event)
 		//}
 		break;
 	}
+	return 0;
 }
 
 static void on_enter(void)
