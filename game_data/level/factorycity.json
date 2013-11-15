@@ -1,0 +1,244 @@
+{
+	"name":	"default",
+	"tilemap":	"level02_01.tmx",
+	"timelimit":	100,
+	"params":	[{
+			"type":	"TURRET",
+			"name":	"DEF",
+			"max_hp":	250,
+			"coins":	50,
+			"shoot_interval":	2,
+			"burst_number":	2,
+			"rot_speed":	0.200000
+		}, {
+			"type":	"FACTORY",
+			"name":	"DEF",
+			"max_hp":	250,
+			"coins":	50,
+			"max_tanks":	10,
+			"spawn_delay":	0,
+			"coins":	50,
+			"sprite":	"factoryblue",
+			"shape":	"factory.shape",
+			"object_spawn":	{
+				"type":	"TANK",
+				"name":	"DEF"
+			}
+		}, {
+			"type":	"ROBOTARM",
+			"name":	"DEF",
+			"max_hp":	250,
+			"coins":	50
+		}, {
+			"type":	"TANK",
+			"name":	"DEF",
+			"max_hp":	50,
+			"coins":	50
+		}, {
+			"type":	"ROCKET",
+			"name":	"DEF",
+			"max_hp":	250,
+			"coins":	50
+		}],
+	"objects":	[{
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-483.367093,
+				"y":	-1432.614341,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-118.415705,
+				"y":	-1506.724227,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	253.549423,
+				"y":	-1490.573938,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	607.537030,
+				"y":	-1379.166783,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	933.985385,
+				"y":	-1190.504321,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	1193.760392,
+				"y":	-924.564750,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	1382.512531,
+				"y":	-611.905968,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	1477.748746,
+				"y":	-254.324803,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	1486.376802,
+				"y":	127.085806,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	1410.494256,
+				"y":	495.495785,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	1245.209540,
+				"y":	832.162283,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	995.696895,
+				"y":	1118.557649,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	685.448655,
+				"y":	1336.849099,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	330.542222,
+				"y":	1469.725002,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-51.129107,
+				"y":	1502.977812,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-424.815513,
+				"y":	1443.105339,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-769.083499,
+				"y":	1293.271486,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-1083.692167,
+				"y":	1077.342041,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-1316.637986,
+				"y":	769.882279,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-1464.756228,
+				"y":	419.767884,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-1524.050626,
+				"y":	42.415760,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-1479.566381,
+				"y":	-335.810875,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-1352.065290,
+				"y":	-708.373230,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-1115.007234,
+				"y":	-1030.307304,
+				"r":	0
+			}
+		}, {
+			"type":	"factory",
+			"name":	"DEF",
+			"pos":	{
+				"x":	-825.177663,
+				"y":	-1268.375501,
+				"r":	0
+			}
+		}]
+}
