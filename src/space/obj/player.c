@@ -72,8 +72,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->radar_image = cmp_new_minimap(10, COL_GREEN);
 
 	player->flame = particles_get_emitter(current_particles,RLAY_BACK_MID, EMITTER_FLAME);
-	player->flame->self_draw = 1;
-	player->flame->disable = 1;
+    if (player->flame) {
+        player->flame->self_draw = 1;
+        player->flame->disable = 1;
+    }
 	player->disable=0;
 
 	//cpVect player_pos = cpv(0,990);
@@ -110,9 +112,11 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	player->flame->p = player->data.body->p;
-	player->flame->angular_offset = player->direction + WE_PI_2;
-	particles_draw_emitter(player->flame);
+	if (player->flame) {
+		player->flame->p = player->data.body->p;
+		player->flame->angular_offset = player->direction + WE_PI_2;
+		particles_draw_emitter(player->flame);
+	}
 
 	draw_color4f(1,1,1,1);
 	sprite_render_body(RLAY_GAME_BACK, &(player->gun), player->gunwheel);
@@ -237,12 +241,15 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 	sound_play(SND_FACTORY_EXPLODE);
 	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, player->data.body->p);
 	player->disable = 1;
-	player->flame->disable = 1;
+    if (player->flame) {
+    	player->flame->disable = 1;
+    }
 	we_body_remove_constraints(current_space, player->data.body);
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
+	particles_release_emitter(player->flame);
 	we_body_remove(current_space, &player->gunwheel);
 	we_body_remove(current_space, &player->data.body);
 }
