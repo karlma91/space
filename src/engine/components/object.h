@@ -139,7 +139,7 @@ LList object_get_instances(const object_id *type);
 #define OBJ_START(name) struct OBJ_TYPE_2(name) {instance data; struct OBJ_PARAM_2(name) param;
 #define OBJ_END };
 
-#define PARAM_START(name) struct OBJ_PARAM_2(name) {
+#define PARAM_START(name) struct OBJ_PARAM_2(name) { char obj_param_name[16];
 #define PARAM_END };
 #define PARAM_EMPTY(name) PARAM_START(name) PARAM_END
 

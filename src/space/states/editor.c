@@ -20,6 +20,8 @@ static obj_param_tank tmp_tank_param = {
 };
 static level *lvl;
 
+static int remove_tool = 0;
+
 static char object_type[32];
 static char param_name[32];
 static char level_name[32];
@@ -74,12 +76,28 @@ static char sprite_names[EDITOR_OBJECT_COUNT][32] = {
 static button btn_objects[EDITOR_OBJECT_COUNT];
 
 static cpVect start;
-static int dragged;
 
 static view *main_view;
 
+struct instance_dummy {
+	instance ins;
+	struct {
+
+	} params;
+};
+
+static void update_instances(instance *obj, void *data)
+{
+	if(obj->TYPE != obj_id_player) {
+		level_add_object_recipe_name(lvl, obj->TYPE->NAME, (char*)&(((struct instance_dummy *)obj)->params), obj->p_start,0);
+	}
+}
+
 static void start_editor_level(void *unused)
 {
+	SDL_Log("EDITOR: STARTING LEVEL FROM EDITOR");
+	llist_clear(lvl->level_data);
+	instance_iterate(update_instances, NULL);
 	statesystem_set_state(state_space);
 	space_init_level_from_level(lvl);
 }
@@ -122,6 +140,9 @@ static int touch_motion(cpVect pos_view)
 		if (ins && ((ins->INS_IDENTIFIER ^ INS_MAGIC_COOKIE) == 0)) {
 			ins->p_start = pos;
 			ins->TYPE->call.init(ins);
+			if(remove_tool) {
+				instance_remove(ins);
+			}
 		}
 		start = pos_view;
 		return 1; /* consume event: no zoom/pan/rotate of scroller*/
@@ -137,7 +158,7 @@ static int touch_up(cpVect pos_view)
 	cpShape *shape = cpSpaceNearestPointQueryNearest(current_space, pos, 100, CP_ALL_LAYERS, CP_NO_GROUP, NULL);
 	if (!shape) {
 		//TODO make sure there are no other instances beneath pos!
-		level_add_object_recipe_name(lvl, object_type, param_name, pos,0);
+		//level_add_object_recipe_name(lvl, object_type, param_name, pos,0);
 		instance_create(object_by_name(object_type),
 				level_get_param(lvl->param_list, object_type, param_name)
 				,pos, cpvzero);
@@ -244,6 +265,7 @@ void editor_init()
 static void on_enter(void)
 {
 	currentlvl = lvl;
+	objectsystem_clear();
 	level_start_level(lvl);
 }
 
@@ -287,6 +309,9 @@ static int sdl_event(SDL_Event *event)
 	switch(event->type) {
 	case SDL_KEYDOWN:
 		key = event->key.keysym.scancode;
+		if(key == SDL_SCANCODE_D) {
+			remove_tool = 1;
+		}
 		break;
 	}
 	return 0;

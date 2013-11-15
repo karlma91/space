@@ -116,6 +116,8 @@ static void parse_param_object(cJSON *param, hashmap * param_list)
 		obj_param_robotarm robotarm;
 	} arg;
 
+	strcpy((char*)&arg, name);
+
 	if (obj_id == obj_id_tank) {
 		arg.tank.max_hp = cJSON_GetObjectItem(param,"max_hp")->valueint;
 		arg.tank.coins =  cJSON_GetObjectItem(param,"coins")->valueint;
@@ -175,6 +177,7 @@ level *level_load(char * filename)
 
 	level *lvl = calloc(1, sizeof(level));
 	lvl->level_data = llist_create();
+	llist_set_remove_callback(lvl->level_data, free);
 
 	int i;
 	cJSON *root = cJSON_Parse(buff);
@@ -227,7 +230,7 @@ level *level_load(char * filename)
 		cJSON *pos = cJSON_GetObjectItem(object,"pos");
 		cpVect p;
 		p.x = cJSON_GetObjectItem(pos,"x")->valuedouble;
-		p.x = cJSON_GetObjectItem(pos,"y")->valuedouble;
+		p.y = cJSON_GetObjectItem(pos,"y")->valuedouble;
 		level_add_object_recipe_name(lvl, type, name, p, 0);
 
 	}
@@ -235,12 +238,34 @@ level *level_load(char * filename)
 	return lvl;
 }
 
+
+
 void level_add_object_recipe_name(level * lvl, char * obj_type, char * param_name, cpVect pos, float rotation)
 {
+
+	if(!obj_type){
+		SDL_Log("LEVEL: INVALID OBJECT TYPE");
+		return;
+	}
+
+	if(!param_name){
+		SDL_Log("LEVEL: INVALID param NAME");
+		return;
+	}
+
+	char data_type[32];
+	strcpy(data_type, obj_type);
+	char data_name[32];
+	strcpy(data_name, param_name);
+
+	str_to_upper(data_type);
+	str_to_upper(data_name);
+	SDL_Log("LEVEL: ADDING %s,  %s", data_type, data_name);
+
 	object_recipe * rec = calloc(1,sizeof(object_recipe));
-	rec->obj_type = object_by_name(obj_type);
-	rec->param = level_get_param(lvl->param_list, obj_type, param_name);
-	strcpy(rec->param_name, param_name);
+	rec->obj_type = object_by_name(data_type);
+	rec->param = level_get_param(lvl->param_list, data_type, data_name);
+	strcpy(rec->param_name, data_name);
 	rec->pos = pos;
 	rec->rotation = rotation;
 	llist_set_remove_callback(lvl->level_data, free);
@@ -267,6 +292,11 @@ void level_start_level(level *lvl)
 		instance_create(data->obj_type, data->param, data->pos, cpvzero);
 	}
 	llist_end_loop(lvl->level_data);
+}
+
+void level_clear_objects(level *lvl)
+{
+	llist_clear(lvl->level_data);
 }
 
 void level_unload(level *lvl)

@@ -53,6 +53,7 @@ void level_add_object_recipe(level * lvl, object_id *obj_id,char * param_name,  
 
 void * level_get_param(hashmap * h, char *type, char * name);
 level *level_load(char * filename);
+void level_clear_objects(level *lvl);
 void level_start_level(level *lvl);
 level_ship* level_get_world();
 
