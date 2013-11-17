@@ -41,11 +41,13 @@ static button btn_options[OPTION_COUNT];
 
 static scroll_p scroller;
 
+static cpVect boxsize;
+static view *view_box;
 
 int bit_settings;
 
-Color col_btn_checked = {51, 255, 51, 255};
-Color col_btn_unchecked = {255, 255, 255, 255};
+static Color col_btn_checked = {51, 255, 51, 255};
+static Color col_btn_unchecked = {255, 255, 255, 255};
 
 /* * * * * * * * * *
  * state functions *
@@ -57,6 +59,11 @@ static void on_enter(void)
 
 static void pre_update(void)
 {
+	cpVect offset = scroll_get_offset(scroller);
+	int i;
+	for (i = 0; i < OPTION_COUNT; i++) {
+		touch_place(btn_options[i], 0, GAME_HEIGHT/2*0.8+50 + offset.y - i * 150);
+	}
 }
 
 static void post_update(void)
@@ -65,21 +72,6 @@ static void post_update(void)
 
 static void draw(void)
 {
-	float yoffset = scroll_get_yoffset(scroller);
-
-	draw_color4f(0,0,0,0.5f);
-	draw_box(1, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
-	draw_color4f(0.1,0.2,0.5,0.3);
-	draw_box(2, cpvzero,cpv(SCROLL_WIDTH,GAME_HEIGHT),0,1);
-
-	draw_color(COL_WHITE);
-	bmfont_center(FONT_SANS, cpv(0, GAME_HEIGHT/2 - 180 + yoffset),1.5,"Settings");
-
-	//TODO move view around instead of buttons
-	int i;
-	for (i = 0; i < OPTION_COUNT; i++) {
-		touch_place(btn_options[i], 0, -i * 160 + GAME_HEIGHT/5 + yoffset);
-	}
 }
 
 static int sdl_event(SDL_Event *event)
@@ -165,16 +157,35 @@ static void option_click(settings_option option)
 	}
 }
 
+static void gui(view *cam)
+{
+	draw_color4f(0,0,0,0.5f);
+	draw_box(1, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
+	draw_color4f(0.2,0.4,0.8,0.8);
+	draw_box(2, cpvzero,cpv(SCROLL_WIDTH,GAME_HEIGHT),0,1);
+
+	draw_color(COL_WHITE);
+	bmfont_center(FONT_SANS, cpv(0, GAME_HEIGHT/2 - 100), 1.5, "Settings");
+}
+
 void settings_init(void)
 {
 	statesystem_register(state_settings,0);
+
+	view *view_main = state_view_get(state_settings, 0);
+	view_main->GUI = gui;
+
+	view_box = state_view_add(state_settings);
+	boxsize = cpv(WINDOW_WIDTH * SCROLL_WIDTH / GAME_WIDTH , 0.8 * WINDOW_HEIGHT);
+	//TODO fix transformation error when using non-centered viewport?
+	view_set_port(view_box, cpvsub(cpv(WINDOW_WIDTH/2,WINDOW_HEIGHT/2),cpvmult(boxsize, 0.5)), boxsize, 0);  //-0.1*WINDOW_HEIGHT
 
 	int i;
 	for (i = 0; i < OPTION_COUNT; i++) {
 		btn_options[i] = button_create(SPRITE_BTN_PUSH, 1, str_options[i], 0, 0, 800, 115);
 		button_set_callback(btn_options[i], (void (*)(void *))option_click, NULL + i);
 		button_set_hotkeys(btn_options[i], digit2scancode[(i+1) % 10], 0);
-		state_register_touchable(this, btn_options[i]);
+		state_register_touchable_view(view_box, btn_options[i]);
 	}
 
 	//TODO load options from file
@@ -193,8 +204,8 @@ void settings_init(void)
 	btn_options[OPT_DELETE]->enabled = 0;
 
 	scroller = scroll_create(0,0,SCROLL_WIDTH,GAME_HEIGHT, 0.95, GAME_HEIGHT, 0, 0, 1);
-	scroll_set_bounds(scroller, cpBBNew(0, -GAME_HEIGHT/2, 0, 100));
-	state_register_touchable(state_settings, scroller);
+	scroll_set_bounds(scroller, cpBBNew(0, 0, 0, 150 * (OPTION_COUNT-1)));
+	state_register_touchable_view(view_box, scroller);
 
 	btn_back = button_create(NULL, 0, "", 0,0,GAME_WIDTH,GAME_HEIGHT);
 	button_set_hotkeys(btn_back, KEY_ESCAPE, KEY_RETURN_2);

@@ -22,6 +22,7 @@ static level *lvl;
 
 static int remove_tool = 0;
 
+static int active_obj_index = 0;
 static char object_type[32];
 static char param_name[32];
 static char level_name[32];
@@ -59,17 +60,18 @@ static editor_mode current_mode = MODE_OBJECTS_ADD;
 
 #define EDITOR_OBJECT_COUNT 5
 
+//TODO show actual objects in list
 static char object_names[EDITOR_OBJECT_COUNT][32] = {
-		"TURRET",
 		"TANK",
 		"FACTORY",
+		"TURRET",
 		"ROCKET",
 		"ROBOTARM"};
 
 static char sprite_names[EDITOR_OBJECT_COUNT][32] = {
-		"turretgun001",
 		"tankbody001",
 		"factoryblue",
+		"turretgun001",
 		"rocket",
 		"saw"};
 
@@ -109,25 +111,49 @@ static void save_level_to_file(void *unused)
 
 static void select_object_type(void *index)
 {
-	int i = *((int *)&index);
-	strncpy(object_type, object_names[i], 32);
+	Color col_active = {150,150,150,150};
+	button_set_backcolor(btn_objects[active_obj_index],COL_WHITE);
+	active_obj_index = *((int *)&index);
+	button_set_backcolor(btn_objects[active_obj_index],col_active);
+	strncpy(object_type, object_names[active_obj_index], 32);
 }
 
 static void clear_editor(void *unused)
 {
-	llist_clear(lvl->level_data);
+	currentlvl = lvl;
 	objectsystem_clear();
-	space_create_player(1);;
+	space_create_player(1);
+	select_object_type(0);
 }
 
+
+#define MAX_TOUCH_STACKSIZE 64
+
+typedef struct finger_data {
+	SDL_FingerID;
+	int timestamp;
+	int identifier;
+	void *data;
+} finger_data;
+
+typedef struct editor_touch {
+	cpVect first;
+} editor_touch;
+
+int touch_stack_i = 0;
+editor_touch touch_stack[MAX_TOUCH_STACKSIZE];
 
 static int touch_down(cpVect pos_view)
 {
 	//TODO map finger-id til et evt. objekt, ellers, returner null
 	//TODO detect double tap for delete? eller bruke en state for sletting av objekter (ved trykk på knapp)
 	//TODO create a system for registration of finger_id with an void* data, returning a unique id for touch (incrementing int)
-	//FIXME vanskelig å zoome ut (evt. umulig) om man zoomer helt inn på et objekt (kan evt. fikses ved bruk av relativ flytting, og/eller minske største forstørring)
+	//FIXME vanskelig å zoome ut (evt. umulig) om man zoomer helt inn på et objekt (kan evt. fikses ved bruk av relativ flytting, og/eller minske største forstørring, bruk av timeout for touch, reset view knapp)
 	start = pos_view;
+
+
+
+
 	return 1;
 }
 
@@ -202,7 +228,6 @@ void editor_init()
 	}
 
 	state_enable_objects(state_editor, 1);
-	//state_enable_particles(state_editor, 1);
 
 	cpSpaceSetGravity(current_space, cpv(0, 0));
 	cpSpaceSetDamping(current_space, 0.8f);
@@ -251,11 +276,8 @@ void editor_init()
 	state_register_touchable_view(main_view, scr_world);
 
 	lvl = level_load("object_defaults");
-	currentlvl = lvl;
-
+	clear_editor(NULL);
 	state_enable_objects(state_editor, 0);
-
-	space_create_player(1);;
 }
 
 /* * * * * * * * * *
@@ -264,9 +286,6 @@ void editor_init()
 
 static void on_enter(void)
 {
-	currentlvl = lvl;
-	objectsystem_clear();
-	level_start_level(lvl);
 }
 
 static void pre_update(void)
@@ -310,7 +329,7 @@ static int sdl_event(SDL_Event *event)
 	case SDL_KEYDOWN:
 		key = event->key.keysym.scancode;
 		if(key == SDL_SCANCODE_D) {
-			remove_tool = 1;
+			remove_tool ^= 1;
 		}
 		break;
 	}

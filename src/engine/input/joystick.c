@@ -101,7 +101,7 @@ void joystick_touch(joystick *stick, float pos_x, float pos_y)
 				dx /= length;
 				dy /= length;
 
-				joystick_place(stick, pos_x - stick->radius * dx, pos_y - stick->radius * dy);
+				//joystick_place(stick, pos_x - stick->radius * dx, pos_y - stick->radius * dy); /* joystick follows finger when out of range */
 			}
 		}
 		joystick_axis(stick, dx, dy);

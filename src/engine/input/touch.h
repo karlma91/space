@@ -16,6 +16,15 @@
 #include "SDL_events.h"
 #include "SDL_touch.h"
 
+typedef int touch_unique_id;
+
+void finger_init(void);
+touch_unique_id finger_bind(SDL_FingerID finger_id); /* binds finger_id to the returned unique touch_id, returns -1 if id is already bound */
+touch_unique_id finger_bind_force(SDL_FingerID finger_id); /* same as finger_bind but captures earlier binding if any */
+int finger_status(touch_unique_id touch_id); /* returns whether if touch_id is active or not*/
+void finger_release(SDL_FingerID finger_id); /* unbinds the unique_touch_id associated with SDL_fingerID */
+void finger_unbind(touch_unique_id touch_id); /* unbinds the given unique_touch_id */
+
 struct touch_calls;
 
 typedef struct {

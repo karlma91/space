@@ -60,18 +60,10 @@ static void update(touchable * scr_id)
 	if (scr->touch_data.container) {
 		zoom = scr->touch_data.container->zoom;
 	}
-	float spd = scr->max_speed * 0.8 * dt / zoom;
+	float spd = scr->max_speed * 0.8 * dt;
 	//TODO check if mouse is inside touch area
 	cpVect delta = {(keys[scr->key_left] - keys[scr->key_right]) * spd,
 					(keys[scr->key_down] - keys[scr->key_up]) * spd};
-	if (scr->rotate_delta) {
-		delta = cpvrotate(delta, cpvforangle(-scr->rot));
-	}
-
-	if (scr->rotate_delta) {
-		delta = cpvrotate(delta, cpvforangle(-scr->rot));
-	}
-	scr->offset = cpvadd(scr->offset, delta);
 
 	if(keys[scr->key_in]){
 		scr->zoom *= 1 + 1 * dt;
@@ -84,6 +76,13 @@ static void update(touchable * scr_id)
 	} else if(keys[scr->key_rotcw]) {
 		scr->rot -= WE_2PI * dt / 4;
 	}
+	if (scr->zoom_delta) {
+		delta = cpvmult(delta, 1  / zoom);
+	}
+	if (scr->rotate_delta) {
+		delta = cpvrotate(delta, cpvforangle(-scr->rot));
+	}
+	scr->offset = cpvadd(scr->offset, delta);
 
 	if (!scr->scrolling) {
 		scr->offset = cpvadd(scr->offset, scr->speed);
@@ -92,7 +91,8 @@ static void update(touchable * scr_id)
 	}
 	scr->speed = cpvmult(scr->speed, scr->friction);
 	if (scr->have_bounds) {
-		scr->offset = cpvadd(cpvmult(cpBBClampVect(scr->bounds, scr->offset),0.2),cpvmult(scr->offset,0.8));
+		//scr->offset = cpvadd(cpvmult(cpBBClampVect(scr->bounds, scr->offset),0.2),cpvmult(scr->offset,0.8));
+		scr->offset = cpBBClampVect(scr->bounds, scr->offset);
 	}
 
 }
@@ -104,6 +104,8 @@ static void render(touchable * scr_id)
 		scroll_priv * scr = (scroll_priv *) scr_id;
 		draw_color4b(20,40,20,10);
 		draw_box(0, cpv(scr->touch_data.get.t1x,scr->touch_data.get.t1y),cpv(scr->touch_data.get.width, scr->touch_data.get.height),0,0);
+		draw_color4b(255,0,0,128);
+		draw_box(0, scr->offset, cpv(10,10),0,1);
 	}
 }
 
@@ -229,6 +231,10 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 				scr->offset = cpvadd(scr->offset, delta);
 				scr->speed = cpvadd(cpvmult(scr->speed, 0.5), cpvmult(delta, 0.5));
 
+				if (scr->have_bounds) {
+					//scr->offset = cpvadd(cpvmult(cpBBClampVect(scr->bounds, scr->offset),0.2),cpvmult(scr->offset,0.8));
+					scr->offset = cpBBClampVect(scr->bounds, scr->offset);
+				}
 				return scr->consume_events;
 			}
 		} else { /* finger_1 inactive */

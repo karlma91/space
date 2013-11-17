@@ -58,7 +58,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 			//diff = cpvmult(diff, 50/length);
 		if (length > 60) {
 			diff = cpvnormalize(diff);
-			diff = cpvmult(diff, 140);
+			diff = cpvmult(diff, 8400*dt);
 			coin->data.body->v = cpvadd(coin->data.body->v, diff);
 		} else {
 			((obj_player *) player)->coins += 10;
@@ -77,7 +77,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	if (time > 0) {
 		alpha = 255 * (COIN_TIME_FADEOUT - time) / COIN_TIME_FADEOUT;
 	}
-	draw_color4b(255,255,255,alpha);
+	draw_color_rgbmulta4b(255,255,255,alpha);
 	sprite_render_body(RLAY_GAME_FRONT, &(coin->data.spr), coin->data.body);
 }
 

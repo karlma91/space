@@ -112,6 +112,11 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
+	if (player->data.destroyed && player->data.time_destroyed < 2) {
+		player->gun_timer += dt * we_randf*we_randf;
+		action_shoot(player);
+	}
+
 	if (player->flame) {
 		player->flame->p = player->data.body->p;
 		player->flame->angular_offset = player->direction + WE_PI_2;
@@ -147,7 +152,6 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	if (player->disable == 0){
 		controls(player);
 	}
-
 }
 
 static void controls(obj_player *player)
@@ -179,9 +183,9 @@ static void controls(obj_player *player)
 		player->direction_target = cpvtoangle(j);
 
 		cpBodyApplyImpulse(player->data.body, j, cpvmult(player_dir, -1*dt)); // applies impulse from rocket
-		player->flame->disable = 0;
+		if (player->flame) player->flame->disable = 0;
 	} else {
-		player->flame->disable = 1;
+		if (player->flame) player->flame->disable = 1;
 		float vel_angle = cpvtoangle(cpBodyGetVel(player->data.body));
 		player->direction = turn_toangle(vel_angle, player->direction,WE_2PI * dt / 10000);
 	}

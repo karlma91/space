@@ -666,11 +666,12 @@ static void main_tick(void *data)
 	dt = (thisTime - lastTime) / 1000.0f;
 	lastTime = thisTime;
 
+	frames += dt;
+	fps++;
+
 	dt = dt > 0.1 ? 0.1 : dt;
 	mdt = dt * 1000;
 
-	frames += dt;
-	fps++;
 
     engine_time +=dt;
     GLint uTime = glGetUniformLocation(gl_program, "uTime");
@@ -690,19 +691,36 @@ static void main_tick(void *data)
 	if (!paused) {
 		check_events();
 
+		static float update_time = 0, draw_time = 0;
+		int timer = SDL_GetTicks();
 		statesystem_update();
+		update_time += SDL_GetTicks() - timer;
+		timer = SDL_GetTicks();
 		statesystem_draw();
+		draw_time += SDL_GetTicks() - timer;
 
 		int gl_error = glGetError();
 		if (gl_error) SDL_Log("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error);
 
+		static int min_frame = 10000, max_frame = 0;
+		int frame_time = (SDL_GetTicks() - thisTime);
+		if (frame_time < min_frame) min_frame = frame_time;
+		if (frame_time > max_frame) max_frame = frame_time;
+
 		if (frames >= 1) {
+			float avg_frame = 1000.0/fps;
+			update_time /=fps;
+			draw_time /=fps;
 			sprintf(&fps_buf[0], "%.2f FPS ", fps);
 #if !ARCADE_MODE
-			SDL_Log("%s frame: %d ms", fps_buf, SDL_GetTicks() - thisTime);
+			fprintf(stderr, "%s\t%5.1f ms\t%4d ms\t%4d ms\t%6.2f ms\t%6.2f ms\n", fps_buf, avg_frame, min_frame, max_frame, update_time, draw_time);
 #endif
 			frames = 0;
 			fps = 0;
+			min_frame = 10000;
+			max_frame = 0;
+			update_time = 0;
+			draw_time = 0;
 		}
 
 		/*// rendering is not supported outside of a drawing call
