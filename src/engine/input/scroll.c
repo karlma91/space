@@ -256,11 +256,13 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	} else { /* remove finger if not inside scroll */
 		if (id && (active & FINGER_ID)) {
 			if (id & FINGER_1) {
+				finger_unbind(scr->touch_1);
 				scr->touch_1 = scr->touch_2;
 				scr->pf1 = scr->pf2;
 				if ((id & FINGER_2) == 0) scr->scrolling = 0;
+			} else {
+				finger_unbind(scr->touch_2);
 			}
-			finger_unbind(scr->touch_2);
 			scr->touch_2 = -1;
 		}
 	}
