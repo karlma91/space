@@ -5,6 +5,9 @@
  *      Author: Mathias
  */
 
+#define THIS_IS_A_TOUCH_OBJECT 1
+#include "touch.h"
+
 #include <math.h>
 
 #include "joystick.h"
@@ -14,8 +17,6 @@
 #include "../graphics/sprite.h"
 #include "we_utils.h"
 
-#define THIS_IS_A_TOUCH_OBJECT 1
-#include "touch.h"
 
 //FIXME one controller cancels the other
 
@@ -111,10 +112,6 @@ void joystick_touch(joystick *stick, float pos_x, float pos_y)
 void joystick_release(joystick *stick)
 {
 	stick->pressed = 0;
-
-	llist_remove(active_fingers, stick->finger_id);
-	stick->finger_id = 0;
-
 	if (!stick->persistent) {
 		joystick_axis(stick, 0, 0);
 	}
@@ -161,7 +158,7 @@ void joystick_axis(joystick *stick, float x, float y)
 }
 
 #define STCK_FRCT 0.7
-#define PULL_FRCT 0.9
+#define PULL_FRCT 0.5
 static void update(touchable * stick_id)
 {
 	joystick *stick = (joystick *) stick_id;
@@ -209,78 +206,58 @@ static void render(touchable * stick_id)
 static int touch_down(touchable * stick_id, SDL_TouchFingerEvent *finger)
 {
 	joystick *stick = (joystick *) stick_id;
-
-	if (llist_contains(active_fingers, (void *)finger->fingerId)) {
-		return 0; // fingerId already registered by another object
-	}
-
 	float tx = finger->x, ty = finger->y;
-	//normalized2game(&tx, &ty);
 
 	//TODO decide whether to allow new finger to ++capture++ active finger or not
 	if (touch_is_inside(stick_id, tx, ty)) {
-		stick->pressed = 1;
-		llist_remove(active_fingers, (void *)stick->finger_id);
-		stick->finger_id = finger->fingerId;
-		joystick_place(stick, tx, ty);
-		joystick_axis(stick, 0, 0);
-
-		llist_add(active_fingers, (void *)finger->fingerId);
-
-		return 1;
+		touch_unique_id last_id = stick->touch_id;
+		stick->touch_id = finger_bind(finger->fingerId);
+		if (stick->touch_id != -1) {
+			stick->pressed = 1;
+			joystick_place(stick, tx, ty);
+			joystick_axis(stick, 0, 0);
+			finger_unbind(last_id);
+			return 1;
+		}
 	}
-
 	return 0;
 }
 
 static int touch_motion(touchable * stick_id, SDL_TouchFingerEvent *finger)
 {
 	joystick *stick = (joystick *) stick_id;
-
 	float tx = finger->x, ty = finger->y;
-	//normalized2game(&tx, &ty);
 
 	if (!stick->pressed) {
-		if (llist_contains(active_fingers, (void *)finger->fingerId)) {
-			return 0;
-		} else { // fingerId available
-			if (touch_is_inside(stick_id, tx, ty)) {
+		if (touch_is_inside(stick_id, tx, ty)) {
+			touch_unique_id last_id = stick->touch_id;
+			stick->touch_id = finger_bind(finger->fingerId);
+			if (stick->touch_id != -1) {
 				stick->pressed = 1;
-				llist_remove(active_fingers, (void *)stick->finger_id);
-				stick->finger_id = finger->fingerId;
-				llist_add(active_fingers, (void *)finger->fingerId);
+				joystick_place(stick, tx, ty);
+				joystick_axis(stick, 0, 0);
+				finger_unbind(last_id);
 			} else {
 				return 0;
 			}
+		} else {
+			return 0;
 		}
-	} else if (stick->finger_id != finger->fingerId) {
+	} else if (!finger_status(stick->touch_id, finger->fingerId)) {
 		return 0;
 	}
-
-	//TODO decide whether if movement outside region should release joystick or ++not++
-	if (!touch_is_inside(stick_id, tx,ty)) {
-		//joystick_release(stick);
-		//return 0;
-	}
-
 	joystick_touch(stick, tx, ty);
-
 	return 1;
 }
 
 static int touch_up(touchable * stick_id, SDL_TouchFingerEvent *finger)
 {
 	joystick *stick = (joystick *) stick_id;
-
-	if (!stick->pressed || stick->finger_id != finger->fingerId)
+	int active = finger_status(stick->touch_id, finger->fingerId);
+	if (!stick->pressed || !active)
 		return 0;
 
-	if (!llist_contains(active_fingers, (void *)finger->fingerId)) {
-		return 0; // finger not registered as active
-	}
-
 	joystick_release(stick);
-
 	return 0;
 }
 

@@ -21,8 +21,10 @@ typedef int touch_unique_id;
 void finger_init(void);
 touch_unique_id finger_bind(SDL_FingerID finger_id); /* binds finger_id to the returned unique touch_id, returns -1 if id is already bound */
 touch_unique_id finger_bind_force(SDL_FingerID finger_id); /* same as finger_bind but captures earlier binding if any */
-int finger_status(touch_unique_id touch_id); /* returns whether if touch_id is active or not*/
+int finger_status(touch_unique_id touch_id, SDL_FingerID finger_id); /* returns whether if touch_id is active and corresponds to finger_id, or not. Set finger_id to -1 to check only if touch_id is active */
+int finger_active(SDL_FingerID finger_id); /* return if finger_id is already bound */
 void finger_release(SDL_FingerID finger_id); /* unbinds the unique_touch_id associated with SDL_fingerID */
+void finger_release_all(void); /* releases all bindings */
 void finger_unbind(touch_unique_id touch_id); /* unbinds the given unique_touch_id */
 
 struct touch_calls;
@@ -83,6 +85,8 @@ int touch_is_inside(touchable *t, float x, float y);
 #endif /* TOUCH_H_ */
 
 #if THIS_IS_A_TOUCH_OBJECT
+#ifndef TOUCH_OBJECT_H_
+#define TOUCH_OBJECT_H_
 static void update(touchable *);
 static void render(touchable *);
 static int touch_down(touchable *, SDL_TouchFingerEvent *finger);
@@ -109,5 +113,5 @@ static const touch_calls calls = {update,render,touch_down,touch_motion,touch_up
 		((touchable *)t)->get.margin=0;
 
 #define INSIDE( t, x, y) touch_is_inside((touchable *) t, x, y)
-
+#endif /* TOUCH_OBJECT_H_ */
 #endif

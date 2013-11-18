@@ -13,7 +13,7 @@
 
 typedef touchable *scroll_p;
 
-typedef int (*pre_touch_callback) (cpVect pos);
+typedef int (*pre_touch_callback) (SDL_TouchFingerEvent *finger);
 
 scroll_p scroll_create(float pos_x, float pos_y, float width, float height, float friction, float max_speed, int rotate_delta, int zoom_delta, int consume_events);
 

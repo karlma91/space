@@ -212,6 +212,8 @@ void statesystem_set_state(STATE_ID state_id)
     stack_tail = state;
     update_global_current_var(state);
     state->call.on_enter();
+
+    finger_release_all(); /* clear all bindings */
 }
 
 static void update_instances(instance *obj, void *data)

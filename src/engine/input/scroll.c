@@ -4,13 +4,14 @@
  *  Created on: 14. juli 2013
  *      Author: Mathias
  */
+
+#define THIS_IS_A_TOUCH_OBJECT 1
+#include "touch.h"
+
 #include "scroll.h"
 #include "../state/statesystem.h"
 #include "../engine.h"
 #include "../data/llist.h"
-
-#define THIS_IS_A_TOUCH_OBJECT 1
-#include "touch.h"
 
 
 typedef struct {
@@ -33,7 +34,7 @@ typedef struct {
 	pre_touch_callback pre_touch_motion;
 	pre_touch_callback pre_touch_up;
 
-	SDL_FingerID finger_1, finger_2;
+	touch_unique_id touch_1, touch_2;
 
 	cpVect pf1, pf2;
 
@@ -113,7 +114,7 @@ static void render(touchable * scr_id)
 #define FINGER_2 0x2  //(1<<1)
 #define FINGER_ID 0x4 //(1<<2)
 
-static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
+static int touch_down(touchable * scr_id, SDL_TouchFingerEvent *finger)
 {
 	scroll_priv * scr = (scroll_priv *) scr_id;
 
@@ -121,31 +122,33 @@ static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	//normalized2game(&tx, &ty);
 
 	if (INSIDE(scr, tx, ty)) {
-		int id = (scr->finger_1 == finger->fingerId) | ((scr->finger_2 == finger->fingerId) << 1);
-		int active = (llist_contains(active_fingers, scr->finger_1)) | (llist_contains(active_fingers, scr->finger_2) << 1);
-		active |= id ? (active != 0) << 2 : (llist_contains(active_fingers, finger->fingerId) << 2);
+		int id = finger_status(scr->touch_1, finger->fingerId) | (finger_status(scr->touch_2, finger->fingerId) << 1);
+		int active = finger_status(scr->touch_1, -1) | (finger_status(scr->touch_2, -1) << 1);
+		active |= id ? FINGER_ID << 2 : (finger_active(finger->fingerId) << 2);
 
 		if (active & FINGER_ID) {
 			return 0;
 		}
 
-		if (scr->pre_touch_down && scr->pre_touch_down(cpv(finger->x,finger->y))) return 1;
+		if (scr->pre_touch_down && scr->pre_touch_down(finger)) return 1;
 
 		if (active & FINGER_1) {
 			if (!(id & FINGER_1) && !(active & FINGER_2)) {
-				scr->finger_2 = finger->fingerId;
-				scr->pf2 = cpv(finger->x,finger->y);
-				scr->speed = cpvzero;
-				llist_add(active_fingers, (void *)finger->fingerId);
-				return scr->consume_events;
+				scr->touch_2 = finger_bind(finger->fingerId);
+				if (scr->touch_2 != -1) {
+					scr->pf2 = cpv(finger->x,finger->y);
+					scr->speed = cpvzero;
+					return scr->consume_events;
+				}
 			}
 		} else {
-			scr->finger_1 = finger->fingerId;
-			scr->pf1 = cpv(finger->x,finger->y);
-			llist_add(active_fingers, (void *)finger->fingerId);
-			scr->speed = cpvzero;
-			scr->scrolling = 1;
-			return scr->consume_events;
+			scr->touch_1 = finger_bind(finger->fingerId);
+			if (scr->touch_1 != -1) {
+				scr->pf1 = cpv(finger->x,finger->y);
+				scr->speed = cpvzero;
+				scr->scrolling = 1;
+				return scr->consume_events;
+			}
 		}
 	}
 
@@ -154,15 +157,15 @@ static int touch_down(touchable * scr_id, SDL_TouchFingerEvent * finger)
 
 static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 {
-	scroll_priv * scr = (scroll_priv *) scr_id;
+	scroll_priv *scr = (scroll_priv *) scr_id;
 
-	int id = (scr->finger_1 == finger->fingerId) | ((scr->finger_2 == finger->fingerId) << 1);
-	int active = (llist_contains(active_fingers, scr->finger_1)) | (llist_contains(active_fingers, scr->finger_2) << 1);
-	active |= id ? FINGER_ID : (llist_contains(active_fingers, finger->fingerId) << 2);
+	int id = finger_status(scr->touch_1, finger->fingerId) | (finger_status(scr->touch_2, finger->fingerId) << 1);
+	int active = finger_status(scr->touch_1, -1) | (finger_status(scr->touch_2, -1) << 1);
+	active |= id ? FINGER_ID : (finger_active(finger->fingerId) << 2);
 
 	if (INSIDE(scr, finger->x, finger->y)) {
 		if ((active & FINGER_ID) == 0) {
-			if (scr->pre_touch_motion && scr->pre_touch_motion(cpv(finger->x,finger->y))) return 1;
+			if (scr->pre_touch_motion && scr->pre_touch_motion(finger)) return 1;
 		}
 
 		if (active & FINGER_1) {
@@ -180,10 +183,9 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 				if (active & FINGER_ID) {
 					return 0;
 				} else {
-					scr->finger_2 = finger->fingerId;
+					scr->touch_2 = finger_bind(finger->fingerId);
 					scr->pf2 = cpv(finger->x,finger->y);
 					scr->speed = cpvzero;
-					llist_add(active_fingers, (void *)finger->fingerId);
 				}
 			}
 
@@ -239,28 +241,30 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 			}
 		} else { /* finger_1 inactive */
 			if (!(active & FINGER_ID)) {  /* finger available */
-				scr->finger_1 = finger->fingerId;
+				scr->touch_1 = finger_bind(finger->fingerId);
 				scr->pf1 = cpv(finger->x,finger->y);
 				scr->speed = cpvzero;
 				scr->scrolling = 1;
-				llist_add(active_fingers, (void *)finger->fingerId);
 				return scr->consume_events;
 			} else if (id & FINGER_2) { /* transfer finger_2 to finger_1 */
-				scr->finger_1 = scr->finger_2;
+				touch_unique_id  last_id = scr->touch_1;
+				scr->touch_1 = scr->touch_2;
+				scr->touch_2 = last_id != scr->touch_2 ? last_id : -1; // avoids use of the same touch_id
 				scr->pf1 = scr->pf2;
-				scr->finger_2 = -1;
 				return scr->consume_events;
 			}
 		}
 	} else { /* remove finger if not inside scroll */
 		if (id && (active & FINGER_ID)) {
-			llist_remove(active_fingers, finger->fingerId);
 			if (id & FINGER_1) {
-				scr->finger_1 = scr->finger_2;
+				scr->touch_1 = scr->touch_2;
 				scr->pf1 = scr->pf2;
 				if ((id & FINGER_2) == 0) scr->scrolling = 0;
+				finger_unbind(scr->touch_1);
+			} else if (id & FINGER_2) {
+				finger_unbind(scr->touch_2);
 			}
-			scr->finger_2 = -1;
+			scr->touch_2 = -1;
 		}
 	}
 	return 0;
@@ -270,21 +274,22 @@ static int touch_up(touchable * scr_id, SDL_TouchFingerEvent * finger)
 {
 	scroll_priv * scr = (scroll_priv *) scr_id;
 
-	int id = (scr->finger_1 == finger->fingerId) | ((scr->finger_2 == finger->fingerId) << 1);
-	int active = (llist_contains(active_fingers, scr->finger_1)) | (llist_contains(active_fingers, scr->finger_2) << 1);
-	active |= id ? FINGER_ID : (llist_contains(active_fingers, finger->fingerId) << 2);
+	int id = finger_status(scr->touch_1, finger->fingerId) | (finger_status(scr->touch_2, finger->fingerId) << 1);
+	int active = finger_status(scr->touch_1, -1) | (finger_status(scr->touch_2, -1) << 1);
+	active |= id ? FINGER_ID : (finger_active(finger->fingerId) << 2);
 
 	if (id && (active & FINGER_ID)) {
-		llist_remove(active_fingers, finger->fingerId);
 		if (id & FINGER_1) {
-			scr->finger_1 = scr->finger_2;
+			touch_unique_id  last_id = scr->touch_1;
+			scr->touch_1 = scr->touch_2;
+			scr->touch_2 = last_id != scr->touch_2 ? last_id : -1; // avoids use of the same touch_id
 			scr->pf1 = scr->pf2;
 		}
 		if ((id & FINGER_2) == 0) scr->scrolling = 0;
-		scr->finger_2 = -1;
+		scr->touch_2 = -1;
 		return scr->consume_events;
 	} else {
-		if (scr->pre_touch_up && scr->pre_touch_up(cpv(finger->x,finger->y))) return 1;
+		if (scr->pre_touch_up && scr->pre_touch_up(finger)) return 1;
 	}
 
 	return 0;
@@ -336,6 +341,9 @@ scroll_p scroll_create(float pos_x, float pos_y, float width, float height, floa
 	scr->z_min= 0.01;
 	scr->z_max= 1000;
 	scr->zoom_delta = zoom_delta;
+
+	scr->touch_1 = -1;
+	scr->touch_2 = -1;
 
 	scr->consume_events = consume_events;
 	return scr_id;

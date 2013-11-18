@@ -213,19 +213,23 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 	hpbar_draw(RLAY_GUI_BACK, &tank->hp_bar,cpvtoangle(tank->data.body->p));
 
-	if (1) { //TODO REMOVE TMP TEST
+	/*if (1) { //TODO REMOVE TMP TEST
 		instance *left, *right;
 		cpFloat left_dist, right_dist;
 		instance_get2nearest((instance *)tank, obj_id_tank, &left, &right, &left_dist, &right_dist);
-		draw_color_rgbmulta4f(1,(left_dist > 300),(left_dist > 300),alpha);
+
+		float col_left = (left_dist > 300);
+		float col_right = (right_dist > 300);
+
+		draw_color4f(alpha,col_left*alpha,col_left*alpha,0.5);
 		sprite_render_body(RLAY_GAME_FRONT, &(tank->wheel_sprite), tank->wheel1);
-		draw_color_rgbmulta4f(1,(right_dist > 300),(right_dist > 300),alpha);
+		draw_color4f(alpha,col_right*alpha,col_right*alpha,0.5);
 		sprite_render_body(RLAY_GAME_FRONT, &(tank->wheel_sprite), tank->wheel2);
-	} else {
+	} else {*/
 	draw_color_rgbmulta4f(1,1,1,alpha);
 	sprite_render_body(RLAY_GAME_FRONT, &(tank->wheel_sprite), tank->wheel1);
 	sprite_render_body(RLAY_GAME_FRONT, &(tank->wheel_sprite), tank->wheel2);
-	}
+	//}
 
 	if (tank->param.max_hp >= 300) {//TODO add color into param
 		draw_color_rgbmulta4f(1,0.2,0.3,alpha);

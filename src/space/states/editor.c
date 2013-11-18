@@ -143,22 +143,21 @@ typedef struct editor_touch {
 int touch_stack_i = 0;
 editor_touch touch_stack[MAX_TOUCH_STACKSIZE];
 
-static int touch_down(cpVect pos_view)
+static int touch_down(SDL_TouchFingerEvent *finger)
 {
+	cpVect pos_view = cpv(finger->x, finger->y);
 	//TODO map finger-id til et evt. objekt, ellers, returner null
 	//TODO detect double tap for delete? eller bruke en state for sletting av objekter (ved trykk på knapp)
 	//TODO create a system for registration of finger_id with an void* data, returning a unique id for touch (incrementing int)
 	//FIXME vanskelig å zoome ut (evt. umulig) om man zoomer helt inn på et objekt (kan evt. fikses ved bruk av relativ flytting, og/eller minske største forstørring, bruk av timeout for touch, reset view knapp)
 	start = pos_view;
 
-
-
-
 	return 1;
 }
 
-static int touch_motion(cpVect pos_view)
+static int touch_motion(SDL_TouchFingerEvent *finger)
 {
+	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(main_view, pos_view);
 	//TODO lage hjelpemetode for å hente objekt på posisjon
 	cpNearestPointQueryInfo info;
@@ -179,8 +178,9 @@ static int touch_motion(cpVect pos_view)
 	}
 }
 
-static int touch_up(cpVect pos_view)
+static int touch_up(SDL_TouchFingerEvent *finger)
 {
+	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(main_view, pos_view);
 	//TODO lage hjelpemetode for å hente objekt på posisjon
 	cpShape *shape = cpSpaceNearestPointQueryNearest(current_space, pos, 20, CP_ALL_LAYERS, CP_NO_GROUP, NULL);

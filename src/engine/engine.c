@@ -83,8 +83,6 @@ static SDL_Rect fullscreen_dimensions;
 
 static int main_running = 1;
 
-LList active_fingers;
-
 configuration config = {
 		.fullscreen = 1,
 		.width = 1920,
@@ -508,7 +506,7 @@ static void main_init(void)
 	SDL_Log("DEBUG: GL_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
 	initGP();          /* setup a gl context */
 	SDL_Log("DEBUG: GP_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-
+	finger_init();
     accelerometer = SDL_JoystickOpen(0);
 #if !ARCADE_MODE
     if (accelerometer == NULL) {
@@ -552,7 +550,9 @@ static void main_init(void)
 	lastTime = SDL_GetTicks();
 	SDL_Log("DEBUG: ALL INIT DONE time: %.3f", (lastTime-startTime) / 1000.0);
 
-	active_fingers = llist_create();
+#if !ARCADE_MODE
+	fprintf(stderr, "%s\t%5s ms\t%4s ms\t%4s ms\t%6s ms\t%6s ms\t%6s ms\n", "FPS", "AVG", "MIN", "MAX", "Update", "Draw", "GLSwap");
+#endif
 }
 
 static void check_events(void)
@@ -584,7 +584,7 @@ static void check_events(void)
 			}
 			break;
 		case SDL_FINGERUP:
-			llist_remove(active_fingers, (void *) event.tfinger.fingerId);
+			finger_release(event.tfinger.fingerId);
 			break;
 #if !GOT_TOUCH
 		case SDL_MOUSEBUTTONDOWN:
@@ -627,7 +627,7 @@ static void check_events(void)
 			sim_event.tfinger.y = (float) event.button.y / WINDOW_HEIGHT;
 			statesystem_push_event(&sim_event);
 			pressed = 0;
-			llist_remove(active_fingers, (void *) sim_event.tfinger.fingerId);
+			finger_release(sim_event.tfinger.fingerId);
 			break;
 #endif
 		}
@@ -691,13 +691,16 @@ static void main_tick(void *data)
 	if (!paused) {
 		check_events();
 
-		static float update_time = 0, draw_time = 0;
+		static float update_time = 0, draw_time = 0, swap_time = 0;
 		int timer = SDL_GetTicks();
 		statesystem_update();
 		update_time += SDL_GetTicks() - timer;
 		timer = SDL_GetTicks();
 		statesystem_draw();
 		draw_time += SDL_GetTicks() - timer;
+		timer = SDL_GetTicks();
+		SDL_GL_SwapWindow(window);
+		swap_time += SDL_GetTicks() - timer;
 
 		int gl_error = glGetError();
 		if (gl_error) SDL_Log("main.c: %d  GL_ERROR: %d\n",__LINE__,gl_error);
@@ -711,9 +714,10 @@ static void main_tick(void *data)
 			float avg_frame = 1000.0/fps;
 			update_time /=fps;
 			draw_time /=fps;
+			swap_time /=fps;
 			sprintf(&fps_buf[0], "%.2f FPS ", fps);
 #if !ARCADE_MODE
-			fprintf(stderr, "%s\t%5.1f ms\t%4d ms\t%4d ms\t%6.2f ms\t%6.2f ms\n", fps_buf, avg_frame, min_frame, max_frame, update_time, draw_time);
+			fprintf(stderr, "%5.2f\t%5.1f\t%4d\t%4d\t%6.2f\t%6.2f\t%6.2f\n", fps, avg_frame, min_frame, max_frame, update_time, draw_time, swap_time);
 #endif
 			frames = 0;
 			fps = 0;
@@ -721,6 +725,7 @@ static void main_tick(void *data)
 			max_frame = 0;
 			update_time = 0;
 			draw_time = 0;
+			swap_time = 0;
 		}
 
 		/*// rendering is not supported outside of a drawing call
@@ -734,7 +739,6 @@ static void main_tick(void *data)
 		font_drawText(GAME_WIDTH/2-5,-GAME_HEIGHT/2+20,FULL_VERSION_STRING);
 		*/
 
-		SDL_GL_SwapWindow(window);
 	}
 
 	//input handler

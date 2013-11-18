@@ -240,7 +240,7 @@ level *level_load(char * filename)
 
 
 
-void level_add_object_recipe_name(level * lvl, char * obj_type, char * param_name, cpVect pos, float rotation)
+void level_add_object_recipe_name(level * lvl, const char * obj_type, const char * param_name, cpVect pos, float rotation)
 {
 
 	if(!obj_type){
@@ -272,7 +272,7 @@ void level_add_object_recipe_name(level * lvl, char * obj_type, char * param_nam
 	llist_add(lvl->level_data, rec);
 }
 
-void level_add_object_recipe(level * lvl, object_id *obj_id, char * param_name, void * param, cpVect pos, float rotation)
+void level_add_object_recipe(level * lvl, object_id *obj_id, const char * param_name, void * param, cpVect pos, float rotation)
 {
 	object_recipe * rec = calloc(1,sizeof(object_recipe));
 	rec->obj_type = obj_id;

@@ -15,7 +15,7 @@
 typedef struct {
 	touchable touch_data;
 
-	SDL_FingerID finger_id;
+	touch_unique_id touch_id;
 
 	int pressed;
 

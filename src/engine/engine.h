@@ -68,8 +68,6 @@ struct state_ {
 
 extern SDL_Joystick *accelerometer;
 
-extern LList active_fingers;
-
 #define GAME_HEIGHT 1200
 extern int GAME_WIDTH; // expected minimum width = 4:3 -> 1600
 extern float ASPECT_RATIO; // 2:1 <-> 8:5 <-> 4:3

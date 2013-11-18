@@ -4,10 +4,12 @@
  *  Created on: 30. juni 2013
  *      Author: Mathias
  */
+#define THIS_IS_A_TOUCH_OBJECT 1
+#include "touch.h"
+
 #include "button.h"
 
 #include <string.h>
-
 #include "../engine.h"
 #include "../data/llist.h"
 #include "../graphics/draw.h"
@@ -15,8 +17,6 @@
 #include "../../space/game.h"
 #include "we_utils.h"
 
-#define THIS_IS_A_TOUCH_OBJECT 1
-#include "touch.h"
 
 
 static int BUTTON_UP = 0;
@@ -27,7 +27,7 @@ static int BUTTON_DOWN = 1;
 struct button {
 	touchable touch_data;
 
-	SDL_FingerID finger_id;
+	touch_unique_id touch_id;
 
 	sprite spr;
 	char label[50];
@@ -172,7 +172,6 @@ void button_clear(button btn_id)
 {
 	struct button *btn = (struct button *) btn_id;
 
-	btn->finger_id = 0;
 	btn->pressed = 0;
 	if (!btn->animated) sprite_set_index(&(btn->spr), BUTTON_UP);
 }
@@ -249,11 +248,13 @@ static int touch_down(button btn_id, SDL_TouchFingerEvent *finger)
 	//normalized2game(&tx, &ty);
 
 	if (INSIDE(btn, tx, ty)) {
-		btn->finger_id = finger->fingerId;
-		btn->pressed = 1;
-		if (!btn->animated) sprite_set_index(&(btn->spr), BUTTON_DOWN);
-		llist_add(active_fingers, (void *)finger->fingerId);
-		return 1;
+		finger_unbind(btn->touch_id);
+		btn->touch_id = finger_bind_force(finger->fingerId);
+		if (btn->touch_id != -1) {
+			btn->pressed = 1;
+			if (!btn->animated) sprite_set_index(&(btn->spr), BUTTON_DOWN);
+			return 1;
+		}
 	}
 
 	return 0;
@@ -261,16 +262,15 @@ static int touch_down(button btn_id, SDL_TouchFingerEvent *finger)
 
 static int touch_motion(button btn_id, SDL_TouchFingerEvent *finger)
 {
+	float tx = finger->x, ty = finger->y;
 	struct button *btn = (struct button *) btn_id;
+	int active = finger_status(btn->touch_id, finger->fingerId);
 
-	if (!btn->pressed || btn->finger_id != finger->fingerId)
+	if (!btn->pressed || !active)
 		return 0;
 
-	float tx = finger->x, ty = finger->y;
-	//normalized2game(&tx, &ty);
-
 	if (!INSIDE(btn, tx,ty)) {
-		llist_remove(active_fingers, (void *) btn->finger_id); // make finger available to other touchables
+		finger_unbind(btn->touch_id);
 		button_clear(btn_id);
 		return 0;
 	}
@@ -280,15 +280,14 @@ static int touch_motion(button btn_id, SDL_TouchFingerEvent *finger)
 
 static int touch_up(button btn_id, SDL_TouchFingerEvent *finger)
 {
+	float tx = finger->x, ty = finger->y;
 	struct button *btn = (struct button *) btn_id;
+	int active = finger_status(btn->touch_id, finger->fingerId);
 
-	if (!btn->pressed || btn->finger_id != finger->fingerId)
+	if (!btn->pressed || !active)
 		return 0;
 
 	button_clear(btn_id);
-
-	float tx = finger->x, ty = finger->y;
-	//normalized2game(&tx, &ty);
 
 	if (INSIDE(btn, tx,ty)) {
 		if (!btn->animated) sprite_set_index(&(btn->spr), BUTTON_UP);

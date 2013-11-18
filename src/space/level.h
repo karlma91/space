@@ -48,8 +48,8 @@ extern void level_get_ships(level_ship **,int *);
 extern int level_get_station_count(void);
 extern int level_get_level_count(int station);
 
-void level_add_object_recipe_name(level * lvl, char * obj_type, char * param_name, cpVect pos, float rotation);
-void level_add_object_recipe(level * lvl, object_id *obj_id,char * param_name,  void * param, cpVect pos, float rotation);
+void level_add_object_recipe_name(level * lvl, const char * obj_type, const char * param_name, cpVect pos, float rotation);
+void level_add_object_recipe(level * lvl, object_id *obj_id, const char * param_name,  void * param, cpVect pos, float rotation);
 
 void * level_get_param(hashmap * h, char *type, char * name);
 level *level_load(char * filename);
