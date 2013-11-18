@@ -13,6 +13,10 @@
 #include "SDL.h"
 #include "SDL_main.h"
 
+#ifndef PRINT_STATS
+#define PRINT_STATS 1
+#endif
+
 #ifndef SOUND_DISABLED
 #define SOUND_DISABLED 1
 #endif
@@ -716,7 +720,7 @@ static void main_tick(void *data)
 			draw_time /=fps;
 			swap_time /=fps;
 			sprintf(&fps_buf[0], "%.2f FPS ", fps);
-#if !ARCADE_MODE
+#if !ARCADE_MODE && PRINT_STATS
 			fprintf(stderr, "%5.2f\t%5.1f\t%4d\t%4d\t%6.2f\t%6.2f\t%6.2f\n", fps, avg_frame, min_frame, max_frame, update_time, draw_time, swap_time);
 #endif
 			frames = 0;

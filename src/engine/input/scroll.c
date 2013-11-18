@@ -182,7 +182,7 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 			} else {
 				if (active & FINGER_ID) {
 					return 0;
-				} else {
+				} else if (!(active & FINGER_2)) {
 					scr->touch_2 = finger_bind(finger->fingerId);
 					scr->pf2 = cpv(finger->x,finger->y);
 					scr->speed = cpvzero;
@@ -247,9 +247,8 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 				scr->scrolling = 1;
 				return scr->consume_events;
 			} else if (id & FINGER_2) { /* transfer finger_2 to finger_1 */
-				touch_unique_id  last_id = scr->touch_1;
 				scr->touch_1 = scr->touch_2;
-				scr->touch_2 = last_id != scr->touch_2 ? last_id : -1; // avoids use of the same touch_id
+				scr->touch_2 = -1;
 				scr->pf1 = scr->pf2;
 				return scr->consume_events;
 			}
@@ -260,10 +259,8 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 				scr->touch_1 = scr->touch_2;
 				scr->pf1 = scr->pf2;
 				if ((id & FINGER_2) == 0) scr->scrolling = 0;
-				finger_unbind(scr->touch_1);
-			} else if (id & FINGER_2) {
-				finger_unbind(scr->touch_2);
 			}
+			finger_unbind(scr->touch_2);
 			scr->touch_2 = -1;
 		}
 	}

@@ -164,7 +164,7 @@ int texture_load(const char *file)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glHint(GL_GENERATE_MIPMAP_HINT, GL_FASTEST);
+		glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST);
 
 		/* pre-multiply alpha */
 		if (premult_alpha) {
