@@ -164,9 +164,9 @@ static int touch_motion(touchable * scr_id, SDL_TouchFingerEvent * finger)
 	active |= id ? FINGER_ID : (finger_active(finger->fingerId) << 2);
 
 	if (INSIDE(scr, finger->x, finger->y)) {
-		if ((active & FINGER_ID) == 0) {
+		//if ((active & FINGER_ID) == 0) {
 			if (scr->pre_touch_motion && scr->pre_touch_motion(finger)) return 1;
-		}
+		//}
 
 		if (active & FINGER_1) {
 			cpVect last_diff = cpvsub(scr->pf2, scr->pf1);

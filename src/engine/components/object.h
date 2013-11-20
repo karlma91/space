@@ -108,6 +108,7 @@ instance *instance_first(object_id *type);
 instance *instance_n(object_id *type, int n);
 instance *instance_last(object_id *type);
 instance *instance_by_id(object_id *type, int instance_id);
+instance *instance_at_pos(cpVect pos, float dist, cpLayers layers, cpGroup group);
 
 #define instance_render(ins) ins->TYPE->call.on_render(ins)
 

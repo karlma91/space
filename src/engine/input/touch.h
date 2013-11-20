@@ -26,6 +26,7 @@ int finger_active(SDL_FingerID finger_id); /* return if finger_id is already bou
 void finger_release(SDL_FingerID finger_id); /* unbinds the unique_touch_id associated with SDL_fingerID */
 void finger_release_all(void); /* releases all bindings */
 void finger_unbind(touch_unique_id touch_id); /* unbinds the given unique_touch_id */
+touch_unique_id finger_get_touch_id(SDL_FingerID finger_id);
 
 struct touch_calls;
 

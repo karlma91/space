@@ -112,6 +112,7 @@ void joystick_touch(joystick *stick, float pos_x, float pos_y)
 void joystick_release(joystick *stick)
 {
 	stick->pressed = 0;
+    finger_unbind(stick->touch_id);
 	if (!stick->persistent) {
 		joystick_axis(stick, 0, 0);
 	}

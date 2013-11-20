@@ -14,11 +14,13 @@ static button btn_clear;
 static button btn_test;
 static button btn_save;
 
-static obj_param_tank tmp_tank_param = {
-	500,
-	50
-};
 static level *lvl;
+
+typedef struct editor_touch {
+	touch_unique_id ID;
+	cpVect viewpos_start, viewpos_last, game_offset;
+	instance *ins;
+} editor_touch;
 
 static int remove_tool = 0;
 
@@ -26,6 +28,9 @@ static int active_obj_index = 0;
 static char object_type[32];
 static char param_name[32];
 static char level_name[32];
+
+static LList ll_touches;
+static pool *pool_touches;
 
 typedef enum EDITOR_MODE {
 	MODE_OBJECTS_ADD,
@@ -77,9 +82,7 @@ static char sprite_names[EDITOR_OBJECT_COUNT][32] = {
 
 static button btn_objects[EDITOR_OBJECT_COUNT];
 
-static cpVect start;
-
-static view *main_view;
+static view *view_editor;
 extern obj_player * space_create_player(int id);
 struct instance_dummy {
 	instance ins;
@@ -126,71 +129,95 @@ static void clear_editor(void *unused)
 	select_object_type(0);
 }
 
+static editor_touch *get_touch(SDL_FingerID finger_id)
+{
+	touch_unique_id id = finger_get_touch_id(finger_id);
+	llist_begin_loop(ll_touches);
+	while (llist_hasnext(ll_touches)) {
+		editor_touch *touch = (editor_touch *) llist_next(ll_touches);
+		if (touch->ID == id) {
+			llist_end_loop(ll_touches);
+			return touch;
+		}
+	}
+	llist_end_loop(ll_touches);
+	return NULL;
+}
 
-#define MAX_TOUCH_STACKSIZE 64
-
-typedef struct finger_data {
-	SDL_FingerID;
-	int timestamp;
-	int identifier;
-	void *data;
-} finger_data;
-
-typedef struct editor_touch {
-	cpVect first;
-} editor_touch;
-
-int touch_stack_i = 0;
-editor_touch touch_stack[MAX_TOUCH_STACKSIZE];
+static void move_instance(editor_touch *touch)
+{
+	cpVect pos = view_view2world(view_editor, touch->viewpos_last);
+	touch->ins->p_start = cpvadd(pos, touch->game_offset);
+	touch->ins->TYPE->call.init(touch->ins);
+	if (remove_tool) {
+		instance_remove(touch->ins);
+	}
+}
 
 static int touch_down(SDL_TouchFingerEvent *finger)
 {
-	cpVect pos_view = cpv(finger->x, finger->y);
-	//TODO map finger-id til et evt. objekt, ellers, returner null
 	//TODO detect double tap for delete? eller bruke en state for sletting av objekter (ved trykk på knapp)
-	//TODO create a system for registration of finger_id with an void* data, returning a unique id for touch (incrementing int)
 	//FIXME vanskelig å zoome ut (evt. umulig) om man zoomer helt inn på et objekt (kan evt. fikses ved bruk av relativ flytting, og/eller minske største forstørring, bruk av timeout for touch, reset view knapp)
-	start = pos_view;
 
-	return 1;
+	cpVect pos_view = cpv(finger->x, finger->y);
+	cpVect pos = view_view2world(view_editor, pos_view);
+	instance *ins = instance_at_pos(pos, 10/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP); //TODO use zoom to decide max distance?
+
+	touch_unique_id touch_id = finger_bind(finger->fingerId);
+	if (touch_id != -1) {
+		editor_touch *touch = pool_instance(pool_touches);
+		llist_add(ll_touches, touch);
+		touch->viewpos_start = pos_view;
+		touch->viewpos_last = pos_view;
+		touch->ID = touch_id;
+		touch->ins = ins;
+		if (ins) {
+			//TODO don't allow more than one(or two for rotate/scale of instance) binding per instance!
+			touch->game_offset = cpvsub(ins->body->p, pos);
+			move_instance(touch);
+		}
+		return 1; /* consume event: no zoom/pan/rotate of scroller*/
+	}
+	return 0;
 }
 
 static int touch_motion(SDL_TouchFingerEvent *finger)
 {
 	cpVect pos_view = cpv(finger->x, finger->y);
-	cpVect pos = view_view2world(main_view, pos_view);
-	//TODO lage hjelpemetode for å hente objekt på posisjon
-	cpNearestPointQueryInfo info;
-	cpShape *shape = cpSpaceNearestPointQueryNearest(current_space, pos, 20, CP_ALL_LAYERS, CP_NO_GROUP, &info);
-	if (shape) {
-		instance *ins = shape->body->data;
-		if (ins && ((ins->INS_IDENTIFIER ^ INS_MAGIC_COOKIE) == 0)) {
-			ins->p_start = pos;
-			ins->TYPE->call.init(ins);
-			if(remove_tool) {
-				instance_remove(ins);
+	editor_touch *touch = get_touch(finger->fingerId);
+	if (touch) {
+		instance *ins = touch->ins;
+		if (ins) {
+			if(remove_tool) { //TODO create use inner state to decide what to do
+				instance_remove(touch->ins);
+			} else {
+				touch->viewpos_last = pos_view;
+				move_instance(touch);
 			}
+		} else if (cpvdistsq(touch->viewpos_start, pos_view) > 20*20) {
+			finger_unbind(touch->ID);
+			llist_remove(ll_touches, touch);
+			pool_release(pool_touches, touch);
 		}
-		start = pos_view;
-		return 1; /* consume event: no zoom/pan/rotate of scroller*/
-	} else if (cpvlength(cpvsub(pos_view, start)) > 50) {
-		return 0;
+		return 1;
 	}
+
+	return 0;
 }
 
 static int touch_up(SDL_TouchFingerEvent *finger)
 {
 	cpVect pos_view = cpv(finger->x, finger->y);
-	cpVect pos = view_view2world(main_view, pos_view);
-	//TODO lage hjelpemetode for å hente objekt på posisjon
-	cpShape *shape = cpSpaceNearestPointQueryNearest(current_space, pos, 20, CP_ALL_LAYERS, CP_NO_GROUP, NULL);
-	if (!shape) {
-		//TODO make sure there are no other instances beneath pos!
-		//level_add_object_recipe_name(lvl, object_type, param_name, pos,0);
-		instance_create(object_by_name(object_type),
-				level_get_param(lvl->param_list, object_type, param_name)
-				,pos, cpvzero);
-		return 1;
+	cpVect pos = view_view2world(view_editor, pos_view);
+	editor_touch *touch = get_touch(finger->fingerId);
+	if (touch) {
+		if (touch->ins == NULL) {
+			//TODO make sure there are no other instances beneath pos!
+			instance_create(object_by_name(object_type), level_get_param(lvl->param_list, object_type, param_name), pos, cpvzero);
+			llist_remove(ll_touches, touch);
+			pool_release(pool_touches, touch);
+			return 1;
+		}
 	}
 	return 0;
 }
@@ -202,7 +229,7 @@ void editor_init()
 	sprintf(level_name, "%s", "TESTING");
 	int i;
 	statesystem_register(state_editor,0);
-	main_view = state_view_get(state_editor, 0);
+	view_editor = state_view_get(state_editor, 0);
 	state_add_layers(state_editor, 20);
 
 	int layers = state_layer_count(state_editor);
@@ -232,6 +259,9 @@ void editor_init()
 	cpSpaceSetGravity(current_space, cpv(0, 0));
 	cpSpaceSetDamping(current_space, 0.8f);
 
+	ll_touches = llist_create();
+	pool_touches = pool_create(sizeof(editor_touch));
+
 	btn_space = button_create(SPRITE_BTN_HOME, 0, "", -400, GAME_HEIGHT/2 - 100, 125, 125);
 	btn_clear = button_create(SPRITE_BTN_RETRY, 0, "", -200, GAME_HEIGHT/2-100, 125, 125);
 	btn_test = button_create(SPRITE_BTN_NEXT, 0, "",0, GAME_HEIGHT/2 - 100, 125, 125);
@@ -249,11 +279,11 @@ void editor_init()
 	button_set_enlargement(btn_test, 1.5);
 	button_set_enlargement(btn_save, 1.5);
 
-	state_register_touchable_view(main_view, btn_space);
-	state_register_touchable_view(main_view, btn_clear);
-	state_register_touchable_view(main_view, btn_test);
-	state_register_touchable_view(main_view, btn_save);
-	state_register_touchable_view(main_view, btn_settings);
+	state_register_touchable_view(view_editor, btn_space);
+	state_register_touchable_view(view_editor, btn_clear);
+	state_register_touchable_view(view_editor, btn_test);
+	state_register_touchable_view(view_editor, btn_save);
+	state_register_touchable_view(view_editor, btn_settings);
 
 	float size = 200;
 	float x = -GAME_WIDTH/2+size*2;
@@ -265,15 +295,15 @@ void editor_init()
 		button_set_callback(btn, select_object_type, i);
 		button_set_hotkeys(btn, key <= SDL_SCANCODE_0 ? key : 0, 0);
 		button_set_enlargement(btn, 1.5);
-		state_register_touchable_view(main_view, btn); //TODO use another view for these buttons
+		state_register_touchable_view(view_editor, btn); //TODO use another view for these buttons
 		btn_objects[i] = btn;
 	}
-	scr_world = scroll_create(150,0,GAME_WIDTH-300,GAME_HEIGHT, 0.98, 3000, 1, 1, 0); // max 4 000 gu / sec
+	scr_world = scroll_create(150,0,GAME_WIDTH-300,GAME_HEIGHT, 0.9, 3000, 1, 1, 0); // max 4 000 gu / sec
 	scr_objects = scroll_create(-GAME_WIDTH/2+150,0,300,GAME_HEIGHT,0.9,50,0,0,1);
 	scroll_set_callback(scr_world, touch_down, touch_motion, touch_up);
 	scroll_set_bounds(scr_objects, cpBBNew(0,-GAME_HEIGHT/2,0,GAME_HEIGHT/2));
-	state_register_touchable_view(main_view, scr_objects);
-	state_register_touchable_view(main_view, scr_world);
+	state_register_touchable_view(view_editor, scr_objects);
+	state_register_touchable_view(view_editor, scr_world);
 
 	lvl = level_load("object_defaults");
 	clear_editor(NULL);
@@ -290,8 +320,8 @@ static void on_enter(void)
 
 static void pre_update(void)
 {
-	main_view->zoom = scroll_get_zoom(scr_world);
-	view_update(main_view, cpvneg(scroll_get_offset(scr_world)), scroll_get_rotation(scr_world));
+	view_editor->zoom = scroll_get_zoom(scr_world);
+	view_update(view_editor, cpvneg(scroll_get_offset(scr_world)), scroll_get_rotation(scr_world));
 
 
 	cpVect obj_offset = scroll_get_offset(scr_objects);
@@ -302,6 +332,22 @@ static void pre_update(void)
 	for (i = 0; i < EDITOR_OBJECT_COUNT; i++, y -= 250) {
 		touch_place(btn_objects[i], x, y);
 	}
+
+	llist_begin_loop(ll_touches);
+	while (llist_hasnext(ll_touches)) {
+		editor_touch *touch = (editor_touch *) llist_next(ll_touches);
+		if (finger_status(touch->ID, -1)) {
+            if (touch->ins) {
+                move_instance(touch);
+            } else {
+                //TODO remove touch after timeout?
+            }
+		} else {
+			llist_remove(ll_touches, touch);
+			pool_release(pool_touches, touch);
+		}
+	}
+	llist_end_loop(ll_touches);
 }
 
 static void post_update(void)
@@ -320,10 +366,9 @@ static void draw(void)
 static int sdl_event(SDL_Event *event)
 {
 	SDL_TouchFingerEvent *finger = &event->tfinger;
-	float zoom;
 	SDL_Scancode key;
 	cpVect pos;
-	pos = view_touch2world(main_view, cpv(finger->x, finger->y));
+	pos = view_touch2world(view_editor, cpv(finger->x, finger->y));
 
 	switch(event->type) {
 	case SDL_KEYDOWN:
@@ -346,6 +391,8 @@ static void on_leave(void)
 
 static void destroy(void)
 {
+	llist_destroy(ll_touches);
+	pool_destroy(pool_touches);
 }
 
 static void update(touchable *t)

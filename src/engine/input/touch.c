@@ -233,4 +233,15 @@ void finger_unbind(touch_unique_id touch_id)
 	}
 }
 
+touch_unique_id finger_get_touch_id(SDL_FingerID finger_id)
+{
+	int i;
+	for (i = 0; i < MAX_FINGERS; i++) {
+		if (fingers[i].finger_id == finger_id) {
+			return fingers[i].touch_id;
+		}
+	}
+	return 0;
+}
+
 

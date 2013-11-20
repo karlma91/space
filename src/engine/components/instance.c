@@ -226,6 +226,15 @@ instance *instance_by_id(object_id *type, int instance_id)
 	return NULL;
 }
 
+instance *instance_at_pos(cpVect pos, float dist, cpLayers layers, cpGroup group)
+{
+	cpShape *shape = cpSpaceNearestPointQueryNearest(current_space, pos, dist, CP_ALL_LAYERS, CP_NO_GROUP, NULL);
+	if (shape && shape->body->data && ((((instance *)shape->body->data)->INS_IDENTIFIER ^ INS_MAGIC_COOKIE) == 0)) {
+		return shape->body->data;
+	}
+	return NULL;
+}
+
 int instance_count(object_id *type)
 {
 	if (current_objects) {
