@@ -9,6 +9,7 @@
 #define PARTICLE_COLOR_MAX 10
 #define PARTICLE_ALPHA_MAX 10
 
+
 typedef struct particle_color {
 	float r,g,b;
 	float offset;
@@ -25,6 +26,8 @@ typedef struct range {
 typedef struct particle particle;
 typedef struct emitter emitter;
 typedef struct system particle_system;
+
+typedef const emitter *EMITTER_ID;
 
 struct particle {
 
@@ -44,10 +47,9 @@ struct particle {
 
 struct emitter {
 
-	int type;
 	int layer;
 
-	particle_system * ps;
+	particle_system * partl_sys;
 
 	int self_draw;
 
@@ -107,6 +109,7 @@ struct emitter {
 	p_color colors[PARTICLE_COLOR_MAX]; /* a list of colors that the particles get the color from */
 	int color_count;
 
+	EMITTER_ID ID;
 	/** data to use in a custom draw function */
 	void *data;
 };
@@ -119,26 +122,27 @@ struct system {
 };
 
 
-int read_emitter_from_file (char *filename);
+EMITTER_ID particles_bind_emitter(const char *name);
+EMITTER_ID read_emitter_from_file(const char *filename);
 void particles_init(void);
 void particles_destroy(void);
-void particlesystem_free(particle_system *s);
-void particles_draw(particle_system *s);
-void particles_update(particle_system *s);
-void particles_release_emitter(emitter* e);
+void particlesystem_free(particle_system *);
+void particles_draw(particle_system *);
+void particles_update(particle_system *);
+void particles_release_emitter(emitter* em);
 particle_system *particlesystem_new();
-void particles_draw_emitter(emitter *e);
+void particles_draw_emitter(emitter *em);
 
-void particles_self_draw(emitter *e, int enable);
+void particles_self_draw(emitter *em, int enable);
 
 void particle_set_gravity_func(particle_system *s, cpVect (*gravity_dir_func)(cpVect p));
 
-emitter *particles_add_score_popup(particle_system *s, int layer, cpVect p, int score);
-emitter *particles_add_sparks(particle_system *s, int layer, cpVect p, float angle, float force);
+emitter *particles_add_score_popup(particle_system *, int layer, cpVect p, int score);
+emitter *particles_add_sparks(particle_system *, int layer, cpVect p, float angle, float force);
 
-void particles_clear(particle_system *s);
-emitter *particles_get_emitter(particle_system *s, int layer, int type);
-emitter *particles_get_emitter_at(particle_system *s, int layer, int type,cpVect p);
+void particles_clear(particle_system *);
+emitter *particles_get_emitter(particle_system *, int layer, EMITTER_ID);
+emitter *particles_get_emitter_at(particle_system *, int layer, EMITTER_ID, cpVect p);
 
 void particles_reload_particles(void);
 

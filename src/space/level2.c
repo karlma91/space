@@ -348,11 +348,11 @@ void level_unload(level *lvl)
 			free(data);
 			data = hm_iterator_next(it2);
 		}
-		hm_destroy_iterator(it2);
+		hm_iterator_destroy(it2);
 		hm_destroy(h);
 		h = hm_iterator_next(it);
 	}
-	hm_destroy_iterator(it);
+	hm_iterator_destroy(it);
 	hm_destroy(lvl->param_list);
 	free(lvl->tiles);
 	free(lvl);

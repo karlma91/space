@@ -217,7 +217,7 @@ char * hm_iterator_get_key(hashiterator *it)
  return it->key;
 }
 
-void hm_destroy_iterator(hashiterator *it)
+void hm_iterator_destroy(hashiterator *it)
 {
 	free(it);
 }

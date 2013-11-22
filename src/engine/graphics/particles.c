@@ -10,12 +10,9 @@
 
 #define PARTICLE_READ_BUFFER_SIZE 4096
 
-static hashmap *hm_emitters;
-
 /**
  * parse functions
  */
-int read_emitter_from_file (char *filename);
 static int parse_range(mxml_node_t *node, range *r);
 static int parse_point(mxml_node_t *node, p_point *point);
 static int parse_color_step(mxml_node_t *node, emitter *e);
@@ -36,7 +33,7 @@ static void draw_all_particles(emitter *em);
 static void default_particle_draw(emitter *em, particle *p);
 static void particle_update_pos(particle *p);
 
-static emitter * get_emitter(int layer);
+static emitter * get_emitter(void);
 static void set_emitter_available(emitter *e);
 
 static cpVect default_gravity_func(cpVect pos) {
@@ -53,15 +50,13 @@ static void set_particle_available(particle *p);
 /*
  * variables
  */
-static int current_emitter = -1;
-
 static struct pool * main_emitter_pool;
 static struct pool *main_particle_pool;
 
-//TODO: make emitter_templates dynamic size
-static emitter emitter_templates[40];
-
 unsigned int particles_active = 0;
+
+static int emitter_type_count = 0;
+static hashmap *hm_emitter_names;
 
 /**
  * GLOABL FUNCTIONS
@@ -74,7 +69,7 @@ void particles_init(void)
 {
 	main_emitter_pool = pool_create(sizeof(emitter));
 	main_particle_pool = pool_create(sizeof(particle));
-	hm_emitters = hm_create();
+	hm_emitter_names = hm_create();
 }
 
 particle_system *particlesystem_new()
@@ -137,7 +132,7 @@ void particles_draw(particle_system *s)
 	llist_end_loop(s->emitters);
 }
 
-emitter *particles_get_emitter_at(particle_system *s, int layer, int type, cpVect p)
+emitter *particles_get_emitter_at(particle_system *s, int layer, EMITTER_ID type, cpVect p)
 {
 	if (!s) return NULL;
 	emitter *e = particles_get_emitter(s, layer, type);
@@ -145,27 +140,28 @@ emitter *particles_get_emitter_at(particle_system *s, int layer, int type, cpVec
 	return e;
 }
 
-
-emitter *particles_get_emitter(particle_system *s, int layer, int type)
+emitter *particles_get_emitter(particle_system *partl_sys, int layer, EMITTER_ID type)
 {
-	if (!s) return NULL;
-	emitter *e = get_emitter(layer);
-	llist_add(s->emitters, e);
-	LList l = e->particles;
-	int lay = e->layer;
-	//TODO replace with hashmap
-	*e = (emitter_templates[type]);
-	e->particles = l;
-	e->layer = lay;
-	if(e->emit_count_enabled){
+	if (!partl_sys) return NULL;
+	if (type->ID != type) {
+		SDL_Log("ERROR: Invalid emitter template!");
+		return NULL;
+	}
+	emitter *e = get_emitter();
+	llist_add(partl_sys->emitters, e);
+	LList ll_particles = e->particles;
+	*e = *type;
+	e->particles = ll_particles;
+	e->layer = layer;
+	if (e->emit_count_enabled) {
 		e->emit_count_set = range_get_random(e->emit_count);
 	}
-	if(e->length_enabled){
+	if (e->length_enabled) {
 		e->length_set = range_get_random(e->length);
 	}
 	e->alive = 1;
 	e->self_draw = 0;
-	e->ps = s;
+	e->partl_sys = partl_sys;
 	return e;
 }
 
@@ -224,7 +220,13 @@ void particles_destroy()
 	// FIXME: fix crash on destroy
 	//pool_destroy(main_emitter_pool);
 	//pool_destroy(main_particle_pool);
-	hm_destroy(hm_emitters);
+
+	hashiterator *it = hm_get_iterator(hm_emitter_names);
+	while (hm_iterator_hasnext(it)) {
+		free(hm_iterator_next(it));
+	}
+	hm_iterator_destroy(it);
+	hm_destroy(hm_emitter_names);
 }
 
 /**
@@ -307,7 +309,7 @@ static void update_all_particles(emitter *em)
 			p->alive = 0;
 			llist_remove(em->particles, p); // Sets particle available with remove callback
 		} else {
-		    cpVect g = em->ps->gravity_dir_func(p->p);
+		    cpVect g = em->partl_sys->gravity_dir_func(p->p);
 
 		    p->v = cpvadd(p->v, cpvmult(g, em->gravityfactor * 0.0001f * mdt));
 
@@ -332,10 +334,10 @@ static void set_particle_available(particle *p)
 }
 
 /**
- * get a particle from the available pool and put it in the in_use list
+ * get an emitter from the available pool and put it in the in_use list
  * if the pool is empty, then it returns available_pool[0]
  */
-static emitter * get_emitter(int layer)
+static emitter *get_emitter(void)
 {
 	emitter *e = pool_instance(main_emitter_pool);
 	if(e == NULL) {
@@ -345,7 +347,6 @@ static emitter * get_emitter(int layer)
             e->particles = llist_create();
             llist_set_remove_callback(e->particles, (ll_rm_callback) clear_rm_particle );
         }
-        e->layer = layer;
     }
 	return e;
 }
@@ -478,20 +479,22 @@ static void default_particle_draw(emitter *em, particle *p)
 /**
  * reads from a xml file made with pedegree slick2d particle editor
  */
-int read_emitter_from_file (char *filename)
+EMITTER_ID read_emitter_from_file(const char *filename)
 {
-	current_emitter += 1;
-	//TODO replace with hashmap
-	emitter *emi = &(emitter_templates[current_emitter]);
-	emi->type = current_emitter;
-	emi->alpha_count = 0;
-	emi->color_count = 0;
-	emi->alive = 1;
-	emi->disable = 0;
-	emi->next_spawn = 0;
-	emi->particle_count = 0;
-	emi->waiting_to_die = 0;
-	emi->draw_particle = default_particle_draw;
+	EMITTER_ID id = particles_bind_emitter(filename);
+	if (id) return id->ID; //TODO be able to re-load emitter templates
+
+	id = calloc(1, sizeof(emitter));
+	emitter *em = (emitter *) id;
+	em->ID = id;
+	em->alpha_count = 0;
+	em->color_count = 0;
+	em->alive = 1;
+	em->disable = 0;
+	em->next_spawn = 0;
+	em->particle_count = 0;
+	em->waiting_to_die = 0;
+	em->draw_particle = default_particle_draw;
 
 	mxml_node_t * tree = NULL;
 	mxml_node_t * node  = NULL;
@@ -506,15 +509,16 @@ int read_emitter_from_file (char *filename)
 		tree = mxmlLoadString(NULL, buffer, MXML_OPAQUE_CALLBACK);
 	}else {
 		SDL_Log("Could Not Open the File Provided");
-		return 1;
+		free(em);
+		return -1;
 	}
 	if(tree == NULL){
 		SDL_Log("particles.c: file is empty \n");
-		return 1;
-
+		free(em);
+		return -1;
 	}
 
-	int alpha_last = 0;
+	int alpha_last = 0; //TODO go through/check child or parent node instead of using state variable
 
 	for (node = mxmlFindElement(tree, tree,NULL,NULL, NULL,MXML_DESCEND);
 			node != NULL;
@@ -522,10 +526,10 @@ int read_emitter_from_file (char *filename)
 	){
 		if (node->type  == MXML_ELEMENT) {
 			if (alpha_last) {
-				int index = emi->alpha_count;
-				if (index < PARTICLE_ALPHA_MAX && (parse_point(node, emi->alpha + index) == 0)) {
-					++emi->alpha_count;
-					fprintf(stderr, "DEBUG: added point = {%f, %f}\n", (emi->alpha+index)->x, (emi->alpha+index)->y);
+				int index = em->alpha_count;
+				if (index < PARTICLE_ALPHA_MAX && (parse_point(node, em->alpha + index) == 0)) {
+					++em->alpha_count;
+					fprintf(stderr, "DEBUG: added point = {%f, %f}\n", (em->alpha+index)->x, (em->alpha+index)->y);
 				} else {
 					alpha_last = 0;
 					fprintf(stderr, "DEBUG: alpha_last = 0\n");
@@ -533,60 +537,60 @@ int read_emitter_from_file (char *filename)
 			}
 
 			if(TESTNAME("system")){
-				parse_bool(node,"additive",&(emi->additive));
+				parse_bool(node,"additive",&(em->additive));
 			}else if(TESTNAME("emitter")){
 				char *(spint[1]);
 				parse_string(node,"spriteName",spint);
 				//SDL_Log( "HELLO TEXTURE: %s\n", *spint);
 				if(*spint != NULL){
-					emi->sprite_id = sprite_link(*spint);
+					em->sprite_id = sprite_link(*spint);
 				}
-				//parse_bool(node,"useAdditive",&(emi->additive));
-				parse_bool(node,"useOriented",&(emi->rotation));
+				//parse_bool(node,"useAdditive",&(em->additive));
+				parse_bool(node,"useOriented",&(em->rotation));
 			}else if(TESTNAME("spawnInterval")){
-				parse_range(node,&(emi->spawn_interval));
+				parse_range(node,&(em->spawn_interval));
 			}else if(TESTNAME("spawnCount")){
-				parse_range(node,&(emi->spawn_count));
+				parse_range(node,&(em->spawn_count));
 			}else if(TESTNAME("initialLife")){
-				parse_range(node,&(emi->init_life));
+				parse_range(node,&(em->init_life));
 			}else if(TESTNAME("initialSize")){
-				parse_range(node,&(emi->init_size));
+				parse_range(node,&(em->init_size));
 			}else if(TESTNAME("initialRotation")){
-				parse_range(node,&(emi->init_rotation));
+				parse_range(node,&(em->init_rotation));
 			}else if(TESTNAME("rotationSpeed")){
-				parse_range(node,&(emi->speed_rotation));
+				parse_range(node,&(em->speed_rotation));
 			}else if(TESTNAME("xOffset")){
-				parse_range(node,&(emi->xoffset));
+				parse_range(node,&(em->xoffset));
 			}else if(TESTNAME("yOffset")){
-				parse_range(node,&(emi->yoffset));
+				parse_range(node,&(em->yoffset));
 			}else if(TESTNAME("initialDistance")){
-				parse_range(node,&(emi->init_distance));
+				parse_range(node,&(em->init_distance));
 			}else if(TESTNAME("speed")){
-				parse_range(node,&(emi->speed));
+				parse_range(node,&(em->speed));
 			}else if(TESTNAME("emitCount")){
-				parse_range(node,&(emi->emit_count));
-				parse_bool(node,"enabled",&(emi->emit_count_enabled));
+				parse_range(node,&(em->emit_count));
+				parse_bool(node,"enabled",&(em->emit_count_enabled));
 			}else if(TESTNAME("length")){
-				parse_range(node,&(emi->length));
-				parse_bool(node,"enabled",&(emi->length_enabled));
+				parse_range(node,&(em->length));
+				parse_bool(node,"enabled",&(em->length_enabled));
 			}else if(TESTNAME("spread")){
-				parse_float(node,"value", &(emi->spread));
-				emi->spread /= WE_180_PI; //convert to radians
+				parse_float(node,"value", &(em->spread));
+				em->spread /= WE_180_PI; //convert to radians
 			}else if(TESTNAME("angularOffset")){
-				parse_float(node,"value",&(emi->angular_offset));
-				emi->angular_offset /= WE_180_PI; //convert to radians
+				parse_float(node,"value",&(em->angular_offset));
+				em->angular_offset /= WE_180_PI; //convert to radians
 			}else if(TESTNAME("growthFactor")){
-				parse_float(node,"value",&(emi->growthfactor));
+				parse_float(node,"value",&(em->growthfactor));
 			}else if(TESTNAME("gravityFactor")){
-				parse_float(node,"value",&(emi->gravityfactor));
+				parse_float(node,"value",&(em->gravityfactor));
 			}else if(TESTNAME("windFactor")){
-				parse_float(node,"value",&(emi->windfactor));
+				parse_float(node,"value",&(em->windfactor));
 			}else if(TESTNAME("alpha")){
 				alpha_last = 1;
 				fprintf(stderr, "DEBUG: alpha_last = 1\n");
 			}else if(TESTNAME("color")){
 			}else if(TESTNAME("step")){
-				parse_color_step(node,emi);
+				parse_color_step(node,em);
 			}else{
 				// SDL_Log("unused element %s \n", node->value.element.name);
 			}
@@ -595,11 +599,16 @@ int read_emitter_from_file (char *filename)
 			// SDL_Log("Type Default Node is %s \n", node->value.element.name);
 		}
 	}
-
 	mxmlDelete(tree);
-	return current_emitter;
+	emitter_type_count++;
+	hm_add(hm_emitter_names, filename, em);
+	return em->ID;
 }
 
+EMITTER_ID particles_bind_emitter(const char *name)
+{
+	return (EMITTER_ID) hm_get(hm_emitter_names, name);
+}
 
 
 /**

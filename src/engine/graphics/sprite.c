@@ -133,7 +133,7 @@ SPRITE_ID sprite_add_subimg(int tex_id, const char *spr_name, sprite_subimg subi
 	}
 	index = index < 1 ? 0 : index - 1; // NB! Forces external index to start at 1 (for easier Blender import (blender starts at frame 1 as default))
 	array_set_safe(spr_id->sub_images, index, &subimg);
-	fprintf(stderr, "SPRITE: %16s[%d] = {%f, %f, %f, %f}\n", spr_id->name, index, subimg.x1, subimg.y1, subimg.x2, subimg.y2);
+	//fprintf(stderr, "SPRITE: %16s[%d] = {%f, %f, %f, %f}\n", spr_id->name, index, subimg.x1, subimg.y1, subimg.x2, subimg.y2);
 	sprite_link(spr_id->name); //check if added
 	return spr_id;
 }
