@@ -1,0 +1,68 @@
+[  
+  {"staticpolygon": [
+    {"char":"spr_name"},
+    {"int":"outline"},
+    {"float":"scale"},
+    {"float":"texture_scale"},
+    {"char":"shape_name"},
+    {"polyshape":"shape_id"}
+  ]},
+  {"player": [
+    {"float":"max_hp"},
+    {"int":"tex_id"},
+    {"int":"player_id"},
+    {"float":"gun_cooldown"},
+    {"float":"cash_radius"}
+  ]},
+  {"bullet": [
+    {"int":"friendly"},
+    {"float":"damage"}
+  ]},
+  {"tank": [
+    {"int":"max_hp"},
+    {"int":"coins"}
+  ]},
+   {"factory": [
+    {"int":"max_tanks"},
+    {"float":"max_hp"},
+    {"float":"spawn_delay"},
+    {"int":"coins"},
+    {"object_id":"type"},
+    {"char":"param_name"},
+    {"char":"type_name"},
+    {"char":"sprite_name"},
+    {"char":"shape_name"}
+  ]},
+  {"turret": [
+    {"int":"max_hp"},
+    {"int":"coins"},
+    {"float":"rot_speed"},
+    {"float":"shoot_interval"},
+    {"int":"burst_number"},
+    {"int":"tex_id"},
+    {"char":"shape_name"},
+    {"polyshape":"*shape_id"}
+  ]},
+  {"rocket": [
+    {"float":"max_hp"},
+    {"int":"coins"},
+    {"int":"tex_id"},
+    {"float":"force"},
+    {"float":"damage"}
+  ]},
+  {"robotarm": [
+    {"int":"max_hp"},
+    {"int":"coins"}
+  ]},
+  {"spikeball": [
+    {"float":"radius"},
+    {"float":"up_speed"},
+    {"float":"down_force"},
+    {"float":"top_delay"},
+    {"float":"bot_delay"},
+    {"float":"damage"}
+  ]},
+  {"coin": [
+    {"float":"explo_fmax"}
+  ]}
+]

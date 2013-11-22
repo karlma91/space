@@ -18,12 +18,12 @@
 #include "../engine/engine.h"
 #include "../engine/io/waffle_utils.h"
 
-#include "cJSON.h"
-
 #include "states/space.h"
 
 static int station_count;
 static level_ship *world;
+
+static char DEF_STRING[10] = "HELLO";
 
 
 void str_to_upper(char * str)
@@ -88,11 +88,94 @@ void * level_get_param(hashmap * h, char *type, char * name)
 	return NULL;
 }
 
+int level_safe_parse_int(cJSON *param, char *name )
+{
+	cJSON *t = cJSON_GetObjectItem(param, name);
+	if(t!=NULL){
+		return t->valueint;
+	}
+	SDL_Log("Could not load param int %s", name);
+	return 0;
+}
+double level_safe_parse_float(cJSON *param, char *name )
+{
+	cJSON *t = cJSON_GetObjectItem(param, name);
+	if(t!=NULL){
+		return t->valuedouble;
+	}
+	SDL_Log("Could not load param int %s", name);
+	return 0;
+}
+char* level_safe_parse_char(cJSON *param, char *name )
+{
+	cJSON *t = cJSON_GetObjectItem(param, name);
+	if(t!=NULL){
+		return t->valuestring;
+	}
+	SDL_Log("Could not load param char %s", name);
+	return DEF_STRING;
+}
+
+
+/*static void* parse_generated(cJSON *param, char* type, char *name)
+{
+
+	object_id *obj_id = object_by_name(type);
+
+	// add new sub object definition
+	union {
+		obj_param_tank tank;
+		obj_param_rocket rocket;
+		obj_param_turret turret;
+		obj_param_factory factory;
+		obj_param_robotarm robotarm;
+	} arg;
+
+	strcpy((char*) &arg, name);
+
+	if (obj_id == obj_id_tank) {
+		arg.tank.max_hp = safe_parse_int(param, "max_hp");
+		arg.tank.coins = safe_parse_int(param, "coins");
+	} else if (obj_id == obj_id_turret) {
+		arg.turret.max_hp = safe_parse_int(param, "max_hp");
+		arg.turret.coins = safe_parse_int(param, "coins");
+		arg.turret.shoot_interval = safe_parse_float(param, "shoot_interval");
+		arg.turret.burst_number = safe_parse_float(param, "burst_number");
+		arg.turret.rot_speed = safe_parse_float(param, "rot_speed");
+	} else if (obj_id == obj_id_rocket) {
+		arg.rocket.max_hp = safe_parse_int(param, "max_hp");
+		arg.rocket.coins = safe_parse_int(param, "coins");
+	} else if (obj_id == obj_id_factory) {
+		arg.factory.max_tanks = safe_parse_int(param, "max_tanks");
+		arg.factory.max_hp = safe_parse_int(param, "max_hp");
+		arg.factory.spawn_delay = safe_parse_int(param, "spawn_delay");
+		arg.factory.coins = safe_parse_int(param, "coins");
+		strcpy(arg.factory.shape_name, safe_parse_char(param, "shape"));
+		strcpy(arg.factory.sprite_name, safe_parse_char(param, "sprite"));
+		cJSON * object_spawn = cJSON_GetObjectItem(param, "object_spawn");
+		arg.factory.type = object_by_name(
+		        safe_parse_char(object_spawn, "type"));
+		strcpy(arg.factory.param_name, safe_parse_char(object_spawn, "name"));
+		strcpy(arg.factory.type_name, safe_parse_char(object_spawn, "type"));
+
+	} else if (obj_id == obj_id_robotarm) {
+		arg.robotarm.max_hp = safe_parse_int(param, "max_hp");
+		arg.robotarm.coins = safe_parse_int(param, "coins");
+	}
+
+	const int paramsize = obj_id->P_SIZE;
+
+	void * data = calloc(1, paramsize);
+
+	memcpy(data, &arg, paramsize);
+	return data;
+}*/
+
 static void parse_param_object(cJSON *param, hashmap * param_list)
 {
 
-	char * type = cJSON_GetObjectItem(param,"type")->valuestring;
-	char * name = cJSON_GetObjectItem(param,"name")->valuestring;
+	char * type = level_safe_parse_char(param,"type");
+	char * name = level_safe_parse_char(param,"name");
 	str_to_upper(type);
 	str_to_upper(name);
 
@@ -105,54 +188,7 @@ static void parse_param_object(cJSON *param, hashmap * param_list)
 		hm_add(param_list, type, names);
 	}
 
-	object_id *obj_id = object_by_name(type);
-
-	/* add new sub object definition */
-	union {
-		obj_param_tank tank;
-		obj_param_rocket rocket;
-		obj_param_turret turret;
-		obj_param_factory factory;
-		obj_param_robotarm robotarm;
-	} arg;
-
-	strcpy((char*)&arg, name);
-
-	if (obj_id == obj_id_tank) {
-		arg.tank.max_hp = cJSON_GetObjectItem(param,"max_hp")->valueint;
-		arg.tank.coins =  cJSON_GetObjectItem(param,"coins")->valueint;
-	} else if (obj_id == obj_id_turret) {
-		arg.turret.max_hp =         cJSON_GetObjectItem(param,"max_hp")->valueint;
-		arg.turret.coins =          cJSON_GetObjectItem(param,"coins")->valueint;
-		arg.turret.shoot_interval = cJSON_GetObjectItem(param,"shoot_interval")->valuedouble;
-		arg.turret.burst_number =   cJSON_GetObjectItem(param,"burst_number")->valuedouble;
-		arg.turret.rot_speed =      cJSON_GetObjectItem(param,"rot_speed")->valuedouble;
-	} else if (obj_id == obj_id_rocket) {
-		arg.rocket.max_hp =       cJSON_GetObjectItem(param,"max_hp")->valueint;
-		arg.rocket.coins =        cJSON_GetObjectItem(param,"coins")->valueint;
-	} else if (obj_id == obj_id_factory) {
-		arg.factory.max_tanks =   cJSON_GetObjectItem(param,"max_tanks")->valueint;
-		arg.factory.max_hp =      cJSON_GetObjectItem(param,"max_hp")->valueint;
-		arg.factory.spawn_delay = cJSON_GetObjectItem(param,"spawn_delay")->valueint;
-		arg.factory.coins =       cJSON_GetObjectItem(param,"coins")->valueint;
-		strcpy(arg.factory.shape_name, cJSON_GetObjectItem(param,"shape")->valuestring);
-		strcpy(arg.factory.sprite_name, cJSON_GetObjectItem(param,"sprite")->valuestring);
-		cJSON * object_spawn = cJSON_GetObjectItem(param,"object_spawn");
-		arg.factory.type = object_by_name(cJSON_GetObjectItem(object_spawn,"type")->valuestring);
-		strcpy(arg.factory.param_name, cJSON_GetObjectItem(object_spawn,"name")->valuestring);
-		strcpy(arg.factory.type_name, cJSON_GetObjectItem(object_spawn,"type")->valuestring);
-
-	}else if (obj_id == obj_id_robotarm) {
-		arg.robotarm.max_hp = cJSON_GetObjectItem(param,"max_hp")->valueint;
-		arg.robotarm.coins =  cJSON_GetObjectItem(param,"coins")->valueint;
-	}
-
-	const int paramsize = obj_id->P_SIZE;
-
-	void * data = calloc(1, paramsize);
-
-	memcpy(data, &arg, paramsize);
-
+	void * data = parse_generated(param,type,name);
 
 	if(hm_add(names, name, data)) {
 		SDL_Log("param of type %s with name %s was already in leveldata", type, name);
