@@ -40,6 +40,9 @@ typedef struct {
 minimap cmp_new_minimap(float size, Color c);
 
 #include "obj/object_types.h"
+#include "autogen/paramsgen.h"
+
+
 /* STATES */
 extern STATE_ID state_menu; /* deprecated state! */
 extern STATE_ID state_gameover; /* deprecated state! */

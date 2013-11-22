@@ -26,7 +26,6 @@ int LAYER_PICKUP        = L4 | L8;
 /* registration of all objects */
 void object_types_init(void)
 {
-	OBJECT_REGISTER(template);
 
 	OBJECT_REGISTER(bullet);
 	OBJECT_REGISTER(player);

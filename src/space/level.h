@@ -3,6 +3,7 @@
 
 #include "tilemap.h"
 #include "../engine/components/object.h"
+#include "cJSON.h"
 
 typedef struct level_ship {
 	int id;
@@ -39,6 +40,10 @@ typedef struct level {
 
 	tilemap *tiles;
 } level;
+
+int level_safe_parse_int(cJSON *param, char *name );
+double level_safe_parse_float(cJSON *param, char *name );
+char* level_safe_parse_char(cJSON *param, char *name );
 
 extern int level_init(void);
 extern void level_unload(level *lvl);

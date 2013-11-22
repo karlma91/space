@@ -14,7 +14,7 @@
 		{ "type": "FACTORY", "name": "DEF",
 		  "max_tanks": 2, "max_hp": 250, "spawn_delay": 3, "coins": 50, 
 		  "object_spawn": {"type":"TANK", "name":"DEF"},
-		  "sprite": "factoryblue", "shape": "factory.shape"},
+		  "sprite_name": "factoryblue", "shape_name": "factory.shape"},
 		  
 		{ "type": "ROCKET", "name": "DEF",
 		  "max_hp": 250,"coins": 50,
