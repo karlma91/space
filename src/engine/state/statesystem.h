@@ -52,6 +52,8 @@ STATE_ID statesystem_get_render_state(void);
 STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs);
 
 void state_enable_objects(STATE_ID state_id, int enabled);
+void state_enable_physics(STATE_ID state_id, int enabled);
+void state_enable_objupdate(STATE_ID state_id, int enabled);
 void state_enable_particles(STATE_ID state_id, int enabled);
 
 view *state_view_add(STATE_ID state_id);

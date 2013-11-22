@@ -22,7 +22,7 @@ typedef struct {
 #define FILE_BUFFER_SIZE (1024*256)
 static char buffer[FILE_BUFFER_SIZE];
 
-hashmap *hm_sprites;
+static hashmap *hm_sprites;
 
 /* sprites used by engine */
 SPRITE_ID SPRITE_ERROR;

@@ -13,6 +13,7 @@ static button btn_space;
 static button btn_clear;
 static button btn_test;
 static button btn_save;
+static button btn_delete;
 
 static level *lvl;
 
@@ -121,12 +122,49 @@ static void select_object_type(void *index)
 	strncpy(object_type, object_names[active_obj_index], 32);
 }
 
-static void clear_editor(void *unused)
+static void enable_objlist(int enable)
+{
+	if (enable) {
+
+	} else {
+
+	}
+}
+
+static void tap_clear_editor(void *unused)
 {
 	currentlvl = lvl;
 	objectsystem_clear();
 	space_create_player(1);
 	select_object_type(0);
+
+	cpVect p = cpvzero;
+	instance *player = instance_first(obj_id_player);
+	if (player) p = player->body->p;
+	view_editor->zoom = 1;
+	view_update(view_editor, p, 0);
+	remove_tool = 0;
+	enable_objlist(!remove_tool);
+}
+
+static void tap_delete_click(void *unused)
+{
+	remove_tool = !remove_tool;
+	enable_objlist(!remove_tool);
+}
+
+static int contains_instance(instance *ins)
+{
+	llist_begin_loop(ll_touches);
+	while (llist_hasnext(ll_touches)) {
+		editor_touch *touch = (editor_touch *) llist_next(ll_touches);
+		if (touch->ins == ins) {
+			llist_end_loop(ll_touches);
+			return 1;
+		}
+	}
+	llist_end_loop(ll_touches);
+	return 0;
 }
 
 static editor_touch *get_touch(SDL_FingerID finger_id)
@@ -151,21 +189,26 @@ static void move_instance(editor_touch *touch)
 	touch->ins->TYPE->call.init(touch->ins);
 	if (remove_tool) {
 		instance_remove(touch->ins);
+		finger_unbind(touch->ID);
+		llist_remove(ll_touches, touch);
+		pool_release(pool_touches, touch);
 	}
 }
 
 static int touch_down(SDL_TouchFingerEvent *finger)
 {
 	//TODO detect double tap for delete? eller bruke en state for sletting av objekter (ved trykk på knapp)
-	//FIXME vanskelig å zoome ut (evt. umulig) om man zoomer helt inn på et objekt (kan evt. fikses ved bruk av relativ flytting, og/eller minske største forstørring, bruk av timeout for touch, reset view knapp)
 
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
 	instance *ins = instance_at_pos(pos, 10/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP); //TODO use zoom to decide max distance?
 
 	touch_unique_id touch_id = finger_bind(finger->fingerId);
-	if (touch_id != -1) {
+	if (touch_id != -1 && !contains_instance(ins)) {
 		editor_touch *touch = pool_instance(pool_touches);
+		if (get_touch(finger->fingerId)) {
+			return 0;
+		}
 		llist_add(ll_touches, touch);
 		touch->viewpos_start = pos_view;
 		touch->viewpos_last = pos_view;
@@ -255,35 +298,45 @@ void editor_init()
 	}
 
 	state_enable_objects(state_editor, 1);
+	state_enable_objupdate(state_editor, 0);
+	state_enable_physics(state_editor, 1);
 
 	cpSpaceSetGravity(current_space, cpv(0, 0));
-	cpSpaceSetDamping(current_space, 0.8f);
+	cpSpaceSetDamping(current_space, 0);
 
 	ll_touches = llist_create();
 	pool_touches = pool_create(sizeof(editor_touch));
 
-	btn_space = button_create(SPRITE_BTN_HOME, 0, "", -400, GAME_HEIGHT/2 - 100, 125, 125);
-	btn_clear = button_create(SPRITE_BTN_RETRY, 0, "", -200, GAME_HEIGHT/2-100, 125, 125);
-	btn_test = button_create(SPRITE_BTN_NEXT, 0, "",0, GAME_HEIGHT/2 - 100, 125, 125);
-	btn_save = button_create(SPRITE_COIN, 0, "",200, GAME_HEIGHT/2 -100, 125, 125);
+	btn_space  = button_create(SPRITE_BTN_HOME, 0, "", -400, GAME_HEIGHT/2 - 100, 125, 125);
+	btn_clear  = button_create(SPRITE_BTN_RETRY, 0, "", -200, GAME_HEIGHT/2-100, 125, 125);
+	btn_test   = button_create(SPRITE_BTN_NEXT, 0, "",0, GAME_HEIGHT/2 - 100, 125, 125);
+	btn_save   = button_create(SPRITE_COIN, 0, "",200, GAME_HEIGHT/2 -100, 125, 125);
+	btn_delete = button_create(SPRITE_SPIKEBALL, 0, "X", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 100, 125, 125);
 
 	button_set_callback(btn_space, statesystem_set_state, state_stations);
-	button_set_callback(btn_clear, clear_editor, 0);
+	button_set_callback(btn_clear, tap_clear_editor, 0);
 	button_set_callback(btn_test, start_editor_level, 0); // TODO test level with this button
 	button_set_callback(btn_save, save_level_to_file, 0);
+	button_set_callback(btn_save, save_level_to_file, 0);
+	button_set_callback(btn_delete, tap_delete_click, 0);
+
 	button_set_hotkeys(btn_test, KEY_RETURN_1, KEY_RETURN_2);
 	button_set_hotkeys(btn_space, KEY_ESCAPE, 0);
+	button_set_hotkeys(btn_delete, SDLK_DELETE, SDLK_BACKSPACE);
 
 	button_set_enlargement(btn_space, 1.5);
 	button_set_enlargement(btn_clear, 1.5);
 	button_set_enlargement(btn_test, 1.5);
 	button_set_enlargement(btn_save, 1.5);
+	button_set_enlargement(btn_delete, 1.5);
+	button_set_backcolor(btn_delete, COL_RED);
 
 	state_register_touchable_view(view_editor, btn_space);
 	state_register_touchable_view(view_editor, btn_clear);
 	state_register_touchable_view(view_editor, btn_test);
 	state_register_touchable_view(view_editor, btn_save);
 	state_register_touchable_view(view_editor, btn_settings);
+	state_register_touchable_view(view_editor, btn_delete);
 
 	float size = 200;
 	float x = -GAME_WIDTH/2+size*2;
@@ -298,7 +351,7 @@ void editor_init()
 		state_register_touchable_view(view_editor, btn); //TODO use another view for these buttons
 		btn_objects[i] = btn;
 	}
-	scr_world = scroll_create(150,0,GAME_WIDTH-300,GAME_HEIGHT, 0.9, 3000, 1, 1, 0); // max 4 000 gu / sec
+	scr_world = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.9, 3000, 1, 1, 0); // max 4 000 gu / sec
 	scr_objects = scroll_create(-GAME_WIDTH/2+150,0,300,GAME_HEIGHT,0.9,50,0,0,1);
 	scroll_set_callback(scr_world, touch_down, touch_motion, touch_up);
 	scroll_set_bounds(scr_objects, cpBBNew(0,-GAME_HEIGHT/2,0,GAME_HEIGHT/2));
@@ -306,8 +359,7 @@ void editor_init()
 	state_register_touchable_view(view_editor, scr_world);
 
 	lvl = level_load("object_defaults");
-	clear_editor(NULL);
-	state_enable_objects(state_editor, 0);
+	tap_clear_editor(NULL);
 }
 
 /* * * * * * * * * *
@@ -323,11 +375,12 @@ static void pre_update(void)
 	view_editor->zoom = scroll_get_zoom(scr_world);
 	view_update(view_editor, cpvneg(scroll_get_offset(scr_world)), scroll_get_rotation(scr_world));
 
-
+	float panel_offset = (remove_tool ? -400 : 0);
+	touch_place(scr_objects,-GAME_WIDTH/2+150+panel_offset,0);
 	cpVect obj_offset = scroll_get_offset(scr_objects);
 	//TODO use another view for objects_scroller
 	int i;
-	float x = -GAME_WIDTH/2+150;
+	float x = -GAME_WIDTH/2+150 + panel_offset;
 	float y = GAME_HEIGHT/2-200 + obj_offset.y;
 	for (i = 0; i < EDITOR_OBJECT_COUNT; i++, y -= 250) {
 		touch_place(btn_objects[i], x, y);
@@ -372,10 +425,6 @@ static int sdl_event(SDL_Event *event)
 
 	switch(event->type) {
 	case SDL_KEYDOWN:
-		key = event->key.keysym.scancode;
-		if(key == SDL_SCANCODE_D) {
-			remove_tool ^= 1;
-		}
 		break;
 	}
 	return 0;

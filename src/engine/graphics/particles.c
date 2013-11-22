@@ -10,6 +10,8 @@
 
 #define PARTICLE_READ_BUFFER_SIZE 4096
 
+static hashmap *hm_emitters;
+
 /**
  * parse functions
  */
@@ -32,7 +34,6 @@ static void draw_all_particles(emitter *em);
  * Particle draw functions
  */
 static void default_particle_draw(emitter *em, particle *p);
-
 static void particle_update_pos(particle *p);
 
 static emitter * get_emitter(int layer);
@@ -73,6 +74,7 @@ void particles_init(void)
 {
 	main_emitter_pool = pool_create(sizeof(emitter));
 	main_particle_pool = pool_create(sizeof(particle));
+	hm_emitters = hm_create();
 }
 
 particle_system *particlesystem_new()
@@ -151,6 +153,7 @@ emitter *particles_get_emitter(particle_system *s, int layer, int type)
 	llist_add(s->emitters, e);
 	LList l = e->particles;
 	int lay = e->layer;
+	//TODO replace with hashmap
 	*e = (emitter_templates[type]);
 	e->particles = l;
 	e->layer = lay;
@@ -221,6 +224,7 @@ void particles_destroy()
 	// FIXME: fix crash on destroy
 	//pool_destroy(main_emitter_pool);
 	//pool_destroy(main_particle_pool);
+	hm_destroy(hm_emitters);
 }
 
 /**
@@ -477,6 +481,7 @@ static void default_particle_draw(emitter *em, particle *p)
 int read_emitter_from_file (char *filename)
 {
 	current_emitter += 1;
+	//TODO replace with hashmap
 	emitter *emi = &(emitter_templates[current_emitter]);
 	emi->type = current_emitter;
 	emi->alpha_count = 0;

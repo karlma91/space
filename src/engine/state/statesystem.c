@@ -37,8 +37,9 @@ struct systemstate {
 
     LList touch_objects;
 
-    int objects_enabled;
+    int disable_updates;
     int disable_physics;
+    int objects_enabled;
     int particles_enabled;
 
     object_system *objects;
@@ -117,6 +118,22 @@ void state_enable_objects(STATE_ID state_id, int enabled)
 		current_space = state->objects->space;
 	}
 	state->objects_enabled = enabled;
+}
+
+void state_enable_physics(STATE_ID state_id, int enabled)
+{
+	State *state = (State *) state_id;
+	if (state->objects) {
+		state->disable_physics = !enabled;
+	}
+}
+
+void state_enable_objupdate(STATE_ID state_id, int enabled)
+{
+	State *state = (State *) state_id;
+	if (state->objects) {
+		state->disable_updates = !enabled;
+	}
 }
 
 void state_enable_particles(STATE_ID state_id, int enabled)
@@ -272,14 +289,17 @@ void statesystem_update(void)
 	/* update objects */
 	if (current_objects && current_space) {
 		if (state->objects_enabled) {
+			if (!state->disable_updates)
 				instance_iterate(update_instances, NULL);
 
 			/* update Chipmunk */
 			//TODO check object system
-			accumulator += dt;
-			while (accumulator >= phys_step) {
-				cpSpaceStep(current_space, phys_step);
-				accumulator -= phys_step;
+			if (!state->disable_physics) {
+				accumulator += dt;
+				while (accumulator >= phys_step) {
+					cpSpaceStep(current_space, phys_step);
+					accumulator -= phys_step;
+				}
 			}
 		} else {
 			cpSpaceStep(current_space, 0);

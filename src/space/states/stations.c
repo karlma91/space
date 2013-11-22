@@ -82,7 +82,7 @@ static void draw(void)
 		bmfont_center(FONT_SANS, stations[i].pos,1, stations[i].level_name);
 	}
 
-	bmfont_center(FONT_SANS, cpv(1400,-1150),1,"CREDTIS:\nMathias Wilhelmsen\nKarl Magnus Kalvik");
+	bmfont_center(FONT_SANS, cpv(1400,-1150),1,"CREDITS:\nMathias Wilhelmsen\nKarl Magnus Kalvik");
 	draw_color4b(200,210,230,255);
 	bmfont_right(FONT_SANS, cpv(-600,300),1,"the quick brown fox jumps over the lazy dog\nTHE QUICK BROWN FOX JUMPS OVER THE LAZY DOG");
 
