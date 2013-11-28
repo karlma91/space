@@ -57,7 +57,7 @@ SPRITE_ID sprite_add_subimg(int tex_id, const char *spr_name, sprite_subimg subi
 SPRITE_ID sprite_link(const char *name);
 float sprite_get_aspect_ratio(SPRITE_ID id); /* returns sprite_height/sprite_width */
 void sprite_get_current_image(sprite *spr, float *sub_map);
-void sprite_get_first_image(SPRITE_ID id, float *sub_map);
+void sprite_get_subimg_by_index(SPRITE_ID id, int index, float *sub_map);
 void sprite_get_subimg_mapped(SPRITE_ID id, sprite_subimg subimg, float *sub_map);
 void sprite_subimg2submap(sprite_subimg img, float *sub_map);
 int sprite_get_texture(SPRITE_ID id);
@@ -71,6 +71,7 @@ void sprite_set_index_normalized(sprite *spr, float p);
 
 void sprite_update(sprite *spr);
 void sprite_render_by_id(int layer, SPRITE_ID id, cpVect pos, cpVect size, float angle);
+void sprite_render_index_by_id(int layer, SPRITE_ID id, int index, cpVect pos, cpVect size, float angle);
 void sprite_render(int layer, sprite *spr, cpVect pos, float angle);
 void sprite_render_body(int layer, sprite *spr, cpBody *body);
 void sprite_render_scaled(int layer, sprite *spr, cpVect pos, float angle, float size);

@@ -11,6 +11,8 @@
 
 STATE_ID state_stations;
 
+static SPRITE_ID spr_sun;
+
 static button *btn_stations;
 static button btn_home;
 static button btn_editor;
@@ -69,24 +71,36 @@ static int sdl_event(SDL_Event *event)
 
 static void draw(void)
 {
-
 	draw_color4f(1,1,1,1);
-
-
 	draw_box(1, a, b, r, 1);
 
-
-	bmfont_center(FONT_SANS, cpv(0,500),1.5,"SPACE");
+	//bmfont_center(FONT_SANS, cpv(0,500),1.5,"SPACE");
 	int i;
 	for(i = 0; i<station_count; i++) {
 		bmfont_center(FONT_SANS, stations[i].pos,1, stations[i].level_name);
 	}
 
 	bmfont_center(FONT_SANS, cpv(1400,-1150),1,"CREDITS:\nMathias Wilhelmsen\nKarl Magnus Kalvik");
-	draw_color4b(200,210,230,255);
-	bmfont_right(FONT_SANS, cpv(-600,300),1,"the quick brown fox jumps over the lazy dog\nTHE QUICK BROWN FOX JUMPS OVER THE LAZY DOG");
+	//draw_color4b(200,210,230,255);
+	//bmfont_right(FONT_SANS, cpv(-600,300),1,"the quick brown fox jumps over the lazy dog\nTHE QUICK BROWN FOX JUMPS OVER THE LAZY DOG");
 
+	float f = 1/2.0;
+	float size_dither = (engine_time*f - floor(engine_time*f) - 0.5)*(engine_time*f - floor(engine_time*f) - 0.5)*10;
+	cpVect sun_size = {400+size_dither,400+size_dither};
+	static float a_sun_add1 = 0;
+	static float a_sun_add2 = 0;
+    float spd = 0.01;
+	a_sun_add1 += dt*WE_2PI*spd;
+	a_sun_add2 -= dt*WE_2PI*spd;
 
+	//draw_color4b(100,100,100,0);
+	//sprite_render_index_by_id(RLAY_GAME_BACK, SPRITE_GLOW, 0, cpvzero, cpvmult(sun_size,1.5), a_sun_base);
+	draw_color4b(255,40,20,255);
+	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 0, cpvzero, sun_size, 0);
+	draw_color4b(255,192,30,0);
+	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 1, cpvzero, sun_size, a_sun_add1);
+	draw_color4b(255,132,30,0);
+	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 2, cpvzero, sun_size, a_sun_add2);
 }
 
 static void button_callback(void *data)
@@ -131,13 +145,14 @@ void stations_init(void)
 
 	main_view = state_view_get(state_stations, 0);
 
-	btn_home = button_create(SPRITE_PLAYERGUN001, 0, "", 0, 0, 250, 250);
+	spr_sun = sprite_link("sun01");
+	btn_home = button_create(SPRITE_PLAYERBODY001, 0, "", 800, 600, 250, 250);
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
-	state_register_touchable_view(main_view, btn_home);
+	state_register_touchable(this, btn_home);
 
-	btn_editor = button_create(SPRITE_WRENCH, 0, "", 0, -600, 873/2, 247/2);
+	btn_editor = button_create(SPRITE_WRENCH, 0, "", -440, 840, 873/2, 247/2);
 	button_set_callback(btn_editor, open_editor, 0);
 	button_set_enlargement(btn_editor, 2);
 	button_set_hotkeys(btn_editor, SDL_SCANCODE_E, -1);
@@ -164,30 +179,35 @@ void stations_init(void)
 	scroll_set_bounds(scroller, cpBBNew(-GAME_WIDTH-200, -GAME_HEIGHT-200, GAME_WIDTH+200, GAME_HEIGHT+200));
 	state_register_touchable_view(main_view, scroller);
 
-	state_add_layers(state_stations, 10);
+	state_add_layers(state_stations, 22);
 
 	int layers = state_layer_count(state_stations);
 
-	for(i = 2; i<layers; i++){
+	for(i = 11; i<layers; i++){
 		//float depth =  2 + 10*tan((1.0f*i/la_sys->num_layers)*WE_PI_2);
 		float f = (layers - i * 0.99f) / (layers);
 		state_set_layer_parallax(state_stations, i, f, f);
 	}
 
-	for(i = 0; i<1000; i++){
-		int layer =  2 + roundf(we_randf*(layers-1-2));
-		float size = 150 + we_randf*90 - layer*4;
-		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),6600);
-		SPRITE_ID spr;
-		int s = rand() & 7;
-		switch(s) {
-        default: spr = SPRITE_SPIKEBALL; break;
-		case 1: spr = SPRITE_GEAR; break;
-		case 2: spr = SPRITE_STATION001; break;
-		case 3: spr = SPRITE_TANKWHEEL001; break;
+	SPRITE_ID spr = sprite_link("starcross01");
+    Color col1 = {255,255,255,0};
+    Color col2 = {0,128,0,0};
+	for(i = 0; i < 2000; i++){
+		int layer =  11 + roundf((1-we_randf*we_randf*we_randf)*(layers-1-11));
+		float size = 250 + we_randf*90 - layer*4;
+		//byte l = 255 - 200 * layer / layers;
+		//col = {l,l,l,255};
+		float rand_x = we_randf;
+		float rand_y = we_randf;
+		cpVect pos = cpvmult(cpv(rand_x-0.5,rand_y-0.5),30000);
+		float f = minf(rand_x*0.6 + 0.4*rand_y*(0.9+0.1*rand_x), 1);
+		col2.r = 255*(f);
+		col2.b = 255*(1-f);
+		if (we_randf < 0.1) {
+			state_add_sprite(state_stations, layer, SPRITE_SPIKEBALL, size,size, pos, 0, col2);
+		} else {
+			state_add_dualsprite(state_stations, layer, spr, pos, cpv(size,size), col1, col2);
 		}
-
-		state_add_sprite(state_stations, layer, spr, size, size, pos, we_randf*WE_2PI * (spr != SPRITE_STATION001));
 	}
 }
 

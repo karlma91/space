@@ -1,8 +1,8 @@
 { "stations": [
-	 {"x":700, "y":-100, "level":"easymode"},
-	 {"x":-300, "y":-400, "level":"fromeditor"},
-	 {"x":-600, "y":-200, "level":"factorycity"},
-	 {"x":1200, "y":-400, "level":"test"},
+	 {"x":800, "y":-200, "level":"easymode"},
+	 {"x":-500, "y":-800, "level":"fromeditor"},
+	 {"x":-900, "y":-400, "level":"factorycity"},
+	 {"x":1500, "y":-800, "level":"test"},
 	 {"x":0, "y":1000, "level":"test"}
 	 ]
 }

@@ -16,8 +16,9 @@ layer_system * state_get_layersystem(STATE_ID state_id);
 
 typedef struct sprite_ext {
 	cpVect pos;
-	float a;
-	sprite s;
+	float angle;
+	sprite spr;
+	Color col;
 }sprite_ext;
 
 static LList get_blend_modes(int layer)
@@ -87,8 +88,8 @@ layer_system * layersystem_new(void)
 int layersystem_add_layer(layer_system *lsys)
 {
 	layer_ins *layer = calloc(1,sizeof(layer_ins));
-	layer->ll_spr = llist_create();
-	llist_set_remove_callback(layer->ll_spr, free);
+	layer->ll_drawables = llist_create();
+	llist_set_remove_callback(layer->ll_drawables, free);
 	layer->parallax_factor = 0;
 	layer->parallax_zoom = 1;
 	lsys->num_layers += 1;
@@ -96,23 +97,56 @@ int layersystem_add_layer(layer_system *lsys)
 	return alist_add(lsys->layers, layer);
 }
 
-void state_add_sprite(STATE_ID state_id, int layer, SPRITE_ID id, float w, float h, cpVect p, float a)
+static void draw_sprite_ext(int layer, sprite_ext *sprx)
 {
-	//FIXME: CURRENTLY NOT SUPPORTED
+	draw_color(sprx->col);
+	sprite_update(&sprx->spr);
+	sprite_render(layer, &(sprx->spr), sprx->pos, sprx->angle);
+}
 
+void state_add_drawable(STATE_ID state_id, int layer, draw_callback drawfunc, void *drawdata, int datasize)
+{
 	layer_system *ls =state_get_layersystem(state_id);
 	if(check_bounds(ls, layer)){
 		return;
 	}
 
 	layer_ins *lay = alist_get(ls->layers, layer);
+	struct draw_ext {
+		drawable draw;
+		char *data;
+	};
 
-	sprite_ext *s = calloc(1, sizeof *s);
-	sprite_create(&(s->s), id, w, h, 30);
-	sprite_set_index_normalized(&(s->s),we_randf);
-	s->a = a;
-	s->pos = p;
-	llist_add(lay->ll_spr, s);
+	struct draw_ext *s = calloc(1, sizeof(drawable) + datasize);
+	s->draw.func = drawfunc;
+	s->draw.datasize = datasize;
+	s->draw.data = &s->data;
+	memcpy(&s->data, drawdata, datasize);
+
+	llist_add(lay->ll_drawables, s);
+}
+
+void state_add_dualsprite(STATE_ID state_id, int layer, SPRITE_ID spr_id, cpVect pos, cpVect size, Color col1, Color col2)
+{
+	drawbl_dualspr dualspr;
+	dualspr.pos = pos;
+	dualspr.col1 = col1;
+	dualspr.col2 = col2;
+	dualspr.size = size;
+	dualspr.spr_id = spr_id;
+	dualspr.anti_rotation = 1;
+	state_add_drawable(state_id, layer, draw_dualsprite, &dualspr, sizeof dualspr);
+}
+
+void state_add_sprite(STATE_ID state_id, int layer, SPRITE_ID id, float w, float h, cpVect p, float a, Color col)
+{
+	sprite_ext sprx;
+	sprx.angle = a;
+	sprx.pos = p;
+	sprx.col = col;
+	sprite_create(&(sprx.spr), id, w, h, 30);
+	sprite_set_index_normalized(&(sprx.spr), we_randf);
+	state_add_drawable(state_id, layer, draw_sprite_ext, &sprx, sizeof sprx);
 }
 
 int TMP_DRAW_CALLS = 0;
@@ -129,28 +163,23 @@ void layersystem_render(STATE_ID state_id, view *cam)
 
 	int layer_index = ls->num_layers;
 	while (layer_index--) {
-		byte l = 255 - 200 * layer_index / ls->num_layers;
-		draw_color4b(l,l,l,255);
 		/* register layersystem sprites */
 		layer_ins *lay = alist_get(ls->layers, layer_index);
-		llist_begin_loop(lay->ll_spr);
-
-		while(llist_hasnext(lay->ll_spr)) {
-			sprite_ext *s = llist_next(lay->ll_spr);
-			sprite_update(&s->s);
+		llist_begin_loop(lay->ll_drawables);
+		while(llist_hasnext(lay->ll_drawables)) {
+			drawable *draw = llist_next(lay->ll_drawables);
 			draw_push_matrix();
 			float zoom = cam->zoom * lay->parallax_zoom;
 			draw_scale(zoom * cam->ratio, zoom);
 			draw_rotate(cam->rotation);
 			draw_translatev(cpvmult(current_view->p, -lay->parallax_factor));
-			sprite_render(layer_index, &(s->s), s->pos, s->a);
+			draw->func(layer_index, draw->data);
 			draw_pop_matrix();
 		}
-		llist_end_loop(lay->ll_spr);
+		llist_end_loop(lay->ll_drawables);
 	}
 
 	while (max_layers--) {
-
 		float paralax = 1;
 		float zoom  = 1;
 		layer_ins *lay = alist_get(ls->layers, layer_index);
@@ -173,8 +202,6 @@ void layersystem_render(STATE_ID state_id, view *cam)
 				render_batch *batch = alist_get(blends->al_tex, tex_index);
 				if (batch && batch->count) {
 					vertex_elem *elems = (vertex_elem*) array_get(batch->elems, 0);
-
-
 
 					//GLES2
 					glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof *elems, &elems[0].x);
@@ -379,7 +406,7 @@ void layersystem_free(layer_system *ls)
 	int i;
 	for(i = 0; i < ls->num_layers; i++) {
 		layer_ins *lay = alist_get(ls->layers, i);
-		llist_destroy(lay->ll_spr);
+		llist_destroy(lay->ll_drawables);
 		free(lay);
 	}
 	free(ls);

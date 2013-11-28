@@ -245,6 +245,8 @@ void menu_init(void)
 	for(i = 0; i<1000; i++){
 		int layer =  2 + roundf(we_randf*(layers-1-2));
 		float size = 150 + we_randf*90 - layer*4;
+		byte l = 255 - 200 * i / layers;
+		Color col = {l,l,l,255};
 		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),6600);
 		SPRITE_ID spr;
 		int s = rand() & 7;
@@ -255,6 +257,6 @@ void menu_init(void)
 		case 3: spr = SPRITE_TANKWHEEL001; break;
 		}
 
-		state_add_sprite(state_menu, layer, spr, size, size, pos, we_randf*WE_2PI * (spr != SPRITE_STATION001));
+		state_add_sprite(state_menu, layer, spr, size, size, pos, we_randf*WE_2PI * (spr != SPRITE_STATION001), col);
 	}
 }

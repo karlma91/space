@@ -202,10 +202,10 @@ void sprite_get_current_image(sprite *spr, float *sub_map)
 	sprite_subimg2submap(*subimg, sub_map);
 }
 
-void sprite_get_first_image(SPRITE_ID id, float *sub_map)
+void sprite_get_subimg_by_index(SPRITE_ID id, int index, float *sub_map)
 {
 	if (!id) return;
-	sprite_subimg *subimg = (sprite_subimg *)array_get(((sprite_data*)id)->sub_images, 0);
+	sprite_subimg *subimg = (sprite_subimg *)array_get(((sprite_data*)id)->sub_images, index);
 	sprite_subimg2submap(*subimg, sub_map);
 }
 
@@ -276,6 +276,16 @@ void sprite_set_index_normalized(sprite *spr, float p)
 	}
 }
 
+void sprite_render_index_by_id(int layer, SPRITE_ID id, int index, cpVect pos, cpVect size, float angle)
+{
+	int tex_id = 0;
+	sprite_data *data = (sprite_data*)id;
+	if (data) tex_id = data->tex_id;
+
+	float sub_map[8];
+	sprite_get_subimg_by_index(id, index, sub_map);
+	draw_texture(layer, tex_id, pos, sub_map, size, angle);
+}
 void sprite_render_by_id(int layer, SPRITE_ID id, cpVect pos, cpVect size, float angle)
 {
 	int tex_id = 0;
@@ -283,7 +293,7 @@ void sprite_render_by_id(int layer, SPRITE_ID id, cpVect pos, cpVect size, float
 	if (data) tex_id = data->tex_id;
 
 	float sub_map[8];
-	sprite_get_first_image(id, sub_map);
+	sprite_get_subimg_by_index(id,0,sub_map);
 	draw_texture(layer, tex_id, pos, sub_map, size, angle);
 }
 

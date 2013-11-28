@@ -79,7 +79,9 @@ int state_add_layers(STATE_ID state_id, int number);
 int state_layer_count(STATE_ID state_id);
 void state_set_layer_offset(STATE_ID state_id, int layer, cpVect offset);
 void state_set_layer_parallax(STATE_ID state_id, int layer, float factor, float zoom_factor);
-void state_add_sprite(STATE_ID state_id, int layer, SPRITE_ID id, float w, float h, cpVect p, float a);
+void state_add_drawable(STATE_ID state_id, int layer, draw_callback drawfunc, void *drawdata, int datasize);
+void state_add_dualsprite(STATE_ID state_id, int layer, SPRITE_ID spr_id, cpVect pos, cpVect size, Color col1, Color col2);
+void state_add_sprite(STATE_ID state_id, int layer, SPRITE_ID id, float w, float h, cpVect p, float angle, Color col);
 
 void layersystem_render(STATE_ID state_id, view *cam);
 

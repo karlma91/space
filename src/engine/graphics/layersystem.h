@@ -16,7 +16,7 @@ typedef struct {
 	float parallax_factor;
 	float parallax_zoom;
 	cpVect offset;
-	LList ll_spr;
+	LList ll_drawables;
 }layer_ins;
 
 typedef struct {

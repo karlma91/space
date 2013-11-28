@@ -1,6 +1,7 @@
 #include "draw.h"
 #include "texture.h"
 #include "matrix2d.h"
+#include "../state/statesystem.h"
 
 #include "../engine.h"
 #include "../data/stack.h"
@@ -213,7 +214,7 @@ void draw_disable_tex2d(void) // deprecated method!
 void draw_line_spr_id(int layer, SPRITE_ID id, cpVect a, cpVect b, float w, int append_edge)
 {
 	float tex_map[8];
-	sprite_get_first_image(id,tex_map);
+	sprite_get_subimg_by_index(id,0,tex_map);
     int tex_id = sprite_get_texture(id);
 	draw_line_tex(layer, tex_id, tex_map, a, b, w, append_edge);
 }
@@ -294,7 +295,7 @@ void draw_quad_line(int layer, cpVect a, cpVect b, float w)
 {
 	float subimg[8];
 	texture_bind_virt(sprite_get_texture(SPRITE_WHITE));
-	sprite_get_first_image(SPRITE_WHITE,subimg);
+	sprite_get_subimg_by_index(SPRITE_WHITE,0,subimg);
 	float dx = b.x-a.x;
 	float dy = b.y-a.y;
 
@@ -361,7 +362,7 @@ void draw_box(int layer, cpVect p, cpVect s, GLfloat angle, int centered)
 {
 	float subimg[8];
 	texture_bind_virt(sprite_get_texture(SPRITE_WHITE));
-	sprite_get_first_image(SPRITE_WHITE,subimg);
+	sprite_get_subimg_by_index(SPRITE_WHITE,0,subimg);
     draw_push_matrix();
     draw_translate(p.x,p.y);
 	draw_rotate(angle);
@@ -500,6 +501,16 @@ void draw_current_texture_append(int layer, cpVect pos, const float *tex_map, cp
 	draw_scalev(size);
 	draw_quad_new(layer, triangle_quad, tex_map);
 	draw_pop_matrix();
+}
+
+draw_dualsprite(int layer, drawbl_dualspr *dualspr)
+{
+	float angle = dualspr->anti_rotation ? -current_view->rotation : 0;
+
+	draw_color(dualspr->col1);
+	sprite_render_index_by_id(layer, dualspr->spr_id, 0, dualspr->pos, dualspr->size, angle);
+	draw_color(dualspr->col2);
+	sprite_render_index_by_id(layer, dualspr->spr_id, 1, dualspr->pos, dualspr->size, angle);
 }
 
 void draw_translatev(cpVect offset)

@@ -49,6 +49,21 @@ extern const Color COL_RED;
 extern const Color COL_GREEN;
 extern const Color COL_BLUE;
 
+typedef void (*draw_callback)(int layer, void *drawdata);
+typedef struct drawable {
+	int datasize;
+	draw_callback func;
+	void *data;
+} drawable;
+
+typedef struct drawbl_dualspr {
+	SPRITE_ID spr_id;
+	cpVect pos, size;
+	Color col1, col2;
+	int anti_rotation;
+} drawbl_dualspr;
+draw_dualsprite(int layer, drawbl_dualspr *dualspr);
+
 static inline Color RGBAColor4b(byte r, byte g, byte b, byte a)
 {
 	Color color = {r, g, b, a};

@@ -4,6 +4,8 @@
 #include "space.h"
 #include "../level.h"
 
+#define TAP_TIMEOUT 0.2
+
 STATE_ID state_editor;
 
 static touchable *scr_world;
@@ -21,6 +23,7 @@ typedef struct editor_touch {
 	touch_unique_id ID;
 	cpVect viewpos_start, viewpos_last, game_offset;
 	instance *ins;
+    float time;
 } editor_touch;
 
 static int remove_tool = 0;
@@ -202,18 +205,20 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
 	instance *ins = instance_at_pos(pos, 10/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP); //TODO use zoom to decide max distance?
-
+    
+    if (contains_instance(ins)) {
+        return 0;
+    }
+    
 	touch_unique_id touch_id = finger_bind(finger->fingerId);
-	if (touch_id != -1 && !contains_instance(ins)) {
+	if (touch_id != -1) {
 		editor_touch *touch = pool_instance(pool_touches);
-		if (get_touch(finger->fingerId)) {
-			return 0;
-		}
 		llist_add(ll_touches, touch);
 		touch->viewpos_start = pos_view;
 		touch->viewpos_last = pos_view;
 		touch->ID = touch_id;
 		touch->ins = ins;
+        touch->time = 0;
 		if (ins) {
 			//TODO don't allow more than one(or two for rotate/scale of instance) binding per instance!
 			touch->game_offset = cpvsub(ins->body->p, pos);
@@ -284,17 +289,19 @@ void editor_init()
 	for(i = 0; i<500; i++){
 		int layer =  11 + roundf(we_randf*(layers-1-11));
 		float size = 150 + we_randf*90 - layer*4;
+		byte l = 255;//255 - 200 * i / layers;
+		Color col = {l,l,l,0};
 		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),6600);
 		SPRITE_ID spr;
 		int s = rand() & 7;
 		switch(s) {
-        default: spr = SPRITE_SPIKEBALL; break;
-		case 1: spr = SPRITE_GEAR; break;
-		case 2: spr = SPRITE_STATION001; break;
-		case 3: spr = SPRITE_TANKWHEEL001; break;
+        default: spr = SPRITE_DOT; break;
+		//case 1: spr = SPRITE_GEAR; break;
+		//case 2: spr = SPRITE_STATION001; break;
+		//case 3: spr = SPRITE_TANKWHEEL001; break;
 		}
 
-		state_add_sprite(state_editor, layer, spr, size, size, pos, we_randf*WE_2PI);
+		state_add_sprite(state_editor, layer, spr, size, size, pos, we_randf*WE_2PI,col);
 	}
 
 	state_enable_objects(state_editor, 1);
@@ -390,10 +397,11 @@ static void pre_update(void)
 	while (llist_hasnext(ll_touches)) {
 		editor_touch *touch = (editor_touch *) llist_next(ll_touches);
 		if (finger_status(touch->ID, -1)) {
+            touch->time += dt;
             if (touch->ins) {
                 move_instance(touch);
-            } else {
-                //TODO remove touch after timeout?
+            } else if (touch->time >= TAP_TIMEOUT) {
+                finger_unbind(touch->ID);
             }
 		} else {
 			llist_remove(ll_touches, touch);
