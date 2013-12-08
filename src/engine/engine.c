@@ -289,7 +289,8 @@ static void initGL(void)
 
 	draw_load_identity();
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	glClearColor(0,0,0, 1);
+	//glClearColor(0,0,0, 1);
+	glClearColor(0,0,0.05,1);
 
 	//glEnable(GL_MULTISAMPLE); //GLES1!
 	glDisable(GL_DEPTH_TEST);
@@ -713,7 +714,7 @@ static void main_tick(void *data)
 	draw_matrix_clear();
 
 	//clear all
-	draw_color4f(0.05,003,0.1,1);
+	draw_color4f(0,0,0,1);
 	glDisable(GL_SCISSOR_TEST);
 	glViewport(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -850,11 +851,6 @@ static int main_destroy(void) {
 
 	waffle_destroy();
 
-	/*TODO idea:
-	 * add stack with callback functions to both destroy- and init methods of modules
-	 * and then loop through stack to call the functions automatically
-	 */
-
 	// Once finished with OpenGL functions, the SDL_GLContext can be deleted.
 	//SDL_GL_MakeCurrent(NULL, NULL);
 
@@ -862,6 +858,9 @@ static int main_destroy(void) {
 	glDeleteShader(gl_vertshader);
 	glDeleteProgram(gl_program);
 	SDL_GL_DeleteContext(glcontext);
+
+	extern int stat_hm_adds, stat_hm_rehash;
+	fprintf(stderr, "hashmap stats: %d adds (%.2f %% rehash)\n", stat_hm_adds, 100.0 * stat_hm_rehash / stat_hm_adds);
 
 #if !TARGET_OS_IPHONE
 	SDL_DestroyWindow(window);

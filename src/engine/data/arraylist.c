@@ -55,7 +55,7 @@ int alist_add(arraylist *al, void *data)
 }
 
 
-void alist_set_safe(arraylist *al, unsigned int index, void *data)
+void alist_set_safe(arraylist *al, int index, void *data)
 {
 	while(index >= al->size) {
 		alist_resize(al);
@@ -63,7 +63,7 @@ void alist_set_safe(arraylist *al, unsigned int index, void *data)
 
 	alist_set(al, index, data);
 }
-void alist_set(arraylist *al, unsigned int index, void *data)
+void alist_set(arraylist *al, int index, void *data)
 {
 	if(index < al->size) {
 		al->data[index] = data;
@@ -72,7 +72,7 @@ void alist_set(arraylist *al, unsigned int index, void *data)
 	}
 }
 
-void * alist_get(arraylist *al, unsigned int index)
+void * alist_get(arraylist *al, int index)
 {
 	if ( index < al->size ) {
 		return al->data[index];

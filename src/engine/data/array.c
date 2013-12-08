@@ -8,11 +8,11 @@
 struct array {
 	int size;
 	int last_elem;
-	unsigned int elem_size;
+	int elem_size;
 	char *data;
 };
 
-array * array_new(unsigned int element_size)
+array * array_new(int element_size)
 {
 	array *al = calloc(1, sizeof(array));
 	if (al) {
@@ -45,7 +45,7 @@ static void array_resize(array *al)
 	al->size = new_size;
 }
 
-void array_set_safe(array *al, unsigned int index, void *data)
+void array_set_safe(array *al, int index, void *data)
 {
 	while(index >= al->size) {
 		array_resize(al);
@@ -53,7 +53,7 @@ void array_set_safe(array *al, unsigned int index, void *data)
 
 	array_set(al, index, data);
 }
-void array_set(array *al, unsigned int index, void *data)
+void array_set(array *al, int index, void *data)
 {
 	if(index < al->size) {
 		memcpy(((void*)(al->data + index * al->elem_size)), data, al->elem_size);
@@ -65,7 +65,7 @@ void array_set(array *al, unsigned int index, void *data)
 	}
 }
 
-void * array_get(array *al, unsigned int index)
+void * array_get(array *al, int index)
 {
 	if ( index < al->size ) {
 		return (void*)(al->data + index * al->elem_size);

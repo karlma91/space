@@ -1,6 +1,6 @@
 [  
   {"staticpolygon": [
-    {"char":"spr_name"},
+    {"char":"tex_name"},
     {"int":"outline"},
     {"float":"scale"},
     {"float":"texture_scale"},

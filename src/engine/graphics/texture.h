@@ -12,6 +12,7 @@ extern array *tex_units;
 extern int texture_load(const char *file);
 extern int texture_init(void);
 extern GLint texture_get_current(void);
+extern void texture_bind_clear(void);
 extern int texture_bind_virt(int);
 extern int texture_bind(int);
 

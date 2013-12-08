@@ -9,8 +9,8 @@
 
 #if SOUND_DISABLED
 void sound_init(void) {}
-Mix_Music *sound_load_music(const char *name) {return NULL;}
-Mix_Chunk *sound_load_chunk(const char *name) {return NULL;}
+Mix_Music *sound_loadmusic(const char *name) {return NULL;}
+Mix_Chunk *sound_loadchunk(const char *name) {return NULL;}
 void sound_play(Mix_Chunk *chunk) {}
 void sound_music(Mix_Music *music) {}
 void sound_destroy(void) {}
@@ -22,7 +22,7 @@ void sound_music_unmute(void) {}
 
 #include "SDL_log.h"
 #include "String.h"
-#include "../data/llist.h"
+#include "../data/hashmap.h"
 
 #if __IPHONEOS__
 #define SOUND_PATH ""
@@ -32,31 +32,11 @@ void sound_music_unmute(void) {}
 
 #define SOUND_DEFAULT_VOLUME (SDL_MIX_MAXVOLUME/8)
 #define SOUND_DEFAULT_MUSIC_VOLUME (SDL_MIX_MAXVOLUME/2)
-#define NUM_CHANNELS 32
+#define NUM_CHANNELS 128
+#define NUM_CHANNELS_PRESERVED 16
 
-typedef struct {
-	char name[100];
-	int is_track;
-	union {
-		Mix_Music *track;
-		Mix_Chunk *sound;
-	};
-} audio;
-
-static LList tracks;
-static LList chunks;
-
-static void remove_audio(audio * a)
-{
-	if (a) {
-		if (a->is_track) {
-			Mix_FreeMusic(a->track);
-		} else {
-			Mix_FreeChunk(a->sound);
-		}
-		free(a);
-	}
-}
+static hashmap *hm_tracks;
+static hashmap *hm_chunks;
 
 void sound_init(void)
 {
@@ -65,13 +45,11 @@ void sound_init(void)
 		exit(-1);
 	}
 
-	tracks = llist_create();
-	chunks = llist_create();
+	hm_tracks = hm_create();
+	hm_chunks = hm_create();
+	//TODO remember to remove/free chunks/music
 
-	llist_set_remove_callback(tracks, (ll_rm_callback)remove_audio);
-	llist_set_remove_callback(chunks, (ll_rm_callback)remove_audio);
-
-	if (Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,2048)<0) {
+	if (Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,256)<0) {
 		SDL_Log("ERROR: Opening mixer failed");
 		exit(-1);
 	}
@@ -79,22 +57,23 @@ void sound_init(void)
 	Mix_VolumeMusic(SOUND_DEFAULT_MUSIC_VOLUME);
 
 	Mix_AllocateChannels(NUM_CHANNELS);
+	Mix_ReserveChannels(NUM_CHANNELS_PRESERVED);
 }
 
-Mix_Music *sound_load_music(const char *name)
+Mix_Music *sound_loadmusic(const char *name)
 {
 	char path[100] = SOUND_PATH;
 	strcat(path, name);
 
-	Mix_Music *track = Mix_LoadMUS(path); // "Broken_Logic.ogg"
-
+	Mix_Music *track = hm_get(hm_tracks, name);
 	if (track) {
-		audio *a = malloc(sizeof(*a));
-		strcpy(a->name, name);
-		a->is_track = 0;
-		a->track = track;
+		return track;
+	}
 
-		llist_add(tracks, a);
+	//waffle_read_file(sou) //TODO use waffle_read to read from zip !!!!!!!!!!!!!!!!!!!!!
+	track = Mix_LoadMUS(path); // "Broken_Logic.ogg"
+	if (track) {
+		hm_add(hm_tracks, name, track);
 	} else {
 		SDL_Log("ERROR: Could not load soundtrack '%s'", name);
 	}
@@ -102,22 +81,20 @@ Mix_Music *sound_load_music(const char *name)
 	return track;
 }
 
-Mix_Chunk *sound_load_chunk(const char *name)
+Mix_Chunk *sound_loadchunk(const char *name)
 {
+	Mix_Chunk *chunk = hm_get(hm_chunks, name);
+	if (chunk) return chunk;
+
 	char path[100] = SOUND_PATH;
 	strcat(path, name);
 
-	Mix_Chunk *chunk = Mix_LoadWAV(path); // "laser_02.ogg"
+	//waffle_read_file(sou) //TODO use waffle_read to read from zip
+	chunk = Mix_LoadWAV(path);
 
 	if (chunk) {
-		audio *a = malloc(sizeof(*a));
-		strcpy(a->name, name);
-		a->is_track = 0;
-		a->sound = chunk;
-
 		Mix_VolumeChunk(chunk, SOUND_DEFAULT_VOLUME);
-
-		llist_add(tracks, a);
+		hm_add(hm_chunks, name, chunk);
 	} else {
 		SDL_Log("ERROR: Could not load soundchunk '%s'", name);
 	}
@@ -142,8 +119,9 @@ void sound_music(Mix_Music *music)
 
 void sound_destroy(void)
 {
-	llist_destroy(chunks);
-	llist_destroy(tracks);
+	//TODO iterate hashmaps and free chunks and music
+	hm_destroy(hm_chunks);
+	hm_destroy(hm_tracks);
 
 	Mix_Quit();
 }
@@ -151,12 +129,14 @@ void sound_destroy(void)
 
 void sound_mute(void)
 {
-	Mix_HaltChannel(-1);
+	//Mix_HaltChannel(-1);
+	Mix_Pause(-1);
 	Mix_Volume(-1, 0);
 }
 
 void sound_unmute(void)
 {
+	Mix_Resume(-1);
 	Mix_Volume(-1, SDL_MIX_MAXVOLUME);
 }
 

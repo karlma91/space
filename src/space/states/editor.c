@@ -30,8 +30,8 @@ static int remove_tool = 0;
 
 static int active_obj_index = 0;
 static char object_type[32];
-static char param_name[32];
 static char level_name[32];
+static char *param_name;
 
 static LList ll_touches;
 static pool *pool_touches;
@@ -67,19 +67,28 @@ typedef enum EDITOR_MODE {
 static editor_mode current_mode = MODE_OBJECTS_ADD;
 
 
-#define EDITOR_OBJECT_COUNT 5
+#define EDITOR_OBJECT_COUNT 6
 
 //TODO show actual objects in list
 static char object_names[EDITOR_OBJECT_COUNT][32] = {
 		"TANK",
 		"FACTORY",
+		"FACTORY",
 		"TURRET",
 		"ROCKET",
 		"ROBOTARM"};
+static char param_names[EDITOR_OBJECT_COUNT][32] = {
+		"DEF",
+		"DEF",
+		"DEF_RAMP",
+		"DEF",
+		"DEF",
+		"DEF"};
 
 static char sprite_names[EDITOR_OBJECT_COUNT][32] = {
 		"tankbody001",
 		"factoryblue",
+		"ramp",
 		"turretgun001",
 		"rocket",
 		"saw"};
@@ -123,6 +132,7 @@ static void select_object_type(void *index)
 	active_obj_index = *((int *)&index);
 	button_set_backcolor(btn_objects[active_obj_index],col_active);
 	strncpy(object_type, object_names[active_obj_index], 32);
+	param_name = param_names[active_obj_index];
 }
 
 static void enable_objlist(int enable)
@@ -148,6 +158,18 @@ static void tap_clear_editor(void *unused)
 	view_update(view_editor, p, 0);
 	remove_tool = 0;
 	enable_objlist(!remove_tool);
+
+
+	// TODO: REMOVE TMP CODE
+	obj_param_staticpolygon polytest = {
+			.tex_name = "metal01"TEX_FORMAT,
+			.outline = 1,
+			.scale = 700,
+			.texture_scale = 1,
+	};
+	polytest.shape_id = POLYSHAPE_TURRET;
+	polytest.texture_scale = 0.4;
+	instance_create(obj_id_staticpolygon, &polytest, cpv(0,800), cpvzero);
 }
 
 static void tap_delete_click(void *unused)
@@ -205,11 +227,11 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
 	instance *ins = instance_at_pos(pos, 10/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP); //TODO use zoom to decide max distance?
-    
+
     if (contains_instance(ins)) {
         return 0;
     }
-    
+
 	touch_unique_id touch_id = finger_bind(finger->fingerId);
 	if (touch_id != -1) {
 		editor_touch *touch = pool_instance(pool_touches);
@@ -272,7 +294,6 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 
 void editor_init()
 {
-	sprintf(param_name, "%s", "DEF");
 	sprintf(object_type, "%s", "TURRET");
 	sprintf(level_name, "%s", "TESTING");
 	int i;

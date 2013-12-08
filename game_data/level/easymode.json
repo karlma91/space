@@ -1,5 +1,5 @@
 {
-	"name" : "easymode",
+	"name" : "Easy",
 	"tilemap" : "level02_01.tmx",
 	"timelimit": 100,
 	
@@ -8,9 +8,11 @@
 		  "max_hp":250, "coins":50,
 		  "texture_name": "tank_00.png" },
 		{ "type": "FACTORY", "name": "SMALL",
-		  "max_tanks": 1, "max_hp": 250, "spawn_delay": 5, "coins": 50, 
-		  "object_spawn": {"type":"TANK", "name":"LIGHT"},
-		  "sprite": "factoryblue", "shape": "factory.shape"}
+		  "max_tanks": 1, "max_hp": 250, "spawn_delay": 5, "coins": 50,
+		  "sprite_name":"factoryblue",
+			"shape_name":"factory.shape",
+			"type_name":"TANK",
+			"param_name":"LIGHT"}
 	],
 	"objects" : [
 		{"type":"FACTORY", "name": "SMALL", "pos": {"x":1200, "y":560, "r": 100}}

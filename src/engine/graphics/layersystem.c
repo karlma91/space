@@ -121,7 +121,7 @@ void state_add_drawable(STATE_ID state_id, int layer, draw_callback drawfunc, vo
 	s->draw.func = drawfunc;
 	s->draw.datasize = datasize;
 	s->draw.data = &s->data;
-	memcpy(&s->data, drawdata, datasize);
+	memcpy(s->draw.data, drawdata, datasize);
 
 	llist_add(lay->ll_drawables, s);
 }
@@ -178,6 +178,8 @@ void layersystem_render(STATE_ID state_id, view *cam)
 		}
 		llist_end_loop(lay->ll_drawables);
 	}
+
+	texture_bind_clear();
 
 	while (max_layers--) {
 		float paralax = 1;
@@ -290,7 +292,7 @@ static render_batch *current_batch(int layer)
         if (batch == NULL) {
             SDL_Log("ERROR: NOT ENOUGH MEMORY!");
         } else {
-        	//SDL_Log("New batch renderer created (state_id=%p, blend=%x, layer=%d, tex_id=%d): p=%p", state_id, current_blend.src_factor, layer, tex_id, batch);
+        	//SDL_Log("New batch renderer created (blend=%x, layer=%d, tex_id=%d): p=%p", current_blend.src_factor, layer, tex_id, batch);
         	alist_set_safe(al, tex_id, batch);
         }
 	}

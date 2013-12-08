@@ -193,8 +193,21 @@ void game_components(void)
 	REGISTER_CMP(CREATOR, 1);
 }
 
+void game_spritepacks(void)
+{
+	sprite_packload("spacetex.pack");
+}
+
 void game_sprites(void)
 {
+	//TODO make sure engine doesn't depend on these directly
+	SPRITE_ERROR = sprite_link("error");
+	SPRITE_GLOWDOT = sprite_link("glowdot");
+	SPRITE_DOT = sprite_link("dot");
+	SPRITE_GLOW = sprite_link("glow");
+	SPRITE_WHITE = sprite_link("pixel");
+	SPRITE_BAR = sprite_link("bar");
+
 	REGISTER_SPRITE( PLAYERBODY001 );
 	REGISTER_SPRITE( PLAYERGUN001 );
 	REGISTER_SPRITE( BTN_PUSH );
@@ -253,20 +266,20 @@ void game_font(void)
 
 void game_audio(void)
 {
-	SND_LASER_1 = sound_load_chunk("laser_03.ogg");
-	SND_LASER_2 = sound_load_chunk("laser_02.ogg");
-	SND_LASER_MISS = sound_load_chunk("laser_melt.ogg");
-	SND_HIT_1 = sound_load_chunk("hit_01.ogg");
-	SND_HIT_2 = sound_load_chunk("hit_02.ogg");
-	SND_TANK_EXPLODE = sound_load_chunk("hit_03.ogg");
-	SND_FACTORY_EXPLODE = sound_load_chunk("factory_explode.ogg");
-	SND_TURRET_EXPLODE = sound_load_chunk("turret_explode.ogg");
-	SND_COIN = sound_load_chunk("coin_pickup.ogg");
-	SND_EXPLOSION = sound_load_chunk("explosion.ogg");
+	SND_LASER_1 = sound_loadchunk("laser_03.ogg");
+	SND_LASER_2 = sound_loadchunk("laser_02.ogg");
+	SND_LASER_MISS = sound_loadchunk("laser_melt.ogg");
+	SND_HIT_1 = sound_loadchunk("hit_01.ogg");
+	SND_HIT_2 = sound_loadchunk("hit_02.ogg");
+	SND_TANK_EXPLODE = sound_loadchunk("hit_03.ogg");
+	SND_FACTORY_EXPLODE = sound_loadchunk("factory_explode.ogg");
+	SND_TURRET_EXPLODE = sound_loadchunk("turret_explode.ogg");
+	SND_COIN = sound_loadchunk("coin_pickup.ogg");
+	SND_EXPLOSION = sound_loadchunk("explosion.ogg");
 
-	MUSIC_MENU = sound_load_music("Broken_Logic.ogg");
-	MUSIC_LEVEL = sound_load_music("Blocked Bus.ogg");
-	MUSIC_GAMEOVER = sound_load_music("Idling.ogg");
+	MUSIC_MENU = sound_loadmusic("Broken_Logic.ogg");
+	MUSIC_LEVEL = sound_loadmusic("Blocked Bus.ogg");
+	MUSIC_GAMEOVER = sound_loadmusic("Idling.ogg");
 }
 
 
@@ -279,7 +292,7 @@ static void open_settings(void *unused)
 /* all global touchables goes in here. NB! Cannot contain direct reference to any state-id as they are uninitialized! */
 void game_touchables(void)
 {
-	btn_settings = button_create(SPRITE_GEAR, 0, "", GAME_WIDTH/2 - 100, GAME_HEIGHT/2 - 100, 125, 125);
+	btn_settings = button_create(SPRITE_GEAR, 0, "", GAME_WIDTH/2 - 130, GAME_HEIGHT/2 - 130, 150, 150);
 	button_set_callback(btn_settings, open_settings, 0);
 	button_set_enlargement(btn_settings, 1.5);
 	button_set_hotkeys(btn_settings, SDL_SCANCODE_F1, 0);
@@ -288,6 +301,7 @@ void game_touchables(void)
 void game_init(void)
 {
 	//TODO generalize particles.c and sprites.c, (and level.c?)
+	game_spritepacks();
 	game_sprites();
 	game_polyshapes();
 	game_audio();

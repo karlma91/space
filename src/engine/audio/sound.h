@@ -20,8 +20,8 @@ typedef void *Mix_Chunk;
 
 void sound_init(void);
 
-Mix_Music *sound_load_music(const char *name);
-Mix_Chunk *sound_load_chunk(const char *name);
+Mix_Music *sound_loadmusic(const char *name);
+Mix_Chunk *sound_loadchunk(const char *name);
 
 void sound_play(Mix_Chunk *chunk);
 void sound_music(Mix_Music *music);

@@ -66,6 +66,8 @@ int hm_size(hashmap *hm)
 	return hm->count;
 }
 
+int stat_hm_adds = 0, stat_hm_rehash = 0;
+
 static int hm_add_internal(hashnode **buckets, hashnode *node, int size)
 {
 	int index = hash((unsigned char*)node->key) % size;
@@ -79,11 +81,14 @@ static int hm_add_internal(hashnode **buckets, hashnode *node, int size)
 			}
 			if(temp->next == NULL){
 				temp->next = node;
-				return 0;
+				++stat_hm_rehash;
+				break;
+			} else {
+				temp = temp->next;
 			}
-			temp = temp->next;
 		}
 	}
+	++stat_hm_adds;
 	return 0;
 }
 

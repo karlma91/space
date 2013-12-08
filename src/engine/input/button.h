@@ -21,6 +21,7 @@ typedef void (*btn_callback)(void *);
 button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_x, float pos_y, float width, float height);
 void button_free(button btn);
 
+void button_set_txt_antirot(button btn_id, int antirot);
 void button_set_callback(button btn_id, void (*callback)(void *), void *data);
 void button_set_hotkeys(button btn_id, SDL_Scancode key, SDL_Scancode key_alt);
 
@@ -31,6 +32,8 @@ void button_set_animated(button btn_id, int animated, float fps);
 void button_set_enlargement(button btn_id, float size);
 void button_set_sprite(button btn_id, SPRITE_ID spr_id);
 void button_set_font(button btn_id, bm_font *f, float size);
+
+sprite *button_get_sprite(button btn_id);
 
 void button_clear(button btn);
 

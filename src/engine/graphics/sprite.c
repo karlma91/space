@@ -56,11 +56,25 @@ void sprite_init(void)
 {
 	hm_sprites = hm_create();
 
+	/*
+	SPRITE_ERROR = sprite_link("error");
+	SPRITE_GLOWDOT = sprite_link("glowdot");
+	SPRITE_DOT = sprite_link("dot");
+	SPRITE_GLOW = sprite_link("glow");
+	SPRITE_WHITE = sprite_link("pixel");
+	SPRITE_BAR = sprite_link("bar");
+	*/
+}
+
+int sprite_packload(const char* spritepack)
+{
+	char file[256];
+	sprintf(file, "textures/%s", spritepack);
 	/* read texture package file */
-	int filesize = waffle_read_file("textures/spacetex.pack", &buffer[0], FILE_BUFFER_SIZE);
+	int filesize = waffle_read_file(file, &buffer[0], FILE_BUFFER_SIZE);
 	if (!filesize) {
 		SDL_Log("ERROR: Could not load texpack data!");
-		exit(1);
+		return -1;
 	}
 
 	chr_unread = filesize;
@@ -99,13 +113,7 @@ void sprite_init(void)
 		sprite_add_subimg(tex_id, sprname, subimg, i);
 	}
 
-//TODO use error sprite when using null-sprites
-	SPRITE_ERROR = sprite_link("error"); /* image to be shown for images which fails to load */
-	SPRITE_GLOWDOT = sprite_link("glowdot");
-	SPRITE_DOT = sprite_link("dot");
-	SPRITE_GLOW = sprite_link("glow");
-	SPRITE_WHITE = sprite_link("pixel");
-	SPRITE_BAR = sprite_link("bar");
+	return 0;
 }
 
 void strtolower(char *to, const char *from)
@@ -316,6 +324,8 @@ void sprite_render_scaled(int layer, sprite *spr, cpVect pos, float angle, float
 	if (data) {
 		tex_id = data->tex_id;
 	}
+
+	if (spr->antirot) angle -= current_view->rotation;
 
 	float sub_map[8];
 	sprite_get_current_image(spr, sub_map);

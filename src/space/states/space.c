@@ -18,6 +18,7 @@
 #include "../level.h"
 
 STATE_ID state_space;
+#define STICK_RADIUS 120
 
 /**
  * The global space state
@@ -403,7 +404,7 @@ static void draw_gui(view *cam)
 				instance_count(obj_id_tank));
 
 #if !ARCADE_MODE
-		bmfont_right(FONT_SANS, cpv(vright-15, vtop+20), 0.5, fps_buf);
+		bmfont_right(FONT_SANS, cpv(vright-15, vtop-40), 0.5, fps_buf);
 #endif
 		if (!multiplayer) {
 			char str_time[20];
@@ -510,7 +511,7 @@ static void sticks_hide(void) {
 
 // TODO: REMOVE
 static obj_param_staticpolygon polytest = {
-		.spr_name = "metal01",
+		.tex_name = "metal01"TEX_FORMAT,
 		.outline = 1,
 		.scale = 700,
 		.texture_scale = 1,
@@ -650,10 +651,11 @@ void space_init_level_from_level(level * lvl)
 
 	particles_clear(current_particles);
 
-	/*
+
 	polytest.shape_id = POLYSHAPE_TURRET;
 	polytest.texture_scale = 0.4;
 	instance_create(obj_id_staticpolygon, &polytest, cpv(0,800), cpvzero);
+	/*
 	polytest.shape_id = POLYSHAPE_RAMP;
 	polytest.texture_scale = 0.6;
 	instance_create(obj_id_staticpolygon, &polytest, cpv(0,-800), cpvzero);
@@ -804,9 +806,9 @@ void space_init(void)
     }
     */
 
-    btn_pause = button_create(SPRITE_BTN_PAUSE, 0, "", GAME_WIDTH/2-85, GAME_HEIGHT/2-77, 80, 80);
+    btn_pause = button_create(SPRITE_BTN_PAUSE, 0, "", GAME_WIDTH/2-100, GAME_HEIGHT/2-100, 120, 120);
     button_set_callback(btn_pause, (btn_callback) statesystem_pause, 0);
-    button_set_enlargement(btn_pause, 2.0f);
+    button_set_enlargement(btn_pause, 1.5f);
     button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);
 #if !ARCADE_MODE
     state_register_touchable_view(view_p1, btn_pause);
@@ -830,10 +832,10 @@ void space_init(void)
 
     float h = GAME_HEIGHT*0.5;
 
-    joy_p1_left = joystick_create(0, 80, 2, -GAME_WIDTH/2 + 170, -0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
-    joy_p1_right = joystick_create(0, 80, 2, GAME_WIDTH/2 - 170, -0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
-    joy_p2_left = joystick_create(0, 80, 2, -GAME_WIDTH/2 + 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
-    joy_p2_right = joystick_create(0, 80, 2, GAME_WIDTH/2 - 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p1_left = joystick_create(0, STICK_RADIUS, 2, -GAME_WIDTH/2 + 170, -0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p1_right = joystick_create(0, STICK_RADIUS, 2, GAME_WIDTH/2 - 170, -0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p2_left = joystick_create(0, STICK_RADIUS, 2, -GAME_WIDTH/2 + 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
+    joy_p2_right = joystick_create(0, STICK_RADIUS, 2, GAME_WIDTH/2 - 170, +0.25*GAME_HEIGHT, 340, h, SPRITE_JOYSTICK_BACK, SPRITE_JOYSTICK);
 
     state_register_touchable_view(view_p1, (touchable *)joy_p1_left);
     state_register_touchable_view(view_p1, (touchable *)joy_p1_right);
@@ -922,10 +924,10 @@ void setup_singleplay(void)
     float h = view_p1->view_height*0.5;
 
     touch_place((touchable *)btn_pause, view_p1->view_width/2-80, view_p1->view_height/2-70);
-    joystick_reposition(joy_p1_left, 80, 2, -view_p1->view_width/2 + 170, -0.25*view_p1->view_height, w, h);
-	joystick_reposition(joy_p1_right, 80, 2, view_p1->view_width/2 - 170, -0.25*view_p1->view_height, w, h);
-    joystick_reposition(joy_p2_left, 80, 2, -view_p1->view_width/2 + 170, 0.25*view_p1->view_height, w, h);
-    joystick_reposition(joy_p2_right, 80, 2, view_p1->view_width/2 - 170, 0.25*view_p1->view_height, w, h);
+    joystick_reposition(joy_p1_left, STICK_RADIUS, 2, -view_p1->view_width/2 + 170, -0.25*view_p1->view_height, w, h);
+	joystick_reposition(joy_p1_right, STICK_RADIUS, 2, view_p1->view_width/2 - 170, -0.25*view_p1->view_height, w, h);
+    joystick_reposition(joy_p2_left, STICK_RADIUS, 2, -view_p1->view_width/2 + 170, 0.25*view_p1->view_height, w, h);
+    joystick_reposition(joy_p2_right, STICK_RADIUS, 2, view_p1->view_width/2 - 170, 0.25*view_p1->view_height, w, h);
 
     LList ll_touchies = view_p1->touch_objects;
     if (!llist_contains(ll_touchies, joy_p2_left)) {
@@ -972,10 +974,10 @@ void setup_multiplay(void)
     float w = 340;
     float h1 = view_p1->view_height*0.5;
     float h2 = view_p2->view_height*0.5;
-	joystick_reposition(joy_p1_left, 80, 2, -view_p1->view_width/2 + 170, -0.25*view_p1->view_height, w, h1);
-	joystick_reposition(joy_p1_right, 80, 2, view_p1->view_width/2 - 170, -0.25*view_p1->view_height, w, h1);
-    joystick_reposition(joy_p2_left, 80, 2, -view_p2->view_width/2 + 170, -0.25*view_p2->view_height, w, h2);
-    joystick_reposition(joy_p2_right, 80, 2, view_p2->view_width/2 - 170, -0.25*view_p2->view_height, w, h2);
+	joystick_reposition(joy_p1_left, STICK_RADIUS, 2, -view_p1->view_width/2 + 170, -0.25*view_p1->view_height, w, h1);
+	joystick_reposition(joy_p1_right, STICK_RADIUS, 2, view_p1->view_width/2 - 170, -0.25*view_p1->view_height, w, h1);
+    joystick_reposition(joy_p2_left, STICK_RADIUS, 2, -view_p2->view_width/2 + 170, -0.25*view_p2->view_height, w, h2);
+    joystick_reposition(joy_p2_right, STICK_RADIUS, 2, view_p2->view_width/2 - 170, -0.25*view_p2->view_height, w, h2);
 
     #if !ARCADE_MODE
     joy_p2_left->touch_data.visible = 1;

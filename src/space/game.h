@@ -10,6 +10,12 @@
 
 #include "we.h"
 
+#if TARGET_OS_IPHONE
+#define TEX_FORMAT ".pvr"
+#else
+#define TEX_FORMAT ".png"
+#endif
+
 #define SPACE_BODIES_MAX 5
 
 // RLAYS

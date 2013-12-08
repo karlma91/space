@@ -226,7 +226,7 @@ void statesystem_set_state(STATE_ID state_id)
     if (stack_head != state_id) {
     	finger_release_all(); /* clear all bindings */
     }
-    
+
 	state = (State *) state_id;
     state->time_alive = 0;
     stack_head = state;

@@ -4,7 +4,7 @@
 #include "../game.h"
 
 OBJ_START(staticpolygon)
-	SPRITE_ID spr_id;
+	int tex_id;
 	float texture_scale;
 	int outline;
 	float scale;

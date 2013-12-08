@@ -28,6 +28,7 @@ typedef struct {
 	float sub_index;
 	float width;
 	float height;
+	int antirot;
 } sprite;
 
 
@@ -41,6 +42,7 @@ extern SPRITE_ID SPRITE_BAR;
 
 
 void sprite_init(void);
+int sprite_packload(const char* spritepack); /* returns 0 on success and -1 on failure */
 void sprite_destroy(void);
 
 SPRITE_ID sprite_add_subimg(int tex_id, const char *spr_name, sprite_subimg subimg, int index);

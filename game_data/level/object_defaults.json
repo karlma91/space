@@ -8,18 +8,28 @@
 		  "texture_name": "turret.png", "rot_speed": 0.2},
 		  
 		{ "type": "TANK", "name":"DEF", 
-		  "max_hp":250, "coins":50,
-		  "texture_name": "tank_00.png" },
+		  "max_hp":220, "coins":50},
 		  
 		{ "type": "FACTORY", "name": "DEF",
 		  "max_tanks": 2, "max_hp": 250, "spawn_delay": 3, "coins": 50, 
-		  "object_spawn": {"type":"TANK", "name":"DEF"},
+		  "type_name":"TANK", "param_name":"DEF",
 		  "sprite_name": "factoryblue", "shape_name": "factory.shape"},
 		  
 		{ "type": "ROCKET", "name": "DEF",
-		  "max_hp": 250,"coins": 50,
+		  "max_hp": 120,"coins": 50,
 		  "texture_name": "rocket.png"},
-		  
+		{
+			"type":	"FACTORY",
+			"name":	"DEF_RAMP",
+			"max_hp":	450,
+			"coins":	200,
+			"max_tanks":	3,
+			"spawn_delay":	4,
+			"sprite_name":"ramp",
+			"shape_name":"ramp.shape",
+			"type_name":"ROCKET",
+			"param_name":"DEF"
+		},  
 		{ "type": "ROBOTARM", "name": "DEF",
 		  "max_hp": 250, "coins": 50, 
 		  "texture_name": "tank_00.png"}

@@ -14,7 +14,7 @@
 #define TEXTURE_RESOLUTION ""
 #endif
 
-#define MAX_IMAGE_BUFFER (1024*1024*80)
+#define MAX_IMAGE_BUFFER (1024*1024*20)
 
 
 typedef struct PVRTextureHeaderV3 { /* Reference: PVRTTexture.h from ImgTec's PVR SDK */
@@ -95,13 +95,6 @@ int texture_load(const char *file)
 #if !LOAD_TEXTURES
 	return 0;
 #endif
-	{
-#if TARGET_OS_IPHONE
-	const char *file = "spacetex.pvr"; // TMP
-#else
-	const char *file = "spacetex.png"; // TMP
-#endif
-
 	if (!buffer) SDL_Log("ERROR: tried to load texture before initializing texture loader!");
 
 	int tex_id_ext = (int) hm_get(hm_name2tex, file);
@@ -197,7 +190,6 @@ int texture_load(const char *file)
 		SDL_Log("ERROR: Unable to load texture: %s\n IMG_ERROR: %s\n", filepath, IMG_GetError());
 		return 0;
 	}
-	} // TMP
 }
 
 #include "SDL_endian.h"
@@ -237,6 +229,11 @@ int texture_destroy(void)
 	hm_destroy(hm_name2tex);
 	free(buffer);
 	return 0;
+}
+
+void texture_bind_clear(void)
+{
+	gl_tex_id = -1;
 }
 
 int texture_bind_virt(int tex_id) {

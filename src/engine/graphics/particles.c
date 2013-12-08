@@ -529,10 +529,10 @@ EMITTER_ID read_emitter_from_file(const char *filename)
 				int index = em->alpha_count;
 				if (index < PARTICLE_ALPHA_MAX && (parse_point(node, em->alpha + index) == 0)) {
 					++em->alpha_count;
-					fprintf(stderr, "DEBUG: added point = {%f, %f}\n", (em->alpha+index)->x, (em->alpha+index)->y);
+					//fprintf(stderr, "DEBUG: added point = {%f, %f}\n", (em->alpha+index)->x, (em->alpha+index)->y);
 				} else {
 					alpha_last = 0;
-					fprintf(stderr, "DEBUG: alpha_last = 0\n");
+					//fprintf(stderr, "DEBUG: alpha_last = 0\n");
 				}
 			}
 
@@ -587,7 +587,7 @@ EMITTER_ID read_emitter_from_file(const char *filename)
 				parse_float(node,"value",&(em->windfactor));
 			}else if(TESTNAME("alpha")){
 				alpha_last = 1;
-				fprintf(stderr, "DEBUG: alpha_last = 1\n");
+				//fprintf(stderr, "DEBUG: alpha_last = 1\n");
 			}else if(TESTNAME("color")){
 			}else if(TESTNAME("step")){
 				parse_color_step(node,em);

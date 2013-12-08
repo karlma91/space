@@ -32,6 +32,86 @@ static float r;
 
 static view *main_view;
 
+enum {
+	A,
+	C,
+	E,
+	NOTE_COUNT
+};
+
+static Mix_Chunk *note[NOTE_COUNT];
+
+static int tone_index1 = 0, tone_index2 = 0, tone_index3 = 0;
+#define TONE_COUNT 8
+
+typedef struct tone {
+	int note, ms;
+} tone;
+
+static tone score1[TONE_COUNT] = {
+		{A, 250},
+		{C, 250},
+		{A, 250},
+		{C, 250},
+		{A, 250},
+		{C, 250},
+		{A, 250},
+		{C, 250}
+};
+static tone score2[TONE_COUNT] = {
+		{A, 250},
+		{C, 250},
+		{E, 250},
+		{A, 250},
+		{C, 250},
+		{E, 250},
+		{C, 250},
+		{E, 250}
+};
+static tone score3[TONE_COUNT] = {
+		{E, 250},
+		{A, 250},
+		{C, 250},
+		{A, 250},
+		{E, 250},
+		{A, 250},
+		{C, 250},
+		{A, 250}
+};
+
+void loop_end(int channel)
+{
+	switch(channel) {
+	case 0:
+		Mix_PlayChannelTimed(channel, note[score1[tone_index1].note], -1, score1[tone_index1].ms);
+		if (++tone_index1 >= TONE_COUNT) tone_index1 = 0;
+		break;
+	case 1:
+		Mix_PlayChannelTimed(channel, note[score2[tone_index2].note], -1, score2[tone_index2].ms);
+		if (++tone_index2 >= TONE_COUNT) tone_index2 = 0;
+		break;
+	case 2:
+		Mix_PlayChannelTimed(channel, note[score3[tone_index3].note], -1, score3[tone_index3].ms);
+		if (++tone_index3 >= TONE_COUNT) tone_index3 = 0;
+		break;
+	}
+}
+
+void sound_testing(void)
+{
+	note[A] = sound_loadchunk("sineA3.ogg");
+	note[C] = sound_loadchunk("sineC4.ogg");
+	note[E] = sound_loadchunk("sineE4.ogg");
+	Mix_GroupChannels(0,2, 1);
+	Mix_FadeInChannelTimed(0, note[A], -1, 100, 5000);
+	Mix_FadeInChannelTimed(1, note[C], -1, 100, 5000);
+	Mix_FadeInChannelTimed(2, note[E], -1, 100, 5000);
+	//Mix_FadeInChannelTimed(2, toneE, -1, 0, -1);
+	Mix_ChannelFinished(loop_end);
+	//Mix_ //TODO check out callback
+}
+
+
 /* * * * * * * * * *
  * state functions *
  * * * * * * * * * */
@@ -72,34 +152,36 @@ static int sdl_event(SDL_Event *event)
 static void draw(void)
 {
 	draw_color4f(1,1,1,1);
-	draw_box(1, a, b, r, 1);
+	//draw_box(1, a, b, r, 1);
 
-	//bmfont_center(FONT_SANS, cpv(0,500),1.5,"SPACE");
-	int i;
-	for(i = 0; i<station_count; i++) {
-		bmfont_center(FONT_SANS, stations[i].pos,1, stations[i].level_name);
-	}
-
-	bmfont_center(FONT_SANS, cpv(1400,-1150),1,"CREDITS:\nMathias Wilhelmsen\nKarl Magnus Kalvik");
-	//draw_color4b(200,210,230,255);
-	//bmfont_right(FONT_SANS, cpv(-600,300),1,"the quick brown fox jumps over the lazy dog\nTHE QUICK BROWN FOX JUMPS OVER THE LAZY DOG");
+	draw_push_matrix();
+	draw_translate(1800,-1550);
+	draw_rotate(-current_view->rotation);
+	bmfont_center(FONT_SANS, cpvzero,1,"SPACE (working title)\nETA: Feb 2014\n\nCREDITS:\nMathias Wilhelmsen\nKarl Magnus Kalvik");
+	draw_pop_matrix();
 
 	float f = 1/2.0;
 	float size_dither = (engine_time*f - floor(engine_time*f) - 0.5)*(engine_time*f - floor(engine_time*f) - 0.5)*10;
 	cpVect sun_size = {400+size_dither,400+size_dither};
 	static float a_sun_add1 = 0;
 	static float a_sun_add2 = 0;
-    float spd = 0.01;
+    static float spd = 0.03;
 	a_sun_add1 += dt*WE_2PI*spd;
 	a_sun_add2 -= dt*WE_2PI*spd;
 
 	//draw_color4b(100,100,100,0);
 	//sprite_render_index_by_id(RLAY_GAME_BACK, SPRITE_GLOW, 0, cpvzero, cpvmult(sun_size,1.5), a_sun_base);
-	draw_color4b(255,40,20,255);
+    static Color sun_base = {0x70,0x30,0x30,0xff};
+    static Color sun_glow = {0xff,0xa0,0x70,0x80};
+    static Color sun_add1 = {0x90,0x80,0x40,0x00};
+    static Color sun_add2 = {0xb0,0x70,0x40,0x00};
+	draw_color(sun_base);
 	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 0, cpvzero, sun_size, 0);
-	draw_color4b(255,192,30,0);
+	draw_color(sun_glow);
+	sprite_render_index_by_id(RLAY_GAME_BACK, SPRITE_GLOW, 0, cpvzero, cpvmult(sun_size,2), 0);
+	draw_color(sun_add1);
 	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 1, cpvzero, sun_size, a_sun_add1);
-	draw_color4b(255,132,30,0);
+	draw_color(sun_add2);
 	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 2, cpvzero, sun_size, a_sun_add2);
 }
 
@@ -140,35 +222,38 @@ void stations_init(void)
 
 	btn_stations = calloc(station_count, sizeof(button));
 
-	Color col_back = {255,255,255,255};
+	Color col_back = {255,180,140,255};
 	//Color col_text = {1,1,1,1};
 
 	main_view = state_view_get(state_stations, 0);
 
 	spr_sun = sprite_link("sun01");
-	btn_home = button_create(SPRITE_PLAYERBODY001, 0, "", 800, 600, 250, 250);
+	btn_home = button_create(NULL, 0, "Upgrades", -GAME_WIDTH/4, -GAME_HEIGHT/2 + 80, 200, 200);
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
-	state_register_touchable(this, btn_home);
+	state_register_touchable_view(main_view, btn_home);
 
-	btn_editor = button_create(SPRITE_WRENCH, 0, "", -440, 840, 873/2, 247/2);
+	btn_editor = button_create(NULL, 0, "Editor", GAME_WIDTH/4, -GAME_HEIGHT/2 + 80, 873*2/5, 247*2/5);
 	button_set_callback(btn_editor, open_editor, 0);
 	button_set_enlargement(btn_editor, 2);
 	button_set_hotkeys(btn_editor, SDL_SCANCODE_E, -1);
-	state_register_touchable(this, btn_editor);
+	state_register_touchable_view(main_view, btn_editor);
 
 	int i;
 	for (i = 0; i < station_count; i++) {
 		char stri[10];
 		sprintf(stri, "%d", i+1);
 		float size = 350 + (i ? -50 : 50);
-		btn_stations[i] = button_create(SPRITE_STATION001, 0, "", stations[i].pos.x,stations[i].pos.y, size, size);
+		btn_stations[i] = button_create(SPRITE_STATION001, 0, stations[i].level_name, stations[i].pos.x,stations[i].pos.y, size, size);
 		button_set_callback(btn_stations[i], button_callback, &stations[i]);
+		button_set_txt_antirot(btn_stations[i], 1);
 		button_set_backcolor(btn_stations[i], col_back);
 		button_set_animated(btn_stations[i], 1, (i ? 18 : 15));
 		button_set_enlargement(btn_stations[i], 1.5);
 		button_set_hotkeys(btn_stations[i], digit2scancode[(i+1) % 10], 0);
+		sprite *spr = button_get_sprite(btn_stations[i]);
+		spr->antirot = 1;
 
 		state_register_touchable(this, btn_stations[i]);
 	}
@@ -176,7 +261,8 @@ void stations_init(void)
 	state_register_touchable_view(main_view, btn_settings);
 
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 1, 0); // max 4 000 gu / sec
-	scroll_set_bounds(scroller, cpBBNew(-GAME_WIDTH-200, -GAME_HEIGHT-200, GAME_WIDTH+200, GAME_HEIGHT+200));
+	scroll_set_bounds(scroller, cpBBNew(-GAME_WIDTH*2-200, -GAME_HEIGHT*2-200, GAME_WIDTH*2+200, GAME_HEIGHT*2+200));
+	scroll_set_zoomlimit(scroller, 0.3, 2);
 	state_register_touchable_view(main_view, scroller);
 
 	state_add_layers(state_stations, 22);
@@ -190,10 +276,10 @@ void stations_init(void)
 	}
 
 	SPRITE_ID spr = sprite_link("starcross01");
-    Color col1 = {255,255,255,0};
-    Color col2 = {0,128,0,0};
-	for(i = 0; i < 2000; i++){
-		int layer =  11 + roundf((1-we_randf*we_randf*we_randf)*(layers-1-11));
+	for(i = 0; i < 500; i++){
+        Color col1 = {255,255,255,0};
+        Color col2 = {0,0,0,0};
+		int layer =  11 + roundf((1-we_randf*we_randf)*(layers-1-11));
 		float size = 250 + we_randf*90 - layer*4;
 		//byte l = 255 - 200 * layer / layers;
 		//col = {l,l,l,255};
@@ -201,13 +287,21 @@ void stations_init(void)
 		float rand_y = we_randf;
 		cpVect pos = cpvmult(cpv(rand_x-0.5,rand_y-0.5),30000);
 		float f = minf(rand_x*0.6 + 0.4*rand_y*(0.9+0.1*rand_x), 1);
-		col2.r = 255*(f);
-		col2.b = 255*(1-f);
+		//col2.g = 255*(f);
+		//col2.b = 255*(1-f);
+        col2 = draw_col_rainbow((f+0.5)*1536);
 		if (we_randf < 0.1) {
+			col2.a = 1;
 			state_add_sprite(state_stations, layer, SPRITE_SPIKEBALL, size,size, pos, 0, col2);
 		} else {
+			col2.r = (255 + col2.r)/2;
+			col2.g = (255 + col2.g)/2;
+			col2.b = (255 + col2.b)/2;
+			col2.a = 0;
 			state_add_dualsprite(state_stations, layer, spr, pos, cpv(size,size), col1, col2);
 		}
 	}
+
+	sound_testing();
 }
 

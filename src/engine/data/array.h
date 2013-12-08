@@ -10,13 +10,13 @@
 
 typedef struct array array;
 
-array * array_new(unsigned int element_size);
+array * array_new(int element_size);
 int array_count(array *a);
 int array_size(array *a);
 int array_add(array *a, void *data);
-void array_set_safe(array *a, unsigned int index, void *data);
-void array_set(array *a, unsigned int index, void *data);
-void * array_get(array *a, unsigned int index);
+void array_set_safe(array *a, int index, void *data);
+void array_set(array *a, int index, void *data);
+void * array_get(array *a, int index);
 void array_destroy(array *a);
 
 #endif /* ARRAY_H_ */

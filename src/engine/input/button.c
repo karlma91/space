@@ -26,11 +26,11 @@ static int BUTTON_DOWN = 1;
 
 struct button {
 	touchable touch_data;
-
 	touch_unique_id touch_id;
 
 	sprite spr;
 	char label[50];
+	int txt_antirot;
 	int stretch;
 
 	int pressed; /* whether if button is currently pressed down or not */
@@ -98,6 +98,12 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 	return (button) btn;
 }
 
+void button_set_txt_antirot(button btn_id, int antirot)
+{
+	struct button *btn = (struct button *) btn_id;
+	btn->txt_antirot = antirot;
+}
+
 void button_set_callback(button btn_id, btn_callback callback, void *data)
 {
 	struct button *btn = (struct button *) btn_id;
@@ -155,6 +161,12 @@ void button_set_font(button btn_id, bm_font *f, float size)
 	struct button *btn = (struct button *) btn_id;
 	btn->font = f;
 	btn->font_size = size;
+}
+
+sprite *button_get_sprite(button btn_id)
+{
+	struct button *btn = (struct button *) btn_id;
+	return &btn->spr;
 }
 
 void button_free(button btn_id)
@@ -228,14 +240,13 @@ static void render(button btn_id)
 
 	if (btn->label[0]) {
 		//TODO create font struct with color + size + alignment + angle
-		setTextAlign(TEXT_CENTER);
-		setTextAngle(0);
-
 		draw_color(btn->frontcol);
-
-		setTextSize(height / 4 * scale);
 		//font_drawText(0, x, y + 12 * scale, btn->label);
-		bmfont_center(btn->font, cpv(x, y), btn->font_size * scale, "%s", btn->label);
+		draw_push_matrix();
+		draw_translate(x,y);
+		draw_rotate(btn->txt_antirot ? -current_view->rotation : 0);
+		bmfont_center(btn->font, cpvzero, btn->font_size * scale, "%s", btn->label);
+		draw_pop_matrix();
 	}
 }
 

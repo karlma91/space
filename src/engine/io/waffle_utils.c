@@ -5,6 +5,14 @@
 
 #define RESOURCE_VERSION 9 // changed: 05.11.13
 
+#if TARGET_OS_IPHONE
+#define GAME_RESOURCES "game_data_ios.zip"
+#elif __ANDROID__
+#define GAME_RESOURCES "game_data.zip"
+#else
+#define GAME_RESOURCES "game_data.zip"
+#endif
+
 #if __ANDROID__
 
 static char APK_PATH[200] = "";
@@ -42,7 +50,7 @@ void waffle_init(void)
 	game_data = zzip_dir_open(APK_PATH, &zzip_err); // NB! is actually .apk, not game_data
 	strcpy(&INTERNAL_PATH[0], SDL_AndroidGetInternalStoragePath());
 #else
-	game_data = zzip_dir_open("game_data.zip", &zzip_err);
+	game_data = zzip_dir_open(GAME_RESOURCES, &zzip_err);
 	if (!game_data) {
 		SDL_Log("ERROR: game_data.zip could not be found!\n"
 				"Run ./zip_res.sh to compress current game data");
