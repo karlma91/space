@@ -67,10 +67,6 @@ def levelParse(file, data):
                         file.write("    strcpy(arg." + param_name + "." + name + ", level_safe_parse_")
                         file.write(str(types))
                         file.write("(param, \"" + name +"\"));\n")
-                    elif types == "object_id":
-                        file.write("    object_spawn = cJSON_GetObjectItem(param, \"object_spawn\");\n")
-                        file.write("    arg." + param_name + "." + name + " = object_by_name(level_safe_parse_char(object_spawn, \"type\"));")
-                    
             
     file.write("  }\n")
     file.write("const int paramsize = obj_id->P_SIZE;\n" + 

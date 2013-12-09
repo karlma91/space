@@ -33,7 +33,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	cpFloat size = 375;
 	SPRITE_ID sprite_id = sprite_link(factory->param.sprite_name);
-
+	factory->param.type = object_by_name(factory->param.type_name);
 	sprite_create(&factory->data.spr, sprite_id, 400, 400, 30);
 
 	if (factory->param.type == obj_id_tank) {

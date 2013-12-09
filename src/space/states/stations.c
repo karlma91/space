@@ -81,6 +81,7 @@ static tone score3[TONE_COUNT] = {
 
 void loop_end(int channel)
 {
+	/*
 	switch(channel) {
 	case 0:
 		Mix_PlayChannelTimed(channel, note[score1[tone_index1].note], -1, score1[tone_index1].ms);
@@ -95,10 +96,12 @@ void loop_end(int channel)
 		if (++tone_index3 >= TONE_COUNT) tone_index3 = 0;
 		break;
 	}
+	*/
 }
 
 void sound_testing(void)
 {
+	/*
 	note[A] = sound_loadchunk("sineA3.ogg");
 	note[C] = sound_loadchunk("sineC4.ogg");
 	note[E] = sound_loadchunk("sineE4.ogg");
@@ -109,6 +112,7 @@ void sound_testing(void)
 	//Mix_FadeInChannelTimed(2, toneE, -1, 0, -1);
 	Mix_ChannelFinished(loop_end);
 	//Mix_ //TODO check out callback
+	*/
 }
 
 
