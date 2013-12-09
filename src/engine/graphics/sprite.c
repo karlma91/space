@@ -86,11 +86,15 @@ int sprite_packload(const char* spritepack)
 	readln(); //filter: Mag,Min
 	readln(); //repeat: x/y/xy
 
+	float scale = 1;
 #if TARGET_OS_IPHONE //TODO check ext if current gpu supports pvrt1_4bpp
 	char *suffix = memchr(texname, '.', line_size);
 	if (strcmp(suffix, ".png") == 0) {
 		strcpy(suffix, ".pvr");
 	}
+
+	#warning "tmp fix for rescaled images"
+	scale = 0.5;
 #endif
 
 	//TODO get texture id
@@ -109,7 +113,7 @@ int sprite_packload(const char* spritepack)
 
 		//TODO normalize uv-pos and size
 
-		sprite_subimg subimg = {x,y,x+w,y+h};
+		sprite_subimg subimg = {x*scale,y*scale,(x+w)*scale,(y+h)*scale};
 		sprite_add_subimg(tex_id, sprname, subimg, i);
 	}
 
