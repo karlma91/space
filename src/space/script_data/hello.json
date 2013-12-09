@@ -27,7 +27,7 @@
     {"float":"max_hp"},
     {"float":"spawn_delay"},
     {"int":"coins"},
-    {"object_id":"type"},
+  	{"object_id":"type"},
     {"char":"param_name"},
     {"char":"type_name"},
     {"char":"sprite_name"},

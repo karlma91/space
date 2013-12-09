@@ -74,7 +74,7 @@ void alist_set(arraylist *al, int index, void *data)
 
 void * alist_get(arraylist *al, int index)
 {
-	if ( index < al->size ) {
+	if (index >= 0 && index < al->size ) {
 		return al->data[index];
 	} else{
 		return NULL;
