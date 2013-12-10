@@ -30,6 +30,10 @@ def generateParams(file, data):
                         file.write("\tchar " + str(name) + "[MAX_STRING_SIZE];\n")
                     elif types == "object_id":
                         file.write("\tobject_id *" + str(name)+";\n")
+                    elif types == "sprite":
+                        file.write("\tSPRITE_ID " + str(name)+";\n")
+                    elif types == "shape":
+                        file.write("\tpolyshape " + str(name)+";\n")
                     else:
                         file.write("\t" + str(types) + " " + str(name) + ";\n")
             file.write("PARAM_END\n")
@@ -58,7 +62,7 @@ def levelParse(file, data):
         file.write("(obj_id == " +"obj_id_"+ str(param_name) + ") {\n")
         for instance in value:
                 for types, name in instance.items():
-                    if types in ("int" ,"float"):
+                    if types in ("int" ,"float", "sprite", "object_id", "shape"):
                         file.write("    arg." + param_name + "." + name + " = level_safe_parse_")
                         file.write(str(types))
                         file.write("(param, \"" + name +"\");\n")
@@ -68,14 +72,50 @@ def levelParse(file, data):
                         file.write("(param, \"" + name +"\"));\n")
             
     file.write("  }\n")
-    file.write("const int paramsize = obj_id->P_SIZE;\n" + 
-               " void * data = calloc(1, paramsize);\n" +
-               "memcpy(data, &arg, paramsize);\n" +
-               "return data;")
+    file.write("  const int paramsize = obj_id->P_SIZE;\n" + 
+               "  void * data = calloc(1, paramsize);\n" +
+               "  memcpy(data, &arg, paramsize);\n" +
+               "  return data;\n")
     file.write("}")
     
 #def writeParse(file, data):
     
+
+def levelWrite(file, data):
+    file.write("cJSON * write_generated(object_id *obj_id, void *data,  char *type, char *name) \n" + 
+               "{\n")
+    file.write("  cJSON *param = cJSON_CreateObject();\n")
+    file.write("  cJSON_AddItemToObject(param, \"type\", cJSON_CreateString(type));\n")
+    file.write("  cJSON_AddItemToObject(param, \"name\", cJSON_CreateString(name));\n")
+   
+   
+    i = 0
+    for index, param in enumerate(data):
+        (param_name, value) = param.items()[0]
+        if index == 0:
+            file.write("  if ")
+        else:
+            file.write("  } else if ")
+        file.write("(obj_id == " +"obj_id_"+ str(param_name) + ") {\n")
+        for instance in value:
+                for types, name in instance.items():
+                    if types in ("int" ,"float", "sprite", "object_id", "shape"):
+                        file.write("    arg." + param_name + "." + name + " = level_safe_parse_")
+                        file.write(str(types))
+                        file.write("(param, \"" + name +"\");\n")
+                    elif types == "char":
+                        file.write("    strcpy(arg." + param_name + "." + name + ", level_safe_parse_")
+                        file.write(str(types))
+                        file.write("(param, \"" + name +"\"));\n")
+            
+    file.write("  }\n")
+    file.write("  const int paramsize = obj_id->P_SIZE;\n" + 
+               "  void * data = calloc(1, paramsize);\n" +
+               "  memcpy(data, &arg, paramsize);\n" +
+               "  return data;\n")
+    file.write("}")
+    
+
 
 def generateParse(file, data):
     print "-----------paramsgen.c-------------"

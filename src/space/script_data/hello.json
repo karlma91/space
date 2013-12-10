@@ -5,7 +5,7 @@
     {"float":"scale"},
     {"float":"texture_scale"},
     {"char":"shape_name"},
-    {"polyshape":"shape_id"}
+    {"shape":"shape_id"}
   ]},
   {"player": [
     {"float":"max_hp"},
@@ -27,11 +27,10 @@
     {"float":"max_hp"},
     {"float":"spawn_delay"},
     {"int":"coins"},
-  	{"object_id":"type"},
     {"char":"param_name"},
-    {"char":"type_name"},
-    {"char":"sprite_name"},
-    {"char":"shape_name"}
+  	{"object_id":"spawn_type"},
+    {"sprite":"sprite"},
+    {"shape":"shape"}
   ]},
   {"turret": [
     {"int":"max_hp"},
@@ -41,7 +40,7 @@
     {"int":"burst_number"},
     {"int":"tex_id"},
     {"char":"shape_name"},
-    {"polyshape":"*shape_id"}
+    {"shape":"shape_id"}
   ]},
   {"rocket": [
     {"float":"max_hp"},

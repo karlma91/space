@@ -32,7 +32,8 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	float size = staticpolygon->scale;
-	polyshape p = staticpolygon->shape_id;
+	polyshape ps = staticpolygon->shape_id;
+	LList p = ps->pshape;
 	llist_begin_loop(p);
 	while (llist_hasnext(p)) {
 		polygon_ins *pi = (polygon_ins*) llist_next(p);

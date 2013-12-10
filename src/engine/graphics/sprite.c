@@ -259,6 +259,10 @@ int sprite_get_texture(SPRITE_ID id)
 {
 	return ((sprite_data*)id)->tex_id;
 }
+char * sprite_get_name(SPRITE_ID id)
+{
+	return ((sprite_data*)id)->name;
+}
 
 sprite_subimg sprite_get_subimg(SPRITE_ID id)
 {

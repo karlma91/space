@@ -24,12 +24,15 @@ static int station_count;
 static level_ship *world;
 
 static char DEF_STRING[10] = "HELLO";
+//TODO: set to a NOT in use sprite.
+static SPRITE_ID DEF_SPRITE = NULL;
+static polyshape DEF_SHAPE = NULL;
 
 
-void str_to_upper(char * str)
+void str_to_lower(char * str)
 {
 	while(*str){
-		*str = toupper(*str);
+		*str = tolower(*str);
 		str++;
 	}
 }
@@ -76,16 +79,26 @@ int level_init(void)
 
 void * level_get_param(hashmap * h, char *type, char * name)
 {
-	hashmap *names = (hashmap*)hm_get(h,type);
+	char l_type[20];
+	char l_name[20];
+
+	strcpy(l_type, type);
+	strcpy(l_name, name);
+
+	str_to_lower(l_type);
+	str_to_lower(l_name);
+
+	hashmap *names = (hashmap*)hm_get(h,l_type);
+
 	if(names) {
-		void *data = hm_get(names, name);
+		void *data = hm_get(names, l_name);
 		if(data){
 			return data;
 		}else{
-			SDL_Log("could not find %s in type %s names", name, type);
+			SDL_Log("LEVEL: could not find %s in type %s names", l_name, l_type);
 		}
 	} else {
-		SDL_Log("Could not find type %s", type);
+		SDL_Log("LEVEL: Could not find type %s", l_type);
 	}
 	return NULL;
 }
@@ -117,6 +130,37 @@ char* level_safe_parse_char(cJSON *param, char *name )
 	SDL_Log("Could not load param char %s", name);
 	return DEF_STRING;
 }
+
+SPRITE_ID level_safe_parse_sprite(cJSON *param, char *name )
+{
+	cJSON *t = cJSON_GetObjectItem(param, name);
+	if (t != NULL) {
+		return sprite_link(t->valuestring);
+	}
+	SDL_Log("Could not load sprite %s", name);
+	return DEF_SPRITE;
+}
+
+polyshape level_safe_parse_shape(cJSON *param, char *name)
+{
+	cJSON *t = cJSON_GetObjectItem(param, name);
+	if(t!=NULL){
+		return shape_read(t->valuestring);
+	}
+	SDL_Log("Could not load shape %s", name);
+	return DEF_SHAPE;
+}
+
+object_id* level_safe_parse_object_id(cJSON *param, char *name)
+{
+	cJSON *t = cJSON_GetObjectItem(param, name);
+	if (t != NULL) {
+			return object_by_name(t->valuestring);
+	}
+	SDL_Log("Could not load object_id %s", name);
+	return NULL;
+}
+
 
 
 /*static void* parse_generated(cJSON *param, char* type, char *name)
@@ -178,8 +222,8 @@ static void parse_param_object(cJSON *param, hashmap * param_list)
 
 	char * type = level_safe_parse_char(param,"type");
 	char * name = level_safe_parse_char(param,"name");
-	str_to_upper(type);
-	str_to_upper(name);
+	str_to_lower(type);
+	str_to_lower(name);
 
 	SDL_Log("PARSING TYPE: %s name: %s ", type, name);
 
@@ -200,8 +244,6 @@ static void parse_param_object(cJSON *param, hashmap * param_list)
 level *level_load(char * filename)
 {
 
-	SDL_Log("PARSING LEVEL : %s", filename);
-	SDL_Log("PARSING LEVEL : %s", filename);
 	SDL_Log("PARSING LEVEL : %s", filename);
 	char file_path[100];
 	sprintf(file_path,"level/%s.json", filename);
@@ -261,8 +303,8 @@ level *level_load(char * filename)
 
 		char *type = cJSON_GetObjectItem(object,"type")->valuestring;
 		char *name = cJSON_GetObjectItem(object,"name")->valuestring;
-		str_to_upper(type);
-		str_to_upper(name);
+		str_to_lower(type);
+		str_to_lower(name);
 
 		SDL_Log("ADDING OBJECT TYPE: %s name: %s ", type, name);
 		cJSON *pos = cJSON_GetObjectItem(object,"pos");
@@ -296,8 +338,8 @@ void level_add_object_recipe_name(level * lvl, const char * obj_type, const char
 	char data_name[32];
 	strcpy(data_name, param_name);
 
-	str_to_upper(data_type);
-	str_to_upper(data_name);
+	str_to_lower(data_type);
+	str_to_lower(data_name);
 	SDL_Log("LEVEL: ADDING %s,  %s", data_type, data_name);
 
 	object_recipe * rec = calloc(1,sizeof(object_recipe));
@@ -360,6 +402,50 @@ void level_unload(level *lvl)
 	free(lvl);
 }
 
+cJSON * write_generated(object_id *obj_id, void *data,  char *type, char *name)
+{
+	cJSON *param = cJSON_CreateObject();
+	//cJSON_AddItemReferenceToArray(param_array, param);
+
+	cJSON_AddItemToObject(param, "type", cJSON_CreateString(type));
+	cJSON_AddItemToObject(param, "name", cJSON_CreateString(name));
+
+	if ( obj_id == obj_id_tank) {
+		obj_param_tank * tank = (obj_param_tank*) data;
+		cJSON_AddNumberToObject(param, "max_hp",tank->max_hp);
+		cJSON_AddNumberToObject(param, "coins",tank->coins);
+	} else if (obj_id == obj_id_turret) {
+		obj_param_turret * turret = (obj_param_turret*) data;
+		cJSON_AddNumberToObject(param, "max_hp",turret->max_hp);
+		cJSON_AddNumberToObject(param, "coins",turret->coins);
+		cJSON_AddNumberToObject(param, "shoot_interval", turret->shoot_interval);
+		cJSON_AddNumberToObject(param, "burst_number",turret->burst_number);
+		cJSON_AddNumberToObject(param, "rot_speed",turret->rot_speed);
+		//cJSON_AddItemToObject(param, "texture_name", cJSON_CreateString(turret->)); TODO: ADD sprite to turret
+	} else if (obj_id == obj_id_rocket) {
+		obj_param_rocket *rocket = (obj_param_rocket*) data;
+		cJSON_AddNumberToObject(param, "max_hp",rocket->max_hp);
+		cJSON_AddNumberToObject(param, "coins",rocket->coins);
+		//cJSON_AddItemToObject(param, "texture_name", cJSON_CreateString(turret->)); TODO: ADD sprite to rocket
+	} else if (obj_id == obj_id_factory) {
+		obj_param_factory *factory = (obj_param_factory *) data;
+		cJSON_AddNumberToObject(param, "max_hp",factory->max_hp);
+		cJSON_AddNumberToObject(param, "coins",factory->coins);
+		cJSON_AddNumberToObject(param, "max_tanks",factory->max_tanks);
+		cJSON_AddNumberToObject(param, "spawn_delay",factory->spawn_delay);
+		cJSON_AddNumberToObject(param, "coins",factory->coins);
+		cJSON *object_spawn = cJSON_CreateObject();
+		cJSON_AddItemToObject(object_spawn, "name", cJSON_CreateString(factory->param_name));
+		cJSON_AddItemToObject(param, "object_spawn", object_spawn);
+	}else if (obj_id == obj_id_robotarm) {
+		obj_param_robotarm * robotarm = (obj_param_robotarm*) data;
+		cJSON_AddNumberToObject(param, "max_hp",robotarm->max_hp);
+		cJSON_AddNumberToObject(param, "coins",robotarm->coins);
+		//cJSON_AddItemToObject(param, "texture_name", cJSON_CreateString(turret->)); TODO: ADD sprite to robotarm
+	}
+	return param;
+}
+
 void level_write_to_file(level *lvl)
 {
 	cJSON *root;//,*fmt;
@@ -379,48 +465,8 @@ void level_write_to_file(level *lvl)
 		while(data != NULL) {
 
 			SDL_Log("Adding param to array");
-			cJSON *param = cJSON_CreateObject();
-			//cJSON_AddItemReferenceToArray(param_array, param);
 
-			cJSON_AddItemToObject(param, "type", cJSON_CreateString(hm_iterator_get_key(it)));
-			cJSON_AddItemToObject(param, "name", cJSON_CreateString(hm_iterator_get_key(it2)));
-
-			if ( obj_id == obj_id_tank) {
-				obj_param_tank * tank = (obj_param_tank*) data;
-				cJSON_AddNumberToObject(param, "max_hp",tank->max_hp);
-				cJSON_AddNumberToObject(param, "coins",tank->coins);
-			} else if (obj_id == obj_id_turret) {
-				obj_param_turret * turret = (obj_param_turret*) data;
-				cJSON_AddNumberToObject(param, "max_hp",turret->max_hp);
-				cJSON_AddNumberToObject(param, "coins",turret->coins);
-				cJSON_AddNumberToObject(param, "shoot_interval", turret->shoot_interval);
-				cJSON_AddNumberToObject(param, "burst_number",turret->burst_number);
-				cJSON_AddNumberToObject(param, "rot_speed",turret->rot_speed);
-				//cJSON_AddItemToObject(param, "texture_name", cJSON_CreateString(turret->)); TODO: ADD sprite to turret
-			} else if (obj_id == obj_id_rocket) {
-				obj_param_rocket *rocket = (obj_param_rocket*) data;
-				cJSON_AddNumberToObject(param, "max_hp",rocket->max_hp);
-				cJSON_AddNumberToObject(param, "coins",rocket->coins);
-				//cJSON_AddItemToObject(param, "texture_name", cJSON_CreateString(turret->)); TODO: ADD sprite to rocket
-			} else if (obj_id == obj_id_factory) {
-				obj_param_factory *factory = (obj_param_factory *) data;
-				cJSON_AddNumberToObject(param, "max_hp",factory->max_hp);
-				cJSON_AddNumberToObject(param, "coins",factory->coins);
-				cJSON_AddNumberToObject(param, "max_tanks",factory->max_tanks);
-				cJSON_AddNumberToObject(param, "spawn_delay",factory->spawn_delay);
-				cJSON_AddNumberToObject(param, "coins",factory->coins);
-				cJSON_AddItemToObject(param, "sprite", cJSON_CreateString(factory->sprite_name));
-				cJSON_AddItemToObject(param, "shape", cJSON_CreateString(factory->shape_name));
-				cJSON *object_spawn = cJSON_CreateObject();
-				cJSON_AddItemToObject(object_spawn, "type", cJSON_CreateString(factory->type_name));
-				cJSON_AddItemToObject(object_spawn, "name", cJSON_CreateString(factory->param_name));
-				cJSON_AddItemToObject(param, "object_spawn", object_spawn);
-			}else if (obj_id == obj_id_robotarm) {
-				obj_param_robotarm * robotarm = (obj_param_robotarm*) data;
-				cJSON_AddNumberToObject(param, "max_hp",robotarm->max_hp);
-				cJSON_AddNumberToObject(param, "coins",robotarm->coins);
-				//cJSON_AddItemToObject(param, "texture_name", cJSON_CreateString(turret->)); TODO: ADD sprite to robotarm
-			}
+			cJSON * param = write_generated(obj_id, data, hm_iterator_get_key(it), hm_iterator_get_key(it2));
 			cJSON_AddItemToArray(param_array, param);
 			data = hm_iterator_next(it2);
 		}

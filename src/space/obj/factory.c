@@ -29,14 +29,12 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	factory->max_distance = 900; //TODO read from object definition
 	//fac->hp = fac->param.max_hp; //TODO FIXME
 
-	factory->spawn_param = level_get_param(currentlvl->param_list, factory->param.type_name, factory->param.param_name);
+	factory->spawn_param = level_get_param(currentlvl->param_list, factory->param.spawn_type->NAME, factory->param.param_name);
 
 	cpFloat size = 375;
-	SPRITE_ID sprite_id = sprite_link(factory->param.sprite_name);
-	factory->param.type = object_by_name(factory->param.type_name);
-	sprite_create(&factory->data.spr, sprite_id, 400, 400, 30);
+	sprite_create(&factory->data.spr, factory->param.sprite, 400, 400, 30);
 
-	if (factory->param.type == obj_id_tank) {
+	if (factory->param.spawn_type == obj_id_tank) {
 		factory->smoke = particles_get_emitter(current_particles, RLAY_GAME_BACK, EMITTER_SMOKE);
 		particles_self_draw(factory->smoke, 1);
 		factory->data.spr.sub_index = rand() & 0x7;
@@ -48,9 +46,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 			cpBodyNew(m, cpMomentForBox(m, size, size)));
 
 	se_velfunc(factory->data.body, 1);
-	polyshape shape = shape_read(factory->param.shape_name);
 
-	shape_add_shapes(current_space, shape, factory->data.body, 400, cpvzero, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
+	shape_add_shapes(current_space, factory->param.shape, factory->data.body, 400, cpvzero, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
 	cpBodySetUserData(factory->data.body, factory);
 
 	init(factory);
@@ -71,7 +68,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 			pos.x += 100;
 			pos = we_pol2cart(pos);
 
-			instance * ins = instance_create(factory->param.type, factory->spawn_param, pos, cpvzero);
+			instance * ins = instance_create(factory->param.spawn_type, factory->spawn_param, pos, cpvzero);
 			COMPONENT_SET(ins, CREATOR, factory);
 			factory->timer = 0;
 			factory->cur += 1;
@@ -128,5 +125,5 @@ static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	particles_release_emitter(factory->smoke);
 	we_body_remove(current_space, &factory->data.body);
-	instance_iterate_type((object_id *) factory->param.type, remove_factory_from_child, factory);
+	instance_iterate_type((object_id *) factory->param.spawn_type, remove_factory_from_child, factory);
 }

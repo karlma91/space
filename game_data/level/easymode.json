@@ -9,10 +9,10 @@
 		  "texture_name": "tank_00.png" },
 		{ "type": "FACTORY", "name": "SMALL",
 		  "max_tanks": 1, "max_hp": 250, "spawn_delay": 5, "coins": 50,
-		  "sprite_name":"factoryblue",
-			"shape_name":"factory.shape",
-			"type_name":"TANK",
-			"param_name":"LIGHT"}
+		  "sprite":"factoryblue",
+		  "shape":"factory.shape",
+		  "type":"TANK",
+		  "param_name":"LIGHT"}
 	],
 	"objects" : [
 		{"type":"FACTORY", "name": "SMALL", "pos": {"x":1200, "y":560, "r": 100}}

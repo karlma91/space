@@ -23,8 +23,10 @@ polyshape shape_read(char *filename)
 		return polys;
 	}
 
-	polys = llist_create();
-	llist_set_remove_callback(polys, rigid_body_remove);
+	polys = calloc(sizeof(*polys), 1);
+	polys->pshape = llist_create();
+	strcpy(polys->name, filename);
+	llist_set_remove_callback(polys->pshape, rigid_body_remove);
 
 	char file_path[100];
 	sprintf(file_path,"shapes/%s", filename);
@@ -66,7 +68,7 @@ polyshape shape_read(char *filename)
 			vertex_array *data = read_vertex_array(vertices);
 			llist_add(pi->outlines, data);
 		}
-		llist_add(polys, pi);
+		llist_add(polys->pshape, pi);
 	}
 	cJSON_Delete(root);
 	hm_add(names, filename, polys);
@@ -93,8 +95,9 @@ static vertex_array* read_vertex_array(cJSON * array)
 	return va;
 }
 
-void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, cpVect offset, float friction, float elasticity, cpGroup group, cpCollisionType type, cpLayers layer, unsigned int shapes)
+void shape_add_shapes(cpSpace *space, polyshape ps, cpBody * body, int size, cpVect offset, float friction, float elasticity, cpGroup group, cpCollisionType type, cpLayers layer, unsigned int shapes)
 {
+	LList p = ps->pshape;
 	if (!p) {
 		SDL_Log("ERROR: polyshape pointer to NULL in add_shapes!");
 		//TODO add a default shape instead

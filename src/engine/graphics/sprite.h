@@ -66,6 +66,8 @@ int sprite_get_texture(SPRITE_ID id);
 void sprite_create(sprite *spr, SPRITE_ID id, int width, int height, float speed);
 sprite_subimg sprite_get_subimg(SPRITE_ID id);
 
+char * sprite_get_name(SPRITE_ID id);
+
 void sprite_set_size(sprite *spr, int width, int height);
 void sprite_set_length(sprite *spr, float length);
 void sprite_set_index(sprite *spr, int index);
