@@ -8,6 +8,7 @@
 #include "../game.h"
 #include "we_defstate.h"
 #include "levelscreen.h"
+#include "../solarsystem.h"
 
 STATE_ID state_stations;
 
@@ -19,6 +20,8 @@ static button btn_editor;
 
 static level_ship *stations;
 static int station_count = 2;
+
+static solarsystem *solsys;
 
 static scroll_p scroller;
 
@@ -164,6 +167,9 @@ static void draw(void)
 	bmfont_center(FONT_SANS, cpvzero,1,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
 	draw_pop_matrix();
 
+	solarsystem_draw(solsys);
+
+	/*
 	float f = 1/2.0;
 	float size_dither = (engine_time*f - floor(engine_time*f) - 0.5)*(engine_time*f - floor(engine_time*f) - 0.5)*10;
 	cpVect sun_size = {400+size_dither,400+size_dither};
@@ -179,15 +185,7 @@ static void draw(void)
     static Color sun_glow = {0xff,0xa0,0x70,0x80};
     static Color sun_add1 = {0x90,0x80,0x40,0x00};
     static Color sun_add2 = {0xb0,0x70,0x40,0x00};
-	draw_color(sun_base);
-	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 0, cpvzero, sun_size, 0);
-	draw_color(sun_glow);
-	sprite_render_index_by_id(RLAY_GAME_BACK, SPRITE_GLOW, 0, cpvzero, cpvmult(sun_size,2), 0);
-	draw_color(sun_add1);
-	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 1, cpvzero, sun_size, a_sun_add1);
-	draw_color(sun_add2);
-	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 2, cpvzero, sun_size, a_sun_add2);
-    
+
     static Color sun2_glow = {0xe0,0xa0,0x70,0x80};
     static Color sun2_add1 = {0x40,0x80,0x90,0x00};
     static Color sun2_add2 = {0x40,0x70,0xb0,0x00};
@@ -203,6 +201,7 @@ static void draw(void)
 	draw_color(sun2_add2);
 	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 2, cpvzero, sun_size, a_sun_add2);
     draw_pop_matrix();
+    */
 }
 
 static void button_callback(void *data)
@@ -247,7 +246,6 @@ void stations_init(void)
 
 	main_view = state_view_get(state_stations, 0);
 
-	spr_sun = sprite_link("sun01");
 	btn_home = button_create(NULL, 0, "Upgrades", -GAME_WIDTH/4, -GAME_HEIGHT/2 + 80, 200, 200);
 	button_set_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
@@ -320,6 +318,16 @@ void stations_init(void)
 			col2.a = 0;
 			state_add_dualsprite(state_stations, layer, spr, pos, cpv(size,size), col1, col2);
 		}
+	}
+
+	//TMP add solar systems
+	spr_sun = sprite_link("sun01");
+    static Color base = {0x70,0x30,0x30,0xff};
+    static Color glow = {0xff,0xa0,0x70,0x80};
+    static Color add1 = {0x90,0x80,0x40,0x00};
+    static Color add2 = {0xb0,0x70,0x40,0x00};
+	for (i=0; i<100; i++) {
+		solsys = solarsystem_create(main_view, i, 400 + we_randf*1600, spr_sun, base, glow, add1, add2);
 	}
 
 	sound_testing();
