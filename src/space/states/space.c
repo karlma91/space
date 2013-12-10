@@ -404,6 +404,7 @@ static void draw_gui(view *cam)
 				instance_count(obj_id_tank));
 
 #if !ARCADE_MODE
+		draw_color4f(1.0,0.4,0.4,1);
 		bmfont_right(FONT_SANS, cpv(vright-15, vtop-40), 0.5, fps_buf);
 #endif
 		if (!multiplayer) {

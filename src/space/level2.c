@@ -70,6 +70,8 @@ int level_init(void)
 			SDL_Log("Error while loading level data, could not load all stations! (%d of %d loaded)\n", i, station_count);
 			exit(2);
 		}
+    
+    return 1;
 }
 
 void * level_get_param(hashmap * h, char *type, char * name)
@@ -360,7 +362,7 @@ void level_unload(level *lvl)
 
 void level_write_to_file(level *lvl)
 {
-	cJSON *root,*fmt;
+	cJSON *root;//,*fmt;
 	root = cJSON_CreateObject();
 	cJSON_AddItemToObject(root, "name", cJSON_CreateString(lvl->name));
 	cJSON_AddItemToObject(root, "tilemap", cJSON_CreateString("level02_01.tmx"));

@@ -32,13 +32,13 @@ static float r;
 
 static view *main_view;
 
+/*
 enum {
 	A,
 	C,
 	E,
 	NOTE_COUNT
 };
-
 static Mix_Chunk *note[NOTE_COUNT];
 
 static int tone_index1 = 0, tone_index2 = 0, tone_index3 = 0;
@@ -78,7 +78,7 @@ static tone score3[TONE_COUNT] = {
 		{C, 250},
 		{A, 250}
 };
-
+*/
 void loop_end(int channel)
 {
 	/*
@@ -159,9 +159,9 @@ static void draw(void)
 	//draw_box(1, a, b, r, 1);
 
 	draw_push_matrix();
-	draw_translate(1800,-1550);
+	draw_translate(1900,-1750);
 	draw_rotate(-current_view->rotation);
-	bmfont_center(FONT_SANS, cpvzero,1,"SPACE (working title)\nETA: Feb 2014\n\nCREDITS:\nMathias Wilhelmsen\nKarl Magnus Kalvik");
+	bmfont_center(FONT_SANS, cpvzero,1,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
 	draw_pop_matrix();
 
 	float f = 1/2.0;
@@ -187,6 +187,22 @@ static void draw(void)
 	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 1, cpvzero, sun_size, a_sun_add1);
 	draw_color(sun_add2);
 	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 2, cpvzero, sun_size, a_sun_add2);
+    
+    static Color sun2_glow = {0xe0,0xa0,0x70,0x80};
+    static Color sun2_add1 = {0x40,0x80,0x90,0x00};
+    static Color sun2_add2 = {0x40,0x70,0xb0,0x00};
+    draw_push_matrix();
+    draw_translate(6000, 2000);
+    draw_scale(5, 5);
+	draw_color(sun_base);
+	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 0, cpvzero, sun_size, 0);
+	draw_color(sun2_glow);
+	sprite_render_index_by_id(RLAY_GAME_BACK, SPRITE_GLOW, 0, cpvzero, cpvmult(sun_size,2), 0);
+	draw_color(sun2_add1);
+	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 1, cpvzero, sun_size, a_sun_add1);
+	draw_color(sun2_add2);
+	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 2, cpvzero, sun_size, a_sun_add2);
+    draw_pop_matrix();
 }
 
 static void button_callback(void *data)
@@ -266,7 +282,7 @@ void stations_init(void)
 
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 1, 0); // max 4 000 gu / sec
 	scroll_set_bounds(scroller, cpBBNew(-GAME_WIDTH*2-200, -GAME_HEIGHT*2-200, GAME_WIDTH*2+200, GAME_HEIGHT*2+200));
-	scroll_set_zoomlimit(scroller, 0.3, 2);
+	scroll_set_zoomlimit(scroller, 0.1, 2);
 	state_register_touchable_view(main_view, scroller);
 
 	state_add_layers(state_stations, 22);

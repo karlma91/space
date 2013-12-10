@@ -17,6 +17,8 @@ LList font_list;
 #define FILE_BUFFER_SIZE 16384
 static char buffer[FILE_BUFFER_SIZE];
 
+#define is_utf8_0xCX(chr) ((((chr) & 0xF0) ^ 0xC0) == 0)
+
 static void flush_line(bm_font *font, float text_width, float x, float y);
 
 void bmfont_init(void)
@@ -71,10 +73,9 @@ bm_font * bmfont_read_font(char *filename)
     		parse_int(node,"count",&(count));
     	}else if(TESTNAME("char")){
     		int id = 0;
-    		bm_char *c;
     		parse_int(node,"id",&(id));
-    		c = &(f->chars[id]);
-    		if(id < 256){
+    		if(id <= 0xFFFF){
+    			bm_char *c = &(f->chars[id]);
     			c->id = id;
     			parse_int(node,"x",&(c->x));
     			parse_int(node,"y",&(c->y));
@@ -83,7 +84,7 @@ bm_font * bmfont_read_font(char *filename)
     			parse_int(node,"xoffset",&(c->x_offset));
     			parse_int(node,"yoffset",&(c->y_offset));
     			parse_int(node,"xadvance",&(c->x_advance));
-    		}
+            }
 
     	}
     }
@@ -92,13 +93,18 @@ bm_font * bmfont_read_font(char *filename)
 }
 
 
-static int get_line_width(bm_font *font, char * text) {
+static int get_line_width(bm_font *font, unsigned const char * text) {
 	int width = 0;
 	while(*text != '\n' && *text != '\0') {
 		if(*text == ' ') {
 			width += 16;
+		} else if (is_utf8_0xCX(*text)) { // utf-8 two byte character
+			int chr = *text << 8;
+			chr |= *++text;
+			bm_char *c = &(font->chars[chr]);
+			width += (c->x_advance);
 		} else {
-			bm_char * c = &(font->chars[*text]);
+			bm_char * c = &(font->chars[*text]); //TODO support æøåÆØÅ!
 			width += (c->x_advance);
 		}
 		text++;
@@ -125,31 +131,31 @@ static void draw_char(bm_font *f, bm_char *c)
     draw_translate(c->x_advance,0);
 }
 
-void bmfont_left(bm_font *font, cpVect pos, float scale, char *format, ...)
+void bmfont_left(bm_font *font, cpVect pos, float scale, const char *format, ...)
 {
     if (!format || format[0] == '\0') return;
     char text[BMFONT_MAXLEN];
     va_list ap; va_start(ap, format); vsnprintf(text, BMFONT_MAXLEN, format, ap); va_end(ap);
-    bmfont_render(font, BMFONT_LEFT,pos.x,pos.y,scale,text);
+    bmfont_render(font, BMFONT_LEFT,pos.x,pos.y,scale,(unsigned char *)text);
 }
 
-void bmfont_center(bm_font *font, cpVect pos, float scale, char *format, ...)
+void bmfont_center(bm_font *font, cpVect pos, float scale, const char *format, ...)
 {
     if (!format || format[0] == '\0') return;
     char text[BMFONT_MAXLEN];
     va_list ap; va_start(ap, format); vsnprintf(text, BMFONT_MAXLEN, format, ap); va_end(ap);
-    bmfont_render(font, BMFONT_CENTER,pos.x,pos.y,scale,text);
+    bmfont_render(font, BMFONT_CENTER,pos.x,pos.y,scale,(unsigned char *)text);
 }
 
-void bmfont_right(bm_font *font, cpVect pos, float scale, char *format, ...)
+void bmfont_right(bm_font *font, cpVect pos, float scale, const char *format, ...)
 {
     if (!format || format[0] == '\0') return;
     char text[BMFONT_MAXLEN];
     va_list ap; va_start(ap, format); vsnprintf(text, BMFONT_MAXLEN, format, ap); va_end(ap);
-    bmfont_render(font, BMFONT_RIGHT,pos.x,pos.y,scale,text);
+    bmfont_render(font, BMFONT_RIGHT,pos.x,pos.y,scale,(unsigned char *)text);
 }
 
-void bmfont_render(bm_font *font, int align, float x, float y, float scale, char *text)
+void bmfont_render(bm_font *font, int align, float x, float y, float scale, unsigned const char *text)
 {
     int line_width = get_line_width(font, text);
 
@@ -186,6 +192,11 @@ void bmfont_render(bm_font *font, int align, float x, float y, float scale, char
             draw_translate(0, -font->line_height);
         } else if (text[i] == '\0') {
         	break;
+        } else if (is_utf8_0xCX(text[i])) { // utf-8 two byte character
+        	int chr = text[i] << 8 | text[i+1];
+            bm_char * c = &(font->chars[chr]);
+            draw_char(font, c);
+            i++;
         } else if (text[i] != ' ') {
             bm_char * c = &(font->chars[(int)text[i]]);
             draw_char(font, c);

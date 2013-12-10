@@ -62,7 +62,7 @@ typedef struct drawbl_dualspr {
 	Color col1, col2;
 	int anti_rotation;
 } drawbl_dualspr;
-draw_dualsprite(int layer, drawbl_dualspr *dualspr);
+void draw_dualsprite(int layer, drawbl_dualspr *dualspr);
 
 static inline Color RGBAColor4b(byte r, byte g, byte b, byte a)
 {

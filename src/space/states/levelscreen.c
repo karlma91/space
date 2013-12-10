@@ -18,16 +18,16 @@ STATE_ID state_levelscreen;
 static button start_level;
 
 static Color col_default = {255,255,255,255};
-static Color col_selected= {0,255,0,255};
+//static Color col_selected= {0,255,0,255};
 
 static button btn_disable;
 static button btn_background;
 
-static int level_count = 0;
+//static int level_count = 0;
 
 static rect box = {{0,0}, {1000,800}};
 
-static float w = 150;
+//static float w = 150;
 static float h = 150;
 
 static sprite spr_star;

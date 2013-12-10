@@ -28,6 +28,7 @@ static const int char_count = 37; /* valid_char length*/
 static enum gameover_state gameover_state = enter_name;
 
 #if ARCADE_MODE
+static Color color;
 static void draw_highscore(int);
 
 static char input[MAX_NAME_LENGTH+1] = "A  ";
@@ -112,8 +113,8 @@ static int sdl_event(SDL_Event *event)
 		}
 		break;
 	}
-	return 0;
 #endif
+	return 0;
 }
 
 void gameover_init(void)
@@ -190,7 +191,6 @@ static void pre_update(void) {
 	}
 #endif
 }
-static Color color;
 
 static void draw(void)
 {

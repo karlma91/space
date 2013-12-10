@@ -64,7 +64,7 @@ typedef enum EDITOR_MODE {
 	 */
 } editor_mode;
 
-static editor_mode current_mode = MODE_OBJECTS_ADD;
+//static editor_mode current_mode = MODE_OBJECTS_ADD;
 
 
 #define EDITOR_OBJECT_COUNT 6
@@ -122,7 +122,7 @@ static void start_editor_level(void *unused)
 
 static void save_level_to_file(void *unused)
 {
-	level_write_to_file(lvl);
+	//level_write_to_file(lvl);
 }
 
 static void select_object_type(void *index)
@@ -448,7 +448,7 @@ static void draw(void)
 static int sdl_event(SDL_Event *event)
 {
 	SDL_TouchFingerEvent *finger = &event->tfinger;
-	SDL_Scancode key;
+	//SDL_Scancode key;
 	cpVect pos;
 	pos = view_touch2world(view_editor, cpv(finger->x, finger->y));
 

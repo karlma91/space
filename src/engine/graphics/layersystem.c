@@ -135,7 +135,7 @@ void state_add_dualsprite(STATE_ID state_id, int layer, SPRITE_ID spr_id, cpVect
 	dualspr.size = size;
 	dualspr.spr_id = spr_id;
 	dualspr.anti_rotation = 1;
-	state_add_drawable(state_id, layer, draw_dualsprite, &dualspr, sizeof dualspr);
+	state_add_drawable(state_id, layer, (draw_callback)draw_dualsprite, &dualspr, sizeof dualspr);
 }
 
 void state_add_sprite(STATE_ID state_id, int layer, SPRITE_ID id, float w, float h, cpVect p, float a, Color col)
@@ -146,7 +146,7 @@ void state_add_sprite(STATE_ID state_id, int layer, SPRITE_ID id, float w, float
 	sprx.col = col;
 	sprite_create(&(sprx.spr), id, w, h, 30);
 	sprite_set_index_normalized(&(sprx.spr), we_randf);
-	state_add_drawable(state_id, layer, draw_sprite_ext, &sprx, sizeof sprx);
+	state_add_drawable(state_id, layer, (draw_callback)draw_sprite_ext, &sprx, sizeof sprx);
 }
 
 int TMP_DRAW_CALLS = 0;

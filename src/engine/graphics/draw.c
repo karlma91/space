@@ -503,7 +503,7 @@ void draw_current_texture_append(int layer, cpVect pos, const float *tex_map, cp
 	draw_pop_matrix();
 }
 
-draw_dualsprite(int layer, drawbl_dualspr *dualspr)
+void draw_dualsprite(int layer, drawbl_dualspr *dualspr)
 {
 	float angle = dualspr->anti_rotation ? -current_view->rotation : 0;
 

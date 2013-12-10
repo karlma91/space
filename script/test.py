@@ -47,8 +47,7 @@ def levelParse(file, data):
         param_name = param.keys()[0]
         file.write("      " + papre  + str(param_name) + " " + str(param_name) + ";\n" )
     file.write("  } arg;\n" +
-               "  strcpy((char*) &arg, name);\n"+
-               "cJSON * object_spawn = NULL;\n")
+               "  strcpy((char*) &arg, name);\n")
     i = 0
     for index, param in enumerate(data):
         (param_name, value) = param.items()[0]

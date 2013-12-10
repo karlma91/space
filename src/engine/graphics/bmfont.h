@@ -4,7 +4,7 @@
 #define BMFONT_LEFT 0
 #define BMFONT_CENTER 1
 #define BMFONT_RIGHT 2
-#define BMFONT_MAXLEN 256
+#define BMFONT_MAXLEN (1024*10)
 
 typedef struct _bm_char{
     int id;
@@ -27,17 +27,17 @@ typedef struct _bm_font{
     int         tex_h;
     int         tex_id;
     SPRITE_ID   spr_id;
-    bm_char     chars[256];
+    bm_char     chars[0x10000];
     float       mmat[16];
 } bm_font;
 
 bm_font * bmfont_read_font(char *filename);
 void bmfont_init(void);
 
-void bmfont_left(bm_font *font, cpVect pos, float scale, char *format, ...);
-void bmfont_center(bm_font *font, cpVect pos, float scale, char *format, ...);
-void bmfont_right(bm_font *font, cpVect pos, float scale, char *format, ...);
-void bmfont_render(bm_font *font, int align, float x, float y, float scale, char *text);
+void bmfont_left(bm_font *font, cpVect pos, float scale, const char *format, ...);
+void bmfont_center(bm_font *font, cpVect pos, float scale, const char *format, ...);
+void bmfont_right(bm_font *font, cpVect pos, float scale, const char *format, ...);
+void bmfont_render(bm_font *font, int align, float x, float y, float scale, unsigned const char *text);
 
 
 #endif

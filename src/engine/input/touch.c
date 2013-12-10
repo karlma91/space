@@ -10,7 +10,7 @@
 
 #include "touch.h"
 #include "we_utils.h"
-
+#include "SDL.h"
 
 static void update_touch_region(touchable *t)
 {
