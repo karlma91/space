@@ -21,7 +21,8 @@ static button btn_editor;
 static level_ship *stations;
 static int station_count = 2;
 
-static solarsystem *solsys;
+#define SOLSYS_COUNT 25
+static solarsystem *solsys[SOLSYS_COUNT];
 
 static scroll_p scroller;
 
@@ -167,7 +168,10 @@ static void draw(void)
 	bmfont_center(FONT_SANS, cpvzero,1,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
 	draw_pop_matrix();
 
-	solarsystem_draw(solsys);
+	int i;
+	for (i=0; i<SOLSYS_COUNT; i++) {
+		solarsystem_draw(solsys[i]);
+	}
 
 	/*
 	float f = 1/2.0;
@@ -235,6 +239,7 @@ static void open_editor(void *unused)
 
 void stations_init(void)
 {
+	srand(0x9b3a09fa);
 	statesystem_register(state_stations, 0);
 
 	level_get_ships(&stations, &station_count);
@@ -262,7 +267,11 @@ void stations_init(void)
 	for (i = 0; i < station_count; i++) {
 		char stri[10];
 		sprintf(stri, "%d", i+1);
-		float size = 350 + (i ? -50 : 50);
+		float size = 300 + we_randf * 100;
+		cpFloat radius = (i+2) * 450;
+		cpFloat angle = WE_2PI * we_randf;
+		stations[i].pos = WE_P2C(radius,angle);
+
 		btn_stations[i] = button_create(SPRITE_STATION001, 0, stations[i].level_name, stations[i].pos.x,stations[i].pos.y, size, size);
 		button_set_callback(btn_stations[i], button_callback, &stations[i]);
 		button_set_txt_antirot(btn_stations[i], 1);
@@ -279,8 +288,9 @@ void stations_init(void)
 	state_register_touchable_view(main_view, btn_settings);
 
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 1, 0); // max 4 000 gu / sec
-	scroll_set_bounds(scroller, cpBBNew(-GAME_WIDTH*2-200, -GAME_HEIGHT*2-200, GAME_WIDTH*2+200, GAME_HEIGHT*2+200));
-	scroll_set_zoomlimit(scroller, 0.1, 2);
+	scroll_set_bounds(scroller, cpBBNew(-60000, -60000, 60000, 60000));
+	scroll_set_zoomlimit(scroller, 0.01, 1);
+	scroll_set_zoom(scroller,0.5);
 	state_register_touchable_view(main_view, scroller);
 
 	state_add_layers(state_stations, 22);
@@ -294,16 +304,16 @@ void stations_init(void)
 	}
 
 	SPRITE_ID spr = sprite_link("starcross01");
-	for(i = 0; i < 500; i++){
+	for(i = 0; i < 2000; i++){
         Color col1 = {255,255,255,0};
         Color col2 = {0,0,0,0};
 		int layer =  11 + roundf((1-we_randf*we_randf)*(layers-1-11));
-		float size = 250 + we_randf*90 - layer*4;
+		float size = 850 + we_randf*190 - layer*4;
 		//byte l = 255 - 200 * layer / layers;
 		//col = {l,l,l,255};
 		float rand_x = we_randf;
 		float rand_y = we_randf;
-		cpVect pos = cpvmult(cpv(rand_x-0.5,rand_y-0.5),30000);
+		cpVect pos = cpvmult(cpv(rand_x-0.5,rand_y-0.5),400000);
 		float f = minf(rand_x*0.6 + 0.4*rand_y*(0.9+0.1*rand_x), 1);
 		//col2.g = 255*(f);
 		//col2.b = 255*(1-f);
@@ -322,12 +332,13 @@ void stations_init(void)
 
 	//TMP add solar systems
 	spr_sun = sprite_link("sun01");
-    static Color base = {0x70,0x30,0x30,0xff};
-    static Color glow = {0xff,0xa0,0x70,0x80};
-    static Color add1 = {0x90,0x80,0x40,0x00};
-    static Color add2 = {0xb0,0x70,0x40,0x00};
-	for (i=0; i<100; i++) {
-		solsys = solarsystem_create(main_view, i, 400 + we_randf*1600, spr_sun, base, glow, add1, add2);
+	for (i=0; i<SOLSYS_COUNT; i++) {
+		float rnd = rand() & 0x1f;
+		Color base = {0x70-rnd,0x30,0x30+rnd,0xff};
+		Color glow = {0xff-rnd,0xa0,0x70+rnd,0x80};
+		Color add1 = {0x90-rnd,0x80,0x40+rnd,0x00};
+		Color add2 = {0xb0-rnd,0x70,0x40+rnd,0x00};
+		solsys[i] = solarsystem_create(main_view, i, (500 + we_randf*(i*1500/SOLSYS_COUNT + (i>1?1000:0)) + 300*i/SOLSYS_COUNT), spr_sun, base, glow, add1, add2);
 	}
 
 	sound_testing();

@@ -5,14 +5,19 @@
 solarsystem *solarsystem_create(view *cam, int solsys_index, float star_size, SPRITE_ID star_spr, Color star_base, Color star_glow, Color star_add1, Color star_add2)
 {
 	solarsystem *solsys = (solarsystem *)calloc(1, sizeof *solsys);
-
 	solsys->cam = cam;
 	solsys->index = solsys_index;
 
-	cpFloat radius = solsys_index*solsys_index * 6500;
-	cpFloat angle = WE_2PI * solsys_index / 17.371;
+	int i = solsys_index + 2;
+	cpFloat radius = powf(i, 0.8) * 4800;
+	cpFloat angle = WE_2PI * powf(i, 0.8) / 3.768226535;//  + we_randf / 50);
+	i = 2;
+	cpFloat off_radius = powf(i, 0.8) * 4800;
+	cpFloat off_angle = WE_2PI * powf(i, 0.8) / 3.768226535;//  + we_randf / 50);
 
-	solsys->origo = WE_P2C(radius,angle);
+	cpVect jitter = cpvmult(cpv(we_randf - 0.5, we_randf - 0.5), 100);
+	cpVect offset = WE_P2C(off_radius, off_angle);
+	solsys->origo = cpvsub(cpvadd(WE_P2C(radius,angle), jitter), offset);
 
 	solsys->station_count = 0;
 	solsys->sun.size = star_size;
@@ -22,6 +27,7 @@ solarsystem *solarsystem_create(view *cam, int solsys_index, float star_size, SP
 	solsys->sun.add2 = star_add2;
 	solsys->sun.pos = solsys->origo;
 	solsys->sun.spr_id = star_spr;
+	solsys->sun.angvel = 0.03;
 
 	return solsys;
 }
@@ -31,14 +37,14 @@ void solarsystem_add_station(SPRITE_ID spr_id)
 //TODO implement stations
 }
 
-void solarsystem_update(solarsystem *sun)
+void solarsystem_update(solarsystem *solsys)
 {
 
 }
 
-void solarsystem_draw(solarsystem *sun)
+void solarsystem_draw(solarsystem *solsys)
 {
-	sun_render(RLAY_GAME_BACK, sun);
+	sun_render(RLAY_GAME_BACK, &solsys->sun);
 }
 
 
