@@ -67,10 +67,11 @@ typedef enum EDITOR_MODE {
 //static editor_mode current_mode = MODE_OBJECTS_ADD;
 
 
-#define EDITOR_OBJECT_COUNT 6
+#define EDITOR_OBJECT_COUNT 7
 
 //TODO show actual objects in list
 static char object_names[EDITOR_OBJECT_COUNT][32] = {
+		"staticpolygon",
 		"TANK",
 		"FACTORY",
 		"FACTORY",
@@ -78,6 +79,7 @@ static char object_names[EDITOR_OBJECT_COUNT][32] = {
 		"ROCKET",
 		"ROBOTARM"};
 static char param_names[EDITOR_OBJECT_COUNT][32] = {
+		"def",
 		"DEF",
 		"DEF",
 		"DEF_RAMP",
@@ -86,6 +88,7 @@ static char param_names[EDITOR_OBJECT_COUNT][32] = {
 		"DEF"};
 
 static char sprite_names[EDITOR_OBJECT_COUNT][32] = {
+		"turretgun001",
 		"tankbody001",
 		"factoryblue",
 		"ramp",
@@ -122,7 +125,9 @@ static void start_editor_level(void *unused)
 
 static void save_level_to_file(void *unused)
 {
-	//level_write_to_file(lvl);
+	llist_clear(lvl->level_data);
+	instance_iterate(update_instances, NULL);
+	level_write_to_file(lvl);
 }
 
 static void select_object_type(void *index)
@@ -158,18 +163,6 @@ static void tap_clear_editor(void *unused)
 	view_update(view_editor, p, 0);
 	remove_tool = 0;
 	enable_objlist(!remove_tool);
-
-
-	// TODO: REMOVE TMP CODE
-	obj_param_staticpolygon polytest = {
-			.tex_name = "metal01"TEX_FORMAT,
-			.outline = 1,
-			.scale = 700,
-			.texture_scale = 1,
-	};
-	polytest.shape_id = POLYSHAPE_TURRET;
-	polytest.texture_scale = 0.4;
-	instance_create(obj_id_staticpolygon, &polytest, cpv(0,800), cpvzero);
 }
 
 static void tap_delete_click(void *unused)

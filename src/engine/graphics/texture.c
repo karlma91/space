@@ -119,6 +119,7 @@ int texture_load(const char *file)
 	int filesize = waffle_read_file(filepath, buffer, MAX_IMAGE_BUFFER);
 	if (!filesize) {
 		SDL_Log("ERROR: Unable to find texture: %s", file);
+		return 1;
 	}
 
 	rw = SDL_RWFromMem(&buffer[0], filesize);

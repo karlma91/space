@@ -211,7 +211,7 @@ void finger_release_all(void)
 		fingers[i].touch_id = -1;
 	}
 	touch_count = 0;
-	fprintf(stderr, "all bindings removed\n");
+	fprintf(stderr, "TOUCH: all bindings removed\n");
 }
 
 /* unbinds the given unique_touch_id */

@@ -4,17 +4,23 @@
 	"timelimit": 100,
 	
 	"params" : [
-		{ "type": "TANK", "name":"LIGHT", 
-		  "max_hp":250, "coins":50,
-		  "texture_name": "tank_00.png" },
-		{ "type": "FACTORY", "name": "SMALL",
-		  "max_tanks": 1, "max_hp": 250, "spawn_delay": 5, "coins": 50,
+		{ "type": "tank", 
+		  "name":"light", 
+		  "max_hp":250, 
+		  "coins":50,
+		  "texture_name": "tank_00.png" 
+		},
+		{ "type": "factory", "name": "small",
+		  "max_tanks": 1, 
+		  "max_hp": 250, 
+		  "spawn_delay": 5, 
+		  "coins": 50,
 		  "sprite":"factoryblue",
 		  "shape":"factory.shape",
-		  "type":"TANK",
-		  "param_name":"LIGHT"}
+		  "spawn_type":"tank",
+		  "param_name":"light"}
 	],
 	"objects" : [
-		{"type":"FACTORY", "name": "SMALL", "pos": {"x":1200, "y":560, "r": 100}}
+		{"type":"factory", "name": "small", "pos": {"x":1200, "y":560, "r": 100}}
 	]
 }

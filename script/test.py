@@ -13,6 +13,7 @@ def generateParams(file, data):
                 "#include \"../level.h\"\n" +
                 "#define MAX_STRING_SIZE 64\n\n")
     file.write("void* parse_generated(cJSON *param, char* type, char *name); \n")
+    file.write("cJSON * write_generated(object_id * obj_id, void *data, char *type, char *name); \n")
     
     param_list = []
     # OBJECT_DECLARE generate
@@ -63,11 +64,11 @@ def levelParse(file, data):
         for instance in value:
                 for types, name in instance.items():
                     if types in ("int" ,"float", "sprite", "object_id", "shape"):
-                        file.write("    arg." + param_name + "." + name + " = level_safe_parse_")
+                        file.write("     arg." + param_name + "." + name + " = level_safe_parse_")
                         file.write(str(types))
                         file.write("(param, \"" + name +"\");\n")
                     elif types == "char":
-                        file.write("    strcpy(arg." + param_name + "." + name + ", level_safe_parse_")
+                        file.write("     strcpy(arg." + param_name + "." + name + ", level_safe_parse_")
                         file.write(str(types))
                         file.write("(param, \"" + name +"\"));\n")
             
@@ -76,12 +77,12 @@ def levelParse(file, data):
                "  void * data = calloc(1, paramsize);\n" +
                "  memcpy(data, &arg, paramsize);\n" +
                "  return data;\n")
-    file.write("}")
+    file.write("}\n")
     
 #def writeParse(file, data):
     
 
-def levelWrite(file, data):
+def writeParse(file, data):
     file.write("cJSON * write_generated(object_id *obj_id, void *data,  char *type, char *name) \n" + 
                "{\n")
     file.write("  cJSON *param = cJSON_CreateObject();\n")
@@ -97,23 +98,30 @@ def levelWrite(file, data):
         else:
             file.write("  } else if ")
         file.write("(obj_id == " +"obj_id_"+ str(param_name) + ") {\n")
+        file.write("    obj_param_" + str(param_name) + " * " + str(param_name))
+        file.write(" = (obj_param_" + str(param_name) + "*) data;\n")
         for instance in value:
                 for types, name in instance.items():
-                    if types in ("int" ,"float", "sprite", "object_id", "shape"):
-                        file.write("    arg." + param_name + "." + name + " = level_safe_parse_")
-                        file.write(str(types))
-                        file.write("(param, \"" + name +"\");\n")
-                    elif types == "char":
-                        file.write("    strcpy(arg." + param_name + "." + name + ", level_safe_parse_")
-                        file.write(str(types))
-                        file.write("(param, \"" + name +"\"));\n")
+                    if types in ("int" ,"float"):
+                        file.write("    cJSON_AddNumberToObject(param,")
+                        file.write( "\"" + name + "\"," + param_name + "->" + name + ");\n")
+                    elif type == "char":
+                       file.write("    cJSON_AddItemToObject(param,")
+                       file.write( "\"" + name + "\",cJSON_CreateString(" + param_name + "->" + name + "));\n")
+                    elif types == "sprite":
+                       file.write("    cJSON_AddItemToObject(param,")
+                       file.write( "\"" + name + "\",cJSON_CreateString(sprite_get_name(" + param_name + "->" + name + ")));\n")
+                    elif types == "shape":
+                       file.write("    cJSON_AddItemToObject(param,")
+                       file.write( "\"" + name + "\",cJSON_CreateString(" + param_name + "->" + name + "->name));\n")
+                    elif types == "object_id":
+                       file.write("    cJSON_AddItemToObject(param,")
+                       file.write( "\"" + name + "\",cJSON_CreateString(" + param_name + "->" + name + "->NAME));\n")
+                        
             
     file.write("  }\n")
-    file.write("  const int paramsize = obj_id->P_SIZE;\n" + 
-               "  void * data = calloc(1, paramsize);\n" +
-               "  memcpy(data, &arg, paramsize);\n" +
-               "  return data;\n")
-    file.write("}")
+    file.write("  return param;\n")
+    file.write("}\n")
     
 
 
@@ -122,8 +130,9 @@ def generateParse(file, data):
     file.write("/* GENERATED FILE DO NOT CHANGE */\n")
     file.write("\n")
     file.write("#include \"paramsgen.h\"\n")
+    file.write("#include \"we.h\"\n")
     levelParse(file,data)
-#    writeParse(file,data)
+    writeParse(file,data)
     file.close()
 
 f = open(game + 'script_data/hello.json')

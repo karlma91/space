@@ -54,4 +54,6 @@ static inline void we_error(char * msg)
 	raise(SIGSEGV);
 }
 
+void strtolower(char *to, const char *from);
+
 #endif /* WE_UTILS_H_ */

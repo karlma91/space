@@ -4,12 +4,10 @@
     {"int":"outline"},
     {"float":"scale"},
     {"float":"texture_scale"},
-    {"char":"shape_name"},
     {"shape":"shape_id"}
   ]},
   {"player": [
     {"float":"max_hp"},
-    {"int":"tex_id"},
     {"int":"player_id"},
     {"float":"gun_cooldown"},
     {"float":"cash_radius"}
@@ -38,14 +36,11 @@
     {"float":"rot_speed"},
     {"float":"shoot_interval"},
     {"int":"burst_number"},
-    {"int":"tex_id"},
-    {"char":"shape_name"},
     {"shape":"shape_id"}
   ]},
   {"rocket": [
     {"float":"max_hp"},
     {"int":"coins"},
-    {"int":"tex_id"},
     {"float":"force"},
     {"float":"damage"}
   ]},

@@ -6,6 +6,7 @@
  */
 
 #include "sprite.h"
+#include "we_utils.h"
 #include "../data/llist.h"
 #include "../engine.h"
 #include "texture.h"
@@ -118,15 +119,6 @@ int sprite_packload(const char* spritepack)
 	}
 
 	return 0;
-}
-
-void strtolower(char *to, const char *from)
-{
-	int i;
-	for (i=0; from[i]; i++) {
-		to[i] = tolower(from[i]);
-	}
-	to[i] = '\0';
 }
 
 SPRITE_ID sprite_add_subimg(int tex_id, const char *spr_name, sprite_subimg subimg, int index)

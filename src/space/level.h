@@ -55,6 +55,8 @@ extern void level_unload(level *lvl);
 extern void level_destroy(void);
 extern void level_get_ships(level_ship **,int *);
 
+void level_write_to_file(level *lvl);
+
 extern int level_get_station_count(void);
 extern int level_get_level_count(int station);
 
