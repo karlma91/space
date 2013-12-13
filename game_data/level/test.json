@@ -16,7 +16,7 @@
 			"sprite_name":"factoryblue",
 			"shape_name":"factory.shape",
 			"type_name":"TANK",
-			"param_name":"DEF"}
+			"param_name":"LIGHT"}
 	],
 	"objects" : [
 		{"type":"FACTORY", "name": "SMALL", "pos": {"x":1200, "y":560, "r": 100}},
