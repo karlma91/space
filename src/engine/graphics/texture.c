@@ -42,7 +42,7 @@ static int tex_counter = 0; //textures goes from 1 and up
 char *buffer = NULL;
 
 static GLenum GL_ENUM_TYPE = GL_UNSIGNED_BYTE;
-static GLint gl_tex_id = -1;
+static GLint gl_tex_id_virt = -1, gl_tex_id = -1;
 
 Uint32 time_start;
 
@@ -216,9 +216,9 @@ sprite_subimg texture_normalize_uv(int tex_id, sprite_subimg subimg)
 	return subimg;
 }
 
-GLint texture_get_current(void)
+GLint texture_get_current_virt(void)
 {
-	return gl_tex_id;
+	return gl_tex_id_virt;
 }
 
 int texture_destroy(void)
@@ -242,15 +242,19 @@ int texture_bind_virt(int tex_id) {
 #if !LOAD_TEXTURES
 	return 1;
 #endif
-	if (tex_id != gl_tex_id && tex_id >= 0) {
-		gl_tex_id = tex_id;
+	if (tex_id != gl_tex_id_virt && tex_id >= 0) {
+		gl_tex_id_virt = tex_id;
 		return 0;
 	}
 	return 1;
 }
 
 int texture_bind(int tex_id) {
-	if (texture_bind_virt(tex_id) == 0) {
+#if !LOAD_TEXTURES
+	return 1;
+#endif
+	if (tex_id != gl_tex_id && tex_id >= 0) {
+		gl_tex_id = tex_id;
 		glBindTexture(GL_TEXTURE_2D, ((tex_unit *)array_get(tex_units, tex_id))->gl_tex);
 		return 0;
 	}

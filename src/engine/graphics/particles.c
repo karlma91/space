@@ -134,15 +134,19 @@ void particles_draw(particle_system *s)
 
 emitter *particles_get_emitter_at(particle_system *s, int layer, EMITTER_ID type, cpVect p)
 {
-	if (!s) return NULL;
+	extern int objsys_terminating;
+	if (!s || objsys_terminating) return NULL;
+
 	emitter *e = particles_get_emitter(s, layer, type);
 	e->p = p;
+
 	return e;
 }
 
 emitter *particles_get_emitter(particle_system *partl_sys, int layer, EMITTER_ID type)
 {
-	if (!partl_sys) return NULL;
+	extern int objsys_terminating;
+	if (!partl_sys || objsys_terminating) return NULL;
 	if (type->ID != type) {
 		SDL_Log("ERROR: Invalid emitter template!");
 		return NULL;

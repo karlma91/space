@@ -105,15 +105,19 @@ Mix_Chunk *sound_loadchunk(const char *name)
 
 void sound_play(Mix_Chunk *chunk)
 {
-	Mix_PlayChannel(-1, chunk,0);
+	extern int objsys_terminating;
+	if (!objsys_terminating)
+		Mix_PlayChannel(-1, chunk,0);
 }
 
 void sound_music(Mix_Music *music)
 {
-	Mix_PlayMusic(music, 1);
-
-	if (Mix_PlayingMusic() == -1) {
-		SDL_Log("ERROR: Music failed to played!");
+	extern int objsys_terminating;
+	if (!objsys_terminating) {
+		Mix_PlayMusic(music, 1);
+		if (Mix_PlayingMusic() == -1) {
+			SDL_Log("ERROR: Music failed to played!");
+		}
 	}
 }
 

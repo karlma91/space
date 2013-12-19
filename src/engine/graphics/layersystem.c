@@ -282,7 +282,7 @@ static render_batch *current_batch(int layer)
 		//SDL_Log("Did not find current blend in tree, creating new blend...");
 	}
 
-	GLint tex_id = texture_get_current();
+	GLint tex_id = texture_get_current_virt();
 	if (tex_id < 0) {
 		we_error("ERROR: No texture binding preceding texture render");
 	}

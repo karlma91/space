@@ -541,6 +541,7 @@ void space_init_level_from_level(level * lvl)
 	sticks_init();
 
 	objectsystem_clear();
+	particles_clear(current_particles);
 
 	player1 = NULL;
 	player2 = NULL;
