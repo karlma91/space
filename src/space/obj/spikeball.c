@@ -63,6 +63,10 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	}
 }
 
+static void on_update_dead(OBJ_TYPE *OBJ_NAME)
+{
+}
+
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	cpVect a = spikeball->data.body->p;

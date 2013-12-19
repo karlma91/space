@@ -200,15 +200,21 @@ static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
 	return body;
 }
 
+static void on_update_dead(OBJ_TYPE *OBJ_NAME)
+{
+	if (tank->data.time_destroyed > 2) {
+		instance_remove((instance *)tank);
+	}
+}
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	float alpha = 1;
-	if (tank->data.time_destroyed > 2) { //TODO automatically? or in its own destroyed_tick?
-		instance_remove((instance *)tank);
-		alpha = 0;
-	} else if (tank->data.destroyed) {
+	float time_destroyed = tank->data.time_destroyed;
+	if (time_destroyed > 0) {
 		alpha = maxf(0, 1 - tank->data.time_destroyed / 2);
+		alpha = 1-alpha;
+		alpha = 1-alpha*alpha*alpha;
 	}
 
 	hpbar_draw(RLAY_GUI_BACK, &tank->hp_bar,cpvtoangle(tank->data.body->p));
@@ -231,7 +237,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	sprite_render_body(RLAY_GAME_FRONT, &(tank->wheel_sprite), tank->wheel2);
 	//}
 
-	if (tank->param.max_hp >= 300) {//TODO add color into param
+	if (tank->param.max_hp >= 200) {//TODO add color into param
 		draw_color_rgbmulta4f(1,0.2,0.3,alpha);
 	} else {
 		draw_color_rgbmulta4f(1,1,1,alpha);

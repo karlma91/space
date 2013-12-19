@@ -17,6 +17,7 @@
 static void init(OBJ_TYPE *obj);
 static void on_create(OBJ_TYPE *obj);
 static void on_update(OBJ_TYPE *obj);
+static void on_update_dead(OBJ_TYPE *obj);
 static void on_render(OBJ_TYPE *obj);
 static void on_destroy(OBJ_TYPE *obj);
 static void on_remove(OBJ_TYPE *obj);
@@ -31,6 +32,7 @@ static object_id this = {
 		(void (*)(instance *)) init,
 		(void (*)(instance *)) on_create,
 		(void (*)(instance *)) on_update,
+		(void (*)(instance *)) on_update_dead,
 		(void (*)(instance *)) on_render,
 		(void (*)(instance *)) on_destroy,
 		(void (*)(instance *)) on_remove

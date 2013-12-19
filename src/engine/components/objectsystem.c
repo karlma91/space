@@ -134,7 +134,6 @@ void objectsystem_free(object_system *system)
 }
 
 
-
 instance *instance_super_malloc(object_id *type)
 {
 	LList list = current_objects->objects_meta[type->ID].pool;

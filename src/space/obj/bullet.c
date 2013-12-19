@@ -44,14 +44,18 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	}
 }
 
+static void on_update_dead(OBJ_TYPE *OBJ_NAME)
+{
+	if (bullet->data.time_destroyed > 0.250) {
+		instance_remove((instance *)bullet);
+	}
+}
+
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	float alpha = 1;
-	if (bullet->data.destroyed) {
-		alpha = bullet->energy / 250;
-		if ((bullet->energy -= mdt) < 0) {
-			instance_remove((instance *)bullet);
-		}
+	if (bullet->data.time_destroyed > 0) {
+		alpha = maxf(0, 1 - bullet->data.time_destroyed / 0.250);
 	}
 
 	if (bullet->param.friendly) {

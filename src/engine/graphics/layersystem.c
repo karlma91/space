@@ -283,6 +283,9 @@ static render_batch *current_batch(int layer)
 	}
 
 	GLint tex_id = texture_get_current();
+	if (tex_id < 0) {
+		we_error("ERROR: No texture binding preceding texture render");
+	}
 	arraylist *al = blend_texs->al_tex;
 	render_batch *batch = alist_get(al, tex_id);
 

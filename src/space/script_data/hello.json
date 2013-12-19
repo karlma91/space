@@ -58,5 +58,8 @@
   ]},
   {"coin": [
     {"float":"explo_fmax"}
+  ]},
+  {"explosion": [
+    {"float":"size"}
   ]}
 ]

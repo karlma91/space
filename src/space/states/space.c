@@ -531,7 +531,6 @@ void space_init_level(char *name)
 		currentlvl = level_load(name);
 	}
 	space_init_level_from_level(currentlvl);
-
 }
 
 void space_init_level_from_level(level * lvl)

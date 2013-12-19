@@ -138,10 +138,11 @@ void instance_iterate_comp(int comp_index, void (*f)(instance *, void *data), vo
 }
 
 void instance_update(instance *ins) {
-	if (!ins->destroyed) { //TODO avgjøre om destroyed skal bestemme on update skal kalles eller ikke
+	if (!ins->destroyed) {
 		ins->TYPE->call.on_update(ins);
 		ins->time_alive += dt;
 	} else {
+		ins->TYPE->call.on_update_dead(ins);
 		ins->time_destroyed += dt;
 	}
 }

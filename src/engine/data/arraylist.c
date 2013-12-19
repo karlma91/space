@@ -65,10 +65,10 @@ void alist_set_safe(arraylist *al, int index, void *data)
 }
 void alist_set(arraylist *al, int index, void *data)
 {
-	if(index < al->size) {
+	if (index >= 0 && index < al->size) {
 		al->data[index] = data;
 	} else {
-		we_error("INDEX OUT OF BOUNDS");
+		we_error("ERROR: index out of bounds");
 	}
 }
 

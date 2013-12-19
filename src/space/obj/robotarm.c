@@ -119,17 +119,19 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	cpBodyApplyForce(robotarm->saw, cpvmult(d, 10000), cpvzero);
 }
 
+static void on_update_dead(OBJ_TYPE *OBJ_NAME)
+{
+	if (robotarm->data.time_destroyed >= 1.5) {
+		particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION_BIG, robotarm->saw->p);
+		sound_play(SND_FACTORY_EXPLODE);
+		instance_remove((instance *)robotarm);
+	}
+}
+
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	float redfade = (1.5 - robotarm->data.time_destroyed) / 1.5;
 	redfade = redfade < 0 ? 0 : redfade;
-	if (robotarm->data.time_destroyed >= 1.5) { //TODO automatically? or in its own destroyed_tick?
-		particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION_BIG, robotarm->saw->p);
-		sound_play(SND_FACTORY_EXPLODE);
-		instance_remove((instance *)robotarm);
-	} else if (robotarm->data.destroyed) {
-
-	}
 
 	if (!robotarm->data.destroyed) {
 		draw_color4f(1,0,0,1);

@@ -112,11 +112,6 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	if (player->data.destroyed && player->data.time_destroyed < 2) {
-		player->gun_timer += dt * we_randf*we_randf;
-		action_shoot(player);
-	}
-
 	if (player->flame) {
 		player->flame->p = player->data.body->p;
 		player->flame->angular_offset = player->direction + WE_PI_2;
@@ -237,6 +232,14 @@ static void action_shoot(obj_player *player)
 		}
 
 		player->gun_timer = 0;
+	}
+}
+
+static void on_update_dead(OBJ_TYPE *OBJ_NAME)
+{
+	if (player->data.destroyed && player->data.time_destroyed < 2) {
+		player->gun_timer += dt * we_randf*we_randf;
+		action_shoot(player);
 	}
 }
 

@@ -52,6 +52,7 @@ struct object {
 		void (*init)(instance *obj);
 		void (*on_create)(instance *obj);
 		void (*on_update)(instance *obj);
+		void (*on_update_dead)(instance *obj);
 		void (*on_render)(instance *obj);
 		void (*on_destroy)(instance *obj);
 		void (*on_remove)(instance *obj);

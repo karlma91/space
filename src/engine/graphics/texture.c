@@ -147,6 +147,7 @@ int texture_load(const char *file)
 
 		/*Generate an OpenGL 2D texture from the SDL_Surface*.*/
 		glGenTextures(1, &tex.gl_tex);
+		//texture_bind(tex.gl_tex);
 		glBindTexture(GL_TEXTURE_2D, tex.gl_tex);
 
 		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

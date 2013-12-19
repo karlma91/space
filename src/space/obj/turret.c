@@ -115,14 +115,19 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 }
 
-static void on_render(OBJ_TYPE *OBJ_NAME)
+static void on_update_dead(OBJ_TYPE *OBJ_NAME)
 {
-	float alpha = 2;
 	if (turret->data.time_destroyed > 2) {
 		instance_remove((instance *)turret);
-		alpha = 0;
-	} else if (turret->data.destroyed) {
+	}
+}
+
+static void on_render(OBJ_TYPE *OBJ_NAME)
+{
+	float alpha = 1;
+	if (turret->data.time_destroyed > 0) {
 		alpha = maxf(0, 1 - turret->data.time_destroyed / 2);
+		alpha = 1- (1-alpha)*(1-alpha);
 	}
 
 	draw_color_rgbmulta4f(1,1,1,alpha);

@@ -61,15 +61,16 @@ void array_set(array *al, int index, void *data)
 			al->last_elem = index;
 		}
 	} else {
-		we_error("INDEX OUT OF BOUNDS");
+		we_error("ERROR: Array set, index out of bounds");
 	}
 }
 
-void * array_get(array *al, int index)
+void *array_get(array *al, int index)
 {
-	if ( index < al->size ) {
+	if (index >= 0 && index < al->size) {
 		return (void*)(al->data + index * al->elem_size);
 	} else{
+		we_error("ERROR: Array get, index out of bounds");
 		return NULL;
 	}
 }

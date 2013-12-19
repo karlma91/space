@@ -119,6 +119,10 @@ OBJ_START(spikeball)
 	float winch_length;
 OBJ_END
 
+OBJ_START(explosion)
+	int d;
+OBJ_END
+
 OBJ_START(coin)
 	cpBool pulled; //TODO create pickup component
 OBJ_END

@@ -84,6 +84,10 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	}
 }
 
+static void on_update_dead(OBJ_TYPE *OBJ_NAME)
+{
+}
+
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	draw_color4f(1,1,1,1);

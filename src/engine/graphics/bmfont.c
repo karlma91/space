@@ -164,7 +164,7 @@ void bmfont_render(bm_font *font, int align, float x, float y, float scale, unsi
     draw_scale(scale, scale);
     draw_translate(0,font->base-font->line_height);
 
-    //texture_bind_virt(font->tex_id);
+    texture_bind_virt(sprite_get_texture(font->spr_id));
 
 	if (align == BMFONT_CENTER) {
 		draw_translate(-(line_width/2.0f), 0);
