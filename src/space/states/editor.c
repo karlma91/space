@@ -465,6 +465,7 @@ static void on_leave(void)
 
 static void destroy(void)
 {
+	objectsystem_clear();
 	llist_destroy(ll_touches);
 	pool_destroy(pool_touches);
 }

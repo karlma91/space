@@ -106,7 +106,7 @@ static float state_timer = 0;
  * Inner state functions
  */
 
-#define QUICK_ENTER 0
+#define QUICK_ENTER 1
 
 void setup_singleplay(void);
 void setup_multiplay(void);
@@ -644,32 +644,9 @@ void space_init_level_from_level(level * lvl)
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
 	cpShapeSetElasticity(ceiling, 0.7f);
 
-	/*
-	 * puts all shapes in correct position
-	 */
-	//update_all();
-
-	particles_clear(current_particles);
-
-
 	polytest.shape_id = POLYSHAPE_TURRET;
 	polytest.texture_scale = 0.4;
 	instance_create(obj_id_staticpolygon, &polytest, cpv(0,800), cpvzero);
-	/*
-	polytest.shape_id = POLYSHAPE_RAMP;
-	polytest.texture_scale = 0.6;
-	instance_create(obj_id_staticpolygon, &polytest, cpv(0,-800), cpvzero);
-	polytest.shape_id = POLYSHAPE_TANK;
-	polytest.texture_scale = 1;
-	polytest.outline = 0;
-	instance_create(obj_id_staticpolygon, &polytest, cpv(800,0), cpvzero);
-	polytest.shape_id = POLYSHAPE_TURRET;
-	polytest.texture_scale = 4;
-	polytest.scale = 1000;
-	obj_staticpolygon *sp = (obj_staticpolygon *)instance_create(obj_id_staticpolygon, &polytest, cpv(-800,0), cpvzero);
-	cpBodySetAngle(sp->body, 312);
-	cpSpaceReindexShapesForBody(current_space, sp->body);
-	*/
 }
 
 static void on_enter(void)

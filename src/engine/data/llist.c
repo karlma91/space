@@ -174,7 +174,7 @@ int llist_add(LList id, void *p)
 void *llist_pop(LList id) {
 	struct llist *list = (struct llist *)id;
 
-	if (list) {
+	if (list && is_valid(list)) {
 		node* last = list->tail;
 		if (last) {
 			void *item = last->item;

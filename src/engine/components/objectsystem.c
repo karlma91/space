@@ -11,6 +11,9 @@
 #include "../engine.h"
 #include "../state/statesystem.h"
 
+
+#define DEBUG_MEMORY
+
 static int debug_allocs = 0;
 static int debug_frees = 0;
 
@@ -29,6 +32,10 @@ static void free_dead_func(void *obj)
 #ifdef DEBUG_MEMORY
 	SDL_Log("TMP: removing %p[%s]",obj, ((instance *)obj)->TYPE->NAME);
 #endif
+	if (!((instance *)obj)->destroyed) {
+		((instance *)obj)->TYPE->call.on_destroy(obj);
+	}
+	destroy_func(obj);
 	free(obj);
 	++debug_frees;
 }
@@ -38,7 +45,6 @@ static void free_active_func(instance *obj)
 	if (!((instance*)obj)->destroyed) {
 		obj->TYPE->call.on_destroy(obj);
 	}
-	destroy_func(obj);
 	free_dead_func(obj);
 }
 
@@ -48,10 +54,18 @@ void objectsystem_clear(void)
 	int obj_id;
 	object_info *obj = current_objects->objects_meta;
 
+	int term_state = objsys_terminating;
+	objsys_terminating = 1;
+
 	for (obj_id = 0; obj_id < object_getcount(); ++obj_id, ++obj) {
-		llist_clear(obj->active);
+		llist_iterate_func(obj->active, instance_destroy, NULL);
+		llist_iterate_func(obj->active, instance_remove, NULL);
 		obj->count = 0;
 	}
+	void instance_poststep(void);
+	instance_poststep();
+
+	objsys_terminating = term_state;
 }
 
 static void instance_remove_dead(instance *ins, void *unused)
@@ -113,8 +127,13 @@ void objectsystem_free(object_system *system)
 	if (!system)
 		return;
 
+	//TODO call objectsystem_clear first
+	current_objects = system;
+	//objectsystem_clear();
+
 	int term_state = objsys_terminating;
 	objsys_terminating = 1;
+
 
 	llist_destroy(system->ins2destroy);
 
@@ -172,7 +191,7 @@ void instance_super_free(instance *ins)
 	LList list = current_objects->objects_meta[obj_id].pool;
 	llist_add(list, (void *)ins);
 #ifdef DEBUG_MEMORY
-	SDL_Log( "Info: object id %d has now %d unused allocations\n", TYPE, llist_size(active));
+	SDL_Log( "Info: obj_%s got %d unused allocations\n", ins->TYPE->NAME, llist_size(list));
 #endif
 }
 

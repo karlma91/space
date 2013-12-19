@@ -234,9 +234,8 @@ void particles_destroy()
  */
 void particles_clear(particle_system *s)
 {
-	//FIXME
-	//llist_set_remove_callback(s->emitters, (ll_rm_callback) clear_emitter_particles);
-	//llist_clear(s->emitters);
+	llist_set_remove_callback(s->emitters, (ll_rm_callback) clear_emitter_particles);
+	llist_clear(s->emitters);
 }
 
 
