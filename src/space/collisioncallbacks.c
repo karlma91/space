@@ -22,7 +22,7 @@ static void add_sparks_at_contactpoint(cpArbiter *arb, float min_force)
 			cpVect v = cpArbiterGetPoint(arb, 0);
 			cpVect n = cpArbiterGetNormal(arb, 0);
 			float angle = cpvtoangle(n);
-			particles_add_sparks(current_particles,RLAY_GAME_FRONT, v,angle,f);
+			particles_add_sparks(RLAY_GAME_FRONT, v,angle,f);
 		}
 	}
 }
@@ -31,7 +31,7 @@ static void se_add_explotion_at_contact_point(cpArbiter *arb)
 {
 	if(cpArbiterGetCount(arb) >0){
 		cpVect v = cpArbiterGetPoint(arb, 0);
-		particles_get_emitter_at(current_particles,RLAY_GAME_FRONT, EMITTER_EXPLOSION, v);
+		particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_EXPLOSION, v);
 	}
 }
 

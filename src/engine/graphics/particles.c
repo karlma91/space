@@ -8,6 +8,8 @@
 #include "we_utils.h"
 #include "we_data.h"
 
+extern particle_system *current_particles;
+
 #define PARTICLE_READ_BUFFER_SIZE 4096
 
 /**
@@ -132,21 +134,23 @@ void particles_draw(particle_system *s)
 	llist_end_loop(s->emitters);
 }
 
-emitter *particles_get_emitter_at(particle_system *s, int layer, EMITTER_ID type, cpVect p)
+emitter *particles_get_emitter_at(int layer, EMITTER_ID type, cpVect p)
 {
+	particle_system *s = current_particles;
 	extern int objsys_terminating;
-	if (!s || objsys_terminating) return NULL;
+	if (!s || objsys_terminating || !type) return NULL;
 
-	emitter *e = particles_get_emitter(s, layer, type);
+	emitter *e = particles_get_emitter(layer, type);
 	e->p = p;
 
 	return e;
 }
 
-emitter *particles_get_emitter(particle_system *partl_sys, int layer, EMITTER_ID type)
+emitter *particles_get_emitter(int layer, EMITTER_ID type)
 {
+	particle_system *partl_sys = current_particles;
 	extern int objsys_terminating;
-	if (!partl_sys || objsys_terminating) return NULL;
+	if (!partl_sys || objsys_terminating || !type) return NULL;
 	if (type->ID != type) {
 		SDL_Log("ERROR: Invalid emitter template!");
 		return NULL;

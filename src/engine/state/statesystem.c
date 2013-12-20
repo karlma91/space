@@ -10,6 +10,8 @@
 #include "SDL.h"
 #define MAX_INNER_STATES 10
 
+int debug_disable_render = 0;
+
 LList ll_states;
 
 cpSpace *current_space;
@@ -365,7 +367,8 @@ void statesystem_draw(void)
     		draw_push_matrix();
     		/* draw all objects */
     		if (current_objects) {
-    			instance_iterate(render_instances, NULL);
+    			if (!debug_disable_render)
+    				instance_iterate(render_instances, NULL);
     			debugdraw_space(current_space);
     		}
     		draw_pop_matrix();

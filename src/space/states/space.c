@@ -34,6 +34,7 @@ obj_player * space_create_player(int id);
 view *view_p1, *view_p2;
 
 static button btn_pause;
+static button btn_continue;
 static int game_paused = 0;
 
 static float game_time;
@@ -98,6 +99,22 @@ static void draw_gui(view *cam);
 #define ARCADE_LVL_COUNT 7
 #define ARCADE_SCORE_LVL (60 * 5 * 10) // in decisec
 static int arcade_lvl_score = ARCADE_LVL_COUNT * ARCADE_SCORE_LVL;
+
+static int continue_touched = 0, waiting_continue = 0;
+static void wait_continue(void)
+{
+	continue_touched = 0;
+	waiting_continue = 1;
+	btn_continue->enabled = 1;
+}
+
+static void continue_func(void)
+{
+	continue_touched = 1;
+	waiting_continue = 0;
+	btn_continue->enabled = 0;
+}
+
 
 /* The state timer */
 static float state_timer = 0;
@@ -164,10 +181,12 @@ static void level_running(void)
 	state_enable_objects(state_space, 1);
 	if(player1 && player1->hp_bar.value <= 0 && (player2 == NULL || player2->hp_bar.value <=0 )){
 		//player->disable = 1;
+		wait_continue();
 		change_state(LEVEL_PLAYER_DEAD);
 	}
 
 	if ((instance_count(obj_id_factory) + instance_count(obj_id_tank) + instance_count(obj_id_turret) + instance_count(obj_id_robotarm)) == 0) {
+		wait_continue();
 		change_state(LEVEL_CLEARED);
 	}
 }
@@ -179,7 +198,11 @@ static void level_player_dead(void)
 	//update_all();
 
 	static int tmp_atom = 0;
+#if GOT_TOUCH
+	if (continue_touched && !tmp_atom) {
+#else
 	if (state_timer > 1 && !tmp_atom) {
+#endif
 		tmp_atom = 1;
 		lvl_cleared=0;
 		sticks_hide();
@@ -192,13 +215,18 @@ static void level_player_dead(void)
 		tmp_atom = 0;
 	}
 }
+
 static void level_cleared(void)
 {
 	obj_player *player = (obj_player *)instance_first(obj_id_player);
 	//update_all();
-//TODO split player1 and player2 coin amount
+//TODO split player1 and player2 coin amount?
 	static int tmp_atom = 0;
+#if GOT_TOUCH
+	if (continue_touched && !tmp_atom) {
+#else
 	if (state_timer > 2 && !tmp_atom) {
+#endif
 		//float p = (player->hp_bar.value / player->hp_bar.max_hp);
 		//player->coins += (int)(p*p * 4)*4 * 25;
 
@@ -459,6 +487,11 @@ static void draw_gui(view *cam)
 		/* invalid value */
 		break;
 	}
+
+	if (waiting_continue) {
+		draw_color4f(1,1,1,1);
+		bmfont_center(FONT_SANS, cpvzero, 1, "Tap for results!");
+	}
 }
 
 
@@ -690,12 +723,12 @@ static int sdl_event(SDL_Event *event)
 			break;
 		}
 		switch(key) {
-		case SDL_SCANCODE_1: particles_get_emitter_at(current_particles, RLAY_GUI_FRONT, EMITTER_EXPLOSION, player1->data.body->p); break;
-		case SDL_SCANCODE_2: particles_get_emitter_at(current_particles, RLAY_GUI_FRONT, EMITTER_EXPLOSION_BIG, player1->data.body->p); break;
-		case SDL_SCANCODE_3: particles_get_emitter_at(current_particles, RLAY_GUI_FRONT, EMITTER_FRAGMENTS, player1->data.body->p); break;
-		case SDL_SCANCODE_4: particles_get_emitter_at(current_particles, RLAY_GUI_FRONT, EMITTER_SMOKE, player1->data.body->p); break;
-		case SDL_SCANCODE_5: particles_get_emitter_at(current_particles, RLAY_GUI_FRONT, EMITTER_SPARKS, player1->data.body->p); break;
-		case SDL_SCANCODE_6: particles_get_emitter_at(current_particles, RLAY_GUI_FRONT, EMITTER_ROCKET_FLAME, player1->data.body->p); break;
+		case SDL_SCANCODE_1: particles_get_emitter_at(RLAY_GUI_FRONT, EMITTER_EXPLOSION, player1->data.body->p); break;
+		case SDL_SCANCODE_2: particles_get_emitter_at(RLAY_GUI_FRONT, EMITTER_EXPLOSION_BIG, player1->data.body->p); break;
+		case SDL_SCANCODE_3: particles_get_emitter_at(RLAY_GUI_FRONT, EMITTER_FRAGMENTS, player1->data.body->p); break;
+		case SDL_SCANCODE_4: particles_get_emitter_at(RLAY_GUI_FRONT, EMITTER_SMOKE, player1->data.body->p); break;
+		case SDL_SCANCODE_5: particles_get_emitter_at(RLAY_GUI_FRONT, EMITTER_SPARKS, player1->data.body->p); break;
+		case SDL_SCANCODE_6: particles_get_emitter_at(RLAY_GUI_FRONT, EMITTER_ROCKET_FLAME, player1->data.body->p); break;
 		default: break;
 		}
 		break;
@@ -785,12 +818,18 @@ void space_init(void)
     */
 
     btn_pause = button_create(SPRITE_BTN_PAUSE, 0, "", GAME_WIDTH/2-100, GAME_HEIGHT/2-100, 120, 120);
-    button_set_callback(btn_pause, (btn_callback) statesystem_pause, 0);
+	btn_continue = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
+	button_set_callback(btn_pause, (btn_callback) statesystem_pause, 0);
+	button_set_callback(btn_continue, continue_func, 0);
     button_set_enlargement(btn_pause, 1.5f);
     button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);
+	button_set_hotkeys(btn_continue, KEY_ESCAPE, KEY_RETURN_2);
+	btn_continue->visible = 0;
+	btn_continue->enabled = 0;
 #if !ARCADE_MODE
     state_register_touchable_view(view_p1, btn_pause);
 #endif
+
 
     ll_floor_segs = llist_create();
     llist_set_remove_callback(ll_floor_segs, (ll_rm_callback) remove_static);
@@ -819,6 +858,7 @@ void space_init(void)
     state_register_touchable_view(view_p1, (touchable *)joy_p1_right);
     state_register_touchable_view(view_p2, (touchable *)joy_p2_left);
     state_register_touchable_view(view_p2, (touchable *)joy_p2_right);
+    state_register_touchable_view(view_p1, btn_continue);
     state_timer = 10;
 	change_state(LEVEL_START);
 }

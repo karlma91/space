@@ -31,7 +31,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	COMPONENT_SET(rocket, MINIMAP, &rocket->radar_image);
 	rocket->radar_image = cmp_new_minimap(5, COL_RED);
 
-	rocket->flame = particles_get_emitter(current_particles,RLAY_GAME_FRONT, EMITTER_ROCKET_FLAME);
+	rocket->flame = particles_get_emitter(RLAY_GAME_FRONT, EMITTER_ROCKET_FLAME);
 	particles_self_draw(rocket->flame, 1);
 
 	cpFloat height = ROCKET_SIZE/8;
@@ -107,7 +107,7 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, rocket->data.body->p);
+	particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_EXPLOSION, rocket->data.body->p);
 	sound_play(SND_TANK_EXPLODE);
 	particles_release_emitter(rocket->flame);
 	we_body_remove(current_space, &rocket->data.body);

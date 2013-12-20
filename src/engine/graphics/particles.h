@@ -137,12 +137,12 @@ void particles_self_draw(emitter *em, int enable);
 
 void particle_set_gravity_func(particle_system *s, cpVect (*gravity_dir_func)(cpVect p));
 
-emitter *particles_add_score_popup(particle_system *, int layer, cpVect p, int score);
-emitter *particles_add_sparks(particle_system *, int layer, cpVect p, float angle, float force);
+emitter *particles_add_score_popup(int layer, cpVect p, int score);
+emitter *particles_add_sparks(int layer, cpVect p, float angle, float force);
 
 void particles_clear(particle_system *);
-emitter *particles_get_emitter(particle_system *, int layer, EMITTER_ID);
-emitter *particles_get_emitter_at(particle_system *, int layer, EMITTER_ID, cpVect p);
+emitter *particles_get_emitter(int layer, EMITTER_ID);
+emitter *particles_get_emitter_at(int layer, EMITTER_ID, cpVect p);
 
 void particles_reload_particles(void);
 

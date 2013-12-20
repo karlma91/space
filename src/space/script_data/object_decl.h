@@ -120,7 +120,8 @@ OBJ_START(spikeball)
 OBJ_END
 
 OBJ_START(explosion)
-	int d;
+	float size;
+	cpShape *shape;
 OBJ_END
 
 OBJ_START(coin)

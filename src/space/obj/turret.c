@@ -140,7 +140,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	sound_play(SND_FACTORY_EXPLODE);
-	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, turret->data.body->p);
+	particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_EXPLOSION, turret->data.body->p);
 	se_spawn_coins((instance *)turret);
 	we_body_remove_constraints(current_space, turret->data.body);
 }

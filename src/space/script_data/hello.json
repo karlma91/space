@@ -60,6 +60,11 @@
     {"float":"explo_fmax"}
   ]},
   {"explosion": [
+    {"char":"em_frag"},
+    {"char":"em_expl"},
+    {"char":"snd"},
+    {"float":"force"},
+    {"float":"seconds"},
     {"float":"size"}
   ]}
 ]

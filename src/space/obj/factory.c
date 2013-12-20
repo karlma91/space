@@ -35,7 +35,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&factory->data.spr, factory->param.sprite, 400, 400, 30);
 
 	if (factory->param.spawn_type == obj_id_tank) {
-		factory->smoke = particles_get_emitter(current_particles, RLAY_GAME_BACK, EMITTER_SMOKE);
+		factory->smoke = particles_get_emitter(RLAY_GAME_BACK, EMITTER_SMOKE);
 		particles_self_draw(factory->smoke, 1);
 		factory->data.spr.sub_index = rand() & 0x7;
 	}
@@ -118,9 +118,7 @@ void factory_remove_child(instance *child)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(current_particles,RLAY_GAME_FRONT, EMITTER_FRAGMENTS, factory->data.body->p);
-	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION_BIG, factory->data.body->p);
-	sound_play(SND_FACTORY_EXPLODE);
+	instance_create(obj_id_explosion, NULL, factory->data.body->p, cpvzero);
 	se_spawn_coins((instance *)factory);
 	instance_remove((instance *)factory);
 }

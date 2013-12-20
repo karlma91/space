@@ -12,6 +12,8 @@
 
 STATE_ID state_settings;
 
+extern int debug_disable_render;
+
 #define SCROLL_WIDTH 1200
 
 typedef enum {
@@ -19,6 +21,7 @@ typedef enum {
 	OPT_MUSIC,
 	OPT_ASSISTED_STEERING,
 	OPT_DEBUG,
+	OPT_TOGGLE_RENDER,
 	OPT_DELETE,
 	OPT_INVULNERABLE, // TODO: DISABLE DEBUG CHEAT!
 	OPT_UNLOCK, // TODO: DISABLE DEBUG CHEAT!
@@ -31,6 +34,7 @@ char str_options[OPTION_COUNT][50] = {
 		"TOGGLE MUSIC",
 		"ASSISTED STEERING",
         "DEBUG DRAW",
+        "TOGGLE RENDER",
         "DELETE ALL",
 		"CHEAT: INVULNERABLE",
 		"CHEAT: UNLOCK ALL",
@@ -136,6 +140,10 @@ static void option_click(settings_option option)
     case OPT_DEBUG:
         debug_draw = bit_toggle(option);
         button_set_backcolor(btn_options[option], debug_draw ? col_btn_checked : col_btn_unchecked);
+        break;
+    case OPT_TOGGLE_RENDER:
+    	debug_disable_render = bit_toggle(option);
+        button_set_backcolor(btn_options[option], debug_disable_render ? col_btn_checked : col_btn_unchecked);
         break;
 	case OPT_DELETE:
 		/* TODO implement this unimplemented option! */

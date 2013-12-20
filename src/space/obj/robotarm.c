@@ -122,7 +122,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 static void on_update_dead(OBJ_TYPE *OBJ_NAME)
 {
 	if (robotarm->data.time_destroyed >= 1.5) {
-		particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION_BIG, robotarm->saw->p);
+		particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_EXPLOSION_BIG, robotarm->saw->p);
 		sound_play(SND_FACTORY_EXPLODE);
 		instance_remove((instance *)robotarm);
 	}
@@ -163,7 +163,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, robotarm->data.body->p);
+	particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_EXPLOSION, robotarm->data.body->p);
 	sound_play(SND_TANK_EXPLODE);
 	se_spawn_coins((instance *)robotarm);
 	cpBodySetForce(robotarm->saw, cpvzero);

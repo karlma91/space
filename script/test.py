@@ -11,7 +11,7 @@ def generateParams(file, data):
                 "#include \"we_object.h\"\n" +
                 "#include \"cJSON.h\"\n" +
                 "#include \"../level.h\"\n" +
-                "#define MAX_STRING_SIZE 64\n\n")
+                "#define MAX_STRING_SIZE 256\n\n")
     file.write("void* parse_generated(cJSON *param, char* type, char *name); \n")
     file.write("cJSON * write_generated(object_id * obj_id, void *data, char *type, char *name); \n")
     

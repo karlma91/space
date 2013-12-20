@@ -249,8 +249,8 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(current_particles,RLAY_GAME_FRONT, EMITTER_FRAGMENTS, tank->data.body->p);
-	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, tank->data.body->p);
+	particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_FRAGMENTS, tank->data.body->p);
+	particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_EXPLOSION, tank->data.body->p);
 	se_spawn_coins((instance *)tank);
 	we_body_remove_constraints(current_space, tank->data.body);
 	cpBodySetTorque(tank->wheel1, 0);

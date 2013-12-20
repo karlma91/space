@@ -71,7 +71,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->data.components[CMP_MINIMAP] = &player->radar_image;
 	player->radar_image = cmp_new_minimap(10, COL_GREEN);
 
-	player->flame = particles_get_emitter(current_particles,RLAY_BACK_MID, EMITTER_FLAME);
+	player->flame = particles_get_emitter(RLAY_BACK_MID, EMITTER_FLAME);
     if (player->flame) {
         player->flame->self_draw = 1;
         player->flame->disable = 1;
@@ -246,7 +246,7 @@ static void on_update_dead(OBJ_TYPE *OBJ_NAME)
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
 	sound_play(SND_FACTORY_EXPLODE);
-	particles_get_emitter_at(current_particles, RLAY_GAME_FRONT, EMITTER_EXPLOSION, player->data.body->p);
+	particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_EXPLOSION, player->data.body->p);
 	player->disable = 1;
     if (player->flame) {
     	player->flame->disable = 1;
