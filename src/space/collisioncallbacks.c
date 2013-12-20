@@ -141,8 +141,28 @@ static int sensor_pickup(cpArbiter *arb, cpSpace *space, void *unused)
 	return 0;
 }
 
+static int collision_explosion(cpArbiter *arb, cpSpace *space, void *unused)
+{
+
+	cpShape *a, *b;
+	cpArbiterGetShapes(arb, &a, &b);
+	obj_explosion *expl = ((obj_explosion *)(a->body->data));
+	//TODO use param to decide what force to apply
+	cpVect f = cpvmult(cpvnormalize_safe(cpvsub(b->body->p, a->body->p)),expl->param.force);
+	cpBodyApplyImpulse(b->body, f, cpvzero);
+
+	return 0;
+}
+
+
 void collisioncallbacks_init(void)
 {
+	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_tank, collision_explosion, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_player, collision_explosion, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_robotarm, collision_explosion, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_factory, collision_explosion, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_rocket, collision_explosion, NULL, NULL, NULL, NULL);
+
 	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, obj_id_tank, NULL, NULL, collision_bullet_VS_object_with_score, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, obj_id_rocket, NULL, NULL, collision_bullet_VS_object_with_score, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, obj_id_factory, NULL, NULL, collision_bullet_VS_object_with_score, NULL, NULL);

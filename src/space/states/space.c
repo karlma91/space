@@ -101,6 +101,10 @@ static void draw_gui(view *cam);
 static int arcade_lvl_score = ARCADE_LVL_COUNT * ARCADE_SCORE_LVL;
 
 static int continue_touched = 0, waiting_continue = 0;
+#if !GOT_TOUCH
+static void wait_continue(void){}
+static void continue_func(void){}
+#else
 static void wait_continue(void)
 {
 	continue_touched = 0;
@@ -114,7 +118,7 @@ static void continue_func(void)
 	waiting_continue = 0;
 	btn_continue->enabled = 0;
 }
-
+#endif
 
 /* The state timer */
 static float state_timer = 0;

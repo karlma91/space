@@ -12,7 +12,7 @@
 #include "../state/statesystem.h"
 
 
-#define DEBUG_MEMORY
+//#define DEBUG_MEMORY
 
 static int debug_allocs = 0;
 static int debug_frees = 0;
