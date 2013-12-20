@@ -5,6 +5,8 @@
 #include "we_data.h"
 #include "sprite.h"
 
+typedef int TEXTURE_ID;
+
 #define MAX_TEXNAME_LEN 50
 extern const float TEX_MAP_FULL[8];
 extern array *tex_units;
@@ -15,6 +17,8 @@ extern GLint texture_get_current_virt(void);
 extern void texture_bind_clear(void);
 extern int texture_bind_virt(int);
 extern int texture_bind(int);
+
+extern char * texture_get_name(TEXTURE_ID);
 
 extern sprite_subimg texture_normalize_uv(int tex_id, sprite_subimg subimg);
 

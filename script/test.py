@@ -35,6 +35,12 @@ def generateParams(file, data):
                         file.write("\tSPRITE_ID " + str(name)+";\n")
                     elif types == "shape":
                         file.write("\tpolyshape " + str(name)+";\n")
+                    elif types == "emitter":
+                        file.write("\tEMITTER_ID " + str(name)+";\n")
+                    elif types == "sound":
+                        file.write("\tMix_Chunk *" + str(name)+";\n")
+                    elif types == "texture":
+                        file.write("\tTEXTURE_ID " + str(name)+";\n")
                     else:
                         file.write("\t" + str(types) + " " + str(name) + ";\n")
             file.write("PARAM_END\n")
@@ -63,7 +69,7 @@ def levelParse(file, data):
         file.write("(obj_id == " +"obj_id_"+ str(param_name) + ") {\n")
         for instance in value:
                 for types, name in instance.items():
-                    if types in ("int" ,"float", "sprite", "object_id", "shape"):
+                    if types in ("int" ,"float", "sprite", "object_id", "shape", "emitter", "sound", "texture", "tex_unit"):
                         file.write("     arg." + param_name + "." + name + " = level_safe_parse_")
                         file.write(str(types))
                         file.write("(param, \"" + name +"\");\n")
@@ -117,6 +123,15 @@ def writeParse(file, data):
                     elif types == "object_id":
                        file.write("    cJSON_AddItemToObject(param,")
                        file.write( "\"" + name + "\",cJSON_CreateString(" + param_name + "->" + name + "->NAME));\n")
+                    elif types == "emitter":
+                       file.write("    cJSON_AddItemToObject(param,")
+                       file.write( "\"" + name + "\",cJSON_CreateString(particles_get_name(" + param_name + "->" + name + ")));\n")
+                    elif types == "sound":
+                       file.write("    cJSON_AddItemToObject(param,")
+                       file.write( "\"" + name + "\",cJSON_CreateString(sound_get_name(" + param_name + "->" + name + ")));\n")
+                    elif types == "texture":
+                       file.write("    cJSON_AddItemToObject(param,")
+                       file.write( "\"" + name + "\",cJSON_CreateString(texture_get_name(" + param_name + "->" + name + ")));\n")
                         
             
     file.write("  }\n")

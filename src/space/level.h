@@ -4,6 +4,7 @@
 #include "tilemap.h"
 #include "../engine/components/object.h"
 #include "../engine/components/shape.h"
+#include "../engine/audio/sound.h"
 #include "cJSON.h"
 
 typedef struct level_ship {
@@ -49,6 +50,10 @@ char* level_safe_parse_char(cJSON *param, char *name );
 object_id* level_safe_parse_object_id(cJSON *param, char *name);
 polyshape level_safe_parse_shape(cJSON *param, char *name);
 SPRITE_ID level_safe_parse_sprite(cJSON *param, char *name);
+EMITTER_ID level_safe_parse_emitter(cJSON *param, char *name);
+Mix_Chunk * level_safe_parse_sound(cJSON *param, char *name);
+int level_safe_parse_texture(cJSON *param, char *name );
+
 
 extern int level_init(void);
 extern void level_unload(level *lvl);

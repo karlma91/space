@@ -11,6 +11,7 @@
 void sound_init(void) {}
 Mix_Music *sound_loadmusic(const char *name) {return NULL;}
 Mix_Chunk *sound_loadchunk(const char *name) {return NULL;}
+char *sound_get_name(Mix_Chunk * mc) {return NULL;}
 void sound_play(Mix_Chunk *chunk) {}
 void sound_music(Mix_Music *music) {}
 void sound_destroy(void) {}
@@ -100,6 +101,23 @@ Mix_Chunk *sound_loadchunk(const char *name)
 	}
 
 	return chunk;
+}
+
+char *sound_get_name(Mix_Chunk * mc)
+{
+	hashiterator *it = hm_get_iterator(hm_chunks);
+	Mix_Chunk *mc_temp = hm_iterator_next(it);
+	while (mc_temp != NULL) {
+		if (mc_temp == mc) {
+			char *name = hm_iterator_get_key(it);
+			hm_iterator_destroy(it);
+			return name;
+		} else {
+			mc_temp = hm_iterator_next(it);
+		}
+	}
+	hm_iterator_destroy(it);
+	return NULL;
 }
 
 

@@ -194,6 +194,23 @@ int texture_load(const char *file)
 	}
 }
 
+char * texture_get_name(TEXTURE_ID id)
+{
+	hashiterator *it = hm_get_iterator(hm_name2tex);
+	TEXTURE_ID id_temp = (int)hm_iterator_next(it);
+	while (id_temp != NULL) {
+		if (id_temp == id) {
+			char *name = (char*)hm_iterator_get_key(it);
+			hm_iterator_destroy(it);
+			return name;
+		} else {
+			id_temp = (int)hm_iterator_next(it);
+		}
+	}
+	hm_iterator_destroy(it);
+	return NULL;
+}
+
 #include "SDL_endian.h"
 int texture_init(void)
 {

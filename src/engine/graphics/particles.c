@@ -146,6 +146,14 @@ emitter *particles_get_emitter_at(int layer, EMITTER_ID type, cpVect p)
 	return e;
 }
 
+char *particles_get_name(EMITTER_ID id){
+	if(id) {
+		return id->name;
+	}else{
+		return NULL;
+	}
+}
+
 emitter *particles_get_emitter(int layer, EMITTER_ID type)
 {
 	particle_system *partl_sys = current_particles;
@@ -614,7 +622,11 @@ EMITTER_ID read_emitter_from_file(const char *filename)
 
 EMITTER_ID particles_bind_emitter(const char *name)
 {
-	return (EMITTER_ID) hm_get(hm_emitter_names, name);
+	EMITTER_ID id = (EMITTER_ID) hm_get(hm_emitter_names, name);
+	if(id == NULL) {
+		SDL_Log("PARTICLES could not find emitter %s", name);
+	}
+	return id;
 }
 
 

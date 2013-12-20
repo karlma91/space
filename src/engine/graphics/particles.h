@@ -6,6 +6,8 @@
 #include "../data/llist.h"
 
 
+#define PARTICLE_STRING_LENGTH 32
+
 #define PARTICLE_COLOR_MAX 10
 #define PARTICLE_ALPHA_MAX 10
 
@@ -30,7 +32,6 @@ typedef struct system particle_system;
 typedef const emitter *EMITTER_ID;
 
 struct particle {
-
 	int alive;
 
 	cpVect p;
@@ -46,7 +47,7 @@ struct particle {
 };
 
 struct emitter {
-
+	char name[PARTICLE_STRING_LENGTH];
 	int layer;
 
 	particle_system * partl_sys;
@@ -141,6 +142,7 @@ emitter *particles_add_score_popup(int layer, cpVect p, int score);
 emitter *particles_add_sparks(int layer, cpVect p, float angle, float force);
 
 void particles_clear(particle_system *);
+char *particles_get_name(EMITTER_ID);
 emitter *particles_get_emitter(int layer, EMITTER_ID);
 emitter *particles_get_emitter_at(int layer, EMITTER_ID, cpVect p);
 

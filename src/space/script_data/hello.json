@@ -63,6 +63,8 @@
     {"char":"em_frag"},
     {"char":"em_expl"},
     {"char":"snd"},
+    {"emitter":"emit"},
+    {"sound":"exp_sound"},
     {"float":"force"},
     {"float":"seconds"},
     {"float":"size"}

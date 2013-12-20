@@ -28,6 +28,7 @@ void sound_music(Mix_Music *music);
 
 void sound_mute(void);
 void sound_unmute(void);
+char *sound_get_name(Mix_Chunk * mc);
 
 void sound_music_mute(void);
 void sound_music_unmute(void);

@@ -25,9 +25,10 @@
 static int station_count;
 static level_ship *world;
 
+//TODO: Set all default values to something usefull
 static char DEF_STRING[10] = "HELLO";
-//TODO: set to a NOT in use sprite.
 static SPRITE_ID DEF_SPRITE = NULL;
+static EMITTER_ID DEF_EMITTER = NULL;
 static polyshape DEF_SHAPE = NULL;
 
 
@@ -144,6 +145,45 @@ SPRITE_ID level_safe_parse_sprite(cJSON *param, char *name )
 	}
 	SDL_Log("Could not load sprite %s", name);
 	return DEF_SPRITE;
+}
+
+/**
+ * Parse an EMITTER_ID from cJSON struct
+ */
+EMITTER_ID level_safe_parse_emitter(cJSON *param, char *name )
+{
+	cJSON *t = cJSON_GetObjectItem(param, name);
+	if (t != NULL) {
+		return particles_bind_emitter(t->valuestring);
+	}
+	SDL_Log("Could not load emitter %s", name);
+	return DEF_EMITTER;
+}
+
+/**
+ * Parse an Mix_Chunk from cJSON struct
+ */
+Mix_Chunk * level_safe_parse_sound(cJSON *param, char *name )
+{
+	cJSON *t = cJSON_GetObjectItem(param, name);
+	if (t != NULL) {
+		return sound_loadchunk(t->valuestring);
+	}
+	SDL_Log("Could not load sound %s", name);
+	return NULL;
+}
+
+/**
+ * Parse an texture from cJSON struct
+ */
+int level_safe_parse_texture(cJSON *param, char *name )
+{
+	cJSON *t = cJSON_GetObjectItem(param, name);
+	if (t != NULL) {
+		return texture_load(t->valuestring);
+	}
+	SDL_Log("Could not load texture %s", name);
+	return NULL;
 }
 
 /**

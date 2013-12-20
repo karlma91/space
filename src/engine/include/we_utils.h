@@ -11,6 +11,7 @@
 #include "chipmunk.h"
 #include "SDL_log.h"
 #include <signal.h>
+#include <stdio.h>
 
 #ifndef WE_DEBUG
 #define WE_DEBUG 0
