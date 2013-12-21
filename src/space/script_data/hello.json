@@ -1,72 +1,70 @@
-[  
-  {"staticpolygon": [
-    {"char":"tex_name"},
-    {"int":"outline"},
-    {"float":"scale"},
-    {"float":"texture_scale"},
-    {"shape":"shape_id"}
-  ]},
-  {"player": [
-    {"float":"max_hp"},
-    {"int":"player_id"},
-    {"float":"gun_cooldown"},
-    {"float":"cash_radius"}
-  ]},
-  {"bullet": [
-    {"int":"friendly"},
-    {"float":"damage"}
-  ]},
-  {"tank": [
-    {"int":"max_hp"},
-    {"int":"coins"}
-  ]},
-   {"factory": [
-    {"int":"max_tanks"},
-    {"float":"max_hp"},
-    {"float":"spawn_delay"},
-    {"int":"coins"},
-    {"char":"param_name"},
-  	{"object_id":"spawn_type"},
-    {"sprite":"sprite"},
-    {"shape":"shape"}
-  ]},
-  {"turret": [
-    {"int":"max_hp"},
-    {"int":"coins"},
-    {"float":"rot_speed"},
-    {"float":"shoot_interval"},
-    {"int":"burst_number"},
-    {"shape":"shape_id"}
-  ]},
-  {"rocket": [
-    {"float":"max_hp"},
-    {"int":"coins"},
-    {"float":"force"},
-    {"float":"damage"}
-  ]},
-  {"robotarm": [
-    {"int":"max_hp"},
-    {"int":"coins"}
-  ]},
-  {"spikeball": [
-    {"float":"radius"},
-    {"float":"up_speed"},
-    {"float":"down_force"},
-    {"float":"top_delay"},
-    {"float":"bot_delay"},
-    {"float":"damage"}
-  ]},
-  {"coin": [
-    {"float":"explo_fmax"}
-  ]},
-  {"explosion": [
-    {"char":"em_frag"},
-    {"char":"em_expl"},
-    {"char":"snd"},
-    {"emitter":"emit"},
-    {"sound":"exp_sound"},
-    {"float":"force"},
-    {"float":"seconds"},
-    {"float":"size"}
-  ]}
-]
+{
+  "staticpolygon": {
+    "tex_name": "char",
+    "outline": "int",
+    "scale": "float",
+    "texture_scale": "float",
+    "shape_id": "shape"
+  },
+  "player": {
+    "max_hp": "float",
+    "player_id": "int",
+    "gun_cooldown": "float",
+    "cash_radius": "float"
+  },
+  "bullet": {
+    "friendly": "int",
+    "damage": "float"
+  },
+  "tank": {
+    "max_hp": "int",
+    "coins": "int"
+  },
+  "factory": {
+    "max_tanks": "int",
+    "max_hp": "float",
+    "spawn_delay": "float",
+    "coins": "int",
+    "param_name": "char",
+    "spawn_type": "object_id",
+    "sprite": "sprite",
+    "shape": "shape"
+  },
+  "turret": {
+    "max_hp": "int",
+    "coins": "int",
+    "rot_speed": "float",
+    "shoot_interval": "float",
+    "burst_number": "int",
+    "shape_id": "shape"
+  },
+  "rocket": {
+    "max_hp": "float",
+    "coins": "int",
+    "force": "float",
+    "damage": "float"
+  },
+  "robotarm": {
+    "max_hp": "int",
+    "coins": "int"
+  },
+  "spikeball": {
+    "radius": "float",
+    "up_speed": "float",
+    "down_force": "float",
+    "top_delay": "float",
+    "bot_delay": "float",
+    "damage": "float"
+  },
+  "coin": {
+    "explo_fmax": "float"
+  },
+  "explosion": {
+    "em_frag": "emitter",
+    "em_expl": "emitter",
+    "snd": "sound",
+    "force": "float",
+    "seconds": "float",
+    "size": "float"
+  }
+}

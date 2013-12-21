@@ -18,16 +18,16 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	explosion->param.force = 1300;
 	explosion->param.seconds = 0.3;
 	explosion->param.size = 350;
-	strncpy(explosion->param.em_expl, "explosion_building.xml", MAX_STRING_SIZE);
-	strncpy(explosion->param.em_frag, "fragments.xml", MAX_STRING_SIZE);
-	strncpy(explosion->param.snd, "factory_explode.ogg", MAX_STRING_SIZE);
+	//strncpy(explosion->param.em_expl, "explosion_building.xml", MAX_STRING_SIZE);
+	//strncpy(explosion->param.em_frag, "fragments.xml", MAX_STRING_SIZE);
+	//strncpy(explosion->param.snd, "factory_explode.ogg", MAX_STRING_SIZE);
 
-	EMITTER_ID em_expl = particles_bind_emitter(explosion->param.em_expl);
-	EMITTER_ID em_frag = particles_bind_emitter(explosion->param.em_frag);
-	particles_get_emitter_at(RLAY_GAME_FRONT, em_expl, explosion->data.p_start);
-	particles_get_emitter_at(RLAY_GAME_FRONT, em_frag, explosion->data.p_start);
-	Mix_Chunk * snd = sound_loadchunk(explosion->param.snd);
-	sound_play(snd);
+	//EMITTER_ID em_expl = particles_bind_emitter(explosion->param.em_expl);
+	//EMITTER_ID em_frag = particles_bind_emitter(explosion->param.em_frag);
+	particles_get_emitter_at(RLAY_GAME_FRONT, explosion->param.em_expl, explosion->data.p_start);
+	particles_get_emitter_at(RLAY_GAME_FRONT, explosion->param.em_frag, explosion->data.p_start);
+	//Mix_Chunk * snd = sound_loadchunk(explosion->param.snd);
+	sound_play(explosion->param.snd);
 
 	float mass = 1;
 	explosion->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, 1, cpvzero)));
