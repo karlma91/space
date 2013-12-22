@@ -17,33 +17,31 @@ def generateParams(file, data):
     
     param_list = []
     # OBJECT_DECLARE generate
-    for param in data:
-        for param_name, value in param.items():
-            file.write("OBJECT_DECLARE(" + str(param_name) + ");\n")
+    for param_name in data:
+        file.write("OBJECT_DECLARE(" + str(param_name) + ");\n")
     
     # Generate structs
-    for param in data:
-        for param_name, value in param.items():
-            file.write("PARAM_START(" + str(param_name) + ")\n")
-            for instance in value:
-                for types, name in instance.items():
-                    if types == "char":
-                        file.write("\tchar " + str(name) + "[MAX_STRING_SIZE];\n")
-                    elif types == "object_id":
-                        file.write("\tobject_id *" + str(name)+";\n")
-                    elif types == "sprite":
-                        file.write("\tSPRITE_ID " + str(name)+";\n")
-                    elif types == "shape":
-                        file.write("\tpolyshape " + str(name)+";\n")
-                    elif types == "emitter":
-                        file.write("\tEMITTER_ID " + str(name)+";\n")
-                    elif types == "sound":
-                        file.write("\tMix_Chunk *" + str(name)+";\n")
-                    elif types == "texture":
-                        file.write("\tTEXTURE_ID " + str(name)+";\n")
-                    else:
-                        file.write("\t" + str(types) + " " + str(name) + ";\n")
-            file.write("PARAM_END\n")
+    for param_name in data:
+        file.write("PARAM_START(" + str(param_name) + ")\n")
+        for field_name in data[param_name]:
+            field_type = data[param_name][field_name]
+            if field_type == "char":
+                file.write("\tchar " + str(field_name) + "[MAX_STRING_SIZE];\n")
+            elif field_type == "object_id":
+                file.write("\tobject_id *" + str(field_name)+";\n")
+            elif field_type == "sprite":
+                file.write("\tSPRITE_ID " + str(field_name)+";\n")
+            elif field_type == "shape":
+                file.write("\tpolyshape " + str(field_name)+";\n")
+            elif field_type == "emitter":
+                file.write("\tEMITTER_ID " + str(field_name)+";\n")
+            elif field_type == "sound":
+                file.write("\tMix_Chunk *" + str(field_name)+";\n")
+            elif field_type == "texture":
+                file.write("\tTEXTURE_ID " + str(field_name)+";\n")
+            else:
+                file.write("\t" + str(field_type) + " " + str(field_name) + ";\n")
+        file.write("PARAM_END\n")
     file.write("#include \"../script_data/object_decl.h\"\n")
     file.write("\n#endif /* end of PARAMS_GENERATED_H_ */")
     file.close()
@@ -54,30 +52,28 @@ def levelParse(file, data):
                "{\n")
     file.write("  object_id *obj_id = object_by_name(type);\n")
     file.write("  union {\n")
-    for param in data:
-        param_name = param.keys()[0]
+    for param_name in data:
         file.write("      " + papre  + str(param_name) + " " + str(param_name) + ";\n" )
     file.write("  } arg;\n" +
                "  strcpy((char*) &arg, name);\n")
     i = 0
-    for index, param in enumerate(data):
-        (param_name, value) = param.items()[0]
+    for index, param_name in enumerate(data):
         if index == 0:
             file.write("  if ")
         else:
             file.write("  } else if ")
         file.write("(obj_id == " +"obj_id_"+ str(param_name) + ") {\n")
-        for instance in value:
-                for types, name in instance.items():
-                    if types in ("int" ,"float", "sprite", "object_id", "shape", "emitter", "sound", "texture", "tex_unit"):
-                        file.write("     arg." + param_name + "." + name + " = level_safe_parse_")
-                        file.write(str(types))
-                        file.write("(param, \"" + name +"\");\n")
-                    elif types == "char":
-                        file.write("     strcpy(arg." + param_name + "." + name + ", level_safe_parse_")
-                        file.write(str(types))
-                        file.write("(param, \"" + name +"\"));\n")
-            
+        for field_name in data[param_name]:
+            field_type = data[param_name][field_name]
+            if field_type in ("int" ,"float", "sprite", "object_id", "shape", "emitter", "sound", "texture", "tex_unit"):
+                file.write("     arg." + param_name + "." + field_name + " = level_safe_parse_")
+                file.write(str(field_type))
+                file.write("(param, \"" + field_name +"\");\n")
+            elif field_type == "char":
+                file.write("     strcpy(arg." + param_name + "." + field_name + ", level_safe_parse_")
+                file.write(str(field_type))
+                file.write("(param, \"" + field_name +"\"));\n")
+    
     file.write("  }\n")
     file.write("  const int paramsize = obj_id->P_SIZE;\n" + 
                "  void * data = calloc(1, paramsize);\n" +
@@ -97,8 +93,7 @@ def writeParse(file, data):
    
    
     i = 0
-    for index, param in enumerate(data):
-        (param_name, value) = param.items()[0]
+    for index, param_name in enumerate(data):
         if index == 0:
             file.write("  if ")
         else:
@@ -106,32 +101,32 @@ def writeParse(file, data):
         file.write("(obj_id == " +"obj_id_"+ str(param_name) + ") {\n")
         file.write("    obj_param_" + str(param_name) + " * " + str(param_name))
         file.write(" = (obj_param_" + str(param_name) + "*) data;\n")
-        for instance in value:
-                for types, name in instance.items():
-                    if types in ("int" ,"float"):
-                        file.write("    cJSON_AddNumberToObject(param,")
-                        file.write( "\"" + name + "\"," + param_name + "->" + name + ");\n")
-                    elif type == "char":
-                       file.write("    cJSON_AddItemToObject(param,")
-                       file.write( "\"" + name + "\",cJSON_CreateString(" + param_name + "->" + name + "));\n")
-                    elif types == "sprite":
-                       file.write("    cJSON_AddItemToObject(param,")
-                       file.write( "\"" + name + "\",cJSON_CreateString(sprite_get_name(" + param_name + "->" + name + ")));\n")
-                    elif types == "shape":
-                       file.write("    cJSON_AddItemToObject(param,")
-                       file.write( "\"" + name + "\",cJSON_CreateString(" + param_name + "->" + name + "->name));\n")
-                    elif types == "object_id":
-                       file.write("    cJSON_AddItemToObject(param,")
-                       file.write( "\"" + name + "\",cJSON_CreateString(" + param_name + "->" + name + "->NAME));\n")
-                    elif types == "emitter":
-                       file.write("    cJSON_AddItemToObject(param,")
-                       file.write( "\"" + name + "\",cJSON_CreateString(particles_get_name(" + param_name + "->" + name + ")));\n")
-                    elif types == "sound":
-                       file.write("    cJSON_AddItemToObject(param,")
-                       file.write( "\"" + name + "\",cJSON_CreateString(sound_get_name(" + param_name + "->" + name + ")));\n")
-                    elif types == "texture":
-                       file.write("    cJSON_AddItemToObject(param,")
-                       file.write( "\"" + name + "\",cJSON_CreateString(texture_get_name(" + param_name + "->" + name + ")));\n")
+        for field_name in data[param_name]:
+            field_type = data[param_name][field_name]
+            if field_type in ("int" ,"float"):
+                file.write("    cJSON_AddNumberToObject(param,")
+                file.write( "\"" + field_name + "\"," + param_name + "->" + field_name + ");\n")
+            elif field_type == "char":
+               file.write("    cJSON_AddItemToObject(param,")
+               file.write( "\"" + field_name + "\",cJSON_CreateString(" + param_name + "->" + field_name + "));\n")
+            elif field_type == "sprite":
+               file.write("    cJSON_AddItemToObject(param,")
+               file.write( "\"" + field_name + "\",cJSON_CreateString(sprite_get_name(" + param_name + "->" + field_name + ")));\n")
+            elif field_type == "shape":
+               file.write("    cJSON_AddItemToObject(param,")
+               file.write( "\"" + field_name + "\",cJSON_CreateString(" + param_name + "->" + field_name + "->name));\n")
+            elif field_type == "object_id":
+               file.write("    cJSON_AddItemToObject(param,")
+               file.write( "\"" + field_name + "\",cJSON_CreateString(" + param_name + "->" + field_name + "->NAME));\n")
+            elif field_type == "emitter":
+               file.write("    cJSON_AddItemToObject(param,")
+               file.write( "\"" + field_name + "\",cJSON_CreateString(particles_get_name(" + param_name + "->" + field_name + ")));\n")
+            elif field_type == "sound":
+               file.write("    cJSON_AddItemToObject(param,")
+               file.write( "\"" + field_name + "\",cJSON_CreateString(sound_get_name(" + param_name + "->" + field_name + ")));\n")
+            elif field_type == "texture":
+               file.write("    cJSON_AddItemToObject(param,")
+               file.write( "\"" + field_name + "\",cJSON_CreateString(texture_get_name(" + param_name + "->" + field_name + ")));\n")
                         
             
     file.write("  }\n")
