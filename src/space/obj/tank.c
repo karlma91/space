@@ -165,18 +165,20 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	} else {
 		int force = (tank->timeout > 5);
 		if (ptx < 0) {
-			if (left_clear || force)
+			if (left_clear || force) {
 				set_wheel_torque(tank, left_dist > 500 || force ? velocity_high : velocity_low);
-			else if (right_clear)
+				tank->timeout += dt;
+			} else if (right_clear)
 				set_wheel_torque(tank, right_dist > 500 ? -velocity_high : -velocity_low);
 			else {
 				set_wheel_torque(tank, 0);
 				tank->timeout += dt;
 			}
 		} else if (ptx > 0) {
-			if (right_clear || force)
+			if (right_clear || force) {
 				set_wheel_torque(tank, right_dist > 500 || force ? -velocity_high : -velocity_low);
-			else if (left_clear)
+				tank->timeout += dt;
+			} else if (left_clear)
 				set_wheel_torque(tank, left_dist > 500 ? velocity_high : velocity_low);
 			else {
 				set_wheel_torque(tank, 0);
