@@ -713,6 +713,7 @@ static void pause_game(void)
 static int sdl_event(SDL_Event *event)
 {
 	SDL_Scancode key;
+	EMITTER_ID em_id = NULL;
 	switch(event->type) {
 	case SDL_KEYDOWN:
         key = event->key.keysym.scancode;
@@ -727,12 +728,13 @@ static int sdl_event(SDL_Event *event)
 			break;
 		}
 		switch(key) {
-		case SDL_SCANCODE_1: particles_get_emitter_at(RLAY_GUI_FRONT, EMITTER_EXPLOSION, player1->data.body->p); break;
-		case SDL_SCANCODE_2: particles_get_emitter_at(RLAY_GUI_FRONT, EMITTER_EXPLOSION_BIG, player1->data.body->p); break;
-		case SDL_SCANCODE_3: particles_get_emitter_at(RLAY_GUI_FRONT, EMITTER_FRAGMENTS, player1->data.body->p); break;
-		case SDL_SCANCODE_4: particles_get_emitter_at(RLAY_GUI_FRONT, EMITTER_SMOKE, player1->data.body->p); break;
-		case SDL_SCANCODE_5: particles_get_emitter_at(RLAY_GUI_FRONT, EMITTER_SPARKS, player1->data.body->p); break;
-		case SDL_SCANCODE_6: particles_get_emitter_at(RLAY_GUI_FRONT, EMITTER_ROCKET_FLAME, player1->data.body->p); break;
+		case SDL_SCANCODE_1: em_id = EM_EXPLOSION; break;
+		case SDL_SCANCODE_2: em_id = EM_EXPLOSIONBIG; break;
+		case SDL_SCANCODE_3: em_id = EM_FRAGMENTS; break;
+		case SDL_SCANCODE_4: em_id = EM_SMOKE; break;
+		case SDL_SCANCODE_5: em_id = EM_SPARKS; break;
+		case SDL_SCANCODE_6: em_id = EM_ROCKETFLAME; break;
+		particles_get_emitter_at(RLAY_GUI_FRONT, em_id, player1->data.body->p);
 		default: break;
 		}
 		break;

@@ -28,6 +28,6 @@ typedef t_polyshape * polyshape;
 void shape_destroy(polyshape p);
 polyshape shape_read(char *filename);
 polyshape shape_link(char *name);
-void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, cpVect offset, float friction, float elasticity, cpGroup group, cpCollisionType type, cpLayers layer, unsigned int shapes);
+void shape_add_shapes(cpSpace *space, polyshape p, cpBody * body, int size, float mass, cpVect offset, float friction, float elasticity, cpGroup group, cpCollisionType type, cpLayers layer, unsigned int shapes);
 
 #endif /* POLYSHAPE_H_ */

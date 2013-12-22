@@ -9,7 +9,7 @@ static void draw_particle_as_spark(emitter *em, particle *p);
 
 emitter *particles_add_score_popup(int layer, cpVect p,int score)
 {
-    emitter *e = particles_get_emitter_at(layer, EMITTER_SCORE, p);
+    emitter *e = particles_get_emitter_at(layer, EM_SCORE, p);
     if(e){
         e->data = (void*)score;
         e->draw_particle = draw_particle_as_score;
@@ -21,7 +21,7 @@ emitter *particles_add_score_popup(int layer, cpVect p,int score)
 
 emitter *particles_add_sparks(int layer, cpVect p, float angle, float force)
 {
-    emitter *e = particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_SPARKS, p);
+    emitter *e = particles_get_emitter_at(RLAY_GAME_FRONT, EM_SPARKS, p);
     if(e){
         float intensity = 0;
         if(force > 1000){

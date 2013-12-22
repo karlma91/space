@@ -31,7 +31,7 @@ static void se_add_explotion_at_contact_point(cpArbiter *arb)
 {
 	if(cpArbiterGetCount(arb) >0){
 		cpVect v = cpArbiterGetPoint(arb, 0);
-		particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_EXPLOSION, v);
+		particles_get_emitter_at(RLAY_GAME_FRONT, EM_EXPLOSION, v);
 	}
 }
 

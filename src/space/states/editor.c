@@ -67,7 +67,7 @@ typedef enum EDITOR_MODE {
 //static editor_mode current_mode = MODE_OBJECTS_ADD;
 
 
-#define EDITOR_OBJECT_COUNT 7
+#define EDITOR_OBJECT_COUNT 8
 
 //TODO show actual objects in list
 static char object_names[EDITOR_OBJECT_COUNT][32] = {
@@ -378,7 +378,7 @@ void editor_init()
 	scr_world = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.9, 3000, 1, 1, 0); // max 4 000 gu / sec
 	scr_objects = scroll_create(-GAME_WIDTH/2+150,0,300,GAME_HEIGHT,0.9,50,0,0,1);
 	scroll_set_callback(scr_world, touch_down, touch_motion, touch_up);
-	scroll_set_bounds(scr_objects, cpBBNew(0,-GAME_HEIGHT/2,0,GAME_HEIGHT/2));
+	scroll_set_bounds(scr_objects, cpBBNew(0,-GAME_HEIGHT/2,0,EDITOR_OBJECT_COUNT * 200));
 	state_register_touchable_view(view_editor, scr_objects);
 	state_register_touchable_view(view_editor, scr_world);
 

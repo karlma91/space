@@ -34,6 +34,7 @@ OBJ_START(player)
 	object_id *bullet_type;
 
 	emitter *flame;
+	emitter *smoke;
 	cpBody *gunwheel;
 
 	sprite gun;
@@ -61,6 +62,7 @@ OBJ_START(tank)
 	/* tmp debug variables */
 	cpFloat debug_left_dist;
 	cpFloat debug_right_dist;
+	cpFloat timeout;
 OBJ_END
 
 OBJ_START(factory)

@@ -39,7 +39,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	sprite_create(&(robotarm->saw_sprite), SPRITE_SAW, 300, 300, 30);
 	sprite_create(&(robotarm->data.spr), SPRITE_TANKBODY001, 200, 100, 0);
-	robotarm->segments = 4;
+	robotarm->segments = 3;
 	robotarm->seg_length = currentlvl->height / (2*robotarm->segments);
 	cpVect pos = robotarm->data.p_start;
 	robotarm->x = 	  calloc(robotarm->segments, sizeof(float));
@@ -55,8 +55,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpFloat mass = 2.0f;
 	robotarm->saw = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(robotarm->saw, pos);
-	cpBodySetVelLimit(robotarm->saw, 300);
-	cpBodySetUserData(robotarm->saw , (instance*)robotarm);
+	cpBodySetVelLimit(robotarm->saw, 280); //TODO param
+	cpBodySetUserData(robotarm->saw, (instance*)robotarm);
 
 	shape = we_add_circle_shape(current_space, robotarm->saw, radius, 0.7, 0.0);
 	we_shape_collision(shape, ID_GROUND , LAYER_ENEMY, robotarm);
@@ -114,16 +114,14 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		d = se_dist_v(robotarm->saw->p, player->body->p);
 	}
 
-	cpBodySetForce(robotarm->saw, cpvzero);
 	d = cpvnormalize(d);
-	cpBodyApplyForce(robotarm->saw, cpvmult(d, 10000), cpvzero);
+	cpBodySetForce(robotarm->saw, cpvmult(d, 4000));
 }
 
 static void on_update_dead(OBJ_TYPE *OBJ_NAME)
 {
 	if (robotarm->data.time_destroyed >= 1.5) {
-		particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_EXPLOSION_BIG, robotarm->saw->p);
-		sound_play(SND_FACTORY_EXPLODE);
+		explosion_create(robotarm->saw->p, EM_EXPLOSIONBIG, EM_SPARKS, SND_BUILDING_EXPLODE, 1200, 320, 0.3);
 		instance_remove((instance *)robotarm);
 	}
 }
@@ -163,8 +161,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_EXPLOSION, robotarm->data.body->p);
-	sound_play(SND_TANK_EXPLODE);
+	explosion_create(robotarm->data.body->p, EM_EXPLOSION, NULL, SND_UNIT_EXPLODE, 800, 210, 0.3);
 	se_spawn_coins((instance *)robotarm);
 	cpBodySetForce(robotarm->saw, cpvzero);
 	we_body_remove_constraints(current_space, robotarm->data.body);

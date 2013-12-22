@@ -71,7 +71,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->data.components[CMP_MINIMAP] = &player->radar_image;
 	player->radar_image = cmp_new_minimap(10, COL_GREEN);
 
-	player->flame = particles_get_emitter(RLAY_BACK_MID, EMITTER_FLAME);
+	player->flame = particles_get_emitter(RLAY_BACK_MID, EM_FLAME);
     if (player->flame) {
         player->flame->self_draw = 1;
         player->flame->disable = 1;
@@ -83,7 +83,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	/* make and add new body */
 	player->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
 	cpBodySetPos(player->data.body, player->data.p_start);
-	cpBodySetVelLimit(player->data.body,2000); //450 //700
+	//cpBodySetVelLimit(player->data.body,2000); //450 //700
 	cpBodySetUserData(player->data.body, (void*)player);
 	se_velfunc(player->data.body, 1);
 
@@ -119,8 +119,9 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	}
 
 	draw_color4f(1,1,1,1);
-	sprite_render_body(RLAY_GAME_BACK, &(player->gun), player->gunwheel);
 	sprite_render_body(RLAY_GAME_BACK,&(player->data.spr), player->data.body);
+	sprite_render_body(RLAY_GAME_BACK, &(player->gun), player->gunwheel);
+	particles_draw_emitter(player->smoke);
 	hpbar_draw(RLAY_GAME_FRONT, &player->hp_bar, cpvtoangle(player->data.body->p));
 }
 
@@ -141,7 +142,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		cpBodySetAngle(player->data.body, player->direction);
 	}
 
-	//cpBodySetPos(player->gunwheel, player->data.body->p);
+	cpBodySetPos(player->gunwheel, player->data.body->p);
 	//cpBodySetVel(player->gunwheel, player->data.body->v);
 
 	if (player->disable == 0){
@@ -158,7 +159,12 @@ static void controls(obj_player *player)
 
 	if (player->joy_left->amplitude) {
 		cpVect player_dir = cpvrotate(cpv(player->joy_left->axis_x, player->joy_left->axis_y), cpvforangle(-pl_view->rotation));
-		cpVect j = cpvmult(player_dir, player->force);
+		static float FORCE = 200, VELOCITY = 435;
+		//cpVect j = cpvmult(player_dir, player->force);
+		cpVect j = cpvmult(player_dir, FORCE);
+		//cpBodySetVelLimit(player->data.body, VELOCITY);
+		//cpBodySetVelLimit(player->gunwheel, VELOCITY);
+
 
 		if (player_assisted_steering) {
 			//TODO get appliedForce instead?
@@ -241,22 +247,33 @@ static void on_update_dead(OBJ_TYPE *OBJ_NAME)
 		player->gun_timer += dt * we_randf*we_randf;
 		action_shoot(player);
 	}
+
+	if (player->smoke) {
+		cpVect pos = player->data.body->p;
+		cpVect rot = player->data.body->rot;
+		pos = cpvadd(pos,cpvrotate(cpv(20,10),rot));
+		player->smoke->p = pos;
+		player->smoke->angular_offset = player->data.body->a; //TODO make sure smoke is going in -g direction
+	}
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	sound_play(SND_FACTORY_EXPLODE);
-	particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_EXPLOSION, player->data.body->p);
+	explosion_create(player->data.body->p, EM_EXPLOSION, EM_FRAGMENTS, SND_BUILDING_EXPLODE, 1300, 180, 0.2);
 	player->disable = 1;
     if (player->flame) {
     	player->flame->disable = 1;
     }
 	we_body_remove_constraints(current_space, player->data.body);
+
+	player->smoke = particles_get_emitter(RLAY_GAME_BACK, EM_SMOKE);
+	particles_self_draw(player->smoke, 1);
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
 	particles_release_emitter(player->flame);
+	particles_release_emitter(player->smoke);
 	we_body_remove(current_space, &player->gunwheel);
 	we_body_remove(current_space, &player->data.body);
 }

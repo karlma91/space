@@ -12,7 +12,7 @@ static cpBody *addWheel(cpSpace *space, cpVect pos, cpGroup group);
 
 #define MASS 4.0f
 #define MASS_WHEEL 4.0f
-#define MASS_BARREL 1.0f
+#define MASS_BARREL 3.0f
 #define SHOOT_VEL 1500
 
 static void init(OBJ_TYPE *OBJ_NAME)
@@ -84,7 +84,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpBodySetUserData(tank->wheel2, tank);
 	se_tangent_body(tank->barrel);
 	se_velfunc(tank->barrel, 1);
-	shape_add_shapes(current_space, POLYSHAPE_TANK, tank->barrel, 150, cpvzero, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
+	shape_add_shapes(current_space, POLYSHAPE_TANK, tank->barrel, 150, MASS_BARREL, cpvzero, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
 	cpSpaceAddConstraint(current_space, cpSimpleMotorNew(tank->data.body, tank->barrel, 0));
 	cpSpaceAddConstraint(current_space, cpPivotJointNew(tank->data.body, tank->barrel, tank->data.body->p));
 
@@ -126,7 +126,9 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 		cpBodySetAngle(tank->barrel, tank->barrel->a);
 
-		if(tank->timer > 1 + (3.0f*we_randf) && se_arcdist2player(tank->data.body->p)<tank->max_distance){
+		float playerdist = se_arcdist2player(tank->data.body->p);
+
+		if(tank->timer > 1 + (3.0f*we_randf) && fabsf(playerdist) < tank->max_distance){
 			//TODO hent ut lik kode for skyting og lag en metode av det
 			cpVect shoot_vel = tank->barrel->rot;
 			cpVect shoot_pos = cpvadd(tank->data.body->p, cpvmult(shoot_vel,55));
@@ -161,23 +163,31 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		else
 			set_wheel_torque(tank, 0);
 	} else {
+		int force = (tank->timeout > 5);
 		if (ptx < 0) {
-			if (left_clear)
-				set_wheel_torque(tank, left_dist > 500 ? velocity_high : velocity_low);
+			if (left_clear || force)
+				set_wheel_torque(tank, left_dist > 500 || force ? velocity_high : velocity_low);
 			else if (right_clear)
 				set_wheel_torque(tank, right_dist > 500 ? -velocity_high : -velocity_low);
-			else
+			else {
 				set_wheel_torque(tank, 0);
+				tank->timeout += dt;
+			}
 		} else if (ptx > 0) {
-			if (right_clear)
-				set_wheel_torque(tank, right_dist > 500 ? -velocity_high : -velocity_low);
+			if (right_clear || force)
+				set_wheel_torque(tank, right_dist > 500 || force ? -velocity_high : -velocity_low);
 			else if (left_clear)
 				set_wheel_torque(tank, left_dist > 500 ? velocity_high : velocity_low);
-			else
+			else {
 				set_wheel_torque(tank, 0);
+				tank->timeout += dt;
+			}
 		} else {
 			set_wheel_torque(tank, 0);
 		}
+	}
+	if (tank->timeout > 7) {
+		tank->timeout = 0;
 	}
 }
 
@@ -249,14 +259,11 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_FRAGMENTS, tank->data.body->p);
-	particles_get_emitter_at(RLAY_GAME_FRONT, EMITTER_EXPLOSION, tank->data.body->p);
+	explosion_create(tank->data.body->p, EM_EXPLOSIONBIG, EM_FRAGMENTS, SND_BUILDING_EXPLODE, 800, 140, 0.25);
 	se_spawn_coins((instance *)tank);
 	we_body_remove_constraints(current_space, tank->data.body);
 	cpBodySetTorque(tank->wheel1, 0);
 	cpBodySetTorque(tank->wheel2, 0);
-	sound_play(SND_TANK_EXPLODE);
-	//instance_remove(tank); //TODO don't call this method, but just remove constraints
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)

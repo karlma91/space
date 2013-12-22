@@ -35,7 +35,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&factory->data.spr, factory->param.sprite, 400, 400, 30);
 
 	if (factory->param.spawn_type == obj_id_tank) {
-		factory->smoke = particles_get_emitter(RLAY_GAME_BACK, EMITTER_SMOKE);
+		factory->smoke = particles_get_emitter(RLAY_GAME_BACK, EM_SMOKE);
 		particles_self_draw(factory->smoke, 1);
 		factory->data.spr.sub_index = rand() & 0x7;
 	}
@@ -47,7 +47,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	se_velfunc(factory->data.body, 1);
 
-	shape_add_shapes(current_space, factory->param.shape, factory->data.body, 400, cpvzero, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
+	shape_add_shapes(current_space, factory->param.shape, factory->data.body, 400, m, cpvzero, 1, 0.7, factory, &this, LAYER_BUILDING, 1);
 	cpBodySetUserData(factory->data.body, factory);
 
 	init(factory);
@@ -118,7 +118,7 @@ void factory_remove_child(instance *child)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	instance_create(obj_id_explosion, NULL, factory->data.body->p, cpvzero);
+	explosion_create(factory->data.body->p, EM_EXPLOSIONBIG, EM_FRAGMENTS, SND_BUILDING_EXPLODE, 1300, 350, 0.3);
 	se_spawn_coins((instance *)factory);
 	instance_remove((instance *)factory);
 }

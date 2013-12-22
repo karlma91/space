@@ -54,7 +54,9 @@ int CMP_CREATOR;
 
 /* global sprite definitions */
 SPRITE_ID SPRITE_PLAYERBODY001;
+SPRITE_ID SPRITE_PLAYERBODY002;
 SPRITE_ID SPRITE_PLAYERGUN001;
+SPRITE_ID SPRITE_PLAYERGUN002;
 SPRITE_ID SPRITE_BTN_PUSH;
 SPRITE_ID SPRITE_TANKBODY001;
 SPRITE_ID SPRITE_TANKWHEEL001;
@@ -86,15 +88,15 @@ POLYSHAPE_ID POLYSHAPE_POLY;
 /* end */
 
 /* global emitter */
-EMITTER_ID EMITTER_FLAME;
-EMITTER_ID EMITTER_ROCKET_FLAME;
-EMITTER_ID EMITTER_EXPLOSION;
-EMITTER_ID EMITTER_EXPLOSION_BIG;
-EMITTER_ID EMITTER_SPARKS;
-EMITTER_ID EMITTER_SMOKE;
-EMITTER_ID EMITTER_SCORE;
-EMITTER_ID EMITTER_FRAGMENTS;
-EMITTER_ID EMITTER_COUNT;
+EMITTER_ID EM_FLAME;
+EMITTER_ID EM_ROCKETFLAME;
+EMITTER_ID EM_EXPLOSION;
+EMITTER_ID EM_EXPLOSIONBIG;
+EMITTER_ID EM_SPARKS;
+EMITTER_ID EM_SMOKE;
+EMITTER_ID EM_SCORE;
+EMITTER_ID EM_FRAGMENTS;
+EMITTER_ID EM_COUNT;
 /* extern particles end */
 
 //extern fonts
@@ -108,8 +110,8 @@ Mix_Chunk *SND_LASER_2;
 Mix_Chunk *SND_LASER_MISS;
 Mix_Chunk *SND_HIT_1;
 Mix_Chunk *SND_HIT_2;
-Mix_Chunk *SND_TANK_EXPLODE;
-Mix_Chunk *SND_FACTORY_EXPLODE;
+Mix_Chunk *SND_UNIT_EXPLODE;
+Mix_Chunk *SND_BUILDING_EXPLODE;
 Mix_Chunk *SND_TURRET_EXPLODE;
 Mix_Chunk *SND_COIN;
 Mix_Chunk *SND_EXPLOSION;
@@ -209,7 +211,9 @@ void game_sprites(void)
 	SPRITE_BAR = sprite_link("bar");
 
 	REGISTER_SPRITE( PLAYERBODY001 );
+	REGISTER_SPRITE( PLAYERBODY002 );
 	REGISTER_SPRITE( PLAYERGUN001 );
+	REGISTER_SPRITE( PLAYERGUN002 );
 	REGISTER_SPRITE( BTN_PUSH );
 	REGISTER_SPRITE( TANKBODY001 );
 	REGISTER_SPRITE( TANKWHEEL001 );
@@ -244,17 +248,17 @@ void game_particles(void)
 {
 #define PARTICLE_STRESS 0
 #if PARTICLE_STRESS
-    EMITTER_FLAME =         read_emitter_from_file("flame_stress.xml");
+    EM_FLAME =         read_emitter_from_file("flame_stress.xml");
 #else
-    EMITTER_FLAME =         read_emitter_from_file("flame_3.xml");
+    EM_FLAME =         read_emitter_from_file("flame_3.xml");
 #endif
-    EMITTER_ROCKET_FLAME =  read_emitter_from_file("rocket_flame.xml");
-    EMITTER_EXPLOSION =     read_emitter_from_file("explosion_ground.xml");
-    EMITTER_EXPLOSION_BIG = read_emitter_from_file("explosion_building.xml");
-    EMITTER_SPARKS =        read_emitter_from_file("sparks.xml");
-    EMITTER_SMOKE =         read_emitter_from_file("smoke.xml");
-    EMITTER_SCORE =         read_emitter_from_file("score.xml");
-    EMITTER_FRAGMENTS =     read_emitter_from_file("fragments.xml");
+    EM_ROCKETFLAME =  read_emitter_from_file("rocket_flame.xml");
+    EM_EXPLOSION =     read_emitter_from_file("explosion_ground.xml");
+    EM_EXPLOSIONBIG = read_emitter_from_file("explosion_building.xml");
+    EM_SPARKS =        read_emitter_from_file("sparks.xml");
+    EM_SMOKE =         read_emitter_from_file("smoke.xml");
+    EM_SCORE =         read_emitter_from_file("score.xml");
+    EM_FRAGMENTS =     read_emitter_from_file("fragments.xml");
 }
 
 void game_font(void)
@@ -271,8 +275,8 @@ void game_audio(void)
 	SND_LASER_MISS = sound_loadchunk("laser_melt.ogg");
 	SND_HIT_1 = sound_loadchunk("hit_01.ogg");
 	SND_HIT_2 = sound_loadchunk("hit_02.ogg");
-	SND_TANK_EXPLODE = sound_loadchunk("hit_03.ogg");
-	SND_FACTORY_EXPLODE = sound_loadchunk("factory_explode.ogg");
+	SND_UNIT_EXPLODE = sound_loadchunk("hit_03.ogg");
+	SND_BUILDING_EXPLODE = sound_loadchunk("factory_explode.ogg");
 	SND_TURRET_EXPLODE = sound_loadchunk("turret_explode.ogg");
 	SND_COIN = sound_loadchunk("coin_pickup.ogg");
 	SND_EXPLOSION = sound_loadchunk("explosion.ogg");

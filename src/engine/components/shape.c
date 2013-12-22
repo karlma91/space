@@ -95,7 +95,7 @@ static vertex_array* read_vertex_array(cJSON * array)
 	return va;
 }
 
-void shape_add_shapes(cpSpace *space, polyshape ps, cpBody * body, int size, cpVect offset, float friction, float elasticity, cpGroup group, cpCollisionType type, cpLayers layer, unsigned int shapes)
+void shape_add_shapes(cpSpace *space, polyshape ps, cpBody * body, int size, float mass, cpVect offset, float friction, float elasticity, cpGroup group, cpCollisionType type, cpLayers layer, unsigned int shapes)
 {
 	LList p = ps->pshape;
 	if (!p) {
@@ -124,6 +124,8 @@ void shape_add_shapes(cpSpace *space, polyshape ps, cpBody * body, int size, cpV
 				cpShapeSetCollisionType(sh, type);
 				cpShapeSetLayers(sh, layer);
 				cpSpaceAddShape(space, sh);
+#warning "momemtum not supported by polyshapes!"
+				//cpBodySetMoment(body, cpMomentForPoly(mass, data->num, d, offset));
 			}
 			llist_end_loop(pi->shape);
 		}

@@ -22,7 +22,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	staticpolygon->body = cpBodyNewStatic();
 	cpBodySetPos(staticpolygon->body, staticpolygon->data.p_start);
 
-	shape_add_shapes(current_space, staticpolygon->shape_id, staticpolygon->body, staticpolygon->scale, cpvzero, 1, 0.7, staticpolygon, ID_GROUND, CP_ALL_LAYERS, 0);
+	shape_add_shapes(current_space, staticpolygon->shape_id, staticpolygon->body, staticpolygon->scale, 1, cpvzero, 1, 0.7, staticpolygon, ID_GROUND, CP_ALL_LAYERS, 0);
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)

@@ -19,7 +19,7 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 			{25, 2.4, 1.5, 620, 3200}, // 64
 			{17, 3.7, 2.0, 650, 4500}  // 78
 		},
-		.spr_id = &SPRITE_PLAYERGUN001,
+		.spr_id = &SPRITE_PLAYERGUN002,
 		.obj_name = "BULLET"
 	}, {
 		.name = "MACHINE GUN",
@@ -50,16 +50,39 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 
 upg_armor armors[ARMOR_UPGRADES] = {
 	{.name = "BASIC ARMOR", .max_hp = 200, .mass = 1, .shield = 0, .shield_regen = 0, .price = 0, .spr_id = &SPRITE_PLAYERBODY001},
-	{.name = "MIDDLE ARMOR", .max_hp = 500, .mass = 2, .shield = 0, .shield_regen = 0, .price = 13200, .spr_id = &SPRITE_PLAYERBODY001},
+	{.name = "MIDDLE ARMOR", .max_hp = 500, .mass = 2, .shield = 0, .shield_regen = 0, .price = 13200, .spr_id = &SPRITE_PLAYERBODY002},
 	{.name = "ELEPHANT ARMOR", .max_hp = 800, .mass = 3, .shield = 0, .shield_regen = 0, .price = 13200, .spr_id = &SPRITE_PLAYERBODY001},
 	{.name = "T-REX SKIN", .max_hp = 100000, .mass = 10, .shield = 0, .shield_regen = 0, .price = 9999990, .spr_id = &SPRITE_SPIKEBALL}
 };
 
 upg_engine engines[ENGINE_UPGRADES] = {
-	{.name = "TURTLE POWER", .force = 80, .max_speed = 435, .price = 0, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_PLAYERBODY001},
-	{.name = "CHEAP JET", .force = 160, .max_speed = 475, .price = 9500, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_PLAYERBODY001},
-	{.name = "UBERSPEED", .force = 500, .max_speed = 9999, .price = 999500, .particle_type = &EMITTER_FLAME, .spr_id = &SPRITE_STATION001}
+	{.name = "TURTLE POWER", .force = 250, .max_speed = 435, .price = 0, .particle_type = &EM_FLAME, .spr_id = &SPRITE_PLAYERBODY001},
+	{.name = "CHEAP JET", .force = 300, .max_speed = 475, .price = 9500, .particle_type = &EM_FLAME, .spr_id = &SPRITE_PLAYERBODY001},
+	{.name = "Jetlag", .force = 500, .max_speed = 600, .price = 99950, .particle_type = &EM_FLAME, .spr_id = &SPRITE_STATION001},
+	{.name = "UBERSPEED", .force = 1300, .max_speed = 700, .price = 999500, .particle_type = &EM_FLAME, .spr_id = &SPRITE_STATION001}
 };
+
+/*
+ * (Be able to upgrade indivudal motors?)
+ * Try not to make upgrades obsolote
+ *
+ * need to balance acceleration vs. max speed vs. usabillity
+ * 1: lowest
+ * 2: low
+ * 3: mid
+ * 4: high
+ * 5: highest
+ * cheap category:
+ * a v
+ * 3 1
+ * 3 2
+ * 2 3
+ *
+ * Cheap:     high a == low vmax (Better control + maneuverability)
+ * Mid:       mid a == mid vmax (faster + ok maneuverability)
+ * cheap: low a == high vmax (faster + ok maneuverability)
+ *
+ */
 
 void test_me(void)
 {
