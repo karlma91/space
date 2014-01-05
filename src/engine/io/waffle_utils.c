@@ -1,16 +1,24 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "waffle_utils.h"
 #include "SDL.h"
+
+#include "../../tools/encrypt/we_crypt.h"
 
 #define RESOURCE_VERSION 9 // changed: 05.11.13
 
 #if TARGET_OS_IPHONE
-#define GAME_RESOURCES "game_data_ios.zip"
+#define GAME_RESFOLDER "game_data_ios"
+#define GAME_RESOURCES GAME_RESFOLDER".zip"
 #elif __ANDROID__
-#define GAME_RESOURCES "game_data.zip"
+#define GAME_RESFOLDER "game_data"
+#define GAME_RESOURCES GAME_RESFOLDER".zip"
 #else
-#define GAME_RESOURCES "game_data.zip"
+#define GAME_RESFOLDER "game" //"game_data"
+#define GAME_RESOURCES GAME_RESFOLDER".dat" //".zip"
+//#define GAME_RESFOLDER "game_data"
+//#define GAME_RESOURCES GAME_RESFOLDER".zip"
 #endif
 
 #if __ANDROID__
@@ -40,24 +48,43 @@ JNIEXPORT void JNICALL Java_org_libsdl_app_SDLActivity_set_1apk_1path
 #endif
 
 
+static zzip_ssize_t decrypt_block(int fd, void *data, zzip_size_t len);
 static ZZIP_DIR *game_data = NULL;
+
+static zzip_strings_t ext[] = { ".zip", ".ZIP", ".dat", ".DAT", "", 0};
+static zzip_plugin_io_handlers io_handler;
 
 void waffle_init(void)
 {
+	byte key[20];
+	we_genkey(key, "abcdefghijklmnopqrstuvwxyz*&_ #=");
+	we_setkey(key);
+
+	zzip_init_io(&io_handler, 0);
+	io_handler.fd.read = &decrypt_block;
+
 	zzip_error_t zzip_err;
 	//SDL_Log("DEBUG: Loading game resources...");
 #if __ANDROID__
 	game_data = zzip_dir_open(APK_PATH, &zzip_err); // NB! is actually .apk, not game_data
 	strcpy(&INTERNAL_PATH[0], SDL_AndroidGetInternalStoragePath());
 #else
-	game_data = zzip_dir_open(GAME_RESOURCES, &zzip_err);
+	game_data = zzip_dir_open_ext_io(GAME_RESOURCES, &zzip_err, ext, &io_handler);
 	if (!game_data) {
-		SDL_Log("ERROR: game_data.zip could not be found!\n"
+		SDL_Log("ERROR: game data could not be loaded!\n"
 				"Run ./zip_res.sh to compress current game data");
 		exit(-1);
+	} else {
+		SDL_Log("Game data loaded");
 	}
 #endif
-
+	ZZIP_DIRENT zd;
+	zzip_rewinddir(game_data);
+	do {
+		zzip_dir_read(game_data, &zd);
+		fprintf(stderr, "file: %s\n", zd.d_name);
+	} while (strcmp("ver", zd.d_name));
+	//zzip_dir_stat(game_data, )
 	//SDL_Log("Checking if game resources are up to date...");
 	ZZIP_FILE *zf = waffle_open("ver");
 	if (zf) {
@@ -113,10 +140,12 @@ ZZIP_FILE *waffle_open(char *path)
 #else
 	sprintf(&full_path[0], "%s", path);
 #endif
+	fprintf(stderr, "opening file: %s\n", full_path);
 	return zzip_file_open(game_data, full_path, 0);
+	//return zzip_open_ext_io(full_path, O_RDONLY, ZZIP_ONLYZIP | ZZIP_CASELESS, ext, &io_handler);
 }
 
-//Todo make sure that the caller is notified if the given file is not fully read
+//Todo make sure that the caller is notified if the given file is not fully read!
 int waffle_read(ZZIP_FILE *zf, char *buffer, int len)
 {
 	int filesize = zzip_read(zf, buffer, len);
@@ -195,6 +224,61 @@ FILE *waffle_internal_fopen(enum WAFFLE_DIR dir_type,const char *filename, const
 	strcpy(&path[0], folder);
 	strcat(&path[0], filename);
 	return fopen(path, opentype);
+}
+
+static zzip_ssize_t decrypt_block(int fd, void *data, zzip_size_t len)
+{
+	int warn = 0;
+	byte *dst = data;
+	zzip_off_t start_pos = lseek(fd, 0, SEEK_CUR);
+
+	int pad_start = 0, pad_end = 0;
+	if (start_pos & 3) {
+		//fprintf(stderr, "Warning! pos not a factor of 4! Changing [pos, len]: [%lld, %lu] -> ", start_pos, len); //TODO support pos not a factor of 4!
+		pad_start = start_pos & 3;
+		start_pos = lseek(fd, -pad_start, SEEK_CUR);
+		//if (start_pos & 3) fprintf(stderr, "\nERROR: could not change file offset correctly\n");
+		len += pad_start;
+		//fprintf(stderr, "[%lld, %lu] with start padding of %d byte\n", start_pos, len, pad_start);
+		//warn=1;
+	}
+	if (len & 3) {
+		//fprintf(stderr, "Warning! length not a factor of 4! len %ld -> ", len);
+		pad_end = 4 - len & 3;
+		len += pad_end;
+		//fprintf(stderr, "%ld with end padding of %d byte\n", len, pad_end);
+		//warn=1;
+	}
+
+	byte src[len];
+	zzip_size_t size = read(fd, src, len); // read encrypted data to tmp buffer
+	lseek(fd, -pad_end, SEEK_CUR); /* move to expected seek position */
+
+	if (size & 3) {
+		fprintf(stderr, "Warning! file size not a factor of 4!\n");
+		warn=1;
+	}
+	//zzip_off_t end = start_pos + (size - pad_end);
+	//fprintf(stderr, "io: read %lld\tsize: %lub\tend: %lld\n", start_pos, size, end);
+
+	int src_i = 0, dst_i = 0, fpos;
+	/* decrypt block to buffer*/
+	for (fpos = start_pos, src_i = 0; src_i < len; src_i += 4, fpos += 4) {
+		int eword, dword;
+		eword = chr2int(&src[src_i]);
+		dword = we_decrypt(fpos, eword);
+		//if (warn) fprintf(stderr, "%08x%c", dword, fpos & 0x3f ? ' ' : '\n');
+		int2chr(&src[src_i], dword);
+	}
+
+	/* copy decrypted block to dst data */
+	src_i = pad_start; // skip padding
+	size = len - pad_end - pad_start; // ignore padding from total size
+	for (dst_i = 0; dst_i < size; dst_i++, src_i++) {
+		dst[dst_i] = src[src_i];
+	}
+	//if (warn) fprintf(stderr, "\n");
+	return size;
 }
 
 
