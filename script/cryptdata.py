@@ -1,14 +1,20 @@
 import os
+import platform
+import zipfile
 
-key = "abcdefghijklmnopqrstuvwxyz*&_ #=" #supported characters: [a-z] * & (space) # _ =
-cryptexe  = "../tools/encrypt/encrypt"
-indata    = "../game_data.zip"
-checkdata = "../game_data_decrypted.zip"
-outdata   = "../game.dat"
+sysname = platform.system();
+exesuffix = ".exe" if sysname=="Windows" else ""
+cryptexe  = "../tools/encrypt/encrypt" + exesuffix
 
-statexe   = "../tools/bytestats/stats"
+#zipfile.
+     
+def cryptfile(key, src, dst, dst_check):
+    cryptcmd = cryptexe + " " + src + " " + dst + " " + dst_check + " '" + key + "'" 
+    os.system(cryptcmd)
 
-cryptcmd = cryptexe + " " + indata + " " + outdata + " " + checkdata + " '" + key + "'" 
-os.system(cryptcmd)
-os.system(statexe + " " + outdata)
-os.system(statexe + " " + checkdata)
+reskey = "abcdefghijklmnopqrstuvwxyz*&_ #=" #supported characters: [a-z] * & (space) # _ =
+cryptfile(reskey, "../game_data.zip", "../res.dat", "../game_data_decrypted.zip");
+
+if sysname == "Darwin":
+    statsexe = "../tools/bytestats/stats"
+    os.system(statsexe + " ../res.dat ../game_data.zip")

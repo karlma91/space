@@ -10,6 +10,11 @@
 
 #include "we.h"
 
+void logprint(char *format, ...);
+void logprintln(char *format, ...);
+#define SDL_Log(...) logprintln(__VA_ARGS__), SDL_Log(__VA_ARGS__)
+#define fprintf(stderr, ...) logprint(__VA_ARGS__), fprintf(stderr, __VA_ARGS__)
+
 #if TARGET_OS_IPHONE
 #define TEX_FORMAT ".pvr"
 #else
@@ -60,6 +65,7 @@ extern STATE_ID state_leveldone;
 extern STATE_ID state_stations;
 extern STATE_ID state_levelscreen;
 extern STATE_ID state_editor;
+extern STATE_ID state_log;
 
 /* SPRITES */
 extern SPRITE_ID SPRITE_PLAYERBODY001;
@@ -108,6 +114,7 @@ extern EMITTER_ID EM_COUNT;
 extern bm_font *FONT_NORMAL;
 extern bm_font *FONT_BIG;
 extern bm_font *FONT_SANS;
+extern bm_font *FONT_COURIER;
 
 /* GLOBAL SOUND CHUNKS */
 extern Mix_Chunk *SND_LASER_1;

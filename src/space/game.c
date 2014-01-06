@@ -18,6 +18,7 @@ extern void pause_init(void);
 extern void settings_init(void);
 extern void upgrades_init(void);
 extern void stations_init(void);
+extern void log_init(void);
 
 
 #include "states/arcade/menu.h"
@@ -103,6 +104,7 @@ EMITTER_ID EM_COUNT;
 bm_font * FONT_NORMAL;
 bm_font * FONT_BIG;
 bm_font * FONT_SANS;
+bm_font * FONT_COURIER;
 
 /* GLOBAL SOUND CHUNKS */
 Mix_Chunk *SND_LASER_1;
@@ -266,6 +268,7 @@ void game_font(void)
    FONT_NORMAL = bmfont_read_font("Arial.fnt");
    FONT_BIG = bmfont_read_font("bigariel.fnt");
    FONT_SANS = bmfont_read_font("sans.fnt");
+   FONT_COURIER = bmfont_read_font("courier.fnt");
 }
 
 void game_audio(void)
@@ -301,6 +304,26 @@ void game_touchables(void)
 	button_set_enlargement(btn_settings, 1.5);
 	button_set_hotkeys(btn_settings, SDL_SCANCODE_F1, 0);
 }
+/* Global variables */
+static IPaddress serverIP;
+static TCPsocket tcpsock = NULL;
+
+#define SERVER_PORT 8049
+char *server = "80.203.98.253";
+void connect_init(void)
+{
+	SDLNet_ResolveHost(&serverIP, server, SERVER_PORT);
+	if (serverIP.host == INADDR_NONE) {
+		fprintf(stderr, "Could not resolve hostname\n");
+	} else {
+		tcpsock = SDLNet_TCP_Open(&serverIP);
+		if (tcpsock == NULL) {
+			fprintf(stderr,"Connect failed\n");
+		} else {
+			fprintf(stderr,"Connected!\n");
+		}
+	}
+}
 
 void game_init(void)
 {
@@ -321,6 +344,7 @@ void game_init(void)
     game_touchables();
 
 	/* init all states (warning: make sure that no init method depends on uninitialized state_id!) */
+    log_init();
     settings_init();
     stations_init();
     menu_init();
@@ -331,7 +355,6 @@ void game_init(void)
     levelscreen_init();
     leveldone_init();
     editor_init();
-
 #if ARCADE_MODE
     statesystem_set_state(state_menu);
 #else
@@ -339,6 +362,7 @@ void game_init(void)
 #endif
 
 	sound_music(MUSIC_LEVEL);
+	connect_init();
 }
 
 /* Component functions */

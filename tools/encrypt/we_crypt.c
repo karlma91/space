@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "we_crypt.h"
+#include "../../src/engine/include/we_crypt.h"
 
 //TODO support partly encryption of files? (for encryption of android assets)
 

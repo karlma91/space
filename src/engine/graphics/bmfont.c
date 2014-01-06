@@ -197,6 +197,8 @@ void bmfont_render(bm_font *font, int align, float x, float y, float scale, unsi
             bm_char * c = &(font->chars[chr]);
             draw_char(font, c);
             i++;
+        } else if (text[i] == '\t') {
+            draw_translate(16*4,0);
         } else if (text[i] != ' ') {
             bm_char * c = &(font->chars[(int)text[i]]);
             draw_char(font, c);

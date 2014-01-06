@@ -25,6 +25,7 @@ typedef enum {
 	OPT_DELETE,
 	OPT_INVULNERABLE, // TODO: DISABLE DEBUG CHEAT!
 	OPT_UNLOCK, // TODO: DISABLE DEBUG CHEAT!
+	OPT_LOG, // TODO: DISABLE DEBUG CHEAT!
 
 	OPTION_COUNT
 } settings_option;
@@ -38,6 +39,7 @@ char str_options[OPTION_COUNT][50] = {
         "DELETE ALL",
 		"CHEAT: INVULNERABLE",
 		"CHEAT: UNLOCK ALL",
+		"DEBUG: LOG",
 };
 
 static button btn_back;
@@ -158,6 +160,9 @@ static void option_click(settings_option option)
 		/* TODO implement this unimplemented option! */
 		bit_toggle(option);
 		button_set_backcolor(btn_options[option], bit_get_status(option) ? col_btn_checked : col_btn_unchecked);
+		break;
+	case OPT_LOG:
+		statesystem_push_state(state_log);
 		break;
 	default:
 		//ERROR invalid case OPTion

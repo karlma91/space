@@ -36,6 +36,7 @@
 #include "audio/sound.h"
 
 #include "../space/game.h" //TODO remove dependency
+#include "we_unitinfo.h"
 
 #define GAME_VERSION "PRE-ALPHA 9.0" //TMP placement for this define
 #if TARGET_OS_IPHONE
@@ -523,23 +524,31 @@ static void initGP(void)
 	we_ortho(GAME_WIDTH / 2, GAME_HEIGHT / 2); //GLES1!
 }
 
+static void net_init(void)
+{
+	if (SDLNet_Init() == -1) {
+		fprintf(stderr, "ERROR: SDLNet_Init: %s\n", SDLNet_GetError());
+		exit(-1);
+	}
+}
+
+#define TIMEUSE_INIT Uint32 startTime = SDL_GetTicks()
+#define TIMEUSE(x)  fprintf(stderr,"STATS time: %6.3f "x"\n", (SDL_GetTicks()-startTime) / 1000.0)
+#define INITCALL(func) func(); TIMEUSE(#func" done")
 
 static void main_init(void)
 {
-	Uint32 startTime = SDL_GetTicks();
+	we_info_init();
+	TIMEUSE_INIT;
 	srand(time(0)); /* init pseudo-random generator */
 	//TODO Make sure faulty inits stops the program from proceeding
 	waffle_init();      /* prepare game resources and general methods*/
-	SDL_Log("DEBUG: waffle_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	game_config();      /* load default and user-changed settings */
-	SDL_Log("DEBUG: game_config done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	display_init();     /* sets attributes and creates windows and renderer*/
-	SDL_Log("DEBUG: display_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	initGL();           /* setup a gl context */
-	SDL_Log("DEBUG: GL_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	initGP();          /* setup a gl context */
-	SDL_Log("DEBUG: GP_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	finger_init();
+	INITCALL(game_config);	/* load default and user-changed settings */
+	INITCALL(display_init);
+	INITCALL(initGL);           /* setup a gl context */
+	INITCALL(initGP);          /* setup a gl context */
+	INITCALL(finger_init);
+	INITCALL(net_init);
     accelerometer = SDL_JoystickOpen(0);
 #if !ARCADE_MODE
     if (accelerometer == NULL) {
@@ -547,30 +556,19 @@ static void main_init(void)
     }
 #endif
 
-	//cpInitChipmunk();
-	sound_init();
-	SDL_Log("DEBUG: sound_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	texture_init();     /* preload textures */
-	SDL_Log("DEBUG: texture_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	sprite_init();
-	SDL_Log("DEBUG: sprite_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-    bmfont_init();
-	SDL_Log("DEBUG: bmfont_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	draw_init();        /* initializes circular shapes and rainbow colors */
-	SDL_Log("DEBUG: draw_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	particles_init();   /* load and prepare all particle systems */
-	SDL_Log("DEBUG: particles_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	//font_init();      /* (currently not in use) */
-	statesystem_init(); /* init all states */
-	SDL_Log("DEBUG: statesystem_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	layersystem_init();
-	SDL_Log("DEBUG: layersystem_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	object_init();
-	SDL_Log("DEBUG: object_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	objectsystem_init();
-	SDL_Log("DEBUG: objectsystem_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
-	game_init();
-	SDL_Log("DEBUG: game_init done: %.3f", (SDL_GetTicks()-startTime) / 1000.0);
+	//cpInitChipmunk);
+    INITCALL(sound_init);
+    INITCALL(texture_init);
+    INITCALL(sprite_init);
+    INITCALL(bmfont_init);
+    INITCALL(draw_init);
+    INITCALL(particles_init);
+	//INITCALL(font_init);      /* currently not in use) */
+    INITCALL(statesystem_init);
+    INITCALL(layersystem_init);
+    INITCALL(object_init);
+    INITCALL(objectsystem_init);
+    INITCALL(game_init);
 
 	// Handle iOS app-events (pause, low-memory, terminating, etc...) and SDL_QUIT
 	SDL_SetEventFilter(HandleAppEvents, NULL);
@@ -580,8 +578,8 @@ static void main_init(void)
     //InitGameCenter(); //TODO support GameCenter
 #endif
 
+	TIMEUSE("ALL INIT DONE time");
 	lastTime = SDL_GetTicks();
-	SDL_Log("DEBUG: ALL INIT DONE time: %.3f", (lastTime-startTime) / 1000.0);
 
 #if !ARCADE_MODE
 	fprintf(stderr, "%s\t%5s ms\t%4s ms\t%4s ms\t%6s ms\t%6s ms\t%6s ms\n", "FPS", "AVG", "MIN", "MAX", "Update", "Draw", "GLSwap");
@@ -862,6 +860,7 @@ static int main_destroy(void) {
 	extern int stat_hm_adds, stat_hm_rehash;
 	fprintf(stderr, "hashmap stats: %d adds (%.2f %% rehash)\n", stat_hm_adds, 100.0 * stat_hm_rehash / stat_hm_adds);
 
+	SDLNet_Quit();
 #if !TARGET_OS_IPHONE
 	SDL_DestroyWindow(window);
 	SDL_Quit();

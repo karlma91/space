@@ -4,18 +4,18 @@
 #include "waffle_utils.h"
 #include "SDL.h"
 
-#include "../../tools/encrypt/we_crypt.h"
+#include "we_crypt.h"
 
 #define RESOURCE_VERSION 9 // changed: 05.11.13
 
 #if TARGET_OS_IPHONE
-#define GAME_RESFOLDER "game_data_ios"
-#define GAME_RESOURCES GAME_RESFOLDER".zip"
+#define GAME_RESFOLDER "res"
+#define GAME_RESOURCES GAME_RESFOLDER".dat"
 #elif __ANDROID__
-#define GAME_RESFOLDER "game_data"
-#define GAME_RESOURCES GAME_RESFOLDER".zip"
+#define GAME_RESFOLDER "res"
+#define GAME_RESOURCES GAME_RESFOLDER".dat"
 #else
-#define GAME_RESFOLDER "game" //"game_data"
+#define GAME_RESFOLDER "res" //"game_data"
 #define GAME_RESOURCES GAME_RESFOLDER".dat" //".zip"
 //#define GAME_RESFOLDER "game_data"
 //#define GAME_RESOURCES GAME_RESFOLDER".zip"
