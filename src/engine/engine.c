@@ -534,7 +534,7 @@ static void net_init(void)
 
 #define TIMEUSE_INIT Uint32 startTime = SDL_GetTicks()
 #define TIMEUSE(x)  fprintf(stderr,"STATS time: %6.3f "x"\n", (SDL_GetTicks()-startTime) / 1000.0)
-#define INITCALL(func) func(); TIMEUSE(#func" done")
+#define INITCALL(func) fprintf(stderr, "INIT: "#func"\n"), func(), TIMEUSE(#func" done")
 
 static void main_init(void)
 {
@@ -542,7 +542,7 @@ static void main_init(void)
 	TIMEUSE_INIT;
 	srand(time(0)); /* init pseudo-random generator */
 	//TODO Make sure faulty inits stops the program from proceeding
-	waffle_init();      /* prepare game resources and general methods*/
+	INITCALL(waffle_init);      /* prepare game resources and general methods*/
 	INITCALL(game_config);	/* load default and user-changed settings */
 	INITCALL(display_init);
 	INITCALL(initGL);           /* setup a gl context */

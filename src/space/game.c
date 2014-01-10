@@ -304,25 +304,39 @@ void game_touchables(void)
 	button_set_enlargement(btn_settings, 1.5);
 	button_set_hotkeys(btn_settings, SDL_SCANCODE_F1, 0);
 }
-/* Global variables */
+
 static IPaddress serverIP;
 static TCPsocket tcpsock = NULL;
 
-#define SERVER_PORT 8049
-char *server = "80.203.98.253";
-void connect_init(void)
+int db_connected = 0;
+#define SERVER_HOST "78.46.42.4"
+#define SERVER_PORT 3306
+
+void connect_thread(void *unused)
 {
-	SDLNet_ResolveHost(&serverIP, server, SERVER_PORT);
-	if (serverIP.host == INADDR_NONE) {
-		fprintf(stderr, "Could not resolve hostname\n");
-	} else {
-		tcpsock = SDLNet_TCP_Open(&serverIP);
-		if (tcpsock == NULL) {
-			fprintf(stderr,"Connect failed\n");
-		} else {
-			fprintf(stderr,"Connected!\n");
+	while (1) {
+		SDL_Delay(5000);
+		if (!db_connected) {
+			db_connected = 0;
+			SDLNet_ResolveHost(&serverIP, SERVER_HOST, SERVER_PORT);
+			if (serverIP.host == INADDR_NONE) {
+				fprintf(stderr, "SERVER: Could not resolve host: %s\n", SDLNet_GetError());
+			} else {
+				tcpsock = SDLNet_TCP_Open(&serverIP);
+				if (tcpsock == NULL) {
+					fprintf(stderr,"SERVER: Connection failed: %s\n", SDLNet_GetError());
+				} else {
+					db_connected = 1;
+					fprintf(stderr,"SERVER: Connected!\n");
+				}
+			}
 		}
 	}
+}
+
+void connect_init(void)
+{
+	SDL_CreateThread(connect_thread, "network", NULL);
 }
 
 void game_init(void)

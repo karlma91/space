@@ -208,6 +208,12 @@ static void draw(void)
     */
 }
 
+static void draw_gui(view *v)
+{
+	draw_color4f(!db_connected,db_connected,0,1);
+	draw_circle(0, cpv(-v->view_width/2+20, v->view_height/2-20), 15);
+}
+
 static void button_callback(void *data)
 {
 	levelscreen_change_to(data);
@@ -250,6 +256,7 @@ void stations_init(void)
 	//Color col_text = {1,1,1,1};
 
 	main_view = state_view_get(state_stations, 0);
+	main_view->GUI = draw_gui;
 
 	btn_home = button_create(NULL, 0, "Upgrades", -GAME_WIDTH/4, -GAME_HEIGHT/2 + 80, 200, 200);
 	button_set_callback(btn_home, open_upgrades, 0);

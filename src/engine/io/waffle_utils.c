@@ -8,6 +8,11 @@
 
 #define RESOURCE_VERSION 9 // changed: 05.11.13
 
+/* Pass '-DLOAD_FROM_FOLDER=1' to compiler for reading files directly from game_data/... */
+#ifndef LOAD_FROM_FOLDER
+#define LOAD_FROM_FOLDER 0
+#endif
+
 #if TARGET_OS_IPHONE
 #define GAME_RESFOLDER "res"
 #define GAME_RESOURCES GAME_RESFOLDER".dat"
@@ -17,8 +22,6 @@
 #else
 #define GAME_RESFOLDER "res" //"game_data"
 #define GAME_RESOURCES GAME_RESFOLDER".dat" //".zip"
-//#define GAME_RESFOLDER "game_data"
-//#define GAME_RESOURCES GAME_RESFOLDER".zip"
 #endif
 
 #if __ANDROID__
@@ -56,6 +59,9 @@ static zzip_plugin_io_handlers io_handler;
 
 void waffle_init(void)
 {
+#if LOAD_FROM_FOLDER
+	/* do nothing */
+#else
 	byte key[20];
 	we_genkey(key, "abcdefghijklmnopqrstuvwxyz*&_ #=");
 	we_setkey(key);
@@ -74,10 +80,8 @@ void waffle_init(void)
 		SDL_Log("ERROR: game data could not be loaded!\n"
 				"Run ./zip_res.sh to compress current game data");
 		exit(-1);
-	} else {
-		SDL_Log("Game data loaded");
 	}
-#endif
+#endif /* __ANDROID__ */
 	ZZIP_DIRENT zd;
 	zzip_rewinddir(game_data);
 	do {
@@ -86,31 +90,30 @@ void waffle_init(void)
 	} while (strcmp("ver", zd.d_name));
 	//zzip_dir_stat(game_data, )
 	//SDL_Log("Checking if game resources are up to date...");
-	ZZIP_FILE *zf = waffle_open("ver");
-	if (zf) {
-		char buffer[4096];
-		int filesize = zzip_file_read(zf, buffer, 4096);
-		buffer[filesize] = 0;
-		zzip_file_close(zf);
+#endif /* LOAD_FROM_FOLDER */
 
-		int version = 0;
+	char buffer[4096];
+	int filesize = waffle_read_file("ver", buffer, 4096);
+	if (filesize) {
+		int version = -1;
 		sscanf(buffer, "%d", &version);
-
 		if (version != RESOURCE_VERSION) {
 			SDL_Log("ERROR: you need to update game_data.zip, found version %d, but expected version %d", version, RESOURCE_VERSION);
 			exit(-1);
 		}
-
 	} else {
 		SDL_Log("ERROR: could not open version file! Make sure your game_data.zip is up to date!\n"
-				"Run ./zip_res.sh to compress current game data");
+				"Run ./zip_res.sh to compress cunrrent game data");
 		exit(-1);
 	}
+	SDL_Log("Game data ready for loading\n");
 }
 
 void waffle_destroy(void)
 {
+#if !LOAD_FROM_FOLDER
 	zzip_dir_close(game_data);
+#endif
 }
 
 
@@ -135,14 +138,20 @@ ZZIP_FILE *waffle_open(char *path)
 {
 	char full_path[256];
 
+#if LOAD_FROM_FOLDER
+	sprintf(&full_path[0], "game_data/%s", path);
+	fprintf(stderr, "opening file: %s\n", full_path);
+	return zzip_open(full_path, ZZIP_CASELESS);
+#else
 #if __ANDROID__
 	sprintf(&full_path[0], "assets/game_data/%s", path);
 #else
 	sprintf(&full_path[0], "%s", path);
-#endif
+#endif /* __ANDROID__ */
 	fprintf(stderr, "opening file: %s\n", full_path);
 	return zzip_file_open(game_data, full_path, 0);
 	//return zzip_open_ext_io(full_path, O_RDONLY, ZZIP_ONLYZIP | ZZIP_CASELESS, ext, &io_handler);
+#endif /* LOAD_FROM_FOLDER */
 }
 
 //Todo make sure that the caller is notified if the given file is not fully read!
