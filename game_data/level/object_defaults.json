@@ -73,6 +73,8 @@
 		},  
 		{ "type": "robotarm", 
 		  "name": "def",
+		  "segments": 3,
+		  "seg_length": 300,
 		  "max_hp": 250, 
 		  "coins": 50
 		}
