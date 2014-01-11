@@ -162,6 +162,7 @@ static void draw(void)
 	draw_color4f(1,1,1,1);
 	//draw_box(1, a, b, r, 1);
 
+
 	draw_push_matrix();
 	draw_translate(1900,-1750);
 	draw_rotate(-current_view->rotation);
@@ -172,6 +173,7 @@ static void draw(void)
 	for (i=0; i<SOLSYS_COUNT; i++) {
 		solarsystem_draw(solsys[i]);
 	}
+
 
 	/*
 	float f = 1/2.0;
@@ -214,6 +216,9 @@ static void draw_gui(view *v)
 	draw_color4f(!db_connected,db_connected,0,1);
 	draw_circle(0, cpv(-v->view_width/2+20, v->view_height/2-20), 15);
 #endif
+	draw_color4f(1,1,1,1);
+	sprite_render_by_id(0,SPRITE_GEAR, cpv(0,200),cpv(100,100),0);
+	draw_quad_patch_center(0,SPRITE_GEAR,cpv(0,0),cpv(200,200), 50,0);
 }
 
 static void button_callback(void *data)

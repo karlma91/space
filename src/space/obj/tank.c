@@ -261,7 +261,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	explosion_create(tank->data.body->p, EM_EXPLOSIONBIG, EM_FRAGMENTS, SND_BUILDING_EXPLODE, 800, 140, 0.25);
+	explosion_create(tank->data.body->p, EM_EXPLOSIONBIG, EM_FRAGMENTS, SND_BUILDING_EXPLODE, 1200, 140, 0.1);
 	se_spawn_coins((instance *)tank);
 	we_body_remove_constraints(current_space, tank->data.body);
 	cpBodySetTorque(tank->wheel1, 0);

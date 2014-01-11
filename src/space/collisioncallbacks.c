@@ -158,12 +158,14 @@ static int collision_explosion(cpArbiter *arb, cpSpace *space, void *unused)
 void collisioncallbacks_init(void)
 {
 	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_tank, collision_explosion, NULL, NULL, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_crate, collision_explosion, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_player, collision_explosion, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_robotarm, collision_explosion, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_factory, collision_explosion, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_rocket, collision_explosion, NULL, NULL, NULL, NULL);
 
 	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, obj_id_tank, NULL, NULL, collision_bullet_VS_object_with_score, NULL, NULL);
+	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, obj_id_crate, NULL, NULL, collision_bullet_VS_object_with_score, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, obj_id_rocket, NULL, NULL, collision_bullet_VS_object_with_score, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, obj_id_factory, NULL, NULL, collision_bullet_VS_object_with_score, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, obj_id_robotarm, NULL, NULL, collision_bullet_VS_object_with_score, NULL, NULL);

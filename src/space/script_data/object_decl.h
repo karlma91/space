@@ -127,6 +127,12 @@ OBJ_START(coin)
 	cpBool pulled; //TODO create pickup component
 OBJ_END
 
+OBJ_START(crate)
+	hpbar hp_bar;
+	int destroyable;
+	int is_static;
+OBJ_END
+
 
 
 #endif /* OBJECT_DECL_H_ */

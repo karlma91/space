@@ -81,7 +81,11 @@ def levelParse(file, data):
                "  return data;\n")
     file.write("}\n")
     
-#def writeParse(file, data):
+def levelRegisterFunc(file, data):
+    file.write("void object_types_init(void)\n{\n")
+    for param_name in data:
+        file.write("  OBJECT_REGISTER(" + str(param_name) + ");\n")
+    file.write("}\n")
     
 
 def writeParse(file, data):
@@ -141,6 +145,7 @@ def generateParse(file, data):
     file.write("\n")
     file.write("#include \"paramsgen.h\"\n")
     file.write("#include \"we.h\"\n")
+    levelRegisterFunc(file, data)
     levelParse(file,data)
     writeParse(file,data)
     file.close()
