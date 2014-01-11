@@ -526,10 +526,12 @@ static void initGP(void)
 
 static void net_init(void)
 {
+#ifdef GOT_SDL_NET
 	if (SDLNet_Init() == -1) {
 		fprintf(stderr, "ERROR: SDLNet_Init: %s\n", SDLNet_GetError());
 		exit(-1);
 	}
+#endif
 }
 
 #define TIMEUSE_INIT Uint32 startTime = SDL_GetTicks()
@@ -859,8 +861,9 @@ static int main_destroy(void) {
 
 	extern int stat_hm_adds, stat_hm_rehash;
 	fprintf(stderr, "hashmap stats: %d adds (%.2f %% rehash)\n", stat_hm_adds, 100.0 * stat_hm_rehash / stat_hm_adds);
-
+#ifdef GOT_SDL_NET
 	SDLNet_Quit();
+#endif
 #if !TARGET_OS_IPHONE
 	SDL_DestroyWindow(window);
 	SDL_Quit();

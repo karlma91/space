@@ -305,6 +305,7 @@ void game_touchables(void)
 	button_set_hotkeys(btn_settings, SDL_SCANCODE_F1, 0);
 }
 
+#ifdef GOT_SDL_NET
 static IPaddress serverIP;
 static TCPsocket tcpsock = NULL;
 
@@ -338,6 +339,9 @@ void connect_init(void)
 {
 	SDL_CreateThread(connect_thread, "network", NULL);
 }
+#else
+void connect_init(void){}
+#endif
 
 void game_init(void)
 {

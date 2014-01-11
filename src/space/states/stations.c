@@ -210,8 +210,10 @@ static void draw(void)
 
 static void draw_gui(view *v)
 {
+#ifdef GOT_SDL_NET
 	draw_color4f(!db_connected,db_connected,0,1);
 	draw_circle(0, cpv(-v->view_width/2+20, v->view_height/2-20), 15);
+#endif
 }
 
 static void button_callback(void *data)

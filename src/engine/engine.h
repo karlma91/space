@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include "SDL.h"
-#include "SDL_net.h"
+//#include "SDL_net.h"
 #include "input/button.h"
 #include "data/llist.h"
 #include "graphics/camera.h"
