@@ -279,6 +279,103 @@ void draw_line_tex(int layer, int tex_id, float *tex_map, cpVect a, cpVect b, fl
     draw_pop_matrix();
 }
 
+void draw_quad_patch_center_spr(int layer, sprite *spr, cpVect a, cpVect b, float w, float angle)
+{
+	float tex_map[8];
+	sprite_get_current_image(spr,tex_map);
+	int tex_id = sprite_get_texture(spr->id);
+	draw_quad_patch_center_tex(layer, tex_id, tex_map, a, b, w, angle);
+}
+
+void draw_quad_patch_center(int layer, SPRITE_ID id, cpVect a, cpVect b, float w, float angle)
+{
+	float tex_map[8];
+	sprite_get_subimg_by_index(id, 0, tex_map);
+	int tex_id = sprite_get_texture(id);
+	draw_quad_patch_center_tex(layer, tex_id, tex_map, a, b, w, angle);
+}
+
+void draw_quad_patch_center_tex(int layer, int tex_id, float *tex_map, cpVect pos, cpVect size, float w, float angle)
+{
+
+	texture_bind_virt(tex_id);
+	draw_push_matrix();
+	draw_translate(pos.x, pos.y);
+	draw_rotate(angle);
+
+	float tx_1 = tex_map[0];
+	float tx_2 = tex_map[2];
+	float tx_h = tx_1 + (tx_2-tx_1)/2;
+	float ty_1 = tex_map[1];
+	float ty_2 = tex_map[5];
+	float ty_h = ty_1 + (ty_2 - ty_1)/2;
+
+	float tex_top[16] ={
+			tx_1, ty_1,
+			tx_1,  ty_h,
+			tx_h, ty_1,
+			tx_h,  ty_h,
+			tx_h, ty_1,
+			tx_h,  ty_h,
+			tx_2, ty_1,
+			tx_2,  ty_h};
+
+	float tex_mid[16] ={
+			tx_1, ty_h,
+			tx_1,  ty_h,
+			tx_h, ty_h,
+			tx_h,  ty_h,
+			tx_h, ty_h,
+			tx_h,  ty_h,
+			tx_2, ty_h,
+			tx_2,  ty_h};
+
+	float tex_bot[16] ={
+			tx_1, ty_h,
+			tx_1,  ty_2,
+			tx_h, ty_h,
+			tx_h,  ty_2,
+			tx_h, ty_h,
+			tx_h,  ty_2,
+			tx_2, ty_h,
+			tx_2,  ty_2};
+
+
+	float x0 = -size.x/2 - w;
+	float x1 = -size.x/2;
+	float x2 =  size.x/2;
+	float x3 =  size.x/2 + w;
+
+	float y0 = -size.y/2 - w;
+	float y1 = -size.y/2;
+	float y2 =  size.y/2;
+	float y3 =  size.y/2 + w;
+
+	GLfloat line_top[16] = {
+			x0, y0, x0, y1,
+			x1, y0, x1, y1,
+			x2, y0, x2, y1,
+			x3, y0, x3, y1};
+
+	GLfloat line_mid[16] = {
+			x0, y1, x0, y2,
+			x1, y1, x1, y2,
+			x2, y1, x2, y2,
+			x3, y1, x3, y2};
+
+	GLfloat line_bot[16] = {
+			x0, y2, x0, y3,
+			x1, y2, x1, y3,
+			x2, y2, x2, y3,
+			x3, y2, x3, y3};
+
+	draw_triangle_strip(layer, line_top, tex_top, 8);
+	draw_triangle_strip(layer, line_mid, tex_mid, 8);
+	draw_triangle_strip(layer, line_bot, tex_bot, 8);
+
+	draw_pop_matrix();
+}
+
 void draw_glow_line(cpVect a, cpVect b, float w)
 {
 	draw_push_color();

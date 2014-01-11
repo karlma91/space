@@ -66,5 +66,10 @@
     "force": "float",
     "seconds": "float",
     "size": "float"
+  },
+  "crate": {
+    "size": "float",
+    "max_hp": "int",
+    "coins": "int"
   }
 }

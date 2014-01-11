@@ -71,7 +71,7 @@ typedef enum EDITOR_MODE {
 
 //TODO show actual objects in list
 static char object_names[EDITOR_OBJECT_COUNT][32] = {
-		"staticpolygon",
+		"CRATE",
 		"TANK",
 		"FACTORY",
 		"FACTORY",
