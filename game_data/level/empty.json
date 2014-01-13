@@ -1,0 +1,10 @@
+{
+	"name" : "empty",
+	"tilemap" : "level02_01.tmx",
+	"timelimit": 100,
+	
+	"params" : [
+	],
+	"objects" : [
+	]
+}
