@@ -29,7 +29,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	factory->max_distance = 900; //TODO read from object definition
 	//fac->hp = fac->param.max_hp; //TODO FIXME
 
-	factory->spawn_param = level_get_param(currentlvl->param_list, factory->param.spawn_type->NAME, factory->param.param_name);
+	factory->spawn_param = level_get_param(&(currentlvl->params), factory->param.spawn_type->NAME, factory->param.param_name);
 
 	cpFloat size = 375;
 	sprite_create(&factory->data.spr, factory->param.sprite, 400, 400, 30);

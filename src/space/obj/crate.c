@@ -17,8 +17,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	COMPONENT_SET(crate, HPBAR, &crate->hp_bar);
 	COMPONENT_SET(crate, COINS, &crate->param.coins);
-	sprite_create(&(crate->data.spr), SPRITE_GEAR, crate->param.size, crate->param.size, 0);
-	SDL_Log("crate size: %f", crate->param.size );
+	sprite_create(&(crate->data.spr), crate->param.sprite, crate->param.size, crate->param.size, 0);
 	float mass = 5;
 	cpFloat moment = cpMomentForBox(mass, crate->param.size, crate->param.size);
 	crate->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, moment));
@@ -42,7 +41,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
 	draw_color(COL_WHITE);
-	float border = 50;
+	float border = 40;
 	draw_quad_patch_center_spr(RLAY_GAME_MID, &(crate->data.spr),crate->data.body->p,cpv(crate->param.size-border*2, crate->param.size-border*2), border, crate->data.body->a);
 	hpbar_draw(RLAY_GUI_BACK, &crate->hp_bar, cpvtoangle(crate->data.body->p));
 }

@@ -31,69 +31,111 @@ static SPRITE_ID DEF_SPRITE = NULL;
 static EMITTER_ID DEF_EMITTER = NULL;
 static polyshape DEF_SHAPE = NULL;
 
+param_list param_defs;
 
 int level_init(void)
 {
 	/* read space station data */
-		char buff[10000]; // TODO: stor nok?
-		int filesize = waffle_read_file("space_1.json", &buff[0], 10000);
-		if (!filesize) {
+	char buff[10000]; // TODO: stor nok?
+	int filesize = waffle_read_file("space_1.json", &buff[0], 10000);
+	if (!filesize) {
+		SDL_Log("Could not load level data!");
+		exit(1);
+	}
+
+	int i;
+	cJSON *root = cJSON_Parse(buff);
+	if(root == NULL){
+		SDL_Log("[Level] could not parse level: %s", "space_1");
+		SDL_Log("Error before: [%s]\n",cJSON_GetErrorPtr());
+		return NULL;
+	}
+	cJSON *station_array = cJSON_GetObjectItem(root,"stations");
+	station_count = cJSON_GetArraySize(station_array);
+	world = calloc(station_count,sizeof(level_ship));
+
+	for (i = 0; i < cJSON_GetArraySize(station_array); i++){
+		cJSON *station = cJSON_GetArrayItem(station_array, i);
+		world[i].id = i+1;
+		world[i].radius = 100;
+		world[i].rotation = 1;
+		world[i].rotation_speed = 1;
+		world[i].pos.x = cJSON_GetObjectItem(station,"x")->valuedouble;
+		world[i].pos.y = cJSON_GetObjectItem(station,"y")->valuedouble;
+		strcpy(world[i].level_name, cJSON_GetObjectItem(station,"level")->valuestring);
+	}
+
+	if (i != station_count || i <= 0) {
+		SDL_Log("Error while loading level data, could not load all stations! (%d of %d loaded)\n", i, station_count);
+		exit(2);
+	}
+
+	cJSON_Delete(root);
+
+	filesize = waffle_read_file("level/object_defaults.json", &buff[0], 10000);
+	if (!filesize) {
 			SDL_Log("Could not load level data!");
 			exit(1);
 		}
+	root = cJSON_Parse(buff);
+	if(root == NULL){
+		SDL_Log("[Level] could not parse level: %s", "level/object_defaults.json");
+		SDL_Log("Error before: [%s]\n",cJSON_GetErrorPtr());
+		return NULL;
+	}
+	level_load_params(&(param_defs), root);
+	cJSON_Delete(root);
 
-		int i;
-		cJSON *root = cJSON_Parse(buff);
-		if(root == NULL){
-			SDL_Log("[Level] could not parse level: %s", "space_1");
-			SDL_Log("Error before: [%s]\n",cJSON_GetErrorPtr());
-			return NULL;
-		}
-		cJSON *station_array = cJSON_GetObjectItem(root,"stations");
-		station_count = cJSON_GetArraySize(station_array);
-		world = calloc(station_count,sizeof(level_ship));
-
-		for (i = 0; i < cJSON_GetArraySize(station_array); i++){
-			cJSON *station = cJSON_GetArrayItem(station_array, i);
-			world[i].id = i+1;
-			world[i].radius = 100;
-			world[i].rotation = 1;
-			world[i].rotation_speed = 1;
-			world[i].pos.x = cJSON_GetObjectItem(station,"x")->valuedouble;
-			world[i].pos.y = cJSON_GetObjectItem(station,"y")->valuedouble;
-			strcpy(world[i].level_name, cJSON_GetObjectItem(station,"level")->valuestring);
-		}
-
-		if (i != station_count || i <= 0) {
-			SDL_Log("Error while loading level data, could not load all stations! (%d of %d loaded)\n", i, station_count);
-			exit(2);
-		}
-    
-    return 1;
+	return 1;
 }
 
-void * level_get_param(hashmap * h, char *type, char * name)
+
+
+static void * level_get_param_direct(param_list *params, char *type, char * name)
+{
+	hashmap *names = (hashmap*)hm_get(params->param,type);
+
+	if(names) {
+		void *data = hm_get(names, name);
+		if(data){
+			return data;
+		}else{
+			SDL_Log("LEVEL: could not find %s in type %s names", name, type);
+		}
+	} else {
+		SDL_Log("LEVEL: Could not find type %s", type);
+	}
+	return NULL;
+}
+
+void * level_get_param(param_list *params, char *type, char * name)
 {
 	char l_type[20];
 	char l_name[20];
 
 	strtolower(l_type, type);
 	strtolower(l_name, name);
-
-	hashmap *names = (hashmap*)hm_get(h,l_type);
-
-	if(names) {
-		void *data = hm_get(names, l_name);
-		if(data){
-			return data;
-		}else{
-			SDL_Log("LEVEL: could not find %s in type %s names", l_name, l_type);
-		}
+	void * param = level_get_param_direct(params, l_type, l_name);
+	if (param) {
+		return param;
 	} else {
-		SDL_Log("LEVEL: Could not find type %s", l_type);
+		SDL_Log("LEVEL: Loading from param_DEFS");
+		param = level_get_param_direct(&(param_defs), l_type, l_name);
+		if(param){
+			return param;
+		}else{
+			param = level_get_param_direct(&(param_defs), l_type, "def");
+			if(param){
+				return param;
+			}else{
+				SDL_Log("LEVEL: Could not find type crash %s", l_type);
+				return NULL;
+			}
+		}
 	}
-	return NULL;
 }
+
+
 
 /**
  * Parse an int from cJSON struct
@@ -280,14 +322,8 @@ level *level_load(char * filename)
 	//lvl->outer_radius = lvl->inner_radius + lvl->height;
 	lvl->outer_radius = lvl->inner_radius + lvl->height;
 
-	cJSON *param_array = cJSON_GetObjectItem(root,"params");
 
-	lvl->param_list = hm_create();
-
-	for (i = 0; i < cJSON_GetArraySize(param_array); i++){
-		cJSON *param = cJSON_GetArrayItem(param_array, i);
-		parse_param_object(param, lvl->param_list);
-	}
+	level_load_params(&(lvl->params), root);
 
 	cJSON * object_array = cJSON_GetObjectItem(root,"objects");
 
@@ -312,6 +348,16 @@ level *level_load(char * filename)
 }
 
 
+void level_load_params(param_list *defs, cJSON *root)
+{
+	cJSON *param_array = cJSON_GetObjectItem(root,"params");
+	defs->param = hm_create();
+	int i;
+	for (i = 0; i < cJSON_GetArraySize(param_array); i++){
+		cJSON *param = cJSON_GetArrayItem(param_array, i);
+		parse_param_object(param, defs->param);
+	}
+}
 
 void level_add_object_recipe_name(level * lvl, const char * obj_type, const char * param_name, cpVect pos, float rotation)
 {
@@ -336,7 +382,7 @@ void level_add_object_recipe_name(level * lvl, const char * obj_type, const char
 
 	object_recipe * rec = calloc(1, sizeof(object_recipe));
 	rec->obj_type = object_by_name(data_type);
-	rec->param = level_get_param(lvl->param_list, data_type, data_name);
+	rec->param = level_get_param(&(lvl->params), data_type, data_name);
 	strcpy(rec->param_name, data_name);
 	rec->pos = pos;
 	rec->rotation = rotation;
@@ -361,7 +407,7 @@ void level_start_level(level *lvl)
 	while(llist_hasnext(lvl->level_data)) {
 		object_recipe * data = llist_next(lvl->level_data);
 		SDL_Log("INSTANTIATING TYPE: %s at: %f ", data->obj_type->NAME, data->pos.x);
-		instance_create(data->obj_type, data->param, data->pos, cpvzero);
+		instance *ins = instance_create(data->obj_type, data->param, data->pos, cpvzero);
 	}
 	llist_end_loop(lvl->level_data);
 }
@@ -374,8 +420,14 @@ void level_clear_objects(level *lvl)
 void level_unload(level *lvl)
 {
 	tilemap_destroy(lvl->tiles);
-	// TODO: move to hashmap with remove callback
-	hashiterator *it = hm_get_iterator(lvl->param_list);
+	level_destry_param_list(&(lvl->params));
+	free(lvl->tiles);
+	free(lvl);
+}
+
+void level_destry_param_list(param_list *params)
+{
+	hashiterator *it = hm_get_iterator(params->param);
 	hashmap * h = hm_iterator_next(it);
 	while(h != NULL) {
 		hashiterator *it2 = hm_get_iterator(h);
@@ -389,9 +441,7 @@ void level_unload(level *lvl)
 		h = hm_iterator_next(it);
 	}
 	hm_iterator_destroy(it);
-	hm_destroy(lvl->param_list);
-	free(lvl->tiles);
-	free(lvl);
+	hm_destroy(params->param);
 }
 
 void level_write_to_file(level *lvl)
@@ -404,7 +454,7 @@ void level_write_to_file(level *lvl)
 
 	cJSON * param_array = cJSON_CreateArray();
 
-	hashiterator *it = hm_get_iterator(lvl->param_list);
+	hashiterator *it = hm_get_iterator(lvl->params.param);
 	hashmap * h = hm_iterator_next(it);
 	while(h != NULL) {
 		object_id *obj_id = object_by_name(hm_iterator_get_key(it));

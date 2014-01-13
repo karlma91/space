@@ -217,8 +217,6 @@ static void draw_gui(view *v)
 	draw_circle(0, cpv(-v->view_width/2+20, v->view_height/2-20), 15);
 #endif
 	draw_color4f(1,1,1,1);
-	sprite_render_by_id(0,SPRITE_GEAR, cpv(0,200),cpv(100,100),0);
-	draw_quad_patch_center(0,SPRITE_GEAR,cpv(0,0),cpv(200,200), 50,0);
 }
 
 static void button_callback(void *data)

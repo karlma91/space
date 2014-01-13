@@ -1,7 +1,6 @@
 { "stations": [
 	 {"x":800, "y":-200, "level":"easymode"},
 	 {"x":-500, "y":-800, "level":"fromeditor"},
-	 {"x":-900, "y":-400, "level":"factorycity"},
-	 {"x":1500, "y":-800, "level":"test"}
+	 {"x":-900, "y":-400, "level":"factorycity"}
 	 ]
 }

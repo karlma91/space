@@ -25,6 +25,10 @@ typedef struct object_recipe {
 	float rotation;
 }object_recipe;
 
+typedef struct param_defs {
+	hashmap * param;
+} param_list;
+
 typedef struct level {
 	char name[30];
 	int station;
@@ -37,15 +41,15 @@ typedef struct level {
 	float inner_radius;
 	float outer_radius;
 
-	hashmap * param_list;
+	param_list params;
 	LList level_data;
 
 	tilemap *tiles;
 } level;
 
-typedef struct param_defs {
-	hashmap * param;
-} param_defs;
+
+
+extern param_list param_defs;
 
 int level_safe_parse_int(cJSON *param, char *name );
 double level_safe_parse_float(cJSON *param, char *name );
@@ -59,20 +63,24 @@ Mix_Chunk * level_safe_parse_sound(cJSON *param, char *name);
 int level_safe_parse_texture(cJSON *param, char *name );
 
 
-extern int level_init(void);
-extern void level_unload(level *lvl);
-extern void level_destroy(void);
-extern void level_get_ships(level_ship **,int *);
+void level_load_params(param_list *defs, cJSON *root);
+
+int level_init(void);
+void level_unload(level *lvl);
+void level_destroy(void);
+void level_get_ships(level_ship **,int *);
 
 void level_write_to_file(level *lvl);
 
-extern int level_get_station_count(void);
-extern int level_get_level_count(int station);
+void level_destry_param_list(param_list *params);
+
+int level_get_station_count(void);
+int level_get_level_count(int station);
 
 void level_add_object_recipe_name(level * lvl, const char * obj_type, const char * param_name, cpVect pos, float rotation);
 void level_add_object_recipe(level * lvl, object_id *obj_id, const char * param_name,  void * param, cpVect pos, float rotation);
 
-void * level_get_param(hashmap * h, char *type, char * name);
+void * level_get_param(param_list *params, char *type, char * name);
 level *level_load(char * filename);
 void level_clear_objects(level *lvl);
 void level_start_level(level *lvl);

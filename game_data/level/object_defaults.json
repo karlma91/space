@@ -3,10 +3,17 @@
 	"tilemap" : "level02_01.tmx",
 	"timelimit": 100,
 	"params" : [
+		{ "type": "player", 
+		  "name":"def", 
+		  "player_id": 1,
+		  "gun_cooldown":0.2,
+		  "cash_radius":250,
+		  "max_hp":200
+		},
 		{ "type": "turret", 
 		  "name":"def", 
 		  "max_hp":250,
-		  "coins":50,
+		  "coins":35,
 		  "rot_speed": 0.2,
 		  "shoot_interval": 2,
 		  "burst_number": 2,
@@ -23,19 +30,19 @@
 		{ "type": "tank", 
 		  "name":"def", 
 		  "max_hp":120, 
-		  "coins":25
+		  "coins":5
 		},
 		{ "type": "tank", 
 		  "name":"red", 
 		  "max_hp":320, 
-		  "coins":85
+		  "coins":10
 		},
 		{ "type": "factory", 
 		  "name": "def",
 		  "max_tanks": 2, 
 		  "max_hp": 250, 
 		  "spawn_delay": 3, 
-		  "coins": 150, 
+		  "coins": 30, 
 		  "param_name":"def",
 		  "spawn_type":"tank", 
 		  "sprite": "factoryblue", 
@@ -80,11 +87,36 @@
 		},
 		{ "type": "crate", 
 		  "name": "def",
+		  "sprite": "factoryblue",
 		  "invinc": 0,
 		  "size": 100,
 		  "max_hp": 50, 
 		  "coins": 10
-		}
+		},
+		{ "type": "crate", 
+		  "name": "def_inv",
+		  "sprite": "factoryblue",
+		  "invinc": 1,
+		  "size": 200,
+		  "max_hp": 50, 
+		  "coins": 10
+		},
+		{ "type": "tank", 
+		  "name":"light", 
+		  "max_hp":250, 
+		  "coins":50,
+		  "texture_name": "tank_00.png" 
+		},
+		{ "type": "factory", "name": "small",
+		  "max_tanks": 1, 
+		  "max_hp": 250, 
+		  "spawn_delay": 5, 
+		  "coins": 50,
+		  "sprite":"factoryblue",
+		  "shape":"factory.shape",
+		  "spawn_type":"tank",
+		  "param_name":"light"
+		 }
 	],
 	"objects" : [ ]
 }

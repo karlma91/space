@@ -2,42 +2,7 @@
 	"name":	"Factory City",
 	"tilemap":	"level02_01.tmx",
 	"timelimit":	100,
-	"params":	[{
-			"type":	"TURRET",
-			"name":	"DEF",
-			"max_hp":	250,
-			"coins":	50,
-			"shoot_interval":	2,
-			"burst_number":	2,
-			"rot_speed":	0.200000
-		}, {
-			"type":	"FACTORY",
-			"name":	"DEF",
-			"max_hp":	250,
-			"coins":	50,
-			"max_tanks":	10,
-			"spawn_delay":	0,
-			"coins":	50,
-			"sprite":"factoryblue",
-			"shape":"factory.shape",
-			"spawn_type":"TANK",
-			"param_name":"DEF"
-		}, {
-			"type":	"ROBOTARM",
-			"name":	"DEF",
-			"max_hp":	250,
-			"coins":	50
-		}, {
-			"type":	"TANK",
-			"name":	"DEF",
-			"max_hp":	50,
-			"coins":	50
-		}, {
-			"type":	"ROCKET",
-			"name":	"DEF",
-			"max_hp":	250,
-			"coins":	50
-		}],
+	"params":	[],
 	"objects":	[{
 			"type":	"factory",
 			"name":	"DEF",

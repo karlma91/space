@@ -2,24 +2,12 @@
 	"name" : "Easy",
 	"tilemap" : "level02_01.tmx",
 	"timelimit": 100,
-	
-	"params" : [
-		{ "type": "tank", 
-		  "name":"light", 
-		  "max_hp":250, 
-		  "coins":50,
-		  "texture_name": "tank_00.png" 
-		},
-		{ "type": "factory", "name": "small",
-		  "max_tanks": 1, 
-		  "max_hp": 250, 
-		  "spawn_delay": 5, 
-		  "coins": 50,
-		  "sprite":"factoryblue",
-		  "shape":"factory.shape",
-		  "spawn_type":"tank",
-		  "param_name":"light"}
-	],
+	"inner_raduis":0,
+	"outer_radius": 20,
+	"tileset": "test",
+	"tile_w": 32,
+	"tile_h": 20,
+	"params" : [],
 	"objects" : [
 		{"type":"factory", "name": "small", "pos": {"x":1200, "y":560, "r": 100}}
 	]

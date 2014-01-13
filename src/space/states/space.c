@@ -639,7 +639,8 @@ void space_init_level_from_level(level * lvl)
 		exit(-1);
 	}
 
-	player1 = space_create_player(1);
+	player1 = instance_first(obj_id_player);
+	//player1 = space_create_player(1);
 	setup_singleplay();
 
 	change_state(LEVEL_START);

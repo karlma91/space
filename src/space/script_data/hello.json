@@ -73,6 +73,7 @@
     "size": "float",
     "max_hp": "int",
     "coins": "int",
-    "invinc": "int"
+    "invinc": "int",
+    "sprite": "sprite"
   }
 }

@@ -37,21 +37,11 @@ static LList ll_touches;
 static pool *pool_touches;
 
 typedef enum EDITOR_MODE {
-	MODE_OBJECTS_ADD,
-	MODE_OBJECTS_MOVE,
-	MODE_OBJECTS_REMOVE,
 
-	MODE_PARAMS_CREATE,
-	MODE_PARAMS_EDIT,
+	MODE_OBJECTS,
+	MODE_TILEMAP,
+	MODE_RESIZE
 
-	MODE_POLY_CREATE,
-	MODE_POLY_MOVEPOINT,
-	MODE_POLY_MOVEFULL,
-	MODE_POLY_REMOVEFULL,
-	MODE_POLY_REMOVEPOINT,
-
-	MODE_SPRITE_ADD,
-	MODE_SPRITE_REMOVE
 	/*
 	MODE_GAME_OBJECTS
 		- add, move, (rotate), and remove objects
@@ -90,7 +80,7 @@ static char param_names[EDITOR_OBJECT_COUNT][32] = {
 		"DEF"};
 
 static char sprite_names[EDITOR_OBJECT_COUNT][32] = {
-		"turretgun001",
+		"gear",
 		"tankbody001",
 		"factoryblue",
 		"factoryred",
@@ -112,9 +102,7 @@ struct instance_dummy {
 
 static void update_instances(instance *obj, void *data)
 {
-	if(obj->TYPE != obj_id_player) {
 		level_add_object_recipe_name(lvl, obj->TYPE->NAME, (char*)&(((struct instance_dummy *)obj)->params), obj->p_start,0);
-	}
 }
 
 static void start_editor_level(void *unused)
@@ -279,7 +267,7 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 	if (touch) {
 		if (touch->ins == NULL) {
 			//TODO make sure there are no other instances beneath pos!
-			instance_create(object_by_name(object_type), level_get_param(lvl->param_list, object_type, param_name), pos, cpvzero);
+			instance_create(object_by_name(object_type), level_get_param(&(lvl->params), object_type, param_name), pos, cpvzero);
 			llist_remove(ll_touches, touch);
 			pool_release(pool_touches, touch);
 			return 1;
@@ -382,7 +370,7 @@ void editor_init()
 	state_register_touchable_view(view_editor, scr_objects);
 	state_register_touchable_view(view_editor, scr_world);
 
-	lvl = level_load("object_defaults");
+	lvl = level_load("empty");
 	tap_clear_editor(NULL);
 }
 
@@ -437,6 +425,8 @@ void space_draw_deck(void);
 static void draw(void)
 {
 	draw_color4f(1,1,1,1);
+	currentlvl->inner_radius = 20;
+	currentlvl->outer_radius = 2000;
 	tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
 	space_draw_deck();
 }
