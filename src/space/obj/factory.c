@@ -62,7 +62,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	sprite_update(&(factory->data.spr));
 	if (factory->timer > factory->param.spawn_delay && factory->cur < factory->param.max_tanks) {
 		instance *player = instance_nearest(factory->data.body->p, obj_id_player);
-		if(cpvlength(cpvsub((factory->data.body->p),player->body->p)) < factory->max_distance) {
+		if(player && cpvlength(cpvsub((factory->data.body->p),player->body->p)) < factory->max_distance) {
 			cpVect pos = factory->data.body->p;
 			pos = we_cart2pol(pos);
 			pos.x += 100;

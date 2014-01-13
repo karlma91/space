@@ -10,6 +10,34 @@
 		  "cash_radius":250,
 		  "max_hp":200
 		},
+		{
+			"type": "bullet",
+			"name": "def",
+    	    "friendly": 0,
+    		"damage": 30,
+			"alive_time": 0.650,
+		    "fade_time": 0.250,
+		    "spr_id": "dot",
+		    "radius": 8,
+		    "render_stretch": 0,
+		    "render_size": 32,
+		    "col": "ff0000ff",
+		    "mass": 0.5
+		},
+		{
+			"type": "bullet",
+			"name": "player",
+    	    "friendly": 1,
+    		"damage": 30,
+			"alive_time": 0.650,
+		    "fade_time": 0.250,
+		    "spr_id": "dot",
+		    "radius": 8,
+		    "render_stretch": 1,
+		    "render_size": 32,
+		    "col": "ff0000ff",
+		    "mass": 0.5
+		},
 		{ "type": "turret", 
 		  "name":"def", 
 		  "max_hp":250,
@@ -30,12 +58,16 @@
 		{ "type": "tank", 
 		  "name":"def", 
 		  "max_hp":120, 
-		  "coins":5
+		  "coins":5,
+    	  "bullet_type": "bullet",
+    	  "bullet_param": "def"
 		},
 		{ "type": "tank", 
 		  "name":"red", 
 		  "max_hp":320, 
-		  "coins":10
+		  "coins":10,
+    	  "bullet_type": "bullet",
+    	  "bullet_param": "def"
 		},
 		{ "type": "factory", 
 		  "name": "def",

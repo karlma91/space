@@ -13,7 +13,7 @@ float turn_toangle(float from_angle, float to_angle, float step_size);
 
 float se_arcdist2player(cpVect p);
 cpVect se_dist_a2b(instance *insa, instance *insb);
-cpVect se_dist_v(cpVect a, cpVect b);
+cpVect se_dist2body(cpBody *b1, cpBody *b2);
 
 float se_rect2arch(cpVect *pos);
 void se_rect2arch_column(float x, cpVect *polar);

@@ -48,28 +48,21 @@ cpVect se_dist_a2b(instance *insa, instance *insb)
 	if (insa && insb) {
 		cpVect a = insa->body->p;
 		cpVect b = insb->body->p;
-		cpVect d = se_dist_v(a,b);
+		cpVect d = cpvsub(b,a);
 		return d;
 	} else {
 		return cpv(999999,999999);
 	}
 }
 
-cpVect se_dist_v(cpVect a, cpVect b)
+cpVect se_dist2body(cpBody *b1, cpBody *b2)
 {
-	return cpvsub(b,a);
-	//cpVect d = cpvsub(b,a);
-	//int lvl_width = currentlvl->width;
-	//if(d.x < -lvl_width/2){
-	//	d.x += lvl_width;
-	//}else if(d.x > lvl_width/2){
-	//	d.x -= lvl_width;
-	//}else{
-	//	fabsf(d.x);
-	//}
-	//return d;
+	if (b1 && b2) {
+		return cpvsub(b2->p, b1->p);
+	} else {
+		return cpv(999999,999999);
+	}
 }
-
 
 /**
  * returns 1 if object gets destroyed (returns 0 if already destroyed)

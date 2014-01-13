@@ -37,13 +37,12 @@ OBJ_START(player)
 	emitter *smoke;
 	cpBody *gunwheel;
 
+	void *bullet_param;
+
 	sprite gun;
 OBJ_END
 
 OBJ_START(bullet)
-	int bullet_type;
-	cpFloat speed;
-	Color color;
 	float energy;
 OBJ_END
 
@@ -63,6 +62,7 @@ OBJ_START(tank)
 	cpFloat debug_left_dist;
 	cpFloat debug_right_dist;
 	cpFloat timeout;
+	void *bullet_param;
 OBJ_END
 
 OBJ_START(factory)

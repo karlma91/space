@@ -108,7 +108,7 @@ static void * level_get_param_direct(param_list *params, char *type, char * name
 	return NULL;
 }
 
-void * level_get_param(param_list *params, char *type, char * name)
+void * level_get_param(param_list *params, const char *type, const char * name)
 {
 	char l_type[20];
 	char l_name[20];

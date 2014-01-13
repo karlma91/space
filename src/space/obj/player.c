@@ -42,6 +42,10 @@ static void init(OBJ_TYPE *OBJ_NAME)
 	player->hp_bar.max_hp = armors[armor_index].max_hp;
 	player->hp_bar.value = player->hp_bar.max_hp;
 
+
+	//TODO get bullet type info from shop
+	player->bullet_param = level_get_param(&currentlvl->params, "bullet", "player");
+
 	cpSpaceReindexShapesForBody(current_space, player->gunwheel);
 	cpSpaceReindexShapesForBody(current_space, player->data.body);
 }
@@ -217,26 +221,17 @@ static void controls(obj_player *player)
 //TODO lage en generell skyte-struct
 static void action_shoot(obj_player *player)
 {
+	int i;
 	if (player->gun_timer >= player->param.gun_cooldown) {
-		int i;
-
 		sound_play(SND_LASER_1);
-
 		for(i=0; i < player->gun_level;i++){
 			//obj_bullet *b = object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
 			cpVect shoot_vel = cpvforangle(cpBodyGetAngle(player->gunwheel) + (M_PI/70)*((i+1) - (player->gun_level-i))); //TODO remove and split into another weapon
 			cpVect shoot_pos = cpvadd(player->gunwheel->p, cpvmult(shoot_vel,40));
 			shoot_vel = cpvmult(shoot_vel, 1400);
 			//shoot_vel = cpvadd(shoot_vel, player->data.body->v);
-
-			obj_param_bullet opb = {.friendly = 1, .damage = player->bullet_dmg};
-			void *params = NULL;
-			if (player->bullet_type == obj_id_bullet) {
-				params = &opb;
-			}
-            instance_create(player->bullet_type, params, shoot_pos, shoot_vel);
+			instance_create(player->bullet_type, player->bullet_param, shoot_pos, shoot_vel);
 		}
-
 		player->gun_timer = 0;
 	}
 }

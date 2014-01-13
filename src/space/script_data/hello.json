@@ -14,19 +14,29 @@
   },
   "bullet": {
     "friendly": "int",
-    "damage": "float"
+    "damage": "float",
+    "alive_time": "float",
+    "fade_time": "float",
+    "spr_id": "sprite",
+    "radius": "float",
+    "render_stretch": "int",
+    "render_size": "float",
+    "col": "Color",
+    "mass": "float"
   },
   "tank": {
     "max_hp": "int",
-    "coins": "int"
+    "coins": "int",
+    "bullet_type": "object_id",
+    "bullet_param": "char"
   },
   "factory": {
     "max_tanks": "int",
     "max_hp": "float",
     "spawn_delay": "float",
     "coins": "int",
-    "param_name": "char",
     "spawn_type": "object_id",
+    "param_name": "char",
     "sprite": "sprite",
     "shape": "shape"
   },
@@ -48,7 +58,9 @@
     "max_hp": "int",
     "coins": "int",
     "segments": "int",
-    "seg_length": "int"
+    "seg_length": "int",
+    "force": "float",
+    "max_vel": "float"
   },
   "spikeball": {
     "radius": "float",

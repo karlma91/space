@@ -88,6 +88,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpSpaceAddConstraint(current_space, cpSimpleMotorNew(tank->data.body, tank->barrel, 0));
 	cpSpaceAddConstraint(current_space, cpPivotJointNew(tank->data.body, tank->barrel, tank->data.body->p));
 
+	tank->bullet_param = level_get_param(&currentlvl->params, tank->param.bullet_type->NAME, tank->param.bullet_param);
 	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,0,60,&(tank->data.body->p));
 
 	init(tank);
@@ -132,11 +133,8 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 			//TODO hent ut lik kode for skyting og lag en metode av det
 			cpVect shoot_vel = tank->barrel->rot;
 			cpVect shoot_pos = cpvadd(tank->data.body->p, cpvmult(shoot_vel,55));
-
 			shoot_vel = cpvmult(shoot_vel,SHOOT_VEL);
-
-			obj_param_bullet opb = {.friendly = 0, .damage = 10};
-			instance_create(obj_id_bullet, &opb, shoot_pos, shoot_vel);
+			instance_create(tank->param.bullet_type, tank->bullet_param, shoot_pos, shoot_vel);
 			sound_play(SND_LASER_2);
 			tank->timer = 0;
 		}
