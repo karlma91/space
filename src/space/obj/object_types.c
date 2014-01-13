@@ -23,24 +23,6 @@ int LAYER_SHIELD_PLAYER = 0;
 int LAYER_SHIELD_ENEMY  = 0;
 int LAYER_PICKUP        = L4 | L8;
 
-/* registration of all objects */
-void object_types_init(void) //TODO auto-generate this method
-{
-
-	OBJECT_REGISTER(bullet);
-	OBJECT_REGISTER(player);
-	OBJECT_REGISTER(factory);
-	OBJECT_REGISTER(tank);
-	OBJECT_REGISTER(turret);
-	OBJECT_REGISTER(rocket);
-	OBJECT_REGISTER(robotarm);
-	OBJECT_REGISTER(spikeball);
-	OBJECT_REGISTER(staticpolygon);
-	OBJECT_REGISTER(explosion);
-
-	OBJECT_REGISTER(coin);
-}
-
 #define FLOAT_LARGE 9999999
 
 void instance_get2nearest(instance *object, object_id *obj_id, instance **left, instance **right, cpFloat *left_distance, cpFloat *right_distance)

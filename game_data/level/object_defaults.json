@@ -77,6 +77,13 @@
 		  "seg_length": 300,
 		  "max_hp": 250, 
 		  "coins": 50
+		},
+		{ "type": "crate", 
+		  "name": "def",
+		  "invinc": 0,
+		  "size": 100,
+		  "max_hp": 50, 
+		  "coins": 10
 		}
 	],
 	"objects" : [ ]

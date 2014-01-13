@@ -43,6 +43,10 @@ typedef struct level {
 	tilemap *tiles;
 } level;
 
+typedef struct param_defs {
+	hashmap * param;
+} param_defs;
+
 int level_safe_parse_int(cJSON *param, char *name );
 double level_safe_parse_float(cJSON *param, char *name );
 char* level_safe_parse_char(cJSON *param, char *name );

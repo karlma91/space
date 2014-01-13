@@ -31,7 +31,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpShapeSetGroup(shape, crate);
 
 	hpbar_init(&(crate->hp_bar), crate->param.max_hp, 100, 25, 0, 50, &(crate->data.body->p));
-
+	hpbar_set_invincible(&(crate->hp_bar), crate->param.invinc);
 }
 
 static void on_update(OBJ_TYPE *OBJ_NAME)

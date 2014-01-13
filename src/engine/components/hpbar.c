@@ -16,10 +16,16 @@ void hpbar_init(hpbar *hp_bar, float max_hp, float width, float height, float x_
 			.height = height,
 			.x_offset = x_offset,
 			.y_offset = y_offset,
-			.pos = pos
+			.pos = pos,
+			.invinc = 0
 	};
 
 	*hp_bar = values;
+}
+
+void hpbar_set_invincible(hpbar *hp_bar, we_bool b)
+{
+	hp_bar->invinc = b;
 }
 
 void hpbar_draw(int layer, hpbar *hp_bar, cpFloat angle)

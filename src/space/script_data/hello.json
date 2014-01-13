@@ -72,6 +72,7 @@
   "crate": {
     "size": "float",
     "max_hp": "int",
-    "coins": "int"
+    "coins": "int",
+    "invinc": "int"
   }
 }
