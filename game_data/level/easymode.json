@@ -9,6 +9,7 @@
 	"tile_h": 20,
 	"params" : [],
 	"objects" : [
-		{"type":"factory", "name": "small", "pos": {"x":1200, "y":560, "r": 100}}
+		{"type":"factory", "name":"small", "pos": {"x":1200, "y":560, "r": 100}},
+		{"type":"player","name":"def","pos":{"x":0,"y":-1277.295776,"r":0}}
 	]
 }

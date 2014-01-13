@@ -18,7 +18,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	COMPONENT_SET(crate, HPBAR, &crate->hp_bar);
 	COMPONENT_SET(crate, COINS, &crate->param.coins);
 	sprite_create(&(crate->data.spr), crate->param.sprite, crate->param.size, crate->param.size, 0);
-	float mass = 5;
+	float mass = 1;
 	cpFloat moment = cpMomentForBox(mass, crate->param.size, crate->param.size);
 	crate->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, moment));
 	cpBodySetPos(crate->data.body, crate->data.p_start); //FIXME
