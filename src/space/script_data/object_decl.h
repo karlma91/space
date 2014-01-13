@@ -103,9 +103,6 @@ OBJ_START(robotarm)
 	cpBody *saw;
 	sprite saw_sprite;
 	float timer;
-	float hp;
-	int segments;
-	float seg_length;
 	float *x;
 	float *y;
 	float *angle;

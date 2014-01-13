@@ -46,7 +46,9 @@
   },
   "robotarm": {
     "max_hp": "int",
-    "coins": "int"
+    "coins": "int",
+    "segments": "int",
+    "seg_length": "int"
   },
   "spikeball": {
     "radius": "float",

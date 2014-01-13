@@ -45,8 +45,10 @@
 		}, {
 			"type":	"ROBOTARM",
 			"name":	"DEF",
-			"max_hp":	250,
-			"coins":	50
+		  "segments": 3,
+		  "seg_length": 300,
+		  "max_hp": 250, 
+		  "coins": 50
 		}],
 	"objects":	[{
 			"type":	"turret",
