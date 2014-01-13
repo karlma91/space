@@ -3,7 +3,7 @@ import sys
 game = "../src/space/"
 papre = "obj_param_"
 def generateParams(file, data):
-    print "-----------paramsgen.h-------------"
+    print "Generating 'paramsgen.h'"
     file.write( "/* GENERATED FILE DO NOT EDIT */\n" +
                 "#ifndef PARAMS_GENERATED_H_\n" +
                 "#define PARAMS_GENERATED_H_\n" +
@@ -140,7 +140,7 @@ def writeParse(file, data):
 
 
 def generateParse(file, data):
-    print "-----------paramsgen.c-------------"
+    print "Generating 'paramsgen.c'"
     file.write("/* GENERATED FILE DO NOT CHANGE */\n")
     file.write("\n")
     file.write("#include \"paramsgen.h\"\n")
@@ -156,3 +156,5 @@ hfile = open(game + 'autogen/paramsgen.c','w')
 data = json.load(f)
 generateParams(cfile, data)
 generateParse(hfile, data)
+
+print "Done!"

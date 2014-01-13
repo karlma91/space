@@ -7,10 +7,7 @@
     "shape_id": "shape"
   },
   "player": {
-    "max_hp": "float",
-    "player_id": "int",
-    "gun_cooldown": "float",
-    "cash_radius": "float"
+    "player_id": "int"
   },
   "bullet": {
     "friendly": "int",
@@ -22,13 +19,19 @@
     "render_stretch": "int",
     "render_size": "float",
     "col": "Color",
-    "mass": "float"
+    "mass": "float",
+    "expl_pname": "char"
   },
   "tank": {
     "max_hp": "int",
     "coins": "int",
     "bullet_type": "object_id",
-    "bullet_param": "char"
+    "bullet_param": "char",
+    "shoot_vel": "float",
+    "mass_body": "float",
+    "mass_wheel": "float",
+    "mass_barrel": "float",
+    "expl_pname": "char"
   },
   "factory": {
     "max_tanks": "int",
@@ -38,7 +41,8 @@
     "spawn_type": "object_id",
     "param_name": "char",
     "sprite": "sprite",
-    "shape": "shape"
+    "shape": "shape",
+    "expl_pname": "char"
   },
   "turret": {
     "max_hp": "int",
@@ -46,13 +50,20 @@
     "rot_speed": "float",
     "shoot_interval": "float",
     "burst_number": "int",
-    "shape_id": "shape"
+    "shape_id": "shape",
+    "bullet_type": "object_id",
+    "bullet_param": "char",
+    "turret_size": "float",
+    "shoot_vel": "float",
+    "expl_pname": "char",
+    "mass": "float"
   },
   "rocket": {
     "max_hp": "float",
     "coins": "int",
     "force": "float",
-    "damage": "float"
+    "damage": "float",
+    "expl_pname": "char"
   },
   "robotarm": {
     "max_hp": "int",
@@ -60,7 +71,8 @@
     "segments": "int",
     "seg_length": "int",
     "force": "float",
-    "max_vel": "float"
+    "max_vel": "float",
+    "expl_pname": "char"
   },
   "spikeball": {
     "radius": "float",
@@ -86,6 +98,7 @@
     "max_hp": "int",
     "coins": "int",
     "invinc": "int",
-    "sprite": "sprite"
+    "sprite": "sprite",
+    "expl_pname": "char"
   }
 }

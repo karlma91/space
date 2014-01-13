@@ -31,6 +31,7 @@ OBJ_START(player)
 	minimap radar_image;
 	float force;
 	float bullet_dmg;
+	float gun_cooldown;
 	object_id *bullet_type;
 
 	emitter *flame;
@@ -87,6 +88,7 @@ OBJ_START(turret)
 	minimap radar_image;
 	cpBody *tower;
 	sprite spr_gun;
+	void *bullet_param;
 OBJ_END
 
 OBJ_START(rocket)

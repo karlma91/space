@@ -36,7 +36,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 	player->force = engines[engine_index].force;
 	cpBodySetVelLimit(player->data.body, engines[engine_index].max_speed);
 	cpBodySetMass(player->data.body, upg_total_mass);
-	player->param.gun_cooldown = 1 / weapons[weapon_index].lvls[weapons[weapon_index].level].firerate;
+	player->gun_cooldown = 1 / weapons[weapon_index].lvls[weapons[weapon_index].level].firerate;
 	player->bullet_dmg = weapons[weapon_index].lvls[weapons[weapon_index].level].damage;
 	player->bullet_type = object_by_name(weapons[weapon_index].obj_name);
 	player->hp_bar.max_hp = armors[armor_index].max_hp;
@@ -95,7 +95,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	shape = we_add_circle_shape(current_space, player->data.body,radius,0.8,0.9);
 	we_shape_collision(shape, &this, LAYER_PLAYER, player);
 
-	shape = we_add_circle_shape(current_space, player->data.body, player->param.cash_radius, 0,0);
+	shape = we_add_circle_shape(current_space, player->data.body, 250, 0,0); //TODO be able to upgrade coin magnet radius (<--250)
 	we_shape_collision(shape, &this, LAYER_PICKUP, player);
 	cpShapeSetSensor(shape, 1);
 
@@ -222,7 +222,7 @@ static void controls(obj_player *player)
 static void action_shoot(obj_player *player)
 {
 	int i;
-	if (player->gun_timer >= player->param.gun_cooldown) {
+	if (player->gun_timer >= player->gun_cooldown) {
 		sound_play(SND_LASER_1);
 		for(i=0; i < player->gun_level;i++){
 			//obj_bullet *b = object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);

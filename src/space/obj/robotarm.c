@@ -28,8 +28,6 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	robotarm->param.force = 10000; //TODO TMP PARAM
-	robotarm->param.max_vel = 800; //TODO TMP PARAM
 	int segments = robotarm->param.segments;
 	int seg_length = robotarm->param.seg_length;
 	COMPONENT_SET(robotarm, HPBAR, &robotarm->hp_bar);

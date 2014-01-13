@@ -17,7 +17,6 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	float mass = bullet->param.mass;
 	float radius = bullet->param.radius;
 
-	fprintf(stderr, "creating bullet with mass: %f\n", mass);
 	sprite_create(&bullet->data.spr, bullet->param.spr_id, radius*2, radius*2, 30);
 
 	cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);

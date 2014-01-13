@@ -958,9 +958,6 @@ void setup_singleplay(void)
 obj_player * space_create_player(int id)
 {
 	obj_param_player default_player = {
-			.max_hp = 200,
-			.gun_cooldown = 0.2f,
-			.cash_radius = 250,
 			.player_id = id
 	};
 	return (obj_player *)instance_create(obj_id_player, &default_player, cpv(0,-(currentlvl->height/2+currentlvl->inner_radius)), cpvzero);
