@@ -13,6 +13,7 @@
 STATE_ID state_settings;
 
 extern int debug_disable_render;
+int player_camera_mode = 1;
 
 #define SCROLL_WIDTH 1200
 
@@ -26,6 +27,7 @@ typedef enum {
 	OPT_INVULNERABLE, // TODO: DISABLE DEBUG CHEAT!
 	OPT_UNLOCK, // TODO: DISABLE DEBUG CHEAT!
 	OPT_LOG, // TODO: DISABLE DEBUG CHEAT!
+	OPT_CAMERA, // camera mode
 
 	OPTION_COUNT
 } settings_option;
@@ -40,6 +42,7 @@ char str_options[OPTION_COUNT][50] = {
 		"CHEAT: INVULNERABLE",
 		"CHEAT: UNLOCK ALL",
 		"DEBUG: LOG",
+		"DEBUG: CAMERA"
 };
 
 static button btn_back;
@@ -160,6 +163,9 @@ static void option_click(settings_option option)
 		/* TODO implement this unimplemented option! */
 		bit_toggle(option);
 		button_set_backcolor(btn_options[option], bit_get_status(option) ? col_btn_checked : col_btn_unchecked);
+		break;
+	case OPT_CAMERA:
+		player_camera_mode = player_camera_mode > 1 ? 0 : player_camera_mode + 1;
 		break;
 	case OPT_LOG:
 		statesystem_push_state(state_log);

@@ -164,6 +164,8 @@ extern int weapon_index;
 extern int armor_index;
 extern int engine_index;
 
+extern int player_camera_mode;
+
 void game_config(void);
 void game_init(void);
 void game_destroy(void);

@@ -339,14 +339,15 @@ static void update_camera_position(void)
 
     if (player1) {
     	v_pos = player1->data.body->p;
-    	view_update_zoom(view_p1, player1->data.body->p, currentlvl->height);
+    	view_p1->mode = player_camera_mode;
+    	view_update_zoom(view_p1, player1->data.body->p);
     	v_rot = -se_tangent(v_pos);
     	view_update(view_p1, v_pos, v_rot);
     }
 
     if (player2 && multiplayer) {
     	v_pos = player2->data.body->p;
-    	view_update_zoom(view_p2, player2->data.body->p, currentlvl->height);
+    	view_update_zoom(view_p2, player2->data.body->p);
     	v_rot = -se_tangent(v_pos);
     	view_update(view_p2, v_pos, v_rot);
     }
@@ -547,14 +548,6 @@ static void sticks_hide(void) {
 	((touchable *)joy_p2_right)->visible = 0;
 }
 
-// TODO: REMOVE
-static obj_param_staticpolygon polytest = {
-		.tex_name = "metal01"TEX_FORMAT,
-		.outline = 1,
-		.scale = 700,
-		.texture_scale = 1,
-};
-
 static void remove_static(cpShape *shape)
 {
 	cpSpaceRemoveStaticShape(current_space, shape);
@@ -682,10 +675,6 @@ void space_init_level_from_level(level * lvl)
 	cpShapeSetFriction(ceiling, 0.9f);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
 	cpShapeSetElasticity(ceiling, 0.7f);
-
-	polytest.shape_id = POLYSHAPE_TURRET;
-	polytest.texture_scale = 0.4;
-	instance_create(obj_id_staticpolygon, &polytest, cpv(0,800), cpvzero);
 }
 
 static void on_enter(void)
