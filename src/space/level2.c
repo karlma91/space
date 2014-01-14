@@ -7,6 +7,7 @@
 
 
 #include <stdlib.h>
+#include <dirent.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -33,20 +34,6 @@ static polyshape DEF_SHAPE = NULL;
 
 param_list param_defs;
 
-hashmap *type_parse_functions;
-
-
-void init_type_functions() {
-	type_parse_functions = hm_create();
-	hm_add(type_parse_functions, "int", level_safe_parse_int);
-	hm_add(type_parse_functions, "float", level_safe_parse_float);
-	hm_add(type_parse_functions, "Color", level_safe_parse_int);
-	hm_add(type_parse_functions, "EMITTER_ID", level_safe_parse_int);
-	hm_add(type_parse_functions, "SPRITE_ID", level_safe_parse_int);
-	hm_add(type_parse_functions, "int", level_safe_parse_int);
-	hm_add(type_parse_functions, "int", level_safe_parse_int);
-}
-
 int level_init(void)
 {
 	/* read space station data */
@@ -57,9 +44,20 @@ int level_init(void)
 		exit(1);
 	}
 
-	//TODO: move to new file
-
-	init_type_functions();
+	int files = 0;
+	DIR *d = waffle_internal_diropen(WAFFLE_LIBRARY, "levels");
+	struct dirent *dir;
+	if (d)
+	{
+		while ((dir = readdir(d)) != NULL)
+		{
+			if (dir->d_type == DT_REG){
+				printf("LE VELINIT: %s\n", dir->d_name);
+				files++;
+			}
+		}
+		closedir(d);
+	}
 
 	int i;
 	cJSON *root = cJSON_Parse(buff);
@@ -72,7 +70,7 @@ int level_init(void)
 	station_count = cJSON_GetArraySize(station_array);
 	world = calloc(station_count,sizeof(level_ship));
 
-	for (i = 0; i < cJSON_GetArraySize(station_array); i++){
+	for (i = 0; i < cJSON_GetArraySize(station_array); i++) {
 		cJSON *station = cJSON_GetArrayItem(station_array, i);
 		world[i].id = i+1;
 		world[i].radius = 100;
@@ -118,7 +116,7 @@ static void * level_get_param_direct(param_list *params, char *type, char * name
 		if(data){
 			return data;
 		}else{
-			SDL_Log("LEVEL: could not find %s in type %s names", name, type);
+			SDL_Log("LEVEL: could not find %s of type %s", name, type);
 		}
 	} else {
 		//SDL_Log("LEVEL: Could not find type %s", type);
@@ -148,20 +146,6 @@ void * level_get_param(param_list *params, const char *type, const char * name)
 }
 
 
-
-/**
- * Parse an int from cJSON struct
- */
-int level_safe_parse_int(cJSON *param, char *name, void *def)
-{
-	cJSON *t = cJSON_GetObjectItem(param, name);
-	if(t!=NULL){
-		return t->valueint;
-	}
-	SDL_Log("Could not load param int %s", name);
-	return 0;
-}
-
 /**
  * Parse an double from cJSON struct
  */
@@ -186,97 +170,6 @@ char* level_safe_parse_char(cJSON *param, char *name,  void *def)
 	}
 	SDL_Log("Could not load param char %s", name);
 	return DEF_STRING;
-}
-
-/**
- * Parse an SPRITE_ID from cJSON struct
- */
-SPRITE_ID level_safe_parse_sprite(cJSON *param, char *name,  void *def)
-{
-	cJSON *t = cJSON_GetObjectItem(param, name);
-	if (t != NULL) {
-		return sprite_link(t->valuestring);
-	}
-	SDL_Log("Could not load sprite %s", name);
-	return DEF_SPRITE;
-}
-
-/**
- * Parse an EMITTER_ID from cJSON struct
- */
-EMITTER_ID level_safe_parse_emitter(cJSON *param, char *name,  void *def)
-{
-	cJSON *t = cJSON_GetObjectItem(param, name);
-	if (t != NULL) {
-		return particles_bind_emitter(t->valuestring);
-	}
-	SDL_Log("Could not load emitter %s", name);
-	return DEF_EMITTER;
-}
-
-/**
- * Parse an Mix_Chunk from cJSON struct
- */
-Mix_Chunk * level_safe_parse_sound(cJSON *param, char *name,  void *def)
-{
-	cJSON *t = cJSON_GetObjectItem(param, name);
-	if (t != NULL) {
-		return sound_loadchunk(t->valuestring);
-	}
-	SDL_Log("Could not load sound %s", name);
-	return NULL;
-}
-
-/**
- * Parse an texture from cJSON struct
- */
-int level_safe_parse_texture(cJSON *param, char *name,  void *def)
-{
-	cJSON *t = cJSON_GetObjectItem(param, name);
-	if (t != NULL) {
-		return texture_load(t->valuestring);
-	}
-	SDL_Log("Could not load texture %s", name);
-	return NULL;
-}
-
-/**
- * Parse an polyshape from cJSON struct
- */
-polyshape level_safe_parse_shape(cJSON *param, char *name,  void *def)
-{
-	cJSON *t = cJSON_GetObjectItem(param, name);
-	if(t != NULL){
-		return shape_read(t->valuestring);
-	}
-	SDL_Log("LEVEL: Could not load shape %s", name);
-	return DEF_SHAPE;
-}
-
-/**
- * Parse an object_id from cJSON struct
- */
-object_id* level_safe_parse_object_id(cJSON *param, char *name,  void *def)
-{
-	cJSON *t = cJSON_GetObjectItem(param, name);
-	if (t != NULL) {
-			return object_by_name(t->valuestring);
-	}
-	SDL_Log("Could not load object_id %s", name);
-	return NULL;
-}
-
-/**
- * TODO
- */
-Color level_safe_parse_Color(cJSON *param, char *name,  void *def)
-{
-	cJSON *t = cJSON_GetObjectItem(param, name);
-	if (t != NULL) {
-			return COL_BLACK;
-	}
-	SDL_Log("Could not load object_id %s", name);
-	return COL_WHITE;
 }
 
 static void parse_param_object(cJSON *param, hashmap * param_list)
@@ -471,11 +364,20 @@ void level_destry_param_list(param_list *params)
 
 void level_write_to_file(level *lvl)
 {
+	char filename[200] = "levels/test.json";
+	FILE *file = waffle_internal_fopen(WAFFLE_LIBRARY, filename,"w");
+	if (file == NULL) {
+		SDL_Log( "Could not open %s\n",filename);
+		return;
+	}
+
 	cJSON *root;//,*fmt;
 	root = cJSON_CreateObject();
 	cJSON_AddItemToObject(root, "name", cJSON_CreateString(lvl->name));
 	cJSON_AddItemToObject(root, "tilemap", cJSON_CreateString("level02_01.tmx"));
 	cJSON_AddNumberToObject(root, "timelimit",100);
+	cJSON_AddNumberToObject(root, "innrad",lvl->inner_radius);
+	cJSON_AddNumberToObject(root, "outrad",lvl->outer_radius);
 
 	cJSON * param_array = cJSON_CreateArray();
 
@@ -515,7 +417,9 @@ void level_write_to_file(level *lvl)
 	cJSON_AddItemToObject(root,"objects", object_array);
 
 	char * rendered = cJSON_Print(root);
-	SDL_Log("%s", rendered);
+	//SDL_Log("%s", rendered);
+	fprintf(file,"%s",rendered);
+	fclose(file);
 	// TODO: Write to file
 	cJSON_Delete(root);
 }

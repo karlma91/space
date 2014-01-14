@@ -22,7 +22,6 @@ struct view {
 	float view_width;
 	float view_height;
 
-    int mode;
     cpVect p;
     float zoom;
     float rotation;

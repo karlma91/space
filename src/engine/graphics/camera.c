@@ -50,20 +50,8 @@ void view_set_orientation(view *cam, int orientation)
 
 void view_update(view *cam, cpVect pos, float rot)
 {
-	/* dynamic camera pos */
-	switch (cam->mode) {
-	case 0:
-		cam->p = pos;
-		cam->rotation = rot + cam->priv_port_angle;
-		break;
-	default:
-		cam->p = pos;
-		cam->rotation = rot + cam->priv_port_angle;
-		break;
-	}
-
-	/* camera constraints */
-    //cam->width = cam->port_width / (2 * cam->zoom);
+	cam->p = pos;
+	cam->rotation = rot + cam->priv_port_angle;
 }
 
 void view_clip(view *cam)
@@ -110,12 +98,8 @@ void view_transform2port(view *cam)
 //TODO move out from camera/view
 void view_update_zoom(view *cam, cpVect pos)
 {
-        switch (cam->mode) {
-        default:
-        	cam->zoom = 1.0f*cam->view_height/1500;
-        	cam->p = cpvadd(cam->p, pos);
-            break;
-        }
+	cam->zoom = 1.0f*cam->view_height/1500;
+	cam->p = cpvadd(cam->p, pos);
 }
 
 void view_free(view *c)

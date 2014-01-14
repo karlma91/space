@@ -38,7 +38,7 @@
       "render_stretch": 1,
       "render_size": 32,
       "col": "0000ffff",
-      "mass": 0.5,
+      "mass": 10.5,
       "expl_pname": "NULL"
     },
     {

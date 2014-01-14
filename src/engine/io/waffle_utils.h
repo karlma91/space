@@ -1,6 +1,8 @@
 #ifndef WAFFLE_UTILS_H_
 #define WAFFLE_UTILS_H_
 
+#include <dirent.h>
+#include <stdio.h>
 #include "SDL_log.h"
 #include "SDL_system.h"
 #include "stdio.h"
@@ -62,6 +64,13 @@ extern int waffle_read_file(char *filename, char *buffer, int len);
  * Use this method to return a IO-stream to filename on the device internal storage
  */
 extern FILE *waffle_internal_fopen(enum WAFFLE_DIR dir_type, const char *filename, const char *opentype);
+
+
+/*
+ * Returns a DIR *
+ */
+extern DIR *waffle_internal_diropen(enum WAFFLE_DIR dir_type, const char *dir);
+
 
 /*
  * return number of chars until next '\n'

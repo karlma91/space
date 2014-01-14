@@ -106,7 +106,7 @@ static we_bool parse_sound(cJSON *t, Mix_Chunk *field, Mix_Chunk *def)
 
 static we_bool parse_texture(cJSON *t, int *field, int *def)
 {
-	if(t == NULL){
+	if(t){
 		*field = texture_load(t->valuestring);
 		return WE_TRUE;
 	}else{
@@ -116,7 +116,7 @@ static we_bool parse_texture(cJSON *t, int *field, int *def)
 }
 static we_bool parse_color(cJSON *t, Color *field, Color *def)
 {
-	if(t == NULL){
+	if(t){
 		int v;
 		sscanf(t->valuestring,"%x",&v);
 		field->r = (v>>24) & 0xff;
@@ -142,7 +142,7 @@ void pl_init(void)
 	pl_register_type("texture", (void*)parse_texture);
 	pl_register_type("object_id", (void*)parse_object_id);
 	pl_register_type("shape", (void*)parse_shape);
-	pl_register_type("color", (void*)parse_color);
+	pl_register_type("Color", (void*)parse_color);
 }
 
 void pl_register_type(char *type, parse_function pf)

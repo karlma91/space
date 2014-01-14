@@ -1,6 +1,11 @@
+#include <libgen.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "waffle_utils.h"
 #include "SDL.h"
 
@@ -133,6 +138,39 @@ int checksum(char *data, int length)
 	return sum;
 }
 
+/* Function with behaviour like `mkdir -p'
+ * http://niallohiggins.com/2009/01/08/mkpath-mkdir-p-alike-in-c-for-unix/
+ * */
+int mkpath(const char *s, mode_t mode)
+{
+	char *q, *r = NULL, *path = NULL, *up = NULL;
+	int rv;
+
+	rv = -1;
+	if (strcmp(s, ".") == 0 || strcmp(s, "/") == 0)
+		return 0;
+	if ((path = strdup(s)) == NULL)
+		return 0;
+	if ((q = strdup(s)) == NULL)
+		return 0;
+	if ((r = dirname(q)) == NULL)
+		goto out;
+	if ((up = strdup(r)) == NULL)
+		return 0;
+	if ((mkpath(up, mode) == -1) && (errno != EEXIST))
+		goto out;
+	if ((mkdir(path, mode) == -1) && (errno != EEXIST))
+		rv = -1;
+	else
+		rv = 0;
+
+	out:
+	if (up != NULL)
+		free(up);
+	free(q);
+	free(path);
+	return (rv);
+}
 
 ZZIP_FILE *waffle_open(char *path)
 {
@@ -230,9 +268,33 @@ FILE *waffle_internal_fopen(enum WAFFLE_DIR dir_type,const char *filename, const
 
 	const char *folder = waffle_dirs[dir_type];
 	char path[200] = "";
+	char fopath[200] = "";
+
 	strcpy(&path[0], folder);
 	strcat(&path[0], filename);
+	strcpy(fopath, path);
+	int i;
+	int last_slash = 199;
+	for (i=0; i<200 && fopath[i]; i++) {
+		last_slash = fopath[i] == '/' ? i : last_slash;
+	}
+	fopath[last_slash] = '\0';
+	mkpath(fopath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
 	return fopen(path, opentype);
+}
+
+DIR *waffle_internal_diropen(enum WAFFLE_DIR dir_type, const char *dir)
+{
+	DIR *d;
+	char path[200] = "";
+	strcpy(&path[0], waffle_dirs[dir_type]);
+	strcat(&path[0], dir);
+
+	d = opendir(path);
+
+	return d;
+
 }
 
 static zzip_ssize_t decrypt_block(int fd, void *data, zzip_size_t len)
