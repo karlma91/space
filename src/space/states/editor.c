@@ -516,6 +516,64 @@ static void draw(void)
 	draw_color4f(1,1,1,1);
 	tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
 	space_draw_deck();
+	draw_color4f(1,1,1,1);
+
+	int i, j;
+	int cols = 30;
+	int rows = 0;
+	float c_height = currentlvl->inner_radius;
+	float t_height = currentlvl->outer_radius;
+	float theta_unit = (WE_2PI * 1 / cols);
+	while (c_height < t_height) {
+		rows++;
+		float row_height = theta_unit * c_height;
+		c_height += row_height;
+	}
+
+	c_height = currentlvl->inner_radius;
+	float rad[rows];
+	for(j=0; j<rows; j++) {
+		float row_height = theta_unit * c_height;
+		rad[j] = c_height;
+		c_height += row_height;
+	}
+
+	float xcol[cols];
+	float cosxcol[cols];
+	float sinxcol[cols];
+	float circle[(1+cols)*2];
+	float line[rows*2];
+
+	if ((current_mode == MODE_RESIZE) || (current_mode == MODE_TILEMAP)) {
+		for(i=0; i<cols; i++) {
+			float theta = WE_2PI * i / cols;
+			xcol[i] = theta;
+			cosxcol[i] = cosf(theta);
+			sinxcol[i] = sinf(theta);
+		}
+
+		for (j=0; j<rows; j++) {
+			float radius = rad[j];
+			for (i=0; i < cols; i++) {
+				circle[i*2+0] = cosxcol[i] * radius;
+				circle[i*2+1] = sinxcol[i] * radius;
+			}
+			circle[i*2+0] = cosxcol[0] * radius;
+			circle[i*2+1] = sinxcol[0] * radius;
+			draw_line_strip(circle, (cols+1)*2, 10);
+		}
+
+		for (i=0; i < cols; i++) {
+			float x = cosxcol[i];
+			float y = sinxcol[i];
+			for (j=0; j<rows; j++) {
+				float height = rad[j];
+				line[j*2+0] = x * height;
+				line[j*2+1] = y * height;
+			}
+			draw_line_strip(line, rows*2, 10);
+		}
+	}
 }
 
 static int sdl_event(SDL_Event *event)
@@ -545,13 +603,4 @@ static void destroy(void)
 	objectsystem_clear();
 	llist_destroy(ll_touches);
 	pool_destroy(pool_touches);
-}
-
-static void update(touchable *t)
-{
-
-}
-static void render(touchable *t)
-{
-
 }
