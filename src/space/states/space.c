@@ -332,24 +332,33 @@ void nan_check_instance(instance *ins, void *msg)
 	}
 }
 
+static void view_mode_update(view *v, int mode, obj_player *player)
+{
+	float rot = 0;
+	cpVect pos = player->data.body->p;
+	switch(mode){
+	case 0:
+	case 1:
+		rot = -se_tangent(pos);
+		break;
+	case 2:
+		break;
+	case 3:
+		rot = -player->data.body->a;
+		break;
+	}
+	view_update_zoom(v, pos);
+	view_update(v, pos, rot);
+}
+
 static void update_camera_position(void)
 {
-    cpVect v_pos;
-    float v_rot;
-
     if (player1) {
-    	v_pos = player1->data.body->p;
-    	view_p1->mode = player_camera_mode;
-    	view_update_zoom(view_p1, player1->data.body->p);
-    	v_rot = -se_tangent(v_pos);
-    	view_update(view_p1, v_pos, v_rot);
+    	view_mode_update(view_p1, player_camera_mode, player1);
     }
 
     if (player2 && multiplayer) {
-    	v_pos = player2->data.body->p;
-    	view_update_zoom(view_p2, player2->data.body->p);
-    	v_rot = -se_tangent(v_pos);
-    	view_update(view_p2, v_pos, v_rot);
+    	view_mode_update(view_p2, player_camera_mode,player2);
     }
 }
 
@@ -877,17 +886,17 @@ void input(void)
 	 * Camera modes + F11 = timeout + F8 = reload particles (broken)
 	 */
 	if (keys[SDL_SCANCODE_F1]) {
-		view_p1->mode = 1;
+		player_camera_mode = 1;
 	} else if (keys[SDL_SCANCODE_F2]) {
-		view_p1->mode = 2;
+		player_camera_mode = 2;
 	} else if (keys[SDL_SCANCODE_F3]) {
-		view_p1->mode = 3;
+		player_camera_mode = 3;
 	} else if (keys[SDL_SCANCODE_F4]) {
-		view_p1->mode = 4;
+		player_camera_mode = 4;
 	} else if (keys[SDL_SCANCODE_F5]) {
-		view_p1->mode = 5;
+		player_camera_mode = 5;
 	} else if (keys[SDL_SCANCODE_F6]) {
-		view_p1->mode = 6;
+		player_camera_mode = 6;
 	} else if (keys[SDL_SCANCODE_F11]) {
 		game_time = currentlvl->timelimit;
 		return;
@@ -901,10 +910,6 @@ void input(void)
 		} else {
 			setup_singleplay();
 		}
-	}
-
-	if(view_p2){
-		view_p2->mode = view_p1->mode;
 	}
 
 	/* DEBUG KEYS*/

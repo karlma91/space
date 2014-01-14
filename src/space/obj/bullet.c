@@ -59,13 +59,10 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	if (bullet->data.time_destroyed > 0) {
 		alpha = maxf(0, 1 - bullet->data.time_destroyed / bullet->param.fade_time);
 	}
+	Color col = bullet->param.col;
+	col.a = alpha;
+	draw_color(col);	//draw_color4f(0, 1, 1, alpha); //draw_color4f(1, 0.4, 0.4, alpha);
 
-	//TODO use color from param
-	if (bullet->param.friendly) {
-		draw_color4f(0, 1, 1, alpha);
-	} else {
-		draw_color4f(1, 0.4, 0.4, alpha);
-	}
 	if (bullet->param.render_stretch) {
 		cpVect p1 = bullet->data.body->p;
 		cpVect p2 = cpvadd(p1, cpvmult(bullet->data.body->v, 1.0/64));
