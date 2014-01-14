@@ -164,6 +164,11 @@ int hm_add(hashmap *hm, const char *key, void *data)
 
 void * hm_get(hashmap *hm, const char *key)
 {
+	if (!hm) {
+		SDL_Log("ERROR: NULL pointer hm in hm_get");
+		return NULL;
+	}
+
 	int index = hash((unsigned char*)key) % hm->size;
 	hashnode *node = hm->buckets[index];
 	while(node != NULL){

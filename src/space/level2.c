@@ -94,31 +94,18 @@ int level_init(void)
 static void * level_get_param_direct(param_list *params, char *type, char * name)
 {
 	hashmap *names = (hashmap*)hm_get(params->param,type);
-
-	if(names) {
-		void *data = hm_get(names, name);
-		if(data){
-			return data;
-		}else{
-			SDL_Log("LEVEL: could not find %s in type %s names", name, type);
-		}
-	} else {
-		//SDL_Log("LEVEL: Could not find type %s", type);
-	}
-	return NULL;
+	return hm_get(names, name);
 }
 
 void * level_get_param(param_list *params, const char *type, const char * name)
 {
-	char l_type[40];
-	char l_name[40];
-
+	char l_type[40], l_name[40];
 	strtolower(l_type, type);
 	strtolower(l_name, name);
+
 	void * param = level_get_param_direct(params, l_type, l_name);
 	if (param) return param;
 
-	//SDL_Log("LEVEL: Loading from param_DEFS");
 	param = level_get_param_direct(&(param_defs), l_type, l_name);
 	if (param) return param;
 
