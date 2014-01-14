@@ -27,6 +27,8 @@ static button btn_state_tilemap;
 
 static polgrid *pgrid;
 
+static cpVect lastTouch; //TMP
+
 static level *lvl;
 
 typedef struct editor_touch {
@@ -234,6 +236,7 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
+	lastTouch = pos; //TMP
 	instance *ins;
 	float l;
 
@@ -284,6 +287,8 @@ static int touch_motion(SDL_TouchFingerEvent *finger)
 {
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
+	lastTouch = pos; //TMP
+
 	editor_touch *touch;
 	float new_r;
 	switch(current_mode) {
@@ -352,7 +357,17 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 
 static void draw_gui(view *v)
 {
-	bmfont_center(FONT_COURIER, cpv(0,-WINDOW_HEIGHT/2),1,"MODE: %d",(int)current_mode);
+	grid_index grid_i;
+	switch(current_mode) {
+	case MODE_RESIZE:
+	case MODE_OBJECTS:
+		bmfont_center(FONT_COURIER, cpv(0,-WINDOW_HEIGHT/2),1,"MODE: %d",(int)current_mode);
+		break;
+	case MODE_TILEMAP:
+		grid_i = grid_getindex(pgrid, lastTouch);
+		bmfont_center(FONT_COURIER, cpv(0,-WINDOW_HEIGHT/2),1,"col: %d, row: %d", grid_i.xcol, grid_i.yrow);
+		break;
+	}
 }
 
 void editor_init()

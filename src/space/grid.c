@@ -53,6 +53,31 @@ polgrid *grid_create(int col_count, float inn_rad, float out_rad)
 	return pgrid;
 }
 
+grid_index grid_getindex(polgrid *pgrid, cpVect pos)
+{
+	grid_index grid_i;
+	float angle = cpvtoangle(pos);
+	angle = angle < 0 ? angle + WE_2PI : angle;
+	grid_i.xcol = (int) (angle / pgrid->theta_unit);
+	grid_i.yrow = -1;
+	float radsq = cpvlengthsq(pos);
+
+	int y;
+	float r1 = pgrid->rad[0]; r1 *= r1;
+	for (y = 1; y < pgrid->rows; y++)
+	{
+		float r2 = pgrid->rad[y]; r2 *= r2;
+		if (radsq >= r1 && radsq < r2) {
+			grid_i.yrow = y-1;
+			break;
+		}
+		r1 = r2;
+	}
+
+	return grid_i;
+
+}
+
 void grid_free(polgrid *pgrid)
 {
 	free(pgrid);

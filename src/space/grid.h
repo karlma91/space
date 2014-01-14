@@ -21,6 +21,9 @@ typedef struct polgrid {
 	float theta_unit; /* angle between to columns */
 } polgrid;
 
+typedef struct grid_index {
+	int xcol, yrow;
+} grid_index;
 
 inline static cpVect grid_getpos(polgrid *pgrid, int col_i, int row_i)
 {
@@ -46,4 +49,5 @@ void grid_draw(polgrid *pgrid, int layer, float linewidth);
 polgrid *grid_create(int col_count, float inn_rad, float out_rad);
 void grid_update(polgrid *pgrid, float col_count, float inn_rad, float out_rad);
 void grid_free(polgrid *pgrid);
+grid_index grid_getindex(polgrid *pgrid, cpVect pos);
 #endif /* GRID_H_ */
