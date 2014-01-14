@@ -54,6 +54,7 @@ void view_update(view *cam, cpVect pos, float rot)
 	switch (cam->mode) {
 	case 0:
 		cam->p = pos;
+		cam->rotation = rot + cam->priv_port_angle;
 		break;
 	default:
 		cam->p = pos;
