@@ -68,11 +68,11 @@ def levelParse(file, data):
             if field_type in ("int" ,"float", "sprite", "object_id", "shape", "emitter", "sound", "texture", "tex_unit"):
                 file.write("     arg." + param_name + "." + field_name + " = level_safe_parse_")
                 file.write(str(field_type))
-                file.write("(param, \"" + field_name +"\");\n")
+                file.write("(param, \"" + field_name +"\",NULL);\n")
             elif field_type == "char":
                 file.write("     strcpy(arg." + param_name + "." + field_name + ", level_safe_parse_")
                 file.write(str(field_type))
-                file.write("(param, \"" + field_name +"\"));\n")
+                file.write("(param, \"" + field_name +"\",NULL));\n")
     
     file.write("  }\n")
     file.write("  const int paramsize = obj_id->P_SIZE;\n" + 

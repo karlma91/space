@@ -134,7 +134,7 @@ void * level_get_param(param_list *params, const char *type, const char * name)
 /**
  * Parse an int from cJSON struct
  */
-int level_safe_parse_int(cJSON *param, char *name )
+int level_safe_parse_int(cJSON *param, char *name, void *def)
 {
 	cJSON *t = cJSON_GetObjectItem(param, name);
 	if(t!=NULL){
@@ -147,7 +147,7 @@ int level_safe_parse_int(cJSON *param, char *name )
 /**
  * Parse an double from cJSON struct
  */
-double level_safe_parse_float(cJSON *param, char *name )
+double level_safe_parse_float(cJSON *param, char *name,  void *def)
 {
 	cJSON *t = cJSON_GetObjectItem(param, name);
 	if(t!=NULL){
@@ -160,7 +160,7 @@ double level_safe_parse_float(cJSON *param, char *name )
 /**
  * Parse an string char * from cJSON struct
  */
-char* level_safe_parse_char(cJSON *param, char *name )
+char* level_safe_parse_char(cJSON *param, char *name,  void *def)
 {
 	cJSON *t = cJSON_GetObjectItem(param, name);
 	if(t!=NULL){
@@ -173,7 +173,7 @@ char* level_safe_parse_char(cJSON *param, char *name )
 /**
  * Parse an SPRITE_ID from cJSON struct
  */
-SPRITE_ID level_safe_parse_sprite(cJSON *param, char *name )
+SPRITE_ID level_safe_parse_sprite(cJSON *param, char *name,  void *def)
 {
 	cJSON *t = cJSON_GetObjectItem(param, name);
 	if (t != NULL) {
@@ -186,7 +186,7 @@ SPRITE_ID level_safe_parse_sprite(cJSON *param, char *name )
 /**
  * Parse an EMITTER_ID from cJSON struct
  */
-EMITTER_ID level_safe_parse_emitter(cJSON *param, char *name )
+EMITTER_ID level_safe_parse_emitter(cJSON *param, char *name,  void *def)
 {
 	cJSON *t = cJSON_GetObjectItem(param, name);
 	if (t != NULL) {
@@ -199,7 +199,7 @@ EMITTER_ID level_safe_parse_emitter(cJSON *param, char *name )
 /**
  * Parse an Mix_Chunk from cJSON struct
  */
-Mix_Chunk * level_safe_parse_sound(cJSON *param, char *name )
+Mix_Chunk * level_safe_parse_sound(cJSON *param, char *name,  void *def)
 {
 	cJSON *t = cJSON_GetObjectItem(param, name);
 	if (t != NULL) {
@@ -212,7 +212,7 @@ Mix_Chunk * level_safe_parse_sound(cJSON *param, char *name )
 /**
  * Parse an texture from cJSON struct
  */
-int level_safe_parse_texture(cJSON *param, char *name )
+int level_safe_parse_texture(cJSON *param, char *name,  void *def)
 {
 	cJSON *t = cJSON_GetObjectItem(param, name);
 	if (t != NULL) {
@@ -225,7 +225,7 @@ int level_safe_parse_texture(cJSON *param, char *name )
 /**
  * Parse an polyshape from cJSON struct
  */
-polyshape level_safe_parse_shape(cJSON *param, char *name)
+polyshape level_safe_parse_shape(cJSON *param, char *name,  void *def)
 {
 	cJSON *t = cJSON_GetObjectItem(param, name);
 	if(t != NULL){
@@ -238,7 +238,7 @@ polyshape level_safe_parse_shape(cJSON *param, char *name)
 /**
  * Parse an object_id from cJSON struct
  */
-object_id* level_safe_parse_object_id(cJSON *param, char *name)
+object_id* level_safe_parse_object_id(cJSON *param, char *name,  void *def)
 {
 	cJSON *t = cJSON_GetObjectItem(param, name);
 	if (t != NULL) {
@@ -248,10 +248,23 @@ object_id* level_safe_parse_object_id(cJSON *param, char *name)
 	return NULL;
 }
 
+/**
+ * TODO
+ */
+Color level_safe_parse_Color(cJSON *param, char *name,  void *def)
+{
+	cJSON *t = cJSON_GetObjectItem(param, name);
+	if (t != NULL) {
+			return COL_BLACK;
+	}
+	SDL_Log("Could not load object_id %s", name);
+	return COL_WHITE;
+}
+
 static void parse_param_object(cJSON *param, hashmap * param_list)
 {
-	char * type = level_safe_parse_char(param,"type");
-	char * name = level_safe_parse_char(param,"name");
+	char * type = level_safe_parse_char(param,"type",NULL);
+	char * name = level_safe_parse_char(param,"name",NULL);
 	strtolower(type, type);
 	strtolower(name, name);
 
@@ -324,8 +337,8 @@ level *level_load(char * filename)
 	for (i = 0; i < cJSON_GetArraySize(object_array); i++){
 		cJSON *object = cJSON_GetArrayItem(object_array, i);
 
-		char *type = level_safe_parse_char(object,"type");
-		char *name = level_safe_parse_char(object,"name");
+		char *type = level_safe_parse_char(object,"type",NULL);
+		char *name = level_safe_parse_char(object,"name",NULL);
 		strtolower(type, type);
 		strtolower(name, name);
 
@@ -333,8 +346,8 @@ level *level_load(char * filename)
 		cJSON *pos = cJSON_GetObjectItem(object,"pos");
 		cpVect p = cpvzero;
 		if(pos != NULL){
-			p.x = level_safe_parse_float(pos,"x");
-			p.y = level_safe_parse_float(pos,"y");
+			p.x = level_safe_parse_float(pos,"x",NULL);
+			p.y = level_safe_parse_float(pos,"y",NULL);
 		}
 		level_add_object_recipe_name(lvl, type, name, p, 0);
 	}

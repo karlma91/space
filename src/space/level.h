@@ -51,16 +51,16 @@ typedef struct level {
 
 extern param_list param_defs;
 
-int level_safe_parse_int(cJSON *param, char *name );
-double level_safe_parse_float(cJSON *param, char *name );
-char* level_safe_parse_char(cJSON *param, char *name );
-
-object_id* level_safe_parse_object_id(cJSON *param, char *name);
-polyshape level_safe_parse_shape(cJSON *param, char *name);
-SPRITE_ID level_safe_parse_sprite(cJSON *param, char *name);
-EMITTER_ID level_safe_parse_emitter(cJSON *param, char *name);
-Mix_Chunk * level_safe_parse_sound(cJSON *param, char *name);
-int level_safe_parse_texture(cJSON *param, char *name );
+int level_safe_parse_int(cJSON *param, char *name, void *def);
+double level_safe_parse_float(cJSON *param, char *name,   void *def);
+char* level_safe_parse_char(cJSON *param, char *name,   void *def);
+object_id* level_safe_parse_object_id(cJSON *param, char *name,  void *def);
+polyshape level_safe_parse_shape(cJSON *param, char *name,  void *def);
+SPRITE_ID level_safe_parse_sprite(cJSON *param, char *name,  void *def);
+EMITTER_ID level_safe_parse_emitter(cJSON *param, char *name,  void *def);
+Mix_Chunk * level_safe_parse_sound(cJSON *param, char *name,  void *def);
+int level_safe_parse_texture(cJSON *param, char *name,  void *def);
+Color level_safe_parse_Color(cJSON *param, char *name,  void *def);
 
 
 void level_load_params(param_list *defs, cJSON *root);
