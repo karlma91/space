@@ -107,7 +107,7 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)
 {
-	explosion_create(rocket->data.body->p, EM_EXPLOSION, NULL, SND_UNIT_EXPLODE, 950, 180, 0.2);
+	explosion_create(rocket->data.body->p, EM_EXPLOSION, NULL, SND_UNIT_EXPLODE, 950, 180, 0.2, 15);
 	particles_release_emitter(rocket->flame);
 	we_body_remove(current_space, &rocket->data.body);
 	factory_remove_child((instance *)rocket);

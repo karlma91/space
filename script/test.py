@@ -50,6 +50,7 @@ def generateParams(file, data):
 def levelParse(file, data):
     file.write("void* parse_generated(cJSON *param, char* type, char *name) \n" + 
                "{\n")
+    file.write("void *ptr;")
     file.write("  object_id *obj_id = object_by_name(type);\n")
     file.write("  union {\n")
     for param_name in data:
@@ -63,16 +64,11 @@ def levelParse(file, data):
         else:
             file.write("  } else if ")
         file.write("(obj_id == " +"obj_id_"+ str(param_name) + ") {\n")
+        file.write("      obj_param_" + param_name + " *temp = level_get_param(&(param_defs),\"" + param_name + "\", \"def\");\n")
+        # pl_parse(param, "coins", "int", &( arg.tank.coins), NULL);
         for field_name in data[param_name]:
             field_type = data[param_name][field_name]
-            if field_type in ("int" ,"float", "sprite", "object_id", "shape", "emitter", "sound", "texture", "tex_unit"):
-                file.write("     arg." + param_name + "." + field_name + " = level_safe_parse_")
-                file.write(str(field_type))
-                file.write("(param, \"" + field_name +"\",NULL);\n")
-            elif field_type == "char":
-                file.write("     strcpy(arg." + param_name + "." + field_name + ", level_safe_parse_")
-                file.write(str(field_type))
-                file.write("(param, \"" + field_name +"\",NULL));\n")
+            file.write("      pl_parse(param,\"" + field_name + "\", \"" + field_type + "\" ,&(arg." + param_name + "." + field_name + "),(((ptr = NULL) || temp) && (ptr = &(temp->" + field_name + ")), ptr));\n")
     
     file.write("  }\n")
     file.write("  const int paramsize = obj_id->P_SIZE;\n" + 

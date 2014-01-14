@@ -142,7 +142,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 static void on_update_dead(OBJ_TYPE *OBJ_NAME)
 {
 	if (robotarm->data.time_destroyed >= 1.5) {
-		explosion_create(robotarm->saw->p, EM_EXPLOSIONBIG, EM_SPARKS, SND_BUILDING_EXPLODE, 1200, 320, 0.3);
+		explosion_create(robotarm->saw->p, EM_EXPLOSIONBIG, EM_SPARKS, SND_BUILDING_EXPLODE, 1200, 320, 0.3, 10);
 		instance_remove((instance *)robotarm);
 	}
 }
@@ -189,7 +189,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	explosion_create(robotarm->data.body->p, EM_EXPLOSION, NULL, SND_UNIT_EXPLODE, 800, 210, 0.3);
+	explosion_create(robotarm->data.body->p, EM_EXPLOSION, NULL, SND_UNIT_EXPLODE, 800, 210, 0.3, 10);
 	se_spawn_coins((instance *)robotarm);
 	cpBodySetForce(robotarm->saw, cpvzero);
 	we_body_remove_constraints(current_space, robotarm->data.body);

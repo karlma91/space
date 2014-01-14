@@ -254,7 +254,7 @@ static void on_update_dead(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	explosion_create(player->data.body->p, EM_EXPLOSION, EM_FRAGMENTS, SND_BUILDING_EXPLODE, 1300, 180, 0.2);
+	explosion_create(player->data.body->p, EM_EXPLOSION, EM_FRAGMENTS, SND_BUILDING_EXPLODE, 1300, 180, 0.2,10);
 	player->disable = 1;
     if (player->flame) {
     	player->flame->disable = 1;

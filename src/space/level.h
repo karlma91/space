@@ -51,6 +51,9 @@ typedef struct level {
 
 extern param_list param_defs;
 
+
+we_bool level_safe_parse(cJSON *param, char *field_name, char *type, void *field, void *def);
+
 int level_safe_parse_int(cJSON *param, char *name, void *def);
 double level_safe_parse_float(cJSON *param, char *name,   void *def);
 char* level_safe_parse_char(cJSON *param, char *name,   void *def);
