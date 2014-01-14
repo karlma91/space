@@ -53,6 +53,7 @@ void view_update(view *cam, cpVect pos, float rot)
 	/* dynamic camera pos */
 	switch (cam->mode) {
 	case 0:
+		cam->p = pos;
 		break;
 	default:
 		cam->p = pos;
@@ -111,6 +112,7 @@ void view_update_zoom(view *cam, cpVect pos)
         switch (cam->mode) {
         default:
         	cam->zoom = 1.0f*cam->view_height/1500;
+        	cam->p = cpvadd(cam->p, pos);
             break;
         }
 }
