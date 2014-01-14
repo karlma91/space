@@ -163,7 +163,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		v2.y = robotarm->y[0];
 		v1.x = robotarm->x[0] + cos(robotarm->angle[0])*seg_length;
 		v1.y = robotarm->y[0] + sin(robotarm->angle[0])*seg_length;
-		draw_line_spr_id(RLAY_GAME_FRONT, SPRITE_GEAR, v1, v2, 100, 0);
+		draw_line_spr_id(RLAY_GAME_MID, SPRITE_GEAR, v1, v2, 100, 0);
 
 		draw_color4f(0.9, 0.9, 0.9, 1);
 		sprite_render_by_id(RLAY_GAME_BACK, SPRITE_GEAR, v2, cpv(200,200), cpvtoangle(cpvsub(v2,v1)));
@@ -177,13 +177,13 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 			draw_color4f(0.9, 0.9, 0.9, 1);
 			sprite_render_by_id(RLAY_GAME_BACK, SPRITE_GEAR, v2, cpv(200,200), -cpvtoangle(cpvsub(v2,v1)));
 			draw_color4f(1*(1-(1.0f*i/(segments-1))),0,0,1);
-			draw_line_spr_id(RLAY_GAME_FRONT, SPRITE_GEAR, v1, v2, 100, 0);
+			draw_line_spr_id(RLAY_GAME_MID, SPRITE_GEAR, v1, v2, 100, 0);
 		}
 	}
 
 	draw_color4f(1,redfade,redfade,1);
-	sprite_render_body(RLAY_GAME_BACK, &(robotarm->saw_sprite), robotarm->saw);
-	sprite_render_body(RLAY_GAME_BACK, &(robotarm->data.spr), robotarm->data.body);
+	sprite_render_body(RLAY_GAME_FRONT, &(robotarm->saw_sprite), robotarm->saw);
+	sprite_render_body(RLAY_GAME_FRONT, &(robotarm->data.spr), robotarm->data.body);
 	hpbar_draw(RLAY_GAME_FRONT, &robotarm->hp_bar,cpvtoangle(robotarm->data.body->p));
 }
 

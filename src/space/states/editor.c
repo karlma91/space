@@ -361,11 +361,11 @@ static void draw_gui(view *v)
 	switch(current_mode) {
 	case MODE_RESIZE:
 	case MODE_OBJECTS:
-		bmfont_center(FONT_COURIER, cpv(0,-WINDOW_HEIGHT/2),1,"MODE: %d",(int)current_mode);
+		bmfont_center(FONT_COURIER, cpv(0,-v->view_height/2),1,"MODE: %d",(int)current_mode);
 		break;
 	case MODE_TILEMAP:
 		grid_i = grid_getindex(pgrid, lastTouch);
-		bmfont_center(FONT_COURIER, cpv(0,-WINDOW_HEIGHT/2),1,"col: %d, row: %d", grid_i.xcol, grid_i.yrow);
+		bmfont_center(FONT_COURIER, cpv(0,-v->view_height/2),1,"col: %d, row: %d", grid_i.xcol, grid_i.yrow);
 		break;
 	}
 }
@@ -541,9 +541,9 @@ static void draw(void)
 	tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
 	space_draw_deck();
 
-	draw_color4f(1,1,1,0.4);
+	draw_color4f(0.5,0.5,0.5,1);
 	if ((current_mode == MODE_RESIZE) || (current_mode == MODE_TILEMAP)) {
-		grid_draw(pgrid, 0, 20);
+		grid_draw(pgrid, 0,  10 / current_view->zoom);
 	}
 }
 

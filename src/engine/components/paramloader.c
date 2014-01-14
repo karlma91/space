@@ -93,7 +93,7 @@ static we_bool parse_emitter(cJSON *t, EMITTER_ID *field, EMITTER_ID *def)
 	}
 }
 
-static we_bool parse_sound(cJSON *t, Mix_Chunk *field, Mix_Chunk *def)
+static we_bool parse_sound(cJSON *t, Mix_Chunk **field, Mix_Chunk **def)
 {
 	if(t){
 		*field = sound_loadchunk(t->valuestring);
