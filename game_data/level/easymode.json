@@ -1,6 +1,6 @@
 {
 	"name" : "Easy",
-	"tilemap" : "level02_01.tmx",
+	"tilemap" : "level2.tmx",
 	"timelimit": 100,
 	"inner_raduis":0,
 	"outer_radius": 20,

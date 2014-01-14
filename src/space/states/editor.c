@@ -3,6 +3,7 @@
 #include "we_defstate.h"
 #include "space.h"
 #include "../level.h"
+#include "../grid.h"
 
 #define TAP_TIMEOUT 0.2
 #define MIN_INNER_RADIUS 200
@@ -23,6 +24,8 @@ static button btn_delete;
 static button btn_state_objects;
 static button btn_state_resize;
 static button btn_state_tilemap;
+
+static polgrid *pgrid;
 
 static level *lvl;
 
@@ -307,13 +310,17 @@ static int touch_motion(SDL_TouchFingerEvent *finger)
 		if(resize_finger == finger_get_touch_id(finger->fingerId)){
 			if (resize_mode == RESIZE_INNER) {
 				new_r =  currentlvl->inner_radius + (cpvlength(pos) - cpvlength(resize_prev));
-				if(new_r >= MIN_INNER_RADIUS && new_r <= currentlvl->outer_radius - MIN_RADIUS_OFFSET)
+				if(new_r >= MIN_INNER_RADIUS && new_r <= currentlvl->outer_radius - MIN_RADIUS_OFFSET) {
 					currentlvl->inner_radius = new_r;
+					grid_update(pgrid, pgrid->cols, currentlvl->inner_radius, currentlvl->outer_radius);
+				}
 				resize_prev=pos;
 			} else if(resize_mode == RESIZE_OUTER) {
 				new_r =  currentlvl->outer_radius + (cpvlength(pos) - cpvlength(resize_prev));
-				if(new_r <= MAX_OUTER_RADIUS && new_r >= currentlvl->inner_radius + MIN_RADIUS_OFFSET)
+				if(new_r <= MAX_OUTER_RADIUS && new_r >= currentlvl->inner_radius + MIN_RADIUS_OFFSET) {
 					currentlvl->outer_radius = new_r;
+					grid_update(pgrid, pgrid->cols, currentlvl->inner_radius, currentlvl->outer_radius);
+				}
 				resize_prev=pos;
 			}
 		}else{
@@ -460,6 +467,8 @@ void editor_init()
 
 	lvl = level_load("empty");
 	tap_clear_editor(NULL);
+
+	pgrid = grid_create(32, currentlvl->inner_radius, currentlvl->outer_radius);
 }
 
 /* * * * * * * * * *
@@ -516,63 +525,10 @@ static void draw(void)
 	draw_color4f(1,1,1,1);
 	tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
 	space_draw_deck();
-	draw_color4f(1,1,1,1);
 
-	int i, j;
-	int cols = 30;
-	int rows = 0;
-	float c_height = currentlvl->inner_radius;
-	float t_height = currentlvl->outer_radius;
-	float theta_unit = (WE_2PI * 1 / cols);
-	while (c_height < t_height) {
-		rows++;
-		float row_height = theta_unit * c_height;
-		c_height += row_height;
-	}
-
-	c_height = currentlvl->inner_radius;
-	float rad[rows];
-	for(j=0; j<rows; j++) {
-		float row_height = theta_unit * c_height;
-		rad[j] = c_height;
-		c_height += row_height;
-	}
-
-	float xcol[cols];
-	float cosxcol[cols];
-	float sinxcol[cols];
-	float circle[(1+cols)*2];
-	float line[rows*2];
-
+	draw_color4f(1,1,1,0.4);
 	if ((current_mode == MODE_RESIZE) || (current_mode == MODE_TILEMAP)) {
-		for(i=0; i<cols; i++) {
-			float theta = WE_2PI * i / cols;
-			xcol[i] = theta;
-			cosxcol[i] = cosf(theta);
-			sinxcol[i] = sinf(theta);
-		}
-
-		for (j=0; j<rows; j++) {
-			float radius = rad[j];
-			for (i=0; i < cols; i++) {
-				circle[i*2+0] = cosxcol[i] * radius;
-				circle[i*2+1] = sinxcol[i] * radius;
-			}
-			circle[i*2+0] = cosxcol[0] * radius;
-			circle[i*2+1] = sinxcol[0] * radius;
-			draw_line_strip(circle, (cols+1)*2, 10);
-		}
-
-		for (i=0; i < cols; i++) {
-			float x = cosxcol[i];
-			float y = sinxcol[i];
-			for (j=0; j<rows; j++) {
-				float height = rad[j];
-				line[j*2+0] = x * height;
-				line[j*2+1] = y * height;
-			}
-			draw_line_strip(line, rows*2, 10);
-		}
+		grid_draw(pgrid, 0, 20);
 	}
 }
 
