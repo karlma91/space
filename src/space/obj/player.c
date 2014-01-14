@@ -36,11 +36,15 @@ static void init(OBJ_TYPE *OBJ_NAME)
 	player->force = engines[engine_index].force;
 	cpBodySetVelLimit(player->data.body, engines[engine_index].max_speed);
 	cpBodySetMass(player->data.body, upg_total_mass);
-	player->param.gun_cooldown = 1 / weapons[weapon_index].lvls[weapons[weapon_index].level].firerate;
+	player->gun_cooldown = 1 / weapons[weapon_index].lvls[weapons[weapon_index].level].firerate;
 	player->bullet_dmg = weapons[weapon_index].lvls[weapons[weapon_index].level].damage;
 	player->bullet_type = object_by_name(weapons[weapon_index].obj_name);
 	player->hp_bar.max_hp = armors[armor_index].max_hp;
 	player->hp_bar.value = player->hp_bar.max_hp;
+
+
+	//TODO get bullet type info from shop
+	player->bullet_param = level_get_param(&currentlvl->params, "bullet", "player");
 
 	cpSpaceReindexShapesForBody(current_space, player->gunwheel);
 	cpSpaceReindexShapesForBody(current_space, player->data.body);
@@ -91,7 +95,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	shape = we_add_circle_shape(current_space, player->data.body,radius,0.8,0.9);
 	we_shape_collision(shape, &this, LAYER_PLAYER, player);
 
-	shape = we_add_circle_shape(current_space, player->data.body, player->param.cash_radius, 0,0);
+	shape = we_add_circle_shape(current_space, player->data.body, 250, 0,0); //TODO be able to upgrade coin magnet radius (<--250)
 	we_shape_collision(shape, &this, LAYER_PICKUP, player);
 	cpShapeSetSensor(shape, 1);
 
@@ -217,26 +221,17 @@ static void controls(obj_player *player)
 //TODO lage en generell skyte-struct
 static void action_shoot(obj_player *player)
 {
-	if (player->gun_timer >= player->param.gun_cooldown) {
-		int i;
-
+	int i;
+	if (player->gun_timer >= player->gun_cooldown) {
 		sound_play(SND_LASER_1);
-
 		for(i=0; i < player->gun_level;i++){
 			//obj_bullet *b = object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
 			cpVect shoot_vel = cpvforangle(cpBodyGetAngle(player->gunwheel) + (M_PI/70)*((i+1) - (player->gun_level-i))); //TODO remove and split into another weapon
 			cpVect shoot_pos = cpvadd(player->gunwheel->p, cpvmult(shoot_vel,40));
 			shoot_vel = cpvmult(shoot_vel, 1400);
 			//shoot_vel = cpvadd(shoot_vel, player->data.body->v);
-
-			obj_param_bullet opb = {.friendly = 1, .damage = player->bullet_dmg};
-			void *params = NULL;
-			if (player->bullet_type == obj_id_bullet) {
-				params = &opb;
-			}
-            instance_create(player->bullet_type, params, shoot_pos, shoot_vel);
+			instance_create(player->bullet_type, player->bullet_param, shoot_pos, shoot_vel);
 		}
-
 		player->gun_timer = 0;
 	}
 }

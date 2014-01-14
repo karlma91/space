@@ -56,7 +56,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpFloat mass = 2.0f;
 	robotarm->saw = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(robotarm->saw, pos);
-	cpBodySetVelLimit(robotarm->saw, 280); //TODO param
+	cpBodySetVelLimit(robotarm->saw, robotarm->param.max_vel);
 	cpBodySetUserData(robotarm->saw, (instance*)robotarm);
 
 	shape = we_add_circle_shape(current_space, robotarm->saw, radius, 0.7, 0.0);
@@ -77,10 +77,12 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	we_shape_collision(shape, &this, LAYER_ENEMY, robotarm);
 
 	//connect sawblade with body
-	cpSpaceAddConstraint(current_space, cpSlideJointNew(robotarm->saw, robotarm->data.body, cpv(0,0), cpv(0,0), 1.0f, segments*seg_length));
+	cpSpaceAddConstraint(current_space, cpSlideJointNew(robotarm->data.body,robotarm->saw, cpv(0,0), cpv(0,0), 1.0f, segments*seg_length));
 
 	hpbar_init(&robotarm->hp_bar, robotarm->param.max_hp,80,16,0,60,&(robotarm->data.body->p));
 
+	se_velfunc(robotarm->saw, 0);
+	se_velfunc(robotarm->data.body, 0);
 	init(robotarm);
 }
 
@@ -88,6 +90,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	int segments = robotarm->param.segments;
 	int seg_length = robotarm->param.seg_length;
+	int max_reach = segments*seg_length;
 
 	robotarm->timer += dt;
 	sprite_update(&(robotarm->saw_sprite));
@@ -111,14 +114,29 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		robotarm->y[i-1] = robotarm->y[i] + sin(robotarm->angle[i])*seg_length;
 	}
 
-	instance *player = instance_nearest(robotarm->saw->p,obj_id_player);
-	cpVect d = cpvzero;
-	if(player){
-		d = se_dist_v(robotarm->saw->p, player->body->p);
-	}
 
-	d = cpvnormalize(d);
-	cpBodySetForce(robotarm->saw, cpvmult(d, 4000));
+
+	cpVect dist = cpvzero;
+	instance *player = instance_nearest(robotarm->saw->p,obj_id_player);
+	if (player) {
+		//dist = se_dist2body(robotarm->saw, player->body);
+		/*
+		cpVect target = player->body->p;
+		dist = se_dist2body(robotarm->data.body, player->body);
+		float dist_lensq = cpvlengthsq(dist);
+		float maxmax = max_reach * max_reach;
+		if (dist_lensq > maxmax) {
+			target = cpvmult(cpvnormalize(dist), max_reach);
+		}
+		float len = cpvlength(dist) / max_reach * 10;
+		float force = robotarm->param.force * (len > max_reach / 10 ? 1 : len);
+		dist = cpvnormalize_safe(cpvsub(target, robotarm->saw->p));
+		*/
+		dist = cpvnormalize_safe(se_dist2body(robotarm->saw, player->body));
+		cpBodySetForce(robotarm->saw, cpvmult(dist, robotarm->param.force));
+	} else {
+		cpBodySetForce(robotarm->saw, cpvzero);
+	}
 }
 
 static void on_update_dead(OBJ_TYPE *OBJ_NAME)
@@ -145,10 +163,10 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 		v2.y = robotarm->y[0];
 		v1.x = robotarm->x[0] + cos(robotarm->angle[0])*seg_length;
 		v1.y = robotarm->y[0] + sin(robotarm->angle[0])*seg_length;
-		draw_line_spr_id(RLAY_GAME_BACK, SPRITE_GEAR, v1, v2, 100, 0);
+		draw_line_spr_id(RLAY_GAME_FRONT, SPRITE_GEAR, v1, v2, 100, 0);
 
 		draw_color4f(0.9, 0.9, 0.9, 1);
-		sprite_render_by_id(RLAY_GAME_FRONT, SPRITE_GEAR, v2, cpv(200,200), cpvtoangle(cpvsub(v2,v1)));
+		sprite_render_by_id(RLAY_GAME_BACK, SPRITE_GEAR, v2, cpv(200,200), cpvtoangle(cpvsub(v2,v1)));
 
 		int i;
 		for(i=0; i<segments-1; i++){
@@ -157,15 +175,15 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 			v2.x = robotarm->x[i+1];
 			v2.y = robotarm->y[i+1];
 			draw_color4f(0.9, 0.9, 0.9, 1);
-			sprite_render_by_id(RLAY_GAME_FRONT, SPRITE_GEAR, v2, cpv(200,200), cpvtoangle(cpvsub(v2,v1)));
+			sprite_render_by_id(RLAY_GAME_BACK, SPRITE_GEAR, v2, cpv(200,200), -cpvtoangle(cpvsub(v2,v1)));
 			draw_color4f(1*(1-(1.0f*i/(segments-1))),0,0,1);
-			draw_line_spr_id(RLAY_GAME_BACK, SPRITE_GEAR, v1, v2, 100, 0);
+			draw_line_spr_id(RLAY_GAME_FRONT, SPRITE_GEAR, v1, v2, 100, 0);
 		}
 	}
 
 	draw_color4f(1,redfade,redfade,1);
-	sprite_render_body(RLAY_GAME_MID, &(robotarm->saw_sprite), robotarm->saw);
-	sprite_render_body(RLAY_GAME_MID, &(robotarm->data.spr), robotarm->data.body);
+	sprite_render_body(RLAY_GAME_BACK, &(robotarm->saw_sprite), robotarm->saw);
+	sprite_render_body(RLAY_GAME_BACK, &(robotarm->data.spr), robotarm->data.body);
 	hpbar_draw(RLAY_GAME_FRONT, &robotarm->hp_bar,cpvtoangle(robotarm->data.body->p));
 }
 

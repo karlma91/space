@@ -292,6 +292,7 @@ static void initGL(void)
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	//glClearColor(0,0,0, 1);
 	glClearColor(0,0,0.05,1);
+	//glClearColor(0.5,0.5,0.5,1);
 
 	//glEnable(GL_MULTISAMPLE); //GLES1!
 	glDisable(GL_DEPTH_TEST);

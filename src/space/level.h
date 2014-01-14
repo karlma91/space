@@ -80,7 +80,7 @@ int level_get_level_count(int station);
 void level_add_object_recipe_name(level * lvl, const char * obj_type, const char * param_name, cpVect pos, float rotation);
 void level_add_object_recipe(level * lvl, object_id *obj_id, const char * param_name,  void * param, cpVect pos, float rotation);
 
-void * level_get_param(param_list *params, char *type, char * name);
+void * level_get_param(param_list *params, const char *type, const char * name);
 level *level_load(char * filename);
 void level_clear_objects(level *lvl);
 void level_start_level(level *lvl);

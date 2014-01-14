@@ -12,14 +12,12 @@ static const float tex_map[2][8] = {
 		{0.5,1, 1,1, 0.5,0, 1,0}
 };
 
-#define TURRET_SIZE 200
-#define SHOOT_VEL 1500
-
 static void init(OBJ_TYPE *OBJ_NAME)
 {
+	float turret_size = turret->param.turret_size;
 	cpVect p_start = turret->data.p_start;
 	p_start = we_cart2pol(p_start);
-	p_start.x = currentlvl->inner_radius + TURRET_SIZE/2;
+	p_start.x = currentlvl->inner_radius + turret_size/2;
 	p_start = we_pol2cart(p_start);
 
 	cpBodySetPos(turret->tower, p_start);
@@ -33,6 +31,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
+	float turret_size = turret->param.turret_size;
 	COMPONENT_SET(turret, HPBAR, &turret->hp_bar);
 	COMPONENT_SET(turret, COINS, &turret->param.coins);
 	COMPONENT_SET(turret, MINIMAP, &turret->radar_image);
@@ -45,29 +44,31 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	cpVect p_start = turret->data.p_start;
 	p_start = we_cart2pol(p_start);
-	p_start.x = currentlvl->inner_radius + TURRET_SIZE/2;
+	p_start.x = currentlvl->inner_radius + turret_size/2;
 	p_start = we_pol2cart(p_start);
 
-	turret->tower = cpSpaceAddBody(current_space, cpBodyNew(100, cpMomentForBox(100, TURRET_SIZE, TURRET_SIZE)));
+	turret->tower = cpSpaceAddBody(current_space, cpBodyNew(100, cpMomentForBox(100, turret_size, turret_size)));
 	cpBodySetUserData(turret->tower, turret);
 	cpBodySetPos(turret->tower, p_start);
 	se_tangent_body(turret->tower);
 	se_velfunc(turret->tower, -1);
-	shape_add_shapes(current_space, POLYSHAPE_TURRET, turret->tower, TURRET_SIZE, 100, cpvzero, 1, 0.7, turret, NULL, LAYER_BUILDING, 2);
+	shape_add_shapes(current_space, POLYSHAPE_TURRET, turret->tower, turret_size, 100, cpvzero, 1, 0.7, turret, NULL, LAYER_BUILDING, 2);
 
-	float mass = 14;
-	turret->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0, TURRET_SIZE,cpvzero)));
+	float mass = turret->param.mass;
+	turret->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0, turret_size,cpvzero)));
 	cpBodySetUserData(turret->data.body, turret);
 	cpBodySetPos(turret->data.body, p_start);
 	se_tangent_body(turret->data.body);
 	se_velfunc(turret->data.body, 1);
-	shape_add_shapes(current_space, POLYSHAPE_TURRET, turret->data.body, TURRET_SIZE, mass, cpvzero, 1, 0.7, turret, &this, LAYER_ENEMY, 1);
+	shape_add_shapes(current_space, POLYSHAPE_TURRET, turret->data.body, turret_size, mass, cpvzero, 1, 0.7, turret, &this, LAYER_ENEMY, 1);
 
 	cpSpaceAddConstraint(current_space, cpPivotJointNew(turret->data.body, turret->tower, p_start));
 
 	hpbar_init(&turret->hp_bar,turret->param.max_hp,80,20,0,60,&(turret->data.body->p));
-	sprite_create(&turret->data.spr, SPRITE_TURRETBODY001, TURRET_SIZE, TURRET_SIZE, 0);
-	sprite_create(&turret->spr_gun, SPRITE_TURRETGUN001, TURRET_SIZE, TURRET_SIZE, 0);
+	sprite_create(&turret->data.spr, SPRITE_TURRETBODY001, turret_size, turret_size, 0);
+	sprite_create(&turret->spr_gun, SPRITE_TURRETGUN001, turret_size, turret_size, 0);
+
+	turret->bullet_param = level_get_param(&currentlvl->params, turret->param.bullet_type->NAME, turret->param.bullet_param);
 
 	init(turret);
 }
@@ -81,7 +82,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		return;
 	}
 
-	cpFloat best_angle = se_get_best_shoot_angle(turret->data.body, player->data.body, SHOOT_VEL);
+	cpFloat best_angle = se_get_best_shoot_angle(turret->data.body, player->data.body, turret->param.shoot_vel);
 
 	turret->data.body->a = turn_toangle(turret->data.body->a, best_angle,  WE_2PI*dt*turret->param.rot_speed);
 	cpVect turret_angle = cpvforangle(turret->data.body->a - turret->tower->a);
@@ -98,11 +99,10 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 			&& cpvlengthsq(se_dist_a2b((instance*)turret, (instance*)player)) <  turret->max_distance * turret->max_distance) {
 		turret->bullets += 1;
 
-		cpVect shoot_vel = cpvmult(turret->data.body->rot, SHOOT_VEL);
+		cpVect shoot_vel = cpvmult(turret->data.body->rot, turret->param.shoot_vel);
 		cpVect shoot_pos = cpvadd(turret->data.body->p, cpvmult(turret->data.body->rot, 40));
 
-		obj_param_bullet opb = { .friendly = 0, .damage = 5};
-		instance_create(obj_id_bullet, &opb, shoot_pos, shoot_vel);
+		instance_create(obj_id_bullet, turret->bullet_param, shoot_pos, shoot_vel);
 
 		if (turret->bullets > turret->param.burst_number) {
 			turret->bullets = 0;

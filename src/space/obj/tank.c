@@ -8,12 +8,7 @@
 #include "we_defobj.h"
 
 /* static prototypes */
-static cpBody *addWheel(cpSpace *space, cpVect pos, cpGroup group);
-
-#define MASS 4.0f
-#define MASS_WHEEL 4.0f
-#define MASS_BARREL 3.0f
-#define SHOOT_VEL 1500
+static cpBody *addWheel(cpSpace *space, float mass, cpVect pos, cpGroup group);
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
@@ -50,7 +45,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	cpFloat width = 80;
 	cpFloat height = 30;
-	tank->data.body = cpSpaceAddBody(current_space, cpBodyNew(MASS, cpMomentForBox(MASS, width, height)));
+	tank->data.body = cpSpaceAddBody(current_space, cpBodyNew(tank->param.mass_body, cpMomentForBox(tank->param.mass_body, width, height)));
 	cpBodySetUserData(tank->data.body, tank);
 	se_velfunc(tank->data.body, 1);
 	cpBodySetPos(tank->data.body, tank->data.p_start);
@@ -65,8 +60,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpVect posA = cpvadd(tank->data.body->p, cpvrotate(cpv(-wheel_offset, -30),tank->data.body->rot));
 	cpVect posB = cpvadd(tank->data.body->p, cpvrotate(cpv(wheel_offset, -30), tank->data.body->rot));
 
-	tank->wheel1 = addWheel(current_space, posA, tank);
-	tank->wheel2 = addWheel(current_space, posB, tank);
+	tank->wheel1 = addWheel(current_space, tank->param.mass_wheel, posA, tank);
+	tank->wheel2 = addWheel(current_space, tank->param.mass_wheel, posB, tank);
 
 	tank->data.components[CMP_BODIES] = tank->wheel1;
 	tank->data.components[CMP_BODIES+1] = tank->wheel2;
@@ -77,17 +72,18 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpSpaceAddConstraint(current_space, cpDampedSpringNew(tank->data.body, tank->wheel1 , cpv(-30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
 	cpSpaceAddConstraint(current_space, cpDampedSpringNew(tank->data.body, tank->wheel2, cpv( 30, 0), cpvzero, 50.0f, 600.0f, 0.5f));
 
-	tank->barrel = cpSpaceAddBody(current_space, cpBodyNew(MASS_BARREL, cpMomentForBox(MASS_BARREL, width/2,height/2)));
+	tank->barrel = cpSpaceAddBody(current_space, cpBodyNew(tank->param.mass_barrel, cpMomentForBox(tank->param.mass_barrel, width/2,height/2)));
 	cpBodySetPos(tank->barrel, tank->data.p_start);
 	cpBodySetUserData(tank->barrel, tank);
 	cpBodySetUserData(tank->wheel1, tank);
 	cpBodySetUserData(tank->wheel2, tank);
 	se_tangent_body(tank->barrel);
 	se_velfunc(tank->barrel, 1);
-	shape_add_shapes(current_space, POLYSHAPE_TANK, tank->barrel, 150, MASS_BARREL, cpvzero, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
+	shape_add_shapes(current_space, POLYSHAPE_TANK, tank->barrel, 150, tank->param.mass_barrel, cpvzero, 0.8, 0.7, tank, &this, LAYER_ENEMY, 0);
 	cpSpaceAddConstraint(current_space, cpSimpleMotorNew(tank->data.body, tank->barrel, 0));
 	cpSpaceAddConstraint(current_space, cpPivotJointNew(tank->data.body, tank->barrel, tank->data.body->p));
 
+	tank->bullet_param = level_get_param(&currentlvl->params, tank->param.bullet_type->NAME, tank->param.bullet_param);
 	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,0,60,&(tank->data.body->p));
 
 	init(tank);
@@ -115,7 +111,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	static float ptx = 0;
 
 	if (player) {
-		cpFloat best_angle = se_get_best_shoot_angle(tank->data.body, player->data.body, SHOOT_VEL);
+		cpFloat best_angle = se_get_best_shoot_angle(tank->data.body, player->data.body, tank->param.shoot_vel);
 
 		tank->barrel->a = turn_toangle(tank->barrel->a, best_angle, tank->rot_speed * dt);
 
@@ -132,11 +128,8 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 			//TODO hent ut lik kode for skyting og lag en metode av det
 			cpVect shoot_vel = tank->barrel->rot;
 			cpVect shoot_pos = cpvadd(tank->data.body->p, cpvmult(shoot_vel,55));
-
-			shoot_vel = cpvmult(shoot_vel,SHOOT_VEL);
-
-			obj_param_bullet opb = {.friendly = 0, .damage = 10};
-			instance_create(obj_id_bullet, &opb, shoot_pos, shoot_vel);
+			shoot_vel = cpvmult(shoot_vel,tank->param.shoot_vel);
+			instance_create(tank->param.bullet_type, tank->bullet_param, shoot_pos, shoot_vel);
 			sound_play(SND_LASER_2);
 			tank->timer = 0;
 		}
@@ -196,10 +189,10 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 /*
  * make a wheel
  */
-static cpBody * addWheel(cpSpace *space, cpVect pos, cpGroup group) {
-	cpFloat radius = 30.0f;
+static cpBody * addWheel(cpSpace *space, float mass, cpVect pos, cpGroup group) {
+	cpFloat radius = 30.0f; //TODO be able to determine radius
 	cpBody *body = cpSpaceAddBody(space,
-			cpBodyNew(MASS_WHEEL, cpMomentForCircle(MASS_WHEEL, 0.0f, radius, cpvzero)));
+			cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(body, pos);
 	cpBodySetAngVelLimit(body, 20);
 	se_tangent_body(body);

@@ -31,19 +31,19 @@ OBJ_START(player)
 	minimap radar_image;
 	float force;
 	float bullet_dmg;
+	float gun_cooldown;
 	object_id *bullet_type;
 
 	emitter *flame;
 	emitter *smoke;
 	cpBody *gunwheel;
 
+	void *bullet_param;
+
 	sprite gun;
 OBJ_END
 
 OBJ_START(bullet)
-	int bullet_type;
-	cpFloat speed;
-	Color color;
 	float energy;
 OBJ_END
 
@@ -63,6 +63,7 @@ OBJ_START(tank)
 	cpFloat debug_left_dist;
 	cpFloat debug_right_dist;
 	cpFloat timeout;
+	void *bullet_param;
 OBJ_END
 
 OBJ_START(factory)
@@ -87,6 +88,7 @@ OBJ_START(turret)
 	minimap radar_image;
 	cpBody *tower;
 	sprite spr_gun;
+	void *bullet_param;
 OBJ_END
 
 OBJ_START(rocket)

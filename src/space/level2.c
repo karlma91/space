@@ -103,36 +103,30 @@ static void * level_get_param_direct(param_list *params, char *type, char * name
 			SDL_Log("LEVEL: could not find %s in type %s names", name, type);
 		}
 	} else {
-		SDL_Log("LEVEL: Could not find type %s", type);
+		//SDL_Log("LEVEL: Could not find type %s", type);
 	}
 	return NULL;
 }
 
-void * level_get_param(param_list *params, char *type, char * name)
+void * level_get_param(param_list *params, const char *type, const char * name)
 {
-	char l_type[20];
-	char l_name[20];
+	char l_type[40];
+	char l_name[40];
 
 	strtolower(l_type, type);
 	strtolower(l_name, name);
 	void * param = level_get_param_direct(params, l_type, l_name);
-	if (param) {
-		return param;
-	} else {
-		SDL_Log("LEVEL: Loading from param_DEFS");
-		param = level_get_param_direct(&(param_defs), l_type, l_name);
-		if(param){
-			return param;
-		}else{
-			param = level_get_param_direct(&(param_defs), l_type, "def");
-			if(param){
-				return param;
-			}else{
-				SDL_Log("LEVEL: Could not find type crash %s", l_type);
-				return NULL;
-			}
-		}
-	}
+	if (param) return param;
+
+	//SDL_Log("LEVEL: Loading from param_DEFS");
+	param = level_get_param_direct(&(param_defs), l_type, l_name);
+	if (param) return param;
+
+	param = level_get_param_direct(&(param_defs), l_type, "def");
+	if (param) return param;
+
+	SDL_Log("LEVEL: Could not find type crash %s", l_type);
+	return NULL;
 }
 
 
