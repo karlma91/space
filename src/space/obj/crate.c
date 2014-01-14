@@ -48,7 +48,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	explosion_create(crate->data.body->p, EM_EXPLOSIONBIG, EM_FRAGMENTS, SND_BUILDING_EXPLODE, 2500, 250, 0.10);
+	explosion_create(crate->data.body->p, EM_EXPLOSIONBIG, EM_FRAGMENTS, SND_BUILDING_EXPLODE, 2500, 250, 0.3, 4);
 	se_spawn_coins((instance *)crate);
 	instance_remove((instance *)crate);
 }

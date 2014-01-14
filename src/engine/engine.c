@@ -571,6 +571,7 @@ static void main_init(void)
     INITCALL(layersystem_init);
     INITCALL(object_init);
     INITCALL(objectsystem_init);
+	INITCALL(pl_init);
     INITCALL(game_init);
 
 	// Handle iOS app-events (pause, low-memory, terminating, etc...) and SDL_QUIT

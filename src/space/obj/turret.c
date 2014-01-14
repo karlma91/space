@@ -139,7 +139,7 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	explosion_create(turret->data.body->p, EM_EXPLOSION, NULL, SND_BUILDING_EXPLODE, 1200, 160, 0.3);
+	explosion_create(turret->data.body->p, EM_EXPLOSION, NULL, SND_BUILDING_EXPLODE, 1200, 160, 0.3,10);
 	se_spawn_coins((instance *)turret);
 	we_body_remove_constraints(current_space, turret->data.body);
 }

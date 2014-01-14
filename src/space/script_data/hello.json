@@ -91,7 +91,8 @@
     "snd": "sound",
     "force": "float",
     "seconds": "float",
-    "size": "float"
+    "size": "float",
+    "dmg": "float"
   },
   "crate": {
     "size": "float",

@@ -10,6 +10,7 @@
 #include "../components/hpbar.h"
 #include "../components/object.h"
 #include "../components/shape.h"
+#include "../components/paramloader.h"
 
 
 #endif /* WE_COMP_H_ */

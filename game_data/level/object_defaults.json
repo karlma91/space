@@ -172,7 +172,7 @@
       "sprite": "factoryblue",
       "invinc": 0,
       "size": 100,
-      "max_hp": 50,
+      "max_hp": 10,
       "coins": 10,
       "expl_pname": "medium"
     },

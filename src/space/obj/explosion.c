@@ -14,6 +14,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
+	COMPONENT_SET(explosion, DAMAGE, &(explosion->param.dmg));
 	particles_get_emitter_at(RLAY_GAME_FRONT, explosion->param.em_expl, explosion->data.p_start);
 	particles_get_emitter_at(RLAY_GAME_FRONT, explosion->param.em_frag, explosion->data.p_start);
 	sound_play(explosion->param.snd);
@@ -32,7 +33,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	explosion->shape = shape;
 }
 
-void explosion_create(cpVect p, EMITTER_ID em_expl, EMITTER_ID em_frag, Mix_Chunk *snd, float force, float size, float duration)
+void explosion_create(cpVect p, EMITTER_ID em_expl, EMITTER_ID em_frag, Mix_Chunk *snd, float force, float size, float duration, float dmg)
 {
 	obj_param_explosion param;
 	param.em_expl = em_expl;
@@ -41,6 +42,7 @@ void explosion_create(cpVect p, EMITTER_ID em_expl, EMITTER_ID em_frag, Mix_Chun
 	param.force = force;
 	param.seconds = duration;
 	param.size = size;
+	param.dmg = dmg;
 	instance_create(obj_id_explosion, &param, p, cpvzero);
 }
 

@@ -147,6 +147,12 @@ static int collision_explosion(cpArbiter *arb, cpSpace *space, void *unused)
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
 	obj_explosion *expl = ((obj_explosion *)(a->body->data));
+
+	instance *obj = ((instance *)(b->body->data));
+
+	if (se_damage_object(obj, ((instance *)(a->body->data)))) {
+
+	}
 	//TODO use param to decide what force to apply
 	cpVect f = cpvmult(cpvnormalize_safe(cpvsub(b->body->p, a->body->p)),expl->param.force);
 	cpBodyApplyImpulse(b->body, f, cpvzero);

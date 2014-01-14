@@ -33,6 +33,20 @@ static polyshape DEF_SHAPE = NULL;
 
 param_list param_defs;
 
+hashmap *type_parse_functions;
+
+
+void init_type_functions() {
+	type_parse_functions = hm_create();
+	hm_add(type_parse_functions, "int", level_safe_parse_int);
+	hm_add(type_parse_functions, "float", level_safe_parse_float);
+	hm_add(type_parse_functions, "Color", level_safe_parse_int);
+	hm_add(type_parse_functions, "EMITTER_ID", level_safe_parse_int);
+	hm_add(type_parse_functions, "SPRITE_ID", level_safe_parse_int);
+	hm_add(type_parse_functions, "int", level_safe_parse_int);
+	hm_add(type_parse_functions, "int", level_safe_parse_int);
+}
+
 int level_init(void)
 {
 	/* read space station data */
@@ -42,6 +56,10 @@ int level_init(void)
 		SDL_Log("Could not load level data!");
 		exit(1);
 	}
+
+	//TODO: move to new file
+
+	init_type_functions();
 
 	int i;
 	cJSON *root = cJSON_Parse(buff);
@@ -94,25 +112,38 @@ int level_init(void)
 static void * level_get_param_direct(param_list *params, char *type, char * name)
 {
 	hashmap *names = (hashmap*)hm_get(params->param,type);
-	return hm_get(names, name);
+
+	if(names) {
+		void *data = hm_get(names, name);
+		if(data){
+			return data;
+		}else{
+			SDL_Log("LEVEL: could not find %s in type %s names", name, type);
+		}
+	} else {
+		//SDL_Log("LEVEL: Could not find type %s", type);
+	}
+	return NULL;
 }
 
 void * level_get_param(param_list *params, const char *type, const char * name)
 {
-	char l_type[40], l_name[40];
+	char l_type[40];
+	char l_name[40];
+
 	strtolower(l_type, type);
 	strtolower(l_name, name);
-
 	void * param = level_get_param_direct(params, l_type, l_name);
 	if (param) return param;
 
+	//SDL_Log("LEVEL: Loading from param_DEFS");
 	param = level_get_param_direct(&(param_defs), l_type, l_name);
 	if (param) return param;
 
 	param = level_get_param_direct(&(param_defs), l_type, "def");
 	if (param) return param;
 
-	SDL_Log("LEVEL: Could not find type crash %s", l_type);
+	SDL_Log("LEVEL: Could not find param: %s for type: %s", l_name, l_type);
 	return NULL;
 }
 
