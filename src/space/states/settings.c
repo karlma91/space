@@ -202,7 +202,7 @@ void settings_init(void)
 	int i;
 	for (i = 0; i < OPTION_COUNT; i++) {
 		btn_options[i] = button_create(SPRITE_BTN_PUSH, 1, str_options[i], 0, 0, 800, 115);
-		button_set_callback(btn_options[i], (void (*)(void *))option_click, NULL + i);
+		button_set_click_callback(btn_options[i], (void (*)(void *))option_click, NULL + i);
 		button_set_hotkeys(btn_options[i], digit2scancode[(i+1) % 10], 0);
 		state_register_touchable_view(view_box, btn_options[i]);
 	}
@@ -229,7 +229,7 @@ void settings_init(void)
 	btn_back = button_create(NULL, 0, "", 0,0,GAME_WIDTH,GAME_HEIGHT);
 	button_set_hotkeys(btn_back, KEY_ESCAPE, KEY_RETURN_2);
 
-	button_set_callback(btn_back, statesystem_pop_state, 0);
+	button_set_click_callback(btn_back, statesystem_pop_state, 0);
 	state_register_touchable(this, btn_back);
 	btn_back->visible = 0;
 }

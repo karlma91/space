@@ -572,7 +572,7 @@ void statesystem_push_event(SDL_Event *event)
 			llist_begin_loop(view_touchies);
 			while (!consumed && llist_hasnext(view_touchies)) {
 				touchable *touchy = llist_next(view_touchies);
-				if (touchy->enabled) {
+				if (touchy->enabled && touchy->visible) {
 					if (touchy->calls->touch_keypress(touchy, event->key.keysym.scancode))
 						consumed = 1;
 				}
@@ -583,7 +583,7 @@ void statesystem_push_event(SDL_Event *event)
 
 		while(!consumed && llist_hasnext(game_touchies)) {
 			touchable *touchy = llist_next(game_touchies);
-			if (touchy->enabled) {
+			if (touchy->enabled && touchy->visible) {
 				if (touchy->calls->touch_keypress(touchy, event->key.keysym.scancode))
 					consumed = 1;
 			}
@@ -594,7 +594,7 @@ void statesystem_push_event(SDL_Event *event)
 			llist_begin_loop(view_touchies);
 			while (!consumed && llist_hasnext(view_touchies)) {
 				touchable *touchy = llist_next(view_touchies);
-				if (touchy->enabled) {
+				if (touchy->enabled && touchy->visible) {
 					if (touchy->calls->touch_down(touchy, &event->tfinger))
 						consumed = 1;
 				}
@@ -605,7 +605,7 @@ void statesystem_push_event(SDL_Event *event)
 		event->tfinger.y = game_p.y;
 		while(!consumed && llist_hasnext(game_touchies)) {
 			touchable *touchy = llist_next(game_touchies);
-			if (touchy->enabled) {
+			if (touchy->enabled && touchy->visible) {
 				if (touchy->calls->touch_down(touchy, &event->tfinger))
 					consumed = 1;
 			}
@@ -621,7 +621,7 @@ void statesystem_push_event(SDL_Event *event)
 			llist_begin_loop(view_touchies);
 			while (!consumed && llist_hasnext(view_touchies)) {
 				touchable *touchy = llist_next(view_touchies);
-				if (touchy->enabled) {
+				if (touchy->enabled && touchy->visible) {
 					if (touchy->calls->touch_motion(touchy, &event->tfinger))
 						consumed = 1;
 				}
@@ -632,7 +632,7 @@ void statesystem_push_event(SDL_Event *event)
 		event->tfinger.y = game_p.y;
 		while(!consumed && llist_hasnext(game_touchies)) {
 			touchable *touchy = llist_next(game_touchies);
-			if (touchy->enabled) {
+			if (touchy->enabled && touchy->visible) {
 				if (touchy->calls->touch_motion(touchy, &event->tfinger))
 					consumed = 1;
 			}
@@ -643,7 +643,7 @@ void statesystem_push_event(SDL_Event *event)
 			llist_begin_loop(view_touchies);
 			while (!consumed && llist_hasnext(view_touchies)) {
 				touchable *touchy = llist_next(view_touchies);
-				if (touchy->enabled) {
+				if (touchy->enabled && touchy->visible) {
 					if (touchy->calls->touch_up(touchy, &event->tfinger))
 						consumed = 1;
 				}
@@ -654,7 +654,7 @@ void statesystem_push_event(SDL_Event *event)
 		event->tfinger.y = game_p.y;
 		while(!consumed && llist_hasnext(game_touchies)) {
 			touchable *touchy = llist_next(game_touchies);
-			if (touchy->enabled) {
+			if (touchy->enabled && touchy->visible) {
 				if (touchy->calls->touch_up(touchy, &event->tfinger))
 					consumed = 1;
 			}

@@ -27,7 +27,9 @@ static button btn_space;
 static button btn_clear;
 static button btn_test;
 static button btn_save;
+
 static button btn_delete;
+static button btn_layer;
 
 static button btn_state_objects;
 static button btn_state_resize;
@@ -185,9 +187,31 @@ static void tap_clear_editor(void *unused)
 	enable_objlist(!remove_tool);
 }
 
-static void btn_set_editor_mode(editor_mode state)
+static void setmode(editor_mode state)
 {
 	current_mode = state;
+
+	we_bool visible;
+
+	/* MODE_OBJECTS */
+	visible = (current_mode == MODE_OBJECTS);
+	btn_delete->visible = visible;
+
+	/* MODE_RESIZE */
+	visible = (current_mode == MODE_RESIZE);
+	//btn_layer->visible = visible;
+
+	/* MODE_TILEMAP */
+	visible = (current_mode == MODE_TILEMAP);
+	btn_layer->visible = visible;
+}
+
+static void setlayer(button btn)
+{
+	current_tlay++;
+	current_tlay = current_tlay >= TLAY_COUNT ? 0 : current_tlay;
+	char number[2] = {('0'+(char)current_tlay), '\0'};
+	button_set_text(btn, number);
 }
 
 static void tap_delete_click(void *unused)
@@ -432,21 +456,23 @@ void editor_init()
 	btn_test   = button_create(SPRITE_BTN_NEXT, 0, "",0, GAME_HEIGHT/2 - 100, 125, 125);
 	btn_save   = button_create(SPRITE_COIN, 0, "",200, GAME_HEIGHT/2 -100, 125, 125);
 	btn_delete = button_create(SPRITE_SPIKEBALL, 0, "X", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 100, 125, 125);
+	btn_layer  = button_create(NULL, 0, "1", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 100, 125, 125);
 
 	btn_state_objects = button_create(SPRITE_SPIKEBALL, 0, "Objects", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 400, 125, 125);
 	btn_state_resize = button_create(SPRITE_SPIKEBALL, 0, "Resize", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 300, 125, 125);
 	btn_state_tilemap = button_create(SPRITE_SPIKEBALL, 0, "Tilemap", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 200, 125, 125);
 
-	button_set_callback(btn_state_objects, btn_set_editor_mode, MODE_OBJECTS);
-	button_set_callback(btn_state_resize, btn_set_editor_mode,  MODE_RESIZE);
-	button_set_callback(btn_state_tilemap, btn_set_editor_mode,  MODE_TILEMAP);
+	button_set_click_callback(btn_state_objects, setmode, MODE_OBJECTS);
+	button_set_click_callback(btn_state_resize, setmode,  MODE_RESIZE);
+	button_set_click_callback(btn_state_tilemap, setmode,  MODE_TILEMAP);
+	button_set_click_callback(btn_layer, setlayer, btn_layer);
 
-	button_set_callback(btn_space, statesystem_set_state, state_stations);
-	button_set_callback(btn_clear, tap_clear_editor, 0);
-	button_set_callback(btn_test, start_editor_level, 0); // TODO test level with this button
-	button_set_callback(btn_save, save_level_to_file, 0);
-	button_set_callback(btn_save, save_level_to_file, 0);
-	button_set_callback(btn_delete, tap_delete_click, 0);
+	button_set_click_callback(btn_space, statesystem_set_state, state_stations);
+	button_set_click_callback(btn_clear, tap_clear_editor, 0);
+	button_set_click_callback(btn_test, start_editor_level, 0); // TODO test level with this button
+	button_set_click_callback(btn_save, save_level_to_file, 0);
+	button_set_click_callback(btn_save, save_level_to_file, 0);
+	button_set_click_callback(btn_delete, tap_delete_click, 0);
 
 	button_set_hotkeys(btn_test, KEY_RETURN_1, KEY_RETURN_2);
 	button_set_hotkeys(btn_space, KEY_ESCAPE, 0);
@@ -471,6 +497,7 @@ void editor_init()
 	state_register_touchable_view(view_editor, btn_state_objects);
 	state_register_touchable_view(view_editor, btn_state_resize);
 	state_register_touchable_view(view_editor, btn_state_tilemap);
+	state_register_touchable_view(view_editor, btn_layer);
 
 	float size = 200;
 	float x = -GAME_WIDTH/2+size*2;
@@ -479,7 +506,7 @@ void editor_init()
 	for (i = 0; i < EDITOR_OBJECT_COUNT; i++, y -= 250, key++) {
 		SPRITE_ID spr_id = sprite_link(sprite_names[i]);
 		button btn = button_create(spr_id, 0, "", x, y, size, size);
-		button_set_callback(btn, select_object_type, i);
+		button_set_click_callback(btn, select_object_type, i);
 		button_set_hotkeys(btn, key <= SDL_SCANCODE_0 ? key : 0, 0);
 		button_set_enlargement(btn, 1.5);
 		state_register_touchable_view(view_editor, btn); //TODO use another view for these buttons
@@ -559,15 +586,17 @@ static void draw(void)
 	}
 
 
-	draw_color4f(0.5,0.5,0.8,0.6);
-	int x, y;
+	int l, x, y;
 	float verts[8], tex[8];
-	for (y=0; y<pgrid->rows-1; y++) {
-		for (x=0; x<pgrid->cols; x++) {
-			if (tiledata[current_tlay][y][x]) {
-				grid_getquad8f(pgrid, verts, x, y);
-				sprite_get_subimg_by_index(SPRITE_WHITE, 0, tex);
-				draw_quad_new(0, verts, tex);
+	for (l=TLAY_COUNT-1; l>=0; l--) {
+		for (y = 0; y < pgrid->rows - 1; y++) {
+			draw_color_rgbmulta4f(l == 0, l == 1, l == 2, (l == current_tlay) && (current_mode == MODE_TILEMAP)  ? 0.8 : 0.4);
+			for (x=0; x<pgrid->cols; x++) {
+				if (tiledata[l][y][x]) {
+					grid_getquad8f(pgrid, verts, x, y);
+					sprite_get_subimg_by_index(SPRITE_WHITE, 0, tex);
+					draw_quad_new(0, verts, tex);
+				}
 			}
 		}
 	}

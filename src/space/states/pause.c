@@ -131,10 +131,10 @@ void pause_init(void)
 	btn_input = button_create(NULL, 0, "", -GAME_WIDTH/2+50, GAME_HEIGHT/2-50, 100, 100);
 	btn_resume = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-	button_set_callback(btn_space, statesystem_set_state, state_stations);
-	button_set_callback(btn_retry, space_restart_level, 0);
-	button_set_callback(btn_input, input, 0);
-	button_set_callback(btn_resume, resume, 0);
+	button_set_click_callback(btn_space, statesystem_set_state, state_stations);
+	button_set_click_callback(btn_retry, space_restart_level, 0);
+	button_set_click_callback(btn_input, input, 0);
+	button_set_click_callback(btn_resume, resume, 0);
 	button_set_hotkeys(btn_resume, KEY_ESCAPE, KEY_RETURN_2);
 	button_set_hotkeys(btn_retry, SDL_SCANCODE_SPACE, 0);
 	button_set_hotkeys(btn_space, SDL_SCANCODE_BACKSPACE, SDL_SCANCODE_HOME);

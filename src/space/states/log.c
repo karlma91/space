@@ -72,7 +72,7 @@ void log_init(void)
 	statesystem_register(state_log, 0);
 
 	btn_space = button_create(SPRITE_JOYSTICK, 0, "", GAME_WIDTH/2 - 100, GAME_HEIGHT/2 - 100, 130, 130);
-	button_set_callback(btn_space, statesystem_pop_state, NULL);
+	button_set_click_callback(btn_space, statesystem_pop_state, NULL);
 	button_set_enlargement(btn_space, 1.5);
 	button_set_hotkeys(btn_space, KEY_ESCAPE, 0);
 	state_register_touchable(this, btn_space);

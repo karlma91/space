@@ -35,7 +35,8 @@ struct button {
 
 	int pressed; /* whether if button is currently pressed down or not */
 
-	void (*callback)(void *);
+	btn_click_callback click_callback;
+	btn_drag_callback drag_callback;
 
 	int animated;
 	float down_size, current_size;
@@ -48,7 +49,7 @@ struct button {
 
 	SDL_Scancode key1, key2;
 
-	void *data;
+	void *click_data, *drag_data;
 };
 
 static int keypress_down(button btn_id, SDL_Scancode key)
@@ -78,11 +79,7 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 	btn->frontcol = COL_WHITE;
 
 	btn->stretch = stretch;
-	if (text) {
-		strcpy(btn->label, text);
-	} else {
-		btn->label[0] = 0;
-	}
+	button_set_text(btn, text);
 
 	btn->animated = 0;
 	btn->down_size = 1;
@@ -104,11 +101,18 @@ void button_set_txt_antirot(button btn_id, int antirot)
 	btn->txt_antirot = antirot;
 }
 
-void button_set_callback(button btn_id, btn_callback callback, void *data)
+void button_set_click_callback(button btn_id, btn_click_callback click_callback, void *click_data)
 {
 	struct button *btn = (struct button *) btn_id;
-	btn->callback = callback;
-	btn->data = data;
+	btn->click_callback = click_callback;
+	btn->click_data = click_data;
+}
+
+void button_set_drag_callback(button btn_id, btn_drag_callback drag_callback, void *drag_data)
+{
+	struct button *btn = (struct button *) btn_id;
+	btn->drag_callback = drag_callback;
+	btn->drag_data = drag_data;
 }
 
 void button_set_hotkeys(button btn_id, SDL_Scancode key, SDL_Scancode key_alt)
@@ -163,6 +167,16 @@ void button_set_font(button btn_id, bm_font *f, float size)
 	btn->font_size = size;
 }
 
+void button_set_text(button btn_id, char *str)
+{
+	struct button *btn = (struct button *) btn_id;
+	if (str) {
+		strcpy(btn->label, str);
+	} else {
+		btn->label[0] = 0;
+	}
+}
+
 sprite *button_get_sprite(button btn_id)
 {
 	struct button *btn = (struct button *) btn_id;
@@ -191,8 +205,8 @@ void button_clear(button btn_id)
 void button_click(button btn_id)
 {
 	struct button *btn = (struct button *) btn_id;
-	if (btn->callback) {
-		btn->callback(btn->data);
+	if (btn->click_callback) {
+		btn->click_callback(btn->click_data);
 	}
 }
 
@@ -286,6 +300,9 @@ static int touch_motion(button btn_id, SDL_TouchFingerEvent *finger)
 		return 0;
 	}
 
+	if (btn->drag_callback) {
+		btn->drag_callback(btn_id, finger, btn->drag_data);
+	}
 	return 1;
 }
 

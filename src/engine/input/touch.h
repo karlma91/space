@@ -40,8 +40,8 @@ typedef struct {
 		CTRL_SCROLL
 	} type;
 
-	int enabled;
-	int visible;
+	we_bool enabled;
+	we_bool visible;
 
 	struct { /* READ ONLY */
 		float x, y; /* center position of touchable */

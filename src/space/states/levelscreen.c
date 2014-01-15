@@ -119,7 +119,7 @@ void levelscreen_init(void)
 
 	float y = box.p.y - box.s.y/2 + h / 2 + 20;
 	start_level =  button_create(0, 0, "Start", 0, y, 300, 200);
-	button_set_callback(start_level, button_callback, NULL);
+	button_set_click_callback(start_level, button_callback, NULL);
 	button_set_enlargement(start_level, 2);
 	button_set_backcolor(start_level, col_back);
 	button_set_frontcolor(start_level, col_default);
@@ -134,7 +134,7 @@ void levelscreen_init(void)
 
 	btn_background = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
 	btn_background->visible = 0;
-	button_set_callback(btn_background, statesystem_set_state, state_stations);
+	button_set_click_callback(btn_background, statesystem_set_state, state_stations);
 	button_set_hotkeys(btn_background, KEY_ESCAPE, 0);
 	state_register_touchable_view(main_view, btn_background);
 

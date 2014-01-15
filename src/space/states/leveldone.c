@@ -96,9 +96,9 @@ void leveldone_init(void)
 	btn_retry = button_create(SPRITE_BTN_RETRY, 0, "", 0, -GAME_HEIGHT/2 + 200, 250, 250);
 	btn_next = button_create(SPRITE_BTN_NEXT, 0, "", GAME_WIDTH / 2 - 500, -GAME_HEIGHT/2 + 200, 250, 250);
 
-	button_set_callback(btn_space, statesystem_set_state, state_stations);
-	button_set_callback(btn_retry, (btn_callback)space_restart_level, 0);
-	button_set_callback(btn_next, (btn_callback)space_next_level, 0);
+	button_set_click_callback(btn_space, statesystem_set_state, state_stations);
+	button_set_click_callback(btn_retry, (btn_click_callback)space_restart_level, 0);
+	button_set_click_callback(btn_next, (btn_click_callback)space_next_level, 0);
 
 	button_set_hotkeys(btn_next, KEY_RETURN_1, KEY_RETURN_2);
 	button_set_hotkeys(btn_retry, SDL_SCANCODE_SPACE, 0);

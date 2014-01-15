@@ -300,7 +300,7 @@ static void open_settings(void *unused)
 void game_touchables(void)
 {
 	btn_settings = button_create(SPRITE_GEAR, 0, "", GAME_WIDTH/2 - 130, GAME_HEIGHT/2 - 130, 150, 150);
-	button_set_callback(btn_settings, open_settings, 0);
+	button_set_click_callback(btn_settings, open_settings, 0);
 	button_set_enlargement(btn_settings, 1.5);
 	button_set_hotkeys(btn_settings, SDL_SCANCODE_F1, 0);
 }

@@ -264,13 +264,13 @@ void stations_init(void)
 	main_view->GUI = draw_gui;
 
 	btn_home = button_create(NULL, 0, "Upgrades", -GAME_WIDTH/4, -GAME_HEIGHT/2 + 80, 200, 200);
-	button_set_callback(btn_home, open_upgrades, 0);
+	button_set_click_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
 	state_register_touchable_view(main_view, btn_home);
 
 	btn_editor = button_create(NULL, 0, "Editor", GAME_WIDTH/4, -GAME_HEIGHT/2 + 80, 873*2/5, 247*2/5);
-	button_set_callback(btn_editor, open_editor, 0);
+	button_set_click_callback(btn_editor, open_editor, 0);
 	button_set_enlargement(btn_editor, 2);
 	button_set_hotkeys(btn_editor, SDL_SCANCODE_E, -1);
 	state_register_touchable_view(main_view, btn_editor);
@@ -285,7 +285,7 @@ void stations_init(void)
 		stations[i].pos = WE_P2C(radius,angle);
 
 		btn_stations[i] = button_create(SPRITE_STATION001, 0, stations[i].level_name, stations[i].pos.x,stations[i].pos.y, size, size);
-		button_set_callback(btn_stations[i], button_callback, &stations[i]);
+		button_set_click_callback(btn_stations[i], button_callback, &stations[i]);
 		button_set_txt_antirot(btn_stations[i], 1);
 		button_set_backcolor(btn_stations[i], col_back);
 		button_set_animated(btn_stations[i], 1, (i ? 18 : 15));

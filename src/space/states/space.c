@@ -824,8 +824,8 @@ void space_init(void)
 
     btn_pause = button_create(SPRITE_BTN_PAUSE, 0, "", GAME_WIDTH/2-100, GAME_HEIGHT/2-100, 120, 120);
 	btn_continue = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
-	button_set_callback(btn_pause, (btn_callback) statesystem_pause, 0);
-	button_set_callback(btn_continue, continue_func, 0);
+	button_set_click_callback(btn_pause, (btn_click_callback) statesystem_pause, 0);
+	button_set_click_callback(btn_continue, continue_func, 0);
     button_set_enlargement(btn_pause, 1.5f);
     button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);
 	button_set_hotkeys(btn_continue, KEY_ESCAPE, KEY_RETURN_2);
