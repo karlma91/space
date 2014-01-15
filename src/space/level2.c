@@ -116,7 +116,7 @@ static void * level_get_param_direct(param_list *params, char *type, char * name
 		if(data){
 			return data;
 		}else{
-			SDL_Log("LEVEL: could not find %s of type %s", name, type);
+			//SDL_Log("LEVEL: could not find %s of type %s", name, type);
 		}
 	} else {
 		//SDL_Log("LEVEL: Could not find type %s", type);
@@ -141,41 +141,15 @@ void * level_get_param(param_list *params, const char *type, const char * name)
 	param = level_get_param_direct(&(param_defs), l_type, "def");
 	if (param) return param;
 
-	SDL_Log("LEVEL: Could not find param: %s for type: %s", l_name, l_type);
+	//SDL_Log("LEVEL: Could not find param: %s for type: %s", l_name, l_type);
 	return NULL;
-}
-
-
-/**
- * Parse an double from cJSON struct
- */
-double level_safe_parse_float(cJSON *param, char *name,  void *def)
-{
-	cJSON *t = cJSON_GetObjectItem(param, name);
-	if(t!=NULL){
-		return t->valuedouble;
-	}
-	SDL_Log("Could not load param int %s", name);
-	return 0;
-}
-
-/**
- * Parse an string char * from cJSON struct
- */
-char* level_safe_parse_char(cJSON *param, char *name,  void *def)
-{
-	cJSON *t = cJSON_GetObjectItem(param, name);
-	if(t!=NULL){
-		return t->valuestring;
-	}
-	SDL_Log("Could not load param char %s", name);
-	return DEF_STRING;
 }
 
 static void parse_param_object(cJSON *param, hashmap * param_list)
 {
-	char * type = level_safe_parse_char(param,"type",NULL);
-	char * name = level_safe_parse_char(param,"name",NULL);
+	char type[32], name[32];
+	pl_parse(param,"type","char",type, DEF_STRING);
+	pl_parse(param,"name","char",name, DEF_STRING);
 	strtolower(type, type);
 	strtolower(name, name);
 
@@ -193,6 +167,29 @@ static void parse_param_object(cJSON *param, hashmap * param_list)
 	if (hm_add(names, name, data)) {
 		SDL_Log("param of type %s with name %s was already in leveldata", type, name);
 	}
+}
+
+static void load_tilemap(cJSON *t, level *lvl)
+{
+	float def = 0;
+	pl_parse(t, "t_cols", "float", &(lvl->tilemap.cols),&def);
+	pl_parse(t, "t_rows", "float", &(lvl->tilemap.rows),&def);
+	pl_parse(t, "t_layers", "float", &(lvl->tilemap.layers),&def);
+
+	cJSON *data = cJSON_GetObjectItem(t,"tilemaptest");
+	if(data) {
+		int i,j,k;
+		for (i=0; i < lvl->tilemap.layers; i++) {
+			cJSON * row = cJSON_GetArrayItem(data,i);
+			for (j= 0; j < lvl->tilemap.rows; j++) {
+				cJSON * col = cJSON_GetArrayItem(row,j);
+				for (k = 0; k < lvl->tilemap.cols; k++) {
+					lvl->tilemap.data[i][j][k] = cJSON_GetArrayItem(col,k)->valueint;
+				}
+			}
+		}
+	}
+
 }
 
 level *level_load(char * filename)
@@ -225,21 +222,25 @@ level *level_load(char * filename)
 
 	//GET tilemap name
 	char tilemap_name[30];
-	strcpy(tilemap_name, cJSON_GetObjectItem(root,"tilemap")->valuestring);
-	lvl->tiles = calloc(1, sizeof *lvl->tiles);
-	if (tilemap_create(lvl->tiles, tilemap_name)) {
-		SDL_Log("Error while parsing level header. Could not load tilemap %s.\n", tilemap_name);
-		return NULL;
+	cJSON *tilemap = cJSON_GetObjectItem(root,"tilemap");
+	if(tilemap){
+		strcpy(tilemap_name, tilemap->valuestring);
+		lvl->tiles = calloc(1, sizeof *lvl->tiles);
+		if (tilemap_create(lvl->tiles, tilemap_name)) {
+			SDL_Log("Error while parsing level header. Could not load tilemap %s.\n", tilemap_name);
+			return NULL;
+		}
+		lvl->height = lvl->tiles->height*lvl->tiles->tile_height;
+		lvl->width = (lvl->tiles->width*lvl->tiles->tile_width);
+	} else{
+			SDL_Log("LEVEL: No field with name: tilemap");
 	}
-	lvl->height = lvl->tiles->height*lvl->tiles->tile_height;
-	lvl->left = -(lvl->tiles->width*lvl->tiles->tile_width)/2;
-	lvl->right = (lvl->tiles->width*lvl->tiles->tile_width)/2;
-	lvl->width = (lvl->tiles->width*lvl->tiles->tile_width);
-
-	lvl->inner_radius = lvl->width/(WE_2PI);
-	//lvl->outer_radius = lvl->inner_radius + lvl->height;
-	lvl->outer_radius = lvl->inner_radius + lvl->height;
-
+	float def = 0;
+	float def_m = 500;
+	float def_M = 2000;
+	pl_parse(root,"innrad","float",&(lvl->inner_radius),&def_m);
+	pl_parse(root,"outrad","float",&(lvl->outer_radius),&def_M);
+	load_tilemap(root, lvl);
 
 	level_load_params(&(lvl->params), root);
 
@@ -248,8 +249,11 @@ level *level_load(char * filename)
 	for (i = 0; i < cJSON_GetArraySize(object_array); i++){
 		cJSON *object = cJSON_GetArrayItem(object_array, i);
 
-		char *type = level_safe_parse_char(object,"type",NULL);
-		char *name = level_safe_parse_char(object,"name",NULL);
+
+		char *type, *name;
+		pl_parse(object,"type", "char", &type, &DEF_STRING);
+		pl_parse(object,"name", "char", &name, &DEF_STRING);
+
 		strtolower(type, type);
 		strtolower(name, name);
 
@@ -257,8 +261,8 @@ level *level_load(char * filename)
 		cJSON *pos = cJSON_GetObjectItem(object,"pos");
 		cpVect p = cpvzero;
 		if(pos != NULL){
-			p.x = level_safe_parse_float(pos,"x",NULL);
-			p.y = level_safe_parse_float(pos,"y",NULL);
+			pl_parse(pos,"x","float",&(p.x),&def);
+			pl_parse(pos,"y","float",&(p.y),&def);
 		}
 		level_add_object_recipe_name(lvl, type, name, p, 0);
 	}
@@ -375,9 +379,28 @@ void level_write_to_file(level *lvl)
 	root = cJSON_CreateObject();
 	cJSON_AddItemToObject(root, "name", cJSON_CreateString(lvl->name));
 	cJSON_AddItemToObject(root, "tilemap", cJSON_CreateString("level02_01.tmx"));
-	cJSON_AddNumberToObject(root, "timelimit",100);
-	cJSON_AddNumberToObject(root, "innrad",lvl->inner_radius);
-	cJSON_AddNumberToObject(root, "outrad",lvl->outer_radius);
+	cJSON_AddNumberToObject(root, "timelimit", 100);
+	cJSON_AddNumberToObject(root, "innrad", lvl->inner_radius);
+	cJSON_AddNumberToObject(root, "outrad", lvl->outer_radius);
+
+	cJSON_AddNumberToObject(root, "t_layers", lvl->tilemap.layers);
+	cJSON_AddNumberToObject(root, "t_rows", lvl->tilemap.rows);
+	cJSON_AddNumberToObject(root, "t_cols", lvl->tilemap.cols);
+
+	cJSON * tilemap = cJSON_CreateArray();
+	int i,j,k;
+	for (i=0; i < lvl->tilemap.layers; i++) {
+		cJSON * row = cJSON_CreateArray();
+		for (j= 0; j < lvl->tilemap.rows; j++) {
+			int temp[lvl->tilemap.cols];
+			for (k = 0; k < lvl->tilemap.cols; k++) {
+				temp[k] = lvl->tilemap.data[i][j][k];
+			}
+			cJSON * col = cJSON_CreateIntArray(temp, lvl->tilemap.cols);
+			cJSON_AddItemToArray(row, col);
+		}
+		cJSON_AddItemToArray(tilemap, row);
+	}
 
 	cJSON * param_array = cJSON_CreateArray();
 
@@ -413,6 +436,7 @@ void level_write_to_file(level *lvl)
 		cJSON_AddItemToArray(object_array, object);
 	}
 
+	cJSON_AddItemToObject(root,"tilemaptest", tilemap);
 	cJSON_AddItemToObject(root,"params", param_array);
 	cJSON_AddItemToObject(root,"objects", object_array);
 

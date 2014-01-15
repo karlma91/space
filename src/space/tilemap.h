@@ -9,6 +9,7 @@
 #define TILEMAP_H_
 
 #include "we_graphics.h"
+#include "we_data.h"
 
 #define MAX_SINGLE_TILE_COUNT 64
 
@@ -35,6 +36,29 @@ typedef struct tilemap {
 
 }tilemap;
 
+#define TILEMAP_MAX_COLS 100
+#define TILEMAP_MAX_ROWS 100
+#define TILEMAP_LAYERS TLAY_COUNT
+typedef enum tile_layers {
+	TLAY_OVERLAY,
+	TLAY_SOLID,
+	TLAY_BACKGROUND,
+	TLAY_COUNT
+} tile_layers;
+
+typedef struct tilemap2 {
+	int layers;
+	polgrid *grid;
+
+	int cols;
+	int rows;
+
+	char *tileset_name;
+	SPRITE_ID tileset;
+	byte data[TILEMAP_LAYERS][TILEMAP_MAX_ROWS][TILEMAP_MAX_COLS];
+}tilemap2;
+
+void tilemap_fill(polgrid *grid, int layers, byte data[TILEMAP_LAYERS][TILEMAP_MAX_ROWS][TILEMAP_MAX_COLS], tilemap2 *tiles);
 
 void tilemap_render(int layer, tilemap *map);
 int tilemap_create (tilemap *map, char *filename);

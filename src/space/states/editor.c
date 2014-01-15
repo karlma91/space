@@ -1,6 +1,7 @@
 #include "../game.h"
 #include "../spaceengine.h"
 #include "we_defstate.h"
+#include "we_data.h"
 #include "space.h"
 #include "../level.h"
 
@@ -9,13 +10,9 @@
 #define MIN_RADIUS_OFFSET 200
 #define MAX_OUTER_RADIUS 10000
 
-typedef enum tile_layers {
-	TLAY_OVERLAY,
-	TLAY_SOLID,
-	TLAY_BACKGROUND,
-	TLAY_COUNT
-} tile_layers;
+
 static tile_layers current_tlay = TLAY_SOLID;
+
 byte tiledata[TLAY_COUNT][GRID_MAXROW][GRID_MAXCOL]; // TMP tiledata buffer?
 
 STATE_ID state_editor;
@@ -149,6 +146,7 @@ static void save_level_to_file(void *unused)
 {
 	llist_clear(lvl->level_data);
 	instance_iterate(update_instances, NULL);
+	tilemap_fill(pgrid, TLAY_COUNT, tiledata, &(lvl->tilemap));
 	level_write_to_file(lvl);
 }
 
