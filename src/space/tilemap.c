@@ -102,6 +102,21 @@ void tilemap_render(int layer, tilemap *map)
 }
 
 
+void tilemap_fill(int layers, int rows, int cols, byte data[TILEMAP_LAYERS][TILEMAP_MAX_ROWS][TILEMAP_MAX_COLS], tilemap2 *tiles)
+{
+	tiles->layers = layers;
+	tiles->rows = rows;
+	tiles->cols = cols;
+	int i,j, k;
+	for (i=0; i < tiles->layers; i++) {
+		for (j= 0; j < tiles->rows; j++) {
+			for (k = 0; k < tiles->cols; k++) {
+				tiles->data[i][j][k] = data[i][j][k];
+			}
+		}
+	}
+}
+
 /**
  * parsing
  */

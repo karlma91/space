@@ -34,8 +34,6 @@ typedef struct level {
 	int station;
 	int deck;
 	int height;
-	int left;
-	int right;
 	int width;
 	int timelimit;
 	float inner_radius;
@@ -44,6 +42,7 @@ typedef struct level {
 	param_list params;
 	LList level_data;
 
+	tilemap2 tilemap;
 	tilemap *tiles;
 } level;
 

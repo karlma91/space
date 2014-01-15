@@ -10,13 +10,9 @@
 #define MIN_RADIUS_OFFSET 200
 #define MAX_OUTER_RADIUS 10000
 
-typedef enum tile_layers {
-	TLAY_OVERLAY,
-	TLAY_SOLID,
-	TLAY_BACKGROUND,
-	TLAY_COUNT
-} tile_layers;
+
 static tile_layers current_tlay = TLAY_SOLID;
+
 byte tiledata[TLAY_COUNT][GRID_MAXROW][GRID_MAXCOL]; // TMP tiledata buffer?
 
 STATE_ID state_editor;
@@ -148,6 +144,7 @@ static void save_level_to_file(void *unused)
 {
 	llist_clear(lvl->level_data);
 	instance_iterate(update_instances, NULL);
+	tilemap_fill(TLAY_COUNT, pgrid->rows, pgrid->cols, tiledata, &(lvl->tilemap));
 	level_write_to_file(lvl);
 }
 
