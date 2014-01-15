@@ -15,5 +15,6 @@
 #include "../data/llist.h"
 #include "../data/stack.h"
 #include "../tween/pool.h"
+#include "../data/grid.h"
 
 #endif /* WE_DATA_H_ */

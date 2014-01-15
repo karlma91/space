@@ -161,7 +161,12 @@ we_bool pl_parse(cJSON *param, char *field_name, char *type, void *field, void *
 			we_error("ERROR LOADING DEFAULTS! fix object_defaults.json");
 			return WE_FALSE;
 		} else {
-			return pf(t,field, def);
+			if(!pf(t,field, def)){
+				SDL_Log("ERROR PARSING: %s, %s", field_name, type);
+				return WE_FALSE;
+			}else{
+				return WE_TRUE;
+			}
 		}
 	} else {
 		SDL_Log("PARAMLOADER: No type with name %s", type);

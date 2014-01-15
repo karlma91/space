@@ -43,7 +43,7 @@ typedef struct level {
 	LList level_data;
 
 	tilemap2 tilemap;
-	tilemap *tiles;
+	tilemap *tiles; //TODO: REMOVE
 } level;
 
 
@@ -52,17 +52,6 @@ extern param_list param_defs;
 
 
 we_bool level_safe_parse(cJSON *param, char *field_name, char *type, void *field, void *def);
-
-int level_safe_parse_int(cJSON *param, char *name, void *def);
-double level_safe_parse_float(cJSON *param, char *name,   void *def);
-char* level_safe_parse_char(cJSON *param, char *name,   void *def);
-object_id* level_safe_parse_object_id(cJSON *param, char *name,  void *def);
-polyshape level_safe_parse_shape(cJSON *param, char *name,  void *def);
-SPRITE_ID level_safe_parse_sprite(cJSON *param, char *name,  void *def);
-EMITTER_ID level_safe_parse_emitter(cJSON *param, char *name,  void *def);
-Mix_Chunk * level_safe_parse_sound(cJSON *param, char *name,  void *def);
-int level_safe_parse_texture(cJSON *param, char *name,  void *def);
-Color level_safe_parse_Color(cJSON *param, char *name,  void *def);
 
 
 void level_load_params(param_list *defs, cJSON *root);

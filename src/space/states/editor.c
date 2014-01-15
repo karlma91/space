@@ -1,9 +1,9 @@
 #include "../game.h"
 #include "../spaceengine.h"
 #include "we_defstate.h"
+#include "we_data.h"
 #include "space.h"
 #include "../level.h"
-#include "../grid.h"
 
 #define TAP_TIMEOUT 0.2
 #define MIN_INNER_RADIUS 200
@@ -144,7 +144,7 @@ static void save_level_to_file(void *unused)
 {
 	llist_clear(lvl->level_data);
 	instance_iterate(update_instances, NULL);
-	tilemap_fill(TLAY_COUNT, pgrid->rows, pgrid->cols, tiledata, &(lvl->tilemap));
+	tilemap_fill(pgrid, TLAY_COUNT, tiledata, &(lvl->tilemap));
 	level_write_to_file(lvl);
 }
 
