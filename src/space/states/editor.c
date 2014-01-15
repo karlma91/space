@@ -10,6 +10,15 @@
 #define MIN_RADIUS_OFFSET 200
 #define MAX_OUTER_RADIUS 10000
 
+typedef enum tile_layers {
+	TLAY_OVERLAY,
+	TLAY_SOLID,
+	TLAY_BACKGROUND,
+	TLAY_COUNT
+} tile_layers;
+static tile_layers current_tlay = TLAY_SOLID;
+byte tiledata[TLAY_COUNT][GRID_MAXROW][GRID_MAXCOL]; // TMP tiledata buffer?
+
 STATE_ID state_editor;
 
 static touchable *scr_world;
@@ -234,9 +243,9 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 {
 	//TODO detect double tap for delete? eller bruke en state for sletting av objekter (ved trykk på knapp)
 
+	grid_index grid_i;
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
-	lastTouch = pos; //TMP
 	instance *ins;
 	float l;
 
@@ -277,7 +286,11 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 
 		break;
 	case MODE_TILEMAP:
-
+		lastTouch = pos; //TMP
+		grid_i = grid_getindex(pgrid, lastTouch);
+		if (grid_i.yrow != -1) {
+			tiledata[current_tlay][grid_i.yrow][grid_i.xcol] ^= 0x1;
+		}
 		break;
 	}
 	return 0;
@@ -545,6 +558,21 @@ static void draw(void)
 	if ((current_mode == MODE_RESIZE) || (current_mode == MODE_TILEMAP)) {
 		grid_draw(pgrid, 0,  10 / current_view->zoom);
 	}
+
+
+	draw_color4f(0.5,0.5,0.8,0.6);
+	int x, y;
+	float verts[8], tex[8];
+	for (y=0; y<pgrid->rows-1; y++) {
+		for (x=0; x<pgrid->cols; x++) {
+			if (tiledata[current_tlay][y][x]) {
+				grid_getquad8f(pgrid, verts, x, y);
+				sprite_get_subimg_by_index(SPRITE_WHITE, 0, tex);
+				draw_quad_new(0, verts, tex);
+			}
+		}
+	}
+
 }
 
 static int sdl_event(SDL_Event *event)
