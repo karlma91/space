@@ -3,7 +3,6 @@
 #include "we_defstate.h"
 #include "space.h"
 #include "../level.h"
-#include "../grid.h"
 
 #define TAP_TIMEOUT 0.2
 #define MIN_INNER_RADIUS 200
