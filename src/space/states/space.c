@@ -377,7 +377,7 @@ static void draw(void)
 	//drawStars();
 
 	/* draw tilemap */
-	tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
+	//tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
 	space_draw_deck();
 
 	//draw_light_map();
@@ -389,7 +389,7 @@ static void plot_on_radar(instance *obj, void *unused)
 {
 	minimap *m = obj->components[CMP_MINIMAP];
 	if(m != NULL){
-		cpVect p = cpvmult(obj->body->p, 1 / (currentlvl->outer_radius - 5 * 64) * RADAR_SIZE);
+		cpVect p = cpvmult(obj->body->p, RADAR_SIZE / currentlvl->outer_radius);
 		draw_color(m->c);
 		draw_box(0, p, cpv(m->size, m->size), cpvtoangle(p), 1);
 	}
@@ -404,7 +404,7 @@ static void radar_draw(cpVect pos)
 		draw_rotate(-se_tangent(player->data.body->p));
 	}
 	draw_color4b(50,130,210,150);
-	draw_donut(0, cpvzero, (currentlvl->inner_radius + 2 * 64) / currentlvl->outer_radius * RADAR_SIZE, RADAR_SIZE);
+	draw_donut(0, cpvzero, currentlvl->inner_radius / currentlvl->outer_radius * RADAR_SIZE, RADAR_SIZE);
 	instance_iterate_comp(CMP_MINIMAP, (void (*)(instance *, void *))plot_on_radar, NULL);
 	draw_pop_matrix();
 }
@@ -658,8 +658,8 @@ void space_init_level_from_level(level * lvl)
 
 	float r_in = currentlvl->inner_radius;
 	float r_out = currentlvl->outer_radius;
-	float r_ceil = r_in + 64 * (r_out - r_in) / currentlvl->height;
-	float r_floor = r_out - 5 * 64 * (r_out - r_in) / currentlvl->height;
+	float r_ceil = r_in;// + 64 * (r_out - r_in) / currentlvl->height;
+	float r_floor = r_out;// - 5 * 64 * (r_out - r_in) / currentlvl->height;
 
 	static const int segments = 100;
 	static const float seg_radius = 50;
@@ -787,22 +787,31 @@ void space_init(void)
 		float f = (layers - i * 0.99f) / (layers);
 		state_set_layer_parallax(state_space, i, f, f);
 	}
-	for(i = 0; i<500; i++){
-		int layer =  11 + roundf(we_randf*(layers-1-11));
-		float size = 150 + we_randf*90 - layer*4;
-		byte l = 255 - 200 * i / layers;
-		Color col = {l,l,l,255};
-		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),6600);
-		SPRITE_ID spr;
-		int s = rand() & 7;
-		switch(s) {
-        default: spr = SPRITE_SPIKEBALL; break;
-		case 1: spr = SPRITE_GEAR; break;
-		case 2: spr = SPRITE_STATION001; break;
-		case 3: spr = SPRITE_TANKWHEEL001; break;
+	SPRITE_ID spr = sprite_link("starcross01");
+	for(i = 0; i<400; i++){
+        Color col1 = {255,255,255,0};
+        Color col2 = {0,0,0,0};
+		int layer =  11 + roundf((1-we_randf*we_randf)*(layers-1-11));
+		float size = 50 + we_randf*300 - layer*4;
+		//byte l = 255 - 200 * layer / layers;
+		//col = {l,l,l,255};
+		float rand_x = we_randf;
+		float rand_y = we_randf;
+		cpVect pos = cpvmult(cpv(rand_x-0.5,rand_y-0.5),40000);
+		float f = minf(rand_x*0.6 + 0.4*rand_y*(0.9+0.1*rand_x), 1);
+		//col2.g = 255*(f);
+		//col2.b = 255*(1-f);
+        col2 = draw_col_rainbow((f+0.5)*1536);
+		if (we_randf < 0.1) {
+			col2.a = 1;
+			state_add_sprite(state_space, layer, SPRITE_SPIKEBALL, size,size, pos, 0, col2);
+		} else {
+			col2.r = (255 + col2.r)/2;
+			col2.g = (255 + col2.g)/2;
+			col2.b = (255 + col2.b)/2;
+			col2.a = 0;
+			state_add_dualsprite(state_space, layer, spr, pos, cpv(size,size), col1, col2);
 		}
-
-		state_add_sprite(state_space, layer, spr, size, size, pos, we_randf*WE_2PI, col);
 	}
 
     view_p1 = state_view_get(state_space, 0);

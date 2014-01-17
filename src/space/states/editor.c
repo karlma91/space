@@ -10,6 +10,8 @@
 #define MIN_RADIUS_OFFSET 200
 #define MAX_OUTER_RADIUS 10000
 
+#define OBJECT_MARGIN 10
+#define WALL_MARGIN 30
 
 static tile_layers current_tlay = TLAY_SOLID;
 
@@ -33,8 +35,7 @@ static button btn_state_resize;
 static button btn_state_tilemap;
 
 static polgrid *pgrid;
-
-static cpVect lastTouch; //TMP
+static grid_index grid_i_cur;
 
 static level *lvl;
 
@@ -71,13 +72,19 @@ typedef enum RESIZE_MODE {
 	RESIZE_OUTER
 } RESIZE_MODE;
 
+typedef enum TILE_MODE {
+	TILE_NONE,
+	TILE_ADD,
+	TILE_CLEAR
+} TILE_MODE;
+
 typedef struct editor_touch {
 	editor_mode mode;
 	touch_unique_id ID;
-	cpVect viewpos_start, viewpos_last, game_offset, viewpos_prev;
+	cpVect viewpos_start, viewpos_cur, game_offset, viewpos_prev;
 	union {
 		instance *object_ins;
-		void *tilemap_data;
+		TILE_MODE tile_mode;
 		RESIZE_MODE resize_mode;
 		void *mode_data;
 	};
@@ -92,7 +99,7 @@ static editor_touch *add_touchdata(editor_mode m, touch_unique_id ID, cpVect vie
 	llist_add(ll_touches, touch);
 	touch->mode = m;
 	touch->viewpos_start = view_start;
-	touch->viewpos_last = view_start;
+	touch->viewpos_cur = view_start;
 	touch->viewpos_prev = view_start;
 	touch->ID = ID;
 	touch->mode_data = data;
@@ -198,7 +205,7 @@ static void tap_clear_editor(void *unused)
 	enable_objlist(!remove_tool);
 }
 
-static void setmode(editor_mode state)
+static void editor_setmode(editor_mode state)
 {
 	current_mode = state;
 
@@ -263,23 +270,49 @@ static RESIZE_MODE radius_at_pos(cpVect pos, float margin)
 
 static void move_radius(editor_touch *touch)
 {
-	cpVect pos = view_view2world(view_editor, touch->viewpos_last);
+	cpVect pos = view_view2world(view_editor, touch->viewpos_cur);
 	cpVect prev = view_view2world(view_editor, touch->viewpos_prev);
-	if (touch->resize_mode != RESIZE_NONE) {
-		if (touch->resize_mode == RESIZE_INNER) {
-			float new_r = currentlvl->inner_radius + (cpvlength(pos) - cpvlength(prev));
-			if(new_r >= MIN_INNER_RADIUS && new_r <= currentlvl->outer_radius - MIN_RADIUS_OFFSET) {
-				currentlvl->inner_radius = new_r;
-				grid_update(pgrid, pgrid->cols, currentlvl->inner_radius, currentlvl->outer_radius);
-			}
-		} else if(touch->resize_mode == RESIZE_OUTER) {
-			float new_r = currentlvl->outer_radius + (cpvlength(pos) - cpvlength(prev));
-			if(new_r <= MAX_OUTER_RADIUS && new_r >= currentlvl->inner_radius + MIN_RADIUS_OFFSET) {
-				currentlvl->outer_radius = new_r;
-				grid_update(pgrid, pgrid->cols, currentlvl->inner_radius, currentlvl->outer_radius);
-			}
+	if (touch->resize_mode == RESIZE_INNER) {
+		float new_r = currentlvl->inner_radius + (cpvlength(pos) - cpvlength(prev));
+		if(new_r >= MIN_INNER_RADIUS && new_r <= currentlvl->outer_radius - MIN_RADIUS_OFFSET) {
+			currentlvl->inner_radius = new_r;
+			grid_update(pgrid, pgrid->cols, currentlvl->inner_radius, currentlvl->outer_radius);
+		}
+	} else if(touch->resize_mode == RESIZE_OUTER) {
+		float new_r = currentlvl->outer_radius + (cpvlength(pos) - cpvlength(prev));
+		if(new_r <= MAX_OUTER_RADIUS && new_r >= currentlvl->inner_radius + MIN_RADIUS_OFFSET) {
+			currentlvl->outer_radius = new_r;
+			grid_update(pgrid, pgrid->cols, currentlvl->inner_radius, currentlvl->outer_radius);
 		}
 	}
+}
+
+static void paint_tile(editor_touch *touch)
+{
+	cpVect pos = view_view2world(view_editor, touch->viewpos_cur);
+	grid_index grid_i = grid_getindex(pgrid, pos);
+	grid_i_cur = grid_i;
+	if (grid_i.yrow != -1) {
+		if (touch->tile_mode == TILE_ADD) {
+			tiledata[current_tlay][grid_i.yrow][grid_i.xcol] = 1;
+		} else if (touch->tile_mode == TILE_CLEAR) {
+			tiledata[current_tlay][grid_i.yrow][grid_i.xcol] = 0;
+		}
+	}
+}
+
+static int contains_tile_finger(void)
+{
+	llist_begin_loop(ll_touches);
+	while (llist_hasnext(ll_touches)) {
+		editor_touch *touch = (editor_touch *) llist_next(ll_touches);
+		if (touch->mode == MODE_TILEMAP) {
+			llist_end_loop(ll_touches);
+			return 1;
+		}
+	}
+	llist_end_loop(ll_touches);
+	return 0;
 }
 
 static int contains_instance(instance *ins)
@@ -298,7 +331,7 @@ static int contains_instance(instance *ins)
 
 static void move_instance(editor_touch *touch)
 {
-	cpVect pos = view_view2world(view_editor, touch->viewpos_last);
+	cpVect pos = view_view2world(view_editor, touch->viewpos_cur);
 	if (touch->object_ins) {
 		if (!remove_tool) {
 			touch->object_ins->p_start = cpvadd(pos, touch->game_offset);
@@ -311,7 +344,7 @@ static void move_instance(editor_touch *touch)
 			}
 		}
 	} else {
-		touch->object_ins = instance_at_pos(pos, 10/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
+		touch->object_ins = instance_at_pos(pos, OBJECT_MARGIN/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
 	}
 }
 
@@ -328,7 +361,7 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 
 	switch (current_mode) {
 	case MODE_OBJECTS:
-		ins = instance_at_pos(pos, 10/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
+		ins = instance_at_pos(pos, OBJECT_MARGIN/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
 		if ((remove_tool && !ins) || contains_instance(ins)) {
 			return 0;
 		}
@@ -343,7 +376,7 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 		}
 		break;
 	case MODE_RESIZE:
-		resize_mode = radius_at_pos(pos, 50/view_editor->zoom);
+		resize_mode = radius_at_pos(pos, WALL_MARGIN/view_editor->zoom);
 		if (resize_mode != RESIZE_NONE) {
 			touch_unique_id touch_id = finger_bind(finger->fingerId);
 			add_touchdata(MODE_RESIZE, touch_id, pos_view, cpvzero, (void *)resize_mode);
@@ -351,10 +384,12 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 		}
 		break;
 	case MODE_TILEMAP:
-		lastTouch = pos; //TMP
-		grid_i = grid_getindex(pgrid, lastTouch);
+		grid_i = grid_getindex(pgrid, pos);
 		if (grid_i.yrow != -1) {
-			tiledata[current_tlay][grid_i.yrow][grid_i.xcol] ^= 0x1;
+			touch_unique_id touch_id = finger_bind(finger->fingerId);
+			byte tile = tiledata[current_tlay][grid_i.yrow][grid_i.xcol];
+			add_touchdata(MODE_TILEMAP, touch_id, pos_view, cpvzero, tile ? TILE_CLEAR : TILE_ADD);
+			return 1;
 		}
 		break;
 	}
@@ -365,7 +400,6 @@ static int touch_motion(SDL_TouchFingerEvent *finger)
 {
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
-	lastTouch = pos; //TMP
 
 	editor_touch *touch;
 	float new_r;
@@ -373,7 +407,7 @@ static int touch_motion(SDL_TouchFingerEvent *finger)
 	switch(current_mode) {
 	case MODE_OBJECTS:
 		if (touch && touch->mode == MODE_OBJECTS) {
-			touch->viewpos_last = pos_view;
+			touch->viewpos_cur = pos_view;
 			if (!touch->object_ins && !remove_tool && (cpvdistsq(touch->viewpos_start, pos_view) > 20*20)) {
 				fprintf(stderr, "DEBUG: motion unbind\n");
 				finger_unbind(touch->ID);
@@ -385,11 +419,15 @@ static int touch_motion(SDL_TouchFingerEvent *finger)
 		return 0;
 	case MODE_RESIZE:
 		if (touch && touch->mode == MODE_RESIZE) {
-			touch->viewpos_last = pos_view;
+			touch->viewpos_cur = pos_view;
 			return 1;
 		}
 		break;
 	case MODE_TILEMAP:
+		if (touch && touch->mode == MODE_TILEMAP) {
+			touch->viewpos_cur = pos_view;
+			return 1;
+		}
 		break;
 	}
 	return 0;
@@ -434,15 +472,13 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 
 static void draw_gui(view *v)
 {
-	grid_index grid_i;
 	switch(current_mode) {
 	case MODE_RESIZE:
 	case MODE_OBJECTS:
 		bmfont_center(FONT_COURIER, cpv(0,-v->view_height/2),1,"MODE: %d",(int)current_mode);
 		break;
 	case MODE_TILEMAP:
-		grid_i = grid_getindex(pgrid, lastTouch);
-		bmfont_center(FONT_COURIER, cpv(0,-v->view_height/2),1,"col: %d, row: %d", grid_i.xcol, grid_i.yrow);
+		bmfont_center(FONT_COURIER, cpv(0,-v->view_height/2),1,"col: %d, row: %d", grid_i_cur.xcol, grid_i_cur.yrow);
 		break;
 	}
 }
@@ -462,22 +498,32 @@ void editor_init()
 		float f = (layers - i * 0.99f) / (layers);
 		state_set_layer_parallax(state_editor, i, f, f);
 	}
-	for(i = 0; i<500; i++){
-		int layer =  11 + roundf(we_randf*(layers-1-11));
-		float size = 150 + we_randf*90 - layer*4;
-		byte l = 255;//255 - 200 * i / layers;
-		Color col = {l,l,l,0};
-		cpVect pos = cpvmult(cpv(we_randf-0.5,we_randf-0.5),6600);
-		SPRITE_ID spr;
-		int s = rand() & 7;
-		switch(s) {
-        default: spr = SPRITE_DOT; break;
-		//case 1: spr = SPRITE_GEAR; break;
-		//case 2: spr = SPRITE_STATION001; break;
-		//case 3: spr = SPRITE_TANKWHEEL001; break;
-		}
 
-		state_add_sprite(state_editor, layer, spr, size, size, pos, we_randf*WE_2PI,col);
+	SPRITE_ID spr = sprite_link("starcross01");
+	for(i = 0; i<400; i++){
+        Color col1 = {255,255,255,0};
+        Color col2 = {0,0,0,0};
+		int layer =  11 + roundf((1-we_randf*we_randf)*(layers-1-11));
+		float size = 50 + we_randf*300 - layer*4;
+		//byte l = 255 - 200 * layer / layers;
+		//col = {l,l,l,255};
+		float rand_x = we_randf;
+		float rand_y = we_randf;
+		cpVect pos = cpvmult(cpv(rand_x-0.5,rand_y-0.5),40000);
+		float f = minf(rand_x*0.6 + 0.4*rand_y*(0.9+0.1*rand_x), 1);
+		//col2.g = 255*(f);
+		//col2.b = 255*(1-f);
+        col2 = draw_col_rainbow((f+0.5)*1536);
+		if (we_randf < 0.1) {
+			col2.a = 1;
+			state_add_sprite(state_editor, layer, SPRITE_SPIKEBALL, size,size, pos, 0, col2);
+		} else {
+			col2.r = (255 + col2.r)/2;
+			col2.g = (255 + col2.g)/2;
+			col2.b = (255 + col2.b)/2;
+			col2.a = 0;
+			state_add_dualsprite(state_editor, layer, spr, pos, cpv(size,size), col1, col2);
+		}
 	}
 
 	state_enable_objects(state_editor, 1);
@@ -503,9 +549,9 @@ void editor_init()
 	btn_state_resize = button_create(SPRITE_SPIKEBALL, 0, "Resize", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 300, 125, 125);
 	btn_state_tilemap = button_create(SPRITE_SPIKEBALL, 0, "Tilemap", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 200, 125, 125);
 
-	button_set_click_callback(btn_state_objects, setmode, MODE_OBJECTS);
-	button_set_click_callback(btn_state_resize, setmode,  MODE_RESIZE);
-	button_set_click_callback(btn_state_tilemap, setmode,  MODE_TILEMAP);
+	button_set_click_callback(btn_state_objects, editor_setmode, MODE_OBJECTS);
+	button_set_click_callback(btn_state_resize, editor_setmode,  MODE_RESIZE);
+	button_set_click_callback(btn_state_tilemap, editor_setmode,  MODE_TILEMAP);
 	button_set_click_callback(btn_layer, setlayer, btn_layer);
 
 	button_set_click_callback(btn_space, statesystem_set_state, state_stations);
@@ -564,7 +610,7 @@ void editor_init()
 	tap_clear_editor(NULL);
 
 	pgrid = grid_create(32, currentlvl->inner_radius, currentlvl->outer_radius);
-	setmode(MODE_RESIZE);
+	editor_setmode(MODE_RESIZE);
 }
 
 /* * * * * * * * * *
@@ -601,14 +647,14 @@ static void pre_update(void)
 				move_instance(touch);
 				break;
 			case MODE_TILEMAP:
-
+				paint_tile(touch);
 				break;
 			case MODE_RESIZE:
 				move_radius(touch);
 
 				break;
 			}
-			touch->viewpos_prev = touch->viewpos_last;
+			touch->viewpos_prev = touch->viewpos_cur;
 			/*
             if (touch->time >= TAP_TIMEOUT) {
             	fprintf(stderr, "DEBUG: TAP TIMEOUT\n");
@@ -634,7 +680,7 @@ void space_draw_deck(void);
 static void draw(void)
 {
 	draw_color4f(1,1,1,1);
-	tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
+	//tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
 	space_draw_deck();
 
 	draw_color4f(0.5,0.5,0.5,1);
@@ -642,6 +688,17 @@ static void draw(void)
 		grid_draw(pgrid, 0,  10 / current_view->zoom);
 	}
 
+	if (current_mode == MODE_RESIZE) {
+		draw_color4f(0.2,0.6,0.2,0.2);
+		float r1, r2;
+		float margin = WALL_MARGIN / current_view->zoom;
+		r1 = currentlvl->inner_radius, r2 = r1;;
+		r1 -= margin; r2 += margin;
+		draw_donut(RLAY_GAME_FRONT, cpvzero, r1 < 0 ? 0 : r1, r2);
+		r1 = currentlvl->outer_radius, r2 = r1;
+		r1 -= margin; r2 += margin;
+		draw_donut(RLAY_GAME_FRONT, cpvzero, r1 < 0 ? 0 : r1, r2);
+	}
 
 	int l, x, y;
 	float verts[8], tex[8];
