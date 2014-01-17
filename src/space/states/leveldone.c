@@ -33,7 +33,6 @@ static cpVect star_3 = {350,100};
 static void on_enter(void)
 {
 	btn_next->visible = level_star_count != 0;
-	btn_next->enabled = level_star_count != 0;
 }
 
 static void pre_update(void)

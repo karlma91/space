@@ -829,7 +829,6 @@ void space_init(void)
     button_set_enlargement(btn_pause, 1.5f);
     button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);
 	button_set_hotkeys(btn_continue, KEY_ESCAPE, KEY_RETURN_2);
-	btn_continue->visible = 0;
 	btn_continue->enabled = 0;
 #if !ARCADE_MODE
     state_register_touchable_view(view_p1, btn_pause);

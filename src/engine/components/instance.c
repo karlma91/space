@@ -263,7 +263,7 @@ void instance_revive(instance *ins)
 
 void instance_remove(instance *ins)
 {
-	*((int *) &ins->alive) = 0;
+	(ins) && (*((int *) &ins->alive) = 0);
 }
 
 

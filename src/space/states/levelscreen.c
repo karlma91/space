@@ -129,11 +129,9 @@ void levelscreen_init(void)
 	state_register_touchable_view(main_view, btn_settings);
 
 	btn_disable = button_create(NULL, 0, "", box.p.x, box.p.y, box.s.x, box.s.y);
-	btn_disable->visible = 0;
 	state_register_touchable_view(main_view, btn_disable);
 
 	btn_background = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
-	btn_background->visible = 0;
 	button_set_click_callback(btn_background, statesystem_set_state, state_stations);
 	button_set_hotkeys(btn_background, KEY_ESCAPE, 0);
 	state_register_touchable_view(main_view, btn_background);

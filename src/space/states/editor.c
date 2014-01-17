@@ -38,13 +38,6 @@ static cpVect lastTouch; //TMP
 
 static level *lvl;
 
-typedef struct editor_touch {
-	touch_unique_id ID;
-	cpVect viewpos_start, viewpos_last, game_offset;
-	instance *ins;
-    float time;
-} editor_touch;
-
 static int remove_tool = 0;
 
 static int active_obj_index = 0;
@@ -57,9 +50,9 @@ static pool *pool_touches;
 
 typedef enum EDITOR_MODE {
 
-	MODE_OBJECTS,
+	MODE_RESIZE,
 	MODE_TILEMAP,
-	MODE_RESIZE
+	MODE_OBJECTS
 	/*
 	MODE_GAME_OBJECTS
 		- add, move, (rotate), and remove objects
@@ -72,22 +65,43 @@ typedef enum EDITOR_MODE {
 	 */
 } editor_mode;
 
-touch_unique_id resize_finger;
-cpVect resize_prev;
-enum RESIZE_MODE {
+typedef enum RESIZE_MODE {
 	RESIZE_NONE,
 	RESIZE_INNER,
 	RESIZE_OUTER
-};
+} RESIZE_MODE;
+
+typedef struct editor_touch {
+	editor_mode mode;
+	touch_unique_id ID;
+	cpVect viewpos_start, viewpos_last, game_offset, viewpos_prev;
+	union {
+		instance *object_ins;
+		void *tilemap_data;
+		RESIZE_MODE resize_mode;
+		void *mode_data;
+	};
+    float time;
+} editor_touch;
 
 static editor_mode current_mode = MODE_RESIZE;
 
-static enum RESIZE_MODE resize_mode = RESIZE_NONE;
+static editor_touch *add_touchdata(editor_mode m, touch_unique_id ID, cpVect view_start, cpVect offset, void *data)
+{
+	editor_touch *touch = pool_instance(pool_touches);
+	llist_add(ll_touches, touch);
+	touch->mode = m;
+	touch->viewpos_start = view_start;
+	touch->viewpos_last = view_start;
+	touch->viewpos_prev = view_start;
+	touch->ID = ID;
+	touch->mode_data = data;
+	touch->time = 0;
+	return touch;
+}
 
-
+//TODO render objects as they are actually rendered in object list
 #define EDITOR_OBJECT_COUNT 8
-
-//TODO show actual objects in list
 static char object_names[EDITOR_OBJECT_COUNT][32] = {
 		"CRATE",
 		"TANK",
@@ -121,16 +135,15 @@ static button btn_objects[EDITOR_OBJECT_COUNT];
 
 static view *view_editor;
 extern obj_player * space_create_player(int id);
+
 struct instance_dummy {
 	instance ins;
-	struct {
-
-	} params;
+	struct {} params;
 };
 
 static void update_instances(instance *obj, void *data)
 {
-		level_add_object_recipe_name(lvl, obj->TYPE->NAME, (char*)&(((struct instance_dummy *)obj)->params), obj->p_start,0);
+	level_add_object_recipe_name(lvl, obj->TYPE->NAME, (char*)&(((struct instance_dummy *)obj)->params), obj->p_start,0);
 }
 
 static void start_editor_level(void *unused)
@@ -194,6 +207,7 @@ static void setmode(editor_mode state)
 	/* MODE_OBJECTS */
 	visible = (current_mode == MODE_OBJECTS);
 	btn_delete->visible = visible;
+	remove_tool = 0;
 
 	/* MODE_RESIZE */
 	visible = (current_mode == MODE_RESIZE);
@@ -218,20 +232,6 @@ static void tap_delete_click(void *unused)
 	enable_objlist(!remove_tool);
 }
 
-static int contains_instance(instance *ins)
-{
-	llist_begin_loop(ll_touches);
-	while (llist_hasnext(ll_touches)) {
-		editor_touch *touch = (editor_touch *) llist_next(ll_touches);
-		if (touch->ins == ins) {
-			llist_end_loop(ll_touches);
-			return 1;
-		}
-	}
-	llist_end_loop(ll_touches);
-	return 0;
-}
-
 static editor_touch *get_touch(SDL_FingerID finger_id)
 {
 	touch_unique_id id = finger_get_touch_id(finger_id);
@@ -247,16 +247,71 @@ static editor_touch *get_touch(SDL_FingerID finger_id)
 	return NULL;
 }
 
+static RESIZE_MODE radius_at_pos(cpVect pos, float margin)
+{
+	float l = cpvlength(pos);
+	if (currentlvl->inner_radius - margin < l && l < currentlvl->inner_radius + margin ) {
+		fprintf(stderr, "DEBUG: RESIZE_INNER\n");
+		return RESIZE_INNER;
+	} else if (currentlvl->outer_radius - margin < l && l < currentlvl->outer_radius + margin ) {
+		fprintf(stderr, "DEBUG: RESIZE_OUTER\n");
+		return RESIZE_OUTER;
+	}
+	fprintf(stderr, "DEBUG: NONE_RESIZE\n");
+	return RESIZE_NONE;
+}
+
+static void move_radius(editor_touch *touch)
+{
+	cpVect pos = view_view2world(view_editor, touch->viewpos_last);
+	cpVect prev = view_view2world(view_editor, touch->viewpos_prev);
+	if (touch->resize_mode != RESIZE_NONE) {
+		if (touch->resize_mode == RESIZE_INNER) {
+			float new_r = currentlvl->inner_radius + (cpvlength(pos) - cpvlength(prev));
+			if(new_r >= MIN_INNER_RADIUS && new_r <= currentlvl->outer_radius - MIN_RADIUS_OFFSET) {
+				currentlvl->inner_radius = new_r;
+				grid_update(pgrid, pgrid->cols, currentlvl->inner_radius, currentlvl->outer_radius);
+			}
+		} else if(touch->resize_mode == RESIZE_OUTER) {
+			float new_r = currentlvl->outer_radius + (cpvlength(pos) - cpvlength(prev));
+			if(new_r <= MAX_OUTER_RADIUS && new_r >= currentlvl->inner_radius + MIN_RADIUS_OFFSET) {
+				currentlvl->outer_radius = new_r;
+				grid_update(pgrid, pgrid->cols, currentlvl->inner_radius, currentlvl->outer_radius);
+			}
+		}
+	}
+}
+
+static int contains_instance(instance *ins)
+{
+	llist_begin_loop(ll_touches);
+	while (llist_hasnext(ll_touches)) {
+		editor_touch *touch = (editor_touch *) llist_next(ll_touches);
+		if (touch->mode == MODE_OBJECTS && touch->object_ins == ins) {
+			llist_end_loop(ll_touches);
+			return 1;
+		}
+	}
+	llist_end_loop(ll_touches);
+	return 0;
+}
+
 static void move_instance(editor_touch *touch)
 {
 	cpVect pos = view_view2world(view_editor, touch->viewpos_last);
-	touch->ins->p_start = cpvadd(pos, touch->game_offset);
-	touch->ins->TYPE->call.init(touch->ins);
-	if (remove_tool) {
-		instance_remove(touch->ins);
-		finger_unbind(touch->ID);
-		llist_remove(ll_touches, touch);
-		pool_release(pool_touches, touch);
+	if (touch->object_ins) {
+		if (!remove_tool) {
+			touch->object_ins->p_start = cpvadd(pos, touch->game_offset);
+			touch->object_ins->TYPE->call.init(touch->object_ins);
+		} else {
+			if (touch->object_ins->TYPE != obj_id_player) {
+				instance_remove(touch->object_ins);
+				fprintf(stderr, "DEBUG: deleting instance of type: %s\n", touch->object_ins->TYPE->NAME);
+				touch->object_ins = NULL;
+			}
+		}
+	} else {
+		touch->object_ins = instance_at_pos(pos, 10/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
 	}
 }
 
@@ -268,43 +323,32 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
 	instance *ins;
+	RESIZE_MODE resize_mode;
 	float l;
 
 	switch (current_mode) {
 	case MODE_OBJECTS:
-		ins = instance_at_pos(pos, 10/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP); //TODO use zoom to decide max distance?
-		if (contains_instance(ins)) {
+		ins = instance_at_pos(pos, 10/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
+		if ((remove_tool && !ins) || contains_instance(ins)) {
 			return 0;
 		}
 		touch_unique_id touch_id = finger_bind(finger->fingerId);
 		if (touch_id != -1) {
-			editor_touch *touch = pool_instance(pool_touches);
-			llist_add(ll_touches, touch);
-			touch->viewpos_start = pos_view;
-			touch->viewpos_last = pos_view;
-			touch->ID = touch_id;
-			touch->ins = ins;
-			touch->time = 0;
+			editor_touch *touch = add_touchdata(MODE_OBJECTS, touch_id, pos_view, cpvzero, ins);
 			if (ins) {
 				//TODO don't allow more than one(or two for rotate/scale of instance) binding per instance!
 				touch->game_offset = cpvsub(ins->body->p, pos);
-				move_instance(touch);
 			}
 			return 1; /* consume event: no zoom/pan/rotate of scroller*/
 		}
 		break;
 	case MODE_RESIZE:
-		l = cpvlength(pos);
-		if ( l < currentlvl->inner_radius + 10/view_editor->zoom){
-			resize_mode = RESIZE_INNER;
-			resize_prev = pos;
-			resize_finger = finger_bind(finger->fingerId);
-		}else if(l > currentlvl->outer_radius + 10/view_editor->zoom){
-			resize_mode = RESIZE_OUTER;
-			resize_prev = pos;
-			resize_finger = finger_bind(finger->fingerId);
+		resize_mode = radius_at_pos(pos, 50/view_editor->zoom);
+		if (resize_mode != RESIZE_NONE) {
+			touch_unique_id touch_id = finger_bind(finger->fingerId);
+			add_touchdata(MODE_RESIZE, touch_id, pos_view, cpvzero, (void *)resize_mode);
+			return 1;
 		}
-
 		break;
 	case MODE_TILEMAP:
 		lastTouch = pos; //TMP
@@ -325,19 +369,13 @@ static int touch_motion(SDL_TouchFingerEvent *finger)
 
 	editor_touch *touch;
 	float new_r;
+	touch = get_touch(finger->fingerId);
 	switch(current_mode) {
 	case MODE_OBJECTS:
-		touch = get_touch(finger->fingerId);
-		if (touch) {
-			instance *ins = touch->ins;
-			if (ins) {
-				if(remove_tool) { //TODO create use inner state to decide what to do
-					instance_remove(touch->ins);
-				} else {
-					touch->viewpos_last = pos_view;
-					move_instance(touch);
-				}
-			} else if (cpvdistsq(touch->viewpos_start, pos_view) > 20*20) {
+		if (touch && touch->mode == MODE_OBJECTS) {
+			touch->viewpos_last = pos_view;
+			if (!touch->object_ins && !remove_tool && (cpvdistsq(touch->viewpos_start, pos_view) > 20*20)) {
+				fprintf(stderr, "DEBUG: motion unbind\n");
 				finger_unbind(touch->ID);
 				llist_remove(ll_touches, touch);
 				pool_release(pool_touches, touch);
@@ -346,24 +384,9 @@ static int touch_motion(SDL_TouchFingerEvent *finger)
 		}
 		return 0;
 	case MODE_RESIZE:
-		if(resize_finger == finger_get_touch_id(finger->fingerId)){
-			if (resize_mode == RESIZE_INNER) {
-				new_r =  currentlvl->inner_radius + (cpvlength(pos) - cpvlength(resize_prev));
-				if(new_r >= MIN_INNER_RADIUS && new_r <= currentlvl->outer_radius - MIN_RADIUS_OFFSET) {
-					currentlvl->inner_radius = new_r;
-					grid_update(pgrid, pgrid->cols, currentlvl->inner_radius, currentlvl->outer_radius);
-				}
-				resize_prev=pos;
-			} else if(resize_mode == RESIZE_OUTER) {
-				new_r =  currentlvl->outer_radius + (cpvlength(pos) - cpvlength(resize_prev));
-				if(new_r <= MAX_OUTER_RADIUS && new_r >= currentlvl->inner_radius + MIN_RADIUS_OFFSET) {
-					currentlvl->outer_radius = new_r;
-					grid_update(pgrid, pgrid->cols, currentlvl->inner_radius, currentlvl->outer_radius);
-				}
-				resize_prev=pos;
-			}
-		}else{
-			resize_mode = RESIZE_NONE;
+		if (touch && touch->mode == MODE_RESIZE) {
+			touch->viewpos_last = pos_view;
+			return 1;
 		}
 		break;
 	case MODE_TILEMAP:
@@ -377,14 +400,34 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
 	editor_touch *touch = get_touch(finger->fingerId);
+
 	if (touch) {
-		if (touch->ins == NULL) {
-			//TODO make sure there are no other instances beneath pos!
-			instance_create(object_by_name(object_type), level_get_param(&(lvl->params), object_type, param_name), pos, cpvzero);
-			llist_remove(ll_touches, touch);
-			pool_release(pool_touches, touch);
-			return 1;
+		switch(current_mode) {
+		case MODE_OBJECTS:
+			if (touch->mode == MODE_OBJECTS && touch->object_ins == NULL && !remove_tool) {
+				//TODO make sure there are no other instances beneath pos!
+				instance_create(object_by_name(object_type), level_get_param(&(lvl->params), object_type, param_name), pos, cpvzero);
+				llist_remove(ll_touches, touch);
+				pool_release(pool_touches, touch);
+				return 1;
+			}
+			break;
+		case MODE_RESIZE:
+			if (touch->mode == MODE_RESIZE) {
+				llist_remove(ll_touches, touch);
+				pool_release(pool_touches, touch);
+				return 1;
+			}
+			break;
+		case MODE_TILEMAP:
+			if (touch->mode == MODE_TILEMAP) {
+				llist_remove(ll_touches, touch);
+				pool_release(pool_touches, touch);
+				return 1;
+			}
+			break;
 		}
+
 	}
 	return 0;
 }
@@ -521,6 +564,7 @@ void editor_init()
 	tap_clear_editor(NULL);
 
 	pgrid = grid_create(32, currentlvl->inner_radius, currentlvl->outer_radius);
+	setmode(MODE_RESIZE);
 }
 
 /* * * * * * * * * *
@@ -551,13 +595,28 @@ static void pre_update(void)
 	while (llist_hasnext(ll_touches)) {
 		editor_touch *touch = (editor_touch *) llist_next(ll_touches);
 		if (finger_status(touch->ID, -1)) {
-            touch->time += dt;
-            if (touch->ins) {
-                move_instance(touch);
-            } else if (touch->time >= TAP_TIMEOUT) {
+			touch->time += dt;
+			switch(touch->mode) {
+			case MODE_OBJECTS:
+				move_instance(touch);
+				break;
+			case MODE_TILEMAP:
+
+				break;
+			case MODE_RESIZE:
+				move_radius(touch);
+
+				break;
+			}
+			touch->viewpos_prev = touch->viewpos_last;
+			/*
+            if (touch->time >= TAP_TIMEOUT) {
+            	fprintf(stderr, "DEBUG: TAP TIMEOUT\n");
                 finger_unbind(touch->ID);
             }
+			 */
 		} else {
+			/* remove inactive touches */
 			llist_remove(ll_touches, touch);
 			pool_release(pool_touches, touch);
 		}

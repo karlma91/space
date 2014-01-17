@@ -139,8 +139,6 @@ void pause_init(void)
 	button_set_hotkeys(btn_retry, SDL_SCANCODE_SPACE, 0);
 	button_set_hotkeys(btn_space, SDL_SCANCODE_BACKSPACE, SDL_SCANCODE_HOME);
 
-	btn_resume->visible = 0;
-
 	button_set_enlargement(btn_space, 1.5);
 	button_set_enlargement(btn_retry, 1.5);
 

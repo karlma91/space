@@ -231,6 +231,5 @@ void settings_init(void)
 
 	button_set_click_callback(btn_back, statesystem_pop_state, 0);
 	state_register_touchable(this, btn_back);
-	btn_back->visible = 0;
 }
 
