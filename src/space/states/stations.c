@@ -167,9 +167,19 @@ static void draw(void)
 	bmfont_center(FONT_COURIER, cpvzero,1,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
 	draw_pop_matrix();
 
+
 	llist_begin_loop(solar_systems);
+	cpVect p;
+	int i = 0;
 	while (llist_hasnext(solar_systems)) {
-		solarsystem_draw((solarsystem *)llist_next(solar_systems));
+		solarsystem *sol = (solarsystem *)llist_next(solar_systems);
+		solarsystem_draw(sol);
+		if(i>0){
+			draw_color4b(20,20,80,50);
+			draw_quad_line(RLAY_BACK_MID,p, sol->origo, 6/current_view->zoom);
+		}
+		p = sol->origo;
+		i++;
 	}
 	llist_end_loop(solar_systems);
 

@@ -30,7 +30,7 @@ static we_bool parse_int(cJSON *t, int *field, int *def)
 static we_bool parse_float(cJSON *t, float *field, float *def)
 {
 	if(t){
-		*field = t->valuedouble;
+		*field = (float)t->valuedouble;
 		return WE_TRUE;
 	}else{
 		*field = *def;

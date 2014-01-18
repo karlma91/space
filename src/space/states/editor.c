@@ -5,6 +5,8 @@
 #include "space.h"
 #include "../level.h"
 
+
+#define DRAG_LIMIT 50
 #define TAP_TIMEOUT 0.2
 #define MIN_INNER_RADIUS 200
 #define MIN_RADIUS_OFFSET 200
@@ -13,102 +15,55 @@
 #define OBJECT_MARGIN 10
 #define WALL_MARGIN 30
 
-static tile_layers current_tlay = TLAY_SOLID;
-
-byte tiledata[TLAY_COUNT][GRID_MAXROW][GRID_MAXCOL]; // TMP tiledata buffer?
-
 STATE_ID state_editor;
 
-static touchable *scr_world;
-static touchable *scr_objects;
 
-static button btn_space;
-static button btn_clear;
-static button btn_test;
-static button btn_save;
-
-static button btn_delete;
-static button btn_layer;
-
-static button btn_state_objects;
-static button btn_state_resize;
-static button btn_state_tilemap;
-
+/*********** GRID AND TILEDATA ***********/
+static byte tiledata[TLAY_COUNT][GRID_MAXROW][GRID_MAXCOL]; // TMP tiledata buffer?
 static polgrid *pgrid;
 static grid_index grid_i_cur;
+static tile_layers current_tlay = TLAY_SOLID;
 
+/*********** LEVEL DATA ***********/
 static level *lvl;
-
-static int remove_tool = 0;
-
-static int active_obj_index = 0;
-static char object_type[32];
 static char level_name[32];
-static char *param_name;
 
-static LList ll_touches;
-static pool *pool_touches;
 
+/*********** EDITOR STATE ***********/
 typedef enum EDITOR_MODE {
-
 	MODE_RESIZE,
 	MODE_TILEMAP,
 	MODE_OBJECTS
-	/*
-	MODE_GAME_OBJECTS
-		- add, move, (rotate), and remove objects
-	MODE_OBJECT_PARAMS
-		- create, set, copy, and paste object params, create specific sub-objects?
-		- (change view_objects to view_params for list of available params of the selected game object, with an option to duplicate or create new params for that object_type)
-	MODE_LAYERS
-		- change current layer
-		- be able to add, select, change, resize, rotate, remove layersystem's drawables (i.e. sprite_ext, filled polygon with/without outline) for current layer
-	 */
 } editor_mode;
+static editor_mode current_mode = MODE_RESIZE;
 
+
+/*********** RESIZE_MODE ***********/
 typedef enum RESIZE_MODE {
 	RESIZE_NONE,
 	RESIZE_INNER,
 	RESIZE_OUTER
 } RESIZE_MODE;
 
+
+/*********** TILE_MODE ***********/
 typedef enum TILE_MODE {
 	TILE_NONE,
 	TILE_ADD,
 	TILE_CLEAR
 } TILE_MODE;
 
-typedef struct editor_touch {
-	editor_mode mode;
-	touch_unique_id ID;
-	cpVect viewpos_start, viewpos_cur, game_offset, viewpos_prev;
-	union {
-		instance *object_ins;
-		TILE_MODE tile_mode;
-		RESIZE_MODE resize_mode;
-		void *mode_data;
-	};
-    float time;
-} editor_touch;
 
-static editor_mode current_mode = MODE_RESIZE;
+/*********** OBJECT MODE ***********/
+static void select_object_type(void *index);
 
-static editor_touch *add_touchdata(editor_mode m, touch_unique_id ID, cpVect view_start, cpVect offset, void *data)
-{
-	editor_touch *touch = pool_instance(pool_touches);
-	llist_add(ll_touches, touch);
-	touch->mode = m;
-	touch->viewpos_start = view_start;
-	touch->viewpos_cur = view_start;
-	touch->viewpos_prev = view_start;
-	touch->ID = ID;
-	touch->mode_data = data;
-	touch->time = 0;
-	return touch;
-}
+#define EDITOR_OBJECT_COUNT 8
+static int remove_tool = 0;
+static int active_obj_index = 0;
+static char object_type[32], *param_name;
+static float btn_xoffset[EDITOR_OBJECT_COUNT];
 
 //TODO render objects as they are actually rendered in object list
-#define EDITOR_OBJECT_COUNT 8
 static char object_names[EDITOR_OBJECT_COUNT][32] = {
 		"CRATE",
 		"TANK",
@@ -138,15 +93,50 @@ static char sprite_names[EDITOR_OBJECT_COUNT][32] = {
 		"rocket",
 		"saw"};
 
-static button btn_objects[EDITOR_OBJECT_COUNT];
-
-static view *view_editor;
-extern obj_player * space_create_player(int id);
-
 struct instance_dummy {
 	instance ins;
 	struct {} params;
 };
+
+
+/*********** GUI ELEMENTS AND INTERACTION ***********/
+static view *view_editor;
+static touchable *scr_world, *scr_objects;
+static button btn_space, btn_clear, btn_test, btn_save;
+static button btn_state_resize;
+static button btn_state_tilemap, btn_layer;
+static button btn_state_objects, btn_delete, btn_objects[EDITOR_OBJECT_COUNT];
+static LList ll_touches;
+static pool *pool_touches;
+
+typedef union MODE_DATA {
+	instance *object_ins;
+	TILE_MODE tile_mode;
+	RESIZE_MODE resize_mode;
+	void *mode_data;
+} MODE_DATA;
+typedef struct editor_touch {
+	editor_mode mode;
+	touch_unique_id ID;
+	cpVect viewpos_start, viewpos_cur, game_offset, viewpos_prev;
+	MODE_DATA data;
+    float time;
+} editor_touch;
+
+
+static editor_touch *add_touchdata(editor_mode m, touch_unique_id ID, cpVect view_start, cpVect offset, MODE_DATA data)
+{
+	editor_touch *touch = pool_instance(pool_touches);
+	llist_add(ll_touches, touch);
+	touch->mode = m;
+	touch->viewpos_start = view_start;
+	touch->viewpos_cur = view_start;
+	touch->viewpos_prev = view_start;
+	touch->ID = ID;
+	touch->data = data;
+	touch->time = 0;
+	return touch;
+}
 
 static void update_instances(instance *obj, void *data)
 {
@@ -170,16 +160,6 @@ static void save_level_to_file(void *unused)
 	level_write_to_file(lvl);
 }
 
-static void select_object_type(void *index)
-{
-	Color col_active = {150,150,150,150};
-	button_set_backcolor(btn_objects[active_obj_index],COL_WHITE);
-	active_obj_index = *((int *)&index);
-	button_set_backcolor(btn_objects[active_obj_index],col_active);
-	strncpy(object_type, object_names[active_obj_index], 32);
-	param_name = param_names[active_obj_index];
-}
-
 static void enable_objlist(int enable)
 {
 	if (enable) {
@@ -193,6 +173,7 @@ static void tap_clear_editor(void *unused)
 {
 	currentlvl = lvl;
 	objectsystem_clear();
+	extern obj_player * space_create_player(int id);
 	space_create_player(1);
 	select_object_type(0);
 
@@ -233,6 +214,8 @@ static void setlayer(button btn)
 	button_set_text(btn, number);
 }
 
+
+
 static void tap_delete_click(void *unused)
 {
 	remove_tool = !remove_tool;
@@ -272,13 +255,13 @@ static void move_radius(editor_touch *touch)
 {
 	cpVect pos = view_view2world(view_editor, touch->viewpos_cur);
 	cpVect prev = view_view2world(view_editor, touch->viewpos_prev);
-	if (touch->resize_mode == RESIZE_INNER) {
+	if (touch->data.resize_mode == RESIZE_INNER) {
 		float new_r = currentlvl->inner_radius + (cpvlength(pos) - cpvlength(prev));
 		if(new_r >= MIN_INNER_RADIUS && new_r <= currentlvl->outer_radius - MIN_RADIUS_OFFSET) {
 			currentlvl->inner_radius = new_r;
 			grid_update(pgrid, pgrid->cols, currentlvl->inner_radius, currentlvl->outer_radius);
 		}
-	} else if(touch->resize_mode == RESIZE_OUTER) {
+	} else if(touch->data.resize_mode == RESIZE_OUTER) {
 		float new_r = currentlvl->outer_radius + (cpvlength(pos) - cpvlength(prev));
 		if(new_r <= MAX_OUTER_RADIUS && new_r >= currentlvl->inner_radius + MIN_RADIUS_OFFSET) {
 			currentlvl->outer_radius = new_r;
@@ -293,9 +276,9 @@ static void paint_tile(editor_touch *touch)
 	grid_index grid_i = grid_getindex(pgrid, pos);
 	grid_i_cur = grid_i;
 	if (grid_i.yrow != -1) {
-		if (touch->tile_mode == TILE_ADD) {
+		if (touch->data.tile_mode == TILE_ADD) {
 			tiledata[current_tlay][grid_i.yrow][grid_i.xcol] = 1;
-		} else if (touch->tile_mode == TILE_CLEAR) {
+		} else if (touch->data.tile_mode == TILE_CLEAR) {
 			tiledata[current_tlay][grid_i.yrow][grid_i.xcol] = 0;
 		}
 	}
@@ -320,7 +303,7 @@ static int contains_instance(instance *ins)
 	llist_begin_loop(ll_touches);
 	while (llist_hasnext(ll_touches)) {
 		editor_touch *touch = (editor_touch *) llist_next(ll_touches);
-		if (touch->mode == MODE_OBJECTS && touch->object_ins == ins) {
+		if (touch->mode == MODE_OBJECTS && touch->data.object_ins == ins) {
 			llist_end_loop(ll_touches);
 			return 1;
 		}
@@ -332,20 +315,30 @@ static int contains_instance(instance *ins)
 static void move_instance(editor_touch *touch)
 {
 	cpVect pos = view_view2world(view_editor, touch->viewpos_cur);
-	if (touch->object_ins) {
+	if (touch->data.object_ins) {
 		if (!remove_tool) {
-			touch->object_ins->p_start = cpvadd(pos, touch->game_offset);
-			touch->object_ins->TYPE->call.init(touch->object_ins);
+			touch->data.object_ins->p_start = cpvadd(pos, touch->game_offset);
+			touch->data.object_ins->TYPE->call.init(touch->data.object_ins);
 		} else {
-			if (touch->object_ins->TYPE != obj_id_player) {
-				instance_remove(touch->object_ins);
-				fprintf(stderr, "DEBUG: deleting instance of type: %s\n", touch->object_ins->TYPE->NAME);
-				touch->object_ins = NULL;
+			if (touch->data.object_ins->TYPE != obj_id_player) {
+				instance_remove(touch->data.object_ins);
+				fprintf(stderr, "DEBUG: deleting instance of type: %s\n", touch->data.object_ins->TYPE->NAME);
+				touch->data.object_ins = NULL;
 			}
 		}
 	} else {
-		touch->object_ins = instance_at_pos(pos, OBJECT_MARGIN/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
+		touch->data.object_ins = instance_at_pos(pos, OBJECT_MARGIN/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
 	}
+}
+
+static void select_object_type(void *index)
+{
+	Color col_active = {150,150,150,150};
+	button_set_backcolor(btn_objects[active_obj_index],COL_WHITE);
+	active_obj_index = *((int *)&index);
+	button_set_backcolor(btn_objects[active_obj_index],col_active);
+	strncpy(object_type, object_names[active_obj_index], 32);
+	param_name = param_names[active_obj_index];
 }
 
 static int touch_down(SDL_TouchFingerEvent *finger)
@@ -355,31 +348,29 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 	grid_index grid_i;
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
-	instance *ins;
-	RESIZE_MODE resize_mode;
-	float l;
+	MODE_DATA data;
 
 	switch (current_mode) {
 	case MODE_OBJECTS:
-		ins = instance_at_pos(pos, OBJECT_MARGIN/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
-		if ((remove_tool && !ins) || contains_instance(ins)) {
+		data.object_ins = instance_at_pos(pos, OBJECT_MARGIN/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
+		if ((remove_tool && !data.object_ins) || contains_instance(data.object_ins)) {
 			return 0;
 		}
 		touch_unique_id touch_id = finger_bind(finger->fingerId);
 		if (touch_id != -1) {
-			editor_touch *touch = add_touchdata(MODE_OBJECTS, touch_id, pos_view, cpvzero, ins);
-			if (ins) {
+			editor_touch *touch = add_touchdata(MODE_OBJECTS, touch_id, pos_view, cpvzero, data);
+			if (data.object_ins) {
 				//TODO don't allow more than one(or two for rotate/scale of instance) binding per instance!
-				touch->game_offset = cpvsub(ins->body->p, pos);
+				touch->game_offset = cpvsub(data.object_ins->body->p, pos);
 			}
 			return 1; /* consume event: no zoom/pan/rotate of scroller*/
 		}
 		break;
 	case MODE_RESIZE:
-		resize_mode = radius_at_pos(pos, WALL_MARGIN/view_editor->zoom);
-		if (resize_mode != RESIZE_NONE) {
+		data.resize_mode = radius_at_pos(pos, WALL_MARGIN/view_editor->zoom);
+		if (data.resize_mode != RESIZE_NONE) {
 			touch_unique_id touch_id = finger_bind(finger->fingerId);
-			add_touchdata(MODE_RESIZE, touch_id, pos_view, cpvzero, (void *)resize_mode);
+			add_touchdata(MODE_RESIZE, touch_id, pos_view, cpvzero, data);
 			return 1;
 		}
 		break;
@@ -393,7 +384,8 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 		} else if (grid_i.yrow != -1) {
 			touch_unique_id touch_id = finger_bind(finger->fingerId);
 			byte tile = tiledata[current_tlay][grid_i.yrow][grid_i.xcol];
-			add_touchdata(MODE_TILEMAP, touch_id, pos_view, cpvzero, tile ? TILE_CLEAR : TILE_ADD);
+			data.tile_mode = tile ? TILE_CLEAR : TILE_ADD;
+			add_touchdata(MODE_TILEMAP, touch_id, pos_view, cpvzero, data);
 			return 1;
 		}
 		break;
@@ -404,16 +396,13 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 static int touch_motion(SDL_TouchFingerEvent *finger)
 {
 	cpVect pos_view = cpv(finger->x, finger->y);
-	cpVect pos = view_view2world(view_editor, pos_view);
+	editor_touch *touch = get_touch(finger->fingerId);
 
-	editor_touch *touch;
-	float new_r;
-	touch = get_touch(finger->fingerId);
 	switch(current_mode) {
 	case MODE_OBJECTS:
 		if (touch && touch->mode == MODE_OBJECTS) {
 			touch->viewpos_cur = pos_view;
-			if (!touch->object_ins && !remove_tool && (cpvdistsq(touch->viewpos_start, pos_view) > 20*20)) {
+			if (!touch->data.object_ins && !remove_tool && (cpvdistsq(touch->viewpos_start, pos_view) > 20*20)) {
 				fprintf(stderr, "DEBUG: motion unbind\n");
 				finger_unbind(touch->ID);
 				llist_remove(ll_touches, touch);
@@ -447,7 +436,7 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 	if (touch) {
 		switch(current_mode) {
 		case MODE_OBJECTS:
-			if (touch->mode == MODE_OBJECTS && touch->object_ins == NULL && !remove_tool) {
+			if (touch->mode == MODE_OBJECTS && touch->data.object_ins == NULL && !remove_tool) {
 				//TODO make sure there are no other instances beneath pos!
 				instance_create(object_by_name(object_type), level_get_param(&(lvl->params), object_type, param_name), pos, cpvzero);
 				llist_remove(ll_touches, touch);
@@ -470,7 +459,42 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 			}
 			break;
 		}
+	}
+	return 0;
+}
 
+static int editor_drag_button(button btn_id, SDL_TouchFingerEvent *finger, void *drag_data)
+{
+	cpVect pos_view = cpv(finger->x, finger->y);
+	cpVect pos = view_view2world(view_editor, pos_view);
+	int index = *((int *)&drag_data);
+	float offset = btn_xoffset[index] + finger->dx * view_editor->view_width;
+	if (offset >= DRAG_LIMIT) {
+		btn_xoffset[index] = 0;
+		select_object_type(drag_data);
+		finger_release(finger->fingerId);
+		button_clear(btn_id);
+		instance *ins = instance_create(object_by_name(object_type), level_get_param(&(lvl->params), object_type, param_name), pos, cpvzero);
+		touch_down(finger);
+
+		touch_unique_id touch_id = finger_get_touch_id(finger->fingerId);
+		if (touch_id) {
+			/* get editor_touch ptr from finger_id */
+			llist_begin_loop(ll_touches);
+			while (llist_hasnext(ll_touches)) {
+				editor_touch *touch = (editor_touch *) llist_next(ll_touches);
+				if (touch->ID == touch_id) {
+					touch->data.object_ins = ins;
+					break;
+				}
+			}
+			llist_end_loop(ll_touches);
+
+			return 1;
+		}
+	} else {
+		offset = fmaxf(fminf(DRAG_LIMIT, offset), 0);
+		btn_xoffset[index] = offset;
 	}
 	return 0;
 }
@@ -591,6 +615,7 @@ void editor_init()
 	state_register_touchable_view(view_editor, btn_state_tilemap);
 	state_register_touchable_view(view_editor, btn_layer);
 
+	/* OBJECT BUTTON INIT */
 	float size = 200;
 	float x = -GAME_WIDTH/2+size*2;
 	float y = GAME_HEIGHT/2-size*2;
@@ -598,7 +623,9 @@ void editor_init()
 	for (i = 0; i < EDITOR_OBJECT_COUNT; i++, y -= 250, key++) {
 		SPRITE_ID spr_id = sprite_link(sprite_names[i]);
 		button btn = button_create(spr_id, 0, "", x, y, size, size);
-		button_set_click_callback(btn, select_object_type, i);
+		btn_xoffset[i] = 0;
+		button_set_drag_callback(btn, editor_drag_button, *(int **)(&i));
+		button_set_click_callback(btn, select_object_type, *(int **)(&i));
 		button_set_hotkeys(btn, key <= SDL_SCANCODE_0 ? key : 0, 0);
 		button_set_enlargement(btn, 1.5);
 		state_register_touchable_view(view_editor, btn); //TODO use another view for these buttons
@@ -614,7 +641,7 @@ void editor_init()
 	lvl = level_load(WAFFLE_ZIP, "empty");
 	tap_clear_editor(NULL);
 
-	pgrid = grid_create(200, currentlvl->inner_radius, currentlvl->outer_radius);
+	pgrid = grid_create(32, currentlvl->inner_radius, currentlvl->outer_radius);
 	editor_setmode(MODE_RESIZE);
 }
 
@@ -639,7 +666,10 @@ static void pre_update(void)
 	float x = -GAME_WIDTH/2+150 + panel_offset;
 	float y = GAME_HEIGHT/2-200 + obj_offset.y;
 	for (i = 0; i < EDITOR_OBJECT_COUNT; i++, y -= 250) {
-		touch_place(btn_objects[i], x, y);
+		touch_place(btn_objects[i], x, y); // + btn_xoffset[i]
+		if (btn_xoffset[i] > 0) {
+			btn_xoffset[i] *= 0.99;
+		}
 	}
 
 	llist_begin_loop(ll_touches);
@@ -713,7 +743,7 @@ static void draw(void)
 			for (x=0; x<pgrid->cols; x++) {
 				if (tiledata[l][y][x]) {
 					grid_getquad8f(pgrid, verts, x, y);
-					sprite_get_subimg_by_index(SPRITE_WHITE, 0, tex);
+					sprite_get_subimg_by_index(SPRITE_GEAR, 0, tex);
 					draw_quad_new(RLAY_GAME_BACK, verts, tex);
 				}
 			}

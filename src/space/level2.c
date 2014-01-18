@@ -30,15 +30,12 @@ LList solar_systems;
 
 //TODO: Set all default values to something usefull
 static char DEF_STRING[10] = "HELLO";
-static SPRITE_ID DEF_SPRITE = NULL;
-static EMITTER_ID DEF_EMITTER = NULL;
-static polyshape DEF_SHAPE = NULL;
 
 param_list param_defs;
 
 int level_init(void)
 {
-
+	srand(0x9b3a09fa);
 	solar_systems = llist_create();
 	llist_set_remove_callback(solar_systems, solarsystem_destroy);
 	SPRITE_ID spr_sun = sprite_link("sun01");
@@ -195,9 +192,9 @@ static void parse_param_object(cJSON *param, hashmap * param_list)
 static void load_tilemap(cJSON *t, level *lvl)
 {
 	float def = 0;
-	pl_parse(t, "t_cols", "float", &(lvl->tilemap.cols),&def);
-	pl_parse(t, "t_rows", "float", &(lvl->tilemap.rows),&def);
-	pl_parse(t, "t_layers", "float", &(lvl->tilemap.layers),&def);
+	pl_parse(t, "t_cols", "int", &(lvl->tilemap.cols), &def);
+	pl_parse(t, "t_rows", "int", &(lvl->tilemap.rows), &def);
+	pl_parse(t, "t_layers", "int", &(lvl->tilemap.layers), &def);
 
 	cJSON *data = cJSON_GetObjectItem(t,"tilemaptest");
 	if(data) {
@@ -293,9 +290,17 @@ level *level_load(int folder, char * filename)
 		cJSON *pos = cJSON_GetObjectItem(object,"pos");
 		cpVect p = cpvzero;
 		if(pos != NULL){
-			pl_parse(pos,"x","float",&(p.x),&def);
-			pl_parse(pos,"y","float",&(p.y),&def);
+			float def = 100;
+			float x,y;
+			//&(p.x) do not work because its a double
+			pl_parse(pos,"x","float",&(x),&def);
+			pl_parse(pos,"y","float",&(y),&def);
+			p.x = x;
+			p.y = y;
+		} else {
+			SDL_Log("LEVEL PARSING ERROR: Cannot find field pos in object");
 		}
+
 		level_add_object_recipe_name(lvl, type, name, p, 0);
 	}
 	return lvl;
@@ -400,8 +405,8 @@ void level_destry_param_list(param_list *params)
 
 void level_write_to_file(level *lvl)
 {
-	char filename[200] = "levels/test.json";
-	FILE *file = waffle_fopen(WAFFLE_LIBRARY, filename,"w");
+	char filename[200] = "levels/karlmka/test.json";
+	FILE *file = waffle_fopen(WAFFLE_DOCUMENTS, filename,"w");
 	if (file == NULL) {
 		SDL_Log( "Could not open %s\n",filename);
 		return;

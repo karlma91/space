@@ -16,7 +16,7 @@
 
 typedef touchable *button;
 typedef void (*btn_click_callback)(void *click_data);
-typedef void (*btn_drag_callback)(button btn_id, SDL_TouchFingerEvent *finger, void *drag_data);
+typedef int (*btn_drag_callback)(button btn_id, SDL_TouchFingerEvent *finger, void *drag_data);
 
 //TODO add timeout for move and up?
 button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_x, float pos_y, float width, float height);

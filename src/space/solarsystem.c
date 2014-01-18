@@ -48,9 +48,9 @@ void solarsystem_add_station(solarsystem * sol, SPRITE_ID spr_id, int dir_type, 
 {
 	station *s = calloc(1, sizeof(station));
 	strcpy(s->level_path, path);
-	int i = llist_size(sol->stations) + 1;
+	int i = llist_size(sol->stations);
 	float size = 300 + we_randf * 100;
-	cpFloat radius = (i+2) * 450;
+	cpFloat radius = sol->sun.size + (i) * 400 ;
 	cpFloat angle = WE_2PI * we_randf;
 	s->pos = cpvadd(WE_P2C(radius,angle), sol->origo);
 	Color col_back = {255,180,140,255};
@@ -80,9 +80,18 @@ void solarsystem_update(solarsystem *solsys)
 
 }
 
-void solarsystem_draw(solarsystem *solsys)
+void solarsystem_draw(solarsystem *sol)
 {
-	sun_render(RLAY_GAME_BACK, &solsys->sun);
+	sun_render(RLAY_GAME_BACK, &sol->sun);
+	llist_begin_loop(sol->stations);
+	draw_color4b(50,50,50,50);
+	while (llist_hasnext(sol->stations)) {
+		cpVect p = ((station *)llist_next(sol->stations))->pos;
+		float r = cpvlength(cpvsub(sol->origo,p));
+		float w = 1 / current_view->zoom;
+		draw_donut(RLAY_GAME_BACK, sol->origo, r - w, r + w);
+	}
+	llist_end_loop(sol->stations);
 }
 
 
@@ -101,6 +110,7 @@ void sun_render(int layer, drawbl_sun *sun)
 	float spd = WE_2PI * dt * sun->angvel;
 	sun->ang1 += spd;
 	sun->ang2 -= spd;
+
 }
 
 void solarsystem_destroy(solarsystem *sy)

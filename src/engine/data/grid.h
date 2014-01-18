@@ -8,7 +8,7 @@
 #ifndef GRID_H_
 #define GRID_H_
 
-#define GRID_MAXCOL 200
+#define GRID_MAXCOL 100
 #define GRID_MAXROW 100
 
 typedef struct polgrid {

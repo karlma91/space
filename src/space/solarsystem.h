@@ -19,7 +19,7 @@ typedef struct level_ship {
 	float rotation;
 	float rotation_speed;
 	char  level_path[256];
-	button *btn;
+	button btn;
 } station;
 
 typedef struct {
