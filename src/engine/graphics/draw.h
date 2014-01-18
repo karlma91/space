@@ -154,7 +154,7 @@ void draw_triangle_strip(int layer, float *ver_list, const float *tex_list, int 
 void draw_triangle_fan(int layer, float *ver_fan, const float *tex_fan, int count); /* converts triangle fan to triangle list and appends to current render state */
 
 void draw_quad_patch_center_tex(int layer, int tex_id, float *tex_map, cpVect pos, cpVect size, float w, float angle);
-void draw_quad_patch_center(int layer, SPRITE_ID id, cpVect a, cpVect b, float w, float angle);
-void draw_quad_patch_center_spr(int layer, sprite *spr, cpVect a, cpVect b, float w, float angle);
+void draw_quad_patch_center(int layer, SPRITE_ID id, cpVect pos, cpVect size, float w, float angle);
+void draw_quad_patch_center_spr(int layer, sprite *spr, cpVect pos, cpVect size, float w, float angle);
 
 #endif /* DRAW_H_ */
