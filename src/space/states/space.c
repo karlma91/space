@@ -650,6 +650,17 @@ void space_init_level_from_level(level * lvl)
 	/* static ground */
 	cpBody *staticBody = current_space->staticBody;
 
+	/* add static tiles */
+	int x, y;
+	for (y = 0; y < lvl->tilemap.rows; y++) {
+		for (x = 0; x < lvl->tilemap.cols; x++) {
+			cpShape *shape = lvl->tilemap.blocks[y][x];
+			if (shape) {
+				cpSpaceAddStaticShape(current_space, shape);
+			}
+		}
+	}
+
 	/* remove floor and ceiling */
 	if(llist_size(ll_floor_segs) > 0 && ceiling != NULL){
 		remove_static(ceiling);

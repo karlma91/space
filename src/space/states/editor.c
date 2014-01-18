@@ -276,8 +276,20 @@ static void paint_tile(editor_touch *touch)
 	if (grid_i.yrow != -1) {
 		if (touch->data.tile_mode == TILE_ADD) {
 			lvl->tilemap.data[current_tlay][grid_i.yrow][grid_i.xcol] = 1;
+			if (current_tlay == TLAY_SOLID && !lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]) {
+				cpVect verts[4];
+				grid_getquad8cpv(lvl->tilemap.grid, verts, grid_i.xcol, grid_i.yrow);
+				cpShape *shape = cpPolyShapeNew(current_space->staticBody, 4, verts, cpvzero);
+				lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol] = shape;
+				cpSpaceAddStaticShape(current_space, shape);
+			}
 		} else if (touch->data.tile_mode == TILE_CLEAR) {
 			lvl->tilemap.data[current_tlay][grid_i.yrow][grid_i.xcol] = 0;
+			if (current_tlay == TLAY_SOLID && lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]) {
+				cpSpaceRemoveShape(current_space, lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]);
+				cpfree(lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]);
+				lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol] = NULL;
+			}
 		}
 	}
 }

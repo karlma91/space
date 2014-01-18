@@ -56,7 +56,7 @@ typedef struct tilemap2 {
 	char *tileset_name;
 	SPRITE_ID tileset;
 	byte data[TILEMAP_LAYERS][TILEMAP_MAX_ROWS][TILEMAP_MAX_COLS];
-	cpShape blocks[TILEMAP_MAX_ROWS][TILEMAP_MAX_COLS];
+	cpShape *blocks[TILEMAP_MAX_ROWS][TILEMAP_MAX_COLS];
 }tilemap2;
 
 void tilemap_fill(void *unused, int layers, void *unused2, tilemap2 *tiles);

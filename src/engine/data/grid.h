@@ -49,12 +49,40 @@ inline static void grid_getpos2f(polgrid *pgrid, float *pos, int col_x, int row_
 	pos[1] = pgrid->sinxcol[col_x] * r;
 }
 
+
+inline static void grid_getpos2cpv(polgrid *pgrid, cpVect *pos, int col_x, int row_y)
+{
+	cpFloat cols = pgrid->cols;
+	cpFloat rows = pgrid->rows;
+	row_y = row_y >= rows ? row_y - rows : (row_y < 0 ? row_y + rows : row_y);
+	col_x = col_x >= cols ? col_x - cols : (col_x < 0 ? col_x + cols : col_x);
+	if (col_x < 0 || col_x >= pgrid->cols) {
+		fprintf(stderr, "ERROR: col_i > cols\n");
+		exit(-1);
+	}
+	if (row_y < 0 || row_y >= pgrid->rows) {
+		fprintf(stderr, "ERROR: row_i > rows\n");
+		exit(-1);
+	}
+	cpFloat r = pgrid->rad[row_y];
+	pos->x = pgrid->cosxcol[col_x] * r;
+	pos->y = pgrid->sinxcol[col_x] * r;
+}
+
+
 inline static void grid_getquad8f(polgrid *pgrid, float *quad, int col_x, int row_y)
 {
 	grid_getpos2f(pgrid, quad, col_x, row_y);
 	grid_getpos2f(pgrid, quad+2, col_x+1, row_y);
 	grid_getpos2f(pgrid, quad+4, col_x, row_y+1);
 	grid_getpos2f(pgrid, quad+6, col_x+1, row_y+1);
+}
+inline static void grid_getquad8cpv(polgrid *pgrid, cpVect *quad, int col_x, int row_y)
+{
+	grid_getpos2cpv(pgrid, quad+0, col_x+0, row_y+0);
+	grid_getpos2cpv(pgrid, quad+1, col_x+1, row_y+0);
+	grid_getpos2cpv(pgrid, quad+2, col_x+1, row_y+1);
+	grid_getpos2cpv(pgrid, quad+3, col_x+0, row_y+1);
 }
 
 void grid_draw(polgrid *pgrid, int layer, float linewidth);
