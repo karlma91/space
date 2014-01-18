@@ -14,11 +14,11 @@ static const float tex_map[2][8] = {
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
-	float turret_size = turret->param.turret_size;
+	//float turret_size = turret->param.turret_size;
 	cpVect p_start = turret->data.p_start;
-	p_start = we_cart2pol(p_start);
-	p_start.x = currentlvl->inner_radius + turret_size/2;
-	p_start = we_pol2cart(p_start);
+	//p_start = we_cart2pol(p_start);
+	//p_start.x = currentlvl->inner_radius + turret_size/2;
+	//p_start = we_pol2cart(p_start);
 
 	cpBodySetPos(turret->tower, p_start);
 	se_tangent_body(turret->tower);
