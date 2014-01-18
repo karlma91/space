@@ -660,7 +660,6 @@ void editor_init()
 	state_register_touchable_view(view_editor, scr_world);
 
 	lvl = level_load(WAFFLE_ZIP, "empty");
-	lvl->tilemap.grid = grid_create(32, lvl->inner_radius, lvl->outer_radius);
 	tap_clear_editor(NULL);
 	editor_setmode(MODE_RESIZE);
 }

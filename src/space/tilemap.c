@@ -105,8 +105,8 @@ void tilemap_render(int layer, tilemap *map)
 void tilemap_fill(void *unused, int layers, void *unused2, tilemap2 *tiles)
 {
 	tiles->layers = layers;
-	tiles->rows = tiles->grid->rows;
-	tiles->cols = tiles->grid->cols;
+	//tiles->rows = tiles->grid->rows;
+	//tiles->cols = tiles->grid->cols;
 }
 
 /**

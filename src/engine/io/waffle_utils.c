@@ -347,7 +347,7 @@ int waffle_read_diriter_file(we_diriter * wedi, char *buffer, int n)
 
 int waffle_dirnext(we_diriter * wedi)
 {
-
+    if (wedi) {
 	wedi->dir = readdir(wedi->d);
 	while (wedi->dir && (strcmp(wedi->dir->d_name, ".") == 0 || strcmp(wedi->dir->d_name, "..") == 0)) {
 		wedi->dir = readdir(wedi->d);
@@ -362,9 +362,9 @@ int waffle_dirnext(we_diriter * wedi)
 			strcat(wedi->cur_path, wedi->dir->d_name);
 		}
 		return 1;
-	}else{
-		return 0;
 	}
+    }
+    return 0;
 }
 
 int waffle_isdir(we_diriter * wedi)

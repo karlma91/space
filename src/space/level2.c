@@ -195,19 +195,25 @@ static void parse_param_object(cJSON *param, hashmap * param_list)
 
 static void load_tilemap(cJSON *t, level *lvl)
 {
-	float def = 0;
-	pl_parse(t, "t_cols", "int", &(lvl->tilemap.cols), &def);
-	pl_parse(t, "t_rows", "int", &(lvl->tilemap.rows), &def);
+	int def = 0;
+	int def_col = 32;
+	int cols, rows;
+
+	pl_parse(t, "t_cols", "int", &cols, &def_col);
+	pl_parse(t, "t_rows", "int", &rows, &def);
 	pl_parse(t, "t_layers", "int", &(lvl->tilemap.layers), &def);
+
+	lvl->tilemap.grid = grid_create(cols, lvl->inner_radius, lvl->outer_radius);
+	//(lvl->tilemap.grid->rows != rows) ==> ERROR
 
 	cJSON *data = cJSON_GetObjectItem(t,"tilemaptest");
 	if(data) {
 		int i,j,k;
 		for (i=0; i < lvl->tilemap.layers; i++) {
 			cJSON * row = cJSON_GetArrayItem(data,i);
-			for (j= 0; j < lvl->tilemap.rows; j++) {
+			for (j= 0; j < lvl->tilemap.grid->rows; j++) {
 				cJSON * col = cJSON_GetArrayItem(row,j);
-				for (k = 0; k < lvl->tilemap.cols; k++) {
+				for (k = 0; k < lvl->tilemap.grid->cols; k++) {
 					lvl->tilemap.data[i][j][k] = cJSON_GetArrayItem(col,k)->valueint;
 				}
 			}
@@ -253,6 +259,7 @@ level *level_load(int folder, char * filename)
 	// GET level name
 	strcpy(lvl->name, cJSON_GetObjectItem(root,"name")->valuestring);
 
+	/*//old tilemap
 	//GET tilemap name
 	char tilemap_name[30];
 	cJSON *tilemap = cJSON_GetObjectItem(root,"tilemap");
@@ -268,6 +275,7 @@ level *level_load(int folder, char * filename)
 	} else{
 			SDL_Log("LEVEL: No field with name: tilemap");
 	}
+	*/
 	float def = 0;
 	float def_m = 500;
 	float def_M = 2000;
@@ -425,19 +433,19 @@ void level_write_to_file(level *lvl)
 	cJSON_AddNumberToObject(root, "outrad", lvl->outer_radius);
 
 	cJSON_AddNumberToObject(root, "t_layers", lvl->tilemap.layers);
-	cJSON_AddNumberToObject(root, "t_rows", lvl->tilemap.rows);
-	cJSON_AddNumberToObject(root, "t_cols", lvl->tilemap.cols);
+	cJSON_AddNumberToObject(root, "t_rows", lvl->tilemap.grid->rows);
+	cJSON_AddNumberToObject(root, "t_cols", lvl->tilemap.grid->cols);
 
 	cJSON * tilemap = cJSON_CreateArray();
 	int i,j,k;
 	for (i=0; i < lvl->tilemap.layers; i++) {
 		cJSON * row = cJSON_CreateArray();
-		for (j= 0; j < lvl->tilemap.rows; j++) {
-			int temp[lvl->tilemap.cols];
-			for (k = 0; k < lvl->tilemap.cols; k++) {
+		for (j= 0; j < lvl->tilemap.grid->rows; j++) {
+			int temp[lvl->tilemap.grid->cols];
+			for (k = 0; k < lvl->tilemap.grid->cols; k++) {
 				temp[k] = lvl->tilemap.data[i][j][k];
 			}
-			cJSON * col = cJSON_CreateIntArray(temp, lvl->tilemap.cols);
+			cJSON * col = cJSON_CreateIntArray(temp, lvl->tilemap.grid->cols);
 			cJSON_AddItemToArray(row, col);
 		}
 		cJSON_AddItemToArray(tilemap, row);

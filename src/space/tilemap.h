@@ -50,8 +50,8 @@ typedef struct tilemap2 {
 	int layers;
 	polgrid *grid;
 
-	int cols;
-	int rows;
+	//int cols;
+	//int rows;
 
 	char *tileset_name;
 	SPRITE_ID tileset;

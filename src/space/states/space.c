@@ -41,7 +41,7 @@ static float game_time;
 
 
 /* level boundaries */
-static LList *ll_floor_segs;
+static LList *ll_tileshapes;
 static cpShape *ceiling;
 
 /* level data */
@@ -672,6 +672,12 @@ void space_init_level_from_level(level * lvl)
 	/* static ground */
 	cpBody *staticBody = current_space->staticBody;
 
+	/* remove floor and ceiling */
+	if(llist_size(ll_tileshapes) > 0 && ceiling != NULL){
+		remove_static(ceiling);
+		llist_clear(ll_tileshapes);
+	}
+
 	/* add static tiles */ //TODO merge/glue tiles togheter
 	fprintf(stderr, "GRID: %d x %d\n", lvl->tilemap.grid->rows, lvl->tilemap.grid->cols);
 	int x, y;
@@ -683,16 +689,14 @@ void space_init_level_from_level(level * lvl)
 				grid_getquad8cpv(lvl->tilemap.grid, verts, x, y);
 				cpShape *shape = cpPolyShapeNew(current_space->staticBody, 4, verts, cpvzero);
 				cpSpaceAddStaticShape(current_space, shape);
+				cpShapeSetFriction(shape, 0.9f);
+				cpShapeSetCollisionType(shape, ID_GROUND);
+				cpShapeSetElasticity(shape, 0.7f);
+				llist_add(ll_tileshapes, shape);
 			}
 			fprintf(stderr, "%c", tile ? '#' : '.');
 		}
 		fprintf(stderr, "%c", '\n');
-	}
-
-	/* remove floor and ceiling */
-	if(llist_size(ll_floor_segs) > 0 && ceiling != NULL){
-		remove_static(ceiling);
-		llist_clear(ll_floor_segs);
 	}
 
 	float r_in = currentlvl->inner_radius;
@@ -704,7 +708,7 @@ void space_init_level_from_level(level * lvl)
 	static const float seg_radius = 50;
 	static const float seg_length = 300;
 	int i;
-	for (i = 0; i < segments; ++i) {
+	for (i = 0; i < segments; ++i) { //TODO swap out with tiles
 		cpVect angle = cpvforangle(2 * M_PI * i / segments);
 		cpVect n = cpvmult(cpvperp(angle), seg_length);
 		cpVect p = cpvmult(angle, r_floor + seg_radius);
@@ -717,7 +721,7 @@ void space_init_level_from_level(level * lvl)
 		cpShapeSetCollisionType(seg, ID_GROUND);
 		cpShapeSetElasticity(seg, 0.7f);
 
-		llist_add(ll_floor_segs, seg);
+		llist_add(ll_tileshapes, seg);
 	}
 	ceiling = cpSpaceAddShape(current_space, cpCircleShapeNew(staticBody, r_ceil, cpvzero));
 	cpShapeSetFriction(ceiling, 0.9f);
@@ -794,10 +798,10 @@ static void on_leave(void)
 
 static void destroy(void)
 {
-	if(llist_size(ll_floor_segs) > 0 && ceiling != NULL){
+	if(llist_size(ll_tileshapes) > 0 && ceiling != NULL){
 		remove_static(ceiling);
 	}
-	llist_destroy(ll_floor_segs);
+	llist_destroy(ll_tileshapes);
 
 	joystick_free(joy_p1_left);
 	joystick_free(joy_p1_right);
@@ -883,8 +887,8 @@ void space_init(void)
 #endif
 
 
-    ll_floor_segs = llist_create();
-    llist_set_remove_callback(ll_floor_segs, (ll_rm_callback) remove_static);
+    ll_tileshapes = llist_create();
+    llist_set_remove_callback(ll_tileshapes, (ll_rm_callback) remove_static);
     ceiling = NULL;
 
     state_enable_objects(state_space, 1);
