@@ -121,7 +121,7 @@ int tilemap_create (tilemap *map, char *filename)
 	sprintf(tilemap_path,"tilemaps/%s", filename);
 
 	char buffer[TILEMAP_READ_BUFFER_SIZE];
-	int filesize = waffle_read_file(tilemap_path, buffer, TILEMAP_READ_BUFFER_SIZE);
+	int filesize = waffle_read_file_zip(tilemap_path, buffer, TILEMAP_READ_BUFFER_SIZE);
 
 	if (filesize){
 		tree = mxmlLoadString (NULL , buffer , MXML_OPAQUE_CALLBACK);

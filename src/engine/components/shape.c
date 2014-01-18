@@ -32,7 +32,7 @@ polyshape shape_read(char *filename)
 	sprintf(file_path,"shapes/%s", filename);
 	char buff[10000];
 
-	int filesize = waffle_read_file(file_path, buff, 10000);
+	int filesize = waffle_read_file_zip(file_path, buff, 10000);
 
 	if (filesize == 0) {
 		return NULL;

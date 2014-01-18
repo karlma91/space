@@ -46,7 +46,7 @@ static cpShape *ceiling;
 
 /* level data */
 level *currentlvl;
-level_ship *current_ship;
+station *current_ship;
 
 static void input(void);
 
@@ -380,6 +380,28 @@ static void draw(void)
 	//tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
 	space_draw_deck();
 
+	int rlay;
+	int l, x, y;
+	float verts[8], tex[8];
+	for (l=TLAY_COUNT-1; l>=0; l--) {
+		for (y = 0; y < currentlvl->tilemap.grid->rows - 1; y++) {
+			if (l == TLAY_SOLID) {
+				draw_color4f(0.1,0.1,0.1,0.6);
+				rlay = RLAY_BACK_FRONT;
+			} else {
+				draw_color_rgbmulta4f(l == 0, l == 1, l == 2, 0.9);
+				rlay = (l == TLAY_OVERLAY) ? RLAY_GUI_BACK : RLAY_BACK_MID;
+			}
+			for (x=0; x<currentlvl->tilemap.grid->cols; x++) {
+				if (currentlvl->tilemap.data[l][y][x]) {
+					grid_getquad8f(currentlvl->tilemap.grid, verts, x, y);
+					sprite_get_subimg_by_index(SPRITE_WHITE, 0, tex);
+					draw_quad_new(rlay, verts, tex);
+				}
+			}
+		}
+	}
+
 	//draw_light_map();
 }
 
@@ -567,7 +589,7 @@ static void remove_static(cpShape *shape)
 void space_init_level(char *name)
 {
 	if(currentlvl == NULL || strcmp(currentlvl->name, name) != 0 ) {
-		currentlvl = level_load(name);
+		currentlvl = level_load(WAFFLE_DOCUMENTS, name);
 	}
 	space_init_level_from_level(currentlvl);
 }
@@ -650,15 +672,21 @@ void space_init_level_from_level(level * lvl)
 	/* static ground */
 	cpBody *staticBody = current_space->staticBody;
 
-	/* add static tiles */
+	/* add static tiles */ //TODO merge/glue tiles togheter
+	fprintf(stderr, "GRID: %d x %d\n", lvl->tilemap.grid->rows, lvl->tilemap.grid->cols);
 	int x, y;
-	for (y = 0; y < lvl->tilemap.rows; y++) {
-		for (x = 0; x < lvl->tilemap.cols; x++) {
-			cpShape *shape = lvl->tilemap.blocks[y][x];
-			if (shape) {
+	for (y = 0; y < lvl->tilemap.grid->rows; y++) {
+		for (x = 0; x < lvl->tilemap.grid->cols; x++) {
+			byte tile = lvl->tilemap.data[TLAY_SOLID][y][x];
+			if (tile) { //TODO support different types of shapes and use a helper method both here and in editor
+				cpVect verts[4];
+				grid_getquad8cpv(lvl->tilemap.grid, verts, x, y);
+				cpShape *shape = cpPolyShapeNew(current_space->staticBody, 4, verts, cpvzero);
 				cpSpaceAddStaticShape(current_space, shape);
 			}
+			fprintf(stderr, "%c", tile ? '#' : '.');
 		}
+		fprintf(stderr, "%c", '\n');
 	}
 
 	/* remove floor and ceiling */
@@ -1057,17 +1085,18 @@ void space_restart_level(void *unused)
 
 void space_next_level(void *unused)
 {
-	int station = currentlvl->station + 1;
-	level_ship * world = level_get_world();
-	int count = level_get_station_count();
+	int station_nr = currentlvl->station + 1;
+	LList world = level_get_world();
+	int count = llist_size(world);
 
 #if ARCADE_MODE
 	arcade_lvl_score += (int)(game_time*10) - (ARCADE_SCORE_LVL + player1->coins/10);
 #endif
 
-	if (station < count) {
+	if (station_nr < count) {
 		statesystem_set_state(state_space);
-		space_init_level(world[station].level_name);
+		station *s = (station*)llist_at_index(world, station_nr);
+		space_init_level(s->level_path);
 	} else {
 #if ARCADE_MODE
 		gameover_setstate(GAMEOVER_WIN);

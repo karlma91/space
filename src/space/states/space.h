@@ -5,12 +5,13 @@
 #include "../level.h"
 #include "we_input.h"
 #include "we_graphics.h"
+#include "../solarsystem.h"
 
 void space_init(void);
 
 extern int multiplayer;
 extern level *currentlvl;
-extern level_ship *current_ship;
+extern station *current_ship;
 extern joystick *joy_p1_left, *joy_p1_right;
 extern joystick *joy_p2_left, *joy_p2_right;
 

@@ -7,15 +7,6 @@
 #include "../engine/audio/sound.h"
 #include "cJSON.h"
 
-typedef struct level_ship {
-	int id;
-	cpVect pos;
-	float radius;
-	float rotation;
-	float rotation_speed;
-	char  level_name[32];
-} level_ship;
-
 typedef struct object_recipe {
 	object_id * obj_type;
 	char param_name[32];
@@ -59,22 +50,18 @@ void level_load_params(param_list *defs, cJSON *root);
 int level_init(void);
 void level_unload(level *lvl);
 void level_destroy(void);
-void level_get_ships(level_ship **,int *);
-
 void level_write_to_file(level *lvl);
 
 void level_destry_param_list(param_list *params);
 
-int level_get_station_count(void);
-int level_get_level_count(int station);
 
 void level_add_object_recipe_name(level * lvl, const char * obj_type, const char * param_name, cpVect pos, float rotation);
 void level_add_object_recipe(level * lvl, object_id *obj_id, const char * param_name,  void * param, cpVect pos, float rotation);
 
 void * level_get_param(param_list *params, const char *type, const char * name);
-level *level_load(char * filename);
+level *level_load(int folder, char * filename);
 void level_clear_objects(level *lvl);
 void level_start_level(level *lvl);
-level_ship* level_get_world();
+LList level_get_world();
 
 #endif /* LEVEL_H_ */

@@ -38,7 +38,7 @@ bm_font * bmfont_read_font(char *filename)
 
     bm_font *f = (bm_font*)calloc(1,sizeof *f);
 
-    int filesize = waffle_read_file(fileread, &buffer[0], FILE_BUFFER_SIZE);
+    int filesize = waffle_read_file_zip(fileread, &buffer[0], FILE_BUFFER_SIZE);
 
     mxml_node_t * tree = NULL;
     mxml_node_t * node  = NULL;

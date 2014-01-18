@@ -518,7 +518,7 @@ EMITTER_ID read_emitter_from_file(const char *filename)
 	sprintf(particle_path, "particles/%s", filename);
 
 	char buffer[PARTICLE_READ_BUFFER_SIZE];
-	int filesize = waffle_read_file(particle_path, buffer, PARTICLE_READ_BUFFER_SIZE);
+	int filesize = waffle_read_file_zip(particle_path, buffer, PARTICLE_READ_BUFFER_SIZE);
 
 	if (filesize) {
 		tree = mxmlLoadString(NULL, buffer, MXML_OPAQUE_CALLBACK);

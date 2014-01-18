@@ -14,15 +14,13 @@ STATE_ID state_stations;
 
 static SPRITE_ID spr_sun;
 
-static button *btn_stations;
+//static button *btn_stations;
 static button btn_home;
 static button btn_editor;
 
-static level_ship *stations;
-static int station_count = 2;
-
 #define SOLSYS_COUNT 25
-static solarsystem *solsys[SOLSYS_COUNT];
+//static solarsystem *solsys[SOLSYS_COUNT];
+LList solar_systems;
 
 static scroll_p scroller;
 
@@ -146,6 +144,13 @@ static void pre_update(void)
     float rot = scroll_get_rotation(scroller);
 	cpVect offset = cpvneg(scroll_get_offset(scroller));
 	view_update(main_view, offset, rot);
+
+	llist_begin_loop(solar_systems);
+	while (llist_hasnext(solar_systems)) {
+		solarsystem *sol = (solarsystem *)llist_next(solar_systems);
+		solarsystem_update(sol);
+	}
+	llist_end_loop(solar_systems);
 }
 
 static void post_update(void)
@@ -169,10 +174,22 @@ static void draw(void)
 	bmfont_center(FONT_COURIER, cpvzero,1,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
 	draw_pop_matrix();
 
-	int i;
-	for (i=0; i<SOLSYS_COUNT; i++) {
-		solarsystem_draw(solsys[i]);
+
+	llist_begin_loop(solar_systems);
+	cpVect p;
+	int i = 0;
+	while (llist_hasnext(solar_systems)) {
+		solarsystem *sol = (solarsystem *)llist_next(solar_systems);
+		solarsystem_update(sol);
+		solarsystem_draw(sol);
+		if(i>0){
+			draw_color4b(20,20,80,50);
+			draw_quad_line(RLAY_BACK_MID,p, sol->origo, 6/current_view->zoom);
+		}
+		p = sol->origo;
+		i++;
 	}
+	llist_end_loop(solar_systems);
 
 
 	/*
@@ -253,9 +270,7 @@ void stations_init(void)
 	srand(0x9b3a09fa);
 	statesystem_register(state_stations, 0);
 
-	level_get_ships(&stations, &station_count);
-
-	btn_stations = calloc(station_count, sizeof(button));
+	solar_systems = level_get_world();
 
 	Color col_back = {255,180,140,255};
 	//Color col_text = {1,1,1,1};
@@ -275,27 +290,11 @@ void stations_init(void)
 	button_set_hotkeys(btn_editor, SDL_SCANCODE_E, -1);
 	state_register_touchable_view(main_view, btn_editor);
 
-	int i;
-	for (i = 0; i < station_count; i++) {
-		char stri[10];
-		sprintf(stri, "%d", i+1);
-		float size = 300 + we_randf * 100;
-		cpFloat radius = (i+2) * 450;
-		cpFloat angle = WE_2PI * we_randf;
-		stations[i].pos = WE_P2C(radius,angle);
-
-		btn_stations[i] = button_create(SPRITE_STATION001, 0, stations[i].level_name, stations[i].pos.x,stations[i].pos.y, size, size);
-		button_set_click_callback(btn_stations[i], button_callback, &stations[i]);
-		button_set_txt_antirot(btn_stations[i], 1);
-		button_set_backcolor(btn_stations[i], col_back);
-		button_set_animated(btn_stations[i], 1, (i ? 18 : 15));
-		button_set_enlargement(btn_stations[i], 1.5);
-		button_set_hotkeys(btn_stations[i], digit2scancode[(i+1) % 10], 0);
-		sprite *spr = button_get_sprite(btn_stations[i]);
-		spr->antirot = 1;
-
-		state_register_touchable(this, btn_stations[i]);
+	llist_begin_loop(solar_systems);
+	while (llist_hasnext(solar_systems)) {
+		solarsystem_register_touch((solarsystem *)llist_next(solar_systems), this);
 	}
+	llist_end_loop(solar_systems);
 
 	state_register_touchable_view(main_view, btn_settings);
 
@@ -309,8 +308,8 @@ void stations_init(void)
 
 	int layers = state_layer_count(state_stations);
 
+	int i;
 	for(i = 11; i<layers; i++){
-		//float depth =  2 + 10*tan((1.0f*i/la_sys->num_layers)*WE_PI_2);
 		float f = (layers - i * 0.99f) / (layers);
 		state_set_layer_parallax(state_stations, i, f, f);
 	}
@@ -343,15 +342,15 @@ void stations_init(void)
 	}
 
 	//TMP add solar systems
-	spr_sun = sprite_link("sun01");
+	/*spr_sun = sprite_link("sun01");
 	for (i=0; i<SOLSYS_COUNT; i++) {
 		float rnd = rand() & 0x1f;
 		Color base = {0x70-rnd,0x30,0x30+rnd,0xff};
 		Color glow = {0xff-rnd,0xa0,0x70+rnd,0x80};
 		Color add1 = {0x90-rnd,0x80,0x40+rnd,0x00};
 		Color add2 = {0xb0-rnd,0x70,0x40+rnd,0x00};
-		solsys[i] = solarsystem_create(main_view, i, (500 + we_randf*(i*1500/SOLSYS_COUNT + (i>1?1000:0)) + 300*i/SOLSYS_COUNT), spr_sun, base, glow, add1, add2);
-	}
+		solsys[i] = solarsystem_create(i, (500 + we_randf*(i*1500/SOLSYS_COUNT + (i>1?1000:0)) + 300*i/SOLSYS_COUNT), spr_sun, base, glow, add1, add2);
+	}*/
 
 	sound_testing();
 }

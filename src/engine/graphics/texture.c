@@ -116,7 +116,7 @@ int texture_load(const char *file)
 	time_start = SDL_GetTicks();
 
 	SDL_RWops *rw;
-	int filesize = waffle_read_file(filepath, buffer, MAX_IMAGE_BUFFER);
+	int filesize = waffle_read_file_zip(filepath, buffer, MAX_IMAGE_BUFFER);
 	if (!filesize) {
 		SDL_Log("ERROR: Unable to find texture: %s", file);
 		return 1;

@@ -10,6 +10,18 @@
 
 #include "we_utils.h"
 #include "we_graphics.h"
+#include "we.h"
+
+typedef struct level_ship {
+	int id;
+	cpVect pos;
+	float radius;
+	float angle;
+	float rotation_speed;
+	char  level_path[256];
+	char level_name[256];
+	button btn;
+} station;
 
 typedef struct {
 	float size;
@@ -22,17 +34,18 @@ typedef struct {
 /* representing a space station system orbitting a sun */
 typedef struct solarsystem {
 	int index;
-	view *cam;
 	cpVect origo;
 	drawbl_sun sun;
 	int station_count;
+	LList stations;
 } solarsystem;
 
 
-solarsystem *solarsystem_create(view *cam, int solsys_index, float star_size, SPRITE_ID star_spr, Color star_base, Color star_glow, Color star_add1, Color star_add2);
-void solarsystem_add_station(SPRITE_ID spr_id);
+solarsystem *solarsystem_create(int solsys_index, float star_size, SPRITE_ID star_spr, Color star_base, Color star_glow, Color star_add1, Color star_add2);
+void solarsystem_add_station(solarsystem * sol, SPRITE_ID spr_id, int dir_type, char * name, char * path);
 void solarsystem_update(solarsystem *sun);
 void solarsystem_draw(solarsystem *sun);
 void sun_render(int layer, drawbl_sun *sun);
+void solarsystem_destroy(solarsystem *sun);
 
 #endif /* SOLARSYSTEM_H_ */
