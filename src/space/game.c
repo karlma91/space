@@ -15,6 +15,7 @@
 //#include "states/settings.h"
 
 extern void pause_init(void);
+extern void textinput_init(void);
 extern void settings_init(void);
 extern void upgrades_init(void);
 extern void stations_init(void);
@@ -364,6 +365,7 @@ void game_init(void)
 	/* init all states (warning: make sure that no init method depends on uninitialized state_id!) */
     log_init();
     settings_init();
+    textinput_init();
     stations_init();
     menu_init();
     space_init();

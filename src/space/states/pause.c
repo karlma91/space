@@ -12,7 +12,7 @@
 
 #include "space.h"
 
-char *input_buffer;
+static char *input_buffer;
 
 STATE_ID state_pause;
 
