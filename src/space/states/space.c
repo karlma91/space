@@ -46,7 +46,7 @@ static cpShape *ceiling;
 
 /* level data */
 level *currentlvl;
-level_ship *current_ship;
+station *current_ship;
 
 static void input(void);
 
@@ -567,7 +567,7 @@ static void remove_static(cpShape *shape)
 void space_init_level(char *name)
 {
 	if(currentlvl == NULL || strcmp(currentlvl->name, name) != 0 ) {
-		currentlvl = level_load(name);
+		currentlvl = level_load(WAFFLE_DOCUMENTS, name);
 	}
 	space_init_level_from_level(currentlvl);
 }
@@ -1046,17 +1046,18 @@ void space_restart_level(void *unused)
 
 void space_next_level(void *unused)
 {
-	int station = currentlvl->station + 1;
-	level_ship * world = level_get_world();
-	int count = level_get_station_count();
+	int station_nr = currentlvl->station + 1;
+	LList world = level_get_world();
+	int count = llist_size(world);
 
 #if ARCADE_MODE
 	arcade_lvl_score += (int)(game_time*10) - (ARCADE_SCORE_LVL + player1->coins/10);
 #endif
 
-	if (station < count) {
+	if (station_nr < count) {
 		statesystem_set_state(state_space);
-		space_init_level(world[station].level_name);
+		station *s = (station*)llist_at_index(world, station_nr);
+		space_init_level(s->level_path);
 	} else {
 #if ARCADE_MODE
 		gameover_setstate(GAMEOVER_WIN);

@@ -62,6 +62,28 @@ static ZZIP_DIR *game_data = NULL;
 static zzip_strings_t ext[] = { ".zip", ".ZIP", ".dat", ".DAT", "", 0};
 static zzip_plugin_io_handlers io_handler;
 
+//TODO make sure folders exists
+#if __ANDROID__
+const static char *waffle_dirs[4] = {
+	INTERNAL_PATH,INTERNAL_PATH,INTERNAL_PATH,INTERNAL_PATH
+};
+#elif TARGET_OS_IPHONE
+const static char *waffle_dirs[4] = {
+	"../Documents/","../Library/Preferences/","../Library/","../tmp/"
+};
+#else // win, linux, mac
+#if ARCADE_MODE
+const static char *waffle_dirs[4] = {
+	"", "", "",""
+};
+#else
+const static char *waffle_dirs[4] = {
+	"bin/user_files/", "bin/user_data/settings/", "bin/user_data/","bin/tmp/"
+};
+#endif
+#endif
+
+
 void waffle_init(void)
 {
 #if LOAD_FROM_FOLDER
@@ -98,7 +120,7 @@ void waffle_init(void)
 #endif /* LOAD_FROM_FOLDER */
 
 	char buffer[4096];
-	int filesize = waffle_read_file("ver", buffer, 4096);
+	int filesize = waffle_read_file_zip("ver", buffer, 4096);
 	if (filesize) {
 		int version = -1;
 		sscanf(buffer, "%d", &version);
@@ -119,182 +141,6 @@ void waffle_destroy(void)
 #if !LOAD_FROM_FOLDER
 	zzip_dir_close(game_data);
 #endif
-}
-
-
-/*
- * a simple checksum method
- */
-int checksum(char *data, int length)
-{
-	unsigned int sum = 0;
-
-	do {
-		sum = (sum >> 1) | (sum << 31);
-		sum += *data;
-		++data;
-	} while (--length);
-
-	return sum;
-}
-
-/* Function with behaviour like `mkdir -p'
- * http://niallohiggins.com/2009/01/08/mkpath-mkdir-p-alike-in-c-for-unix/
- * */
-int mkpath(const char *s, mode_t mode)
-{
-	char *q, *r = NULL, *path = NULL, *up = NULL;
-	int rv;
-
-	rv = -1;
-	if (strcmp(s, ".") == 0 || strcmp(s, "/") == 0)
-		return 0;
-	if ((path = strdup(s)) == NULL)
-		return 0;
-	if ((q = strdup(s)) == NULL)
-		return 0;
-	if ((r = dirname(q)) == NULL)
-		goto out;
-	if ((up = strdup(r)) == NULL)
-		return 0;
-	if ((mkpath(up, mode) == -1) && (errno != EEXIST))
-		goto out;
-	if ((mkdir(path, mode) == -1) && (errno != EEXIST))
-		rv = -1;
-	else
-		rv = 0;
-
-	out:
-	if (up != NULL)
-		free(up);
-	free(q);
-	free(path);
-	return (rv);
-}
-
-ZZIP_FILE *waffle_open(char *path)
-{
-	char full_path[256];
-
-#if LOAD_FROM_FOLDER
-	sprintf(&full_path[0], "game_data/%s", path);
-	fprintf(stderr, "opening file: %s\n", full_path);
-	return zzip_open(full_path, ZZIP_CASELESS);
-#else
-#if __ANDROID__
-	sprintf(&full_path[0], "assets/game_data/%s", path);
-#else
-	sprintf(&full_path[0], "%s", path);
-#endif /* __ANDROID__ */
-	fprintf(stderr, "opening file: %s\n", full_path);
-	return zzip_file_open(game_data, full_path, 0);
-	//return zzip_open_ext_io(full_path, O_RDONLY, ZZIP_ONLYZIP | ZZIP_CASELESS, ext, &io_handler);
-#endif /* LOAD_FROM_FOLDER */
-}
-
-//Todo make sure that the caller is notified if the given file is not fully read!
-int waffle_read(ZZIP_FILE *zf, char *buffer, int len)
-{
-	int filesize = zzip_read(zf, buffer, len);
-	buffer[filesize] = 0;
-	zzip_close(zf);
-
-	return filesize;
-}
-
-
-int waffle_read_file(char *filename, char *buffer, int len)
-{
-	Uint32 time_used = SDL_GetTicks();
-	//SDL_Log("Reading file: '%s'",filename); //verbose
-	ZZIP_FILE *fp = waffle_open(filename);
-
-	if (fp) {
-		int filesize = waffle_read(fp, buffer, len);
-		if (filesize) {
-#if !ARCADE_MODE
-			time_used = SDL_GetTicks() - time_used;
-			SDL_Log("DEBUG: File loaded: #%08x\tsize: %5.3fkB\tname: '%s\ttime: %.3f'", checksum(buffer, filesize), filesize / 1024.0f, filename, time_used / 1000.0);
-#endif
-			return filesize;
-		} else {
-			SDL_Log("ERROR: could not read file '%s' - error code: %d", filename, game_data->errcode);
-			return 0;
-		}
-	} else {
-		SDL_Log("ERROR: could not open file '%s' - error code: %d", filename, game_data->errcode);
-		return 0;
-	}
-}
-
-int waffle_next_line(char *file)
-{
-    int i = 0;
-    while(file[i] != '\n'){
-        if(file[i] == '\0')
-            return -1;
-        i++;
-    }
-    return i;
-}
-
-//TODO make sure folders exists
-#if __ANDROID__
-const static char *waffle_dirs[4] = {
-	INTERNAL_PATH,INTERNAL_PATH,INTERNAL_PATH,INTERNAL_PATH
-};
-#elif TARGET_OS_IPHONE
-const static char *waffle_dirs[4] = {
-	"../Documents/","../Library/Preferences/","../Library/","../tmp/"
-};
-#else // win, linux, mac
-#if ARCADE_MODE
-const static char *waffle_dirs[4] = {
-	"", "", "",""
-};
-#else
-const static char *waffle_dirs[4] = {
-	"bin/user_files/", "bin/user_data/settings/", "bin/user_data/","bin/tmp/"
-};
-#endif
-#endif
-
-FILE *waffle_internal_fopen(enum WAFFLE_DIR dir_type,const char *filename, const char *opentype)
-{
-	if (dir_type > 3) {
-		SDL_Log("ERROR: Invalid directory type: %d", dir_type);
-		exit(-1);
-	}
-
-	const char *folder = waffle_dirs[dir_type];
-	char path[200] = "";
-	char fopath[200] = "";
-
-	strcpy(&path[0], folder);
-	strcat(&path[0], filename);
-	strcpy(fopath, path);
-	int i;
-	int last_slash = 199;
-	for (i=0; i<200 && fopath[i]; i++) {
-		last_slash = fopath[i] == '/' ? i : last_slash;
-	}
-	fopath[last_slash] = '\0';
-	mkpath(fopath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-
-	return fopen(path, opentype);
-}
-
-DIR *waffle_internal_diropen(enum WAFFLE_DIR dir_type, const char *dir)
-{
-	DIR *d;
-	char path[200] = "";
-	strcpy(&path[0], waffle_dirs[dir_type]);
-	strcat(&path[0], dir);
-
-	d = opendir(path);
-
-	return d;
-
 }
 
 static zzip_ssize_t decrypt_block(int fd, void *data, zzip_size_t len)
@@ -351,18 +197,234 @@ static zzip_ssize_t decrypt_block(int fd, void *data, zzip_size_t len)
 	//if (warn) fprintf(stderr, "\n");
 	return size;
 }
-
-
 /*
-int waffle_write_internal(char *filename, char *data)
+ * a simple checksum method
+ */
+int checksum(char *data, int length)
 {
+	unsigned int sum = 0;
 
-	return 0;
+	do {
+		sum = (sum >> 1) | (sum << 31);
+		sum += *data;
+		++data;
+	} while (--length);
+
+	return sum;
 }
 
-int waffle_read_internal(char *filename, char *data)
+ZZIP_FILE *waffle_open_zip(char *path)
+{
+	char full_path[256];
+
+#if LOAD_FROM_FOLDER
+	sprintf(&full_path[0], "game_data/%s", path);
+	fprintf(stderr, "opening file: %s\n", full_path);
+	return zzip_open(full_path, ZZIP_CASELESS);
+#else
+#if __ANDROID__
+	sprintf(&full_path[0], "assets/game_data/%s", path);
+#else
+	sprintf(&full_path[0], "%s", path);
+#endif /* __ANDROID__ */
+	fprintf(stderr, "opening file: %s\n", full_path);
+	return zzip_file_open(game_data, full_path, 0);
+	//return zzip_open_ext_io(full_path, O_RDONLY, ZZIP_ONLYZIP | ZZIP_CASELESS, ext, &io_handler);
+#endif /* LOAD_FROM_FOLDER */
+}
+
+//Todo make sure that the caller is notified if the given file is not fully read!
+int waffle_read_zip(ZZIP_FILE *zf, char *buffer, int len)
+{
+	int filesize = zzip_read(zf, buffer, len);
+	buffer[filesize] = 0;
+	zzip_close(zf);
+
+	return filesize;
+}
+
+
+int waffle_read_file_zip(char *filename, char *buffer, int len)
+{
+	Uint32 time_used = SDL_GetTicks();
+	//SDL_Log("Reading file: '%s'",filename); //verbose
+	ZZIP_FILE *fp = waffle_open_zip(filename);
+
+	if (fp) {
+		int filesize = waffle_read_zip(fp, buffer, len);
+		if (filesize) {
+#if !ARCADE_MODE
+			time_used = SDL_GetTicks() - time_used;
+			SDL_Log("DEBUG: File loaded: #%08x\tsize: %5.3fkB\tname: '%s\ttime: %.3f'", checksum(buffer, filesize), filesize / 1024.0f, filename, time_used / 1000.0);
+#endif
+			return filesize;
+		} else {
+			SDL_Log("ERROR: could not read file '%s' - error code: %d", filename, game_data->errcode);
+			return 0;
+		}
+	} else {
+		SDL_Log("ERROR: could not open file '%s' - error code: %d", filename, game_data->errcode);
+		return 0;
+	}
+}
+
+int waffle_next_line(char *file)
+{
+    int i = 0;
+    while(file[i] != '\n'){
+        if(file[i] == '\0')
+            return -1;
+        i++;
+    }
+    return i;
+}
+
+FILE *waffle_fopen(enum WAFFLE_DIR dir_type, const char *filename, const char *opentype)
+{
+	if (dir_type > 3) {
+		SDL_Log("ERROR: Invalid directory type: %d", dir_type);
+		exit(-1);
+	}
+
+	const char *folder = waffle_dirs[dir_type];
+	char path[200] = "";
+	char fopath[200] = "";
+
+	strcpy(&path[0], folder);
+	strcat(&path[0], filename);
+	strcpy(fopath, path);
+	SDL_Log("Opening: %s", path);
+	int i;
+	int last_slash = 199;
+	for (i=0; i<200 && fopath[i]; i++) {
+		last_slash = fopath[i] == '/' ? i : last_slash;
+	}
+	fopath[last_slash] = '\0';
+	mkpath(fopath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+	return fopen(path, opentype);
+}
+
+we_diriter *waffle_get_diriter(enum WAFFLE_DIR dir_type, const char *path)
+{
+	char fullpath[200] = "";
+	sprintf(fullpath, "%s%s",waffle_dirs[dir_type], path);
+
+	DIR *d = opendir(fullpath);
+
+	if (d){
+		we_diriter *wedi = calloc(1, sizeof(we_diriter));
+		strcpy(wedi->path, path);
+		strcpy(wedi->cur_path, path);
+
+		wedi->d = d;
+		wedi->dir_type = dir_type;
+		return wedi;
+	}else{
+		SDL_Log("Error openging folder %s", fullpath);
+	}
+	return NULL;
+}
+
+void waffle_free_diriter(we_diriter * wedi)
+{
+	if(wedi){
+		closedir(wedi->d);
+		free(wedi);
+	}
+}
+
+int waffle_read_diriter_file(we_diriter * wedi, char *buffer, int n)
+{
+	if(waffle_isfile(wedi)){
+		FILE *f = waffle_fopen(wedi->dir_type, wedi->path,"wr");
+		return waffle_read(f,buffer,n);
+	}else{
+		SDL_Log("[waffle_read_diriter_file]: Cannot read filder to buffer");
+		return -1;
+	}
+}
+
+int waffle_dirnext(we_diriter * wedi)
 {
 
-	return 0;
+	wedi->dir = readdir(wedi->d);
+	while (wedi->dir && (strcmp(wedi->dir->d_name, ".") == 0 || strcmp(wedi->dir->d_name, "..") == 0)) {
+		wedi->dir = readdir(wedi->d);
+	}
+	if (wedi->dir) {
+		strcpy(wedi->cur_path, wedi->path);
+		if(wedi->dir->d_type == DT_DIR){
+			strcat(wedi->cur_path, "/");
+			strcat(wedi->cur_path, wedi->dir->d_name);
+			strcat(wedi->cur_path, "/");
+		} else {
+			strcat(wedi->cur_path, wedi->dir->d_name);
+		}
+		return 1;
+	}else{
+		return 0;
+	}
 }
-*/
+
+int waffle_isdir(we_diriter * wedi)
+{
+	return wedi->dir->d_type == DT_DIR;
+}
+int waffle_isfile(we_diriter * wedi)
+{
+	return wedi->dir->d_type == DT_REG;
+}
+
+//Todo make sure that the caller is notified if the given file is not fully read!
+int waffle_read(FILE *f, char *buffer, int len)
+{
+	int filesize = fread(buffer, 1, len, f);
+	buffer[filesize] = 0;
+	fclose(f);
+	return filesize;
+}
+
+
+int we_mkdir(char *path, unsigned int mode)
+{
+#if defined(_WIN32)
+	return mkdir(path);
+#else
+	return mkdir(path,mode);
+#endif
+}
+
+/* Function with behaviour like `mkdir -p'
+ * http://niallohiggins.com/2009/01/08/mkpath-mkdir-p-alike-in-c-for-unix/
+ * */
+int mkpath(const char *s, mode_t mode)
+{
+	char *q, *r = NULL, *path = NULL, *up = NULL;
+	int rv;
+
+	rv = -1;
+	if (strcmp(s, ".") == 0 || strcmp(s, "/") == 0)
+		return 0;
+	if ((path = strdup(s)) == NULL)
+		return 0;
+	if ((q = strdup(s)) == NULL)
+		return 0;
+	if ((r = dirname(q)) == NULL)
+		goto out;
+	if ((up = strdup(r)) == NULL)
+		return 0;
+	if ((mkpath(up, mode) == -1) && (errno != EEXIST))
+		goto out;
+	if ((we_mkdir(path, mode) == -1) && (errno != EEXIST))
+		rv = -1;
+	else
+		rv = 0;
+
+	out:
+	if (up != NULL)
+		free(up);
+	free(q);
+	free(path);
+	return (rv);
+}

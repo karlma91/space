@@ -24,7 +24,9 @@
 #include "states/space.h"
 
 static int station_count;
-static level_ship *world;
+//static level_ship *world;
+
+LList solar_systems;
 
 //TODO: Set all default values to something usefull
 static char DEF_STRING[10] = "HELLO";
@@ -36,31 +38,48 @@ param_list param_defs;
 
 int level_init(void)
 {
+
+	solar_systems = llist_create();
+	llist_set_remove_callback(solar_systems, solarsystem_destroy);
+	SPRITE_ID spr_sun = sprite_link("sun01");
+	we_diriter *wed = waffle_get_diriter(WAFFLE_DOCUMENTS, "levels");
+	int sun = 0;
+	while(waffle_dirnext(wed)){
+		if(waffle_isdir(wed)) {
+			int stations = 0;
+			float rnd = rand() & 0x1f;
+			Color base = {0x70-rnd,0x30,0x30+rnd,0xff};
+			Color glow = {0xff-rnd,0xa0,0x70+rnd,0x80};
+			Color add1 = {0x90-rnd,0x80,0x40+rnd,0x00};
+			Color add2 = {0xb0-rnd,0x70,0x40+rnd,0x00};
+			solarsystem *sy = solarsystem_create(sun, (500 + we_randf*(sun*1500/2 + (sun>1?1000:0)) + 300*sun/2), spr_sun, base, glow, add1, add2);
+			sun++;
+			we_diriter *wed2 = waffle_get_diriter(WAFFLE_DOCUMENTS, wed->cur_path);
+			while(waffle_dirnext(wed2)) {
+				if(waffle_isfile(wed2)) {
+					SDL_Log("LEVELS ADDING: %s", wed2->cur_path);
+					solarsystem_add_station(sy, NULL, wed2->dir_type, "test", wed2->cur_path);
+					stations++;
+				}
+			}
+			llist_add(solar_systems, sy);
+		}
+	}
+	waffle_free_diriter(wed);
+
+
 	/* read space station data */
 	char buff[10000]; // TODO: stor nok?
-	int filesize = waffle_read_file("space_1.json", &buff[0], 10000);
+	int filesize, i;
+	cJSON *root;
+
+	/*filesize = waffle_read_file_zip("space_1.json", &buff[0], 10000);
 	if (!filesize) {
 		SDL_Log("Could not load level data!");
 		exit(1);
 	}
 
-	int files = 0;
-	DIR *d = waffle_internal_diropen(WAFFLE_LIBRARY, "levels");
-	struct dirent *dir;
-	if (d)
-	{
-		while ((dir = readdir(d)) != NULL)
-		{
-			if (dir->d_type == DT_REG){
-				printf("LE VELINIT: %s\n", dir->d_name);
-				files++;
-			}
-		}
-		closedir(d);
-	}
-
-	int i;
-	cJSON *root = cJSON_Parse(buff);
+	root = cJSON_Parse(buff);
 	if(root == NULL){
 		SDL_Log("[Level] could not parse level: %s", "space_1");
 		SDL_Log("Error before: [%s]\n",cJSON_GetErrorPtr());
@@ -78,7 +97,7 @@ int level_init(void)
 		world[i].rotation_speed = 1;
 		world[i].pos.x = cJSON_GetObjectItem(station,"x")->valuedouble;
 		world[i].pos.y = cJSON_GetObjectItem(station,"y")->valuedouble;
-		strcpy(world[i].level_name, cJSON_GetObjectItem(station,"level")->valuestring);
+		strcpy(world[i].level_path, cJSON_GetObjectItem(station,"level")->valuestring);
 	}
 
 	if (i != station_count || i <= 0) {
@@ -86,9 +105,9 @@ int level_init(void)
 		exit(2);
 	}
 
-	cJSON_Delete(root);
+	cJSON_Delete(root);*/
 
-	filesize = waffle_read_file("level/object_defaults.json", &buff[0], 10000);
+	filesize = waffle_read_file_zip("level/object_defaults.json", &buff[0], 10000);
 	if (!filesize) {
 			SDL_Log("Could not load level data!");
 			exit(1);
@@ -103,6 +122,10 @@ int level_init(void)
 	cJSON_Delete(root);
 
 	return 1;
+}
+
+LList level_get_world(){
+	return solar_systems;
 }
 
 
@@ -192,13 +215,22 @@ static void load_tilemap(cJSON *t, level *lvl)
 
 }
 
-level *level_load(char * filename)
+level *level_load(int folder, char * filename)
 {
 	SDL_Log("PARSING LEVEL : %s", filename);
 	char file_path[100];
-	sprintf(file_path,"level/%s.json", filename);
 	char buff[10000]; // TODO: stor nok?
-	int filesize = waffle_read_file(file_path, buff, 10000);
+	int filesize;
+
+	if(folder == WAFFLE_DOCUMENTS||
+			folder == WAFFLE_LIBRARY){
+		FILE *f = waffle_fopen(WAFFLE_DOCUMENTS, filename, "r");
+		filesize = waffle_read(f, buff, 10000);
+	}else if(folder == WAFFLE_ZIP ) {
+		sprintf(file_path,"level/%s.json", filename);
+		filesize = waffle_read_file_zip(file_path, buff, 10000);
+	}
+
 
 	if (filesize == 0) {
 		SDL_Log("Could not load level %s filesize = 0", filename);
@@ -250,9 +282,9 @@ level *level_load(char * filename)
 		cJSON *object = cJSON_GetArrayItem(object_array, i);
 
 
-		char *type, *name;
-		pl_parse(object,"type", "char", &type, &DEF_STRING);
-		pl_parse(object,"name", "char", &name, &DEF_STRING);
+		char type[128], name[128];
+		pl_parse(object,"type", "char", type, DEF_STRING);
+		pl_parse(object,"name", "char", name, DEF_STRING);
 
 		strtolower(type, type);
 		strtolower(name, name);
@@ -369,7 +401,7 @@ void level_destry_param_list(param_list *params)
 void level_write_to_file(level *lvl)
 {
 	char filename[200] = "levels/test.json";
-	FILE *file = waffle_internal_fopen(WAFFLE_LIBRARY, filename,"w");
+	FILE *file = waffle_fopen(WAFFLE_LIBRARY, filename,"w");
 	if (file == NULL) {
 		SDL_Log( "Could not open %s\n",filename);
 		return;
@@ -448,24 +480,8 @@ void level_write_to_file(level *lvl)
 	cJSON_Delete(root);
 }
 
-void level_get_ships(level_ship **ship, int *count)
-{
-	*ship = world;
-	*count = station_count;
-}
-
-level_ship* level_get_world()
-{
-	return world;
-}
-
-int level_get_station_count(void)
-{
-	return station_count;
-}
 
 void level_destroy(void)
 {
 	station_count = 0;
-	free(world);
 }

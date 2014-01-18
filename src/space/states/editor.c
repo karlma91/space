@@ -611,10 +611,10 @@ void editor_init()
 	state_register_touchable_view(view_editor, scr_objects);
 	state_register_touchable_view(view_editor, scr_world);
 
-	lvl = level_load("empty");
+	lvl = level_load(WAFFLE_ZIP, "empty");
 	tap_clear_editor(NULL);
 
-	pgrid = grid_create(32, currentlvl->inner_radius, currentlvl->outer_radius);
+	pgrid = grid_create(200, currentlvl->inner_radius, currentlvl->outer_radius);
 	editor_setmode(MODE_RESIZE);
 }
 

@@ -71,7 +71,7 @@ static void draw(void)
 	draw_box(3, box.p,box.s,0,1);
 
 	draw_color4f(1,1,1,1);
-	bmfont_center(FONT_SANS, cpv(0,box.p.y+box.s.y / 2 - 100), 1.5, current_ship->level_name);
+	bmfont_center(FONT_SANS, cpv(0,box.p.y+box.s.y / 2 - 100), 1.5, current_ship->level_path);
 
 	for (i = 0; i < 3; i++) {
 		if (stars_unlocked == i+1) {
@@ -98,7 +98,7 @@ static void destroy(void)
 }
 
 
-void levelscreen_change_to(level_ship * ship)
+void levelscreen_change_to(station * ship)
 {
 	current_ship = ship;
 	statesystem_push_state(state_levelscreen);
@@ -106,7 +106,7 @@ void levelscreen_change_to(level_ship * ship)
 
 static void button_callback(void *data)
 {
-	space_start_demo(current_ship->level_name);
+	space_start_demo(current_ship->level_path);
 }
 
 void levelscreen_init(void)

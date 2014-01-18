@@ -113,7 +113,7 @@ void highscorelist_destroy(scorelist *list)
  */
 int highscorelist_readfile(scorelist *list, const char *filename)
 {
-	file = waffle_internal_fopen(WAFFLE_LIBRARY, filename,"r");
+	file = waffle_fopen(WAFFLE_LIBRARY, filename,"r");
 	strcpy(list->filename, filename);
 
 	if (file == NULL) {
@@ -150,7 +150,7 @@ int highscorelist_readfile(scorelist *list, const char *filename)
 int highscorelist_writefile(scorelist *list)
 {
 	//TODO write file to internal storage
-	file = waffle_internal_fopen(WAFFLE_LIBRARY, list->filename,"w");
+	file = waffle_fopen(WAFFLE_LIBRARY, list->filename,"w");
 	if (file == NULL) {
 		SDL_Log( "Could not write to %s\n",list->filename);
 		return 1;

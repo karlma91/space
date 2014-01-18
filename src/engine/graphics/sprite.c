@@ -72,7 +72,7 @@ int sprite_packload(const char* spritepack)
 	char file[256];
 	sprintf(file, "textures/%s", spritepack);
 	/* read texture package file */
-	int filesize = waffle_read_file(file, &buffer[0], FILE_BUFFER_SIZE);
+	int filesize = waffle_read_file_zip(file, &buffer[0], FILE_BUFFER_SIZE);
 	if (!filesize) {
 		SDL_Log("ERROR: Could not load texpack data!");
 		return -1;

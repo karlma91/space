@@ -44,7 +44,7 @@ static we_bool parse_char(cJSON *t, char *field, char *def)
 		strcpy(field, t->valuestring);
 		return WE_TRUE;
 	}else{
-		*field = *def;
+		strcpy(field, def);
 		return WE_FALSE;
 	}
 }
