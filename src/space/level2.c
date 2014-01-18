@@ -55,7 +55,11 @@ int level_init(void)
 			while(waffle_dirnext(wed2)) {
 				if(waffle_isfile(wed2)) {
 					SDL_Log("LEVELS ADDING: %s", wed2->cur_path);
-					solarsystem_add_station(sy, NULL, wed2->dir_type, "test", wed2->cur_path);
+					char temp[64];
+					sscanf(wed2->dir->d_name, "%s.json",temp);
+					temp[strlen(temp) - 5] = 0;
+					SDL_Log("%s", temp);
+					solarsystem_add_station(sy, NULL, wed2->dir_type, temp , wed2->cur_path);
 					stations++;
 				}
 			}

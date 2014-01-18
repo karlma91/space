@@ -102,20 +102,11 @@ void tilemap_render(int layer, tilemap *map)
 }
 
 
-void tilemap_fill(polgrid *grid, int layers, byte data[TILEMAP_LAYERS][TILEMAP_MAX_ROWS][TILEMAP_MAX_COLS], tilemap2 *tiles)
+void tilemap_fill(void *unused, int layers, void *unused2, tilemap2 *tiles)
 {
 	tiles->layers = layers;
-	tiles->grid = grid;
-	tiles->rows = grid->rows;
-	tiles->cols = grid->cols;
-	int i,j, k;
-	for (i=0; i < tiles->layers; i++) {
-		for (j= 0; j < tiles->rows; j++) {
-			for (k = 0; k < tiles->cols; k++) {
-				tiles->data[i][j][k] = data[i][j][k];
-			}
-		}
-	}
+	tiles->rows = tiles->grid->rows;
+	tiles->cols = tiles->grid->cols;
 }
 
 /**

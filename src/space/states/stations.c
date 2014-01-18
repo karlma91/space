@@ -144,6 +144,13 @@ static void pre_update(void)
     float rot = scroll_get_rotation(scroller);
 	cpVect offset = cpvneg(scroll_get_offset(scroller));
 	view_update(main_view, offset, rot);
+
+	llist_begin_loop(solar_systems);
+	while (llist_hasnext(solar_systems)) {
+		solarsystem *sol = (solarsystem *)llist_next(solar_systems);
+		solarsystem_update(sol);
+	}
+	llist_end_loop(solar_systems);
 }
 
 static void post_update(void)
@@ -173,6 +180,7 @@ static void draw(void)
 	int i = 0;
 	while (llist_hasnext(solar_systems)) {
 		solarsystem *sol = (solarsystem *)llist_next(solar_systems);
+		solarsystem_update(sol);
 		solarsystem_draw(sol);
 		if(i>0){
 			draw_color4b(20,20,80,50);

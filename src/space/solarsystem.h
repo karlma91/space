@@ -16,9 +16,10 @@ typedef struct level_ship {
 	int id;
 	cpVect pos;
 	float radius;
-	float rotation;
+	float angle;
 	float rotation_speed;
 	char  level_path[256];
+	char level_name[256];
 	button btn;
 } station;
 

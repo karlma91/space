@@ -48,13 +48,17 @@ void solarsystem_add_station(solarsystem * sol, SPRITE_ID spr_id, int dir_type, 
 {
 	station *s = calloc(1, sizeof(station));
 	strcpy(s->level_path, path);
+	strcpy(s->level_name, name);
 	int i = llist_size(sol->stations);
 	float size = 300 + we_randf * 100;
 	cpFloat radius = sol->sun.size + (i) * 400 ;
 	cpFloat angle = WE_2PI * we_randf;
+	s->radius = radius;
+	s->angle = angle;
+	s->rotation_speed = 1000/radius;
 	s->pos = cpvadd(WE_P2C(radius,angle), sol->origo);
 	Color col_back = {255,180,140,255};
-	s->btn = button_create(SPRITE_STATION001, 0, s->level_path, s->pos.x, s->pos.y, size, size);
+	s->btn = button_create(SPRITE_STATION001, 0, s->level_name, s->pos.x, s->pos.y, size, size);
 	button_set_click_callback(s->btn, button_callback, s);
 	button_set_txt_antirot(s->btn, 1);
 	button_set_backcolor(s->btn, col_back);
@@ -75,8 +79,16 @@ void solarsystem_register_touch(solarsystem *sol, STATE_ID id)
 	llist_end_loop(sol->stations);
 }
 
-void solarsystem_update(solarsystem *solsys)
+void solarsystem_update(solarsystem *sol)
 {
+	llist_begin_loop(sol->stations);
+	while (llist_hasnext(sol->stations)) {
+		station *s = ((station *)llist_next(sol->stations));
+		s->angle += 1/s->radius;
+		s->pos = cpvadd(WE_P2C(s->radius,s->angle), sol->origo);
+		touch_place(s->btn,s->pos.x, s->pos.y);
+	}
+	llist_end_loop(sol->stations);
 
 }
 

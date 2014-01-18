@@ -279,20 +279,20 @@ void draw_line_tex(int layer, int tex_id, float *tex_map, cpVect a, cpVect b, fl
     draw_pop_matrix();
 }
 
-void draw_quad_patch_center_spr(int layer, sprite *spr, cpVect a, cpVect b, float w, float angle)
+void draw_quad_patch_center_spr(int layer, sprite *spr, cpVect pos, cpVect size, float w, float angle)
 {
 	float tex_map[8];
 	sprite_get_current_image(spr,tex_map);
 	int tex_id = sprite_get_texture(spr->id);
-	draw_quad_patch_center_tex(layer, tex_id, tex_map, a, b, w, angle);
+	draw_quad_patch_center_tex(layer, tex_id, tex_map, pos, size, w, angle);
 }
 
-void draw_quad_patch_center(int layer, SPRITE_ID id, cpVect a, cpVect b, float w, float angle)
+void draw_quad_patch_center(int layer, SPRITE_ID id, cpVect pos, cpVect size, float w, float angle)
 {
 	float tex_map[8];
 	sprite_get_subimg_by_index(id, 0, tex_map);
 	int tex_id = sprite_get_texture(id);
-	draw_quad_patch_center_tex(layer, tex_id, tex_map, a, b, w, angle);
+	draw_quad_patch_center_tex(layer, tex_id, tex_map, pos, size, w, angle);
 }
 
 void draw_quad_patch_center_tex(int layer, int tex_id, float *tex_map, cpVect pos, cpVect size, float w, float angle)
