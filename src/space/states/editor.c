@@ -301,18 +301,18 @@ static void paint_tile(editor_touch *touch)
 	}
 }
 
-static int contains_tile_finger(void)
+static editor_touch *contains_tile_finger(void)
 {
 	llist_begin_loop(ll_touches);
 	while (llist_hasnext(ll_touches)) {
 		editor_touch *touch = (editor_touch *) llist_next(ll_touches);
 		if (touch->mode == MODE_TILEMAP) {
 			llist_end_loop(ll_touches);
-			return 1;
+			return touch;
 		}
 	}
 	llist_end_loop(ll_touches);
-	return 0;
+	return NULL;
 }
 
 static int contains_instance(instance *ins)
@@ -385,7 +385,12 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 		break;
 	case MODE_TILEMAP:
 		grid_i = grid_getindex(pgrid, pos);
-		if (grid_i.yrow != -1) {
+		editor_touch *tile_touch = contains_tile_finger();
+		if (tile_touch) { /* release finger and give over to view */
+			finger_unbind(tile_touch->ID);
+			//llist_remove(ll_touches, tile_touch);
+			//pool_release(pool_touches, tile_touch);
+		} else if (grid_i.yrow != -1) {
 			touch_unique_id touch_id = finger_bind(finger->fingerId);
 			byte tile = tiledata[current_tlay][grid_i.yrow][grid_i.xcol];
 			add_touchdata(MODE_TILEMAP, touch_id, pos_view, cpvzero, tile ? TILE_CLEAR : TILE_ADD);
@@ -709,7 +714,7 @@ static void draw(void)
 				if (tiledata[l][y][x]) {
 					grid_getquad8f(pgrid, verts, x, y);
 					sprite_get_subimg_by_index(SPRITE_WHITE, 0, tex);
-					draw_quad_new(0, verts, tex);
+					draw_quad_new(RLAY_GAME_BACK, verts, tex);
 				}
 			}
 		}
