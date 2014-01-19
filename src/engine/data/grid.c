@@ -1,6 +1,8 @@
 #include "we.h"
 #include "grid.h"
 
+#define GRID_CELLRATIO 0.5
+
 void grid_update(polgrid *pgrid, float col_count, float inn_rad, float out_rad)
 {
 	pgrid->rows = 0;
@@ -13,7 +15,7 @@ void grid_update(polgrid *pgrid, float col_count, float inn_rad, float out_rad)
 	float t_height = pgrid->orad;
 	while (c_height < t_height) {
 		pgrid->rad[pgrid->rows] = c_height;
-		c_height += pgrid->theta_unit * c_height;
+		c_height += pgrid->theta_unit * c_height * GRID_CELLRATIO;
 		pgrid->rows++;
 	}
 	pgrid->orad = c_height;
@@ -28,6 +30,7 @@ void grid_update(polgrid *pgrid, float col_count, float inn_rad, float out_rad)
 
 void grid_draw(polgrid *pgrid, int layer, float linewidth)
 {
+	return;
 	int i, j;
 	float circle[(1+pgrid->cols)*2];
 	float line[pgrid->rows*2];

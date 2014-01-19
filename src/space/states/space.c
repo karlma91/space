@@ -379,29 +379,7 @@ static void draw(void)
 	/* draw tilemap */
 	//tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
 	space_draw_deck();
-
-	int rlay;
-	int l, x, y;
-	float verts[8], tex[8];
-	for (l=TLAY_COUNT-1; l>=0; l--) {
-		for (y = 0; y < currentlvl->tilemap.grid->rows - 1; y++) {
-			if (l == TLAY_SOLID) {
-				draw_color4f(0.1,0.1,0.1,0.6);
-				rlay = RLAY_BACK_FRONT;
-			} else {
-				draw_color_rgbmulta4f(l == 0, l == 1, l == 2, 0.9);
-				rlay = (l == TLAY_OVERLAY) ? RLAY_GUI_BACK : RLAY_BACK_MID;
-			}
-			for (x=0; x<currentlvl->tilemap.grid->cols; x++) {
-				if (currentlvl->tilemap.data[l][y][x]) {
-					grid_getquad8f(currentlvl->tilemap.grid, verts, x, y);
-					sprite_get_subimg_by_index(SPRITE_WHITE, 0, tex);
-					draw_quad_new(rlay, verts, tex);
-				}
-			}
-		}
-	}
-
+	tilemap2_render(&currentlvl->tilemap);
 	//draw_light_map();
 }
 
@@ -590,6 +568,9 @@ void space_init_level(char *name)
 {
 	if(currentlvl == NULL || strcmp(currentlvl->name, name) != 0 ) {
 		currentlvl = level_load(WAFFLE_DOCUMENTS, name);
+		currentlvl->tilemap.render_layers[TLAY_BACKGROUND] = RLAY_BACK_FRONT;
+		currentlvl->tilemap.render_layers[TLAY_SOLID] = RLAY_GAME_BACK;
+		currentlvl->tilemap.render_layers[TLAY_OVERLAY] = RLAY_GAME_FRONT;
 	}
 	space_init_level_from_level(currentlvl);
 }
@@ -685,9 +666,27 @@ void space_init_level_from_level(level * lvl)
 		for (x = 0; x < lvl->tilemap.grid->cols; x++) {
 			byte tile = lvl->tilemap.data[TLAY_SOLID][y][x];
 			if (tile) { //TODO support different types of shapes and use a helper method both here and in editor
+				int len = 4;
 				cpVect verts[4];
 				grid_getquad8cpv(lvl->tilemap.grid, verts, x, y);
-				cpShape *shape = cpPolyShapeNew(current_space->staticBody, 4, verts, cpvzero);
+				switch (tile) {
+				case TILE_TYPE_DIAG_SE:
+					verts[0] = verts[1];
+					/* NO BREAK */
+				case TILE_TYPE_DIAG_SW:
+					verts[1] = verts[2];
+					verts[2] = verts[3];
+					len = 3;
+					break;
+				case TILE_TYPE_DIAG_NE:
+					len = 3;
+					break;
+				case TILE_TYPE_DIAG_NW:
+					verts[2] = verts[3];
+					len = 3;
+					break;
+				}
+				cpShape *shape = cpPolyShapeNew(current_space->staticBody, len, verts, cpvzero);
 				cpSpaceAddStaticShape(current_space, shape);
 				cpShapeSetFriction(shape, 0.9f);
 				cpShapeSetCollisionType(shape, ID_GROUND);

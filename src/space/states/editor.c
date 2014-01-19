@@ -275,7 +275,8 @@ static void paint_tile(editor_touch *touch)
 	grid_i_cur = grid_i;
 	if (grid_i.yrow != -1) {
 		if (touch->data.tile_mode == TILE_ADD) {
-			lvl->tilemap.data[current_tlay][grid_i.yrow][grid_i.xcol] = 1;
+			tilemap_settile(&lvl->tilemap, current_tlay, grid_i.xcol, grid_i.yrow, 1);
+
 			if (current_tlay == TLAY_SOLID && !lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]) {
 				cpVect verts[4];
 				grid_getquad8cpv(lvl->tilemap.grid, verts, grid_i.xcol, grid_i.yrow);
@@ -284,7 +285,8 @@ static void paint_tile(editor_touch *touch)
 				cpSpaceAddStaticShape(current_space, shape);
 			}
 		} else if (touch->data.tile_mode == TILE_CLEAR) {
-			lvl->tilemap.data[current_tlay][grid_i.yrow][grid_i.xcol] = 0;
+			tilemap_settile(&lvl->tilemap, current_tlay, grid_i.xcol, grid_i.yrow, 0);
+
 			if (current_tlay == TLAY_SOLID && lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]) {
 				cpSpaceRemoveShape(current_space, lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]);
 				cpfree(lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]);
@@ -660,6 +662,9 @@ void editor_init()
 	state_register_touchable_view(view_editor, scr_world);
 
 	lvl = level_load(WAFFLE_ZIP, "empty");
+	lvl->tilemap.render_layers[TLAY_BACKGROUND] = RLAY_BACK_FRONT;
+	lvl->tilemap.render_layers[TLAY_SOLID] = RLAY_GAME_BACK;
+	lvl->tilemap.render_layers[TLAY_OVERLAY] = RLAY_GAME_FRONT;
 	tap_clear_editor(NULL);
 	editor_setmode(MODE_RESIZE);
 }
@@ -759,22 +764,7 @@ static void draw(void)
 		r1 -= margin; r2 += margin;
 		draw_donut(RLAY_GAME_FRONT, cpvzero, r1 < 0 ? 0 : r1, r2);
 	}
-
-	int l, x, y;
-	float verts[8], tex[8];
-	for (l=TLAY_COUNT-1; l>=0; l--) {
-		for (y = 0; y < lvl->tilemap.grid->rows - 1; y++) {
-			draw_color_rgbmulta4f(l == 0, l == 1, l == 2, (l == current_tlay) && (current_mode == MODE_TILEMAP)  ? 0.8 : 0.4);
-			for (x=0; x<lvl->tilemap.grid->cols; x++) {
-				if (lvl->tilemap.data[l][y][x]) {
-					grid_getquad8f(lvl->tilemap.grid, verts, x, y);
-					sprite_get_subimg_by_index(SPRITE_GEAR, 0, tex);
-					draw_quad_new(RLAY_GAME_BACK, verts, tex);
-				}
-			}
-		}
-	}
-
+	tilemap2_render(&lvl->tilemap);
 }
 
 static int sdl_event(SDL_Event *event)

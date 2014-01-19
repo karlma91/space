@@ -196,7 +196,7 @@ static void parse_param_object(cJSON *param, hashmap * param_list)
 static void load_tilemap(cJSON *t, level *lvl)
 {
 	int def = 0;
-	int def_col = 32;
+	int def_col = 48;
 	int cols, rows;
 
 	pl_parse(t, "t_cols", "int", &cols, &def_col);

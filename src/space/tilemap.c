@@ -102,6 +102,47 @@ void tilemap_render(int layer, tilemap *map)
 }
 
 
+void tilemap2_render(tilemap2 *tm)
+{
+	byte data;
+	int l, x, y;
+	float verts[8], tex[8];
+	sprite_get_subimg_by_index(SPRITE_WHITE, 0, tex);
+	for (l=TLAY_COUNT-1; l>=0; l--) {
+		//draw_color_rgbmulta4f(l==0, l==1, l==2, 0.4);
+		//draw_color4f(l==0, l==1, l==2, 0);
+		draw_color4f(0.2,0.6,0.2,0.2);
+		for (y = 0; y < tm->grid->rows - 1; y++) {
+			for (x=0; x<tm->grid->cols; x++) {
+				data = tilemap_getdata(tm, l, x, y);
+				if (data) {
+					grid_getquad8f(tm->grid, verts, x, y);
+					switch (data) {
+					case TILE_TYPE_DIAG_SW:
+						verts[2] = verts[0];
+						verts[3] = verts[1];
+						break;
+					case TILE_TYPE_DIAG_SE:
+						verts[0] = verts[2];
+						verts[1] = verts[3];
+						break;
+					case TILE_TYPE_DIAG_NE:
+						verts[4] = verts[6];
+						verts[5] = verts[7];
+						break;
+					case TILE_TYPE_DIAG_NW:
+						verts[6] = verts[4];
+						verts[7] = verts[5];
+						break;
+					}
+					draw_quad_new(tm->render_layers[l], verts, tex);
+				}
+			}
+		}
+	}
+}
+
+
 void tilemap_fill(void *unused, int layers, void *unused2, tilemap2 *tiles)
 {
 	tiles->layers = layers;
@@ -200,3 +241,4 @@ static int parse_data(tilemap *map, char *data)
 	//SDL_Log("HELLO %d TEXTUREMAP.c \n",__LINE__);
 	return 0;
 }
+
