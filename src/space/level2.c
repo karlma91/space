@@ -204,7 +204,10 @@ static void load_tilemap(cJSON *t, level *lvl)
 	pl_parse(t, "t_layers", "int", &(lvl->tilemap.layers), &def);
 
 	lvl->tilemap.grid = grid_create(cols, lvl->inner_radius, lvl->outer_radius);
-	//(lvl->tilemap.grid->rows != rows) ==> ERROR
+	if (lvl->tilemap.grid->rows != rows) {
+        fprintf(stderr, "WARNING load_tilemap: inconsistent row count. Got %d, expected %d! Setting row count to expected value\n", lvl->tilemap.grid->rows, rows);
+        lvl->tilemap.grid->rows = rows;
+    }
 
 	cJSON *data = cJSON_GetObjectItem(t,"tilemaptest");
 	if(data) {
