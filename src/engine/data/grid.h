@@ -12,12 +12,16 @@
 #define GRID_MAXROW 100
 
 typedef struct polgrid {
-	int cols, rows;
+	int cols, rows; /* number of rows in selected region */
 	float cosxcol[GRID_MAXCOL];
 	float sinxcol[GRID_MAXCOL];
-	float rad[GRID_MAXROW*2];
-	float irad; /* inner radius */
-	float orad; /* outer radius */
+
+	float rad[GRID_MAXROW*2]; /* all computed radiuses as function of yth row */
+	float min_rad; /* miniumum radius */
+	float max_rows; /* max number of rows */
+	int inner_i; /* inner index of selection */
+	int outer_i; /* outer index of selection (exclusive) */
+
 	float theta_unit; /* angle between to columns */
 } polgrid;
 
@@ -33,14 +37,15 @@ inline static cpVect grid_getpos(polgrid *pgrid, int col_i, int row_i)
 inline static void grid_getpos2f(polgrid *pgrid, float *pos, int col_x, int row_y)
 {
 	float cols = pgrid->cols;
-	float rows = pgrid->rows;
-	row_y = row_y >= rows ? row_y - rows : (row_y < 0 ? row_y + rows : row_y);
-	col_x = col_x >= cols ? col_x - cols : (col_x < 0 ? col_x + cols : col_x);
+	float row_min = pgrid->inner_i;
+	float row_max = pgrid->outer_i;
+	row_y = (row_y >= row_max) ? row_max-1 : (row_y < row_min ? row_min : row_y);
+	col_x = (col_x >= cols) ? col_x - cols : (col_x < 0 ? col_x + cols : col_x);
 	if (col_x < 0 || col_x >= pgrid->cols) {
 		fprintf(stderr, "ERROR: col_i > cols\n");
 		exit(-1);
 	}
-	if (row_y < 0 || row_y >= pgrid->rows) {
+	if (row_y < row_min || row_y >= row_max) {
 		fprintf(stderr, "ERROR: row_i > rows\n");
 		exit(-1);
 	}
@@ -52,18 +57,27 @@ inline static void grid_getpos2f(polgrid *pgrid, float *pos, int col_x, int row_
 
 inline static void grid_getpos2cpv(polgrid *pgrid, cpVect *pos, int col_x, int row_y)
 {
-	cpFloat cols = pgrid->cols;
-	cpFloat rows = pgrid->rows;
-	row_y = row_y >= rows ? row_y - rows : (row_y < 0 ? row_y + rows : row_y);
-	col_x = col_x >= cols ? col_x - cols : (col_x < 0 ? col_x + cols : col_x);
+	float cols = pgrid->cols;
+	float row_min = pgrid->inner_i;
+	float row_max = pgrid->outer_i;
+	row_y = (row_y >= row_max) ? row_max-1 : (row_y < row_min ? row_min : row_y);
+	col_x = (col_x >= cols) ? col_x - cols : (col_x < 0 ? col_x + cols : col_x);
 	if (col_x < 0 || col_x >= pgrid->cols) {
 		fprintf(stderr, "ERROR: col_i > cols\n");
 		exit(-1);
 	}
-	if (row_y < 0 || row_y >= pgrid->rows) {
+	if (row_y < row_min || row_y >= row_max) {
 		fprintf(stderr, "ERROR: row_i > rows\n");
 		exit(-1);
 	}
+	cpFloat r = pgrid->rad[row_y];
+	pos->x = pgrid->cosxcol[col_x] * r;
+	pos->y = pgrid->sinxcol[col_x] * r;
+}
+inline static void grid_getpos2cpv_direct(polgrid *pgrid, cpVect *pos, int col_x, int row_y)
+{
+	float cols = pgrid->cols;
+	col_x = (col_x >= cols) ? col_x - cols : (col_x < 0 ? col_x + cols : col_x);
 	cpFloat r = pgrid->rad[row_y];
 	pos->x = pgrid->cosxcol[col_x] * r;
 	pos->y = pgrid->sinxcol[col_x] * r;
@@ -84,10 +98,19 @@ inline static void grid_getquad8cpv(polgrid *pgrid, cpVect *quad, int col_x, int
 	grid_getpos2cpv(pgrid, quad+2, col_x+1, row_y+1);
 	grid_getpos2cpv(pgrid, quad+3, col_x+0, row_y+1);
 }
+inline static void grid_getquad8cpv_direct(polgrid *pgrid, cpVect *quad, int col_x, int row_y)
+{
+	grid_getpos2cpv_direct(pgrid, quad+0, col_x+0, row_y+0);
+	grid_getpos2cpv_direct(pgrid, quad+1, col_x+1, row_y+0);
+	grid_getpos2cpv_direct(pgrid, quad+2, col_x+1, row_y+1);
+	grid_getpos2cpv_direct(pgrid, quad+3, col_x+0, row_y+1);
+}
 
 void grid_draw(polgrid *pgrid, int layer, float linewidth);
-polgrid *grid_create(int col_count, float inn_rad, float out_rad);
-void grid_update(polgrid *pgrid, float col_count, float inn_rad, float out_rad);
+polgrid *grid_create(int col_count, float min_rad, int max_rows, int inner_index, int outer_index);
+void grid_setcols(polgrid *pgrid, int cols);
+void grid_setregion2i(polgrid *pgrid, int inner_index, int outer_index);
+void grid_setregion2f(polgrid *pgrid, float inner_radius, int outer_radius);
 void grid_free(polgrid *pgrid);
 grid_index grid_getindex(polgrid *pgrid, cpVect pos);
 #endif /* GRID_H_ */

@@ -118,6 +118,7 @@ typedef struct editor_touch {
 	touch_unique_id ID;
 	cpVect viewpos_start, viewpos_cur, game_offset, viewpos_prev;
 	MODE_DATA data;
+	we_bool data_obj_delete;
     float time;
 } editor_touch;
 
@@ -257,13 +258,13 @@ static void move_radius(editor_touch *touch)
 		float new_r = lvl->inner_radius + (cpvlength(pos) - cpvlength(prev));
 		if(new_r >= MIN_INNER_RADIUS && new_r <= lvl->outer_radius - MIN_RADIUS_OFFSET) {
 			lvl->inner_radius = new_r;
-			grid_update(lvl->tilemap.grid, lvl->tilemap.grid->cols, lvl->inner_radius, lvl->outer_radius);
+			grid_setregion2f(lvl->tilemap.grid, lvl->inner_radius, lvl->outer_radius);
 		}
 	} else if(touch->data.resize_mode == RESIZE_OUTER) {
 		float new_r = lvl->outer_radius + (cpvlength(pos) - cpvlength(prev));
 		if(new_r <= MAX_OUTER_RADIUS && new_r >= lvl->inner_radius + MIN_RADIUS_OFFSET) {
 			lvl->outer_radius = new_r;
-			grid_update(lvl->tilemap.grid, lvl->tilemap.grid->cols, lvl->inner_radius, lvl->outer_radius);
+			grid_setregion2f(lvl->tilemap.grid, lvl->inner_radius, lvl->outer_radius);
 		}
 	}
 }
@@ -324,19 +325,45 @@ static int contains_instance(instance *ins)
 	return 0;
 }
 
+
+static we_bool is_deletable(instance *ins)
+{
+	return ins && ins->TYPE != obj_id_player;
+}
+
+static void delete_instance(editor_touch *touch)
+{
+	if (is_deletable(touch->data.object_ins)) {
+		instance_remove(touch->data.object_ins);
+		fprintf(stderr, "DEBUG: deleting instance of type: %s\n", touch->data.object_ins->TYPE->NAME);
+	}
+	touch->data.object_ins = NULL;
+	touch->data_obj_delete = WE_FALSE;
+}
+
 static void move_instance(editor_touch *touch)
 {
 	cpVect pos = view_view2world(view_editor, touch->viewpos_cur);
 	if (touch->data.object_ins) {
 		if (!remove_tool) {
+			// check if pos is inside station walls
+			grid_index grid_i = grid_getindex(lvl->tilemap.grid,pos);
+			if (grid_i.yrow == -1) {
+				if (is_deletable(touch->data.object_ins)) {
+					/* Jiggles instance to indicate that it will get removed on touch_up */
+					pos = cpvadd(pos, cpvmult(cpv(we_randf-0.5,we_randf-0.5), 20));
+					touch->data_obj_delete = WE_TRUE;
+				} else {
+					//TODO smoother instance movement (move to radius of outermost grid)
+					return; /* making sure non-deletable instances are not moved outside of station */
+				}
+			} else {
+				touch->data_obj_delete = WE_FALSE;
+			}
 			touch->data.object_ins->p_start = cpvadd(pos, touch->game_offset);
 			touch->data.object_ins->TYPE->call.init(touch->data.object_ins);
 		} else {
-			if (touch->data.object_ins->TYPE != obj_id_player) {
-				instance_remove(touch->data.object_ins);
-				fprintf(stderr, "DEBUG: deleting instance of type: %s\n", touch->data.object_ins->TYPE->NAME);
-				touch->data.object_ins = NULL;
-			}
+			delete_instance(touch);
 		}
 	} else {
 		touch->data.object_ins = instance_at_pos(pos, OBJECT_MARGIN/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
@@ -357,10 +384,11 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 {
 	//TODO detect double tap for delete? eller bruke en state for sletting av objekter (ved trykk på knapp)
 
-	grid_index grid_i;
+	MODE_DATA data;
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
-	MODE_DATA data;
+	grid_index grid_i = grid_getindex(lvl->tilemap.grid, pos);
+	editor_touch *tile_touch;
 
 	switch (current_mode) {
 	case MODE_OBJECTS:
@@ -374,6 +402,9 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 			if (data.object_ins) {
 				//TODO don't allow more than one(or two for rotate/scale of instance) binding per instance!
 				touch->game_offset = cpvsub(data.object_ins->body->p, pos);
+				if (!remove_tool) {
+					touch->data_obj_delete = is_deletable(touch->data.object_ins) && (grid_i.yrow == -1);
+				}
 			}
 			return 1; /* consume event: no zoom/pan/rotate of scroller*/
 		}
@@ -387,8 +418,7 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 		}
 		break;
 	case MODE_TILEMAP:
-		grid_i = grid_getindex(lvl->tilemap.grid, pos);
-		editor_touch *tile_touch = contains_tile_finger();
+		tile_touch = contains_tile_finger();
 		if (tile_touch) { /* release finger and give over to view */
 			finger_unbind(tile_touch->ID);
 			//llist_remove(ll_touches, tile_touch);
@@ -444,15 +474,22 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
 	editor_touch *touch = get_touch(finger->fingerId);
+	grid_index grid_i = grid_getindex(lvl->tilemap.grid, pos);
 
 	if (touch) {
 		switch(current_mode) {
 		case MODE_OBJECTS:
-			if (touch->mode == MODE_OBJECTS && touch->data.object_ins == NULL && !remove_tool) {
-				//TODO make sure there are no other instances beneath pos!
-				instance_create(object_by_name(object_type), level_get_param(&(lvl->params), object_type, param_name), pos, cpvzero);
-				llist_remove(ll_touches, touch);
-				pool_release(pool_touches, touch);
+			if ((touch->mode == MODE_OBJECTS) && !remove_tool) {
+				if (touch->data_obj_delete) {
+					delete_instance(touch);
+				} else if ((grid_i.yrow != -1) && touch->data.object_ins == NULL) {
+					//TODO make sure there are no other instances beneath pos!
+					instance_create(object_by_name(object_type), level_get_param(&(lvl->params), object_type, param_name), pos, cpvzero);
+					llist_remove(ll_touches, touch);
+					pool_release(pool_touches, touch);
+				} else {
+					return 0;
+				}
 				return 1;
 			}
 			break;
@@ -696,12 +733,13 @@ static void pre_update(void)
 	float x = -GAME_WIDTH/2+150 + panel_offset;
 	float y = GAME_HEIGHT/2-200 + obj_offset.y;
 	for (i = 0; i < EDITOR_OBJECT_COUNT; i++, y -= 250) {
-		touch_place(btn_objects[i], x, y); // + btn_xoffset[i]
+		touch_place(btn_objects[i], x + btn_xoffset[i], y); // + btn_xoffset[i]
 		if (btn_xoffset[i] > 0) {
-			btn_xoffset[i] *= 0.995;
+			btn_xoffset[i] *= 0.995; //TODO detect when button is released
 		}
 	}
 
+	we_bool resizing = WE_FALSE;
 	llist_begin_loop(ll_touches);
 	while (llist_hasnext(ll_touches)) {
 		editor_touch *touch = (editor_touch *) llist_next(ll_touches);
@@ -715,6 +753,7 @@ static void pre_update(void)
 				paint_tile(touch);
 				break;
 			case MODE_RESIZE:
+				resizing = WE_TRUE;
 				move_radius(touch);
 
 				break;
@@ -733,6 +772,13 @@ static void pre_update(void)
 		}
 	}
 	llist_end_loop(ll_touches);
+
+	if (!resizing) {
+		float target_ir = lvl->tilemap.grid->rad[lvl->tilemap.grid->inner_i];
+		float target_or = lvl->tilemap.grid->rad[lvl->tilemap.grid->outer_i-1];
+		lvl->inner_radius = (target_ir+lvl->inner_radius)/2;
+		lvl->outer_radius = (target_or+lvl->outer_radius)/2;
+	}
 }
 
 static void post_update(void)
@@ -749,7 +795,7 @@ static void draw(void)
 	space_draw_deck();
 
 	draw_color4f(0.5,0.5,0.5,1);
-	if ((current_mode == MODE_RESIZE) || (current_mode == MODE_TILEMAP)) {
+	if (0 && current_mode == MODE_TILEMAP) { // (current_mode == MODE_RESIZE)
 		grid_draw(lvl->tilemap.grid, 0,  10 / current_view->zoom);
 	}
 

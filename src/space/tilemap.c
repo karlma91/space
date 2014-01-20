@@ -117,7 +117,7 @@ void tilemap2_render(tilemap2 *tm)
 		} else {
 			draw_color_rgbmulta4f(l==0, l==1, l==2, 0.4);
 		}
-		for (y = 0; y < tm->grid->rows - 1; y++) {
+		for (y = tm->grid->inner_i; y < tm->grid->outer_i - 1; y++) {
 			for (x=0; x<tm->grid->cols; x++) {
 				data = tilemap_getdata(tm, l, x, y);
 				if (data) {

@@ -662,7 +662,21 @@ void space_init_level_from_level(level * lvl)
 	/* add static tiles */ //TODO merge/glue tiles togheter
 	fprintf(stderr, "GRID: %d x %d\n", lvl->tilemap.grid->rows, lvl->tilemap.grid->cols);
 	int x, y;
-	for (y = 0; y < lvl->tilemap.grid->rows; y++) {
+	/*
+	y = lvl->tilemap.grid->outer_i-1;
+	for (x = 0; x < lvl->tilemap.grid->cols; x++) {
+		cpVect verts[4];
+		grid_getquad8cpv_direct(lvl->tilemap.grid, verts, x, y);
+		cpShape *shape = cpPolyShapeNew(current_space->staticBody, 4, verts, cpvzero);
+		cpSpaceAddStaticShape(current_space, shape);
+		cpShapeSetFriction(shape, 0.9f);
+		cpShapeSetCollisionType(shape, ID_GROUND);
+		cpShapeSetElasticity(shape, 0.7f);
+		llist_add(ll_tileshapes, shape);
+	}
+	*/
+
+	for (y = lvl->tilemap.grid->inner_i; y < lvl->tilemap.grid->outer_i; y++) {
 		for (x = 0; x < lvl->tilemap.grid->cols; x++) {
 			byte tile = lvl->tilemap.data[TLAY_SOLID][y][x];
 			if (tile) { //TODO support different types of shapes and use a helper method both here and in editor
@@ -701,8 +715,8 @@ void space_init_level_from_level(level * lvl)
 	float r_in = currentlvl->inner_radius;
 	float r_out = currentlvl->outer_radius;
 	float r_ceil = r_in;// + 64 * (r_out - r_in) / currentlvl->height;
+// /*
 	float r_floor = r_out;// - 5 * 64 * (r_out - r_in) / currentlvl->height;
-
 	static const int segments = 100;
 	static const float seg_radius = 50;
 	static const float seg_length = 300;
@@ -722,6 +736,7 @@ void space_init_level_from_level(level * lvl)
 
 		llist_add(ll_tileshapes, seg);
 	}
+//	*/
 	ceiling = cpSpaceAddShape(current_space, cpCircleShapeNew(staticBody, r_ceil, cpvzero));
 	cpShapeSetFriction(ceiling, 0.9f);
 	cpShapeSetCollisionType(ceiling, ID_GROUND);
@@ -775,7 +790,7 @@ static int sdl_event(SDL_Event *event)
 		case SDL_SCANCODE_4: em_id = EM_SMOKE; break;
 		case SDL_SCANCODE_5: em_id = EM_SPARKS; break;
 		case SDL_SCANCODE_6: em_id = EM_ROCKETFLAME; break;
-		particles_get_emitter_at(RLAY_GUI_FRONT, em_id, player1->data.body->p);
+		particles_get_emitter_at(RLAY_GUI_FRONT, em_id, player1->data.body->p); break;
 		default: break;
 		}
 		break;

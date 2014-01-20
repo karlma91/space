@@ -197,19 +197,22 @@ static void load_tilemap(cJSON *t, level *lvl)
 {
 	int def = 0;
 	int def_col = 48;
-	int cols, rows;
+	int cols;
 
-	pl_parse(t, "t_cols", "int", &cols, &def_col);
-	pl_parse(t, "t_rows", "int", &rows, &def);
+	int def_ii = 8;
+	int def_oi = 32;
+	int ii, oi;
+	float min_rad;
+	float min_rad_def = 250;
+
 	pl_parse(t, "t_layers", "int", &(lvl->tilemap.layers), &def);
+	pl_parse(t, "t_cols", "int", &cols, &def_col);
+	pl_parse(t, "t_inner_i", "int", &ii, &def_ii);
+	pl_parse(t, "t_outer_i", "int", &oi, &def_oi);
+	pl_parse(t, "t_min_rad", "float", &min_rad, &min_rad_def);
 
-	lvl->tilemap.grid = grid_create(cols, lvl->inner_radius, lvl->outer_radius);
-	/*
-	if (lvl->tilemap.grid->rows != rows) {
-        fprintf(stderr, "WARNING load_tilemap: inconsistent row count. Got %d, expected %d! Setting row count to expected value\n", lvl->tilemap.grid->rows, rows);
-        lvl->tilemap.grid->rows = rows;
-    }
-	*/
+	lvl->tilemap.grid = grid_create(cols, min_rad, GRID_MAXROW-1, ii, oi);
+
 	cJSON *data = cJSON_GetObjectItem(t,"tilemaptest");
 	if(data) {
 		int i,j,k;
@@ -218,12 +221,11 @@ static void load_tilemap(cJSON *t, level *lvl)
 			for (j= 0; j < lvl->tilemap.grid->rows; j++) {
 				cJSON * col = cJSON_GetArrayItem(row,j);
 				for (k = 0; k < lvl->tilemap.grid->cols; k++) {
-					lvl->tilemap.data[i][j][k] = cJSON_GetArrayItem(col,k)->valueint;
+					lvl->tilemap.data[i][j+ii][k] = cJSON_GetArrayItem(col,k)->valueint;
 				}
 			}
 		}
 	}
-
 }
 
 #define FILE_SIZE_BUFFER 128000
@@ -281,12 +283,11 @@ level *level_load(int folder, char * filename)
 			SDL_Log("LEVEL: No field with name: tilemap");
 	}
 	*/
-	float def = 0;
-	float def_m = 500;
-	float def_M = 2000;
-	pl_parse(root,"innrad","float",&(lvl->inner_radius),&def_m);
-	pl_parse(root,"outrad","float",&(lvl->outer_radius),&def_M);
 	load_tilemap(root, lvl);
+
+	/* Calculate level size based on grid data */
+	lvl->inner_radius = lvl->tilemap.grid->rad[lvl->tilemap.grid->inner_i];
+	lvl->outer_radius = lvl->tilemap.grid->rad[lvl->tilemap.grid->outer_i-1];;
 
 	level_load_params(&(lvl->params), root);
 
@@ -294,8 +295,6 @@ level *level_load(int folder, char * filename)
 
 	for (i = 0; i < cJSON_GetArraySize(object_array); i++){
 		cJSON *object = cJSON_GetArrayItem(object_array, i);
-
-
 		char type[128], name[128];
 		pl_parse(object,"type", "char", type, DEF_STRING);
 		pl_parse(object,"name", "char", name, DEF_STRING);
@@ -317,7 +316,6 @@ level *level_load(int folder, char * filename)
 		} else {
 			SDL_Log("LEVEL PARSING ERROR: Cannot find field pos in object");
 		}
-
 		level_add_object_recipe_name(lvl, type, name, p, 0);
 	}
 	return lvl;
@@ -434,21 +432,23 @@ void level_write_to_file(level *lvl)
 	cJSON_AddItemToObject(root, "name", cJSON_CreateString(lvl->name));
 	cJSON_AddItemToObject(root, "tilemap", cJSON_CreateString("level02_01.tmx"));
 	cJSON_AddNumberToObject(root, "timelimit", 100);
-	cJSON_AddNumberToObject(root, "innrad", lvl->inner_radius);
-	cJSON_AddNumberToObject(root, "outrad", lvl->outer_radius);
 
+	//TODO update level writing for new variables
 	cJSON_AddNumberToObject(root, "t_layers", lvl->tilemap.layers);
-	cJSON_AddNumberToObject(root, "t_rows", lvl->tilemap.grid->rows);
 	cJSON_AddNumberToObject(root, "t_cols", lvl->tilemap.grid->cols);
+	cJSON_AddNumberToObject(root, "t_inner_i", lvl->tilemap.grid->inner_i);
+	cJSON_AddNumberToObject(root, "t_outer_i", lvl->tilemap.grid->outer_i);
+	cJSON_AddNumberToObject(root, "t_min_rad", lvl->tilemap.grid->min_rad);
 
 	cJSON * tilemap = cJSON_CreateArray();
+	int ii = lvl->tilemap.grid->inner_i;
 	int i,j,k;
 	for (i=0; i < lvl->tilemap.layers; i++) {
 		cJSON * row = cJSON_CreateArray();
 		for (j= 0; j < lvl->tilemap.grid->rows; j++) {
 			int temp[lvl->tilemap.grid->cols];
 			for (k = 0; k < lvl->tilemap.grid->cols; k++) {
-				temp[k] = lvl->tilemap.data[i][j][k];
+				temp[k] = lvl->tilemap.data[i][j+ii][k];
 			}
 			cJSON * col = cJSON_CreateIntArray(temp, lvl->tilemap.grid->cols);
 			cJSON_AddItemToArray(row, col);

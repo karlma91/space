@@ -3,24 +3,24 @@
 
 #define GRID_CELLRATIO 0.5
 
-void grid_update(polgrid *pgrid, float col_count, float inn_rad, float out_rad)
+void grid_setrows(polgrid *pgrid, float min_rad, int max_rows)
 {
-	pgrid->rows = 0;
-	pgrid->cols = col_count;
-	pgrid->irad = inn_rad;
-	pgrid->orad = out_rad;
-	pgrid->theta_unit = (WE_2PI * 1 / pgrid->cols);
-
-	float c_height = pgrid->irad;
-	float t_height = pgrid->orad;
-	while (c_height < t_height) {
-		pgrid->rad[pgrid->rows] = c_height;
-		c_height += pgrid->theta_unit * c_height * GRID_CELLRATIO;
-		pgrid->rows++;
+	int row = 0;
+	float radius = min_rad;
+	pgrid->min_rad = min_rad;
+	pgrid->max_rows = max_rows;
+	while (row < max_rows) {
+		pgrid->rad[row] = radius;
+		radius += radius * (pgrid->theta_unit * GRID_CELLRATIO);
+		row++;
 	}
-	pgrid->orad = c_height;
+}
 
+void grid_setcols(polgrid *pgrid, int cols)
+{
 	int i;
+	pgrid->cols = cols;
+	pgrid->theta_unit = (WE_2PI * 1 / pgrid->cols);
 	for (i = 0; i < pgrid->cols; i++) {
 		float theta = pgrid->theta_unit * i;
 		pgrid->cosxcol[i] = cosf(theta);
@@ -28,13 +28,35 @@ void grid_update(polgrid *pgrid, float col_count, float inn_rad, float out_rad)
 	}
 }
 
+void grid_setregion2i(polgrid *pgrid, int inner_index, int outer_index)
+{
+	pgrid->inner_i = inner_index;
+	pgrid->outer_i = outer_index;
+	pgrid->rows = outer_index - inner_index;
+}
+
+void grid_setregion2f(polgrid *pgrid, float inner_radius, int outer_radius)
+{
+	int y;
+	int ii = 0, oi = 0;
+	float r_last = pgrid->rad[0];
+	for (y = 0; y < pgrid->max_rows; y++) {
+		float r = pgrid->rad[y];
+		float diff = (r - r_last) / 2;
+		ii = (r - diff <= inner_radius) ? y : ii;
+		oi = (r - 3*diff <= outer_radius) ? y : oi;
+		r_last = r;
+	}
+	grid_setregion2i(pgrid, ii, oi);
+}
+
 void grid_draw(polgrid *pgrid, int layer, float linewidth)
 {
-	return;
+	//return;
 	int i, j;
 	float circle[(1+pgrid->cols)*2];
-	float line[pgrid->rows*2];
-	for (j = 0; j < pgrid->rows; j++) {
+	float line[4];
+	for (j = pgrid->inner_i; j < pgrid->outer_i; j++) {
 		for (i = 0; i < pgrid->cols; i++) {
 			grid_getpos2f(pgrid, &circle[2*i], i, j);
 		}
@@ -42,17 +64,19 @@ void grid_draw(polgrid *pgrid, int layer, float linewidth)
 		draw_line_strip(circle, (pgrid->cols+1)*2, linewidth);
 	}
 	for (i = 0; i < pgrid->cols; i++) {
-		for (j = 0; j < pgrid->rows; j++) {
-			grid_getpos2f(pgrid, &line[2*j], i, j);
-		}
-		draw_line_strip(line, pgrid->rows*2, linewidth);
+		grid_getpos2f(pgrid, &line[0], i, pgrid->inner_i);
+		grid_getpos2f(pgrid, &line[2], i, pgrid->outer_i);
+		//draw_line_strip(line, 4, linewidth);
+		draw_quad_line(0, cpv(line[0],line[1]),cpv(line[2],line[3]),linewidth/4);
 	}
 }
 
-polgrid *grid_create(int col_count, float inn_rad, float out_rad)
+polgrid *grid_create(int col_count, float min_rad, int max_rows, int inner_index, int outer_index)
 {
 	polgrid *pgrid = calloc(1, sizeof *pgrid);
-	grid_update(pgrid, col_count, inn_rad, out_rad);
+	grid_setcols(pgrid, col_count);
+	grid_setrows(pgrid, min_rad, max_rows);
+	grid_setregion2i(pgrid, inner_index, outer_index);
 	return pgrid;
 }
 
@@ -66,9 +90,8 @@ grid_index grid_getindex(polgrid *pgrid, cpVect pos)
 	float radsq = cpvlengthsq(pos);
 
 	int y;
-	float r1 = pgrid->rad[0]; r1 *= r1;
-	for (y = 1; y < pgrid->rows; y++)
-	{
+	float r1 = pgrid->rad[pgrid->inner_i]; r1 *= r1;
+	for (y = pgrid->inner_i + 1; y < pgrid->outer_i; y++) {
 		float r2 = pgrid->rad[y]; r2 *= r2;
 		if (radsq >= r1 && radsq < r2) {
 			grid_i.yrow = y-1;
@@ -76,9 +99,7 @@ grid_index grid_getindex(polgrid *pgrid, cpVect pos)
 		}
 		r1 = r2;
 	}
-
 	return grid_i;
-
 }
 
 void grid_free(polgrid *pgrid)

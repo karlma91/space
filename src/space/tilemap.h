@@ -72,17 +72,19 @@ typedef struct tilemap2 {
 
 static __inline__ byte tilemap_getdata(tilemap2 *tm, int layer, int x, int y)
 {
-	int cols = tm->grid->cols, rows = tm->grid->rows;
+	int cols = tm->grid->cols;
+	int ii = tm->grid->inner_i, oi = tm->grid->outer_i;
 	return tm->data[layer]
-	        [(y >= rows-1) ? (rows-2 > 0 ? rows-2 : 0) : (y < 0) ? 0 : y]
+	        [(y >= oi-1) ? (oi-2 > ii ? oi-2 : 0) : (y < ii) ? ii : y]
 	        [(x >= cols) ? x - cols : (x < 0) ? x + cols : x];
 }
 
 static __inline__ void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y)
 {
-	int cols = tm->grid->cols, rows = tm->grid->rows;
+	int cols = tm->grid->cols;
+	int ii = tm->grid->inner_i, oi = tm->grid->outer_i;
 	x = (x >= cols) ? x - cols : (x < 0) ? x + cols : x;
-	y = (y >= rows-1) ? (rows-2 > 0 ? rows-2 : 0) : (y < 0) ? 0 : y;
+	y = (y >= oi-1) ? (oi-2 > ii ? oi-2 : 0) : (y < ii) ? ii : y;
 
 	byte data = tilemap_getdata(tm, layer, x, y);
 
@@ -109,9 +111,10 @@ static __inline__ void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y)
 
 static __inline__ void tilemap_settile(tilemap2 *tm, int layer, int x, int y, we_bool set)
 {
-	int cols = tm->grid->cols, rows = tm->grid->rows;
+	int cols = tm->grid->cols;
+	int ii = tm->grid->inner_i, oi = tm->grid->outer_i;
 	x = (x >= cols) ? x - cols : (x < 0) ? x + cols : x;
-	y = (y >= rows-1) ? (rows-2 > 0 ? rows-2 : 0) : (y < 0) ? 0 : y;
+	y = (y >= oi-1) ? (oi-2 > ii ? oi-2 : 0) : (y < ii) ? ii : y;
 
 	tm->data[layer][y][x] = set ? TILE_TYPE_UNDEF : TILE_TYPE_NONE;
 	tilemap_updatetile(tm, layer, x, y);
