@@ -204,11 +204,12 @@ static void load_tilemap(cJSON *t, level *lvl)
 	pl_parse(t, "t_layers", "int", &(lvl->tilemap.layers), &def);
 
 	lvl->tilemap.grid = grid_create(cols, lvl->inner_radius, lvl->outer_radius);
+	/*
 	if (lvl->tilemap.grid->rows != rows) {
         fprintf(stderr, "WARNING load_tilemap: inconsistent row count. Got %d, expected %d! Setting row count to expected value\n", lvl->tilemap.grid->rows, rows);
         lvl->tilemap.grid->rows = rows;
     }
-
+	*/
 	cJSON *data = cJSON_GetObjectItem(t,"tilemaptest");
 	if(data) {
 		int i,j,k;
@@ -225,20 +226,21 @@ static void load_tilemap(cJSON *t, level *lvl)
 
 }
 
+#define FILE_SIZE_BUFFER 128000
 level *level_load(int folder, char * filename)
 {
 	SDL_Log("PARSING LEVEL : %s", filename);
 	char file_path[100];
-	char buff[10000]; // TODO: stor nok?
+	char buff[FILE_SIZE_BUFFER]; // TODO: stor nok? (10kb ikke stort nok!)
 	int filesize;
 
 	if(folder == WAFFLE_DOCUMENTS||
 			folder == WAFFLE_LIBRARY){
 		FILE *f = waffle_fopen(WAFFLE_DOCUMENTS, filename, "r");
-		filesize = waffle_read(f, buff, 10000);
+		filesize = waffle_read(f, buff, FILE_SIZE_BUFFER);
 	}else if(folder == WAFFLE_ZIP ) {
 		sprintf(file_path,"level/%s.json", filename);
-		filesize = waffle_read_file_zip(file_path, buff, 10000);
+		filesize = waffle_read_file_zip(file_path, buff, FILE_SIZE_BUFFER);
 	}
 
 

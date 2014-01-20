@@ -2,6 +2,11 @@
 	"name" : "empty",
 	"tilemap" : "level1.tmx",
 	"timelimit": 100,
+	"innrad":	500,
+	"outrad":	1893.262207,
+	"t_layers":	3,
+	"t_rows":	22,
+	"t_cols":	48,
 	
 	"params" : [
 	],
