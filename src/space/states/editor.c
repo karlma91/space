@@ -354,7 +354,7 @@ static void move_instance(editor_touch *touch)
 					/* Jiggles instance to indicate that it will get removed on touch_up */
 					pos = cpvadd(pos, cpvmult(cpv(we_randf-0.5,we_randf-0.5), 20));
 					touch->data_obj_delete = WE_TRUE;
-				} else {
+				} else if (grid_i.yrow == -1) {
 					/* making sure non-deletable instances are not moved outside of station */
 					float new_rad = grid_inner_radius(lvl->tilemap.grid);
 					new_rad = (grid_i.dist_sq <= new_rad*new_rad) ? new_rad : grid_outer_radius(lvl->tilemap.grid);
@@ -442,10 +442,9 @@ static int touch_motion(SDL_TouchFingerEvent *finger)
 {
 	cpVect pos_view = cpv(finger->x, finger->y);
 	editor_touch *touch = get_touch(finger->fingerId);
-
-	switch(current_mode) {
-	case MODE_OBJECTS:
-		if (touch && touch->mode == MODE_OBJECTS) {
+	if (touch) {
+		switch(touch->mode) {
+		case MODE_OBJECTS:
 			touch->viewpos_cur = pos_view;
 			if (!touch->data.object_ins && !remove_tool && (cpvdistsq(touch->viewpos_start, pos_view) > 20*20)) {
 				fprintf(stderr, "DEBUG: motion unbind\n");
@@ -454,20 +453,12 @@ static int touch_motion(SDL_TouchFingerEvent *finger)
 				pool_release(pool_touches, touch);
 			}
 			return 1;
-		}
-		return 0;
-	case MODE_RESIZE:
-		if (touch && touch->mode == MODE_RESIZE) {
+		case MODE_RESIZE:
+			/* NO BREAK */
+		case MODE_TILEMAP:
 			touch->viewpos_cur = pos_view;
 			return 1;
 		}
-		break;
-	case MODE_TILEMAP:
-		if (touch && touch->mode == MODE_TILEMAP) {
-			touch->viewpos_cur = pos_view;
-			return 1;
-		}
-		break;
 	}
 	return 0;
 }
@@ -480,9 +471,9 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 	grid_index grid_i = grid_getindex(lvl->tilemap.grid, pos);
 
 	if (touch) {
-		switch(current_mode) {
+		switch(touch->mode) {
 		case MODE_OBJECTS:
-			if ((touch->mode == MODE_OBJECTS) && !remove_tool) {
+			if (!remove_tool) {
 				if (touch->data_obj_delete) {
 					delete_instance(touch);
 				} else if ((grid_i.yrow != -1) && touch->data.object_ins == NULL) {
@@ -493,23 +484,16 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 				} else {
 					return 0;
 				}
-				return 1;
+			} else {
+				return 0;
 			}
-			break;
+			/* NO BREAK */
 		case MODE_RESIZE:
-			if (touch->mode == MODE_RESIZE) {
-				llist_remove(ll_touches, touch);
-				pool_release(pool_touches, touch);
-				return 1;
-			}
-			break;
+			/* NO BREAK */
 		case MODE_TILEMAP:
-			if (touch->mode == MODE_TILEMAP) {
-				llist_remove(ll_touches, touch);
-				pool_release(pool_touches, touch);
-				return 1;
-			}
-			break;
+			llist_remove(ll_touches, touch);
+			pool_release(pool_touches, touch);
+			return 1;
 		}
 	}
 	return 0;
@@ -652,6 +636,10 @@ void editor_init()
 	button_set_click_callback(btn_save, save_level_to_file, 0);
 	button_set_click_callback(btn_save, save_level_to_file, 0);
 	button_set_click_callback(btn_delete, tap_delete_click, 0);
+
+	button_set_hotkeys(btn_state_resize, SDL_SCANCODE_1, 0);
+	button_set_hotkeys(btn_state_tilemap, SDL_SCANCODE_2, 0);
+	button_set_hotkeys(btn_state_objects, SDL_SCANCODE_3, 0);
 
 	button_set_hotkeys(btn_test, KEY_RETURN_1, KEY_RETURN_2);
 	button_set_hotkeys(btn_space, KEY_ESCAPE, 0);
