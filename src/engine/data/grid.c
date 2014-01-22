@@ -83,11 +83,12 @@ polgrid *grid_create(int col_count, float min_rad, int max_rows, int inner_index
 grid_index grid_getindex(polgrid *pgrid, cpVect pos)
 {
 	grid_index grid_i;
-	float angle = cpvtoangle(pos);
-	angle = angle < 0 ? angle + WE_2PI : angle;
-	grid_i.xcol = (int) (angle / pgrid->theta_unit);
+	grid_i.angle = cpvtoangle(pos);
+	grid_i.angle = grid_i.angle < 0 ? grid_i.angle + WE_2PI : grid_i.angle;
+	grid_i.xcol = (int) (grid_i.angle / pgrid->theta_unit);
 	grid_i.yrow = -1;
 	float radsq = cpvlengthsq(pos);
+	grid_i.dist_sq = radsq;
 
 	int y;
 	float r1 = pgrid->rad[pgrid->inner_i]; r1 *= r1;

@@ -27,6 +27,8 @@ typedef struct polgrid {
 
 typedef struct grid_index {
 	int xcol, yrow;
+	float dist_sq;
+	float angle;
 } grid_index;
 
 inline static cpVect grid_getpos(polgrid *pgrid, int col_i, int row_i)
@@ -105,6 +107,9 @@ inline static void grid_getquad8cpv_direct(polgrid *pgrid, cpVect *quad, int col
 	grid_getpos2cpv_direct(pgrid, quad+2, col_x+1, row_y+1);
 	grid_getpos2cpv_direct(pgrid, quad+3, col_x+0, row_y+1);
 }
+
+#define grid_inner_radius(grid_ptr) ((grid_ptr)->rad[(grid_ptr)->inner_i])
+#define grid_outer_radius(grid_ptr) ((grid_ptr)->rad[(grid_ptr)->outer_i-1])
 
 void grid_draw(polgrid *pgrid, int layer, float linewidth);
 polgrid *grid_create(int col_count, float min_rad, int max_rows, int inner_index, int outer_index);

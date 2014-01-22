@@ -54,12 +54,13 @@ typedef enum TILE_MODE {
 
 /*********** OBJECT MODE ***********/
 static void select_object_type(void *index);
-
+#define PANEL_WIDTH 300
 #define EDITOR_OBJECT_COUNT 8
 static int remove_tool = 0;
 static int active_obj_index = 0;
 static char object_type[32], *param_name;
 static float btn_xoffset[EDITOR_OBJECT_COUNT];
+static float panel_offset = -400;
 
 //TODO render objects as they are actually rendered in object list
 static char object_names[EDITOR_OBJECT_COUNT][32] = {
@@ -348,14 +349,16 @@ static void move_instance(editor_touch *touch)
 		if (!remove_tool) {
 			// check if pos is inside station walls
 			grid_index grid_i = grid_getindex(lvl->tilemap.grid,pos);
-			if (grid_i.yrow == -1) {
+			if ((grid_i.yrow == -1) || (touch->viewpos_cur.x < (panel_offset + PANEL_WIDTH - view_editor->view_width/2))) {
 				if (is_deletable(touch->data.object_ins)) {
 					/* Jiggles instance to indicate that it will get removed on touch_up */
 					pos = cpvadd(pos, cpvmult(cpv(we_randf-0.5,we_randf-0.5), 20));
 					touch->data_obj_delete = WE_TRUE;
 				} else {
-					//TODO smoother instance movement (move to radius of outermost grid)
-					return; /* making sure non-deletable instances are not moved outside of station */
+					/* making sure non-deletable instances are not moved outside of station */
+					float new_rad = grid_inner_radius(lvl->tilemap.grid);
+					new_rad = (grid_i.dist_sq <= new_rad*new_rad) ? new_rad : grid_outer_radius(lvl->tilemap.grid);
+					pos = WE_P2C(new_rad, grid_i.angle);
 				}
 			} else {
 				touch->data_obj_delete = WE_FALSE;
@@ -403,7 +406,7 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 				//TODO don't allow more than one(or two for rotate/scale of instance) binding per instance!
 				touch->game_offset = cpvsub(data.object_ins->body->p, pos);
 				if (!remove_tool) {
-					touch->data_obj_delete = is_deletable(touch->data.object_ins) && (grid_i.yrow == -1);
+					touch->data_obj_delete = is_deletable(touch->data.object_ins) && ((grid_i.yrow == -1) || (pos.x < (panel_offset + PANEL_WIDTH - view_editor->view_width/2)));
 				}
 			}
 			return 1; /* consume event: no zoom/pan/rotate of scroller*/
@@ -548,14 +551,13 @@ static int editor_drag_button(button btn_id, SDL_TouchFingerEvent *finger, void 
 	return 0;
 }
 
-static float panel_offset = -400;
 static void draw_gui(view *v)
 {
-	touch_place(scr_objects,-GAME_WIDTH/2+150+panel_offset,0);
+	touch_place(scr_objects,-GAME_WIDTH/2+PANEL_WIDTH/2+panel_offset,0);
 	cpVect obj_offset = scroll_get_offset(scr_objects);
 	//TODO use another view for objects_scroller
 	int i = active_obj_index;
-	float x = -GAME_WIDTH/2+150 + panel_offset;
+	float x = -GAME_WIDTH/2+PANEL_WIDTH/2 + panel_offset;
 	float y = GAME_HEIGHT/2-200 + obj_offset.y - i * 250;
 
 	switch(current_mode) {
@@ -564,7 +566,7 @@ static void draw_gui(view *v)
 		draw_quad_patch_center(0, SPRITE_PLAYERGUN001, cpv(x,y), cpv(200,200), 20, 0);
 		bmfont_center(FONT_COURIER, cpv(0,-v->view_height/2),1,"MODE: %d",(int)current_mode);
 		draw_color4b(50,50,50,25);
-		draw_box(RLAY_GUI_BACK,cpv(-GAME_WIDTH/2+panel_offset,-GAME_HEIGHT/2),cpv(300, GAME_HEIGHT),0,0);
+		draw_box(RLAY_GUI_BACK,cpv(-GAME_WIDTH/2+panel_offset,-GAME_HEIGHT/2),cpv(PANEL_WIDTH, GAME_HEIGHT),0,0);
 		break;
 	case MODE_TILEMAP:
 		bmfont_center(FONT_COURIER, cpv(0,-v->view_height/2),1,"col: %d, row: %d", grid_i_cur.xcol, grid_i_cur.yrow);
