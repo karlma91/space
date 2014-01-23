@@ -53,7 +53,8 @@ typedef enum TILE_TYPE{
 	TILE_TYPE_DIAG_SE, // TILE: /| SE
 	TILE_TYPE_DIAG_NE, // TILE: \| NE
 	TILE_TYPE_DIAG_NW, // TILE: |/ NW
-	TILE_TYPE_COUNT
+	TILE_TYPE_COUNT,
+	TILE_TYPE_OUTSIDE = -1
 } TILE_TYPE;
 
 typedef struct tilemap2 {
@@ -72,8 +73,8 @@ typedef struct tilemap2 {
 
 static __inline__ byte tilemap_getdata(tilemap2 *tm, int layer, int x, int y)
 {
-	grid_wrap_index(tm->grid, &x, &y);
-	return tm->data[layer][y][x];
+	int outside = grid_wrap_index(tm->grid, &x, &y);
+	return outside ? TILE_TYPE_OUTSIDE : tm->data[layer][y][x];
 }
 
 

@@ -265,20 +265,22 @@ void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y)
 		SE = tilemap_getdata(tm, layer, x+1, y+1);
 		SW = tilemap_getdata(tm, layer, x-1, y+1);
 
-		if (N && E && S && W) {
-			data = TILE_TYPE_FULL;
-		} else if (!N && !E && (S || W) && (SE || NW)) {  /* |\ */
-			data = TILE_TYPE_DIAG_SW;
-		} else if (!N && !W && (S || E) && (SW || NE)) {  /* /| */
-			data = TILE_TYPE_DIAG_SE;
-		} else if (!S && !W && (N || E) && (NW || SE)) {  /* \| */
-			data = TILE_TYPE_DIAG_NE;
-		} else if (!S && !E && (N || W) && (NE || SW)) {  /* |/ */
-			data = TILE_TYPE_DIAG_NW;
-		} else {
-			data = TILE_TYPE_FULL;
-		}
-		tm->data[layer][y][x] = data;
+		we_bool D_SW, D_SE, D_NE, D_NW;
+
+		D_SW = !(N | E) && ((S && SE) || (W && NW)); /* |\ */
+		D_SE = !(N | W) && ((S && SW) || (E && NE)); /* /| */
+		D_NE = !(S | W) && ((N && NW) || (E && SE)); /* \| */
+		D_NW = !(S | E) && ((N && NE) || (W && SW)); /* |/ */
+
+		tm->data[layer][y][x] =
+		D_SW && !(D_SE || D_NW) ?
+			TILE_TYPE_DIAG_SW :
+		D_SE && !(D_SW || D_NE) ?
+			TILE_TYPE_DIAG_SE :
+		D_NE && !(D_NW || D_SE) ?
+			TILE_TYPE_DIAG_NE :
+		D_NW && !(D_NE || D_SW) ?
+			TILE_TYPE_DIAG_NW : TILE_TYPE_FULL;
 	}
 }
 
