@@ -72,56 +72,27 @@ typedef struct tilemap2 {
 
 static __inline__ byte tilemap_getdata(tilemap2 *tm, int layer, int x, int y)
 {
-	int cols = tm->grid->cols;
-	int ii = tm->grid->inner_i, oi = tm->grid->outer_i;
-	return tm->data[layer]
-	        [(y >= oi-1) ? (oi-2 > ii ? oi-2 : 0) : (y < ii) ? ii : y]
-	        [(x >= cols) ? x - cols : (x < 0) ? x + cols : x];
+	grid_wrap_index(tm->grid, &x, &y);
+	return tm->data[layer][y][x];
 }
 
-static __inline__ void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y)
-{
-	int cols = tm->grid->cols;
-	int ii = tm->grid->inner_i, oi = tm->grid->outer_i;
-	x = (x >= cols) ? x - cols : (x < 0) ? x + cols : x;
-	y = (y >= oi-1) ? (oi-2 > ii ? oi-2 : 0) : (y < ii) ? ii : y;
 
-	byte data = tilemap_getdata(tm, layer, x, y);
-
-	if (data) {
-		byte N, E, S, W;
-		N = tilemap_getdata(tm, layer, x,   y-1);
-		E = tilemap_getdata(tm, layer, x+1, y);
-		S = tilemap_getdata(tm, layer, x,   y+1);
-		W = tilemap_getdata(tm, layer, x-1, y);
-
-		data = TILE_TYPE_FULL;
-		if (!N && !E && S && W) {         /* |\ */
-			data = TILE_TYPE_DIAG_SW;
-		} else if (!N && E && S && !W) {  /* /| */
-			data = TILE_TYPE_DIAG_SE;
-		} else if (N && E && !S && !W) {  /* \| */
-			data = TILE_TYPE_DIAG_NE;
-		} else if (N && !E && !S && W) {  /* |/ */
-			data = TILE_TYPE_DIAG_NW;
-		}
-		tm->data[layer][y][x] = data;
-	}
-}
+/*static __inline__ */
+void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y);
 
 static __inline__ void tilemap_settile(tilemap2 *tm, int layer, int x, int y, we_bool set)
 {
-	int cols = tm->grid->cols;
-	int ii = tm->grid->inner_i, oi = tm->grid->outer_i;
-	x = (x >= cols) ? x - cols : (x < 0) ? x + cols : x;
-	y = (y >= oi-1) ? (oi-2 > ii ? oi-2 : 0) : (y < ii) ? ii : y;
-
+	grid_wrap_index(tm->grid, &x, &y);
 	tm->data[layer][y][x] = set ? TILE_TYPE_UNDEF : TILE_TYPE_NONE;
 	tilemap_updatetile(tm, layer, x, y);
 	tilemap_updatetile(tm, layer, x+1, y);
 	tilemap_updatetile(tm, layer, x-1, y);
 	tilemap_updatetile(tm, layer, x, y+1);
 	tilemap_updatetile(tm, layer, x, y-1);
+	tilemap_updatetile(tm, layer, x+1, y+1);
+	tilemap_updatetile(tm, layer, x-1, y+1);
+	tilemap_updatetile(tm, layer, x+1, y-1);
+	tilemap_updatetile(tm, layer, x-1, y-1);
 }
 
 void tilemap2_render(tilemap2 *tm);

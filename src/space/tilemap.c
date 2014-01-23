@@ -247,3 +247,38 @@ static int parse_data(tilemap *map, char *data)
 	return 0;
 }
 
+
+void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y)
+{
+	grid_wrap_index(tm->grid, &x, &y);
+	byte data = tilemap_getdata(tm, layer, x, y);
+
+	if (data) {
+		byte N, E, S, W, NW, NE, SE, SW;
+		N = tilemap_getdata(tm, layer, x,   y-1);
+		E = tilemap_getdata(tm, layer, x+1, y);
+		S = tilemap_getdata(tm, layer, x,   y+1);
+		W = tilemap_getdata(tm, layer, x-1, y);
+
+		NW = tilemap_getdata(tm, layer, x-1, y-1);
+		NE = tilemap_getdata(tm, layer, x+1, y-1);
+		SE = tilemap_getdata(tm, layer, x+1, y+1);
+		SW = tilemap_getdata(tm, layer, x-1, y+1);
+
+		if (N && E && S && W) {
+			data = TILE_TYPE_FULL;
+		} else if (!N && !E && (S || W) && (SE || NW)) {  /* |\ */
+			data = TILE_TYPE_DIAG_SW;
+		} else if (!N && !W && (S || E) && (SW || NE)) {  /* /| */
+			data = TILE_TYPE_DIAG_SE;
+		} else if (!S && !W && (N || E) && (NW || SE)) {  /* \| */
+			data = TILE_TYPE_DIAG_NE;
+		} else if (!S && !E && (N || W) && (NE || SW)) {  /* |/ */
+			data = TILE_TYPE_DIAG_NW;
+		} else {
+			data = TILE_TYPE_FULL;
+		}
+		tm->data[layer][y][x] = data;
+	}
+}
+

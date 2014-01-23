@@ -194,7 +194,6 @@ static void editor_setmode(editor_mode state)
 
 	/* MODE_OBJECTS */
 	visible = (current_mode == MODE_OBJECTS);
-	btn_delete->visible = visible;
 	remove_tool = 0;
 
 	/* MODE_RESIZE */
@@ -635,7 +634,6 @@ void editor_init()
 	button_set_click_callback(btn_test, start_editor_level, 0); // TODO test level with this button
 	button_set_click_callback(btn_save, save_level_to_file, 0);
 	button_set_click_callback(btn_save, save_level_to_file, 0);
-	button_set_click_callback(btn_delete, tap_delete_click, 0);
 
 	button_set_hotkeys(btn_state_resize, SDL_SCANCODE_1, 0);
 	button_set_hotkeys(btn_state_tilemap, SDL_SCANCODE_2, 0);
@@ -643,23 +641,19 @@ void editor_init()
 
 	button_set_hotkeys(btn_test, KEY_RETURN_1, KEY_RETURN_2);
 	button_set_hotkeys(btn_space, KEY_ESCAPE, 0);
-	button_set_hotkeys(btn_delete, SDLK_DELETE, SDLK_BACKSPACE);
 
 	button_set_enlargement(btn_space, 1.5);
 	button_set_enlargement(btn_clear, 1.5);
 	button_set_enlargement(btn_test, 1.5);
 	button_set_enlargement(btn_save, 1.5);
-	button_set_enlargement(btn_delete, 1.5);
 	button_set_enlargement(btn_state_objects, 1.2);
 	button_set_enlargement(btn_state_resize, 1.2);
 	button_set_enlargement(btn_state_tilemap, 1.2);
-	button_set_backcolor(btn_delete, COL_RED);
 
 	state_register_touchable_view(view_editor, btn_space);
 	state_register_touchable_view(view_editor, btn_clear);
 	state_register_touchable_view(view_editor, btn_test);
 	state_register_touchable_view(view_editor, btn_save);
-	state_register_touchable_view(view_editor, btn_delete);
 	state_register_touchable_view(view_editor, btn_state_objects);
 	state_register_touchable_view(view_editor, btn_state_resize);
 	state_register_touchable_view(view_editor, btn_state_tilemap);
@@ -784,8 +778,8 @@ static void draw(void)
 	//tilemap_render(RLAY_BACK_BACK, lvl->tiles);
 	space_draw_deck();
 
-	draw_color4f(0.5,0.5,0.5,1);
-	if (0 && current_mode == MODE_TILEMAP) { // (current_mode == MODE_RESIZE)
+	draw_color4b(80,80,80,100);
+	if (current_mode == MODE_TILEMAP) { // (current_mode == MODE_RESIZE)
 		grid_draw(lvl->tilemap.grid, 0,  10 / current_view->zoom);
 	}
 

@@ -36,6 +36,14 @@ inline static cpVect grid_getpos(polgrid *pgrid, int col_i, int row_i)
 	return cpv(pgrid->cosxcol[col_i] * pgrid->rad[row_i], pgrid->sinxcol[col_i] * pgrid->rad[row_i]);
 }
 
+inline static void grid_wrap_index(polgrid *pgrid, int *x, int *y)
+{
+	int cols = pgrid->cols;
+	int ii = pgrid->inner_i, oi = pgrid->outer_i;
+    *y = (*y >= oi-1) ? (oi-2 > ii ? oi-2 : 0) : (*y < ii) ? ii : *y;
+    *x = (*x >= cols) ? *x - cols : (*x < 0) ? *x + cols : *x;
+}
+
 inline static void grid_getpos2f(polgrid *pgrid, float *pos, int col_x, int row_y)
 {
 	float cols = pgrid->cols;

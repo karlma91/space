@@ -52,7 +52,6 @@ void grid_setregion2f(polgrid *pgrid, float inner_radius, int outer_radius)
 
 void grid_draw(polgrid *pgrid, int layer, float linewidth)
 {
-	//return;
 	int i, j;
 	float circle[(1+pgrid->cols)*2];
 	float line[4];
