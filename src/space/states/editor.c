@@ -31,12 +31,14 @@ static char level_name[32];
 typedef enum EDITOR_MODE {
 	MODE_RESIZE,
 	MODE_TILEMAP,
-	MODE_OBJECTS
+	MODE_OBJECTS,
+	MODE_TOGGLE
 } editor_mode;
 static editor_mode current_mode = MODE_RESIZE;
 
 
 /*********** RESIZE_MODE ***********/
+float inner_resize_margin = 0, outer_resize_margin = 0;
 typedef enum RESIZE_MODE {
 	RESIZE_NONE,
 	RESIZE_INNER,
@@ -56,7 +58,6 @@ typedef enum TILE_MODE {
 static void select_object_type(void *index);
 #define PANEL_WIDTH 300
 #define EDITOR_OBJECT_COUNT 8
-static int remove_tool = 0;
 static int active_obj_index = 0;
 static char object_type[32], *param_name;
 static float btn_xoffset[EDITOR_OBJECT_COUNT];
@@ -102,9 +103,9 @@ struct instance_dummy {
 static view *view_editor;
 static touchable *scr_world, *scr_objects;
 static button btn_space, btn_clear, btn_test, btn_save;
-static button btn_state_resize;
-static button btn_state_tilemap, btn_layer;
-static button btn_state_objects, btn_delete, btn_objects[EDITOR_OBJECT_COUNT];
+static button btn_state_toggle;
+static button btn_layer;
+static button btn_objects[EDITOR_OBJECT_COUNT]; //TODO add param buttons
 static LList ll_touches;
 static pool *pool_touches;
 
@@ -182,19 +183,19 @@ static void tap_clear_editor(void *unused)
 	if (player) p = player->body->p;
 	view_editor->zoom = 1;
 	view_update(view_editor, p, 0);
-	remove_tool = 0;
-	enable_objlist(!remove_tool);
 }
 
 static void editor_setmode(editor_mode state)
 {
-	current_mode = state;
-
 	we_bool visible;
+	if (state == MODE_TOGGLE) {
+		state = (current_mode == MODE_OBJECTS) ? MODE_TILEMAP : MODE_OBJECTS;
+	}
+	current_mode = state;
 
 	/* MODE_OBJECTS */
 	visible = (current_mode == MODE_OBJECTS);
-	remove_tool = 0;
+	button_set_text(btn_state_toggle, visible ? "Gulv" : "Fiender");
 
 	/* MODE_RESIZE */
 	visible = (current_mode == MODE_RESIZE);
@@ -211,14 +212,6 @@ static void setlayer(button btn)
 	current_tlay = current_tlay >= TLAY_COUNT ? 0 : current_tlay;
 	char number[2] = {('0'+(char)current_tlay), '\0'};
 	button_set_text(btn, number);
-}
-
-
-
-static void tap_delete_click(void *unused)
-{
-	remove_tool = !remove_tool;
-	enable_objlist(!remove_tool);
 }
 
 static editor_touch *get_touch(SDL_FingerID finger_id)
@@ -260,12 +253,14 @@ static void move_radius(editor_touch *touch)
 			lvl->inner_radius = new_r;
 			grid_setregion2f(lvl->tilemap.grid, lvl->inner_radius, lvl->outer_radius);
 		}
+		inner_resize_margin += (1 - inner_resize_margin) / 2;
 	} else if(touch->data.resize_mode == RESIZE_OUTER) {
 		float new_r = lvl->outer_radius + (cpvlength(pos) - cpvlength(prev));
 		if(new_r <= MAX_OUTER_RADIUS && new_r >= lvl->inner_radius + MIN_RADIUS_OFFSET) {
 			lvl->outer_radius = new_r;
 			grid_setregion2f(lvl->tilemap.grid, lvl->inner_radius, lvl->outer_radius);
 		}
+		outer_resize_margin += (1 - outer_resize_margin) / 2;
 	}
 }
 
@@ -345,28 +340,24 @@ static void move_instance(editor_touch *touch)
 {
 	cpVect pos = view_view2world(view_editor, touch->viewpos_cur);
 	if (touch->data.object_ins) {
-		if (!remove_tool) {
-			// check if pos is inside station walls
-			grid_index grid_i = grid_getindex(lvl->tilemap.grid,pos);
-			if ((grid_i.yrow == -1) || (touch->viewpos_cur.x < (panel_offset + PANEL_WIDTH - view_editor->view_width/2))) {
-				if (is_deletable(touch->data.object_ins)) {
-					/* Jiggles instance to indicate that it will get removed on touch_up */
-					pos = cpvadd(pos, cpvmult(cpv(we_randf-0.5,we_randf-0.5), 20));
-					touch->data_obj_delete = WE_TRUE;
-				} else if (grid_i.yrow == -1) {
-					/* making sure non-deletable instances are not moved outside of station */
-					float new_rad = grid_inner_radius(lvl->tilemap.grid);
-					new_rad = (grid_i.dist_sq <= new_rad*new_rad) ? new_rad : grid_outer_radius(lvl->tilemap.grid);
-					pos = WE_P2C(new_rad, grid_i.angle);
-				}
-			} else {
-				touch->data_obj_delete = WE_FALSE;
+		// check if pos is inside station walls
+		grid_index grid_i = grid_getindex(lvl->tilemap.grid,pos);
+		if ((grid_i.yrow == -1) || (touch->viewpos_cur.x < (panel_offset + PANEL_WIDTH - view_editor->view_width/2))) {
+			if (is_deletable(touch->data.object_ins)) {
+				/* Jiggles instance to indicate that it will get removed on touch_up */
+				pos = cpvadd(pos, cpvmult(cpv(we_randf-0.5,we_randf-0.5), 20));
+				touch->data_obj_delete = WE_TRUE;
+			} else if (grid_i.yrow == -1) {
+				/* making sure non-deletable instances are not moved outside of station */
+				float new_rad = grid_inner_radius(lvl->tilemap.grid);
+				new_rad = (grid_i.dist_sq <= new_rad*new_rad) ? new_rad : grid_outer_radius(lvl->tilemap.grid);
+				pos = WE_P2C(new_rad, grid_i.angle);
 			}
-			touch->data.object_ins->p_start = cpvadd(pos, touch->game_offset);
-			touch->data.object_ins->TYPE->call.init(touch->data.object_ins);
 		} else {
-			delete_instance(touch);
+			touch->data_obj_delete = WE_FALSE;
 		}
+		touch->data.object_ins->p_start = cpvadd(pos, touch->game_offset);
+		touch->data.object_ins->TYPE->call.init(touch->data.object_ins);
 	} else {
 		touch->data.object_ins = instance_at_pos(pos, OBJECT_MARGIN/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
 	}
@@ -393,30 +384,29 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 	editor_touch *tile_touch;
 
 	switch (current_mode) {
-	case MODE_OBJECTS:
+	case MODE_OBJECTS: case MODE_RESIZE:
 		data.object_ins = instance_at_pos(pos, OBJECT_MARGIN/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
-		if ((remove_tool && !data.object_ins) || contains_instance(data.object_ins)) {
-			return 0;
+
+		if (!data.object_ins) {
+			data.resize_mode = radius_at_pos(pos, WALL_MARGIN/view_editor->zoom);
+			if (data.resize_mode != RESIZE_NONE) {
+				touch_unique_id touch_id = finger_bind(finger->fingerId);
+				add_touchdata(MODE_RESIZE, touch_id, pos_view, cpvzero, data);
+				return 1;
+			}
 		}
-		touch_unique_id touch_id = finger_bind(finger->fingerId);
-		if (touch_id != -1) {
-			editor_touch *touch = add_touchdata(MODE_OBJECTS, touch_id, pos_view, cpvzero, data);
-			if (data.object_ins) {
-				//TODO don't allow more than one(or two for rotate/scale of instance) binding per instance!
-				touch->game_offset = cpvsub(data.object_ins->body->p, pos);
-				if (!remove_tool) {
+
+		if (!contains_instance(data.object_ins)) {
+			touch_unique_id touch_id = finger_bind(finger->fingerId);
+			if (touch_id != -1) {
+				editor_touch *touch = add_touchdata(MODE_OBJECTS, touch_id, pos_view, cpvzero, data);
+				if (data.object_ins) {
+					//TODO don't allow more than one(or two for rotate/scale of instance) binding per instance!
+					touch->game_offset = cpvsub(data.object_ins->body->p, pos);
 					touch->data_obj_delete = is_deletable(touch->data.object_ins) && ((grid_i.yrow == -1) || (pos.x < (panel_offset + PANEL_WIDTH - view_editor->view_width/2)));
 				}
+				return 1; /* consume event: no zoom/pan/rotate of scroller*/
 			}
-			return 1; /* consume event: no zoom/pan/rotate of scroller*/
-		}
-		break;
-	case MODE_RESIZE:
-		data.resize_mode = radius_at_pos(pos, WALL_MARGIN/view_editor->zoom);
-		if (data.resize_mode != RESIZE_NONE) {
-			touch_unique_id touch_id = finger_bind(finger->fingerId);
-			add_touchdata(MODE_RESIZE, touch_id, pos_view, cpvzero, data);
-			return 1;
 		}
 		break;
 	case MODE_TILEMAP:
@@ -445,7 +435,7 @@ static int touch_motion(SDL_TouchFingerEvent *finger)
 		switch(touch->mode) {
 		case MODE_OBJECTS:
 			touch->viewpos_cur = pos_view;
-			if (!touch->data.object_ins && !remove_tool && (cpvdistsq(touch->viewpos_start, pos_view) > 20*20)) {
+			if (!touch->data.object_ins && (cpvdistsq(touch->viewpos_start, pos_view) > 20*20)) {
 				fprintf(stderr, "DEBUG: motion unbind\n");
 				finger_unbind(touch->ID);
 				llist_remove(ll_touches, touch);
@@ -472,17 +462,13 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 	if (touch) {
 		switch(touch->mode) {
 		case MODE_OBJECTS:
-			if (!remove_tool) {
-				if (touch->data_obj_delete) {
-					delete_instance(touch);
-				} else if ((grid_i.yrow != -1) && touch->data.object_ins == NULL) {
-					//TODO make sure there are no other instances beneath pos!
-					instance_create(object_by_name(object_type), level_get_param(&(lvl->params), object_type, param_name), pos, cpvzero);
-					llist_remove(ll_touches, touch);
-					pool_release(pool_touches, touch);
-				} else {
-					return 0;
-				}
+			if (touch->data_obj_delete) {
+				delete_instance(touch);
+			} else if ((grid_i.yrow != -1) && touch->data.object_ins == NULL) {
+				//TODO make sure there are no other instances beneath pos!
+				instance_create(object_by_name(object_type), level_get_param(&(lvl->params), object_type, param_name), pos, cpvzero);
+				llist_remove(ll_touches, touch);
+				pool_release(pool_touches, touch);
 			} else {
 				return 0;
 			}
@@ -557,6 +543,7 @@ static void draw_gui(view *v)
 	}
 }
 
+static Color tilecol = {31,143,31,200};
 void editor_init()
 {
 	sprintf(object_type, "%s", "TURRET");
@@ -617,16 +604,12 @@ void editor_init()
 	btn_test   = button_create(SPRITE_BTN_NEXT, 0, "", GAME_WIDTH/2 - 120, GAME_HEIGHT * (0.60-0.5), 125, 125);
 	btn_save   = button_create(SPRITE_COIN, 	0, "", GAME_WIDTH/2 - 120, GAME_HEIGHT * (0.45-0.5), 125, 125);
 
-	btn_state_objects = button_create(SPRITE_SPIKEBALL, 0, "Objects", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 400, 125, 125);
-	btn_state_resize  = button_create(SPRITE_SPIKEBALL, 0, "Resize",  GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 300, 125, 125);
-	btn_state_tilemap = button_create(SPRITE_SPIKEBALL, 0, "Tilemap", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 200, 125, 125);
+	btn_state_toggle = button_create(SPRITE_WHITE, 0, "", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 100, 320, 100);
+	btn_layer  = button_create(NULL, 0, "", GAME_WIDTH/2 - 25, -GAME_HEIGHT/2 + 25, 50, 50);
 
-	btn_delete = button_create(SPRITE_SPIKEBALL, 0, "X", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 100, 125, 125);
-	btn_layer  = button_create(NULL, 0, "1", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 100, 125, 125);
+	button_set_backcolor(btn_state_toggle, tilecol);
 
-	button_set_click_callback(btn_state_objects, editor_setmode, MODE_OBJECTS);
-	button_set_click_callback(btn_state_resize, editor_setmode,  MODE_RESIZE);
-	button_set_click_callback(btn_state_tilemap, editor_setmode,  MODE_TILEMAP);
+	button_set_click_callback(btn_state_toggle, editor_setmode, MODE_TOGGLE);
 	button_set_click_callback(btn_layer, setlayer, btn_layer);
 
 	button_set_click_callback(btn_space, statesystem_set_state, state_stations);
@@ -635,9 +618,7 @@ void editor_init()
 	button_set_click_callback(btn_save, save_level_to_file, 0);
 	button_set_click_callback(btn_save, save_level_to_file, 0);
 
-	button_set_hotkeys(btn_state_resize, SDL_SCANCODE_1, 0);
-	button_set_hotkeys(btn_state_tilemap, SDL_SCANCODE_2, 0);
-	button_set_hotkeys(btn_state_objects, SDL_SCANCODE_3, 0);
+	button_set_hotkeys(btn_state_toggle, SDL_SCANCODE_1, 0);
 
 	button_set_hotkeys(btn_test, KEY_RETURN_1, KEY_RETURN_2);
 	button_set_hotkeys(btn_space, KEY_ESCAPE, 0);
@@ -646,17 +627,13 @@ void editor_init()
 	button_set_enlargement(btn_clear, 1.5);
 	button_set_enlargement(btn_test, 1.5);
 	button_set_enlargement(btn_save, 1.5);
-	button_set_enlargement(btn_state_objects, 1.2);
-	button_set_enlargement(btn_state_resize, 1.2);
-	button_set_enlargement(btn_state_tilemap, 1.2);
+	button_set_enlargement(btn_state_toggle, 1.2);
 
 	state_register_touchable_view(view_editor, btn_space);
 	state_register_touchable_view(view_editor, btn_clear);
 	state_register_touchable_view(view_editor, btn_test);
 	state_register_touchable_view(view_editor, btn_save);
-	state_register_touchable_view(view_editor, btn_state_objects);
-	state_register_touchable_view(view_editor, btn_state_resize);
-	state_register_touchable_view(view_editor, btn_state_tilemap);
+	state_register_touchable_view(view_editor, btn_state_toggle);
 	state_register_touchable_view(view_editor, btn_layer);
 
 	/* OBJECT BUTTON INIT */
@@ -687,7 +664,7 @@ void editor_init()
 	lvl->tilemap.render_layers[TLAY_SOLID] = RLAY_GAME_BACK;
 	lvl->tilemap.render_layers[TLAY_OVERLAY] = RLAY_GAME_FRONT;
 	tap_clear_editor(NULL);
-	editor_setmode(MODE_RESIZE);
+	editor_setmode(MODE_OBJECTS);
 }
 
 /* * * * * * * * * *
@@ -702,7 +679,7 @@ static void on_enter(void)
 static void pre_update(void)
 {
 	float panelspeed = 400*dt / 0.1;
-	if (remove_tool || current_mode == MODE_RESIZE || current_mode == MODE_TILEMAP) {
+	if (current_mode == MODE_TILEMAP) {
 		panel_offset = panel_offset - panelspeed > -400 ? panel_offset - panelspeed : -400;
 	} else {
 		panel_offset = panel_offset + panelspeed < 0 ? panel_offset + panelspeed : 0;
@@ -723,7 +700,7 @@ static void pre_update(void)
 		}
 	}
 
-	we_bool resizing = WE_FALSE;
+	we_bool resize_inn = WE_FALSE, resize_out = WE_FALSE;
 	llist_begin_loop(ll_touches);
 	while (llist_hasnext(ll_touches)) {
 		editor_touch *touch = (editor_touch *) llist_next(ll_touches);
@@ -737,9 +714,9 @@ static void pre_update(void)
 				paint_tile(touch);
 				break;
 			case MODE_RESIZE:
-				resizing = WE_TRUE;
+				resize_inn = touch->data.resize_mode == RESIZE_INNER ? WE_TRUE : resize_inn;
+				resize_out = touch->data.resize_mode == RESIZE_OUTER ? WE_TRUE : resize_out;
 				move_radius(touch);
-
 				break;
 			}
 			touch->viewpos_prev = touch->viewpos_cur;
@@ -757,7 +734,13 @@ static void pre_update(void)
 	}
 	llist_end_loop(ll_touches);
 
-	if (!resizing) {
+	if (!resize_inn) {
+		inner_resize_margin /= 2;
+	}
+	if (!resize_out) {
+		outer_resize_margin /= 2;
+	}
+	if (!(resize_inn || resize_out)) {
 		float target_ir = lvl->tilemap.grid->rad[lvl->tilemap.grid->inner_i];
 		float target_or = lvl->tilemap.grid->rad[lvl->tilemap.grid->outer_i-1];
 		lvl->inner_radius = (target_ir+lvl->inner_radius)/2;
@@ -779,21 +762,21 @@ static void draw(void)
 	space_draw_deck();
 
 	draw_color4b(80,80,80,100);
-	if (current_mode == MODE_TILEMAP) { // (current_mode == MODE_RESIZE)
-		grid_draw(lvl->tilemap.grid, 0,  10 / current_view->zoom);
+	if (current_mode == MODE_TILEMAP) {
+		grid_draw(lvl->tilemap.grid, 0,  6 / current_view->zoom);
 	}
 
-	if (current_mode == MODE_RESIZE) {
-		draw_color4f(0.2,0.6,0.2,0.2);
-		float r1, r2;
-		float margin = WALL_MARGIN / current_view->zoom;
-		r1 = lvl->inner_radius, r2 = r1;;
-		r1 -= margin; r2 += margin;
-		draw_donut(RLAY_GAME_FRONT, cpvzero, r1 < 0 ? 0 : r1, r2);
-		r1 = lvl->outer_radius, r2 = r1;
-		r1 -= margin; r2 += margin;
-		draw_donut(RLAY_GAME_FRONT, cpvzero, r1 < 0 ? 0 : r1, r2);
-	}
+	draw_color4f(0.2,0.6,0.2,0.2);
+	float r1, r2, margin;
+	margin = 20 * inner_resize_margin / current_view->zoom;
+	r1 = lvl->inner_radius, r2 = r1;;
+	r1 -= margin; r2 += margin;
+	if (margin > 0.5) draw_donut(RLAY_GAME_FRONT, cpvzero, r1 < 0 ? 0 : r1, r2);
+	margin = 20 * outer_resize_margin / current_view->zoom;
+	r1 = lvl->outer_radius, r2 = r1;
+	r1 -= margin; r2 += margin;
+
+	if (margin > 0.5) draw_donut(RLAY_GAME_FRONT, cpvzero, r1 < 0 ? 0 : r1, r2);
 	tilemap2_render(&lvl->tilemap);
 }
 
