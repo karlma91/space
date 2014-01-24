@@ -272,22 +272,24 @@ void stations_init(void)
 
 	solar_systems = level_get_world();
 
-	Color col_back = {255,180,140,255};
+	Color col_back = {30,100,30,100};
 	//Color col_text = {1,1,1,1};
 
 	main_view = state_view_get(state_stations, 0);
 	main_view->GUI = draw_gui;
 
-	btn_home = button_create(NULL, 0, "Upgrades", -GAME_WIDTH/4, -GAME_HEIGHT/2 + 80, 200, 200);
+	btn_home = button_create(SPRITE_WHITE, 0, "Upgrades", -GAME_WIDTH/2 + 350, -GAME_HEIGHT/2 + 80, 400, 100);
 	button_set_click_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 2);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
+	button_set_backcolor(btn_home, col_back);
 	state_register_touchable_view(main_view, btn_home);
 
-	btn_editor = button_create(NULL, 0, "Editor", GAME_WIDTH/4, -GAME_HEIGHT/2 + 80, 873*2/5, 247*2/5);
+	btn_editor = button_create(SPRITE_WHITE, 0, "Editor", GAME_WIDTH/2 - 350, -GAME_HEIGHT/2 + 80, 400, 100);
 	button_set_click_callback(btn_editor, open_editor, 0);
 	button_set_enlargement(btn_editor, 2);
 	button_set_hotkeys(btn_editor, SDL_SCANCODE_E, -1);
+	button_set_backcolor(btn_editor, col_back);
 	state_register_touchable_view(main_view, btn_editor);
 
 	llist_begin_loop(solar_systems);

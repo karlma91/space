@@ -420,7 +420,8 @@ void level_destry_param_list(param_list *params)
 
 void level_write_to_file(level *lvl)
 {
-	char filename[200] = "levels/karlmka/test.json";
+	char filename[200];
+	sprintf(filename, "levels/karlmka/%s.json",lvl->name);
 	FILE *file = waffle_fopen(WAFFLE_DOCUMENTS, filename,"w");
 	if (file == NULL) {
 		SDL_Log( "Could not open %s\n",filename);
