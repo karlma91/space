@@ -55,10 +55,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	we_shape_collision(shape, &this, LAYER_ENEMY, tank);
 
 	// Make a car with some nice soft suspension
-	float wheel_offset = 30;
+	float wheel_offset = 60;
 
-	cpVect posA = cpvadd(tank->data.body->p, cpvrotate(cpv(-wheel_offset, -30),tank->data.body->rot));
-	cpVect posB = cpvadd(tank->data.body->p, cpvrotate(cpv(wheel_offset, -30), tank->data.body->rot));
+	cpVect posA = cpvadd(tank->data.body->p, cpvrotate(cpv(-wheel_offset, -60),tank->data.body->rot));
+	cpVect posB = cpvadd(tank->data.body->p, cpvrotate(cpv(wheel_offset, -60), tank->data.body->rot));
 
 	tank->wheel1 = addWheel(current_space, tank->param.mass_wheel, posA, tank);
 	tank->wheel2 = addWheel(current_space, tank->param.mass_wheel, posB, tank);
@@ -150,9 +150,9 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	//TMP DEBUG OVERSTYRING AV TANK
 	if (keys[SDL_SCANCODE_LCTRL]) {
 		if (keys[SDL_SCANCODE_K])
-			set_wheel_torque(tank, 500000);
+			set_wheel_torque(tank, 100000);
 		else if (keys[SDL_SCANCODE_L])
-			set_wheel_torque(tank, -500000);
+			set_wheel_torque(tank, -100000);
 		else
 			set_wheel_torque(tank, 0);
 	} else {
@@ -194,7 +194,7 @@ static cpBody * addWheel(cpSpace *space, float mass, cpVect pos, cpGroup group) 
 	cpBody *body = cpSpaceAddBody(space,
 			cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(body, pos);
-	cpBodySetAngVelLimit(body, 20);
+	//cpBodySetAngVelLimit(body, 20);
 	se_tangent_body(body);
 	se_velfunc(body, 1);
 

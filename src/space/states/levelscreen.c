@@ -71,7 +71,7 @@ static void draw(void)
 	draw_box(3, box.p,box.s,0,1);
 
 	draw_color4f(1,1,1,1);
-	bmfont_center(FONT_SANS, cpv(0,box.p.y+box.s.y / 2 - 100), 1.5, current_ship->level_path);
+	bmfont_center(FONT_SANS, cpv(0,box.p.y+box.s.y / 2 - 100), 1.5, current_ship->level_name);
 
 	for (i = 0; i < 3; i++) {
 		if (stars_unlocked == i+1) {

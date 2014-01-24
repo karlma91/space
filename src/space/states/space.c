@@ -354,7 +354,12 @@ static void view_mode_update(view *v, int mode, obj_player *player)
 static void update_camera_position(void)
 {
     if (player1) {
-    	view_mode_update(view_p1, player_camera_mode, player1);
+    	instance *tank = instance_first(obj_id_tank);
+    	if (tank && keys[SDL_SCANCODE_LCTRL]) {
+    		view_mode_update(view_p1, player_camera_mode, tank);
+    	} else {
+    		view_mode_update(view_p1, player_camera_mode, player1);
+    	}
     }
 
     if (player2 && multiplayer) {

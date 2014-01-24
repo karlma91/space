@@ -35,8 +35,6 @@ typedef struct tilemap {
 
 }tilemap;
 
-#define TILEMAP_MAX_COLS 100
-#define TILEMAP_MAX_ROWS 100
 #define TILEMAP_LAYERS TLAY_COUNT
 typedef enum tile_layers {
 	TLAY_OVERLAY,
@@ -66,8 +64,8 @@ typedef struct tilemap2 {
 
 	char *tileset_name;
 	SPRITE_ID tileset;
-	byte data[TILEMAP_LAYERS][TILEMAP_MAX_ROWS][TILEMAP_MAX_COLS];
-	cpShape *blocks[TILEMAP_MAX_ROWS][TILEMAP_MAX_COLS];
+	byte data[TILEMAP_LAYERS][GRID_MAXROW][GRID_MAXCOL];
+	cpShape *blocks[GRID_MAXROW][GRID_MAXCOL];
 	int render_layers[TILEMAP_LAYERS];
 }tilemap2;
 

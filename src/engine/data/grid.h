@@ -8,8 +8,8 @@
 #ifndef GRID_H_
 #define GRID_H_
 
-#define GRID_MAXCOL 100
-#define GRID_MAXROW 100
+#define GRID_MAXCOL 400
+#define GRID_MAXROW 400
 
 typedef struct polgrid {
 	int cols, rows; /* number of rows in selected region */

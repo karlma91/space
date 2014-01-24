@@ -4,6 +4,7 @@
 #include "we_data.h"
 #include "space.h"
 #include "../level.h"
+#include "textinput.h"
 
 
 #define DRAG_LIMIT 50
@@ -101,7 +102,7 @@ struct instance_dummy {
 /*********** GUI ELEMENTS AND INTERACTION ***********/
 static view *view_editor;
 static touchable *scr_world, *scr_objects;
-static button btn_space, btn_clear, btn_test, btn_save;
+static button btn_space, btn_clear, btn_test, btn_save, btn_name;
 static button btn_state_resize;
 static button btn_state_tilemap, btn_layer;
 static button btn_state_objects, btn_delete, btn_objects[EDITOR_OBJECT_COUNT];
@@ -123,6 +124,11 @@ typedef struct editor_touch {
     float time;
 } editor_touch;
 
+
+static void update_level_name(void *data)
+{
+	textinput_start(state_editor, level_name,"Level name:",  3, 20);
+}
 
 static editor_touch *add_touchdata(editor_mode m, touch_unique_id ID, cpVect view_start, cpVect offset, MODE_DATA data)
 {
@@ -616,6 +622,7 @@ void editor_init()
 	btn_clear  = button_create(SPRITE_BTN_RETRY,0, "", GAME_WIDTH/2 - 120, GAME_HEIGHT * (0.75-0.5), 125, 125);
 	btn_test   = button_create(SPRITE_BTN_NEXT, 0, "", GAME_WIDTH/2 - 120, GAME_HEIGHT * (0.60-0.5), 125, 125);
 	btn_save   = button_create(SPRITE_COIN, 	0, "", GAME_WIDTH/2 - 120, GAME_HEIGHT * (0.45-0.5), 125, 125);
+	btn_name   = button_create(SPRITE_COIN, 	0, "NAME", 0, GAME_HEIGHT /2 - 125, 125, 125);
 
 	btn_state_objects = button_create(SPRITE_SPIKEBALL, 0, "Objects", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 400, 125, 125);
 	btn_state_resize  = button_create(SPRITE_SPIKEBALL, 0, "Resize",  GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 300, 125, 125);
@@ -633,7 +640,7 @@ void editor_init()
 	button_set_click_callback(btn_clear, tap_clear_editor, 0);
 	button_set_click_callback(btn_test, start_editor_level, 0); // TODO test level with this button
 	button_set_click_callback(btn_save, save_level_to_file, 0);
-	button_set_click_callback(btn_save, save_level_to_file, 0);
+	button_set_click_callback(btn_name, update_level_name, 0);
 
 	button_set_hotkeys(btn_state_resize, SDL_SCANCODE_1, 0);
 	button_set_hotkeys(btn_state_tilemap, SDL_SCANCODE_2, 0);
@@ -658,6 +665,7 @@ void editor_init()
 	state_register_touchable_view(view_editor, btn_state_resize);
 	state_register_touchable_view(view_editor, btn_state_tilemap);
 	state_register_touchable_view(view_editor, btn_layer);
+	state_register_touchable_view(view_editor, btn_name);
 
 	/* OBJECT BUTTON INIT */
 	float size = 200;
@@ -701,6 +709,8 @@ static void on_enter(void)
 
 static void pre_update(void)
 {
+	button_set_text(btn_name, level_name);
+
 	float panelspeed = 400*dt / 0.1;
 	if (remove_tool || current_mode == MODE_RESIZE || current_mode == MODE_TILEMAP) {
 		panel_offset = panel_offset - panelspeed > -400 ? panel_offset - panelspeed : -400;
