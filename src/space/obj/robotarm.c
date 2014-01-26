@@ -90,7 +90,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 {
 	int segments = robotarm->param.segments;
 	int seg_length = robotarm->param.seg_length;
-	int max_reach = segments*seg_length;
+	//int max_reach = segments*seg_length;
 
 	robotarm->timer += dt;
 	sprite_update(&(robotarm->saw_sprite));

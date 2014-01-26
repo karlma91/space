@@ -1,6 +1,6 @@
 #include "solarsystem.h"
 #include "game.h"
-
+#include "states/levelscreen.h"
 
 static void station_free(station *s)
 {
@@ -34,7 +34,7 @@ solarsystem *solarsystem_create(int solsys_index, float star_size, SPRITE_ID sta
 	solsys->sun.angvel = 0.03;
 
 	solsys->stations = llist_create();
-	llist_set_remove_callback(solsys->stations, station_free);
+	llist_set_remove_callback(solsys->stations, (ll_rm_callback)station_free);
 
 	return solsys;
 }

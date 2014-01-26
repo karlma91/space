@@ -58,8 +58,8 @@ void objectsystem_clear(void)
 	objsys_terminating = 1;
 
 	for (obj_id = 0; obj_id < object_getcount(); ++obj_id, ++obj) {
-		llist_iterate_func(obj->active, instance_destroy, NULL);
-		llist_iterate_func(obj->active, instance_remove, NULL);
+		llist_iterate_func(obj->active, (ll_iterate_callback)instance_destroy, NULL);
+		llist_iterate_func(obj->active, (ll_iterate_callback)instance_remove, NULL);
 		obj->count = 0;
 	}
 	void instance_poststep(void);

@@ -24,17 +24,15 @@ typedef struct level {
 	char name[30];
 	int station;
 	int deck;
-	int height;
-	int width;
 	int timelimit;
 	float inner_radius;
 	float outer_radius;
+	float height;
 
 	param_list params;
 	LList level_data;
 
 	tilemap2 tilemap;
-	tilemap *tiles; //TODO: REMOVE
 } level;
 
 

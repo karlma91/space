@@ -7,6 +7,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "hashmap.h"
+#include "SDL.h"
 
 #define MAX_KEY_LENGTH 64
 #define INITIAL_SIZE 128

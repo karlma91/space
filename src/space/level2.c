@@ -37,7 +37,7 @@ int level_init(void)
 {
 	srand(0x9b3a09fa);
 	solar_systems = llist_create();
-	llist_set_remove_callback(solar_systems, solarsystem_destroy);
+	llist_set_remove_callback(solar_systems, (ll_rm_callback)solarsystem_destroy);
 	SPRITE_ID spr_sun = sprite_link("sun01");
 	we_diriter *wed = waffle_get_diriter(WAFFLE_DOCUMENTS, "levels");
 	int sun = 0;
@@ -71,7 +71,7 @@ int level_init(void)
 
 	/* read space station data */
 	char buff[10000]; // TODO: stor nok?
-	int filesize, i;
+	int filesize;
 	cJSON *root;
 
 	/*filesize = waffle_read_file_zip("space_1.json", &buff[0], 10000);
@@ -90,6 +90,7 @@ int level_init(void)
 	station_count = cJSON_GetArraySize(station_array);
 	world = calloc(station_count,sizeof(level_ship));
 
+    int i;
 	for (i = 0; i < cJSON_GetArraySize(station_array); i++) {
 		cJSON *station = cJSON_GetArrayItem(station_array, i);
 		world[i].id = i+1;
@@ -381,7 +382,7 @@ void level_start_level(level *lvl)
 	while(llist_hasnext(lvl->level_data)) {
 		object_recipe * data = llist_next(lvl->level_data);
 		SDL_Log("INSTANTIATING TYPE: %s at: %f ", data->obj_type->NAME, data->pos.x);
-		instance *ins = instance_create(data->obj_type, data->param, data->pos, cpvzero);
+		instance_create(data->obj_type, data->param, data->pos, cpvzero);
 	}
 	llist_end_loop(lvl->level_data);
 }
@@ -393,9 +394,7 @@ void level_clear_objects(level *lvl)
 
 void level_unload(level *lvl)
 {
-	tilemap_destroy(lvl->tiles);
 	level_destry_param_list(&(lvl->params));
-	free(lvl->tiles);
 	free(lvl);
 }
 
@@ -434,7 +433,6 @@ void level_write_to_file(level *lvl)
 	cJSON_AddItemToObject(root, "tilemap", cJSON_CreateString("level02_01.tmx"));
 	cJSON_AddNumberToObject(root, "timelimit", 100);
 
-	//TODO update level writing for new variables
 	cJSON_AddNumberToObject(root, "t_layers", lvl->tilemap.layers);
 	cJSON_AddNumberToObject(root, "t_cols", lvl->tilemap.grid->cols);
 	cJSON_AddNumberToObject(root, "t_inner_i", lvl->tilemap.grid->inner_i);

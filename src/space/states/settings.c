@@ -166,6 +166,7 @@ static void option_click(settings_option option)
 		break;
 	case OPT_CAMERA:
 		player_camera_mode = player_camera_mode > 1 ? 0 : player_camera_mode + 1;
+		SDL_ShowSimpleMessageBox(0, "Camera mode changed!", "You changed the camera mode!", NULL);
 		break;
 	case OPT_LOG:
 		statesystem_push_state(state_log);

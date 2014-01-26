@@ -787,7 +787,7 @@ static void main_tick(void *data)
 	if (keys[SDL_SCANCODE_F] && keys[SDL_SCANCODE_LCTRL]) {
 		config.fullscreen ^= 1; // Toggle fullscreen
 		if (SDL_SetWindowFullscreen(window, config.fullscreen)) {
-			SDL_Log(SDL_GetError());
+			SDL_Log("%s",SDL_GetError());
 			config.fullscreen ^= 1; // Re-toggle
 		} else {
 			setAspectRatio();

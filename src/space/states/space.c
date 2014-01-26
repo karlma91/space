@@ -332,10 +332,10 @@ void nan_check_instance(instance *ins, void *msg)
 	}
 }
 
-static void view_mode_update(view *v, int mode, obj_player *player)
+static void view_mode_update(view *v, int mode, instance *ins)
 {
 	float rot = 0;
-	cpVect pos = player->data.body->p;
+	cpVect pos = ins->body->p;
 	switch(mode){
 	case 0:
 	case 1:
@@ -344,7 +344,7 @@ static void view_mode_update(view *v, int mode, obj_player *player)
 	case 2:
 		break;
 	case 3:
-		rot = -player->data.body->a;
+		rot = -ins->body->a;
 		break;
 	}
 	view_update_zoom(v, pos);
@@ -358,12 +358,12 @@ static void update_camera_position(void)
     	if (tank && keys[SDL_SCANCODE_LCTRL]) {
     		view_mode_update(view_p1, player_camera_mode, tank);
     	} else {
-    		view_mode_update(view_p1, player_camera_mode, player1);
+    		view_mode_update(view_p1, player_camera_mode, (instance *)player1);
     	}
     }
 
     if (player2 && multiplayer) {
-    	view_mode_update(view_p2, player_camera_mode,player2);
+    	view_mode_update(view_p2, player_camera_mode, (instance *)player2);
     }
 }
 
@@ -652,7 +652,7 @@ void space_init_level_from_level(level * lvl)
 		exit(-1);
 	}
 
-	player1 = instance_first(obj_id_player);
+	player1 = (obj_player *)instance_first(obj_id_player);
 	//player1 = space_create_player(1);
 	setup_singleplay();
 
@@ -899,7 +899,7 @@ void space_init(void)
     btn_pause = button_create(SPRITE_BTN_PAUSE, 0, "", GAME_WIDTH/2-100, GAME_HEIGHT/2-100, 120, 120);
 	btn_continue = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
 	button_set_click_callback(btn_pause, (btn_click_callback) statesystem_pause, 0);
-	button_set_click_callback(btn_continue, continue_func, 0);
+	button_set_click_callback(btn_continue, (btn_click_callback) continue_func, 0);
     button_set_enlargement(btn_pause, 1.5f);
     button_set_hotkeys(btn_pause, KEY_ESCAPE, SDL_SCANCODE_PAUSE);
 	button_set_hotkeys(btn_continue, KEY_ESCAPE, KEY_RETURN_2);

@@ -15,10 +15,6 @@ float se_arcdist2player(cpVect p);
 cpVect se_dist_a2b(instance *insa, instance *insb);
 cpVect se_dist2body(cpBody *b1, cpBody *b2);
 
-float se_rect2arch(cpVect *pos);
-void se_rect2arch_column(float x, cpVect *polar);
-void se_rect2arch_from_data(cpVect *pos, cpVect *polar);
-
 cpVect se_vect_view2world(view *cam, cpVect p);
 
 void se_spawn_coins(instance *ins);

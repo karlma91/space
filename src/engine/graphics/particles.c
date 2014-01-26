@@ -148,7 +148,7 @@ emitter *particles_get_emitter_at(int layer, EMITTER_ID type, cpVect p)
 
 char *particles_get_name(EMITTER_ID id){
 	if(id) {
-		return id->name;
+		return (char *)id->name;
 	}else{
 		return NULL;
 	}

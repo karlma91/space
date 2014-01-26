@@ -12,8 +12,6 @@
 
 STATE_ID state_stations;
 
-static SPRITE_ID spr_sun;
-
 //static button *btn_stations;
 static button btn_home;
 static button btn_editor;

@@ -163,7 +163,7 @@ static void controls(obj_player *player)
 
 	if (player->joy_left->amplitude) {
 		cpVect player_dir = cpvrotate(cpv(player->joy_left->axis_x, player->joy_left->axis_y), cpvforangle(-pl_view->rotation));
-		static float FORCE = 200, VELOCITY = 435;
+		static float FORCE = 200;//, VELOCITY = 435;
 		//cpVect j = cpvmult(player_dir, player->force);
 		cpVect j = cpvmult(player_dir, FORCE);
 		//cpBodySetVelLimit(player->data.body, VELOCITY);

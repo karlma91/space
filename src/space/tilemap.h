@@ -13,28 +13,6 @@
 
 #define MAX_SINGLE_TILE_COUNT 64
 
-typedef struct tilemap {
-
-    int total_width; /* total width in pixels */
-    int total_height;
-
-    int tile_width;
-    int tile_height;
-
-    int image_width;
-    int image_height;
-    SPRITE_ID spr_id;
-
-    int width; /* number of tiles in level */
-    int height;
-
-    float x2tc[MAX_SINGLE_TILE_COUNT];
-    float y2tc[MAX_SINGLE_TILE_COUNT];
-
-    int *data; /* tilmap data array */
-
-}tilemap;
-
 #define TILEMAP_LAYERS TLAY_COUNT
 typedef enum tile_layers {
 	TLAY_OVERLAY,
@@ -51,6 +29,10 @@ typedef enum TILE_TYPE{
 	TILE_TYPE_DIAG_SE, // TILE: /| SE
 	TILE_TYPE_DIAG_NE, // TILE: \| NE
 	TILE_TYPE_DIAG_NW, // TILE: |/ NW
+	TILE_TYPE_DIAG_SEL, // TILE:    -'| SE LEFT HALF
+	TILE_TYPE_DIAG_SER, // TILE:  .-    SE RIGHT HALF
+	TILE_TYPE_DIAG_SWL, // TILE:  |'-   SW LEFT HALF
+	TILE_TYPE_DIAG_SWR, // TILE:     -. SW RIGHT HALF
 	TILE_TYPE_COUNT,
 	TILE_TYPE_OUTSIDE = -1
 } TILE_TYPE;
@@ -96,8 +78,5 @@ static __inline__ void tilemap_settile(tilemap2 *tm, int layer, int x, int y, we
 
 void tilemap2_render(tilemap2 *tm);
 void tilemap_fill(void *unused, int layers, void *unused2, tilemap2 *tiles);
-void tilemap_render(int layer, tilemap *map);
-int tilemap_create (tilemap *map, char *filename);
-void tilemap_destroy(tilemap *map);
 
 #endif /* TILEMAP_H_ */

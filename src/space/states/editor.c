@@ -32,9 +32,9 @@ static char level_name[32];
 typedef enum EDITOR_MODE {
 	MODE_RESIZE,
 	MODE_TILEMAP,
-	MODE_OBJECTS,
-	MODE_TOGGLE
+	MODE_OBJECTS
 } editor_mode;
+static const int MODE_TOGGLE = 0xFFFF;
 static editor_mode current_mode = MODE_RESIZE;
 
 
@@ -163,7 +163,7 @@ static void save_level_to_file(void *unused)
 {
 	llist_clear(lvl->level_data);
 	instance_iterate(update_instances, NULL);
-	tilemap_fill(NULL, TLAY_COUNT, NULL, &(lvl->tilemap));
+	lvl->tilemap.layers = TLAY_COUNT;
 	strcpy(lvl->name, level_name);
 	level_write_to_file(lvl);
 }
@@ -617,8 +617,8 @@ void editor_init()
 
 	button_set_backcolor(btn_state_toggle, tilecol);
 
-	button_set_click_callback(btn_state_toggle, editor_setmode, MODE_TOGGLE);
-	button_set_click_callback(btn_layer, setlayer, btn_layer);
+	button_set_click_callback(btn_state_toggle, (btn_click_callback) editor_setmode, MODE_TOGGLE);
+	button_set_click_callback(btn_layer, (btn_click_callback) setlayer, btn_layer);
 	button_set_click_callback(btn_lvlname, update_level_name, 0);
 
 	button_set_click_callback(btn_space, statesystem_set_state, state_stations);
@@ -756,6 +756,7 @@ static void pre_update(void)
 		float target_or = lvl->tilemap.grid->rad[lvl->tilemap.grid->outer_i-1];
 		lvl->inner_radius = (target_ir+lvl->inner_radius)/2;
 		lvl->outer_radius = (target_or+lvl->outer_radius)/2;
+		lvl->height = lvl->outer_radius - lvl->inner_radius;
 	}
 }
 

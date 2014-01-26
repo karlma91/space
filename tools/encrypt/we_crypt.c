@@ -234,10 +234,10 @@ int encrypt_file(int fd, char *buf, int len)
 
 	ssize_t i;
 	for (i=0; i < size; i+=4) {
-		int eword, dword, word;
-		word = chr2int(buf+i);
+		int eword, word;
+		word = chr2int((byte *)(buf+i));
 		eword = we_encrypt(pos+i, word);
-		int2chr(buf+i,eword);
+		int2chr((byte *)(buf+i),eword);
 	}
 	return size;
 }

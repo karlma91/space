@@ -198,7 +198,7 @@ char * texture_get_name(TEXTURE_ID id)
 {
 	hashiterator *it = hm_get_iterator(hm_name2tex);
 	TEXTURE_ID id_temp = (int)hm_iterator_next(it);
-	while (id_temp != NULL) {
+	while (id_temp != 0) {
 		if (id_temp == id) {
 			char *name = (char*)hm_iterator_get_key(it);
 			hm_iterator_destroy(it);

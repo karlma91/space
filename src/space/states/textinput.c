@@ -69,7 +69,7 @@ static void draw(void)
 	draw_color_rgbmulta4b(50,50,50,150);
 	draw_box(RLAY_BACK_BACK, cpv(0, 0),cpv(GAME_WIDTH, GAME_HEIGHT),0,1);
 
-	int keyboard_shown = SDL_IsScreenKeyboardShown(window);
+	//int keyboard_shown = SDL_IsScreenKeyboardShown(window);
 	/*if(!keyboard_shown){
 		resume(0);
 	}*/
@@ -87,7 +87,7 @@ static int sdl_event(SDL_Event *event)
 	int add_len = 0;
 	switch(event->type) {
 	case SDL_KEYDOWN:
-		if(event->key.keysym.scancode == SDL_SCANCODE_BACKSPACE) {
+		if ((event->key.keysym.scancode == SDL_SCANCODE_BACKSPACE) || (event->key.keysym.scancode == SDL_SCANCODE_DELETE)) {
 			if(buffer_length>0){
 				buffer_length -= 1;
 				input_buffer[buffer_length] = 0;

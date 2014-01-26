@@ -12,6 +12,7 @@
 
 typedef void* LList;
 typedef void (*ll_rm_callback)(void *);
+typedef void (*ll_iterate_callback)(void *item, void *data);
 
 LList llist_create(void); /* lager en ny lenket liste og returnerer et id-nummer til denne */
 LList llist_create_group(void); /* lager en ny lenket liste av lister */
@@ -30,7 +31,7 @@ void* llist_first(LList list); /* returnerer f�rste peker i listen */
 void* llist_last(LList list);  /* returnerer siste peker i listen */
 void* llist_at_index(LList list, int index); /* returnerer pekeren  p� angitt index */
 
-void llist_iterate_func(LList id, void (*func)(void *item, void *data), void *data); /* kaller p� func for hver peker */
+void llist_iterate_func(LList id, ll_iterate_callback func, void *data); /* kaller p� func for hver peker */
 
 int llist_begin_loop(LList list);   /* push-er ny iterasjons-peker */
 int llist_hasnext(LList list); /* returnerer 1 om n�v�rende iterasjonspeker ikke er NULL */

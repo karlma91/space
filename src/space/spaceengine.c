@@ -169,49 +169,6 @@ float turn_toangle(float from_angle, float to_angle, float step_size) //TODO add
 	return from_angle;
 }
 
-static inline cpFloat rect2arch_r(cpFloat y)
-{
-	float r_in = currentlvl->inner_radius;
-	float r_out = currentlvl->outer_radius;
-	return r_out - y / currentlvl->height * (r_out - r_in);
-}
-
-float se_rect2arch(cpVect *pos)
-{
-#if EXPERIMENTAL_GRAPHICS
-	if (statesystem_get_render_state() != state_space)
-		return 0;
-
-	float angle = pos->x / currentlvl->width * WE_2PI;
-	float r = rect2arch_r(pos->y);
-
-	pos->x = r * cosf(angle);
-	pos->y = r * sinf(angle);
-
-	return angle;
-#else
-	return 0;
-#endif
-}
-
-
-void se_rect2arch_column(float x, cpVect *polar)
-{
-#if EXPERIMENTAL_GRAPHICS
-	float angle = x / currentlvl->width * WE_2PI;
-
-    polar->x = cosf(angle);
-    polar->y = sinf(angle);
-#endif
-}
-
-void se_rect2arch_from_data(cpVect *pos, cpVect *polar)
-{
-#if EXPERIMENTAL_GRAPHICS
-    *pos = cpvmult(*polar, rect2arch_r(pos->y));
-#endif
-}
-
 void se_spawn_coins(instance * ins)
 {
 	int *coins_ptr = COMPONENT(ins, COINS, int *);

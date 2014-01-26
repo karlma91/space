@@ -79,7 +79,7 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 	btn->frontcol = COL_WHITE;
 
 	btn->stretch = stretch;
-	button_set_text(btn, text);
+	button_set_text((button)btn, text);
 
 	btn->animated = 0;
 	btn->down_size = 1;
@@ -167,7 +167,7 @@ void button_set_font(button btn_id, bm_font *f, float size)
 	btn->font_size = size;
 }
 
-void button_set_text(button btn_id, char *str)
+void button_set_text(button btn_id, const char *str)
 {
 	struct button *btn = (struct button *) btn_id;
 	if (str) {

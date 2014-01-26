@@ -41,6 +41,7 @@ typedef struct solarsystem {
 } solarsystem;
 
 
+void solarsystem_register_touch(solarsystem *sol, STATE_ID id);
 solarsystem *solarsystem_create(int solsys_index, float star_size, SPRITE_ID star_spr, Color star_base, Color star_glow, Color star_add1, Color star_add2);
 void solarsystem_add_station(solarsystem * sol, SPRITE_ID spr_id, int dir_type, char * name, char * path);
 void solarsystem_update(solarsystem *sun);

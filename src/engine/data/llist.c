@@ -343,7 +343,7 @@ int llist_set_remove_callback(LList id, ll_rm_callback remove_callback)
 	return 0;
 }
 
-void llist_iterate_func(LList id, void (*func)(void *item, void *data), void *data)
+void llist_iterate_func(LList id, ll_iterate_callback func, void *data)
 {
 	if (is_valid(id) && func) {
 		node *n;

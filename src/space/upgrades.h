@@ -8,7 +8,7 @@
 #ifndef UPGRADES_H_
 #define UPGRADES_H_
 
-#include "../engine/graphics/sprite.h"
+#include "we.h"
 
 typedef enum {
 	PROJECT_LASER,
@@ -68,7 +68,7 @@ typedef struct {
 
 	int price;
 
-	int *particle_type; //or rather store particle file name?
+	EMITTER_ID *particle_type; //or rather store particle file name?
 
 	SPRITE_ID *spr_id;
 } upg_engine;
