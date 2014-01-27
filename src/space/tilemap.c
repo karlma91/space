@@ -32,12 +32,11 @@ void tilemap2_render(tilemap2 *tm)
 	sprite_get_subimg_by_index(SPRITE_WHITE, 0, tex);
 	for (l=TLAY_COUNT-1; l>=0; l--) {
 		//draw_color_rgbmulta4f(l==0, l==1, l==2, 0.4);
-		//draw_color4f(l==0, l==1, l==2, 0);
 
 		if (l==1) {
-			draw_color4f(0.2,0.6,0.2,0.2);
+			draw_color4f(0.2,0.6,0.2,1);
 		} else {
-			draw_color_rgbmulta4f(l==0, l==1, l==2, 0.4);
+			draw_color4f(l==2 ? 0 : 1, l==2 ? 0.3 : 0.2, l==2 ? 0.6 : 0.2, l==2 ? 1 : 0.4);
 		}
 		for (y = tm->grid->inner_i; y < tm->grid->outer_i - 1; y++) {
 			for (x=0; x<tm->grid->cols; x++) {
@@ -149,3 +148,21 @@ void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y)
 	}
 }
 
+void tilemap_clear(tilemap2 *tm)
+{
+	int l, x, y;
+	for (l=TLAY_COUNT-1; l>=0; l--)
+		for (y = tm->grid->inner_i; y < tm->grid->outer_i - 1; y++)
+			for (x=0; x<tm->grid->cols; x++) {
+				tm->data[l][y][x] = TILE_TYPE_NONE;
+			}
+	for (y = tm->grid->inner_i; y < tm->grid->outer_i - 1; y++)
+		for (x=0; x<tm->grid->cols; x++) {
+			cpShape *shape = tm->blocks[y][x];
+			tm->blocks[y][x] = NULL;
+			if (shape) {
+				cpSpaceRemoveShape(current_space, shape);
+				cpShapeFree(shape);
+			}
+		}
+}

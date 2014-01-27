@@ -177,8 +177,12 @@ static void enable_objlist(int enable)
 	}
 }
 
-static void tap_clear_editor(void *unused)
+static void tap_clear_editor(void *force)
 {
+	if (!force) {
+		SDL_ShowSimpleMessageBox(0, "Fjerne alt?", "Sikker på at du vil fjerne alt?", NULL);
+	}
+	//TODO implement dialog box and get confirmation from user
 	currentlvl = lvl;
 	objectsystem_clear();
 	extern obj_player * space_create_player(int id);
@@ -190,6 +194,7 @@ static void tap_clear_editor(void *unused)
 	if (player) p = player->body->p;
 	view_editor->zoom = 1;
 	view_update(view_editor, p, 0);
+	tilemap_clear(&lvl->tilemap);
 }
 
 static void editor_setmode(editor_mode state)
@@ -673,7 +678,7 @@ void editor_init()
 	lvl->tilemap.render_layers[TLAY_BACKGROUND] = RLAY_BACK_FRONT;
 	lvl->tilemap.render_layers[TLAY_SOLID] = RLAY_GAME_BACK;
 	lvl->tilemap.render_layers[TLAY_OVERLAY] = RLAY_GAME_FRONT;
-	tap_clear_editor(NULL);
+	tap_clear_editor(WE_TRUE);
 	editor_setmode(MODE_OBJECTS);
 }
 

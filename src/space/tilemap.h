@@ -57,10 +57,8 @@ static __inline__ byte tilemap_getdata(tilemap2 *tm, int layer, int x, int y)
 	return outside ? TILE_TYPE_OUTSIDE : tm->data[layer][y][x];
 }
 
-
 /*static __inline__ */
 void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y);
-
 static __inline__ void tilemap_settile(tilemap2 *tm, int layer, int x, int y, we_bool set)
 {
 	grid_wrap_index(tm->grid, &x, &y);
@@ -83,6 +81,7 @@ static __inline__ void tilemap_settile(tilemap2 *tm, int layer, int x, int y, we
 	tilemap_updatetile(tm, layer, x+2, y+1);
 }
 
+void tilemap_clear(tilemap2 *tm);
 void tilemap2_render(tilemap2 *tm);
 void tilemap_fill(void *unused, int layers, void *unused2, tilemap2 *tiles);
 

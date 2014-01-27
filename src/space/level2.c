@@ -289,6 +289,7 @@ level *level_load(int folder, char * filename)
 	/* Calculate level size based on grid data */
 	lvl->inner_radius = lvl->tilemap.grid->rad[lvl->tilemap.grid->inner_i];
 	lvl->outer_radius = lvl->tilemap.grid->rad[lvl->tilemap.grid->outer_i-1];;
+	lvl->height = lvl->outer_radius - lvl->inner_radius;
 
 	level_load_params(&(lvl->params), root);
 
