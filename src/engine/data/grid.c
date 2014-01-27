@@ -1,7 +1,7 @@
 #include "we.h"
 #include "grid.h"
 
-#define GRID_CELLRATIO 0.666//0.5
+#define GRID_CELLRATIO 1//0.5
 
 void grid_setrows(polgrid *pgrid, float min_rad, int max_rows)
 {

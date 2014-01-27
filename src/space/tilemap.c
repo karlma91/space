@@ -41,7 +41,6 @@ void tilemap2_render(tilemap2 *tm)
 		}
 		for (y = tm->grid->inner_i; y < tm->grid->outer_i - 1; y++) {
 			for (x=0; x<tm->grid->cols; x++) {
-				draw_color4f(0.2,0.6,0.2,0.2); // TODO REMOVE
 				data = tilemap_getdata(tm, l, x, y);
 				if (data) {
 					grid_getquad8f(tm->grid, verts, x, y);
@@ -49,14 +48,12 @@ void tilemap2_render(tilemap2 *tm)
 					case TILE_TYPE_DIAG_SWL:
 						verts[2] = (verts[6] + verts[2]) / 2;
 						verts[3] = (verts[7] + verts[3]) / 2;
-						draw_color4f(0.2,0.3,0.4,0.2); // TODO REMOVE
 						break;
 					case TILE_TYPE_DIAG_SWR:
 						verts[0] = (verts[4] + verts[0]) / 2;
 						verts[1] = (verts[5] + verts[1]) / 2;
 						verts[2] = verts[0];
 						verts[3] = verts[1];
-						draw_color4f(0.2,0.3,0.9,0.2); // TODO REMOVE
 						break;
 					case TILE_TYPE_DIAG_SW:
 						verts[2] = verts[0];
@@ -67,12 +64,10 @@ void tilemap2_render(tilemap2 *tm)
 						verts[3] = (verts[7] + verts[3]) / 2;
 						verts[0] = verts[2];
 						verts[1] = verts[3];
-						draw_color4f(0.8,0.3,0.2,0.2); // TODO REMOVE
 						break;
 					case TILE_TYPE_DIAG_SER:
 						verts[0] = (verts[4] + verts[0]) / 2;
 						verts[1] = (verts[5] + verts[1]) / 2;
-						draw_color4f(0.5,0.3,0.2,0.2); // TODO REMOVE
 						break;
 					case TILE_TYPE_DIAG_SE:
 						verts[0] = verts[2];
@@ -137,11 +132,11 @@ void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y)
 		tm->data[layer][y][x] =
 		D_SEL && !(D_SWL | D_SWR) ?
 			TILE_TYPE_DIAG_SEL :
-		D_SER && !(D_SWR | D_SWR) ?
+		D_SER && !(D_SWL | D_SWR) ?
 			TILE_TYPE_DIAG_SER :
-		D_SWL && !(D_SER | D_SER) ?
+		D_SWL && !(D_SEL | D_SER) ?
 			TILE_TYPE_DIAG_SWL :
-		D_SWR && !(D_SER | D_SER) ?
+		D_SWR && !(D_SEL | D_SER) ?
 			TILE_TYPE_DIAG_SWR :
 		D_SW && !(D_SE || D_NW) ?
 			TILE_TYPE_DIAG_SW :

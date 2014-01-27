@@ -692,6 +692,25 @@ void space_init_level_from_level(level * lvl)
 				cpVect verts[4];
 				grid_getquad8cpv(lvl->tilemap.grid, verts, x, y);
 				switch (tile) {
+				case TILE_TYPE_DIAG_SEL:
+					verts[0] = verts[1];
+					verts[1] = verts[2];
+					verts[2] = verts[3];
+					verts[0] = cpvmult(cpvadd(verts[0],verts[1]), 0.5);
+					len = 3;
+					break;
+				case TILE_TYPE_DIAG_SER:
+					verts[0] = cpvmult(cpvadd(verts[0],verts[3]), 0.5);
+					break;
+				case TILE_TYPE_DIAG_SWR:
+					verts[1] = verts[2];
+					verts[2] = verts[3];
+					verts[0] = cpvmult(cpvadd(verts[0],verts[2]), 0.5);
+					len = 3;
+					break;
+				case TILE_TYPE_DIAG_SWL:
+					verts[1] = cpvmult(cpvadd(verts[1],verts[2]), 0.5);
+					break;
 				case TILE_TYPE_DIAG_SE:
 					verts[0] = verts[1];
 					/* NO BREAK */
