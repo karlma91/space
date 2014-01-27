@@ -43,7 +43,7 @@ static void resume_done(void *data)
 	}
 	resume(0);
 }
-static void resume_cancle(void *data)
+static void resume_cancel(void *data)
 {
 	resume(0);
 }
@@ -164,7 +164,7 @@ void textinput_init(void)
 	statesystem_register(state_textinput, 0);
 
 	btn_resume = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
-	button_set_click_callback(btn_resume, resume_cancle, 0);
+	button_set_click_callback(btn_resume, resume_cancel, 0);
 	button_set_hotkeys(btn_resume, KEY_ESCAPE, 0);
 	state_register_touchable(this, btn_resume);
 }

@@ -29,10 +29,10 @@ typedef enum TILE_TYPE{
 	TILE_TYPE_DIAG_SE, // TILE: /| SE
 	TILE_TYPE_DIAG_NE, // TILE: \| NE
 	TILE_TYPE_DIAG_NW, // TILE: |/ NW
-	TILE_TYPE_DIAG_SEL, // TILE:    -'| SE LEFT HALF
-	TILE_TYPE_DIAG_SER, // TILE:  .-    SE RIGHT HALF
-	TILE_TYPE_DIAG_SWL, // TILE:  |'-   SW LEFT HALF
-	TILE_TYPE_DIAG_SWR, // TILE:     -. SW RIGHT HALF
+	TILE_TYPE_DIAG_SER, // TILE:    -'| SE RIGHT HALF
+	TILE_TYPE_DIAG_SEL, // TILE:  .-    SE LEFT HALF
+	TILE_TYPE_DIAG_SWR, // TILE:  |'-   SW RIGHT HALF
+	TILE_TYPE_DIAG_SWL, // TILE:     -. SW LEFT HALF
 	TILE_TYPE_COUNT,
 	TILE_TYPE_OUTSIDE = -1
 } TILE_TYPE;
@@ -74,6 +74,13 @@ static __inline__ void tilemap_settile(tilemap2 *tm, int layer, int x, int y, we
 	tilemap_updatetile(tm, layer, x-1, y+1);
 	tilemap_updatetile(tm, layer, x+1, y-1);
 	tilemap_updatetile(tm, layer, x-1, y-1);
+
+	tilemap_updatetile(tm, layer, x-2, y-1);
+	tilemap_updatetile(tm, layer, x-2, y);
+	tilemap_updatetile(tm, layer, x-2, y+1);
+	tilemap_updatetile(tm, layer, x+2, y-1);
+	tilemap_updatetile(tm, layer, x+2, y);
+	tilemap_updatetile(tm, layer, x+2, y+1);
 }
 
 void tilemap2_render(tilemap2 *tm);
