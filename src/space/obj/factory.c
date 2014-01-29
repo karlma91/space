@@ -35,9 +35,9 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&factory->data.spr, factory->param.sprite, 400, 400, 30);
 
 	if (factory->param.spawn_type == obj_id_tank) {
-		factory->smoke = particles_get_emitter(RLAY_GAME_BACK, EM_SMOKE);
+		factory->smoke = particles_get_emitter(RLAY_GAME_FRONT, EM_SMOKE);
 		particles_self_draw(factory->smoke, 1);
-		factory->data.spr.sub_index = rand() & 0x7;
+		sprite_set_index_normalized(&factory->data.spr, we_randf);
 	}
 
 	/* make and add new body */
@@ -78,7 +78,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 	if (factory->smoke) {
 		cpVect pos = factory->data.body->p;
 		cpVect rot = factory->data.body->rot;
-		pos = cpvadd(pos,cpvrotate(cpv(-80,200),rot));
+		pos = cpvadd(pos,cpvrotate(cpv(-80,215),rot));
 		factory->smoke->p = pos;
 		factory->smoke->angular_offset = factory->data.body->a;
 	}

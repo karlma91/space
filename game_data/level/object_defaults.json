@@ -116,8 +116,8 @@
       "coins": 30,
       "param_name": "def",
       "spawn_type": "tank",
-      "sprite": "factoryblue",
-      "shape": "factory.shape",
+      "sprite": "factory_v2",
+      "shape": "factory_v2.shape",
       "expl_pname": "big"
     },
     {

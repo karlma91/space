@@ -87,7 +87,7 @@ static char param_names[EDITOR_OBJECT_COUNT][32] = {
 static char sprite_names[EDITOR_OBJECT_COUNT][32] = {
 		"gear",
 		"tankbody001",
-		"factoryblue",
+		"factory_v2",
 		"factoryred",
 		"ramp",
 		"turretgun001",

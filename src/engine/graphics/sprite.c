@@ -95,7 +95,8 @@ int sprite_packload(const char* spritepack)
 	}
 
 	#warning "tmp fix for rescaled images"
-	scale = 0.5;
+	//scale = 0.5;
+#warning old ios devices not supported atm!
 #endif
 
 	//TODO get texture id
