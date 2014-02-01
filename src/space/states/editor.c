@@ -54,6 +54,11 @@ typedef enum TILE_MODE {
 	TILE_CLEAR
 } TILE_MODE;
 
+typedef enum TILE_BRUSH {
+	TBRUSH_NORMAL,
+	TBRUSH_DESTROYABLE
+} TILE_BRUSH;
+static TILE_BRUSH tilebrush = TBRUSH_NORMAL;
 
 /*********** OBJECT MODE ***********/
 static void select_object_type(void *index);
@@ -106,7 +111,7 @@ static touchable *scr_world, *scr_objects;
 static button btn_space, btn_clear, btn_test, btn_save;
 static button btn_lvlname;
 static button btn_state_toggle;
-static button btn_layer;
+static button btn_layer, btn_tile_toggler;
 static button btn_objects[EDITOR_OBJECT_COUNT]; //TODO add param buttons
 static LList ll_touches;
 static pool *pool_touches;
@@ -216,6 +221,7 @@ static void editor_setmode(editor_mode state)
 	/* MODE_TILEMAP */
 	visible = (current_mode == MODE_TILEMAP);
 	btn_layer->visible = visible;
+	btn_tile_toggler->visible = visible;
 }
 
 static void setlayer(button btn)
@@ -224,6 +230,13 @@ static void setlayer(button btn)
 	current_tlay = current_tlay >= TLAY_COUNT ? 0 : current_tlay;
 	char number[2] = {('0'+(char)current_tlay), '\0'};
 	button_set_text(btn, number);
+}
+
+static void tilemode_toggle(button btn)
+{
+	tilebrush = 1 - tilebrush;
+	char str[2] = {tilebrush ? 'N' : 'X', '\0'};
+	button_set_text(btn, str);
 }
 
 static editor_touch *get_touch(SDL_FingerID finger_id)
@@ -264,6 +277,8 @@ static void move_radius(editor_touch *touch)
 		if(new_r >= MIN_INNER_RADIUS && new_r <= lvl->outer_radius - MIN_RADIUS_OFFSET) {
 			lvl->inner_radius = new_r;
 			grid_setregion2f(lvl->tilemap.grid, lvl->inner_radius, lvl->outer_radius);
+			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->inner_i);
+			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->inner_i+1);
 		}
 		inner_resize_margin += (1 - inner_resize_margin) / 2;
 	} else if(touch->data.resize_mode == RESIZE_OUTER) {
@@ -271,6 +286,10 @@ static void move_radius(editor_touch *touch)
 		if(new_r <= MAX_OUTER_RADIUS && new_r >= lvl->inner_radius + MIN_RADIUS_OFFSET) {
 			lvl->outer_radius = new_r;
 			grid_setregion2f(lvl->tilemap.grid, lvl->inner_radius, lvl->outer_radius);
+			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->outer_i-3);
+			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->outer_i-2);
+			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->outer_i-1);
+			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->outer_i);
 		}
 		outer_resize_margin += (1 - outer_resize_margin) / 2;
 	}
@@ -283,7 +302,7 @@ static void paint_tile(editor_touch *touch)
 	grid_i_cur = grid_i;
 	if (grid_i.yrow != -1) {
 		if (touch->data.tile_mode == TILE_ADD) {
-			tilemap_settile(&lvl->tilemap, current_tlay, grid_i.xcol, grid_i.yrow, 1);
+			tilemap_settile(&lvl->tilemap, current_tlay, grid_i.xcol, grid_i.yrow, 1, tilebrush == TBRUSH_DESTROYABLE);
 
 			if (current_tlay == TLAY_SOLID && !lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]) {
 				cpVect verts[4];
@@ -293,7 +312,7 @@ static void paint_tile(editor_touch *touch)
 				cpSpaceAddStaticShape(current_space, shape);
 			}
 		} else if (touch->data.tile_mode == TILE_CLEAR) {
-			tilemap_settile(&lvl->tilemap, current_tlay, grid_i.xcol, grid_i.yrow, 0);
+			tilemap_settile(&lvl->tilemap, current_tlay, grid_i.xcol, grid_i.yrow, 0, 0);
 
 			if (current_tlay == TLAY_SOLID && lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]) {
 				cpSpaceRemoveShape(current_space, lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]);
@@ -406,6 +425,16 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 				add_touchdata(MODE_RESIZE, touch_id, pos_view, cpvzero, data);
 				return 1;
 			}
+			if (grid_i.yrow != -1) {
+				byte tile = lvl->tilemap.data[current_tlay][grid_i.yrow][grid_i.xcol];
+				if (tile != TILE_TYPE_NONE) {
+					editor_setmode(MODE_TILEMAP);
+					return 0;
+				}
+			} else {
+				editor_setmode(MODE_TILEMAP);
+				return 0;
+			}
 		}
 
 		if (!contains_instance(data.object_ins)) {
@@ -422,6 +451,19 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 		}
 		break;
 	case MODE_TILEMAP:
+		/* toggle to object mode? */
+		data.object_ins = instance_at_pos(pos, OBJECT_MARGIN/view_editor->zoom, CP_ALL_LAYERS, CP_NO_GROUP);
+		if (!contains_instance(data.object_ins)) {
+			if (data.object_ins) {
+				touch_unique_id touch_id = finger_bind(finger->fingerId);
+				editor_touch *touch = add_touchdata(MODE_OBJECTS, touch_id, pos_view, cpvzero, data);
+				touch->game_offset = cpvsub(data.object_ins->body->p, pos);
+				touch->data_obj_delete = is_deletable(touch->data.object_ins) && ((grid_i.yrow == -1) || (pos.x < (panel_offset + PANEL_WIDTH - view_editor->view_width/2)));
+				editor_setmode(MODE_OBJECTS);
+				return 1;
+			}
+		}
+
 		tile_touch = contains_tile_finger();
 		if (tile_touch) { /* release finger and give over to view */
 			finger_unbind(tile_touch->ID);
@@ -432,6 +474,13 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 			byte tile = lvl->tilemap.data[current_tlay][grid_i.yrow][grid_i.xcol];
 			data.tile_mode = tile ? TILE_CLEAR : TILE_ADD;
 			add_touchdata(MODE_TILEMAP, touch_id, pos_view, cpvzero, data);
+			return 1;
+		}
+
+		data.resize_mode = radius_at_pos(pos, WALL_MARGIN/view_editor->zoom);
+		if (data.resize_mode != RESIZE_NONE) {
+			touch_unique_id touch_id = finger_bind(finger->fingerId);
+			add_touchdata(MODE_RESIZE, touch_id, pos_view, cpvzero, data);
 			return 1;
 		}
 		break;
@@ -617,13 +666,15 @@ void editor_init()
 	btn_save   = button_create(SPRITE_COIN, 	0, "", GAME_WIDTH/2 - 120, GAME_HEIGHT * (0.45-0.5), 125, 125);
 	btn_lvlname   = button_create(0, 	0, level_name, 0, GAME_HEIGHT/2 - 50, 125, 125);
 
-	btn_state_toggle = button_create(SPRITE_WHITE, 0, "", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 100, 320, 100);
+	btn_state_toggle = button_create(SPRITE_WHITE, 0, "", GAME_WIDTH/2 - 200, GAME_HEIGHT * (0.2-0.5), 320, 100);
 	btn_layer  = button_create(NULL, 0, "", GAME_WIDTH/2 - 25, -GAME_HEIGHT/2 + 25, 50, 50);
+	btn_tile_toggler  = button_create(NULL, 0, "X", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 50, 100, 100);
 
 	button_set_backcolor(btn_state_toggle, tilecol);
 
 	button_set_click_callback(btn_state_toggle, (btn_click_callback) editor_setmode, MODE_TOGGLE);
 	button_set_click_callback(btn_layer, (btn_click_callback) setlayer, btn_layer);
+	button_set_click_callback(btn_tile_toggler, (btn_click_callback) tilemode_toggle, btn_tile_toggler);
 	button_set_click_callback(btn_lvlname, update_level_name, 0);
 
 	button_set_click_callback(btn_space, statesystem_set_state, state_stations);
@@ -649,6 +700,7 @@ void editor_init()
 	state_register_touchable_view(view_editor, btn_save);
 	state_register_touchable_view(view_editor, btn_state_toggle);
 	state_register_touchable_view(view_editor, btn_layer);
+	state_register_touchable_view(view_editor, btn_tile_toggler);
 	state_register_touchable_view(view_editor, btn_lvlname);
 
 	/* OBJECT BUTTON INIT */

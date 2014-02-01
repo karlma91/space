@@ -33,9 +33,16 @@ typedef enum TILE_TYPE{
 	TILE_TYPE_DIAG_SEL, // TILE:  .-    SE LEFT HALF
 	TILE_TYPE_DIAG_SWR, // TILE:  |'-   SW RIGHT HALF
 	TILE_TYPE_DIAG_SWL, // TILE:     -. SW LEFT HALF
-	TILE_TYPE_COUNT,
-	TILE_TYPE_OUTSIDE = -1
+	TILE_TYPE_GROUND,
+	/* NB! ALWAYS ADD NEW TILES RIGHT ABOVE THIS LINE */
+
+	TILE_TYPE_MASK = 0x1F,
+	TILE_DESTROYABLE_BIT = 0x20,
+
+	TILE_TYPE_OUTSIDE = 0xFF ^ TILE_DESTROYABLE_BIT
 } TILE_TYPE;
+
+#define TILE_TYPE_MASK 0x1F
 
 typedef struct tilemap2 {
 	int layers;
@@ -51,18 +58,39 @@ typedef struct tilemap2 {
 	int render_layers[TILEMAP_LAYERS];
 }tilemap2;
 
-static __inline__ byte tilemap_getdata(tilemap2 *tm, int layer, int x, int y)
+static __inline__ byte tilemap_gettype(tilemap2 *tm, int layer, int x, int y)
 {
 	int outside = grid_wrap_index(tm->grid, &x, &y);
-	return outside ? TILE_TYPE_OUTSIDE : tm->data[layer][y][x];
+	return (outside ? TILE_TYPE_OUTSIDE : tm->data[layer][y][x]) & TILE_TYPE_MASK;
+}
+
+static __inline we_bool tilemap_isground(tilemap2 *tm, int layer, int x, int y)
+{
+	TILE_TYPE type = tilemap_gettype(tm, layer, x, y);
+	TILE_TYPE type_N = tilemap_gettype(tm, layer, x, y-1);
+
+	return ((type == TILE_TYPE_GROUND) |
+			(type == TILE_TYPE_DIAG_SW) |
+			(type == TILE_TYPE_DIAG_SE) |
+			(type == TILE_TYPE_DIAG_SER) |
+			(type == TILE_TYPE_DIAG_SEL) |
+			(type == TILE_TYPE_DIAG_SWR) |
+			(type == TILE_TYPE_DIAG_SWL)) ||
+			(type_N == TILE_TYPE_NONE);
+}
+
+static __inline__ we_bool tilemap_isdestroyable(tilemap2 *tm, int layer, int x, int y)
+{
+	int outside = grid_wrap_index(tm->grid, &x, &y);
+	return outside ? WE_FALSE : (tm->data[layer][y][x] & TILE_DESTROYABLE_BIT ? WE_TRUE : WE_FALSE);
 }
 
 /*static __inline__ */
 void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y);
-static __inline__ void tilemap_settile(tilemap2 *tm, int layer, int x, int y, we_bool set)
+static __inline__ void tilemap_settile(tilemap2 *tm, int layer, int x, int y, we_bool activate, we_bool destroyable)
 {
 	grid_wrap_index(tm->grid, &x, &y);
-	tm->data[layer][y][x] = set ? TILE_TYPE_UNDEF : TILE_TYPE_NONE;
+	tm->data[layer][y][x] = activate ? TILE_TYPE_UNDEF : TILE_TYPE_NONE;
 	tilemap_updatetile(tm, layer, x, y);
 	tilemap_updatetile(tm, layer, x+1, y);
 	tilemap_updatetile(tm, layer, x-1, y);
@@ -79,6 +107,19 @@ static __inline__ void tilemap_settile(tilemap2 *tm, int layer, int x, int y, we
 	tilemap_updatetile(tm, layer, x+2, y-1);
 	tilemap_updatetile(tm, layer, x+2, y);
 	tilemap_updatetile(tm, layer, x+2, y+1);
+
+	tm->data[layer][y][x] |= destroyable ? TILE_DESTROYABLE_BIT : 0;
+}
+
+static __inline__ void tilemap_updaterow(tilemap2 *tm, int y)
+{
+	int layer, x, cols = tm->grid->cols;
+
+	for (layer = 0; layer < TLAY_COUNT; layer++) {
+		for (x = 0; x < cols; x++) {
+			tilemap_updatetile(tm, layer, x, y);
+		}
+	}
 }
 
 void tilemap_clear(tilemap2 *tm);
