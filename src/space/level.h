@@ -42,7 +42,10 @@ extern param_list param_defs;
 
 we_bool level_safe_parse(cJSON *param, char *field_name, char *type, void *field, void *def);
 
+void level_write_solar_file(LList world);
+void level_load_solar();
 
+void level_load_levels_from_folder(LList world);
 void level_load_params(param_list *defs, cJSON *root);
 
 int level_init(void);

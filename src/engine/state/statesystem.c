@@ -708,6 +708,12 @@ void state_register_touchable(STATE_ID state_id, touchable *touchable)
 
 }
 
+int state_remove_touchable(STATE_ID state_id, touchable *touchable)
+{
+	State *state = (State *) state_id;
+	return llist_remove(state->touch_objects, touchable);
+}
+
 /**
  * Registers an overlay touchable to view
  */
@@ -715,6 +721,11 @@ void state_register_touchable_view(view *cam, touchable *touchable)
 {
 	llist_add(cam->touch_objects, touchable);
 	touchable->container = cam;
+}
+
+void state_remove_touchable_view(view *cam, touchable *touchable)
+{
+	llist_remove(cam->touch_objects, touchable);
 }
 
 //void state_register_sprite(STATE_ID state_id, int layer, sprite *spr)

@@ -131,6 +131,18 @@ typedef struct editor_touch {
     float time;
 } editor_touch;
 
+void editor_edit_level(level *levl)
+{
+	statesystem_set_state(state_editor);
+	if(lvl){
+		//free(lvl);
+	}
+	strcpy(level_name, levl->name);
+	lvl = levl;
+	currentlvl = levl;
+	objectsystem_clear();
+	level_start_level(lvl);
+}
 
 static void update_level_name(){
 	textinput_start(state_editor, level_name, "LEVEL NAME:", 4, 20);
@@ -155,14 +167,7 @@ static void update_instances(instance *obj, void *data)
 	level_add_object_recipe_name(lvl, obj->TYPE->NAME, (char*)&(((struct instance_dummy *)obj)->params), obj->p_start,0);
 }
 
-static void start_editor_level(void *unused)
-{
-	SDL_Log("EDITOR: STARTING LEVEL FROM EDITOR");
-	llist_clear(lvl->level_data);
-	instance_iterate(update_instances, NULL);
-	statesystem_set_state(state_space);
-	space_init_level_from_level(lvl);
-}
+
 
 static void save_level_to_file(void *unused)
 {
@@ -171,6 +176,18 @@ static void save_level_to_file(void *unused)
 	lvl->tilemap.layers = TLAY_COUNT;
 	strcpy(lvl->name, level_name);
 	level_write_to_file(lvl);
+	level_load_levels_from_folder(level_get_world());
+	level_write_solar_file(level_get_world());
+}
+
+static void start_editor_level(void *unused)
+{
+	save_level_to_file(NULL);
+	SDL_Log("EDITOR: STARTING LEVEL FROM EDITOR");
+	llist_clear(lvl->level_data);
+	instance_iterate(update_instances, NULL);
+	statesystem_set_state(state_space);
+	space_init_level_from_level(lvl);
 }
 
 static void enable_objlist(int enable)

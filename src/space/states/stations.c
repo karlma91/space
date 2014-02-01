@@ -18,7 +18,7 @@ static button btn_editor;
 
 #define SOLSYS_COUNT 25
 //static solarsystem *solsys[SOLSYS_COUNT];
-LList solar_systems;
+LList user_system;
 
 static scroll_p scroller;
 
@@ -143,12 +143,12 @@ static void pre_update(void)
 	cpVect offset = cpvneg(scroll_get_offset(scroller));
 	view_update(main_view, offset, rot);
 
-	llist_begin_loop(solar_systems);
-	while (llist_hasnext(solar_systems)) {
-		solarsystem *sol = (solarsystem *)llist_next(solar_systems);
+	llist_begin_loop(user_system);
+	while (llist_hasnext(user_system)) {
+		solarsystem *sol = (solarsystem *)llist_next(user_system);
 		solarsystem_update(sol);
 	}
-	llist_end_loop(solar_systems);
+	llist_end_loop(user_system);
 }
 
 static void post_update(void)
@@ -173,11 +173,11 @@ static void draw(void)
 	draw_pop_matrix();
 
 
-	llist_begin_loop(solar_systems);
+	llist_begin_loop(user_system);
 	cpVect p;
 	int i = 0;
-	while (llist_hasnext(solar_systems)) {
-		solarsystem *sol = (solarsystem *)llist_next(solar_systems);
+	while (llist_hasnext(user_system)) {
+		solarsystem *sol = (solarsystem *)llist_next(user_system);
 		solarsystem_update(sol);
 		solarsystem_draw(sol);
 		if(i>0){
@@ -187,7 +187,7 @@ static void draw(void)
 		p = sol->origo;
 		i++;
 	}
-	llist_end_loop(solar_systems);
+	llist_end_loop(user_system);
 
 
 	/*
@@ -268,7 +268,9 @@ void stations_init(void)
 	srand(0x9b3a09fa);
 	statesystem_register(state_stations, 0);
 
-	solar_systems = level_get_world();
+	level_load_solar();
+
+	user_system = level_get_world();
 
 	Color col_back = {30,100,30,100};
 	//Color col_text = {1,1,1,1};
@@ -290,11 +292,11 @@ void stations_init(void)
 	button_set_backcolor(btn_editor, col_back);
 	state_register_touchable_view(main_view, btn_editor);
 
-	llist_begin_loop(solar_systems);
-	while (llist_hasnext(solar_systems)) {
-		solarsystem_register_touch((solarsystem *)llist_next(solar_systems), this);
+	llist_begin_loop(user_system);
+	while (llist_hasnext(user_system)) {
+		solarsystem_register_touch((solarsystem *)llist_next(user_system), this);
 	}
-	llist_end_loop(solar_systems);
+	llist_end_loop(user_system);
 
 	state_register_touchable_view(main_view, btn_settings);
 

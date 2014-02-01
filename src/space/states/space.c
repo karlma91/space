@@ -1142,7 +1142,7 @@ void space_next_level(void *unused)
 	if (station_nr < count) {
 		statesystem_set_state(state_space);
 		station *s = (station*)llist_at_index(world, station_nr);
-		space_init_level(s->level_path);
+		space_init_level(s->path);
 	} else {
 #if ARCADE_MODE
 		gameover_setstate(GAMEOVER_WIN);

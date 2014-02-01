@@ -153,7 +153,6 @@ LList object_get_instances(const object_id *type);
 /* Chipmunk shape and body helper functions */
 cpShape *we_add_circle_shape(cpSpace *space, cpBody *body, cpFloat radius, cpFloat friction, cpFloat elasticity);
 cpShape *we_add_box_shape(cpSpace *space, cpBody *body, cpFloat width, cpFloat height, cpFloat friction, cpFloat elasticity);
-void we_shape_collision(cpShape *shape, cpCollisionType type, cpLayers layers, cpGroup group);
 
 void we_body_remove(cpSpace *space, cpBody **body);
 void we_body_remove_static(cpSpace *space, cpBody **body);
