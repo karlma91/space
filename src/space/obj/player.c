@@ -123,8 +123,8 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 	}
 
 	draw_color4f(1,1,1,1);
-	sprite_render_body(RLAY_GAME_BACK,&(player->data.spr), player->data.body);
-	sprite_render_body(RLAY_GAME_BACK, &(player->gun), player->gunwheel);
+	sprite_render_body(RLAY_GAME_MID,&(player->data.spr), player->data.body);
+	sprite_render_body(RLAY_GAME_MID, &(player->gun), player->gunwheel);
 	particles_draw_emitter(player->smoke);
 	hpbar_draw(RLAY_GAME_FRONT, &player->hp_bar, cpvtoangle(player->data.body->p));
 }
