@@ -35,6 +35,8 @@ enum WAFFLE_DIR {
 extern void waffle_init(void);
 extern void waffle_destroy(void);
 
+int waffle_remove(char *path);
+
 int checksum(char *data, int length);
 
 /*

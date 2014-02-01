@@ -279,6 +279,13 @@ int waffle_next_line(char *file)
     return i;
 }
 
+int waffle_remove(char *path)
+{
+	char fpath[200];
+	sprintf(fpath,"bin/user_files/%s", path);
+	return remove(fpath);
+}
+
 FILE *waffle_fopen(enum WAFFLE_DIR dir_type, const char *filename, const char *opentype)
 {
 	if (dir_type > 3) {
@@ -300,7 +307,10 @@ FILE *waffle_fopen(enum WAFFLE_DIR dir_type, const char *filename, const char *o
 		last_slash = fopath[i] == '/' ? i : last_slash;
 	}
 	fopath[last_slash] = '\0';
-	mkpath(fopath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	if (!strchr(fopath, 'r')) {
+		mkpath(fopath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	}
+
 
 	return fopen(path, opentype);
 }

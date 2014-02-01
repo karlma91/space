@@ -23,102 +23,38 @@
 
 #include "states/space.h"
 
+#define FILE_SIZE_BUFFER 128000
+
 static int station_count;
 //static level_ship *world;
 
-LList solar_systems;
+LList user_system;
+LList game_system;
+
 
 //TODO: Set all default values to something usefull
 static char DEF_STRING[10] = "HELLO";
 
 param_list param_defs;
 
+LList load_solarsystem_file(cJSON *root);
+
 int level_init(void)
 {
 	srand(0x9b3a09fa);
-	solar_systems = llist_create();
-	llist_set_remove_callback(solar_systems, (ll_rm_callback)solarsystem_destroy);
-	SPRITE_ID spr_sun = sprite_link("sun01");
-	we_diriter *wed = waffle_get_diriter(WAFFLE_DOCUMENTS, "levels");
-	int sun = 0;
-	while(waffle_dirnext(wed)){
-		if(waffle_isdir(wed)) {
-			int stations = 0;
-			float rnd = rand() & 0x1f;
-			Color base = {0x70-rnd,0x30,0x30+rnd,0xff};
-			Color glow = {0xff-rnd,0xa0,0x70+rnd,0x80};
-			Color add1 = {0x90-rnd,0x80,0x40+rnd,0x00};
-			Color add2 = {0xb0-rnd,0x70,0x40+rnd,0x00};
-			solarsystem *sy = solarsystem_create(sun, (500 + we_randf*(sun*1500/2 + (sun>1?1000:0)) + 300*sun/2), spr_sun, base, glow, add1, add2);
-			sun++;
-			we_diriter *wed2 = waffle_get_diriter(WAFFLE_DOCUMENTS, wed->cur_path);
-			while(waffle_dirnext(wed2)) {
-				if(waffle_isfile(wed2)) {
-					SDL_Log("LEVELS ADDING: %s", wed2->cur_path);
-					char temp[64];
-					sscanf(wed2->dir->d_name, "%s.json",temp);
-					temp[strlen(temp) - 5] = 0;
-					SDL_Log("%s", temp);
-					solarsystem_add_station(sy, NULL, wed2->dir_type, temp , wed2->cur_path);
-					stations++;
-				}
-			}
-			llist_add(solar_systems, sy);
-		}
-	}
-	waffle_free_diriter(wed);
 
-
-	/* read space station data */
-	char buff[10000]; // TODO: stor nok?
-	int filesize;
+	char buff[FILE_SIZE_BUFFER];
 	cJSON *root;
-
-	/*filesize = waffle_read_file_zip("space_1.json", &buff[0], 10000);
+	int filesize = waffle_read_file_zip("level/object_defaults.json", &buff[0], 10000);
 	if (!filesize) {
 		SDL_Log("Could not load level data!");
 		exit(1);
 	}
-
-	root = cJSON_Parse(buff);
-	if(root == NULL){
-		SDL_Log("[Level] could not parse level: %s", "space_1");
-		SDL_Log("Error before: [%s]\n",cJSON_GetErrorPtr());
-		return NULL;
-	}
-	cJSON *station_array = cJSON_GetObjectItem(root,"stations");
-	station_count = cJSON_GetArraySize(station_array);
-	world = calloc(station_count,sizeof(level_ship));
-
-    int i;
-	for (i = 0; i < cJSON_GetArraySize(station_array); i++) {
-		cJSON *station = cJSON_GetArrayItem(station_array, i);
-		world[i].id = i+1;
-		world[i].radius = 100;
-		world[i].rotation = 1;
-		world[i].rotation_speed = 1;
-		world[i].pos.x = cJSON_GetObjectItem(station,"x")->valuedouble;
-		world[i].pos.y = cJSON_GetObjectItem(station,"y")->valuedouble;
-		strcpy(world[i].level_path, cJSON_GetObjectItem(station,"level")->valuestring);
-	}
-
-	if (i != station_count || i <= 0) {
-		SDL_Log("Error while loading level data, could not load all stations! (%d of %d loaded)\n", i, station_count);
-		exit(2);
-	}
-
-	cJSON_Delete(root);*/
-
-	filesize = waffle_read_file_zip("level/object_defaults.json", &buff[0], 10000);
-	if (!filesize) {
-			SDL_Log("Could not load level data!");
-			exit(1);
-		}
 	root = cJSON_Parse(buff);
 	if(root == NULL){
 		SDL_Log("[Level] could not parse level: %s", "level/object_defaults.json");
 		SDL_Log("Error before: [%s]\n",cJSON_GetErrorPtr());
-		return NULL;
+		return 0;
 	}
 	level_load_params(&(param_defs), root);
 	cJSON_Delete(root);
@@ -126,8 +62,179 @@ int level_init(void)
 	return 1;
 }
 
+
+void level_load_solar()
+{
+	char buff[FILE_SIZE_BUFFER];
+	int filesize = 0;
+	FILE *f = waffle_fopen(WAFFLE_DOCUMENTS, "levels/userlevels.json", "r");
+	if(f){
+		filesize = waffle_read(f, buff, FILE_SIZE_BUFFER);
+	}
+
+	if(!filesize) {
+		SDL_Log("Could not load userlevels.json");
+		exit(1);
+	}
+	cJSON *root;
+	root = cJSON_Parse(buff);
+	if(root == NULL){
+		SDL_Log("[Level] could not parse level: %s", "level/object_defaults.json");
+		SDL_Log("Error before: [%s]\n",cJSON_GetErrorPtr());
+	} else {
+		user_system = load_solarsystem_file(root);
+	}
+	level_load_levels_from_folder(user_system);
+}
+
+
+LList load_solarsystem_file(cJSON *root)
+{
+	SDL_Log("LOADING SOLARSYSTEMS");
+	LList world = llist_create();
+	llist_set_remove_callback(world, (ll_rm_callback)solarsystem_destroy);
+
+
+	cJSON *systems = cJSON_GetObjectItem(root,"systems");
+	if(systems) {
+		int i,j;
+		char name[256];
+		char folder[256];
+		char path[256];
+		char filename[256];
+		char author[256];
+		SPRITE_ID spr;
+		Color col;
+		int size;
+		for (i=0; i < cJSON_GetArraySize(systems); i++) {
+			cJSON * sun = cJSON_GetArrayItem(systems,i);
+			pl_parse(sun, "name", "char", &name, DEF_STRING);
+			pl_parse(sun, "folder", "char", &folder, DEF_STRING);
+			SDL_Log("CREATING SUN)");
+			solarsystem *sy = solarsystem_create(i, name, folder);
+
+			cJSON * levels = cJSON_GetObjectItem(sun,"levels");
+			for (j= 0; j < cJSON_GetArraySize(levels); j++) {
+				cJSON * lvl = cJSON_GetArrayItem(levels,j);
+				pl_parse(lvl, "author", "char", author, DEF_STRING);
+				pl_parse(lvl, "name", "char", name, DEF_STRING);
+				pl_parse(lvl, "filename", "char", filename, DEF_STRING);
+				pl_parse(lvl, "sprite", "sprite", &(spr), SPRITE_STATION001);
+				pl_parse(lvl, "size", "int ", &size, 0);
+				pl_parse(lvl, "color", "Color", &col, 0);
+				sprintf(path, "levels/%s/%s", folder, filename);
+				FILE* f =  waffle_fopen(WAFFLE_DOCUMENTS, path, "r");
+				if(f == NULL){
+					SDL_Log("%s does not exist", path);
+				}else{
+					fclose(f);
+					SDL_Log("CREATING station %s", path);
+					solarsystem_add_station(sy, spr,col, WAFFLE_DOCUMENTS, name , path, author, filename);
+				}
+			}
+			llist_add(world,sy);
+		}
+		/*if(llist_size(sy->stations)){
+				llist_add(world,sy);
+			}else{
+				solarsystem_destroy(sy);
+			}*/
+	} else {
+		SDL_Log("Could not find field systems");
+		SDL_Log("%s", cJSON_GetErrorPtr());
+	}
+	return world;
+}
+
+char * color_to_string(Color c, char *t){
+	sprintf(t,"%02X%02X%02X%02X", c.r, c.b, c.g, c.a);
+	return t;
+}
+void level_write_solar_file(LList world)
+{
+	FILE *file = waffle_fopen(WAFFLE_DOCUMENTS, "levels/userlevels.json","w");
+	if (file == NULL) {
+		SDL_Log( "Could not open levels/userlevels.json");
+		return;
+	}
+	cJSON *root;//,*fmt;
+	root = cJSON_CreateObject();
+	cJSON * systems = cJSON_CreateArray();
+	llist_begin_loop(world);
+	while (llist_hasnext(world)) {
+		solarsystem *sy = llist_next(world);
+
+		cJSON *system = cJSON_CreateObject();
+		cJSON_AddItemToObject(system, "name", cJSON_CreateString(sy->name));
+		cJSON_AddItemToObject(system, "folder", cJSON_CreateString(sy->folder));
+
+		cJSON * levels = cJSON_CreateArray();
+		llist_begin_loop(sy->stations);
+		while (llist_hasnext(sy->stations)) {
+			station *st = llist_next(sy->stations);
+
+			cJSON *station = cJSON_CreateObject();
+			cJSON_AddItemToObject(station, "author", cJSON_CreateString(st->author));
+			cJSON_AddItemToObject(station, "name", cJSON_CreateString(st->name));
+			cJSON_AddItemToObject(station, "filename", cJSON_CreateString(st->filename));
+			cJSON_AddItemToObject(station, "sprite", cJSON_CreateString(sprite_get_name(st->spr_id)));
+			cJSON_AddNumberToObject(station, "size", st->radius);
+			char c[10];
+			cJSON_AddItemToObject(station, "color", cJSON_CreateString(color_to_string(st->col, c)));
+
+			cJSON_AddItemToArray(levels, station);
+		}
+		llist_end_loop(sy->stations);
+
+		cJSON_AddItemToObject(system, "levels", levels);
+		cJSON_AddItemToArray(systems, system);
+		cJSON_AddItemToObject(root, "systems", systems);
+	}
+	llist_end_loop(world);
+	char * rendered = cJSON_Print(root);
+	fprintf(file,"%s",rendered);
+	fclose(file);
+	cJSON_Delete(root);
+
+}
+
+void level_load_levels_from_folder(LList world)
+{
+	we_diriter *wed = waffle_get_diriter(WAFFLE_DOCUMENTS, "levels");
+	while(waffle_dirnext(wed)){
+		if(waffle_isdir(wed)) {
+			solarsystem *sy = solarsystem_get_from_folder(world, wed->dir->d_name);
+			if(sy == NULL){
+				SDL_Log("Creating new solarsystem %s,  %s", wed->dir->d_name, wed->dir->d_name );
+				sy = solarsystem_create(llist_size(world), wed->dir->d_name, wed->dir->d_name);
+				llist_add(world, sy);
+			}else{
+				SDL_Log("Found solarsystem for folder %s", wed->cur_path);
+			}
+			we_diriter *wed2 = waffle_get_diriter(WAFFLE_DOCUMENTS, wed->cur_path);
+			while(waffle_dirnext(wed2)) {
+				if(waffle_isfile(wed2)) {
+					SDL_Log("LOOKING FOR %s",  wed2->dir->d_name);
+					station *st = solarsystem_get_station(sy, wed2->cur_path);
+					if(st == NULL){
+						SDL_Log("LEVELS ADDING: %s", wed2->cur_path);
+						char temp[64];
+						sscanf(wed2->dir->d_name, "%s.json", temp);
+						temp[strlen(temp) - 5] = 0;
+						solarsystem_add_station(sy, SPRITE_COIN, COL_BLACK, wed2->dir_type, temp , wed2->cur_path, "author", wed2->dir->d_name);
+					}else{
+						SDL_Log("Found station %s in folder %s",wed2->dir->d_name, wed2->path);
+					}
+				}
+			}
+		}
+	}
+	waffle_free_diriter(wed);
+}
+
+
 LList level_get_world(){
-	return solar_systems;
+	return user_system;
 }
 
 
@@ -229,7 +336,6 @@ static void load_tilemap(cJSON *t, level *lvl)
 	}
 }
 
-#define FILE_SIZE_BUFFER 128000
 level *level_load(int folder, char * filename)
 {
 	SDL_Log("PARSING LEVEL : %s", filename);

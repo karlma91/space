@@ -254,6 +254,9 @@ int sprite_get_texture(SPRITE_ID id)
 }
 char * sprite_get_name(SPRITE_ID id)
 {
+	if(id == NULL){
+		return "nosprite";
+	}
 	return ((sprite_data*)id)->name;
 }
 

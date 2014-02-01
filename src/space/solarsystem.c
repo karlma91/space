@@ -7,10 +7,24 @@ static void station_free(station *s)
 	free(s);
 }
 
-solarsystem *solarsystem_create(int solsys_index, float star_size, SPRITE_ID star_spr, Color star_base, Color star_glow, Color star_add1, Color star_add2)
+void solarsystem_create_drawbl(drawbl_sun * sun, float star_size, SPRITE_ID star_spr, Color star_base, Color star_glow, Color star_add1, Color star_add2)
+{
+	sun->size = star_size;
+	sun->base = star_base;
+	sun->glow = star_glow;
+	sun->add1 = star_add1;
+	sun->add2 = star_add2;
+	sun->spr_id = star_spr;
+	sun->angvel = 0.03;
+}
+
+solarsystem *solarsystem_create(int solsys_index, char *name, char *folder)
 {
 	solarsystem *solsys = (solarsystem *)calloc(1, sizeof *solsys);
 	solsys->index = solsys_index;
+
+	strcpy(solsys->name, name);
+	strcpy(solsys->folder, folder);
 
 	int i = solsys_index + 2;
 	cpFloat radius = powf(i, 0.8) * 4800;
@@ -23,19 +37,18 @@ solarsystem *solarsystem_create(int solsys_index, float star_size, SPRITE_ID sta
 	cpVect offset = WE_P2C(off_radius, off_angle);
 	solsys->origo = cpvsub(cpvadd(WE_P2C(radius,angle), jitter), offset);
 
-	solsys->station_count = 0;
-	solsys->sun.size = star_size;
-	solsys->sun.base = star_base;
-	solsys->sun.glow = star_glow;
-	solsys->sun.add1 = star_add1;
-	solsys->sun.add2 = star_add2;
 	solsys->sun.pos = solsys->origo;
-	solsys->sun.spr_id = star_spr;
 	solsys->sun.angvel = 0.03;
 
+	SPRITE_ID spr_sun = sprite_link("sun01");
+	float rnd = rand() & 0x1f;
+	Color base = {0x70-rnd,0x30,0x30+rnd,0xff};
+	Color glow = {0xff-rnd,0xa0,0x70+rnd,0x80};
+	Color add1 = {0x90-rnd,0x80,0x40+rnd,0x00};
+	Color add2 = {0xb0-rnd,0x70,0x40+rnd,0x00};
+	int size = (500 + we_randf*(solsys_index*1500/2 + (solsys_index>1?1000:0)) + 300*solsys_index/2);
+	solarsystem_create_drawbl(&(solsys->sun),size, spr_sun,base,glow,add1,add2);
 	solsys->stations = llist_create();
-	llist_set_remove_callback(solsys->stations, (ll_rm_callback)station_free);
-
 	return solsys;
 }
 
@@ -44,11 +57,14 @@ static void button_callback(void *data)
 	levelscreen_change_to(data);
 }
 
-void solarsystem_add_station(solarsystem * sol, SPRITE_ID spr_id, int dir_type, char * name, char * path)
+void solarsystem_add_station(solarsystem * sol, SPRITE_ID spr_id, Color color, int dir_type, char * name, char * path, char * author, char *filename)
 {
 	station *s = calloc(1, sizeof(station));
-	strcpy(s->level_path, path);
-	strcpy(s->level_name, name);
+	s->sol = sol;
+	strcpy(s->path, path);
+	strcpy(s->name, name);
+	strcpy(s->author, author);
+	strcpy(s->filename, filename);
 	int i = llist_size(sol->stations);
 	float size = 300 + we_randf * 100;
 	cpFloat radius = sol->sun.size + (i) * 400 ;
@@ -57,26 +73,39 @@ void solarsystem_add_station(solarsystem * sol, SPRITE_ID spr_id, int dir_type, 
 	s->angle = angle;
 	s->rotation_speed = 1000/radius;
 	s->pos = cpvadd(WE_P2C(radius,angle), sol->origo);
+	s->col = color;
 	Color col_back = {255,180,140,255};
-	s->btn = button_create(SPRITE_STATION001, 0, s->level_name, s->pos.x, s->pos.y, size, size);
+	s->btn = button_create(SPRITE_STATION001, 0, s->name, s->pos.x, s->pos.y, size, size);
 	button_set_click_callback(s->btn, button_callback, s);
 	button_set_txt_antirot(s->btn, 1);
 	button_set_backcolor(s->btn, col_back);
 	button_set_animated(s->btn, 1, (i ? 18 : 15));
 	button_set_enlargement(s->btn, 1.5);
 	button_set_hotkeys(s->btn, digit2scancode[(i+1) % 10], 0);
+	state_register_touchable(state_stations, s->btn);
 	sprite *spr = button_get_sprite(s->btn);
 	spr->antirot = 1;
-	llist_add(sol->stations,s);
+	llist_add(sol->stations, s);
+}
+
+void solarsystem_remove_station(solarsystem *sy, station *s)
+{
+	if(llist_remove(sy->stations, s)) {
+		if(state_remove_touchable(state_stations, s->btn)){
+			SDL_Log("Could not remove station touchable");
+		}
+	}else{
+		SDL_Log("Could not remove station");
+	}
 }
 
 void solarsystem_register_touch(solarsystem *sol, STATE_ID id)
 {
-	llist_begin_loop(sol->stations);
+	/*llist_begin_loop(sol->stations);
 	while (llist_hasnext(sol->stations)) {
 		state_register_touchable(id,((station *)llist_next(sol->stations))->btn);
 	}
-	llist_end_loop(sol->stations);
+	llist_end_loop(sol->stations);*/
 }
 
 void solarsystem_update(solarsystem *sol)
@@ -125,8 +154,41 @@ void sun_render(int layer, drawbl_sun *sun)
 
 }
 
+solarsystem * solarsystem_get_from_folder(LList systems, char *folder)
+{
+	solarsystem *solar = NULL;
+	llist_begin_loop(systems);
+	while (llist_hasnext(systems)) {
+		solarsystem *s = llist_next(systems);
+		if (strcmp(s->folder, folder) == 0) {
+			solar = s;
+			break;
+		}
+	}
+	llist_end_loop(systems);
+	return solar;
+}
+
+station * solarsystem_get_station(solarsystem *ss, char *path)
+{
+	station *found_st = NULL;
+	llist_begin_loop(ss->stations);
+	while (llist_hasnext(ss->stations)) {
+		station *st = llist_next(ss->stations);
+		SDL_Log("%s == %s", st->path, path);
+		if (strcmp(st->path, path) == 0) {
+			found_st = st;
+			break;
+		}
+	}
+	llist_end_loop(ss->stations);
+	return found_st;
+}
+
+
 void solarsystem_destroy(solarsystem *sy)
 {
+	llist_set_remove_callback(sy->stations, (ll_rm_callback)station_free);
 	llist_destroy(sy->stations);
 	free(sy);
 }
