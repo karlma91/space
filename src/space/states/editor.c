@@ -21,7 +21,7 @@ STATE_ID state_editor;
 
 /*********** GRID AND TILEDATA ***********/
 static tile_layers current_tlay = TLAY_SOLID;
-static grid_index grid_i_cur = {-1,-1};
+static grid_index grid_i_cur = {-1,-1, 0, 0};
 
 /*********** LEVEL DATA ***********/
 static level *lvl;
@@ -37,6 +37,7 @@ typedef enum EDITOR_MODE {
 static const int MODE_TOGGLE = 0xFFFF;
 static editor_mode current_mode = MODE_RESIZE;
 
+static void editor_setmode(editor_mode state);
 
 /*********** RESIZE_MODE ***********/
 float inner_resize_margin = 0, outer_resize_margin = 0;
@@ -142,6 +143,7 @@ void editor_edit_level(level *levl)
 	currentlvl = levl;
 	objectsystem_clear();
 	level_start_level(lvl);
+	editor_setmode(MODE_OBJECTS);
 }
 
 static void update_level_name(){
@@ -321,20 +323,20 @@ static void paint_tile(editor_touch *touch)
 		if (touch->data.tile_mode == TILE_ADD) {
 			tilemap_settile(&lvl->tilemap, current_tlay, grid_i.xcol, grid_i.yrow, 1, tilebrush == TBRUSH_DESTROYABLE);
 
-			if (current_tlay == TLAY_SOLID && !lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]) {
+			if (current_tlay == TLAY_SOLID && !lvl->tilemap.metadata[grid_i.yrow][grid_i.xcol].block) {
 				cpVect verts[4];
 				grid_getquad8cpv(lvl->tilemap.grid, verts, grid_i.xcol, grid_i.yrow);
 				cpShape *shape = cpPolyShapeNew(current_space->staticBody, 4, verts, cpvzero);
-				lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol] = shape;
+				lvl->tilemap.metadata[grid_i.yrow][grid_i.xcol].block = shape;
 				cpSpaceAddStaticShape(current_space, shape);
 			}
 		} else if (touch->data.tile_mode == TILE_CLEAR) {
 			tilemap_settile(&lvl->tilemap, current_tlay, grid_i.xcol, grid_i.yrow, 0, 0);
 
-			if (current_tlay == TLAY_SOLID && lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]) {
-				cpSpaceRemoveShape(current_space, lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]);
-				cpfree(lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol]);
-				lvl->tilemap.blocks[grid_i.yrow][grid_i.xcol] = NULL;
+			if (current_tlay == TLAY_SOLID && lvl->tilemap.metadata[grid_i.yrow][grid_i.xcol].block) {
+				cpSpaceRemoveShape(current_space, lvl->tilemap.metadata[grid_i.yrow][grid_i.xcol].block);
+				cpfree(lvl->tilemap.metadata[grid_i.yrow][grid_i.xcol].block);
+				lvl->tilemap.metadata[grid_i.yrow][grid_i.xcol].block = NULL;
 			}
 		}
 	}
@@ -744,11 +746,7 @@ void editor_init()
 	state_register_touchable_view(view_editor, scr_world);
 
 	lvl = level_load(WAFFLE_ZIP, "empty");
-	lvl->tilemap.render_layers[TLAY_BACKGROUND] = RLAY_BACK_FRONT;
-	lvl->tilemap.render_layers[TLAY_SOLID] = RLAY_GAME_BACK;
-	lvl->tilemap.render_layers[TLAY_OVERLAY] = RLAY_GAME_FRONT;
 	tap_clear_editor(WE_TRUE);
-	editor_setmode(MODE_OBJECTS);
 }
 
 /* * * * * * * * * *

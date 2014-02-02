@@ -22,6 +22,12 @@
 
 #define TILEMAP_READ_BUFFER_SIZE 128000
 
+int tile_render_layers[TILEMAP_LAYERS] = {
+		RLAY_GAME_FRONT,
+		RLAY_BACK_FRONT,
+		RLAY_BACK_MID
+};
+
 void tilemap2_render(tilemap2 *tm)
 {
 	draw_color(COL_WHITE);
@@ -94,7 +100,7 @@ void tilemap2_render(tilemap2 *tm)
 					}
 
 					draw_color(col);
-					draw_quad_new(tm->render_layers[l], verts, tex);
+					draw_quad_new(tile_render_layers[l], verts, tex);
 				}
 			}
 		}
@@ -165,7 +171,7 @@ void tilemap2_render(tilemap2 *tm)
 				verts[6] = v3.x; verts[7] = v3.y;
 
 				draw_color(col);
-				draw_quad_new(tm->render_layers[1], verts, tex2);
+				draw_quad_new(tile_render_layers[TLAY_SOLID], verts, tex2);
 			}
 		}
 	}
@@ -245,8 +251,8 @@ void tilemap_clear(tilemap2 *tm)
 			}
 	for (y = tm->grid->inner_i; y < tm->grid->outer_i - 1; y++)
 		for (x=0; x<tm->grid->cols; x++) {
-			cpShape *shape = tm->blocks[y][x];
-			tm->blocks[y][x] = NULL;
+			cpShape *shape = tm->metadata[y][x].block;
+			tm->metadata[y][x].block = NULL;
 			if (shape) {
 				cpSpaceRemoveShape(current_space, shape);
 				cpShapeFree(shape);

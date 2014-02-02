@@ -174,6 +174,7 @@ void game_destroy(void);
 extern float upg_total_mass;
 
 #define ID_GROUND (void *)0x1017 //TMP define with random number
+#define ID_GROUND_DESTROYABLE (void *)0x1018 //TMP define with random number
 
 /* digits hotkeys */
 extern SDL_Scancode digit2scancode[10];

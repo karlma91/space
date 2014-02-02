@@ -73,9 +73,8 @@ void level_load_solar()
 	}
 
 	if(!filesize) {
-		SDL_Log("Could not load userlevels.json");
-		exit(1);
-	}
+		SDL_Log("DEBUG: Could not load userlevels.json");
+	} else {
 	cJSON *root;
 	root = cJSON_Parse(buff);
 	if(root == NULL){
@@ -83,6 +82,7 @@ void level_load_solar()
 		SDL_Log("Error before: [%s]\n",cJSON_GetErrorPtr());
 	} else {
 		user_system = load_solarsystem_file(root);
+	}
 	}
 	level_load_levels_from_folder(user_system);
 }
@@ -332,6 +332,20 @@ static void load_tilemap(cJSON *t, level *lvl)
 					lvl->tilemap.data[i][j+ii][k] = cJSON_GetArrayItem(col,k)->valueint;
 				}
 			}
+		}
+	}
+
+	meta_tile meta_def;
+	meta_def.block = NULL;
+	meta_def.destroyable = WE_FALSE;
+	meta_def.hp = 0;
+
+	int j,k;
+	for (j= 0; j < lvl->tilemap.grid->rows; j++) {
+		meta_def.y_row = j;
+		for (k = 0; k < lvl->tilemap.grid->cols; k++) {
+			meta_def.x_col = k;
+			lvl->tilemap.metadata[j][k] = meta_def;
 		}
 	}
 }

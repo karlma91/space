@@ -38,29 +38,57 @@ static void se_add_explotion_at_contact_point(cpArbiter *arb)
 
 /* collision handling */
 
+void postStepRemove(cpSpace *space, void *key, meta_tile *meta)
+{
+	int x = meta->x_col;
+	int y = meta->y_row;
+	currentlvl->tilemap.data[TLAY_SOLID][y][x] = TILE_TYPE_NONE;
+	cpShape *shape = currentlvl->tilemap.metadata[y][x].block;
+	currentlvl->tilemap.metadata[y][x].destroyable = WE_FALSE;
+	if (shape) {
+		fprintf(stderr, "tile is getting removed\n");
+		cpSpaceRemoveStaticShape(current_space, shape);
+		cpShapeFree(shape);
+	}
+}
+
 static void collision_bullet_VS_object_with_score(cpArbiter *arb, cpSpace *space, void *unused)
 {
 	cpShape *a, *b;
 	cpArbiterGetShapes(arb, &a, &b);
 	instance *bullet = (instance*)(a->body->data);
-	instance *object = (instance *)(b->body->data);
 
 	instance_remove(bullet);
-
 	add_sparks_at_contactpoint(arb, 500);
-	//se_add_explotion_at_contact_point(arb);
 
-	//FIXME how to deal with objects already killed?
-	if (se_damage_object(object, bullet)) {
-		if (object->alive) {
-			instance_remove(bullet);
-			//se_add_score_and_popup(b->body->p, *COMPONENT(object, SCORE, int*));
+	if (b->collision_type == ID_GROUND_DESTROYABLE) {
+		float *damage = COMPONENT(bullet, DAMAGE, float*);
+		if (damage) {
+			fprintf(stderr, "DEBUG: HURTING destroyable tile!\n");
+			meta_tile *meta = b->data;
+			if (meta->hp > 0) {
+				meta->hp -= *damage;
+				if (meta->hp <= 0 && meta->destroyable) {
+					fprintf(stderr, "DEBUG: removing destroyable tile!\n");
+					cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, b, b->data);
+				}
+			}
 		}
 	} else {
-		if (object->TYPE == obj_id_factory) { //TODO play/get sound_id from object
-			sound_play(SND_HIT_1);
+		instance *object = (instance *)(b->body->data);
+
+		//FIXME how to deal with objects already killed?
+		if (se_damage_object(object, bullet)) {
+			if (object->alive) {
+				instance_remove(bullet);
+				//se_add_score_and_popup(b->body->p, *COMPONENT(object, SCORE, int*));
+			}
 		} else {
-			sound_play(SND_HIT_2);
+			if (object->TYPE == obj_id_factory) { //TODO play/get sound_id from object
+				sound_play(SND_HIT_1);
+			} else {
+				sound_play(SND_HIT_2);
+			}
 		}
 	}
 	//cpSpaceAddPostStepCallback(space, (cpPostStepFunc)postStepRemove, a, NULL);
@@ -170,6 +198,7 @@ void collisioncallbacks_init(void)
 	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_factory, collision_explosion, NULL, NULL, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_explosion, obj_id_rocket, collision_explosion, NULL, NULL, NULL, NULL);
 
+	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, ID_GROUND_DESTROYABLE, NULL, NULL, collision_bullet_VS_object_with_score, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, obj_id_tank, NULL, NULL, collision_bullet_VS_object_with_score, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, obj_id_crate, NULL, NULL, collision_bullet_VS_object_with_score, NULL, NULL);
 	cpSpaceAddCollisionHandler(current_space, obj_id_bullet, obj_id_rocket, NULL, NULL, collision_bullet_VS_object_with_score, NULL, NULL);

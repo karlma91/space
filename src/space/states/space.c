@@ -577,9 +577,6 @@ void space_init_level(char *name)
 {
 	if(currentlvl == NULL || strcmp(currentlvl->name, name) != 0 ) {
 		currentlvl = level_load(WAFFLE_DOCUMENTS, name);
-		currentlvl->tilemap.render_layers[TLAY_BACKGROUND] = RLAY_BACK_FRONT;
-		currentlvl->tilemap.render_layers[TLAY_SOLID] = RLAY_GAME_BACK;
-		currentlvl->tilemap.render_layers[TLAY_OVERLAY] = RLAY_GAME_FRONT;
 	}
 	space_init_level_from_level(currentlvl);
 }
@@ -668,9 +665,23 @@ void space_init_level_from_level(level * lvl)
 		llist_clear(ll_tileshapes);
 	}
 
+	int x, y;
+	for (y = lvl->tilemap.grid->inner_i; y < lvl->tilemap.grid->outer_i; y++) {
+		for (x = 0; x < lvl->tilemap.grid->cols; x++) {
+			cpShape *block = currentlvl->tilemap.metadata[y][x].block;
+			if (block) {
+				fprintf(stderr, "removing shape %p\n", block);
+				if(cpSpaceContainsShape(current_space, block)) {
+					cpSpaceRemoveStaticShape(current_space, block);
+					cpShapeFree(block);
+				}
+			}
+		}
+
+	}
+
 	/* add static tiles */ //TODO merge/glue tiles togheter
 	fprintf(stderr, "GRID: %d x %d\n", lvl->tilemap.grid->rows, lvl->tilemap.grid->cols);
-	int x, y;
 	/*
 	y = lvl->tilemap.grid->outer_i-1;
 	for (x = 0; x < lvl->tilemap.grid->cols; x++) {
@@ -687,7 +698,7 @@ void space_init_level_from_level(level * lvl)
 
 	for (y = lvl->tilemap.grid->inner_i; y < lvl->tilemap.grid->outer_i; y++) {
 		for (x = 0; x < lvl->tilemap.grid->cols; x++) {
-			byte tile = lvl->tilemap.data[TLAY_SOLID][y][x];
+			byte tile = tilemap_gettype(&currentlvl->tilemap, TLAY_SOLID, x, y);
 			if (tile) { //TODO support different types of shapes and use a helper method both here and in editor
 				int len = 4;
 				cpVect verts[4];
@@ -731,9 +742,22 @@ void space_init_level_from_level(level * lvl)
 				cpShape *shape = cpPolyShapeNew(current_space->staticBody, len, verts, cpvzero);
 				cpSpaceAddStaticShape(current_space, shape);
 				cpShapeSetFriction(shape, 0.9f);
-				cpShapeSetCollisionType(shape, ID_GROUND);
 				cpShapeSetElasticity(shape, 0.7f);
-				llist_add(ll_tileshapes, shape);
+
+				meta_tile *meta = &currentlvl->tilemap.metadata[y][x];
+				if (tilemap_isdestroyable(&currentlvl->tilemap, TLAY_SOLID, x, y)) {
+					cpShapeSetCollisionType(shape, ID_GROUND_DESTROYABLE);
+					meta->destroyable = WE_TRUE;
+					meta->hp = 100;
+				} else {
+					cpShapeSetCollisionType(shape, ID_GROUND);
+					meta->destroyable = WE_FALSE;
+				}
+				meta->x_col = x;
+				meta->y_row = y;
+				meta->block = shape;
+				cpShapeSetUserData(shape, meta);
+				//llist_add(ll_tileshapes, shape);
 			}
 			fprintf(stderr, "%c", tile ? '#' : '.');
 		}

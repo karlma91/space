@@ -21,7 +21,7 @@ typedef enum tile_layers {
 	TLAY_COUNT
 } tile_layers;
 
-typedef enum TILE_TYPE{
+typedef enum TILE_SHAPE{
 	TILE_TYPE_NONE,
 	TILE_TYPE_UNDEF,
 	TILE_TYPE_FULL,
@@ -42,7 +42,14 @@ typedef enum TILE_TYPE{
 	TILE_TYPE_OUTSIDE = 0xFF ^ TILE_DESTROYABLE_BIT
 } TILE_TYPE;
 
-#define TILE_TYPE_MASK 0x1F
+extern int tile_render_layers[TILEMAP_LAYERS];
+
+typedef struct tile {
+	we_bool destroyable, visible;
+	int x_col, y_row;
+	cpShape *block;
+	float hp;
+} meta_tile;
 
 typedef struct tilemap2 {
 	int layers;
@@ -54,8 +61,7 @@ typedef struct tilemap2 {
 	char *tileset_name;
 	SPRITE_ID tileset;
 	byte data[TILEMAP_LAYERS][GRID_MAXROW][GRID_MAXCOL];
-	cpShape *blocks[GRID_MAXROW][GRID_MAXCOL];
-	int render_layers[TILEMAP_LAYERS];
+	meta_tile metadata[GRID_MAXROW][GRID_MAXCOL];
 }tilemap2;
 
 static __inline__ byte tilemap_gettype(tilemap2 *tm, int layer, int x, int y)
