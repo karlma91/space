@@ -666,8 +666,8 @@ void space_init_level_from_level(level * lvl)
 	}
 
 	int x, y;
-	for (y = lvl->tilemap.grid->inner_i; y < lvl->tilemap.grid->outer_i; y++) {
-		for (x = 0; x < lvl->tilemap.grid->cols; x++) {
+	for (y = lvl->tilemap.grid->pol.inner_i; y < lvl->tilemap.grid->pol.outer_i; y++) {
+		for (x = 0; x < lvl->tilemap.grid->pol.cols; x++) {
 			cpShape *block = currentlvl->tilemap.metadata[y][x].block;
 			if (block) {
 				fprintf(stderr, "removing shape %p\n", block);
@@ -681,7 +681,7 @@ void space_init_level_from_level(level * lvl)
 	}
 
 	/* add static tiles */ //TODO merge/glue tiles togheter
-	fprintf(stderr, "GRID: %d x %d\n", lvl->tilemap.grid->rows, lvl->tilemap.grid->cols);
+	fprintf(stderr, "GRID: %d x %d\n", lvl->tilemap.grid->pol.rows, lvl->tilemap.grid->pol.cols);
 	/*
 	y = lvl->tilemap.grid->outer_i-1;
 	for (x = 0; x < lvl->tilemap.grid->cols; x++) {
@@ -696,8 +696,8 @@ void space_init_level_from_level(level * lvl)
 	}
 	*/
 
-	for (y = lvl->tilemap.grid->inner_i; y < lvl->tilemap.grid->outer_i; y++) {
-		for (x = 0; x < lvl->tilemap.grid->cols; x++) {
+	for (y = lvl->tilemap.grid->pol.inner_i; y < lvl->tilemap.grid->pol.outer_i; y++) {
+		for (x = 0; x < lvl->tilemap.grid->pol.cols; x++) {
 			byte tile = tilemap_gettype(&currentlvl->tilemap, TLAY_SOLID, x, y);
 			if (tile) { //TODO support different types of shapes and use a helper method both here and in editor
 				int len = 4;

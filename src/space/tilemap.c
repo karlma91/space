@@ -51,8 +51,8 @@ void tilemap2_render(tilemap2 *tm)
 		} else {
 			draw_color4f(l==2 ? 0 : 1, l==2 ? 0.3 : 0.2, l==2 ? 0.6 : 0.2, l==2 ? 1 : 0.4);
 		}
-		for (y = tm->grid->inner_i; y < tm->grid->outer_i; y++) {
-			for (x=0; x<tm->grid->cols; x++) {
+		for (y = tm->grid->pol.inner_i; y < tm->grid->pol.outer_i; y++) {
+			for (x=0; x<tm->grid->pol.cols; x++) {
 				Color col = {50,150,50,255}; //TMP TODO REMOVE
 				data = tilemap_gettype(tm, l, x, y);
 				if (data) {
@@ -115,8 +115,8 @@ void tilemap2_render(tilemap2 *tm)
 			1,  0.5};
 
 	texture_bind_virt(texture_load("metal01.png"));
-	for (y = tm->grid->inner_i; y < tm->grid->outer_i; y++) {
-		for (x=0; x<tm->grid->cols; x++) {
+	for (y = tm->grid->pol.inner_i; y < tm->grid->pol.outer_i; y++) {
+		for (x=0; x<tm->grid->pol.cols; x++) {
 			data = tilemap_gettype(tm, 1, x, y);
 			if (data && tilemap_isground(tm, 1, x, y)) {
 				Color col = {200,250,200,200}; //TMP TODO REMOVE?
@@ -247,12 +247,12 @@ void tilemap_clear(tilemap2 *tm)
 {
 	int l, x, y;
 	for (l=TLAY_COUNT-1; l>=0; l--)
-		for (y = tm->grid->inner_i; y < tm->grid->outer_i - 1; y++)
-			for (x=0; x<tm->grid->cols; x++) {
+		for (y = tm->grid->pol.inner_i; y < tm->grid->pol.outer_i - 1; y++)
+			for (x=0; x<tm->grid->pol.cols; x++) {
 				tm->data[l][y][x] = TILE_TYPE_NONE;
 			}
-	for (y = tm->grid->inner_i; y < tm->grid->outer_i - 1; y++)
-		for (x=0; x<tm->grid->cols; x++) {
+	for (y = tm->grid->pol.inner_i; y < tm->grid->pol.outer_i - 1; y++)
+		for (x=0; x<tm->grid->pol.cols; x++) {
 			cpShape *shape = tm->metadata[y][x].block;
 			tm->metadata[y][x].block = NULL;
 			if (shape) {

@@ -108,7 +108,6 @@ typedef struct
     int gl_major_version;
     int gl_minor_version;
     int gl_debug;
-    int gl_profile_mask;
 } SDLTest_CommonState;
 
 #include "begin_code.h"

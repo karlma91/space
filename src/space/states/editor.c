@@ -296,8 +296,8 @@ static void move_radius(editor_touch *touch)
 		if(new_r >= MIN_INNER_RADIUS && new_r <= lvl->outer_radius - MIN_RADIUS_OFFSET) {
 			lvl->inner_radius = new_r;
 			grid_setregion2f(lvl->tilemap.grid, lvl->inner_radius, lvl->outer_radius);
-			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->inner_i);
-			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->inner_i+1);
+			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->pol.inner_i);
+			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->pol.inner_i+1);
 		}
 		inner_resize_margin += (1 - inner_resize_margin) / 2;
 	} else if(touch->data.resize_mode == RESIZE_OUTER) {
@@ -305,10 +305,10 @@ static void move_radius(editor_touch *touch)
 		if(new_r <= MAX_OUTER_RADIUS && new_r >= lvl->inner_radius + MIN_RADIUS_OFFSET) {
 			lvl->outer_radius = new_r;
 			grid_setregion2f(lvl->tilemap.grid, lvl->inner_radius, lvl->outer_radius);
-			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->outer_i-3);
-			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->outer_i-2);
-			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->outer_i-1);
-			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->outer_i);
+			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->pol.outer_i-3);
+			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->pol.outer_i-2);
+			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->pol.outer_i-1);
+			tilemap_updaterow(&lvl->tilemap, lvl->tilemap.grid->pol.outer_i);
 		}
 		outer_resize_margin += (1 - outer_resize_margin) / 2;
 	}
@@ -824,8 +824,8 @@ static void pre_update(void)
 		outer_resize_margin /= 2;
 	}
 	if (!(resize_inn || resize_out)) {
-		float target_ir = lvl->tilemap.grid->rad[lvl->tilemap.grid->inner_i];
-		float target_or = lvl->tilemap.grid->rad[lvl->tilemap.grid->outer_i-1];
+		float target_ir = lvl->tilemap.grid->pol.rad[lvl->tilemap.grid->pol.inner_i];
+		float target_or = lvl->tilemap.grid->pol.rad[lvl->tilemap.grid->pol.outer_i-1];
 		lvl->inner_radius = (target_ir+lvl->inner_radius)/2;
 		lvl->outer_radius = (target_or+lvl->outer_radius)/2;
 		lvl->height = lvl->outer_radius - lvl->inner_radius;

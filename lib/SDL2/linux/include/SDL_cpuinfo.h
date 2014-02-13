@@ -134,11 +134,6 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE41(void);
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE42(void);
 
-/**
- *  This function returns the amount of RAM configured in the system, in MB.
- */
-extern DECLSPEC int SDLCALL SDL_GetSystemRAM(void);
-
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

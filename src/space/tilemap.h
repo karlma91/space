@@ -55,10 +55,7 @@ typedef struct tile {
 
 typedef struct tilemap2 {
 	int layers;
-	polgrid *grid;
-
-	//int cols;
-	//int rows;
+	we_grid *grid;
 
 	char *tileset_name;
 	SPRITE_ID tileset;
@@ -121,7 +118,7 @@ static __inline__ void tilemap_settile(tilemap2 *tm, int layer, int x, int y, we
 
 static __inline__ void tilemap_updaterow(tilemap2 *tm, int y)
 {
-	int layer, x, cols = tm->grid->cols;
+	int layer, x, cols = tm->grid->pol.cols;
 
 	for (layer = 0; layer < TLAY_COUNT; layer++) {
 		for (x = 0; x < cols; x++) {

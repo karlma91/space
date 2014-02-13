@@ -86,14 +86,8 @@ This also solves the problem of...
 disable assertions.
 */
 
-#ifdef _MSC_VER  /* stupid /W4 warnings. */
-#define SDL_NULL_WHILE_LOOP_CONDITION (-1 == __LINE__)
-#else
-#define SDL_NULL_WHILE_LOOP_CONDITION (0)
-#endif
-
 #define SDL_disabled_assert(condition) \
-    do { (void) sizeof ((condition)); } while (SDL_NULL_WHILE_LOOP_CONDITION)
+    do { (void) sizeof ((condition)); } while (0)
 
 typedef enum
 {
@@ -146,7 +140,7 @@ extern DECLSPEC SDL_assert_state SDLCALL SDL_ReportAssertion(SDL_assert_data *,
             } \
             break; /* not retrying. */ \
         } \
-    } while (SDL_NULL_WHILE_LOOP_CONDITION)
+    } while (0)
 
 #endif  /* enabled assertions support code */
 
@@ -170,9 +164,6 @@ extern DECLSPEC SDL_assert_state SDLCALL SDL_ReportAssertion(SDL_assert_data *,
 #else
 #   error Unknown assertion level.
 #endif
-
-/* this assertion is never disabled at any level. */
-#define SDL_assert_always(condition) SDL_enabled_assert(condition)
 
 
 typedef SDL_assert_state (SDLCALL *SDL_AssertionHandler)(

@@ -329,9 +329,9 @@ static void load_tilemap(cJSON *t, level *lvl)
 		int i,j,k;
 		for (i=0; i < lvl->tilemap.layers; i++) {
 			cJSON * row = cJSON_GetArrayItem(data,i);
-			for (j= 0; j < lvl->tilemap.grid->rows; j++) {
+			for (j= 0; j < lvl->tilemap.grid->pol.rows; j++) {
 				cJSON * col = cJSON_GetArrayItem(row,j);
-				for (k = 0; k < lvl->tilemap.grid->cols; k++) {
+				for (k = 0; k < lvl->tilemap.grid->pol.cols; k++) {
 					lvl->tilemap.data[i][j+ii][k] = cJSON_GetArrayItem(col,k)->valueint;
 				}
 			}
@@ -344,9 +344,9 @@ static void load_tilemap(cJSON *t, level *lvl)
 	meta_def.hp = 0;
 
 	int j,k;
-	for (j= 0; j < lvl->tilemap.grid->rows; j++) {
+	for (j= 0; j < lvl->tilemap.grid->pol.rows; j++) {
 		meta_def.y_row = j;
-		for (k = 0; k < lvl->tilemap.grid->cols; k++) {
+		for (k = 0; k < lvl->tilemap.grid->pol.cols; k++) {
 			meta_def.x_col = k;
 			lvl->tilemap.metadata[j][k] = meta_def;
 		}
@@ -410,8 +410,8 @@ level *level_load(int folder, char * filename)
 	load_tilemap(root, lvl);
 
 	/* Calculate level size based on grid data */
-	lvl->inner_radius = lvl->tilemap.grid->rad[lvl->tilemap.grid->inner_i];
-	lvl->outer_radius = lvl->tilemap.grid->rad[lvl->tilemap.grid->outer_i-1];;
+	lvl->inner_radius = lvl->tilemap.grid->pol.rad[lvl->tilemap.grid->pol.inner_i];
+	lvl->outer_radius = lvl->tilemap.grid->pol.rad[lvl->tilemap.grid->pol.outer_i-1];;
 	lvl->height = lvl->outer_radius - lvl->inner_radius;
 
 	level_load_params(&(lvl->params), root);
@@ -558,22 +558,22 @@ void level_write_to_file(level *lvl)
 	cJSON_AddNumberToObject(root, "timelimit", 100);
 
 	cJSON_AddNumberToObject(root, "t_layers", lvl->tilemap.layers);
-	cJSON_AddNumberToObject(root, "t_cols", lvl->tilemap.grid->cols);
-	cJSON_AddNumberToObject(root, "t_inner_i", lvl->tilemap.grid->inner_i);
-	cJSON_AddNumberToObject(root, "t_outer_i", lvl->tilemap.grid->outer_i);
-	cJSON_AddNumberToObject(root, "t_min_rad", lvl->tilemap.grid->min_rad);
+	cJSON_AddNumberToObject(root, "t_cols", lvl->tilemap.grid->pol.cols);
+	cJSON_AddNumberToObject(root, "t_inner_i", lvl->tilemap.grid->pol.inner_i);
+	cJSON_AddNumberToObject(root, "t_outer_i", lvl->tilemap.grid->pol.outer_i);
+	cJSON_AddNumberToObject(root, "t_min_rad", lvl->tilemap.grid->pol.min_rad);
 
 	cJSON * tilemap = cJSON_CreateArray();
-	int ii = lvl->tilemap.grid->inner_i;
+	int ii = lvl->tilemap.grid->pol.inner_i;
 	int i,j,k;
 	for (i=0; i < lvl->tilemap.layers; i++) {
 		cJSON * row = cJSON_CreateArray();
-		for (j= 0; j < lvl->tilemap.grid->rows; j++) {
-			int temp[lvl->tilemap.grid->cols];
-			for (k = 0; k < lvl->tilemap.grid->cols; k++) {
+		for (j= 0; j < lvl->tilemap.grid->pol.rows; j++) {
+			int temp[lvl->tilemap.grid->pol.cols];
+			for (k = 0; k < lvl->tilemap.grid->pol.cols; k++) {
 				temp[k] = lvl->tilemap.data[i][j+ii][k];
 			}
-			cJSON * col = cJSON_CreateIntArray(temp, lvl->tilemap.grid->cols);
+			cJSON * col = cJSON_CreateIntArray(temp, lvl->tilemap.grid->pol.cols);
 			cJSON_AddItemToArray(row, col);
 		}
 		cJSON_AddItemToArray(tilemap, row);

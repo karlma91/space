@@ -16,10 +16,10 @@
 #define DEBUG_TOUCH 0
 #endif
 #if DEBUG_TOUCH
-static void empty();
-#define dlog empty
-#else
 #define dlog fprintf
+#else
+static void empty(){}
+#define dlog empty
 #endif
 
 
