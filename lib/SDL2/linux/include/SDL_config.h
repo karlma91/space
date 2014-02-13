@@ -1,3 +1,4 @@
+/* include/SDL_config.h.  Generated from SDL_config.h.in by configure.  */
 /*
   Simple DirectMedia Layer
   Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
@@ -31,19 +32,22 @@
 /* General platform specific identifiers */
 #include "SDL_platform.h"
 
+/* Make sure that this isn't included by Visual C++ */
+#ifdef _MSC_VER
+#error You should run hg revert SDL_config.h 
+#endif
+
 /* C language features */
 /* #undef const */
 /* #undef inline */
 /* #undef volatile */
 
 /* C datatypes */
-/* Define SIZEOF_VOIDP for 64/32 architectures */
 #ifdef __LP64__
 #define SIZEOF_VOIDP 8
 #else
 #define SIZEOF_VOIDP 4
 #endif
-
 #define HAVE_GCC_ATOMICS 1
 /* #undef HAVE_GCC_SYNC_LOCK_TEST_AND_SET */
 #define HAVE_PTHREAD_SPINLOCK 1
@@ -53,7 +57,7 @@
 #if HAVE_LIBC
 
 /* Useful headers */
-/* #undef HAVE_ALLOCA_H */
+#define HAVE_ALLOCA_H 1
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_STDIO_H 1
 #define STDC_HEADERS 1
@@ -79,7 +83,7 @@
 #define HAVE_CALLOC 1
 #define HAVE_REALLOC 1
 #define HAVE_FREE 1
-/* #undef HAVE_ALLOCA */
+#define HAVE_ALLOCA 1
 #ifndef __WIN32__ /* Don't use C runtime versions of these on Windows */
 #define HAVE_GETENV 1
 #define HAVE_SETENV 1
@@ -127,7 +131,7 @@
 #define HAVE_SSCANF 1
 #define HAVE_SNPRINTF 1
 #define HAVE_VSNPRINTF 1
-#define HAVE_M_PI 1
+#define HAVE_M_PI /**/
 #define HAVE_ATAN 1
 #define HAVE_ATAN2 1
 #define HAVE_CEIL 1
@@ -150,19 +154,18 @@
 #define HAVE_NANOSLEEP 1
 #define HAVE_SYSCONF 1
 /* #undef HAVE_SYSCTLBYNAME */
-/* #undef HAVE_CLOCK_GETTIME */
+#define HAVE_CLOCK_GETTIME 1
 /* #undef HAVE_GETPAGESIZE */
 #define HAVE_MPROTECT 1
-/* #undef HAVE_ICONV */
-/* #undef HAVE_PTHREAD_SETNAME_NP */
+#define HAVE_ICONV 1
+#define HAVE_PTHREAD_SETNAME_NP 1
 /* #undef HAVE_PTHREAD_SET_NAME_NP */
 #define HAVE_SEM_TIMEDWAIT 1
-#elif __WIN32__
+
+#else
 #define HAVE_STDARG_H 1
 #define HAVE_STDDEF_H 1
-#else
-/* We may need some replacement for stdarg.h here */
-#include <stdarg.h>
+#define HAVE_STDINT_H 1
 #endif /* HAVE_LIBC */
 
 /* SDL internal assertion support */
@@ -182,10 +185,11 @@
 /* #undef SDL_TIMERS_DISABLED */
 /* #undef SDL_VIDEO_DISABLED */
 /* #undef SDL_POWER_DISABLED */
+/* #undef SDL_FILESYSTEM_DISABLED */
 
 /* Enable various audio drivers */
-#define SDL_AUDIO_DRIVER_ALSA 1
-#define SDL_AUDIO_DRIVER_ALSA_DYNAMIC "libasound.so"
+/* #undef SDL_AUDIO_DRIVER_ALSA */
+/* #undef SDL_AUDIO_DRIVER_ALSA_DYNAMIC */
 /* #undef SDL_AUDIO_DRIVER_ARTS */
 /* #undef SDL_AUDIO_DRIVER_ARTS_DYNAMIC */
 /* #undef SDL_AUDIO_DRIVER_PULSEAUDIO */
@@ -197,8 +201,8 @@
 #define SDL_AUDIO_DRIVER_DUMMY 1
 /* #undef SDL_AUDIO_DRIVER_XAUDIO2 */
 /* #undef SDL_AUDIO_DRIVER_DSOUND */
-#define SDL_AUDIO_DRIVER_ESD 1
-#define SDL_AUDIO_DRIVER_ESD_DYNAMIC "libesd.so"
+/* #undef SDL_AUDIO_DRIVER_ESD */
+/* #undef SDL_AUDIO_DRIVER_ESD_DYNAMIC */
 /* #undef SDL_AUDIO_DRIVER_NAS */
 /* #undef SDL_AUDIO_DRIVER_NAS_DYNAMIC */
 /* #undef SDL_AUDIO_DRIVER_SNDIO */
@@ -214,6 +218,7 @@
 
 /* Enable various input drivers */
 #define SDL_INPUT_LINUXEV 1
+#define SDL_INPUT_LINUXKD 1
 /* #undef SDL_INPUT_TSLIB */
 /* #undef SDL_JOYSTICK_BEOS */
 /* #undef SDL_JOYSTICK_DINPUT */
@@ -238,7 +243,7 @@
 /* Enable various threading systems */
 /* #undef SDL_THREAD_BEOS */
 #define SDL_THREAD_PTHREAD 1
-/* #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX */
+#define SDL_THREAD_PTHREAD_RECURSIVE_MUTEX 1
 /* #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP */
 /* #undef SDL_THREAD_WINDOWS */
 
@@ -247,7 +252,6 @@
 /* #undef SDL_TIMER_DUMMY */
 #define SDL_TIMER_UNIX 1
 /* #undef SDL_TIMER_WINDOWS */
-/* #undef SDL_TIMER_WINCE */
 
 /* Enable various video drivers */
 /* #undef SDL_VIDEO_DRIVER_BWINDOW */
@@ -257,25 +261,26 @@
 #define SDL_VIDEO_DRIVER_DUMMY 1
 /* #undef SDL_VIDEO_DRIVER_WINDOWS */
 #define SDL_VIDEO_DRIVER_X11 1
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC "libX11.so"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT "libXext.so"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XCURSOR "libXcursor.so"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XINERAMA "libXinerama.so"
+/* #undef SDL_VIDEO_DRIVER_RPI */
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC "libX11.so.6"
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT "libXext.so.6"
+/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XCURSOR */
+/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XINERAMA */
 /* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT2 */
-/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR */
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XSS "libXss.so"
-/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XVIDMODE */
-#define SDL_VIDEO_DRIVER_X11_XCURSOR 1
-#define SDL_VIDEO_DRIVER_X11_XINERAMA 1
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR "libXrandr.so.2"
+/* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XSS */
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XVIDMODE "libXxf86vm.so.1"
+/* #undef SDL_VIDEO_DRIVER_X11_XCURSOR */
+/* #undef SDL_VIDEO_DRIVER_X11_XINERAMA */
 /* #undef SDL_VIDEO_DRIVER_X11_XINPUT2 */
 /* #undef SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH */
-/* #undef SDL_VIDEO_DRIVER_X11_XRANDR */
-#define SDL_VIDEO_DRIVER_X11_XSCRNSAVER 1
+#define SDL_VIDEO_DRIVER_X11_XRANDR 1
+/* #undef SDL_VIDEO_DRIVER_X11_XSCRNSAVER */
 #define SDL_VIDEO_DRIVER_X11_XSHAPE 1
 #define SDL_VIDEO_DRIVER_X11_XVIDMODE 1
-/* #undef SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS */
-/* #undef SDL_VIDEO_DRIVER_X11_CONST_PARAM_XDATA32 */
-/* #undef SDL_VIDEO_DRIVER_X11_CONST_PARAM_XEXTADDDISPLAY */
+#define SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS 1
+#define SDL_VIDEO_DRIVER_X11_CONST_PARAM_XDATA32 1
+#define SDL_VIDEO_DRIVER_X11_CONST_PARAM_XEXTADDDISPLAY 1
 #define SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM 1
 
 /* #undef SDL_VIDEO_RENDER_D3D */
@@ -287,8 +292,10 @@
 /* Enable OpenGL support */
 #define SDL_VIDEO_OPENGL 1
 /* #undef SDL_VIDEO_OPENGL_ES */
+/* #undef SDL_VIDEO_OPENGL_ES2 */
 /* #undef SDL_VIDEO_OPENGL_BGL */
 /* #undef SDL_VIDEO_OPENGL_CGL */
+/* #undef SDL_VIDEO_OPENGL_EGL */
 #define SDL_VIDEO_OPENGL_GLX 1
 /* #undef SDL_VIDEO_OPENGL_WGL */
 /* #undef SDL_VIDEO_OPENGL_OSMESA */
@@ -301,69 +308,15 @@
 /* #undef SDL_POWER_BEOS */
 /* #undef SDL_POWER_HARDWIRED */
 
+/* Enable system filesystem support */
+/* #undef SDL_FILESYSTEM_BEOS */
+/* #undef SDL_FILESYSTEM_COCOA */
+/* #undef SDL_FILESYSTEM_DUMMY */
+#define SDL_FILESYSTEM_UNIX 1
+/* #undef SDL_FILESYSTEM_WINDOWS */
+
 /* Enable assembly routines */
 #define SDL_ASSEMBLY_ROUTINES 1
 /* #undef SDL_ALTIVEC_BLITTERS */
-
-
-/* Platform specific definitions */
-#if !defined(__WIN32__)
-#  if !defined(_STDINT_H_) && !defined(_STDINT_H) && !defined(HAVE_STDINT_H) && !defined(_HAVE_STDINT_H)
-typedef unsigned int size_t;
-typedef signed char int8_t;
-typedef unsigned char uint8_t;
-typedef signed short int16_t;
-typedef unsigned short uint16_t;
-typedef signed int int32_t;
-typedef unsigned int uint32_t;
-typedef signed long long int64_t;
-typedef unsigned long long uint64_t;
-typedef unsigned long uintptr_t;
-#  endif /* if (stdint.h isn't available) */
-#else /* __WIN32__ */
-#  if !defined(_STDINT_H_) && !defined(HAVE_STDINT_H) && !defined(_HAVE_STDINT_H)
-#    if defined(__GNUC__) || defined(__DMC__) || defined(__WATCOMC__)
-#define HAVE_STDINT_H	1
-#    elif defined(_MSC_VER)
-typedef signed __int8 int8_t;
-typedef unsigned __int8 uint8_t;
-typedef signed __int16 int16_t;
-typedef unsigned __int16 uint16_t;
-typedef signed __int32 int32_t;
-typedef unsigned __int32 uint32_t;
-typedef signed __int64 int64_t;
-typedef unsigned __int64 uint64_t;
-#      ifndef _UINTPTR_T_DEFINED
-#        ifdef  _WIN64
-typedef unsigned __int64 uintptr_t;
-#          else
-typedef unsigned int uintptr_t;
-#        endif
-#define _UINTPTR_T_DEFINED
-#      endif
-/* Older Visual C++ headers don't have the Win64-compatible typedefs... */
-#      if ((_MSC_VER <= 1200) && (!defined(DWORD_PTR)))
-#define DWORD_PTR DWORD
-#      endif
-#      if ((_MSC_VER <= 1200) && (!defined(LONG_PTR)))
-#define LONG_PTR LONG
-#      endif
-#    else /* !__GNUC__ && !_MSC_VER */
-typedef signed char int8_t;
-typedef unsigned char uint8_t;
-typedef signed short int16_t;
-typedef unsigned short uint16_t;
-typedef signed int int32_t;
-typedef unsigned int uint32_t;
-typedef signed long long int64_t;
-typedef unsigned long long uint64_t;
-#      ifndef _SIZE_T_DEFINED_
-#define _SIZE_T_DEFINED_
-typedef unsigned int size_t;
-#      endif
-typedef unsigned int uintptr_t;
-#    endif /* __GNUC__ || _MSC_VER */
-#  endif /* !_STDINT_H_ && !HAVE_STDINT_H */
-#endif /* __WIN32__ */
 
 #endif /* _SDL_config_h */

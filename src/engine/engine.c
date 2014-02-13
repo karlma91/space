@@ -199,8 +199,8 @@ static void display_init(void)
 	SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING,1);
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1 );
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //AA not supported on Android test device
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); //AA not supported on Android test device
+	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GLES2 ? 0 : 1);
@@ -232,7 +232,9 @@ static void display_init(void)
 	window = SDL_CreateWindow("SPACE", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, flags);
 
 	if (!window) {
+		char *err =  SDL_GetError();
 		SDL_Log("ERROR - could not create window!\n");
+		SDL_Log("%s", err);
 		//SDL_Quit();
 		//exit(-1);
 	}

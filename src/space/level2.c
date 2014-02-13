@@ -74,11 +74,12 @@ void level_load_solar()
 
 	if(!filesize) {
 		SDL_Log("DEBUG: Could not load userlevels.json");
+		user_system = llist_create();
 	} else {
 	cJSON *root;
 	root = cJSON_Parse(buff);
 	if(root == NULL){
-		SDL_Log("[Level] could not parse level: %s", "level/object_defaults.json");
+		SDL_Log("[Level] could not parse level: %s", "level/userlevels.json");
 		SDL_Log("Error before: [%s]\n",cJSON_GetErrorPtr());
 	} else {
 		user_system = load_solarsystem_file(root);
