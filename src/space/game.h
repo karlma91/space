@@ -9,6 +9,7 @@
 #define GAME_H_
 
 #include "we.h"
+#include "level/spacelvl.h"
 
 void logprint(char *format, ...);
 void logprintln(char *format, ...);

@@ -35,7 +35,6 @@ view *view_p1, *view_p2;
 
 static button btn_pause;
 static button btn_continue;
-static int game_paused = 0;
 
 static float game_time;
 
@@ -45,8 +44,8 @@ static LList *ll_tileshapes;
 static cpShape *ceiling;
 
 /* level data */
+level *lvl_tmpl;
 level *currentlvl;
-station *current_ship;
 
 static void input(void);
 
@@ -239,7 +238,7 @@ static void level_cleared(void)
 
 #if !ARCADE_MODE
 		//TODO set star rating based on missions
-		leveldone_status(1 + player->coins / (4000.0 + 1000 * currentlvl->deck), player->coins, game_time);
+		//leveldone_status(1 + player->coins / (4000.0 + 1000 * currentlvl->deck), player->coins, game_time);
 		statesystem_push_state(state_leveldone);
 #else
 		space_next_level(NULL);
@@ -445,7 +444,7 @@ static void draw_gui(view *cam)
 		if (player) score = player->coins;
 		sprite_render_by_id(RLAY_GUI_FRONT, SPRITE_COIN, cpv(vleft+40,vtop-35),cpv(60,60),0);
 		bmfont_left(FONT_SANS, cpv(vleft+70,vtop-60), 1, "%d", score);
-		bmfont_center(FONT_SANS, cpv(vcenter, vbot+24),0.7,"Level %d.%d", currentlvl->station,currentlvl->deck);
+		//bmfont_center(FONT_SANS, cpv(vcenter, vbot+24),0.7,"Level %d.%d", currentlvl->station,currentlvl->deck);
 
 		//DEBUG INSTANCE COUNT
 		draw_color4f(0.5,0.1,0.1,1);
@@ -573,6 +572,11 @@ static void remove_static(cpShape *shape)
 }
 
 
+void space_set_lvltemplate(level *lvl)
+{
+
+}
+
 void space_init_level(char *name)
 {
 	if(currentlvl == NULL || strcmp(currentlvl->name, name) != 0 ) {
@@ -696,6 +700,7 @@ void space_init_level_from_level(level * lvl)
 	}
 	*/
 
+	//TODO move into function inside tilemap?
 	for (y = lvl->tilemap.grid->pol.inner_i; y < lvl->tilemap.grid->pol.outer_i; y++) {
 		for (x = 0; x < lvl->tilemap.grid->pol.cols; x++) {
 			byte tile = tilemap_gettype(&currentlvl->tilemap, TLAY_SOLID, x, y);
@@ -795,10 +800,6 @@ void space_init_level_from_level(level * lvl)
 	cpShapeSetElasticity(ceiling, 0.7f);
 }
 
-static void on_enter(STATE_ID state_prev)
-{
-	game_paused = 0;
-}
 
 static void game_over(void)
 {
@@ -815,7 +816,6 @@ static void game_over(void)
 static void pause_game(void)
 {
 	statesystem_push_state(state_pause);
-	game_paused = 1;
 }
 
 static int sdl_event(SDL_Event *event)
@@ -857,8 +857,37 @@ static void on_pause(void)
 	}
 }
 
+static void on_enter(STATE_ID state_prev)
+{
+	if (state_prev == state_levelscreen) {
+		fprintf(stderr,"TODO: entering space state - load lvl in space\n");
+		lvl_tmpl = (level*)get_current_lvl_template();
+
+	} else if (state_prev == state_editor) {
+		fprintf(stderr,"TODO: entering space state from editor - load lvl in space\n");
+	} else if (state_prev == state_leveldone) {
+		fprintf(stderr,"TODO: entering space state from leveldone - reload lvl in space\n");
+	} else if (state_prev == state_pause) {
+	} else {
+		statesystem_set_state(state_log);
+	}
+}
+
 static void on_leave(STATE_ID state_next)
 {
+	if (state_next == state_leveldone) {
+		fprintf(stderr,"TODO: exiting space state - unload lvl in space\n");
+	} else if (state_next == state_editor) {
+		fprintf(stderr,"TODO: retry lvl in space\n");
+	} else if (state_next == state_space) {
+		fprintf(stderr,"TODO: going back to editor - unload lvl in space\n");
+	} else if (state_next == state_pause) {
+		fprintf(stderr,"TODO: pausing space state\n");
+	} else if (state_next == state_log) {
+	}else {
+		SDL_Log("ERROR: illegal state transition");
+		statesystem_set_state(state_log);
+	}
 }
 
 static void destroy(void)
@@ -1154,7 +1183,7 @@ void space_restart_level(void *unused)
 
 void space_next_level(void *unused)
 {
-	int station_nr = currentlvl->station + 1;
+	int station_nr = 1 + 1;
 	//LList world = level_get_world();
 	int count = 0;//llist_size(world);
 

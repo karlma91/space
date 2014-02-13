@@ -53,7 +53,7 @@ typedef struct tile {
 	float hp;
 } meta_tile;
 
-typedef struct tilemap2 {
+typedef struct tilemap {
 	int layers;
 	we_grid *grid;
 
@@ -61,15 +61,15 @@ typedef struct tilemap2 {
 	SPRITE_ID tileset;
 	byte data[TILEMAP_LAYERS][GRID_MAXROW][GRID_MAXCOL];
 	meta_tile metadata[GRID_MAXROW][GRID_MAXCOL];
-}tilemap2;
+}tilemap;
 
-static __inline__ byte tilemap_gettype(tilemap2 *tm, int layer, int x, int y)
+static __inline__ byte tilemap_gettype(tilemap *tm, int layer, int x, int y)
 {
 	int outside = grid_wrap_index(tm->grid, &x, &y);
 	return (outside ? TILE_TYPE_OUTSIDE : tm->data[layer][y][x]) & TILE_TYPE_MASK;
 }
 
-static __inline we_bool tilemap_isground(tilemap2 *tm, int layer, int x, int y)
+static __inline we_bool tilemap_isground(tilemap *tm, int layer, int x, int y)
 {
 	TILE_TYPE type = tilemap_gettype(tm, layer, x, y);
 	TILE_TYPE type_N = tilemap_gettype(tm, layer, x, y-1);
@@ -84,15 +84,15 @@ static __inline we_bool tilemap_isground(tilemap2 *tm, int layer, int x, int y)
 			(type_N == TILE_TYPE_NONE);
 }
 
-static __inline__ we_bool tilemap_isdestroyable(tilemap2 *tm, int layer, int x, int y)
+static __inline__ we_bool tilemap_isdestroyable(tilemap *tm, int layer, int x, int y)
 {
 	int outside = grid_wrap_index(tm->grid, &x, &y);
 	return outside ? WE_FALSE : (tm->data[layer][y][x] & TILE_DESTROYABLE_BIT ? WE_TRUE : WE_FALSE);
 }
 
 /*static __inline__ */
-void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y);
-static __inline__ void tilemap_settile(tilemap2 *tm, int layer, int x, int y, we_bool activate, we_bool destroyable)
+void tilemap_updatetile(tilemap *tm, int layer, int x, int y);
+static __inline__ void tilemap_settile(tilemap *tm, int layer, int x, int y, we_bool activate, we_bool destroyable)
 {
 	grid_wrap_index(tm->grid, &x, &y);
 	tm->data[layer][y][x] = activate ? TILE_TYPE_UNDEF : TILE_TYPE_NONE;
@@ -116,7 +116,7 @@ static __inline__ void tilemap_settile(tilemap2 *tm, int layer, int x, int y, we
 	tm->data[layer][y][x] |= destroyable ? TILE_DESTROYABLE_BIT : 0;
 }
 
-static __inline__ void tilemap_updaterow(tilemap2 *tm, int y)
+static __inline__ void tilemap_updaterow(tilemap *tm, int y)
 {
 	int layer, x, cols = tm->grid->pol.cols;
 
@@ -127,8 +127,8 @@ static __inline__ void tilemap_updaterow(tilemap2 *tm, int y)
 	}
 }
 
-void tilemap_clear(tilemap2 *tm);
-void tilemap2_render(tilemap2 *tm);
-void tilemap_fill(void *unused, int layers, void *unused2, tilemap2 *tiles);
+void tilemap_clear(tilemap *tm);
+void tilemap2_render(tilemap *tm);
+void tilemap_fill(void *unused, int layers, void *unused2, tilemap *tiles);
 
 #endif /* TILEMAP_H_ */

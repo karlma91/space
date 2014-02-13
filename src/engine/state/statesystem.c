@@ -190,12 +190,12 @@ void state_set_inner_state(STATE_ID state_id, int inner_state)
 
 static void on_leave(State *state, STATE_ID next)
 {
-    fprintf(stderr, "DEBUG STATESYSTEM: %s.on_leave(%s);\n", state, next);
+    fprintf(stderr, "DEBUG: ->| on_leave %s \t-> %s;\n", state, next);
     state->call.on_leave(next);
 }
 static void on_enter(State *state, STATE_ID prev)
 {
-    fprintf(stderr, "DEBUG STATESYSTEM: %s.on_enter(%s);\n", state, prev);
+    fprintf(stderr, "DEBUG: |-> on_enter %s \t<- %s;\n", state, prev);
     state->call.on_enter(prev);
 }
 
@@ -220,6 +220,10 @@ void statesystem_pop_state(void *unused)
     State *temp = stack_head;
 	STATE_ID prev = (STATE_ID) stack_head;
 	STATE_ID next = stack_head->prev;
+	if (!next) {
+		SDL_Log("ERROR: statesystem.c trying to pop last state");
+		return;
+	}
 
 	update_global_current_var(stack_head);
 	on_leave(stack_head, next);
@@ -234,7 +238,7 @@ void statesystem_set_state(STATE_ID state_id)
 {
 	State *stack_next, *state = stack_tail;
 
-	STATE_ID prev = (STATE_ID) stack_tail;
+	STATE_ID prev = (STATE_ID) stack_head;
 	STATE_ID next = state_id;
 
 	while (state) {

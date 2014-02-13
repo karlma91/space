@@ -30,7 +30,7 @@ int tile_render_layers[TILEMAP_LAYERS] = {
 		RLAY_BACK_MID
 };
 
-void tilemap2_render(tilemap2 *tm)
+void tilemap2_render(tilemap *tm)
 {
 	draw_color(COL_WHITE);
 	//texture_bind_virt(SPRITE_WHITE);
@@ -179,7 +179,7 @@ void tilemap2_render(tilemap2 *tm)
 	}
 }
 
-void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y)
+void tilemap_updatetile(tilemap *tm, int layer, int x, int y)
 {
 	grid_wrap_index(tm->grid, &x, &y);
 	byte data = tilemap_gettype(tm, layer, x, y);
@@ -243,7 +243,7 @@ void tilemap_updatetile(tilemap2 *tm, int layer, int x, int y)
 	}
 }
 
-void tilemap_clear(tilemap2 *tm)
+void tilemap_clear(tilemap *tm)
 {
 	int l, x, y;
 	for (l=TLAY_COUNT-1; l>=0; l--)

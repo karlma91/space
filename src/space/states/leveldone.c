@@ -52,12 +52,12 @@ static void draw(void)
 		draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 		draw_color(COL_WHITE);
 		bmfont_center(FONT_SANS, cpv(0, -100),0.8,level_time_buf);
-		bmfont_center(FONT_SANS, cpv(0, 350),1.5,"Level %d.%d cleared!", currentlvl->station,currentlvl->deck);
+		//bmfont_center(FONT_SANS, cpv(0, 350),1.5,"Level %d.%d cleared!", currentlvl->station,currentlvl->deck);
 	} else {
 		draw_color4f(0.3,0.1,0.1,0.7); //draw_color4f(0,0,0,0.8);
 		draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 		draw_color(COL_RED);
-		bmfont_center(FONT_SANS, cpv(0, 350),1.5,"Level failed!", currentlvl->station,currentlvl->deck);
+		//bmfont_center(FONT_SANS, cpv(0, 350),1.5,"Level failed!", currentlvl->station,currentlvl->deck);
 	}
 
 	draw_color4f(1,1,1,1);
@@ -130,7 +130,7 @@ void leveldone_status(int stars, int score, float time)
 	level_scores.head = NULL;
 
 	char level_score_file[50];
-	sprintf(&level_score_file[0], "lvl_%02d_%02d.score", currentlvl->station, currentlvl->deck);
+	sprintf(&level_score_file[0], "lvl_%02d_%02d.score", 1, 1);
 	highscorelist_readfile(&level_scores,level_score_file);
 	highscorelist_addscore(&level_scores, "LVL", level_score, level_time);
 	highscorelist_writefile(&level_scores);

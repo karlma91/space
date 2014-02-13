@@ -13,16 +13,14 @@
 
 typedef struct level {
 	char name[30];
-	int station;
-	int deck;
 	int timelimit;
+	float height;
 	float inner_radius;
 	float outer_radius;
-	float height;
 
 	LList level_data;
 
-	tilemap2 tilemap;
+	tilemap tilemap;
 } level;
 
 

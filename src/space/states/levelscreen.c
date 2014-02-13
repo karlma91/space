@@ -11,6 +11,8 @@
 #include "we_defstate.h"
 #include "editor.h"
 
+static spacelvl *current_lvl_tmpl = NULL;
+static station *from_station = NULL;
 STATE_ID state_levelscreen;
 
 //#define MAX_LEVELS 10
@@ -73,7 +75,7 @@ static void draw(void)
 	draw_box(3, box.p,box.s,0,1);
 
 	draw_color4f(1,1,1,1);
-	bmfont_center(FONT_SANS, cpv(0,box.p.y+box.s.y / 2 - 100), 1.5, current_ship->name);
+	bmfont_center(FONT_SANS, cpv(0,box.p.y+box.s.y / 2 - 100), 1.5, from_station->name);
 
 	for (i = 0; i < 3; i++) {
 		if (stars_unlocked == i+1) {
@@ -99,31 +101,33 @@ static void destroy(void)
 {
 }
 
-
 void levelscreen_change_to(station * ship)
 {
-	current_ship = ship;
+	from_station = ship;
 	statesystem_push_state(state_levelscreen);
 }
 
 static void button_edit_callback(void *data)
 {
-	level * lvl = level_load(WAFFLE_DOCUMENTS, current_ship->path);
-	editor_edit_level(lvl);
+	//TODO unload previous level, if any?
+	current_lvl_tmpl = (spacelvl*)level_load(WAFFLE_DOCUMENTS, from_station->path);
+	statesystem_set_state(state_editor);
 }
 
 static void button_remove_callback(void *data)
 {
-	if(waffle_remove(current_ship->path) == -1){
-		SDL_Log("COLD NOT DELETE FILE %s",current_ship->path);
+	if(waffle_remove(from_station->path) == -1){
+		SDL_Log("COLD NOT DELETE FILE %s",from_station->path);
 	}
-	solarsystem_remove_station(current_ship->sol, current_ship);
+	solarsystem_remove_station(from_station->sol, from_station);
 	statesystem_pop_state(NULL);
 }
 
-static void button_callback(void *data)
+static void button_start_callback(void *data)
 {
-	space_start_demo(current_ship->path);
+	current_lvl_tmpl = (spacelvl*)level_load(from_station->data_place, from_station->path);
+	space_start_demo(from_station->path);
+	//statesystem_set_state(state_space);
 }
 
 void levelscreen_init(void)
@@ -145,7 +149,7 @@ void levelscreen_init(void)
 
 
 	start_level =  button_create(0, 0, "Start", 0, y, 300, 200);
-	button_set_click_callback(start_level, button_callback, NULL);
+	button_set_click_callback(start_level, button_start_callback, NULL);
 	button_set_enlargement(start_level, 2);
 	button_set_backcolor(start_level, col_back);
 	button_set_frontcolor(start_level, col_default);
@@ -165,4 +169,9 @@ void levelscreen_init(void)
 	state_register_touchable_view(main_view, btn_background);
 
 	sprite_create(&spr_star, SPRITE_STAR, 250, 250, 0);
+}
+
+spacelvl *get_current_lvl_template(void)
+{
+	return current_lvl_tmpl;
 }
