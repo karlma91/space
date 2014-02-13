@@ -12,6 +12,17 @@
 #include "we_utils.h"
 #include "SDL.h"
 
+#ifndef DEBUG_TOUCH
+#define DEBUG_TOUCH 0
+#endif
+#if DEBUG_TOUCH
+static void empty();
+#define dlog empty
+#else
+#define dlog fprintf
+#endif
+
+
 static void update_touch_region(touchable *t)
 {
 	float x, y, s_2;
@@ -90,7 +101,7 @@ touch_unique_id finger_bind(SDL_FingerID finger_id)
 			if (timestamp - fingers[i].timestamp_bind > TOUCH_TIMEOUT) {
 				i_open = i;
 				--touch_count;
-				fprintf(stderr, "touch_count: %2d, timeout -> removes binding [%llx => %x]@%02d\n", touch_count, fingers[i].finger_id, fingers[i].touch_id, i_open);
+				dlog(stderr, "touch_count: %2d, timeout -> removes binding [%llx => %x]@%02d\n", touch_count, fingers[i].finger_id, fingers[i].touch_id, i_open);
 				break;
 			}
 			return -1;
@@ -109,7 +120,7 @@ touch_unique_id finger_bind(SDL_FingerID finger_id)
 		fingers[i_open].touch_id = next_touch_id;
 		fingers[i_open].timestamp_bind = timestamp;
 		fingers[i_open].timestamp_status = timestamp;
-		fprintf(stderr, "touch_count: %2d, binding [%llx => %x]@%02d\n", touch_count, finger_id, next_touch_id, i_open);
+		dlog(stderr, "touch_count: %2d, binding [%llx => %x]@%02d\n", touch_count, finger_id, next_touch_id, i_open);
 		return next_touch_id++;
 	} else {
 		SDL_Log("WARNING: No fingers available!");
@@ -140,11 +151,11 @@ touch_unique_id finger_bind_force(SDL_FingerID finger_id)
 			SDL_Log("ERROR: finger bind force -> touch_count > %d!", MAX_FINGERS);
 		}
 	} else {
-		fprintf(stderr, "force: removing old binding [%llx => %x]@%02d\n", fingers[i_open].finger_id, fingers[i_open].touch_id, i_open);
+		dlog(stderr, "force: removing old binding [%llx => %x]@%02d\n", fingers[i_open].finger_id, fingers[i_open].touch_id, i_open);
 	}
 	if (i_open >= 0) {
 		if (next_touch_id == -1) next_touch_id = 0;
-		fprintf(stderr, "touch_count: %2d, force binding [%llx => %x]@%02d\n", touch_count, finger_id, next_touch_id, i_open);
+		dlog(stderr, "touch_count: %2d, force binding [%llx => %x]@%02d\n", touch_count, finger_id, next_touch_id, i_open);
 		fingers[i_open].finger_id = finger_id;
 		fingers[i_open].touch_id = next_touch_id;
 		fingers[i_open].timestamp_bind = timestamp;
@@ -190,7 +201,7 @@ void finger_release(SDL_FingerID finger_id)
 	for (i = 0; i < MAX_FINGERS; i++) {
 		if (fingers[i].finger_id == finger_id) {
 			--touch_count;
-			fprintf(stderr, "touch_count: %2d, removes binding  [%llx => %x]@%02d\n", touch_count, finger_id, fingers[i].touch_id, i);
+			dlog(stderr, "touch_count: %2d, removes binding  [%llx => %x]@%02d\n", touch_count, finger_id, fingers[i].touch_id, i);
 			fingers[i].finger_id = -1;
 			fingers[i].touch_id = -1;
 			//TODO clear binding?
@@ -211,7 +222,7 @@ void finger_release_all(void)
 		fingers[i].touch_id = -1;
 	}
 	touch_count = 0;
-	fprintf(stderr, "TOUCH: all bindings removed\n");
+	dlog(stderr, "TOUCH: all bindings removed\n");
 }
 
 /* unbinds the given unique_touch_id */
@@ -222,7 +233,7 @@ void finger_unbind(touch_unique_id touch_id)
 	for (i = 0; i < MAX_FINGERS; i++) {
 		if (fingers[i].finger_id != -1 && fingers[i].touch_id == touch_id) {
 			--touch_count;
-			fprintf(stderr, "touch_count: %2d, unbinding [%llx => %x]@%02d\n", touch_count, fingers[i].finger_id, touch_id, i);
+			dlog(stderr, "touch_count: %2d, unbinding [%llx => %x]@%02d\n", touch_count, fingers[i].finger_id, touch_id, i);
 			fingers[i].finger_id = -1;
 			fingers[i].touch_id = -1;
 			if (touch_count < 0) {

@@ -15,13 +15,13 @@
 #endif
 
 /* static prototypes shared by all states */
-static void on_enter(void);
+static void on_enter(STATE_ID state_prev);
 static void pre_update(void);
 static void post_update(void);
 static void draw(void);
 static int sdl_event(SDL_Event *event);
 static void on_pause(void);
-static void on_leave(void);
+static void on_leave(STATE_ID state_next);
 static void destroy(void);
 
 static state_funcs state_functions = {
@@ -38,4 +38,4 @@ static state_funcs state_functions = {
 static STATE_ID this;
 
 /* Macro for registration of state */
-#define statesystem_register(STATE_NAME, INNER_STATES) STATE_NAME = statesystem_create_state(INNER_STATES, &state_functions); this = STATE_NAME;
+#define statesystem_register(STATE_NAME, INNER_STATES) STATE_NAME = statesystem_create_state(#STATE_NAME, INNER_STATES, &state_functions); this = STATE_NAME;

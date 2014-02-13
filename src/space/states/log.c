@@ -20,7 +20,7 @@ static button btn_space;
  * state functions *
  * * * * * * * * * */
 
-static void on_enter(void)
+static void on_enter(STATE_ID state_prev)
 {
 	cpVect pos = cpv(10-GAME_WIDTH/2, -GAME_HEIGHT/2 + 30 + y * 30);
 	scroll_set_offset(scr_view, pos);
@@ -59,7 +59,7 @@ static void on_pause(void)
 {
 }
 
-static void on_leave(void)
+static void on_leave(STATE_ID state_next)
 {
 }
 

@@ -7,6 +7,7 @@
 #include "input/button.h"
 #include "data/llist.h"
 #include "graphics/camera.h"
+
 #if __IPHONEOS__
 #define IS_APP 1
 #define GOT_TOUCH 1
@@ -83,6 +84,8 @@ extern int WINDOW_WIDTH;
 extern int WINDOW_HEIGHT;
 
 extern unsigned char *keys;
+
+extern we_bool debug_logtime;
 
 extern char fps_buf[];
 /* current state in use */

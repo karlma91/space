@@ -64,6 +64,7 @@ static int paused = 0;
 
 static float fps;
 static float frames;
+we_bool debug_logtime = 1;
 
 #define FPS_SLEEP_TIME 16
 
@@ -752,7 +753,9 @@ static void main_tick(void *data)
 			swap_time /=fps;
 			sprintf(&fps_buf[0], "%.2f FPS ", fps);
 #if !ARCADE_MODE && PRINT_STATS
-			fprintf(stderr, "%5.2f\t%5.1f\t%4d\t%4d\t%6.2f\t%6.2f\t%6.2f\n", fps, avg_frame, min_frame, max_frame, update_time, draw_time, swap_time);
+			if (debug_logtime) {
+				fprintf(stderr, "%5.2f\t%5.1f\t%4d\t%4d\t%6.2f\t%6.2f\t%6.2f\n", fps, avg_frame, min_frame, max_frame, update_time, draw_time, swap_time);
+			}
 #endif
 			frames = 0;
 			fps = 0;

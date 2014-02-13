@@ -120,7 +120,7 @@ void sound_testing(void)
  * state functions *
  * * * * * * * * * */
 
-static void on_enter(void)
+static void on_enter(STATE_ID state_prev)
 {
     //TODO: TMP TWEEN TEST
     test = tween_cpv_create(cpv(0,300), cpv(500,500), 2, LinearInterpolation);
@@ -243,7 +243,7 @@ static void on_pause(void)
 {
 }
 
-static void on_leave(void)
+static void on_leave(STATE_ID state_next)
 {
     test = tween_release(test);
     tests = tween_release(tests);

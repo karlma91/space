@@ -23,13 +23,13 @@ extern view * current_view;
 typedef void * STATE_ID;
 
 typedef struct {
-    void (*on_enter)(void);
+    void (*on_enter)(STATE_ID state_prev);
     void (*pre_update)(void);
     void (*post_update)(void);
     void (*draw)(void);
     int (*sdl_event)(SDL_Event *event);
     void (*on_pause)(void);
-    void (*on_leave)(void);
+    void (*on_leave)(STATE_ID state_next);
     void (*destroy)(void);
 } state_funcs;
 
@@ -49,7 +49,7 @@ void statesystem_destroy(void);
 
 STATE_ID statesystem_get_render_state(void);
 
-STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs);
+STATE_ID statesystem_create_state(const char *name, int inner_states, state_funcs *funcs);
 
 void state_enable_objects(STATE_ID state_id, int enabled);
 void state_enable_physics(STATE_ID state_id, int enabled);

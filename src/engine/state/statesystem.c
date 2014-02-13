@@ -25,6 +25,7 @@ static float accumulator = 0;
 
 typedef struct systemstate State;
 struct systemstate {
+	char name[32];
     State *prev;
     State *next;
 
@@ -83,10 +84,11 @@ static void update_global_current_var(State *state)
 	//fprintf(stderr, "DEBUG: par=%p, obj=%p, spc=%p\n",current_particles, current_objects, current_space);
 }
 
-STATE_ID statesystem_create_state(int inner_states, state_funcs *funcs)
+STATE_ID statesystem_create_state(const char *name, int inner_states, state_funcs *funcs)
 {
 	State *state = calloc(1, sizeof *state);
-
+	strncpy(state->name, name, 32);
+	fprintf(stderr, "INFO: Statesystem: created %s\n", state);
     state->id = state;
 
     state->cameras = llist_create();
@@ -186,42 +188,61 @@ void state_set_inner_state(STATE_ID state_id, int inner_state)
     state->current_inner_state = inner_state;
 }
 
+static void on_leave(State *state, STATE_ID next)
+{
+    fprintf(stderr, "DEBUG STATESYSTEM: %s.on_leave(%s);\n", state, next);
+    state->call.on_leave(next);
+}
+static void on_enter(State *state, STATE_ID prev)
+{
+    fprintf(stderr, "DEBUG STATESYSTEM: %s.on_enter(%s);\n", state, prev);
+    state->call.on_enter(prev);
+}
+
 void statesystem_push_state(STATE_ID state_id)
 {
 	State *state = (State *) state_id;
+	STATE_ID prev = (STATE_ID) stack_head;
+	STATE_ID next = state_id;
 
     state->time_alive = 0;
     stack_head->next = state;
     stack_head->next->prev = stack_head;
 	update_global_current_var(stack_head);
-    stack_head->call.on_leave();
+	on_leave(stack_head, next);
     stack_head = stack_head->next;
 	update_global_current_var(stack_head);
-    stack_head->call.on_enter();
+	on_enter(stack_head, prev);
 }
 
 void statesystem_pop_state(void *unused)
 {
     State *temp = stack_head;
+	STATE_ID prev = (STATE_ID) stack_head;
+	STATE_ID next = stack_head->prev;
+
 	update_global_current_var(stack_head);
-    stack_head->call.on_leave();
-    stack_head = stack_head->prev;
+	on_leave(stack_head, next);
+    stack_head = next;
     temp->prev = NULL;
     stack_head->next = NULL;
 	update_global_current_var(stack_head);
-    stack_head->call.on_enter();
+	on_enter(stack_head, prev);
 }
 
 void statesystem_set_state(STATE_ID state_id)
 {
 	State *stack_next, *state = stack_tail;
 
+	STATE_ID prev = (STATE_ID) stack_tail;
+	STATE_ID next = state_id;
+
 	while (state) {
 		state->prev = NULL;
 		stack_next = state->next;
 		state->next = NULL;
 		update_global_current_var(state);
-	    state->call.on_leave();
+		on_leave(state, next);
 		state = stack_next;
 	}
 
@@ -234,8 +255,7 @@ void statesystem_set_state(STATE_ID state_id)
     stack_head = state;
     stack_tail = state;
     update_global_current_var(state);
-    state->call.on_enter();
-
+	on_enter(state, prev);
 }
 
 static void update_instances(instance *obj, void *data)

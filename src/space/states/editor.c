@@ -753,7 +753,7 @@ void editor_init()
  * state functions *
  * * * * * * * * * */
 
-static void on_enter(void)
+static void on_enter(STATE_ID state_prev)
 {
 	currentlvl = lvl;
 }
@@ -882,7 +882,7 @@ static void on_pause(void)
 {
 }
 
-static void on_leave(void)
+static void on_leave(STATE_ID state_next)
 {
 }
 

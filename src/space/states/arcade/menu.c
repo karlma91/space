@@ -88,7 +88,7 @@ static int sdl_event(SDL_Event *event)
 	return 0;
 }
 
-static void on_enter(void)
+static void on_enter(STATE_ID state_prev)
 {
 	select_id = 0;
 	sound_music(MUSIC_MENU);
@@ -98,7 +98,7 @@ static void on_pause(void)
 {
 }
 
-static void on_leave(void)
+static void on_leave(STATE_ID state_next)
 {
 }
 

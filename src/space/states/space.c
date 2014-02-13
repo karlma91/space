@@ -795,7 +795,7 @@ void space_init_level_from_level(level * lvl)
 	cpShapeSetElasticity(ceiling, 0.7f);
 }
 
-static void on_enter(void)
+static void on_enter(STATE_ID state_prev)
 {
 	game_paused = 0;
 }
@@ -857,9 +857,8 @@ static void on_pause(void)
 	}
 }
 
-static void on_leave(void)
+static void on_leave(STATE_ID state_next)
 {
-
 }
 
 static void destroy(void)

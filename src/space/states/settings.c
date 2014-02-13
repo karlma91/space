@@ -27,6 +27,7 @@ typedef enum {
 	OPT_INVULNERABLE, // TODO: DISABLE DEBUG CHEAT!
 	OPT_UNLOCK, // TODO: DISABLE DEBUG CHEAT!
 	OPT_LOG, // TODO: DISABLE DEBUG CHEAT!
+	OPT_TIME, // TODO: DISABLE DEBUG CHEAT!
 	OPT_CAMERA, // camera mode
 
 	OPTION_COUNT
@@ -42,6 +43,7 @@ char str_options[OPTION_COUNT][50] = {
 		"CHEAT: INVULNERABLE",
 		"CHEAT: UNLOCK ALL",
 		"DEBUG: LOG",
+		"DEBUG: Print time",
 		"DEBUG: CAMERA"
 };
 
@@ -62,7 +64,7 @@ static Color col_btn_unchecked = {255, 255, 255, 255};
  * state functions *
  * * * * * * * * * */
 
-static void on_enter(void)
+static void on_enter(STATE_ID state_prev)
 {
 }
 
@@ -92,7 +94,7 @@ static void on_pause(void)
 {
 }
 
-static void on_leave(void)
+static void on_leave(STATE_ID state_next)
 {
 }
 
@@ -162,6 +164,10 @@ static void option_click(settings_option option)
 	case OPT_UNLOCK:
 		/* TODO implement this unimplemented option! */
 		bit_toggle(option);
+		button_set_backcolor(btn_options[option], bit_get_status(option) ? col_btn_checked : col_btn_unchecked);
+		break;
+	case OPT_TIME:
+		debug_logtime = bit_toggle(option);
 		button_set_backcolor(btn_options[option], bit_get_status(option) ? col_btn_checked : col_btn_unchecked);
 		break;
 	case OPT_CAMERA:

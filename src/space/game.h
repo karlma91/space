@@ -13,7 +13,7 @@
 void logprint(char *format, ...);
 void logprintln(char *format, ...);
 #define SDL_Log(...) logprintln(__VA_ARGS__), SDL_Log(__VA_ARGS__)
-#define fprintf(stderr, ...) logprint(__VA_ARGS__), fprintf(stderr, __VA_ARGS__)
+#define fprintf(file,...) logprint(__VA_ARGS__), fprintf(file,__VA_ARGS__)
 
 #if TARGET_OS_IPHONE
 #define TEX_FORMAT ".pvr"
