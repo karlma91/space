@@ -44,7 +44,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 
 	//TODO get bullet type info from shop
-	player->bullet_param = level_get_param(&currentlvl->params, "bullet", "player");
+	player->bullet_param = level_get_param(&param_defs, "bullet", "player");
 
 	cpSpaceReindexShapesForBody(current_space, player->gunwheel);
 	cpSpaceReindexShapesForBody(current_space, player->data.body);

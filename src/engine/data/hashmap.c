@@ -170,6 +170,11 @@ void * hm_get(hashmap *hm, const char *key)
 		return NULL;
 	}
 
+	if(hm->size == 0) {
+		SDL_Log("ERROR: hm size 0");
+		return NULL;
+	}
+
 	int index = hash((unsigned char*)key) % hm->size;
 	hashnode *node = hm->buckets[index];
 	while(node != NULL){

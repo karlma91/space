@@ -68,7 +68,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	sprite_create(&turret->data.spr, SPRITE_TURRETBODY001, turret_size, turret_size, 0);
 	sprite_create(&turret->spr_gun, SPRITE_TURRETGUN001, turret_size, turret_size, 0);
 
-	turret->bullet_param = level_get_param(&currentlvl->params, turret->param.bullet_type->NAME, turret->param.bullet_param);
+	turret->bullet_param = level_get_param(&param_defs, turret->param.bullet_type->NAME, turret->param.bullet_param);
 
 	init(turret);
 }

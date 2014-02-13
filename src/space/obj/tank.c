@@ -83,7 +83,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpSpaceAddConstraint(current_space, cpSimpleMotorNew(tank->data.body, tank->barrel, 0));
 	cpSpaceAddConstraint(current_space, cpPivotJointNew(tank->data.body, tank->barrel, tank->data.body->p));
 
-	tank->bullet_param = level_get_param(&currentlvl->params, tank->param.bullet_type->NAME, tank->param.bullet_param);
+	tank->bullet_param = level_get_param(&param_defs, tank->param.bullet_type->NAME, tank->param.bullet_param);
 	hpbar_init(&tank->hp_bar,tank->param.max_hp,80,16,0,60,&(tank->data.body->p));
 
 	init(tank);

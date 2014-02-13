@@ -546,7 +546,7 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 				delete_instance(touch);
 			} else if ((grid_i.yrow != -1) && touch->data.object_ins == NULL) {
 				//TODO make sure there are no other instances beneath pos!
-				instance_create(object_by_name(object_type), level_get_param(&(lvl->params), object_type, param_name), pos, cpvzero);
+				instance_create(object_by_name(object_type), level_get_param(&(param_defs), object_type, param_name), pos, cpvzero);
 				llist_remove(ll_touches, touch);
 				pool_release(pool_touches, touch);
 			} else {
@@ -575,7 +575,7 @@ static int editor_drag_button(button btn_id, SDL_TouchFingerEvent *finger, void 
 		select_object_type(drag_data);
 		finger_release(finger->fingerId);
 		button_clear(btn_id);
-		instance *ins = instance_create(object_by_name(object_type), level_get_param(&(lvl->params), object_type, param_name), pos, cpvzero);
+		instance *ins = instance_create(object_by_name(object_type), level_get_param(&(param_defs), object_type, param_name), pos, cpvzero);
 		touch_down(finger);
 
 		touch_unique_id touch_id = finger_get_touch_id(finger->fingerId);

@@ -7,7 +7,6 @@
 
 #ifndef WE_UTILS_H_
 #define WE_UTILS_H_
-
 #include "chipmunk.h"
 #include "SDL_log.h"
 #include <signal.h>
