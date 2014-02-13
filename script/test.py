@@ -68,7 +68,7 @@ def levelParse(file, data):
         # pl_parse(param, "coins", "int", &( arg.tank.coins), NULL);
         for field_name in data[param_name]:
             field_type = data[param_name][field_name]
-            file.write("      pl_parse(param,\"" + field_name + "\", \"" + field_type + "\" ,&(arg." + param_name + "." + field_name + "),(((ptr = NULL) || temp) && (ptr = &(temp->" + field_name + ")), ptr));\n")
+            file.write("      jparse_parse(param,\"" + field_name + "\", \"" + field_type + "\" ,&(arg." + param_name + "." + field_name + "),(((ptr = NULL) || temp) && (ptr = &(temp->" + field_name + ")), ptr));\n")
     
     file.write("  }\n")
     file.write("  const int paramsize = obj_id->P_SIZE;\n" + 
