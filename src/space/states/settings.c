@@ -221,6 +221,7 @@ void settings_init(void)
 	option_click(OPT_MUSIC); /* music off */
 	option_click(OPT_UNLOCK); /* everything unlocked */
 	option_click(OPT_ASSISTED_STEERING); /* assisted steering activated by default */
+	option_click(OPT_TIME);option_click(OPT_TIME);
 #if !ARCADE_MODE
 	//option_click(OPT_INVULNERABLE); /* assisted steering activated by default */
 #endif

@@ -11,11 +11,12 @@ void space_init(void);
 
 extern int multiplayer;
 extern level *currentlvl;
-extern station *current_ship;
 extern joystick *joy_p1_left, *joy_p1_right;
 extern joystick *joy_p2_left, *joy_p2_right;
 
 extern view *view_p1, *view_p2;
+
+void space_set_lvltemplate(level *lvl);
 
 /* init new level */
 void space_init_level(char *name);

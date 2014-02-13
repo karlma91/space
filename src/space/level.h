@@ -22,7 +22,7 @@ typedef struct level {
 
 	LList level_data;
 
-	tilemap2 tilemap;
+	tilemap tilemap;
 } level;
 
 

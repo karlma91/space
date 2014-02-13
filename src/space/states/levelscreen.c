@@ -11,6 +11,7 @@
 #include "we_defstate.h"
 #include "editor.h"
 
+static spacelvl *current_lvl_tmpl = NULL;
 STATE_ID state_levelscreen;
 
 //#define MAX_LEVELS 10
@@ -73,7 +74,7 @@ static void draw(void)
 	draw_box(3, box.p,box.s,0,1);
 
 	draw_color4f(1,1,1,1);
-	bmfont_center(FONT_SANS, cpv(0,box.p.y+box.s.y / 2 - 100), 1.5, current_ship->name);
+	bmfont_center(FONT_SANS, cpv(0,box.p.y+box.s.y / 2 - 100), 1.5, current_lvl_tmpl->metadata->name);
 
 	for (i = 0; i < 3; i++) {
 		if (stars_unlocked == i+1) {
@@ -99,31 +100,32 @@ static void destroy(void)
 {
 }
 
-
 void levelscreen_change_to(station * ship)
 {
-	current_ship = ship;
+	current_lvl_tmpl->metadata = ship;
 	statesystem_push_state(state_levelscreen);
 }
 
 static void button_edit_callback(void *data)
 {
-	level * lvl = level_load(WAFFLE_DOCUMENTS, current_ship->path);
-	editor_edit_level(lvl);
+	//TODO unload previous level, if any?
+	current_lvl_tmpl = level_load(WAFFLE_DOCUMENTS, current_lvl_tmpl->metadata->path);
+	statesystem_set_state(state_editor);
 }
 
 static void button_remove_callback(void *data)
 {
-	if(waffle_remove(current_ship->path) == -1){
-		SDL_Log("COLD NOT DELETE FILE %s",current_ship->path);
+	if(waffle_remove(current_lvl_tmpl->metadata->path) == -1){
+		SDL_Log("COLD NOT DELETE FILE %s",current_lvl_tmpl->metadata->path);
 	}
-	solarsystem_remove_station(current_ship->sol, current_ship);
+	solarsystem_remove_station(current_lvl_tmpl->metadata->sol, current_lvl_tmpl->metadata);
 	statesystem_pop_state(NULL);
 }
 
 static void button_callback(void *data)
 {
-	space_start_demo(current_ship->path);
+	space_start_demo(current_lvl_tmpl->metadata->path);
+	statesystem_set_state(state_space);
 }
 
 void levelscreen_init(void)
@@ -165,4 +167,9 @@ void levelscreen_init(void)
 	state_register_touchable_view(main_view, btn_background);
 
 	sprite_create(&spr_star, SPRITE_STAR, 250, 250, 0);
+}
+
+spacelvl *get_current_lvl_template(void)
+{
+	return current_lvl_tmpl;
 }
