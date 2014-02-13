@@ -6,6 +6,8 @@
  *      Author: Mathias
  */
 
+//TODO MOVE TO ENGINE
+
 #include <stdio.h>
 
 #include "tilemap.h"

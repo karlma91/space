@@ -1,6 +1,8 @@
 #ifndef SOLARSYSTEM_H_
 #define SOLARSYSTEM_H_
 
+//TODO MOVE INTO LEVEL FOLDER
+
 #include "we_utils.h"
 #include "we_graphics.h"
 #include "we.h"

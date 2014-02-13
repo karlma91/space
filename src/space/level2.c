@@ -6,6 +6,8 @@
  */
 
 
+//TODO SPLIT INTO SMALLER MODULES
+
 #include <stdlib.h>
 #include <dirent.h>
 #include <stdio.h>

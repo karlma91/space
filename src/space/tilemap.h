@@ -5,6 +5,8 @@
  *      Author: Karl
  */
 
+//TODO MOVE TO ENGINE
+
 #ifndef TILEMAP_H_
 #define TILEMAP_H_
 

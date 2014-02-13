@@ -1,6 +1,8 @@
 #ifndef LEVEL_H_
 #define LEVEL_H_
 
+//TODO SPLIT INTO SMALLER MODULES
+
 #include "tilemap.h"
 #include "../engine/components/object.h"
 #include "../engine/components/shape.h"

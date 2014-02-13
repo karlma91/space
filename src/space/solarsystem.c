@@ -2,6 +2,8 @@
 #include "game.h"
 #include "states/levelscreen.h"
 
+//TODO MOVE INTO LEVEL FOLDER
+
 static void station_free(station *s)
 {
 	free(s);

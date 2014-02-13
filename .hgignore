@@ -13,6 +13,8 @@ Debug/*
 game_data.zip
 game_data/textures/*
 game_data/sound/*
+src/space/autogen/*
+res.dat
 *~
 src/*~
 resources/win/space.res.o

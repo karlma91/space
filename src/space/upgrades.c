@@ -4,7 +4,7 @@
  *  Created on: 27. juli 2013
  *      Author: Mathias
  */
-
+//TODO USE JSON FORMAT TO STORE UPGRADES INSTEAD
 #include "upgrades.h"
 #include "game.h"
 
