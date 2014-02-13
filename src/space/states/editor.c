@@ -178,8 +178,8 @@ static void save_level_to_file(void *unused)
 	lvl->tilemap.layers = TLAY_COUNT;
 	strcpy(lvl->name, level_name);
 	level_write_to_file(lvl);
-	level_load_levels_from_folder(level_get_world());
-	level_write_solar_file(level_get_world());
+	//level_load_levels_from_folder(level_get_world());
+	//level_write_solar_file(level_get_world());
 }
 
 static void start_editor_level(void *unused)

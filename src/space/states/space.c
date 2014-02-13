@@ -1155,8 +1155,8 @@ void space_restart_level(void *unused)
 void space_next_level(void *unused)
 {
 	int station_nr = currentlvl->station + 1;
-	LList world = level_get_world();
-	int count = llist_size(world);
+	//LList world = level_get_world();
+	int count = 0;//llist_size(world);
 
 #if ARCADE_MODE
 	arcade_lvl_score += (int)(game_time*10) - (ARCADE_SCORE_LVL + player1->coins/10);
@@ -1164,7 +1164,7 @@ void space_next_level(void *unused)
 
 	if (station_nr < count) {
 		statesystem_set_state(state_space);
-		station *s = (station*)llist_at_index(world, station_nr);
+		station *s = (station*)llist_at_index(NULL, station_nr);
 		space_init_level(s->path);
 	} else {
 #if ARCADE_MODE

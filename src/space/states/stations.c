@@ -268,12 +268,9 @@ void stations_init(void)
 	srand(0x9b3a09fa);
 	statesystem_register(state_stations, 0);
 
-	level_load_solar();
-
-	user_system = level_get_world();
+	user_system = solarsystem_load_solar("levels/userlevels.json");
 
 	Color col_back = {30,100,30,100};
-	//Color col_text = {1,1,1,1};
 
 	main_view = state_view_get(state_stations, 0);
 	main_view->GUI = draw_gui;

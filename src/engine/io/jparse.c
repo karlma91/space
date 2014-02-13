@@ -23,7 +23,15 @@ void jparse_close(cJSON* j)
 cJSON * jparse_open(int dir_type, char *filepath)
 {
 	cJSON *root;
-	int filesize = waffle_read_file_zip("level/object_defaults.json", &buff[0], 10000);
+	int filesize;
+	if(dir_type == WAFFLE_DOCUMENTS){
+		FILE *f = waffle_fopen(WAFFLE_DOCUMENTS,filepath,"r");
+		if(f){
+			filesize = waffle_read(f, buff, FILE_SIZE_BUFFER);
+		}
+	}else{
+		filesize = waffle_read_file_zip("level/object_defaults.json", &buff[0], FILE_SIZE_BUFFER);
+	}
 	if (!filesize) {
 		SDL_Log("Could not load level data!");
 		return NULL;

@@ -56,6 +56,12 @@ void solarsystem_remove_station(solarsystem *sy, station *s);
 void solarsystem_update(solarsystem *sun);
 void solarsystem_draw(solarsystem *sun);
 void sun_render(int layer, drawbl_sun *sun);
+
+LList solarsystem_load_solar(char *filepath);
+void solarsystem_load_levels_from_folder(LList world);
+void solarsystem_write_solar_file(LList world, char *filepath);
+
+
 void solarsystem_destroy(solarsystem *sun);
 
 #endif /* SOLARSYSTEM_H_ */
