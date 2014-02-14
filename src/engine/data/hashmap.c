@@ -166,12 +166,12 @@ int hm_add(hashmap *hm, const char *key, void *data)
 void * hm_get(hashmap *hm, const char *key)
 {
 	if (!hm) {
-		SDL_Log("ERROR: NULL pointer hm in hm_get");
+		SDL_Log("WARNING: NULL pointer hm in hm_get");
 		return NULL;
 	}
 
 	if(hm->size == 0) {
-		SDL_Log("ERROR: hm size 0");
+		SDL_Log("WARNING: hm size 0"); //TODO REMOVE
 		return NULL;
 	}
 

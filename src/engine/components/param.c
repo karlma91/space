@@ -14,7 +14,7 @@ param_list param_defs;
 
 void* parse_generated(cJSON *param, char* type, char *name);
 
-static void parse_param_object(cJSON *param, hashmap * param_list)
+static void parse_param_object(cJSON *param)
 {
 	char type[32], name[32];
 	jparse_parse(param,"type","char",type, "NULL");
@@ -25,10 +25,10 @@ static void parse_param_object(cJSON *param, hashmap * param_list)
 	SDL_Log("PARSING TYPE: %s name: %s ", type, name);
 
 	hashmap * names;
-	names = hm_get(param_list, type);
+	names = hm_get(param_defs.hm_param, type);
 	if (names == NULL) {
 		names = hm_create();
-		hm_add(param_list, type, names);
+		hm_add(param_defs.hm_param, type, names);
 	}
 
 	void * data = parse_generated(param, type, name);
@@ -38,56 +38,50 @@ static void parse_param_object(cJSON *param, hashmap * param_list)
 	}
 }
 
-static void load_params(param_list *defs, cJSON *root)
+static void load_params(cJSON *root)
 {
 	cJSON *param_array = cJSON_GetObjectItem(root,"params");
-	defs->hm_param = hm_create();
+	param_defs.hm_param = hm_create();
 	int i;
 	for (i = 0; i < cJSON_GetArraySize(param_array); i++){
 		cJSON *param = cJSON_GetArrayItem(param_array, i);
-		parse_param_object(param, defs->hm_param);
+		parse_param_object(param);
 	}
 }
 
 
-param_list * param_load(int dir_type, char *file)
+void param_load(int dir_type, char *file)
 {
 	cJSON *root = jparse_open(dir_type, file);
 	if(root == NULL) {
-		return NULL;
+		return;
 	}
-	param_list *pl = calloc(1,sizeof(param_list));
-
-	load_params(pl, root);
+	load_params(root);
 	jparse_close(root);
-
-	return pl;
 }
 
-void param_list_destroy(param_list *pl)
+void param_list_destroy(void)
 {
-	if (pl) {
-		if (pl->hm_param) {
-			hashiterator *ih = hm_get_iterator(pl->hm_param);
-			while(hm_iterator_hasnext(ih)) {
-				hashmap * hm = hm_iterator_next(ih);
-				hashiterator *ih2 = hm_get_iterator(hm);
-				while(hm_iterator_hasnext(ih2)) {
-					hashmap * hm2 = hm_iterator_next(ih2);
-					hashiterator *ih3 = hm_get_iterator(hm2);
-					while(hm_iterator_hasnext(ih3)) {
-						void * param = hm_iterator_next(ih3);
-						free(param);
-					}
-					hm_iterator_destroy(ih3);
-					hm_destroy(hm2);
+	if (param_defs.hm_param) {
+		hashiterator *ih = hm_get_iterator(param_defs.hm_param);
+		while(hm_iterator_hasnext(ih)) {
+			hashmap * hm = hm_iterator_next(ih);
+			hashiterator *ih2 = hm_get_iterator(hm);
+			while(hm_iterator_hasnext(ih2)) {
+				hashmap * hm2 = hm_iterator_next(ih2);
+				hashiterator *ih3 = hm_get_iterator(hm2);
+				while(hm_iterator_hasnext(ih3)) {
+					void * param = hm_iterator_next(ih3);
+					free(param);
 				}
-				hm_iterator_destroy(ih2);
-				hm_destroy(hm);
+				hm_iterator_destroy(ih3);
+				hm_destroy(hm2);
 			}
-			hm_iterator_destroy(ih);
-			hm_destroy(pl->hm_param);
+			hm_iterator_destroy(ih2);
+			hm_destroy(hm);
 		}
+		hm_iterator_destroy(ih);
+		hm_destroy(param_defs.hm_param);
 	}
 }
 
@@ -113,8 +107,7 @@ void param_list_destroy(param_list *pl)
 
 void param_init()
 {
-	param_list *l = param_load(WAFFLE_ZIP, "level/object_defaults.json");
-	param_defs = *l;
+	param_load(WAFFLE_ZIP, "level/object_defaults.json");
 
 	if(param_defs.hm_param == NULL) {
 		we_error("could not load object_defaults");
