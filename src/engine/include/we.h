@@ -17,6 +17,7 @@
 
 
 #include "../engine.h"
+#include "../debug/monitor.h"
 #include "we_data.h"
 #include "we_audio.h"
 #include "we_graphics.h"

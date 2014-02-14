@@ -5,6 +5,7 @@
 #include "../data/llist.h"
 #include "../input/touch.h"
 #include "../engine.h"
+#include "../debug/monitor.h"
 #include "we_utils.h"
 
 #include "SDL.h"
@@ -428,7 +429,12 @@ void statesystem_draw(void)
     		draw_push_matrix();
     		draw_push_matrix();
     		extern int debug_draw;
+    		if(keys[SDL_SCANCODE_MINUS]) {
+    		        debug_draw = !debug_draw;
+    		        keys[SDL_SCANCODE_MINUS] = 0;
+    		}
     		if (debug_draw) {
+    		    if(cam) monitor_render(cam);
     			//draw_color_rgbmulta4f(1,0,1,0.1);
     			//draw_box(0, cpvzero, cpv(cam->view_width-10, cam->view_height-10), 0, 1);
     			draw_color_rgbmulta4f(0,1,0,1.0);

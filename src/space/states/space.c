@@ -513,6 +513,7 @@ static void draw_gui(view *cam)
 		draw_color4f(1,1,1,1);
 		bmfont_center(FONT_SANS, cpvzero, 1, "Tap for results!");
 	}
+
 }
 
 

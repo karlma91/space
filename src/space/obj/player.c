@@ -34,7 +34,7 @@ static void init(OBJ_TYPE *OBJ_NAME)
 	player->gunwheel->v = cpvzero;
 
 	player->force = engines[engine_index].force;
-	cpBodySetVelLimit(player->data.body, engines[engine_index].max_speed);
+	//cpBodySetVelLimit(player->data.body, engines[engine_index].max_speed);
 	cpBodySetMass(player->data.body, upg_total_mass);
 	player->gun_cooldown = 1 / weapons[weapon_index].lvls[weapons[weapon_index].level].firerate;
 	player->bullet_dmg = weapons[weapon_index].lvls[weapons[weapon_index].level].damage;
@@ -161,9 +161,20 @@ static void controls(obj_player *player)
 
 	view *pl_view = player->player_id == 1 ? view_p1 : view_p2;
 
+
+	float v1 = cpvlength(player->data.body->v);
+	float vv = 800/(v1);
+	vv = vv<=1? vv : 1;
+    player->data.body->v = cpvmult(player->data.body->v, vv);
+    monitor_float("Pspeed",v1);
+    monitor_float("Damping",vv);
+    monitor_cpvect("pos",player->data.body->p);
+    monitor_string("NAME","player");
+    monitor_float("HP", player->hp_bar.value);
+
 	if (player->joy_left->amplitude) {
 		cpVect player_dir = cpvrotate(cpv(player->joy_left->axis_x, player->joy_left->axis_y), cpvforangle(-pl_view->rotation));
-		static float FORCE = 200;//, VELOCITY = 435;
+		static float FORCE = 50;//, VELOCITY = 435;
 		//cpVect j = cpvmult(player_dir, player->force);
 		cpVect j = cpvmult(player_dir, FORCE);
 		//cpBodySetVelLimit(player->data.body, VELOCITY);
@@ -187,7 +198,7 @@ static void controls(obj_player *player)
 
 		player->direction_target = cpvtoangle(j);
 
-		cpBodyApplyImpulse(player->data.body, j, cpvmult(player_dir, -1*dt)); // applies impulse from rocket
+		cpBodyApplyImpulse(player->data.body, j, cpvzero);//cpvmult(player_dir, -1*dt)); // applies impulse from rocket
 		if (player->flame) player->flame->disable = 0;
 	} else {
 		if (player->flame) player->flame->disable = 1;
