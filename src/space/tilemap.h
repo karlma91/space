@@ -130,5 +130,5 @@ static __inline__ void tilemap_updaterow(tilemap *tm, int y)
 void tilemap_clear(tilemap *tm);
 void tilemap2_render(tilemap *tm);
 void tilemap_fill(void *unused, int layers, void *unused2, tilemap *tiles);
-
+void load_tilemap(cJSON *t, tilemap *tm); //TMP TODO make load_tilemap static and automatize it
 #endif /* TILEMAP_H_ */

@@ -3,7 +3,7 @@
 #include "we_defstate.h"
 #include "we_data.h"
 #include "space.h"
-#include "../level.h"
+#include "../level/spacelvl.h"
 #include "textinput.h"
 
 
@@ -24,7 +24,7 @@ static tile_layers current_tlay = TLAY_SOLID;
 static grid_index grid_i_cur = {-1,-1, 0, 0};
 
 /*********** LEVEL DATA ***********/
-static level *lvl_tmpl;
+static spacelvl *lvl_tmpl;
 static char level_name[32];
 
 
@@ -152,18 +152,17 @@ static editor_touch *add_touchdata(editor_mode m, touch_unique_id ID, cpVect vie
 
 static void update_instances(instance *obj, void *data)
 {
-	level_add_object_recipe_name(lvl_tmpl, obj->TYPE->NAME, (char*)&(((struct instance_dummy *)obj)->params), obj->p_start,0);
+	add_object_recipe_name(lvl_tmpl, obj->TYPE->NAME, (char*)&(((struct instance_dummy *)obj)->params), obj->p_start,0);
 }
-
 
 
 static void save_level_to_file(void *unused)
 {
-	llist_clear(lvl_tmpl->level_data);
+	llist_clear(lvl_tmpl->ll_recipes);
 	instance_iterate(update_instances, NULL);
-	lvl_tmpl->tilemap.layers = TLAY_COUNT;
+	lvl_tmpl->tm.layers = TLAY_COUNT;
 	strcpy(lvl_tmpl->name, level_name);
-	level_write_to_file(lvl_tmpl);
+	spacelvl_write(lvl_tmpl);
 	//level_load_levels_from_folder(level_get_world());
 	//level_write_solar_file(level_get_world());
 }
@@ -172,7 +171,7 @@ static void start_editor_level(void *unused)
 {
 	save_level_to_file(NULL);
 	SDL_Log("EDITOR: STARTING LEVEL FROM EDITOR");
-	llist_clear(lvl_tmpl->level_data);
+	llist_clear(lvl_tmpl->ll_recipes);
 	instance_iterate(update_instances, NULL);
 	statesystem_set_state(state_space);
 	space_init_level_from_level(lvl_tmpl);
@@ -204,7 +203,7 @@ static void tap_clear_editor(void *force)
 	if (player) p = player->body->p;
 	view_editor->zoom = 1;
 	view_update(view_editor, p, 0);
-	tilemap_clear(&lvl_tmpl->tilemap);
+	tilemap_clear(&lvl_tmpl->tm);
 }
 
 static void editor_setmode(editor_mode state)
@@ -281,20 +280,20 @@ static void move_radius(editor_touch *touch)
 		float new_r = lvl_tmpl->inner_radius + (cpvlength(pos) - cpvlength(prev));
 		if(new_r >= MIN_INNER_RADIUS && new_r <= lvl_tmpl->outer_radius - MIN_RADIUS_OFFSET) {
 			lvl_tmpl->inner_radius = new_r;
-			grid_setregion2f(lvl_tmpl->tilemap.grid, lvl_tmpl->inner_radius, lvl_tmpl->outer_radius);
-			tilemap_updaterow(&lvl_tmpl->tilemap, lvl_tmpl->tilemap.grid->pol.inner_i);
-			tilemap_updaterow(&lvl_tmpl->tilemap, lvl_tmpl->tilemap.grid->pol.inner_i+1);
+			grid_setregion2f(lvl_tmpl->tm.grid, lvl_tmpl->inner_radius, lvl_tmpl->outer_radius);
+			tilemap_updaterow(&lvl_tmpl->tm, lvl_tmpl->tm.grid->pol.inner_i);
+			tilemap_updaterow(&lvl_tmpl->tm, lvl_tmpl->tm.grid->pol.inner_i+1);
 		}
 		inner_resize_margin += (1 - inner_resize_margin) / 2;
 	} else if(touch->data.resize_mode == RESIZE_OUTER) {
 		float new_r = lvl_tmpl->outer_radius + (cpvlength(pos) - cpvlength(prev));
 		if(new_r <= MAX_OUTER_RADIUS && new_r >= lvl_tmpl->inner_radius + MIN_RADIUS_OFFSET) {
 			lvl_tmpl->outer_radius = new_r;
-			grid_setregion2f(lvl_tmpl->tilemap.grid, lvl_tmpl->inner_radius, lvl_tmpl->outer_radius);
-			tilemap_updaterow(&lvl_tmpl->tilemap, lvl_tmpl->tilemap.grid->pol.outer_i-3);
-			tilemap_updaterow(&lvl_tmpl->tilemap, lvl_tmpl->tilemap.grid->pol.outer_i-2);
-			tilemap_updaterow(&lvl_tmpl->tilemap, lvl_tmpl->tilemap.grid->pol.outer_i-1);
-			tilemap_updaterow(&lvl_tmpl->tilemap, lvl_tmpl->tilemap.grid->pol.outer_i);
+			grid_setregion2f(lvl_tmpl->tm.grid, lvl_tmpl->inner_radius, lvl_tmpl->outer_radius);
+			tilemap_updaterow(&lvl_tmpl->tm, lvl_tmpl->tm.grid->pol.outer_i-3);
+			tilemap_updaterow(&lvl_tmpl->tm, lvl_tmpl->tm.grid->pol.outer_i-2);
+			tilemap_updaterow(&lvl_tmpl->tm, lvl_tmpl->tm.grid->pol.outer_i-1);
+			tilemap_updaterow(&lvl_tmpl->tm, lvl_tmpl->tm.grid->pol.outer_i);
 		}
 		outer_resize_margin += (1 - outer_resize_margin) / 2;
 	}
@@ -303,26 +302,26 @@ static void move_radius(editor_touch *touch)
 static void paint_tile(editor_touch *touch)
 {
 	cpVect pos = view_view2world(view_editor, touch->viewpos_cur);
-	grid_index grid_i = grid_getindex(lvl_tmpl->tilemap.grid, pos);
+	grid_index grid_i = grid_getindex(lvl_tmpl->tm.grid, pos);
 	grid_i_cur = grid_i;
 	if (grid_i.yrow != -1) {
 		if (touch->data.tile_mode == TILE_ADD) {
-			tilemap_settile(&lvl_tmpl->tilemap, current_tlay, grid_i.xcol, grid_i.yrow, 1, tilebrush == TBRUSH_DESTROYABLE);
+			tilemap_settile(&lvl_tmpl->tm, current_tlay, grid_i.xcol, grid_i.yrow, 1, tilebrush == TBRUSH_DESTROYABLE);
 
-			if (current_tlay == TLAY_SOLID && !lvl_tmpl->tilemap.metadata[grid_i.yrow][grid_i.xcol].block) {
+			if (current_tlay == TLAY_SOLID && !lvl_tmpl->tm.metadata[grid_i.yrow][grid_i.xcol].block) {
 				cpVect verts[4];
-				grid_getquad8cpv(lvl_tmpl->tilemap.grid, verts, grid_i.xcol, grid_i.yrow);
+				grid_getquad8cpv(lvl_tmpl->tm.grid, verts, grid_i.xcol, grid_i.yrow);
 				cpShape *shape = cpPolyShapeNew(current_space->staticBody, 4, verts, cpvzero);
-				lvl_tmpl->tilemap.metadata[grid_i.yrow][grid_i.xcol].block = shape;
+				lvl_tmpl->tm.metadata[grid_i.yrow][grid_i.xcol].block = shape;
 				cpSpaceAddStaticShape(current_space, shape);
 			}
 		} else if (touch->data.tile_mode == TILE_CLEAR) {
-			tilemap_settile(&lvl_tmpl->tilemap, current_tlay, grid_i.xcol, grid_i.yrow, 0, 0);
+			tilemap_settile(&lvl_tmpl->tm, current_tlay, grid_i.xcol, grid_i.yrow, 0, 0);
 
-			if (current_tlay == TLAY_SOLID && lvl_tmpl->tilemap.metadata[grid_i.yrow][grid_i.xcol].block) {
-				cpSpaceRemoveShape(current_space, lvl_tmpl->tilemap.metadata[grid_i.yrow][grid_i.xcol].block);
-				cpfree(lvl_tmpl->tilemap.metadata[grid_i.yrow][grid_i.xcol].block);
-				lvl_tmpl->tilemap.metadata[grid_i.yrow][grid_i.xcol].block = NULL;
+			if (current_tlay == TLAY_SOLID && lvl_tmpl->tm.metadata[grid_i.yrow][grid_i.xcol].block) {
+				cpSpaceRemoveShape(current_space, lvl_tmpl->tm.metadata[grid_i.yrow][grid_i.xcol].block);
+				cpfree(lvl_tmpl->tm.metadata[grid_i.yrow][grid_i.xcol].block);
+				lvl_tmpl->tm.metadata[grid_i.yrow][grid_i.xcol].block = NULL;
 			}
 		}
 	}
@@ -377,7 +376,7 @@ static void move_instance(editor_touch *touch)
 	cpVect pos = view_view2world(view_editor, touch->viewpos_cur);
 	if (touch->data.object_ins) {
 		// check if pos is inside station walls
-		grid_index grid_i = grid_getindex(lvl_tmpl->tilemap.grid,pos);
+		grid_index grid_i = grid_getindex(lvl_tmpl->tm.grid,pos);
 		if ((grid_i.yrow == -1) || (touch->viewpos_cur.x < (panel_offset + PANEL_WIDTH - view_editor->view_width/2))) {
 			if (is_deletable(touch->data.object_ins)) {
 				/* Jiggles instance to indicate that it will get removed on touch_up */
@@ -385,8 +384,8 @@ static void move_instance(editor_touch *touch)
 				touch->data_obj_delete = WE_TRUE;
 			} else if (grid_i.yrow == -1) {
 				/* making sure non-deletable instances are not moved outside of station */
-				float new_rad = grid_inner_radius(lvl_tmpl->tilemap.grid);
-				new_rad = (grid_i.dist_sq <= new_rad*new_rad) ? new_rad : grid_outer_radius(lvl_tmpl->tilemap.grid);
+				float new_rad = grid_inner_radius(lvl_tmpl->tm.grid);
+				new_rad = (grid_i.dist_sq <= new_rad*new_rad) ? new_rad : grid_outer_radius(lvl_tmpl->tm.grid);
 				pos = WE_P2C(new_rad, grid_i.angle);
 			}
 		} else {
@@ -416,7 +415,7 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 	MODE_DATA data;
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
-	grid_index grid_i = grid_getindex(lvl_tmpl->tilemap.grid, pos);
+	grid_index grid_i = grid_getindex(lvl_tmpl->tm.grid, pos);
 	editor_touch *tile_touch;
 
 	switch (current_mode) {
@@ -431,7 +430,7 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 				return 1;
 			}
 			if (grid_i.yrow != -1) {
-				byte tile = lvl_tmpl->tilemap.data[current_tlay][grid_i.yrow][grid_i.xcol];
+				byte tile = lvl_tmpl->tm.data[current_tlay][grid_i.yrow][grid_i.xcol];
 				if (tile != TILE_TYPE_NONE) {
 					editor_setmode(MODE_TILEMAP);
 					return 0;
@@ -476,7 +475,7 @@ static int touch_down(SDL_TouchFingerEvent *finger)
 			//pool_release(pool_touches, tile_touch);
 		} else if (grid_i.yrow != -1) {
 			touch_unique_id touch_id = finger_bind(finger->fingerId);
-			byte tile = lvl_tmpl->tilemap.data[current_tlay][grid_i.yrow][grid_i.xcol];
+			byte tile = lvl_tmpl->tm.data[current_tlay][grid_i.yrow][grid_i.xcol];
 			data.tile_mode = tile ? TILE_CLEAR : TILE_ADD;
 			add_touchdata(MODE_TILEMAP, touch_id, pos_view, cpvzero, data);
 			return 1;
@@ -523,7 +522,7 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 	cpVect pos_view = cpv(finger->x, finger->y);
 	cpVect pos = view_view2world(view_editor, pos_view);
 	editor_touch *touch = get_touch(finger->fingerId);
-	grid_index grid_i = grid_getindex(lvl_tmpl->tilemap.grid, pos);
+	grid_index grid_i = grid_getindex(lvl_tmpl->tm.grid, pos);
 
 	if (touch) {
 		switch(touch->mode) {
@@ -532,7 +531,7 @@ static int touch_up(SDL_TouchFingerEvent *finger)
 				delete_instance(touch);
 			} else if ((grid_i.yrow != -1) && touch->data.object_ins == NULL) {
 				//TODO make sure there are no other instances beneath pos!
-				instance_create(object_by_name(object_type), level_get_param(&param_defs, object_type, param_name), pos, cpvzero);
+				instance_create(object_by_name(object_type), param_get(object_type, param_name), pos, cpvzero);
 				llist_remove(ll_touches, touch);
 				pool_release(pool_touches, touch);
 			} else {
@@ -561,7 +560,7 @@ static int editor_drag_button(button btn_id, SDL_TouchFingerEvent *finger, void 
 		select_object_type(drag_data);
 		finger_release(finger->fingerId);
 		button_clear(btn_id);
-		instance *ins = instance_create(object_by_name(object_type), level_get_param(&param_defs, object_type, param_name), pos, cpvzero);
+		instance *ins = instance_create(object_by_name(object_type), param_get(object_type, param_name), pos, cpvzero);
 		touch_down(finger);
 
 		touch_unique_id touch_id = finger_get_touch_id(finger->fingerId);
@@ -731,7 +730,7 @@ void editor_init()
 	state_register_touchable_view(view_editor, scr_objects);
 	state_register_touchable_view(view_editor, scr_world);
 
-	lvl_tmpl = level_load(WAFFLE_ZIP, "empty");
+	lvl_tmpl = spacelvl_parse(WAFFLE_ZIP, "empty");
 	tap_clear_editor(WE_TRUE);
 }
 
@@ -805,8 +804,8 @@ static void pre_update(void)
 		outer_resize_margin /= 2;
 	}
 	if (!(resize_inn || resize_out)) {
-		float target_ir = lvl_tmpl->tilemap.grid->pol.rad[lvl_tmpl->tilemap.grid->pol.inner_i];
-		float target_or = lvl_tmpl->tilemap.grid->pol.rad[lvl_tmpl->tilemap.grid->pol.outer_i-1];
+		float target_ir = lvl_tmpl->tm.grid->pol.rad[lvl_tmpl->tm.grid->pol.inner_i];
+		float target_or = lvl_tmpl->tm.grid->pol.rad[lvl_tmpl->tm.grid->pol.outer_i-1];
 		lvl_tmpl->inner_radius = (target_ir+lvl_tmpl->inner_radius)/2;
 		lvl_tmpl->outer_radius = (target_or+lvl_tmpl->outer_radius)/2;
 		lvl_tmpl->height = lvl_tmpl->outer_radius - lvl_tmpl->inner_radius;
@@ -828,7 +827,7 @@ static void draw(void)
 
 	draw_color4b(80,80,80,100);
 	if (current_mode == MODE_TILEMAP) {
-		grid_draw(lvl_tmpl->tilemap.grid, 0,  6 / current_view->zoom);
+		grid_draw(lvl_tmpl->tm.grid, 0,  6 / current_view->zoom);
 	}
 
 	draw_color4f(0.2,0.6,0.2,0.2);
@@ -842,7 +841,7 @@ static void draw(void)
 	r1 -= margin; r2 += margin;
 
 	if (margin > 0.5) draw_donut(RLAY_GAME_FRONT, cpvzero, r1 < 0 ? 0 : r1, r2);
-	tilemap2_render(&lvl_tmpl->tilemap);
+	tilemap2_render(&lvl_tmpl->tm);
 }
 
 static int sdl_event(SDL_Event *event)
@@ -874,7 +873,7 @@ static void on_enter(STATE_ID state_prev)
 			//free(lvl);
 		}
 		objectsystem_clear();
-		level_start_level(lvl_tmpl);
+		spacelvl_load2state(lvl_tmpl);
 		editor_setmode(MODE_OBJECTS);
 	}
 }

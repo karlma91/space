@@ -7,7 +7,6 @@
 
 #ifndef LEVELSCREEN_H_
 #define LEVELSCREEN_H_
-#include "../level.h"
 #include "../solarsystem.h"
 #include "../level/spacelvl.h"
 

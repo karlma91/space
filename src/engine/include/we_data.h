@@ -16,5 +16,6 @@
 #include "../data/stack.h"
 #include "../tween/pool.h"
 #include "../data/grid.h"
+#include "cJSON.h"
 
 #endif /* WE_DATA_H_ */

@@ -1,6 +1,4 @@
 #include "object_types.h"
-
-#include "../level.h"
 #include "we_data.h"
 
 /* Bit-layers */

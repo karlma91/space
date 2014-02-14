@@ -110,7 +110,7 @@ void levelscreen_change_to(station * ship)
 static void button_edit_callback(void *data)
 {
 	//TODO unload previous level, if any?
-	current_lvl_tmpl = (spacelvl*)level_load(WAFFLE_DOCUMENTS, from_station->path);
+	current_lvl_tmpl = (spacelvl*)spacelvl_parse(WAFFLE_DOCUMENTS, from_station->path);
 	statesystem_set_state(state_editor);
 }
 
@@ -125,7 +125,7 @@ static void button_remove_callback(void *data)
 
 static void button_start_callback(void *data)
 {
-	current_lvl_tmpl = (spacelvl*)level_load(from_station->data_place, from_station->path);
+	current_lvl_tmpl = (spacelvl*)spacelvl_parse(from_station->data_place, from_station->path);
 	space_start_demo(from_station->path);
 	//statesystem_set_state(state_space);
 }

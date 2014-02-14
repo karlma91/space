@@ -1,56 +1,16 @@
 #include "objrecipe.h"
 #include "../io/jparse.h"
 
-static void * get_param_direct(param_list *params, char *type, char * name)
+we_bool add_object_recipe_name(LList * ll_recipes, const char * obj_type, const char * param_name, cpVect pos, float rotation)
 {
-	hashmap *names = (hashmap*)hm_get(params->param,type);
-
-	if(names) {
-		void *data = hm_get(names, name);
-		if(data){
-			return data;
-		}else{
-			//SDL_Log("LEVEL: could not find %s of type %s", name, type);
-		}
-	} else {
-		//SDL_Log("LEVEL: Could not find type %s", type);
-	}
-	return NULL;
-}
-
-
-static void * get_param(param_list *params, const char *type, const char * name)
-{
-	char l_type[40];
-	char l_name[40];
-
-	strtolower(l_type, type);
-	strtolower(l_name, name);
-	void * param = get_param_direct(params, l_type, l_name);
-	if (param) return param;
-
-	//SDL_Log("LEVEL: Loading from param_DEFS");
-	param = get_param_direct(params, l_type, l_name);
-	if (param) return param;
-
-	param = get_param_direct(params, l_type, "def");
-	if (param) return param;
-
-	//SDL_Log("LEVEL: Could not find param: %s for type: %s", l_name, l_type);
-	return NULL;
-}
-
-static void add_object_recipe_name(LList * l, param_list *pl, const char * obj_type, const char * param_name, cpVect pos, float rotation)
-{
-
 	if(!obj_type){
 		SDL_Log("LEVEL: INVALID OBJECT TYPE");
-		return;
+		return WE_FALSE;
 	}
 
 	if(!param_name){
 		SDL_Log("LEVEL: INVALID param NAME");
-		return;
+		return WE_FALSE;
 	}
 
 	char data_type[32];
@@ -63,12 +23,13 @@ static void add_object_recipe_name(LList * l, param_list *pl, const char * obj_t
 
 	object_recipe * rec = calloc(1, sizeof(object_recipe));
 	rec->obj_type = object_by_name(data_type);
-	rec->param = get_param(pl, data_type, data_name);
+	rec->param = param_get(data_type, data_name);
 	strcpy(rec->param_name, data_name);
 	rec->pos = pos;
 	rec->rotation = rotation;
-	llist_set_remove_callback(l, free);
-	llist_add(l, rec);
+	llist_set_remove_callback(ll_recipes, free);
+	llist_add(ll_recipes, rec);
+	return WE_TRUE;
 }
 
 static we_bool objrecipe_parse(cJSON *t, object_recipe *objrep, void *def )
@@ -103,7 +64,7 @@ static we_bool objrecipe_write(cJSON *t,LList l, void *def )
 
 }
 
-void objrecipe_load_objects(LList l, cJSON* object_array, param_list *pl)
+we_bool objrecipe_load_objects(LList l, cJSON* object_array)
 {
 	int i;
 	for (i = 0; i < cJSON_GetArraySize(object_array); i++){
@@ -129,7 +90,7 @@ void objrecipe_load_objects(LList l, cJSON* object_array, param_list *pl)
 		} else {
 			SDL_Log("LEVEL PARSING ERROR: Cannot find field pos in object");
 		}
-		add_object_recipe_name(l, pl, type, name, p, 0);
+		add_object_recipe_name(l, type, name, p, 0);
 	}
 }
 

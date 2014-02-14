@@ -79,7 +79,7 @@ void solarsystem_add_station(solarsystem * sol, SPRITE_ID spr_id, Color color, i
 	s->rotation_speed = 1000/radius;
 	s->pos = cpvadd(WE_P2C(radius,angle), sol->origo);
 	s->col = color;
-	Color col_back = {255,180,140,255};
+	Color col_back = {255,200,180,255};//{255,180,140,255};
 	s->btn = button_create(SPRITE_STATION001, 0, s->name, s->pos.x, s->pos.y, size, size);
 	button_set_click_callback(s->btn, button_callback, s);
 	button_set_txt_antirot(s->btn, 1);
@@ -118,7 +118,7 @@ void solarsystem_update(solarsystem *sol)
 	llist_begin_loop(sol->stations);
 	while (llist_hasnext(sol->stations)) {
 		station *s = ((station *)llist_next(sol->stations));
-		s->angle += 1/s->radius;
+		s->angle += 0.4/s->radius;
 		s->pos = cpvadd(WE_P2C(s->radius,s->angle), sol->origo);
 		touch_place(s->btn,s->pos.x, s->pos.y);
 	}
@@ -293,7 +293,8 @@ LList solarsystem_load_solar(char *filepath)
 	if(root == NULL){
 		SDL_Log("[SOLARSYSTEM] could not parse file: %s", filepath);
 		SDL_Log("Error before: [%s]\n",cJSON_GetErrorPtr());
-	}
+        root = cJSON_CreateObject();
+    }
 	LList userlist = load_solarsystem_file(root);
 	solarsystem_load_levels_from_folder(userlist);
 	return userlist;

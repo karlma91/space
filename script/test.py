@@ -10,7 +10,7 @@ def generateParams(file, data):
                 "\n" +
                 "#include \"we_object.h\"\n" +
                 "#include \"cJSON.h\"\n" +
-                "#include \"../level.h\"\n" +
+                "#include \"../level/spacelvl.h\"\n" +
                 "#define MAX_STRING_SIZE 256\n\n")
     file.write("void* parse_generated(cJSON *param, char* type, char *name); \n")
     file.write("cJSON * write_generated(object_id * obj_id, void *data, char *type, char *name); \n")
@@ -64,7 +64,7 @@ def levelParse(file, data):
         else:
             file.write("  } else if ")
         file.write("(obj_id == " +"obj_id_"+ str(param_name) + ") {\n")
-        file.write("      obj_param_" + param_name + " *temp = level_get_param(&(param_defs),\"" + param_name + "\", \"def\");\n")
+        file.write("      obj_param_" + param_name + " *temp = param_get(\"" + param_name + "\", \"def\");\n")
         # pl_parse(param, "coins", "int", &( arg.tank.coins), NULL);
         for field_name in data[param_name]:
             field_type = data[param_name][field_name]

@@ -575,7 +575,10 @@ static void main_init(void)
     INITCALL(object_init);
     INITCALL(objectsystem_init);
 	INITCALL(jparse_init);
+	INITCALL(objrecipe_init);
     INITCALL(game_init);
+
+    INITCALL(param_init);
 
 	// Handle iOS app-events (pause, low-memory, terminating, etc...) and SDL_QUIT
 	SDL_SetEventFilter(HandleAppEvents, NULL);

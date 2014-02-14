@@ -15,7 +15,6 @@
 
 #include "../tilemap.h"
 #include "../spaceengine.h"
-#include "../level.h"
 
 STATE_ID state_space;
 #define STICK_RADIUS 120
@@ -44,8 +43,8 @@ static LList *ll_tileshapes;
 static cpShape *ceiling;
 
 /* level data */
-level *lvl_tmpl;
-level *currentlvl;
+spacelvl *lvl_tmpl;
+spacelvl *currentlvl;
 
 static void input(void);
 
@@ -387,7 +386,7 @@ static void draw(void)
 	/* draw tilemap */
 	//tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
 	space_draw_deck();
-	tilemap2_render(&currentlvl->tilemap);
+	tilemap2_render(&currentlvl->tm);
 	//draw_light_map();
 }
 
@@ -572,7 +571,7 @@ static void remove_static(cpShape *shape)
 }
 
 
-void space_set_lvltemplate(level *lvl)
+void space_set_lvltemplate(spacelvl *lvl)
 {
 
 }
@@ -580,12 +579,12 @@ void space_set_lvltemplate(level *lvl)
 void space_init_level(char *name)
 {
 	if(currentlvl == NULL || strcmp(currentlvl->name, name) != 0 ) {
-		currentlvl = level_load(WAFFLE_DOCUMENTS, name);
+		currentlvl = spacelvl_parse(WAFFLE_DOCUMENTS, name);
 	}
 	space_init_level_from_level(currentlvl);
 }
 
-void space_init_level_from_level(level * lvl)
+void space_init_level_from_level(spacelvl * lvl)
 {
 
 	currentlvl = lvl;
@@ -602,43 +601,43 @@ void space_init_level_from_level(level * lvl)
 	switch(deck) {
 	case 1:
 		weapon_index = 0;
-		weapons[weapon_index].level = 1;
+		weapons[weapon_index].spacelvl = 1;
 		armor_index = 0;
 		engine_index = 0;
 		break;
 	case 2:
 		weapon_index = 0;
-		weapons[weapon_index].level = 2;
+		weapons[weapon_index].spacelvl = 2;
 		armor_index = 0;
 		engine_index = 0;
 		break;
 	case 3:
 		weapon_index = 1;
-		weapons[weapon_index].level = 0;
+		weapons[weapon_index].spacelvl = 0;
 		armor_index = 0;
 		engine_index = 0;
 		break;
 	case 4:
 		weapon_index = 1;
-		weapons[weapon_index].level = 1;
+		weapons[weapon_index].spacelvl = 1;
 		armor_index = 0;
 		engine_index = 0;
 		break;
 	case 5:
 		weapon_index = 1;
-		weapons[weapon_index].level = 1;
+		weapons[weapon_index].spacelvl = 1;
 		armor_index = 1;
 		engine_index = 0;
 		break;
 	case 6:
 		weapon_index = 1;
-		weapons[weapon_index].level = 2;
+		weapons[weapon_index].spacelvl = 2;
 		armor_index = 2;
 		engine_index = 1;
 		break;
 	case 7:
 		weapon_index = 1;
-		weapons[weapon_index].level = 2;
+		weapons[weapon_index].spacelvl = 2;
 		armor_index = 2;
 		engine_index = 1;
 		break;
@@ -647,7 +646,7 @@ void space_init_level_from_level(level * lvl)
 	}
 #endif
 
-	level_start_level(currentlvl);
+	spacelvl_load2state(currentlvl);
 
 	if (currentlvl == NULL) {
 		SDL_Log( "space_level_init failed!\n");
@@ -670,9 +669,9 @@ void space_init_level_from_level(level * lvl)
 	}
 
 	int x, y;
-	for (y = lvl->tilemap.grid->pol.inner_i; y < lvl->tilemap.grid->pol.outer_i; y++) {
-		for (x = 0; x < lvl->tilemap.grid->pol.cols; x++) {
-			cpShape *block = currentlvl->tilemap.metadata[y][x].block;
+	for (y = lvl->tm.grid->pol.inner_i; y < lvl->tm.grid->pol.outer_i; y++) {
+		for (x = 0; x < lvl->tm.grid->pol.cols; x++) {
+			cpShape *block = currentlvl->tm.metadata[y][x].block;
 			if (block) {
 				fprintf(stderr, "removing shape %p\n", block);
 				if(cpSpaceContainsShape(current_space, block)) {
@@ -685,7 +684,7 @@ void space_init_level_from_level(level * lvl)
 	}
 
 	/* add static tiles */ //TODO merge/glue tiles togheter
-	fprintf(stderr, "GRID: %d x %d\n", lvl->tilemap.grid->pol.rows, lvl->tilemap.grid->pol.cols);
+	fprintf(stderr, "GRID: %d x %d\n", lvl->tm.grid->pol.rows, lvl->tm.grid->pol.cols);
 	/*
 	y = lvl->tilemap.grid->outer_i-1;
 	for (x = 0; x < lvl->tilemap.grid->cols; x++) {
@@ -701,13 +700,13 @@ void space_init_level_from_level(level * lvl)
 	*/
 
 	//TODO move into function inside tilemap?
-	for (y = lvl->tilemap.grid->pol.inner_i; y < lvl->tilemap.grid->pol.outer_i; y++) {
-		for (x = 0; x < lvl->tilemap.grid->pol.cols; x++) {
-			byte tile = tilemap_gettype(&currentlvl->tilemap, TLAY_SOLID, x, y);
+	for (y = lvl->tm.grid->pol.inner_i; y < lvl->tm.grid->pol.outer_i; y++) {
+		for (x = 0; x < lvl->tm.grid->pol.cols; x++) {
+			byte tile = tilemap_gettype(&currentlvl->tm, TLAY_SOLID, x, y);
 			if (tile) { //TODO support different types of shapes and use a helper method both here and in editor
 				int len = 4;
 				cpVect verts[4];
-				grid_getquad8cpv(lvl->tilemap.grid, verts, x, y);
+				grid_getquad8cpv(lvl->tm.grid, verts, x, y);
 				switch (tile) {
 				case TILE_TYPE_DIAG_SEL:
 					verts[0] = verts[1];
@@ -749,8 +748,8 @@ void space_init_level_from_level(level * lvl)
 				cpShapeSetFriction(shape, 0.9f);
 				cpShapeSetElasticity(shape, 0.7f);
 
-				meta_tile *meta = &currentlvl->tilemap.metadata[y][x];
-				if (tilemap_isdestroyable(&currentlvl->tilemap, TLAY_SOLID, x, y)) {
+				meta_tile *meta = &currentlvl->tm.metadata[y][x];
+				if (tilemap_isdestroyable(&currentlvl->tm, TLAY_SOLID, x, y)) {
 					cpShapeSetCollisionType(shape, ID_GROUND_DESTROYABLE);
 					meta->destroyable = WE_TRUE;
 					meta->hp = 100;
@@ -861,7 +860,7 @@ static void on_enter(STATE_ID state_prev)
 {
 	if (state_prev == state_levelscreen) {
 		fprintf(stderr,"TODO: entering space state - load lvl in space\n");
-		lvl_tmpl = (level*)get_current_lvl_template();
+		lvl_tmpl = (spacelvl*)get_current_lvl_template();
 
 	} else if (state_prev == state_editor) {
 		fprintf(stderr,"TODO: entering space state from editor - load lvl in space\n");

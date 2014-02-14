@@ -42,9 +42,9 @@ void postStepRemove(cpSpace *space, void *key, meta_tile *meta)
 {
 	int x = meta->x_col;
 	int y = meta->y_row;
-	currentlvl->tilemap.data[TLAY_SOLID][y][x] = TILE_TYPE_NONE;
-	cpShape *shape = currentlvl->tilemap.metadata[y][x].block;
-	currentlvl->tilemap.metadata[y][x].destroyable = WE_FALSE;
+	currentlvl->tm.data[TLAY_SOLID][y][x] = TILE_TYPE_NONE;
+	cpShape *shape = currentlvl->tm.metadata[y][x].block;
+	currentlvl->tm.metadata[y][x].destroyable = WE_FALSE;
 	if (shape) {
 		fprintf(stderr, "tile is getting removed\n");
 		cpSpaceRemoveStaticShape(current_space, shape);

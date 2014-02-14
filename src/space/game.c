@@ -356,7 +356,7 @@ void game_init(void)
 
 	game_components();
 	object_types_init();
-	level_init();
+	spacelvl_init();
 
 	tween_init();
 
@@ -395,5 +395,5 @@ minimap cmp_new_minimap(float size, Color c)
 void game_destroy(void)
 {
 
-	level_destroy();
+	spacelvl_destroy();
 }

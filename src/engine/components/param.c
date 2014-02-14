@@ -10,6 +10,8 @@
 #include "we_data.h"
 #include "param.h"
 
+param_list param_defs;
+
 void* parse_generated(cJSON *param, char* type, char *name);
 
 static void parse_param_object(cJSON *param, hashmap * param_list)
@@ -39,11 +41,11 @@ static void parse_param_object(cJSON *param, hashmap * param_list)
 static void load_params(param_list *defs, cJSON *root)
 {
 	cJSON *param_array = cJSON_GetObjectItem(root,"params");
-	defs->param = hm_create();
+	defs->hm_param = hm_create();
 	int i;
 	for (i = 0; i < cJSON_GetArraySize(param_array); i++){
 		cJSON *param = cJSON_GetArrayItem(param_array, i);
-		parse_param_object(param, defs->param);
+		parse_param_object(param, defs->hm_param);
 	}
 }
 
@@ -65,8 +67,8 @@ param_list * param_load(int dir_type, char *file)
 void param_list_destroy(param_list *pl)
 {
 	if (pl) {
-		if (pl->param) {
-			hashiterator *ih = hm_get_iterator(pl->param);
+		if (pl->hm_param) {
+			hashiterator *ih = hm_get_iterator(pl->hm_param);
 			while(hm_iterator_hasnext(ih)) {
 				hashmap * hm = hm_iterator_next(ih);
 				hashiterator *ih2 = hm_get_iterator(hm);
@@ -84,7 +86,7 @@ void param_list_destroy(param_list *pl)
 				hm_destroy(hm);
 			}
 			hm_iterator_destroy(ih);
-			hm_destroy(pl->param);
+			hm_destroy(pl->hm_param);
 		}
 	}
 }
@@ -111,6 +113,29 @@ void param_list_destroy(param_list *pl)
 
 void param_init()
 {
+	param_list *l = param_load(WAFFLE_ZIP, "level/object_defaults.json");
+	param_defs = *l;
 
+	if(param_defs.hm_param == NULL) {
+		we_error("could not load object_defaults");
+	}
 }
 
+void *param_get(const char *type, const char * name)
+{
+	void *param = NULL;
+	char l_type[40], l_name[40];
+	strtolower(l_type, type);
+	strtolower(l_name, name);
+
+	hashmap *hm_names = (hashmap*)hm_get(param_defs.hm_param,type);
+
+	if (hm_names) {
+		param = hm_get(hm_names, l_name);
+		if (param) return param;
+		param = hm_get(hm_names, "def");
+		if (param) return param;
+	}
+	//SDL_Log("LEVEL: Could not find param: %s for type: %s", l_name, l_type);
+	return param;
+}

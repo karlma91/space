@@ -261,3 +261,52 @@ void tilemap_clear(tilemap *tm)
 			}
 		}
 }
+
+void load_tilemap(cJSON *t, tilemap *tm)
+{
+	int def = 0;
+	int def_col = 48;
+	int cols;
+
+	int def_ii = 8;
+	int def_oi = 32;
+	int ii, oi;
+	float min_rad;
+	float min_rad_def = 250;
+
+	jparse_parse(t, "t_layers", "int", &(tm->layers), &def);
+	jparse_parse(t, "t_cols", "int", &cols, &def_col);
+	jparse_parse(t, "t_inner_i", "int", &ii, &def_ii);
+	jparse_parse(t, "t_outer_i", "int", &oi, &def_oi);
+	jparse_parse(t, "t_min_rad", "float", &min_rad, &min_rad_def);
+
+	tm->grid = grid_create(cols, min_rad, GRID_MAXROW-1, ii, oi);
+
+	cJSON *data = cJSON_GetObjectItem(t,"tilemaptest");
+	if(data) {
+		int i,j,k;
+		for (i=0; i < tm->layers; i++) {
+			cJSON * row = cJSON_GetArrayItem(data,i);
+			for (j= 0; j < tm->grid->pol.rows; j++) {
+				cJSON * col = cJSON_GetArrayItem(row,j);
+				for (k = 0; k < tm->grid->pol.cols; k++) {
+					tm->data[i][j+ii][k] = cJSON_GetArrayItem(col,k)->valueint;
+				}
+			}
+		}
+	}
+
+	meta_tile meta_def;
+	meta_def.block = NULL;
+	meta_def.destroyable = WE_FALSE;
+	meta_def.hp = 0;
+
+	int j,k;
+	for (j= 0; j < tm->grid->pol.rows; j++) {
+		meta_def.y_row = j;
+		for (k = 0; k < tm->grid->pol.cols; k++) {
+			meta_def.x_col = k;
+			tm->metadata[j][k] = meta_def;
+		}
+	}
+}
