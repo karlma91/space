@@ -24,7 +24,7 @@ static tile_layers current_tlay = TLAY_SOLID;
 static grid_index grid_i_cur = {-1,-1, 0, 0};
 
 /*********** LEVEL DATA ***********/
-static spacelvl *lvl_tmpl;
+static spacelvl *lvl_tmpl = NULL;
 static char level_name[32];
 
 
@@ -152,7 +152,7 @@ static editor_touch *add_touchdata(editor_mode m, touch_unique_id ID, cpVect vie
 
 static void update_instances(instance *obj, void *data)
 {
-	add_object_recipe_name(lvl_tmpl, obj->TYPE->NAME, (char*)&(((struct instance_dummy *)obj)->params), obj->p_start,0);
+	add_object_recipe_name(lvl_tmpl->ll_recipes, obj->TYPE->NAME, (char*)&(((struct instance_dummy *)obj)->params), obj->p_start,0);
 }
 
 
@@ -163,8 +163,8 @@ static void save_level_to_file(void *unused)
 	lvl_tmpl->tm.layers = TLAY_COUNT;
 	strcpy(lvl_tmpl->name, level_name);
 	spacelvl_write(lvl_tmpl);
-	//level_load_levels_from_folder(level_get_world());
-	//level_write_solar_file(level_get_world());
+	solarsystem_load_levels_from_folder(user_system);
+	solarsystem_write_solar_file(user_system, "levels/userlevels.json");
 }
 
 static void start_editor_level(void *unused)

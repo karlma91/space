@@ -8,16 +8,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "we_unitinfo.h"
+#if !__WIN32__
 #include <sys/utsname.h>
+struct utsname unameData;
+#endif
 
 we_unitinfo we_info;
-struct utsname unameData;
 
 #include "../space/game.h"
 
 void we_info_init(void)
 {
-#if !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE && !__WIN32__
     char *user = getenv("USER");
     if (user)
     	strncpy(we_info.name, user, 50);

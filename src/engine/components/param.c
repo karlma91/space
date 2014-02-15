@@ -121,7 +121,7 @@ void *param_get(const char *type, const char * name)
 	strtolower(l_type, type);
 	strtolower(l_name, name);
 
-	hashmap *hm_names = (hashmap*)hm_get(param_defs.hm_param,type);
+	hashmap *hm_names = (hashmap*)hm_get(param_defs.hm_param,l_type);
 
 	if (hm_names) {
 		param = hm_get(hm_names, l_name);
@@ -129,6 +129,6 @@ void *param_get(const char *type, const char * name)
 		param = hm_get(hm_names, "def");
 		if (param) return param;
 	}
-	//SDL_Log("LEVEL: Could not find param: %s for type: %s", l_name, l_type);
+	SDL_Log("LEVEL: Could not find param: %s for type: %s", l_name, l_type);
 	return param;
 }

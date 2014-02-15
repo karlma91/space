@@ -304,7 +304,7 @@ void solarsystem_write_solar_file(LList world, char *filepath)
 {
 	FILE *file = waffle_fopen(WAFFLE_DOCUMENTS, filepath,"w");
 	if (file == NULL) {
-		SDL_Log( "Could not open levels/userlevels.json");
+		SDL_Log( "Could not open %s", filepath);
 		return;
 	}
 	cJSON *root;//,*fmt;

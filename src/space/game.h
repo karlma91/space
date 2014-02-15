@@ -11,6 +11,8 @@
 #include "we.h"
 #include "level/spacelvl.h"
 
+extern LList user_system;
+
 void logprint(char *format, ...);
 void logprintln(char *format, ...);
 #define SDL_Log(...) logprintln(__VA_ARGS__), SDL_Log(__VA_ARGS__)

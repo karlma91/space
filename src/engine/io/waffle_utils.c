@@ -11,6 +11,12 @@
 
 #include "we_crypt.h"
 
+#if __WIN32__
+#define S_IRWXG 1
+#define S_IROTH 1
+#define S_IXOTH 1
+#endif
+
 #define RESOURCE_VERSION 9 // changed: 05.11.13
 
 /* Pass '-DLOAD_FROM_FOLDER=1' to compiler for reading files directly from game_data/... */
@@ -93,8 +99,8 @@ void waffle_init(void)
 	we_genkey(key, "abcdefghijklmnopqrstuvwxyz*&_ #=");
 	we_setkey(key);
 
-	zzip_init_io(&io_handler, 0);
-	io_handler.fd.read = &decrypt_block;
+	//zzip_init_io(&io_handler, 0);
+	//io_handler.fd.read = &decrypt_block;
 
 	zzip_error_t zzip_err;
 	//SDL_Log("DEBUG: Loading game resources...");
@@ -102,10 +108,12 @@ void waffle_init(void)
 	game_data = zzip_dir_open(APK_PATH, &zzip_err); // NB! is actually .apk, not game_data
 	strcpy(&INTERNAL_PATH[0], SDL_AndroidGetInternalStoragePath());
 #else
-	game_data = zzip_dir_open_ext_io(GAME_RESOURCES, &zzip_err, ext, &io_handler);
+	//game_data = zzip_dir_open_ext_io(GAME_RESOURCES, &zzip_err, ext, &io_handler);
+	game_data = zzip_dir_open("game_data.zip", &zzip_err);
 	if (!game_data) {
 		SDL_Log("ERROR: game data could not be loaded!\n"
 				"Run ./zip_res.sh to compress current game data");
+		//SDL_Log("%s",zzip_errno(zzip_err));
 		exit(-1);
 	}
 #endif /* __ANDROID__ */
@@ -220,7 +228,7 @@ ZZIP_FILE *waffle_open_zip(char *path)
 #if LOAD_FROM_FOLDER
 	sprintf(&full_path[0], "game_data/%s", path);
 	fprintf(stderr, "opening file: %s\n", full_path);
-	return zzip_open(full_path, ZZIP_CASELESS);
+	return zzip_open(full_path, O_RDWR);
 #else
 #if __ANDROID__
 	sprintf(&full_path[0], "assets/game_data/%s", path);
@@ -364,7 +372,8 @@ int waffle_dirnext(we_diriter * wedi)
 	}
 	if (wedi->dir) {
 		strcpy(wedi->cur_path, wedi->path);
-		if(wedi->dir->d_type == DT_DIR){
+
+		if(waffle_isdir(wedi)){
 			strcat(wedi->cur_path, "/");
 			strcat(wedi->cur_path, wedi->dir->d_name);
 			strcat(wedi->cur_path, "/");
@@ -377,13 +386,31 @@ int waffle_dirnext(we_diriter * wedi)
     return 0;
 }
 
+static int EndsWith(const char *str, const char *suffix)
+{
+    if (!str || !suffix)
+        return 0;
+    size_t lenstr = strlen(str);
+    size_t lensuffix = strlen(suffix);
+    if (lensuffix >  lenstr)
+        return 0;
+    return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
+}
 int waffle_isdir(we_diriter * wedi)
 {
-	return wedi->dir->d_type == DT_DIR;
+	/*struct stat s;
+	char full[256];
+	sprintf(full,"%s%s", "bin/user_files/",wedi->cur_path);
+	stat(full, &s);
+	if ((s.st_mode & S_IFMT) == S_IFDIR){
+	  return 1;
+	}
+	return 0;*/
+	return !EndsWith(wedi->cur_path,".json");
 }
 int waffle_isfile(we_diriter * wedi)
 {
-	return wedi->dir->d_type == DT_REG;
+	return !waffle_isdir(wedi);
 }
 
 //Todo make sure that the caller is notified if the given file is not fully read!
