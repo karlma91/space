@@ -372,12 +372,8 @@ int waffle_dirnext(we_diriter * wedi)
 	}
 	if (wedi->dir) {
 		strcpy(wedi->cur_path, wedi->path);
-
 		if(waffle_isdir(wedi)){
 			strcat(wedi->cur_path, "/");
-			strcat(wedi->cur_path, wedi->dir->d_name);
-			strcat(wedi->cur_path, "/");
-		} else {
 			strcat(wedi->cur_path, wedi->dir->d_name);
 		}
 		return 1;
@@ -386,31 +382,37 @@ int waffle_dirnext(we_diriter * wedi)
     return 0;
 }
 
-static int EndsWith(const char *str, const char *suffix)
-{
-    if (!str || !suffix)
-        return 0;
-    size_t lenstr = strlen(str);
-    size_t lensuffix = strlen(suffix);
-    if (lensuffix >  lenstr)
-        return 0;
-    return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
-}
 int waffle_isdir(we_diriter * wedi)
 {
-	/*struct stat s;
+	struct stat s;
 	char full[256];
-	sprintf(full,"%s%s", "bin/user_files/",wedi->cur_path);
-	stat(full, &s);
-	if ((s.st_mode & S_IFMT) == S_IFDIR){
-	  return 1;
+	sprintf(full,"%s%s", waffle_dirs[wedi->dir_type], wedi->cur_path);
+
+	SDL_Log("STAT: %s ", full);
+	if(stat(full, &s) == 0){
+		if (S_ISDIR(s.st_mode)){
+			return 1;
+		}
+	}else{
+		SDL_Log("Error doing stat()");
 	}
-	return 0;*/
-	return !EndsWith(wedi->cur_path,".json");
+	return 0;
 }
 int waffle_isfile(we_diriter * wedi)
 {
-	return !waffle_isdir(wedi);
+	struct stat s;
+	char full[256];
+	sprintf(full,"%s%s", waffle_dirs[wedi->dir_type], wedi->cur_path);
+
+	SDL_Log("STAT: %s ", full);
+	if(stat(full, &s) == 0){
+		if (S_ISREG(s.st_mode)){
+			return 1;
+		}
+	}else{
+		SDL_Log("ISFILE Error doing stat()");
+	}
+	return 0;
 }
 
 //Todo make sure that the caller is notified if the given file is not fully read!

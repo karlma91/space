@@ -7,8 +7,8 @@
 #define OBJ_NAME rocket
 #include "we_defobj.h"
 
-#define ROCKET_SIZE 200
-#define ROCKET_VEL_LIMIT 600
+#define ROCKET_SIZE 100
+#define ROCKET_VEL_LIMIT 1200
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
@@ -22,8 +22,8 @@ static void init(OBJ_TYPE *OBJ_NAME)
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
 	rocket->param.damage = 50; // TODO parse damage from file
-	rocket->param.force = 3000; //TODO parse force;
-	rocket->fuel = 7; //TODO add and parse fuel from params
+	rocket->param.force = 5000; //TODO parse force;
+	rocket->fuel = 10; //TODO add and parse fuel from params
 
 	COMPONENT_SET(rocket, HPBAR, &rocket->hp_bar);
 	COMPONENT_SET(rocket, COINS, &rocket->param.coins);
@@ -67,7 +67,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 	if (rocket->active && player) {
 		float target_angle = cpvtoangle(se_dist_a2b((instance*)rocket, player));
-		rocket->data.body->a = turn_toangle(rocket->data.body->a, target_angle, 0.4 * (WE_2PI * dt));
+		rocket->data.body->a = turn_toangle(rocket->data.body->a, target_angle, 0.8 * (WE_2PI * dt));
 		cpBodySetAngle(rocket->data.body, rocket->data.body->a);
 	} else if (SE_ALTITUDE(rocket->data.body->p) >= currentlvl->height * 0.35){
 		rocket->active = 1;
