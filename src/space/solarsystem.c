@@ -338,9 +338,9 @@ void solarsystem_write_solar_file(LList world, char *filepath)
 
 		cJSON_AddItemToObject(system, "levels", levels);
 		cJSON_AddItemToArray(systems, system);
-		cJSON_AddItemToObject(root, "systems", systems);
 	}
 	llist_end_loop(world);
+	cJSON_AddItemToObject(root, "systems", systems);
 	char * rendered = cJSON_Print(root);
 	fprintf(file,"%s",rendered);
 	fclose(file);
