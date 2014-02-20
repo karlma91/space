@@ -4,7 +4,6 @@
 
 #define MB << 20
 #define chunk_size (1 MB)
-typedef unsigned char byte;
 
 #include "we_crypt.h"
 

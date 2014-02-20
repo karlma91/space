@@ -16,4 +16,4 @@ clean :
 	rm encrypt
 
 encrypt : encrypt.c we_crypt.c
-	gcc -o encrypt$(SUFFIX) $^
+	gcc -I ../../src/engine/include -o encrypt$(SUFFIX) $^ 
