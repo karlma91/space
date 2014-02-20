@@ -372,9 +372,9 @@ void game_init(void)
     pause_init();
     upgrades_init();
     gameover_init();
+    editor_init();
     levelscreen_init();
     leveldone_init();
-    editor_init();
 #if ARCADE_MODE
     statesystem_set_state(state_menu);
 #else

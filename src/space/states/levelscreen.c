@@ -107,11 +107,14 @@ void levelscreen_change_to(station * ship)
 	statesystem_push_state(state_levelscreen);
 }
 
-static void button_edit_callback(void *data)
+static void button_playedit_callback(void *state)
 {
-	//TODO unload previous level, if any?
+	if (current_lvl_tmpl) {
+		//TODO unload previous level, if any?
+		//...
+	}
 	current_lvl_tmpl = (spacelvl*)spacelvl_parse(WAFFLE_DOCUMENTS, from_station->path);
-	statesystem_set_state(state_editor);
+	statesystem_set_state(state);
 }
 
 static void button_remove_callback(void *data)
@@ -123,13 +126,6 @@ static void button_remove_callback(void *data)
 	statesystem_pop_state(NULL);
 }
 
-static void button_start_callback(void *data)
-{
-	current_lvl_tmpl = (spacelvl*)spacelvl_parse(from_station->data_place, from_station->path);
-	space_start_demo(from_station->path);
-	//statesystem_set_state(state_space);
-}
-
 void levelscreen_init(void)
 {
 	statesystem_register(state_levelscreen,0);
@@ -139,17 +135,19 @@ void levelscreen_init(void)
 	view *main_view = state_view_get(state_levelscreen,0);
 
 	float y = box.p.y - box.s.y/2 + h / 2 + 20;
-	edit_level = button_create(0, 0, "edit", 0, -100, 300, 100);
-	button_set_click_callback(edit_level, button_edit_callback, NULL);
+	edit_level = button_create(0, 0, "Edit", 0, -100, 300, 100);
+	button_set_click_callback(edit_level, button_playedit_callback, state_editor);
 	button_set_enlargement(edit_level, 2);
 
-	remove_level =  button_create(0, 0, "remove", 0, 100, 300, 100);
+	remove_level =  button_create(0, 0, "Remove", 0, 100, 300, 100);
 	button_set_click_callback(remove_level, button_remove_callback, NULL);
 	button_set_enlargement(remove_level, 2);
 
 
 	start_level =  button_create(0, 0, "Start", 0, y, 300, 200);
-	button_set_click_callback(start_level, button_start_callback, NULL);
+	//current_lvl_tmpl = (spacelvl*)spacelvl_parse(from_station->data_place, from_station->path);
+	//space_start_demo(from_station->path); //TODO move into on_enter in space state?
+	button_set_click_callback(start_level, button_playedit_callback, state_space);
 	button_set_enlargement(start_level, 2);
 	button_set_backcolor(start_level, col_back);
 	button_set_frontcolor(start_level, col_default);

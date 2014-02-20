@@ -12,12 +12,7 @@
 
 STATE_ID state_stations;
 
-//static button *btn_stations;
 static button btn_home;
-static button btn_editor;
-
-#define SOLSYS_COUNT 25
-//static solarsystem *solsys[SOLSYS_COUNT];
 LList user_system;
 
 static scroll_p scroller;
@@ -169,7 +164,7 @@ static void draw(void)
 	draw_push_matrix();
 	draw_translate(1900,-1750);
 	draw_rotate(-current_view->rotation);
-	bmfont_center(FONT_COURIER, cpvzero,1,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
+	bmfont_center(FONT_SANS, cpvzero,1,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
 	draw_pop_matrix();
 
 
@@ -188,41 +183,6 @@ static void draw(void)
 		i++;
 	}
 	llist_end_loop(user_system);
-
-
-	/*
-	float f = 1/2.0;
-	float size_dither = (engine_time*f - floor(engine_time*f) - 0.5)*(engine_time*f - floor(engine_time*f) - 0.5)*10;
-	cpVect sun_size = {400+size_dither,400+size_dither};
-	static float a_sun_add1 = 0;
-	static float a_sun_add2 = 0;
-    static float spd = 0.03;
-	a_sun_add1 += dt*WE_2PI*spd;
-	a_sun_add2 -= dt*WE_2PI*spd;
-
-	//draw_color4b(100,100,100,0);
-	//sprite_render_index_by_id(RLAY_GAME_BACK, SPRITE_GLOW, 0, cpvzero, cpvmult(sun_size,1.5), a_sun_base);
-    static Color sun_base = {0x70,0x30,0x30,0xff};
-    static Color sun_glow = {0xff,0xa0,0x70,0x80};
-    static Color sun_add1 = {0x90,0x80,0x40,0x00};
-    static Color sun_add2 = {0xb0,0x70,0x40,0x00};
-
-    static Color sun2_glow = {0xe0,0xa0,0x70,0x80};
-    static Color sun2_add1 = {0x40,0x80,0x90,0x00};
-    static Color sun2_add2 = {0x40,0x70,0xb0,0x00};
-    draw_push_matrix();
-    draw_translate(6000, 2000);
-    draw_scale(5, 5);
-	draw_color(sun_base);
-	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 0, cpvzero, sun_size, 0);
-	draw_color(sun2_glow);
-	sprite_render_index_by_id(RLAY_GAME_BACK, SPRITE_GLOW, 0, cpvzero, cpvmult(sun_size,2), 0);
-	draw_color(sun2_add1);
-	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 1, cpvzero, sun_size, a_sun_add1);
-	draw_color(sun2_add2);
-	sprite_render_index_by_id(RLAY_GAME_BACK, spr_sun, 2, cpvzero, sun_size, a_sun_add2);
-    draw_pop_matrix();
-    */
 }
 
 static void draw_gui(view *v)
@@ -232,11 +192,6 @@ static void draw_gui(view *v)
 	draw_circle(0, cpv(-v->view_width/2+20, v->view_height/2-20), 15);
 #endif
 	draw_color4f(1,1,1,1);
-}
-
-static void button_callback(void *data)
-{
-	levelscreen_change_to(data);
 }
 
 static void on_pause(void)
@@ -258,10 +213,6 @@ static void open_upgrades(void *unused)
 {
 	statesystem_push_state(state_store);
 }
-static void open_editor(void *unused)
-{
-	statesystem_set_state(state_editor);
-}
 
 void stations_init(void)
 {
@@ -275,19 +226,12 @@ void stations_init(void)
 	main_view = state_view_get(state_stations, 0);
 	main_view->GUI = draw_gui;
 
-	btn_home = button_create(SPRITE_WHITE, 0, "Upgrades", -GAME_WIDTH/2 + 350, -GAME_HEIGHT/2 + 80, 400, 100);
+	btn_home = button_create(SPRITE_WHITE, 0, "Shop", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 200, 250, 250);
 	button_set_click_callback(btn_home, open_upgrades, 0);
-	button_set_enlargement(btn_home, 2);
+	button_set_enlargement(btn_home, 1.5);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
 	button_set_backcolor(btn_home, col_back);
 	state_register_touchable_view(main_view, btn_home);
-
-	btn_editor = button_create(SPRITE_WHITE, 0, "Editor", GAME_WIDTH/2 - 350, -GAME_HEIGHT/2 + 80, 400, 100);
-	button_set_click_callback(btn_editor, open_editor, 0);
-	button_set_enlargement(btn_editor, 2);
-	button_set_hotkeys(btn_editor, SDL_SCANCODE_E, -1);
-	button_set_backcolor(btn_editor, col_back);
-	state_register_touchable_view(main_view, btn_editor);
 
 	llist_begin_loop(user_system);
 	while (llist_hasnext(user_system)) {
@@ -340,17 +284,6 @@ void stations_init(void)
 		}
 	}
 
-	//TMP add solar systems
-	/*spr_sun = sprite_link("sun01");
-	for (i=0; i<SOLSYS_COUNT; i++) {
-		float rnd = rand() & 0x1f;
-		Color base = {0x70-rnd,0x30,0x30+rnd,0xff};
-		Color glow = {0xff-rnd,0xa0,0x70+rnd,0x80};
-		Color add1 = {0x90-rnd,0x80,0x40+rnd,0x00};
-		Color add2 = {0xb0-rnd,0x70,0x40+rnd,0x00};
-		solsys[i] = solarsystem_create(i, (500 + we_randf*(i*1500/SOLSYS_COUNT + (i>1?1000:0)) + 300*i/SOLSYS_COUNT), spr_sun, base, glow, add1, add2);
-	}*/
-
-	sound_testing();
+	sound_testing(); //TMP TODO REMOVE
 }
 

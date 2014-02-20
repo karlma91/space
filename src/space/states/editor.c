@@ -683,8 +683,7 @@ void editor_init()
 
 	button_set_click_callback(btn_space, statesystem_set_state, state_stations);
 	button_set_click_callback(btn_clear, tap_clear_editor, 0);
-	button_set_click_callback(btn_test, start_editor_level, 0); // TODO test level with this button
-	button_set_click_callback(btn_save, save_level_to_file, 0);
+	button_set_click_callback(btn_test, statesystem_set_state, state_space);
 	button_set_click_callback(btn_save, save_level_to_file, 0);
 
 	button_set_hotkeys(btn_state_toggle, SDL_SCANCODE_1, 0);
@@ -860,7 +859,7 @@ static int sdl_event(SDL_Event *event)
 
 static void on_pause(void)
 {
-	//TODO perhaps save lvl when user is exiting lvl?
+	//TODO perhaps save lvl when user is exiting app?
 }
 
 static void on_enter(STATE_ID state_prev)
@@ -868,10 +867,6 @@ static void on_enter(STATE_ID state_prev)
 	if (state_prev == state_levelscreen) {
 		lvl_tmpl = get_current_lvl_template();
 		currentlvl = lvl_tmpl;
-		statesystem_set_state(state_editor);
-		if(lvl_tmpl){
-			//free(lvl);
-		}
 		objectsystem_clear();
 		spacelvl_load2state(lvl_tmpl);
 		editor_setmode(MODE_OBJECTS);
@@ -881,6 +876,9 @@ static void on_enter(STATE_ID state_prev)
 
 static void on_leave(STATE_ID state_next)
 {
+	if (state_next == state_stations) {
+		//TODO clear editor
+	}
 }
 
 static void destroy(void)

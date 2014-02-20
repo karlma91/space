@@ -193,7 +193,6 @@ static void level_running(void)
 	}
 }
 
-int lvl_cleared = 0; //TODO tmp lvl cleared;
 static void level_player_dead(void)
 {
 	obj_player *player = (obj_player *)instance_first(obj_id_player);
@@ -206,7 +205,6 @@ static void level_player_dead(void)
 	if (state_timer > 1 && !tmp_atom) {
 #endif
 		tmp_atom = 1;
-		lvl_cleared=0;
 		sticks_hide();
 
 #if !ARCADE_MODE
@@ -232,7 +230,6 @@ static void level_cleared(void)
 		//float p = (player->hp_bar.value / player->hp_bar.max_hp);
 		//player->coins += (int)(p*p * 4)*4 * 25;
 
-		lvl_cleared=1;
 		sticks_hide();
 
 #if !ARCADE_MODE
@@ -240,7 +237,6 @@ static void level_cleared(void)
 		//leveldone_status(1 + player->coins / (4000.0 + 1000 * currentlvl->deck), player->coins, game_time);
 		statesystem_push_state(state_leveldone);
 #else
-		space_next_level(NULL);
 #endif
 		tmp_atom = 1;
 	} else {
@@ -305,8 +301,6 @@ static void post_update(void)
 {
 	update_camera_position();
 	if (keys[SDL_SCANCODE_F9]) {
-		space_next_level(NULL);
-		keys[SDL_SCANCODE_F9] = 0;
 	} else if (keys[SDL_SCANCODE_F8]) {
 		if (player1) instance_destroy((instance *)player1);
 		if (player2) instance_destroy((instance *)player2);
@@ -571,12 +565,7 @@ static void remove_static(cpShape *shape)
 	cpShapeFree(shape);
 }
 
-
-void space_set_lvltemplate(spacelvl *lvl)
-{
-
-}
-
+/*
 void space_init_level(char *name)
 {
 	if(currentlvl == NULL || strcmp(currentlvl->name, name) != 0 ) {
@@ -584,7 +573,7 @@ void space_init_level(char *name)
 	}
 	space_init_level_from_level(currentlvl);
 }
-
+*/
 void space_init_level_from_level(spacelvl * lvl)
 {
 
@@ -808,7 +797,6 @@ static void game_over(void)
 	gameover_setstate(enter_name);
 	statesystem_set_state(state_gameover);
 #else
-	lvl_cleared=0;
 	statesystem_push_state(state_leveldone);
 #endif
 }
@@ -857,16 +845,17 @@ static void on_pause(void)
 	}
 }
 
+static we_bool from_editor = WE_FALSE;
 static void on_enter(STATE_ID state_prev)
 {
-	if (state_prev == state_levelscreen) {
-		fprintf(stderr,"TODO: entering space state - load lvl in space\n");
+	if (state_prev == state_levelscreen || state_prev == state_editor || state_prev == state_leveldone) {
+		from_editor = (state_prev == state_editor);
+		fprintf(stderr,"TODO: entering space state from %s\n", state_prev);
 		lvl_tmpl = (spacelvl*)get_current_lvl_template();
-
-	} else if (state_prev == state_editor) {
-		fprintf(stderr,"TODO: entering space state from editor - load lvl in space\n");
-	} else if (state_prev == state_leveldone) {
-		fprintf(stderr,"TODO: entering space state from leveldone - reload lvl in space\n");
+		currentlvl = lvl_tmpl; //TODO remove currentlvl variable completely
+		spacelvl_load2state(lvl_tmpl);
+		space_init_level_from_level(lvl_tmpl); //TMP solution
+		//TODO copy lvl from editor to space, or just keep dynamic variables in separate struct?
 	} else if (state_prev == state_pause) {
 	} else {
 		statesystem_set_state(state_log);
@@ -875,17 +864,20 @@ static void on_enter(STATE_ID state_prev)
 
 static void on_leave(STATE_ID state_next)
 {
+	//TODO unload lvl with spacelvl_unload2state();
 	if (state_next == state_leveldone) {
 		fprintf(stderr,"TODO: exiting space state - unload lvl in space\n");
 	} else if (state_next == state_editor) {
-		fprintf(stderr,"TODO: retry lvl in space\n");
-	} else if (state_next == state_space) {
+		spacelvl_unload2state(lvl_tmpl);
 		fprintf(stderr,"TODO: going back to editor - unload lvl in space\n");
+	} else if (state_next == state_space) {
+		spacelvl_unload2state(lvl_tmpl);
+		fprintf(stderr,"TODO: retry lvl in space\n");
 	} else if (state_next == state_pause) {
 		fprintf(stderr,"TODO: pausing space state\n");
 	} else if (state_next == state_log) {
-	}else {
-		SDL_Log("ERROR: illegal state transition");
+	} else {
+		SDL_Log("ERROR: illegal state transition from SPACE to %s", state_next);
 		statesystem_set_state(state_log);
 	}
 }
@@ -957,16 +949,6 @@ void space_init(void)
 
     view_p1->GUI = draw_gui;
     view_p2->GUI = draw_gui;
-
-    /*
-    {
-    	view *v = state_view_add(state_space); //TODO REMOVE TEST view
-    	cpVect size = cpv(WINDOW_WIDTH/2,WINDOW_HEIGHT/2);
-    	view_set_port(v,cpvadd(size,cpvmult(size,-0.5)),size,1);
-    	//v->GUI = draw_gui;
-    	v->zoom = 0.2;
-    }
-    */
 
     btn_pause = button_create(SPRITE_BTN_PAUSE, 0, "", GAME_WIDTH/2-100, GAME_HEIGHT/2-100, 120, 120);
 	btn_continue = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
@@ -1154,54 +1136,12 @@ void setup_multiplay(void)
 	}
 }
 
-void space_start_demo(char *name)
-{
-	statesystem_set_state(state_space);
-	//TODO set and reset all per-game variables
-	multiplayer = 0;
 
-	//view_p2->enabled = 0;
-
-	space_init_level(name);
-}
-
-/*
-void space_start_multiplayer(int station, int deck) {
-	statesystem_set_state(state_space);
-	//TODO set and reset all per-game variables
-	multiplayer = 1;
-
-	space_init_level(station, deck);
-}
-*/
+//TODO init multiplayer to 0 when starting lvl
 
 void space_restart_level(void *unused)
 {
 	statesystem_set_state(state_space);
-	space_init_level(currentlvl->name);
-}
-
-void space_next_level(void *unused)
-{
-	int station_nr = 1 + 1;
-	//LList world = level_get_world();
-	int count = 0;//llist_size(world);
-
-#if ARCADE_MODE
-	arcade_lvl_score += (int)(game_time*10) - (ARCADE_SCORE_LVL + player1->coins/10);
-#endif
-
-	if (station_nr < count) {
-		statesystem_set_state(state_space);
-		station *s = (station*)llist_at_index(NULL, station_nr);
-		space_init_level(s->path);
-	} else {
-#if ARCADE_MODE
-		gameover_setstate(GAMEOVER_WIN);
-		statesystem_set_state(state_gameover);
-#else
-		//TODO decide what happens when last level on current station is cleared
-		statesystem_set_state(state_stations);
-#endif
-	}
+	//TODO write this method
+	space_init_level_from_level(lvl_tmpl);
 }
