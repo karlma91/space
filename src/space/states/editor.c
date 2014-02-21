@@ -168,16 +168,6 @@ static void save_level_to_file(void *unused)
 	solarsystem_write_solar_file(user_system, "levels/userlevels.json");
 }
 
-static void start_editor_level(void *unused)
-{
-	save_level_to_file(NULL);
-	SDL_Log("EDITOR: STARTING LEVEL FROM EDITOR");
-	llist_clear(lvl_tmpl->ll_recipes);
-	instance_iterate(update_instances, NULL);
-	statesystem_set_state(state_space);
-	space_init_level_from_level(lvl_tmpl);
-}
-
 static void enable_objlist(int enable)
 {
 	if (enable) {

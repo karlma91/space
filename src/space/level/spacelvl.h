@@ -22,6 +22,11 @@ typedef struct spacelvl {
 
 	LList ll_recipes;
 	tilemap tm;
+
+	/* level floor, ceiling and tiles shapes NB! Not transferable between states! */
+	LList *ll_tileshapes;
+	cpShape *ceiling;
+	cpSpace *loaded2space;
 } spacelvl;
 
 extern param_list param_defs;

@@ -38,13 +38,8 @@ static button btn_continue;
 
 static float game_time;
 
-
-/* level boundaries */
-static LList *ll_tileshapes;
-static cpShape *ceiling;
-
 /* level data */
-spacelvl *lvl_tmpl;
+static spacelvl *lvl_tmpl;
 spacelvl *currentlvl;
 
 static void input(void);
@@ -560,12 +555,6 @@ static void sticks_hide(void) {
 	((touchable *)joy_p2_right)->visible = 0;
 }
 
-static void remove_static(cpShape *shape)
-{
-	cpSpaceRemoveStaticShape(current_space, shape);
-	cpShapeFree(shape);
-}
-
 /*
 void space_init_level(char *name)
 {
@@ -575,219 +564,26 @@ void space_init_level(char *name)
 	space_init_level_from_level(currentlvl);
 }
 */
-void space_init_level_from_level(spacelvl * lvl)
-{
 
-	currentlvl = lvl;
+void space_init_game(void)
+{
 	multiplayer = -1;
 	sticks_init();
-
-	objectsystem_clear();
-	particles_clear(current_particles);
 
 	player1 = NULL;
 	player2 = NULL;
 
-#if ARCADE_MODE
-	switch(deck) {
-	case 1:
-		weapon_index = 0;
-		weapons[weapon_index].spacelvl = 1;
-		armor_index = 0;
-		engine_index = 0;
-		break;
-	case 2:
-		weapon_index = 0;
-		weapons[weapon_index].spacelvl = 2;
-		armor_index = 0;
-		engine_index = 0;
-		break;
-	case 3:
-		weapon_index = 1;
-		weapons[weapon_index].spacelvl = 0;
-		armor_index = 0;
-		engine_index = 0;
-		break;
-	case 4:
-		weapon_index = 1;
-		weapons[weapon_index].spacelvl = 1;
-		armor_index = 0;
-		engine_index = 0;
-		break;
-	case 5:
-		weapon_index = 1;
-		weapons[weapon_index].spacelvl = 1;
-		armor_index = 1;
-		engine_index = 0;
-		break;
-	case 6:
-		weapon_index = 1;
-		weapons[weapon_index].spacelvl = 2;
-		armor_index = 2;
-		engine_index = 1;
-		break;
-	case 7:
-		weapon_index = 1;
-		weapons[weapon_index].spacelvl = 2;
-		armor_index = 2;
-		engine_index = 1;
-		break;
-	default:
-		break;
-	}
-#endif
-
-	spacelvl_load2state(currentlvl);
-
-	if (currentlvl == NULL) {
-		SDL_Log( "space_level_init failed!\n");
-		exit(-1);
-	}
+	particles_clear(current_particles);
 
 	player1 = (obj_player *)instance_first(obj_id_player);
-	//player1 = space_create_player(1);
 	setup_singleplay();
 
 	change_state(LEVEL_START);
+}
 
-	/* static ground */
-	cpBody *staticBody = current_space->staticBody;
+void space_init_level_from_level(spacelvl * lvl)
+{
 
-	/* remove floor and ceiling */
-	if(llist_size(ll_tileshapes) > 0 && ceiling != NULL){
-		remove_static(ceiling);
-		llist_clear(ll_tileshapes);
-	}
-
-	int x, y;
-	for (y = lvl->tm.grid->pol.inner_i; y < lvl->tm.grid->pol.outer_i; y++) {
-		for (x = 0; x < lvl->tm.grid->pol.cols; x++) {
-			cpShape *block = currentlvl->tm.metadata[y][x].block;
-			if (block) {
-				fprintf(stderr, "removing shape %p\n", block);
-				if(cpSpaceContainsShape(current_space, block)) {
-					cpSpaceRemoveStaticShape(current_space, block);
-					cpShapeFree(block);
-				}
-			}
-		}
-
-	}
-
-	/* add static tiles */ //TODO merge/glue tiles togheter
-	fprintf(stderr, "GRID: %d x %d\n", lvl->tm.grid->pol.rows, lvl->tm.grid->pol.cols);
-	/*
-	y = lvl->tilemap.grid->outer_i-1;
-	for (x = 0; x < lvl->tilemap.grid->cols; x++) {
-		cpVect verts[4];
-		grid_getquad8cpv_direct(lvl->tilemap.grid, verts, x, y);
-		cpShape *shape = cpPolyShapeNew(current_space->staticBody, 4, verts, cpvzero);
-		cpSpaceAddStaticShape(current_space, shape);
-		cpShapeSetFriction(shape, 0.9f);
-		cpShapeSetCollisionType(shape, ID_GROUND);
-		cpShapeSetElasticity(shape, 0.7f);
-		llist_add(ll_tileshapes, shape);
-	}
-	*/
-
-	//TODO move into function inside tilemap?
-	for (y = lvl->tm.grid->pol.inner_i; y < lvl->tm.grid->pol.outer_i; y++) {
-		for (x = 0; x < lvl->tm.grid->pol.cols; x++) {
-			byte tile = tilemap_gettype(&currentlvl->tm, TLAY_SOLID, x, y);
-			if (tile) { //TODO support different types of shapes and use a helper method both here and in editor
-				int len = 4;
-				cpVect verts[4];
-				grid_getquad8cpv(lvl->tm.grid, verts, x, y);
-				switch (tile) {
-				case TILE_TYPE_DIAG_SEL:
-					verts[0] = verts[1];
-					verts[1] = verts[2];
-					verts[2] = verts[3];
-					verts[0] = cpvmult(cpvadd(verts[0],verts[1]), 0.5);
-					len = 3;
-					break;
-				case TILE_TYPE_DIAG_SER:
-					verts[0] = cpvmult(cpvadd(verts[0],verts[3]), 0.5);
-					break;
-				case TILE_TYPE_DIAG_SWR:
-					verts[1] = verts[2];
-					verts[2] = verts[3];
-					verts[0] = cpvmult(cpvadd(verts[0],verts[2]), 0.5);
-					len = 3;
-					break;
-				case TILE_TYPE_DIAG_SWL:
-					verts[1] = cpvmult(cpvadd(verts[1],verts[2]), 0.5);
-					break;
-				case TILE_TYPE_DIAG_SE:
-					verts[0] = verts[1];
-					/* NO BREAK */
-				case TILE_TYPE_DIAG_SW:
-					verts[1] = verts[2];
-					verts[2] = verts[3];
-					len = 3;
-					break;
-				case TILE_TYPE_DIAG_NE:
-					len = 3;
-					break;
-				case TILE_TYPE_DIAG_NW:
-					verts[2] = verts[3];
-					len = 3;
-					break;
-				}
-				cpShape *shape = cpPolyShapeNew(current_space->staticBody, len, verts, cpvzero);
-				cpSpaceAddStaticShape(current_space, shape);
-				cpShapeSetFriction(shape, 0.9f);
-				cpShapeSetElasticity(shape, 0.7f);
-
-				meta_tile *meta = &currentlvl->tm.metadata[y][x];
-				if (tilemap_isdestroyable(&currentlvl->tm, TLAY_SOLID, x, y)) {
-					cpShapeSetCollisionType(shape, ID_GROUND_DESTROYABLE);
-					meta->destroyable = WE_TRUE;
-					meta->hp = 100;
-				} else {
-					cpShapeSetCollisionType(shape, ID_GROUND);
-					meta->destroyable = WE_FALSE;
-				}
-				meta->x_col = x;
-				meta->y_row = y;
-				meta->block = shape;
-				cpShapeSetUserData(shape, meta);
-				//llist_add(ll_tileshapes, shape);
-			}
-			fprintf(stderr, "%c", tile ? '#' : '.');
-		}
-		fprintf(stderr, "%c", '\n');
-	}
-
-	float r_in = currentlvl->inner_radius;
-	float r_out = currentlvl->outer_radius;
-	float r_ceil = r_in;// + 64 * (r_out - r_in) / currentlvl->height;
-// /*
-	float r_floor = r_out;// - 5 * 64 * (r_out - r_in) / currentlvl->height;
-	static const int segments = 100;
-	static const float seg_radius = 50;
-	static const float seg_length = 300;
-	int i;
-	for (i = 0; i < segments; ++i) { //TODO swap out with tiles
-		cpVect angle = cpvforangle(2 * M_PI * i / segments);
-		cpVect n = cpvmult(cpvperp(angle), seg_length);
-		cpVect p = cpvmult(angle, r_floor + seg_radius);
-
-		cpVect a = cpvadd(p,cpvneg(n));
-		cpVect b = cpvadd(p,n);
-
-		cpShape *seg = cpSpaceAddShape(current_space, cpSegmentShapeNew(staticBody, a, b, seg_radius)); // ground level at 0
-		cpShapeSetFriction(seg, 0.9f);
-		cpShapeSetCollisionType(seg, ID_GROUND);
-		cpShapeSetElasticity(seg, 0.7f);
-
-		llist_add(ll_tileshapes, seg);
-	}
-//	*/
-	ceiling = cpSpaceAddShape(current_space, cpCircleShapeNew(staticBody, r_ceil, cpvzero));
-	cpShapeSetFriction(ceiling, 0.9f);
-	cpShapeSetCollisionType(ceiling, ID_GROUND);
-	cpShapeSetElasticity(ceiling, 0.7f);
 }
 
 
@@ -849,13 +645,13 @@ static void on_pause(void)
 static we_bool from_editor = WE_FALSE;
 static void on_enter(STATE_ID state_prev)
 {
-	if (state_prev == state_levelscreen || state_prev == state_editor || state_prev == state_leveldone) {
+	if (state_prev == state_levelscreen || state_prev == state_editor || state_prev == state_leveldone || state_prev == state_space) {
 		from_editor = (state_prev == state_editor);
 		fprintf(stderr,"TODO: entering space state from %s\n", state_prev);
 		lvl_tmpl = get_current_lvl_template();
 		currentlvl = lvl_tmpl; //TODO remove currentlvl variable completely
 		spacelvl_load2state(lvl_tmpl);
-		space_init_level_from_level(lvl_tmpl); //TMP solution
+		space_init_game();
 		//TODO copy lvl from editor to space, or just keep dynamic variables in separate struct?
 	} else if (state_prev == state_pause) {
 	} else {
@@ -885,11 +681,6 @@ static void on_leave(STATE_ID state_next)
 
 static void destroy(void)
 {
-	if(llist_size(ll_tileshapes) > 0 && ceiling != NULL){
-		remove_static(ceiling);
-	}
-	llist_destroy(ll_tileshapes);
-
 	joystick_free(joy_p1_left);
 	joystick_free(joy_p1_right);
 }
@@ -962,11 +753,6 @@ void space_init(void)
 #if !ARCADE_MODE
     state_register_touchable_view(view_p1, btn_pause);
 #endif
-
-
-    ll_tileshapes = llist_create();
-    llist_set_remove_callback(ll_tileshapes, (ll_rm_callback) remove_static);
-    ceiling = NULL;
 
     state_enable_objects(state_space, 1);
     state_enable_particles(state_space, 1);
@@ -1149,6 +935,5 @@ void space_return(void *unused)
 void space_restart_level(void *unused)
 {
 	statesystem_set_state(state_space);
-	//TODO write this method
-	space_init_level_from_level(lvl_tmpl);
+	statesystem_set_state(state_space); //restart?
 }
