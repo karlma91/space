@@ -12,6 +12,7 @@
 #include "arcade/gameover.h"
 #include "leveldone.h"
 #include "../upgrades.h"
+#include "levelscreen.h"
 
 #include "../tilemap.h"
 #include "../spaceengine.h"
@@ -851,7 +852,7 @@ static void on_enter(STATE_ID state_prev)
 	if (state_prev == state_levelscreen || state_prev == state_editor || state_prev == state_leveldone) {
 		from_editor = (state_prev == state_editor);
 		fprintf(stderr,"TODO: entering space state from %s\n", state_prev);
-		lvl_tmpl = (spacelvl*)get_current_lvl_template();
+		lvl_tmpl = get_current_lvl_template();
 		currentlvl = lvl_tmpl; //TODO remove currentlvl variable completely
 		spacelvl_load2state(lvl_tmpl);
 		space_init_level_from_level(lvl_tmpl); //TMP solution
@@ -1138,6 +1139,12 @@ void setup_multiplay(void)
 
 
 //TODO init multiplayer to 0 when starting lvl
+
+
+void space_return(void *unused)
+{
+	statesystem_set_state(from_editor ? state_editor : state_stations);
+}
 
 void space_restart_level(void *unused)
 {

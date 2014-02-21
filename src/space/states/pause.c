@@ -131,7 +131,7 @@ void pause_init(void)
 	btn_input = button_create(NULL, 0, "", -GAME_WIDTH/2+50, GAME_HEIGHT/2-50, 100, 100);
 	btn_resume = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-	button_set_click_callback(btn_space, statesystem_set_state, state_stations);
+	button_set_click_callback(btn_space, space_return, NULL);
 	button_set_click_callback(btn_retry, space_restart_level, 0);
 	button_set_click_callback(btn_input, input, 0);
 	button_set_click_callback(btn_resume, resume, 0);

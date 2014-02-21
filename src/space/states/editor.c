@@ -5,6 +5,7 @@
 #include "space.h"
 #include "../level/spacelvl.h"
 #include "textinput.h"
+#include "levelscreen.h"
 
 
 #define DRAG_LIMIT 50

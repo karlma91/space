@@ -80,7 +80,7 @@ void leveldone_init(void)
 	btn_space = button_create(SPRITE_BTN_HOME, 0, "", -GAME_WIDTH/2 + 500, -GAME_HEIGHT/2 + 200, 250, 250);
 	btn_retry = button_create(SPRITE_BTN_RETRY, 0, "", 0, -GAME_HEIGHT/2 + 200, 250, 250);
 
-	button_set_click_callback(btn_space, statesystem_set_state, state_stations);
+	button_set_click_callback(btn_space, space_return, NULL);
 	button_set_click_callback(btn_retry, space_restart_level, 0);
 
 	button_set_hotkeys(btn_retry, SDL_SCANCODE_SPACE, 0);

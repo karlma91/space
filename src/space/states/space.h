@@ -19,6 +19,8 @@ extern view *view_p1, *view_p2;
 float extern getGameTime(void);
 extern int getArcadeScore(void);
 
+void space_return(void *unused);
+
 //extern void drawStars(void);
 
 void space_restart_level(void *unused);
