@@ -12,7 +12,8 @@
 
 STATE_ID state_msgbox;
 
-static char *msg;
+static char title[MAX_MSG_LENGTH];
+static char msg[MAX_MSG_LENGTH];
 static msg_call_t msg_call;
 static button btn_ok, btn_cancel, btn_c_full;
 
@@ -49,7 +50,8 @@ static void draw(void)
 	draw_box(RLAY_BACK_BACK, cpv(0, 0),cpv(GAME_WIDTH, GAME_HEIGHT),0,1);
 	draw_color(COL_WHITE);
 	draw_quad_patch_center(RLAY_BACK_BACK,SPRITE_COIN,cpvzero,cpv(800,500),100,0);
-	bmfont_center(FONT_COURIER, cpv(0,150), 1.4, msg);
+	bmfont_center(FONT_COURIER, cpv(0,150), 1.4, title);
+	bmfont_center(FONT_COURIER, cpv(0,90), 1.0, msg);
 }
 
 static void on_pause(void)
@@ -65,11 +67,12 @@ static void destroy(void)
 
 }
 
-void msgbox_show(const char * message, msg_call_t callback)
+void msgbox_show(const char * ftitle, const char * message, msg_call_t callback)
 {
 	if(!message){return;}
 	msg_call = callback;
-	msg = message;
+	strncpy(title, ftitle, MAX_MSG_LENGTH);
+	strncpy(msg, message, MAX_MSG_LENGTH);
 	statesystem_push_state(state_msgbox);
 }
 

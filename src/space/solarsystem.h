@@ -39,6 +39,8 @@ struct drawbl_sun {
 /* representing a space station system orbitting a sun */
 struct solarsystem {
 	int index;        // index in galaxy
+	int cur_rad_i;		  // current station index on current cur_rad
+	int cur_rad;		  // current radius multiplyer
 	char name[256];   // name
 	char folder[256];   // folder levels is in inder levels folder
 	cpVect origo;     // place in space

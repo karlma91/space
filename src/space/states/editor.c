@@ -196,30 +196,12 @@ static void clear_msg_callback(int ok)
 		view_editor->zoom = 1;
 		view_update(view_editor, p, 0);
 		tilemap_clear(&lvl_tmpl->tm);
-	}else{
-
 	}
 }
 
 static void tap_clear_editor(void *force)
 {
-	if (!force) {
-		//SDL_ShowSimpleMessageBox(0, "Fjerne alt?", "Sikker på at du vil fjerne alt?", NULL);
-	}
-	msgbox_show("Clear?",clear_msg_callback);
-	/*//TODO implement dialog box and get confirmation from user
-	currentlvl = lvl_tmpl;
-	objectsystem_clear();
-	extern obj_player * space_create_player(int id);
-	space_create_player(1);
-	select_object_type(0);
-
-	cpVect p = cpvzero;
-	instance *player = instance_first(obj_id_player);
-	if (player) p = player->body->p;
-	view_editor->zoom = 1;
-	view_update(view_editor, p, 0);
-	tilemap_clear(&lvl_tmpl->tm);*/
+	msgbox_show("Clear","Do you want to delete all objects", clear_msg_callback);
 }
 
 
