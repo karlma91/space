@@ -155,6 +155,7 @@ we_bool spacelvl_freecopy(spacelvl **lvl)
 	llist_destroy((*lvl)->ll_tileshapes);
 	free(*lvl);
 	*lvl = NULL;
+	return WE_TRUE;
 }
 
 we_bool spacelvl_load2state(spacelvl *lvl)
@@ -288,7 +289,7 @@ we_bool spacelvl_unload2state(spacelvl *lvl)
 		fprintf(stderr, "ERROR: trying to unload NULL spacelvl\n");
 		return WE_FALSE;
 	}
-	if (!lvl->loaded2space == current_space) {
+	if (lvl->loaded2space != current_space) {
 		fprintf(stderr, "ERROR: trying to unload spacelvl with incorrect cpSpace!\n");
 		return WE_FALSE;
 	}
@@ -301,7 +302,6 @@ we_bool spacelvl_unload2state(spacelvl *lvl)
 		for (x = 0; x < lvl->tm.grid->pol.cols; x++) {
 			cpShape *block = lvl->tm.metadata[y][x].block;
 			if (block) {
-				fprintf(stderr, "removing shape %p\n", block);
 				if(cpSpaceContainsShape(current_space, block)) {
 					cpSpaceRemoveStaticShape(current_space, block);
 					cpShapeFree(block);

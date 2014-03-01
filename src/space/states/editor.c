@@ -902,7 +902,7 @@ static void on_leave(STATE_ID state_next)
 
 static void destroy(void)
 {
-	objectsystem_clear();
+	spacelvl_unload2state(lvl_tmpl);
 	llist_destroy(ll_touches);
 	pool_destroy(pool_touches);
 }
