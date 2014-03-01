@@ -355,7 +355,7 @@ static void update_camera_position(void)
     }
 }
 
-void space_draw_deck(void)
+void space_draw_deck(spacelvl *lvl)
 {
 	/* draw ceiling and floor */
 	//draw_color4f(0.3,0.3,0.3,0.6);
@@ -363,8 +363,8 @@ void space_draw_deck(void)
 	//Color col_back = {20,80,20,160};
 	Color col_back = {50,150,50,255};
 	draw_color(col_back);
-	draw_circle(RLAY_BACK_BACK, cpvzero, currentlvl->inner_radius+5); //TMP margin to cover holes between tilemap and floor and ceiling
-	draw_donut(RLAY_BACK_BACK, cpvzero, currentlvl->outer_radius-5, currentlvl->outer_radius + 300);//0);
+	draw_circle(RLAY_BACK_BACK, cpvzero, lvl->inner_radius+5); //TMP margin to cover holes between tilemap and floor and ceiling
+	draw_donut(RLAY_BACK_BACK, cpvzero, lvl->outer_radius-5, lvl->outer_radius + 300);//0);
 }
 
 static void draw(void)
@@ -375,7 +375,7 @@ static void draw(void)
 
 	/* draw tilemap */
 	//tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
-	space_draw_deck();
+	space_draw_deck(lvl_tmpl);
 	tilemap2_render(&currentlvl->tm);
 	//draw_light_map();
 }
@@ -646,7 +646,7 @@ static we_bool from_editor = WE_FALSE;
 static void on_enter(STATE_ID state_prev)
 {
 	if (state_prev == state_levelscreen || state_prev == state_editor || state_prev == state_leveldone || state_prev == state_space) {
-		from_editor = (state_prev == state_editor);
+		from_editor = (state_prev == state_editor) ? WE_TRUE : ((state_prev == state_levelscreen) ? WE_FALSE : from_editor);
 		fprintf(stderr,"TODO: entering space state from %s\n", state_prev);
 		lvl_tmpl = get_current_lvl_template();
 		lvl_tmpl = spacelvl_copy(lvl_tmpl);

@@ -808,12 +808,12 @@ static void post_update(void)
 }
 
 
-void space_draw_deck(void);
+void space_draw_deck(spacelvl *lvl);
 static void draw(void)
 {
 	draw_color4f(1,1,1,1);
 	//tilemap_render(RLAY_BACK_BACK, lvl->tiles);
-	space_draw_deck();
+	space_draw_deck(lvl_tmpl);
 
 	draw_color4b(80,80,80,100);
 	if (current_mode == MODE_TILEMAP) {
@@ -868,7 +868,7 @@ static void on_enter(STATE_ID state_prev)
 static void on_leave(STATE_ID state_next)
 {
 	if (state_next == state_stations) {
-		//TODO clear editor
+		spacelvl_unload2state(lvl_tmpl);
 	}
 }
 
