@@ -24,7 +24,7 @@ typedef struct spacelvl {
 	tilemap tm;
 
 	/* level floor, ceiling and tiles shapes NB! Not transferable between states! */
-	LList *ll_tileshapes;
+	LList ll_tileshapes;
 	cpShape *ceiling;
 	cpSpace *loaded2space;
 } spacelvl;
@@ -37,8 +37,9 @@ void spacelvl_destroy(void);
 
 spacelvl *spacelvl_parse(int dirtype, const char *path);
 we_bool spacelvl_write(spacelvl *lvl);
-we_bool spacelvl_copy(spacelvl *lvl_dst, spacelvl *lvl_src);
+spacelvl *spacelvl_copy(spacelvl *lvl);
 we_bool spacelvl_load2state(spacelvl *lvl);
 we_bool spacelvl_unload2state(spacelvl *lvl);
+we_bool spacelvl_freecopy(spacelvl *lvl);
 
 #endif /* SPACELVL_H_ */

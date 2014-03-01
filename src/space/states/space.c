@@ -649,6 +649,7 @@ static void on_enter(STATE_ID state_prev)
 		from_editor = (state_prev == state_editor);
 		fprintf(stderr,"TODO: entering space state from %s\n", state_prev);
 		lvl_tmpl = get_current_lvl_template();
+		lvl_tmpl = spacelvl_copy(lvl_tmpl);
 		currentlvl = lvl_tmpl; //TODO remove currentlvl variable completely
 		spacelvl_load2state(lvl_tmpl);
 		space_init_game();
@@ -663,15 +664,11 @@ static void on_leave(STATE_ID state_next)
 {
 	//TODO unload lvl with spacelvl_unload2state();
 	if (state_next == state_leveldone) {
-		fprintf(stderr,"TODO: exiting space state - unload lvl in space\n");
-	} else if (state_next == state_editor) {
+	} else if (state_next == state_editor || state_next == state_space) {
 		spacelvl_unload2state(lvl_tmpl);
-		fprintf(stderr,"TODO: going back to editor - unload lvl in space\n");
-	} else if (state_next == state_space) {
-		spacelvl_unload2state(lvl_tmpl);
-		fprintf(stderr,"TODO: retry lvl in space\n");
+		spacelvl_freecopy(lvl_tmpl);
+		lvl_tmpl = NULL;
 	} else if (state_next == state_pause) {
-		fprintf(stderr,"TODO: pausing space state\n");
 	} else if (state_next == state_log) {
 	} else {
 		SDL_Log("ERROR: illegal state transition from SPACE to %s", state_next);

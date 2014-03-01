@@ -145,9 +145,21 @@ we_bool spacelvl_write(spacelvl *lvl)
 	return WE_TRUE;
 }
 
-we_bool spacelvl_copy(spacelvl *lvl_dst, spacelvl *lvl_src)
+spacelvl *spacelvl_copy(spacelvl *lvl)
 {
-	return WE_FALSE;
+	spacelvl *lvl_dst = calloc(1, sizeof *lvl_dst);
+	*lvl_dst = *lvl;
+	lvl_dst->ll_tileshapes = llist_create();
+    llist_set_remove_callback(lvl->ll_tileshapes, (ll_rm_callback) remove_static);
+    lvl_dst->ceiling = NULL;
+    lvl_dst->loaded2space = NULL;
+	return lvl_dst;
+}
+
+we_bool spacelvl_freecopy(spacelvl *lvl)
+{
+	llist_destroy(lvl->ll_tileshapes);
+	free(lvl);
 }
 
 we_bool spacelvl_load2state(spacelvl *lvl)
