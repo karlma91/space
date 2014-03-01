@@ -32,10 +32,6 @@ static void free_dead_func(void *obj)
 #ifdef DEBUG_MEMORY
 	SDL_Log("TMP: removing %p[%s]",obj, ((instance *)obj)->TYPE->NAME);
 #endif
-	if (!((instance *)obj)->destroyed) {
-		((instance *)obj)->TYPE->call.on_destroy(obj);
-	}
-	destroy_func(obj);
 	free(obj);
 	++debug_frees;
 }

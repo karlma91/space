@@ -677,6 +677,7 @@ static void on_leave(STATE_ID state_next)
 
 static void destroy(void)
 {
+	spacelvl_unload2state(lvl_tmpl);
 	joystick_free(joy_p1_left);
 	joystick_free(joy_p1_right);
 }
