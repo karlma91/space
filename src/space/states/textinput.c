@@ -16,8 +16,6 @@ static int min_length = 0;
 
 static button btn_resume;
 
-STATE_ID from_state;
-
 STATE_ID state_textinput;
 
 
@@ -32,8 +30,9 @@ static int valid_char(char c){
 static void resume(void *data)
 {
 	SDL_StopTextInput();
-		outer_string = NULL;
-		statesystem_set_state(from_state);
+	outer_string = NULL;
+	statesystem_pop_state(NULL);
+	//statesystem_set_state(from_state);
 }
 
 static void resume_done(void *data)
@@ -147,7 +146,6 @@ void textinput_start(STATE_ID from, char * string,char *ti,  int min_len, int ma
 	buffer_length = strlen(string);
 	min_length = min_len;
 	max_length = max_len;
-	from_state = from;
 	SDL_StartTextInput();
 	SDL_Rect r = {0, 0-200, 400, 400};
 	SDL_SetTextInputRect(&r);

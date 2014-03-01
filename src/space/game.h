@@ -63,7 +63,8 @@ extern STATE_ID state_gameover; /* deprecated state! */
 extern STATE_ID state_settings;
 extern STATE_ID state_space;
 extern STATE_ID state_pause;
-extern STATE_ID state_textinput;;
+extern STATE_ID state_textinput;
+extern STATE_ID state_msgbox;
 extern STATE_ID state_store;
 extern STATE_ID state_leveldone;
 extern STATE_ID state_stations;
