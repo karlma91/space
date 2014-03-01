@@ -99,6 +99,10 @@ static void on_leave(STATE_ID state_next)
 
 static void destroy(void)
 {
+	if (current_lvl_tmpl) {
+		spacelvl_free(current_lvl_tmpl);
+		current_lvl_tmpl=NULL;
+	}
 }
 
 void levelscreen_change_to(station * ship)
@@ -110,8 +114,8 @@ void levelscreen_change_to(station * ship)
 static void button_playedit_callback(void *state)
 {
 	if (current_lvl_tmpl) {
-		//TODO unload previous level, if any?
-		//...
+		spacelvl_free(current_lvl_tmpl);
+		current_lvl_tmpl=NULL;
 	}
 	current_lvl_tmpl = (spacelvl*)spacelvl_parse(WAFFLE_DOCUMENTS, from_station->path);
 	statesystem_set_state(state);

@@ -5,6 +5,10 @@
 
 static char DEF_STRING[10] = "SOLARNULL";
 
+static float ring_spacing = 300;
+static float station_spacing = 300;
+static float rotation_speed = 1;
+
 //TODO MOVE INTO LEVEL FOLDER
 
 static void station_free(station *s)
@@ -27,7 +31,8 @@ solarsystem *solarsystem_create(int solsys_index, char *name, char *folder)
 {
 	solarsystem *solsys = (solarsystem *)calloc(1, sizeof *solsys);
 	solsys->index = solsys_index;
-
+	solsys->cur_rad_i = 0;
+	solsys->cur_rad = 0;
 	strcpy(solsys->name, name);
 	strcpy(solsys->folder, folder);
 
@@ -51,7 +56,7 @@ solarsystem *solarsystem_create(int solsys_index, char *name, char *folder)
 	Color glow = {0xff-rnd,0xa0,0x70+rnd,0x80};
 	Color add1 = {0x90-rnd,0x80,0x40+rnd,0x00};
 	Color add2 = {0xb0-rnd,0x70,0x40+rnd,0x00};
-	int size = (500 + we_randf*(solsys_index*1500/2 + (solsys_index>1?1000:0)) + 300*solsys_index/2);
+	int size = (500 + 0.001*we_randf*(solsys_index*1500/2 + (solsys_index>1?1000:0)) + 300*solsys_index/2);
 	solarsystem_create_drawbl(&(solsys->sun),size, spr_sun,base,glow,add1,add2);
 	solsys->stations = llist_create();
 	return solsys;
@@ -71,12 +76,20 @@ void solarsystem_add_station(solarsystem * sol, SPRITE_ID spr_id, Color color, i
 	strcpy(s->author, author);
 	strcpy(s->filename, filename);
 	int i = llist_size(sol->stations);
-	float size = 300 + we_randf * 100;
-	cpFloat radius = sol->sun.size + (i) * 400 ;
-	cpFloat angle = WE_2PI * we_randf;
-	s->radius = radius;
+//	float size = 300 + we_randf * 100;
+	float size = 400;
+	cpFloat radius = sol->sun.size + (sol->cur_rad) * (size + ring_spacing);
+	float omkrets = radius*2*WE_PI;
+	int num_slice = omkrets/(size + station_spacing);
+	cpFloat angle = sol->cur_rad_i*((2*WE_PI)/(num_slice));//WE_2PI * we_randf;
+	sol->cur_rad_i++;
+	if(sol->cur_rad_i >= num_slice){
+		sol->cur_rad_i = 0;
+		sol->cur_rad++;
+	}
+	s->radius = radius + (we_randf-0.5f) * 100;
 	s->angle = angle;
-	s->rotation_speed = 1000/radius;
+	s->rotation_speed = (0.4/radius)*rotation_speed;
 	s->pos = cpvadd(WE_P2C(radius,angle), sol->origo);
 	s->col = color;
 	Color col_back = {255,200,180,255};//{255,180,140,255};
@@ -85,7 +98,7 @@ void solarsystem_add_station(solarsystem * sol, SPRITE_ID spr_id, Color color, i
 	button_set_txt_antirot(s->btn, 1);
 	button_set_backcolor(s->btn, col_back);
 	button_set_animated(s->btn, 1, (i ? 18 : 15));
-	button_set_enlargement(s->btn, 1.5);
+	button_set_enlargement(s->btn, 1.3);
 	button_set_hotkeys(s->btn, digit2scancode[(i+1) % 10], 0);
 	state_register_touchable(state_stations, s->btn);
 	sprite *spr = button_get_sprite(s->btn);
@@ -118,7 +131,7 @@ void solarsystem_update(solarsystem *sol)
 	llist_begin_loop(sol->stations);
 	while (llist_hasnext(sol->stations)) {
 		station *s = ((station *)llist_next(sol->stations));
-		s->angle += 0.4/s->radius;
+		s->angle += s->rotation_speed;
 		s->pos = cpvadd(WE_P2C(s->radius,s->angle), sol->origo);
 		touch_place(s->btn,s->pos.x, s->pos.y);
 	}
@@ -131,10 +144,10 @@ void solarsystem_draw(solarsystem *sol)
 	sun_render(RLAY_GAME_BACK, &sol->sun);
 	llist_begin_loop(sol->stations);
 	draw_color4b(50,50,50,50);
-	while (llist_hasnext(sol->stations)) {
-		cpVect p = ((station *)llist_next(sol->stations))->pos;
-		float r = cpvlength(cpvsub(sol->origo,p));
-		float w = 1 / current_view->zoom;
+	int i=0;
+	for(i=0; i<sol->cur_rad+1; i++){
+		float r = sol->sun.size + (i) * (400 + ring_spacing);
+		float w = 2 / current_view->zoom;
 		draw_donut(RLAY_GAME_BACK, sol->origo, r - w, r + w);
 	}
 	llist_end_loop(sol->stations);

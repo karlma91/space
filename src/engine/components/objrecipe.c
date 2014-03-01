@@ -96,7 +96,10 @@ we_bool objrecipe_load_objects(LList l, cJSON* object_array)
 	return WE_TRUE;
 }
 
-
+void objrecipe_free(object_recipe *l)
+{
+	free(l);
+}
 void objrecipe_init()
 {
 	jparse_register("objrecipe",objrecipe_parse);

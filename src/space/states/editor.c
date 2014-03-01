@@ -5,6 +5,7 @@
 #include "space.h"
 #include "../level/spacelvl.h"
 #include "textinput.h"
+#include "msgbox.h"
 #include "levelscreen.h"
 
 
@@ -17,6 +18,8 @@
 #define OBJECT_MARGIN 10
 #define WALL_MARGIN 30
 
+#define MAX_NAME_LENGTH 64
+
 STATE_ID state_editor;
 
 
@@ -26,7 +29,7 @@ static grid_index grid_i_cur = {-1,-1, 0, 0};
 
 /*********** LEVEL DATA ***********/
 static spacelvl *lvl_tmpl = NULL;
-static char level_name[32];
+static char level_name[MAX_NAME_LENGTH];
 
 
 /*********** EDITOR STATE ***********/
@@ -177,25 +180,30 @@ static void enable_objlist(int enable)
 	}
 }
 
+static void clear_msg_callback(int ok)
+{
+	if(ok == MSGBOX_OK){
+		//TODO implement dialog box and get confirmation from user
+		currentlvl = lvl_tmpl;
+		objectsystem_clear();
+		extern obj_player * space_create_player(int id);
+		space_create_player(1);
+		select_object_type(0);
+
+		cpVect p = cpvzero;
+		instance *player = instance_first(obj_id_player);
+		if (player) p = player->body->p;
+		view_editor->zoom = 1;
+		view_update(view_editor, p, 0);
+		tilemap_clear(&lvl_tmpl->tm);
+	}
+}
+
 static void tap_clear_editor(void *force)
 {
-	if (!force) {
-		SDL_ShowSimpleMessageBox(0, "Fjerne alt?", "Sikker på at du vil fjerne alt?", NULL);
-	}
-	//TODO implement dialog box and get confirmation from user
-	currentlvl = lvl_tmpl;
-	objectsystem_clear();
-	extern obj_player * space_create_player(int id);
-	space_create_player(1);
-	select_object_type(0);
-
-	cpVect p = cpvzero;
-	instance *player = instance_first(obj_id_player);
-	if (player) p = player->body->p;
-	view_editor->zoom = 1;
-	view_update(view_editor, p, 0);
-	tilemap_clear(&lvl_tmpl->tm);
+	msgbox_show("Clear","Do you want to delete all objects", clear_msg_callback);
 }
+
 
 static void editor_setmode(editor_mode state)
 {
@@ -722,7 +730,8 @@ void editor_init()
 	state_register_touchable_view(view_editor, scr_world);
 
 	lvl_tmpl = spacelvl_parse(WAFFLE_ZIP, "empty");
-	tap_clear_editor(WE_TRUE);
+	//tap_clear_editor(WE_TRUE);
+	clear_msg_callback(1);
 }
 
 /* * * * * * * * * *
@@ -850,6 +859,7 @@ static void on_enter(STATE_ID state_prev)
 	if (state_prev == state_levelscreen) {
 		lvl_tmpl = get_current_lvl_template();
 		currentlvl = lvl_tmpl;
+		strncpy(level_name, lvl_tmpl->name, MAX_NAME_LENGTH);
 		objectsystem_clear();
 		spacelvl_load2state(lvl_tmpl);
 		editor_setmode(MODE_OBJECTS);

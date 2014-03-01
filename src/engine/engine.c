@@ -546,7 +546,7 @@ static void main_init(void)
 {
 	we_info_init();
 	TIMEUSE_INIT;
-	srand(time(0)); /* init pseudo-random generator */
+	srand(0x9b3a09fa); /* init pseudo-random generator */
 	//TODO Make sure faulty inits stops the program from proceeding
 	INITCALL(waffle_init);      /* prepare game resources and general methods*/
 	INITCALL(game_config);	/* load default and user-changed settings */

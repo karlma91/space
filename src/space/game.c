@@ -15,6 +15,7 @@
 //#include "states/settings.h"
 
 extern void pause_init(void);
+extern void msgbox_init(void);
 extern void textinput_init(void);
 extern void settings_init(void);
 extern void upgrades_init(void);
@@ -356,16 +357,15 @@ void game_init(void)
 
 	game_components();
 	object_types_init();
-	spacelvl_init();
-
 	tween_init();
 
     game_touchables();
 
 	/* init all states (warning: make sure that no init method depends on uninitialized state_id!) */
+    msgbox_init();
+    textinput_init();
     log_init();
     settings_init();
-    textinput_init();
     stations_init();
     menu_init();
     space_init();
@@ -394,6 +394,4 @@ minimap cmp_new_minimap(float size, Color c)
 
 void game_destroy(void)
 {
-
-	spacelvl_destroy();
 }

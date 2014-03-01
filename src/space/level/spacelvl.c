@@ -12,12 +12,6 @@ static void remove_static(void *data)
 	cpShapeFree(shape);
 }
 
-we_bool spacelvl_init(void)
-{
-	srand(0x9b3a09fa);
-	return 1;
-}
-
 spacelvl *spacelvl_parse(int folder, const char * filename)
 {
 	SDL_Log("PARSING LEVEL : %s", filename);
@@ -42,7 +36,7 @@ spacelvl *spacelvl_parse(int folder, const char * filename)
 
 	spacelvl *lvl = calloc(1, sizeof(spacelvl));
 	lvl->ll_recipes = llist_create();
-	llist_set_remove_callback(lvl->ll_recipes, free);
+	llist_set_remove_callback(lvl->ll_recipes, objrecipe_free);
 
 	cJSON *root = cJSON_Parse(buff);
 	if(root == NULL){
@@ -326,6 +320,7 @@ we_bool spacelvl_unload2state(spacelvl *lvl)
 	/* remove floor and ceiling */
 	if (lvl->ceiling != NULL) {
 		remove_static(lvl->ceiling);
+		lvl->ceiling = NULL;
 	}
 	llist_clear(lvl->ll_tileshapes);
 
@@ -333,7 +328,12 @@ we_bool spacelvl_unload2state(spacelvl *lvl)
 	return WE_TRUE;
 }
 
-void spacelvl_destroy(void)
+
+void spacelvl_free(spacelvl *slvl)
 {
+	llist_destroy(slvl->ll_recipes);
+	llist_destroy(slvl->ll_tileshapes);
+	grid_free(slvl->tm.grid);
+	free(slvl);
 
 }

@@ -28,5 +28,6 @@ typedef struct object_recipe {
 void objrecipe_init();
 we_bool objrecipe_load_objects(LList l, cJSON* object_array);
 we_bool add_object_recipe_name(LList * ll_recipes, const char * obj_type, const char * param_name, cpVect pos, float rotation);
+void objrecipe_free(object_recipe *l);
 
 #endif /* OBJRECIPE_H_ */
