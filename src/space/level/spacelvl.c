@@ -156,10 +156,11 @@ spacelvl *spacelvl_copy(spacelvl *lvl)
 	return lvl_dst;
 }
 
-we_bool spacelvl_freecopy(spacelvl *lvl)
+we_bool spacelvl_freecopy(spacelvl **lvl)
 {
-	llist_destroy(lvl->ll_tileshapes);
-	free(lvl);
+	llist_destroy((*lvl)->ll_tileshapes);
+	free(*lvl);
+	*lvl = NULL;
 }
 
 we_bool spacelvl_load2state(spacelvl *lvl)
@@ -289,6 +290,10 @@ we_bool spacelvl_load2state(spacelvl *lvl)
 
 we_bool spacelvl_unload2state(spacelvl *lvl)
 {
+	if (!lvl) {
+		fprintf(stderr, "ERROR: trying to unload NULL spacelvl\n");
+		return WE_FALSE;
+	}
 	if (!lvl->loaded2space == current_space) {
 		fprintf(stderr, "ERROR: trying to unload spacelvl with incorrect cpSpace!\n");
 		return WE_FALSE;

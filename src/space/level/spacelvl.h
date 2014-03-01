@@ -40,6 +40,6 @@ we_bool spacelvl_write(spacelvl *lvl);
 spacelvl *spacelvl_copy(spacelvl *lvl);
 we_bool spacelvl_load2state(spacelvl *lvl);
 we_bool spacelvl_unload2state(spacelvl *lvl);
-we_bool spacelvl_freecopy(spacelvl *lvl);
+we_bool spacelvl_freecopy(spacelvl **lvl);
 
 #endif /* SPACELVL_H_ */

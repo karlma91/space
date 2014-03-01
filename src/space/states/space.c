@@ -664,10 +664,9 @@ static void on_leave(STATE_ID state_next)
 {
 	//TODO unload lvl with spacelvl_unload2state();
 	if (state_next == state_leveldone) {
-	} else if (state_next == state_editor || state_next == state_space) {
+	} else if (state_next == state_editor || state_next == state_space || state_next == state_stations) {
 		spacelvl_unload2state(lvl_tmpl);
-		spacelvl_freecopy(lvl_tmpl);
-		lvl_tmpl = NULL;
+		spacelvl_freecopy(&lvl_tmpl);
 	} else if (state_next == state_pause) {
 	} else if (state_next == state_log) {
 	} else {
@@ -932,5 +931,6 @@ void space_return(void *unused)
 void space_restart_level(void *unused)
 {
 	statesystem_set_state(state_space);
-	statesystem_set_state(state_space); //restart?
+
+	//statesystem_set_state(state_space); //restart?
 }

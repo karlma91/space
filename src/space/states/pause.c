@@ -109,7 +109,14 @@ static void destroy(void)
 static void resume(void *unused)
 {
 	SDL_StopTextInput();
-	statesystem_set_state(state_space);
+	statesystem_pop_state(NULL);
+}
+
+static void restart(void *unused)
+{
+	SDL_StopTextInput();
+	statesystem_pop_state(NULL);
+	space_restart_level(NULL);
 }
 
 static void input(void *unused)
@@ -132,7 +139,7 @@ void pause_init(void)
 	btn_resume = button_create(NULL, 0, "", 0, 0, GAME_WIDTH, GAME_HEIGHT);
 
 	button_set_click_callback(btn_space, space_return, NULL);
-	button_set_click_callback(btn_retry, space_restart_level, 0);
+	button_set_click_callback(btn_retry, restart, 0);
 	button_set_click_callback(btn_input, input, 0);
 	button_set_click_callback(btn_resume, resume, 0);
 	button_set_hotkeys(btn_resume, KEY_ESCAPE, KEY_RETURN_2);
