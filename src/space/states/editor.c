@@ -607,6 +607,7 @@ void editor_init()
 	int i;
 	statesystem_register(state_editor,0);
 	view_editor = state_view_get(state_editor, 0);
+	/*
 	state_add_layers(state_editor, 20);
 
 	int layers = state_layer_count(state_editor);
@@ -615,7 +616,6 @@ void editor_init()
 		float f = (layers - i * 0.99f) / (layers);
 		state_set_layer_parallax(state_editor, i, f, f);
 	}
-
 	SPRITE_ID spr = sprite_link("starcross01");
 	for(i = 0; i<400; i++){
         Color col1 = {255,255,255,0};
@@ -642,6 +642,7 @@ void editor_init()
 			state_add_dualsprite(state_editor, layer, spr, pos, cpv(size,size), col1, col2);
 		}
 	}
+	*/
 
 	state_enable_objects(state_editor, 1);
 	state_enable_objupdate(state_editor, 0);
@@ -836,15 +837,6 @@ static void draw(void)
 
 static int sdl_event(SDL_Event *event)
 {
-	SDL_TouchFingerEvent *finger = &event->tfinger;
-	//SDL_Scancode key;
-	cpVect pos;
-	pos = view_touch2world(view_editor, cpv(finger->x, finger->y));
-
-	switch(event->type) {
-	case SDL_KEYDOWN:
-		break;
-	}
 	return 0;
 }
 
@@ -862,6 +854,7 @@ static void on_enter(STATE_ID state_prev)
 		spacelvl_load2state(lvl_tmpl);
 		editor_setmode(MODE_OBJECTS);
 	}
+	currentlvl = lvl_tmpl;
 }
 
 

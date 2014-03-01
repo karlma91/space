@@ -5,12 +5,11 @@
 #define FILE_SIZE_BUFFER 128000
 
 //TODO move into utils?
-static void remove_static(cpShape *shape)
+static void remove_static(void *data)
 {
-	if(cpSpaceContainsShape(current_space, shape)) {
-		cpSpaceRemoveStaticShape(current_space, shape);
-		cpShapeFree(shape);
-	}
+	cpShape *shape = data;
+	cpSpaceRemoveStaticShape(current_space, shape);
+	cpShapeFree(shape);
 }
 
 we_bool spacelvl_init(void)
@@ -68,7 +67,7 @@ spacelvl *spacelvl_parse(int folder, const char * filename)
 	objrecipe_load_objects(lvl->ll_recipes,object_array);
 
     lvl->ll_tileshapes = llist_create();
-    llist_set_remove_callback(lvl->ll_tileshapes, (ll_rm_callback) remove_static);
+    llist_set_remove_callback(lvl->ll_tileshapes, remove_static);
     lvl->ceiling = NULL;
 	lvl->loaded2space = NULL;
 
@@ -147,21 +146,29 @@ we_bool spacelvl_write(spacelvl *lvl)
 
 spacelvl *spacelvl_copy(spacelvl *lvl)
 {
+	int x, y;
 	spacelvl *lvl_dst = calloc(1, sizeof *lvl_dst);
 	*lvl_dst = *lvl;
 	lvl_dst->ll_tileshapes = llist_create();
-    llist_set_remove_callback(lvl->ll_tileshapes, (ll_rm_callback) remove_static);
+    llist_set_remove_callback(lvl_dst->ll_tileshapes, (ll_rm_callback) remove_static);
     lvl_dst->ceiling = NULL;
     lvl_dst->loaded2space = NULL;
+	for (y = lvl_dst->tm.grid->pol.inner_i; y < lvl_dst->tm.grid->pol.outer_i; y++)
+		for (x = 0; x < lvl_dst->tm.grid->pol.cols; x++)
+			lvl_dst->tm.metadata[y][x].block = NULL;
 	return lvl_dst;
 }
 
 we_bool spacelvl_freecopy(spacelvl **lvl)
 {
-	llist_destroy((*lvl)->ll_tileshapes);
-	free(*lvl);
-	*lvl = NULL;
-	return WE_TRUE;
+	if (*lvl) {
+		llist_destroy((*lvl)->ll_tileshapes);
+		free(*lvl);
+		*lvl = NULL;
+		return WE_TRUE;
+	} else {
+		return WE_FALSE;
+	}
 }
 
 we_bool spacelvl_load2state(spacelvl *lvl)
@@ -248,7 +255,6 @@ we_bool spacelvl_load2state(spacelvl *lvl)
 				meta->y_row = y;
 				meta->block = shape;
 				cpShapeSetUserData(shape, meta);
-				//llist_add(ll_tileshapes, shape);
 			}
 			fprintf(stderr, "%c", tile ? '#' : '.');
 		}
@@ -258,13 +264,12 @@ we_bool spacelvl_load2state(spacelvl *lvl)
 	float r_in = lvl->inner_radius;
 	float r_out = lvl->outer_radius;
 	float r_ceil = r_in;// + 64 * (r_out - r_in) / currentlvl->height;
-// /*
 	float r_floor = r_out;// - 5 * 64 * (r_out - r_in) / currentlvl->height;
 	static const int segments = 100;
 	static const float seg_radius = 50;
 	static const float seg_length = 300;
 	int i;
-	for (i = 0; i < segments; ++i) { //TODO swap out with tiles
+	for (i = 0; i < segments; ++i) {
 		cpVect angle = cpvforangle(2 * M_PI * i / segments);
 		cpVect n = cpvmult(cpvperp(angle), seg_length);
 		cpVect p = cpvmult(angle, r_floor + seg_radius);
@@ -306,6 +311,7 @@ we_bool spacelvl_unload2state(spacelvl *lvl)
 	int x, y;
 	for (y = lvl->tm.grid->pol.inner_i; y < lvl->tm.grid->pol.outer_i; y++) {
 		for (x = 0; x < lvl->tm.grid->pol.cols; x++) {
+			lvl->tm.metadata[y][x].block = NULL;
 			cpShape *block = lvl->tm.metadata[y][x].block;
 			if (block) {
 				if(cpSpaceContainsShape(current_space, block)) {

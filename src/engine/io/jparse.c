@@ -47,7 +47,7 @@ cJSON * jparse_open(int dir_type, char *filepath)
 
 cJSON* jparse_new()
 {
-
+	return NULL;
 }
 
 void jparse_save(cJSON *c, int dir_type, char *filepath)

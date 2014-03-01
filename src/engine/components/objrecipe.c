@@ -61,7 +61,7 @@ static we_bool objrecipe_parse(cJSON *t, object_recipe *objrep, void *def )
 
 static we_bool objrecipe_write(cJSON *t,LList l, void *def )
 {
-
+	return WE_FALSE;
 }
 
 we_bool objrecipe_load_objects(LList l, cJSON* object_array)
@@ -89,9 +89,11 @@ we_bool objrecipe_load_objects(LList l, cJSON* object_array)
 			p.y = y;
 		} else {
 			SDL_Log("LEVEL PARSING ERROR: Cannot find field pos in object");
+			return WE_FALSE;
 		}
 		add_object_recipe_name(l, type, name, p, 0);
 	}
+	return WE_TRUE;
 }
 
 
