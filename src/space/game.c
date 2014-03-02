@@ -80,6 +80,11 @@ SPRITE_ID SPRITE_COIN;
 SPRITE_ID SPRITE_METAL01;
 SPRITE_ID SPRITE_TURRETBODY001;
 SPRITE_ID SPRITE_TURRETGUN001;
+
+SPRITE_ID SPRITE_BTN1;
+SPRITE_ID SPRITE_BTN_EDIT;
+SPRITE_ID SPRITE_DIALOG1;
+SPRITE_ID SPRITE_DIALOG2;
 /* end of global sprite definitions*/
 
 /* polyshapes */
@@ -106,6 +111,7 @@ EMITTER_ID EM_COUNT;
 bm_font * FONT_NORMAL;
 bm_font * FONT_BIG;
 bm_font * FONT_SANS;
+bm_font * FONT_SANS_PLAIN;
 bm_font * FONT_COURIER;
 
 /* GLOBAL SOUND CHUNKS */
@@ -238,6 +244,11 @@ void game_sprites(void)
 	REGISTER_SPRITE( METAL01 );
 	REGISTER_SPRITE( TURRETBODY001 );
 	REGISTER_SPRITE( TURRETGUN001 );
+
+	REGISTER_SPRITE( BTN1 );
+	REGISTER_SPRITE( BTN_EDIT );
+	REGISTER_SPRITE( DIALOG1 );
+	REGISTER_SPRITE( DIALOG2 );
 }
 
 void game_polyshapes(void)
@@ -270,6 +281,7 @@ void game_font(void)
    FONT_NORMAL = bmfont_read_font("Arial.fnt");
    FONT_BIG = bmfont_read_font("bigariel.fnt");
    FONT_SANS = bmfont_read_font("sans.fnt");
+   FONT_SANS_PLAIN = bmfont_read_font("sans_plain.fnt");
    FONT_COURIER = bmfont_read_font("courier.fnt");
 }
 

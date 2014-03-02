@@ -101,5 +101,7 @@
     "invinc": "int",
     "sprite": "sprite",
     "expl_pname": "char"
+  },
+  "spiky": {
   }
 }

@@ -51,6 +51,10 @@ typedef struct Color {
 	byte r, g, b, a;
 } Color;
 
+Color color_new3b(byte r, byte g, byte b);
+Color color_new4b(byte r, byte g, byte b, byte a);
+Color color_new3f(float r, float g, float b);
+Color color_new4f(float r, float g, float b, float a);
 
 static inline void we_error(char * msg)
 {

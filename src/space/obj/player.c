@@ -138,6 +138,10 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 #endif
 	player->gun_timer += dt;
 
+	if (keys[SDL_SCANCODE_B] | (keys[SDL_SCANCODE_B]=0)) {
+		instance_create(obj_id_spiky, NULL, player->data.body->p, cpvzero);
+	}
+
 	//update physics and player
 	player->direction = turn_toangle(player->direction_target, player->direction, WE_2PI * dt / 1000);
 	if (player->joy_left->amplitude) {

@@ -244,9 +244,8 @@ static void render(button btn_id)
 	} else if (btn->spr.id) {
 		draw_color(btn->backcol);
 		if (btn->stretch) {
-			cpVect a = cpvadd(btn_pos, cpv(-width/2,0));
-			cpVect b = cpvadd(btn_pos, cpv(width/2,0));
-			draw_line_spr(1, &(btn->spr), a, b, height, 0);
+			draw_quad_patch_center_spr(1, &(btn->spr), btn_pos, cpv(width, height), height/2, 0);
+			//draw_line_spr(1, &(btn->spr), a, b, height, 0);
 		} else {
 			sprite_render_scaled(1, &(btn->spr), btn_pos, 0, scale);
 		}

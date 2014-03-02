@@ -396,8 +396,8 @@ static void radar_draw(cpVect pos)
 {
 	obj_player *player = current_view == view_p1 ? player1 : player2;
 	draw_push_matrix();
+	draw_translatev(pos);
 	if (player) {
-		draw_translatev(pos);
 		draw_rotate(-se_tangent(player->data.body->p));
 	}
 	draw_color4b(50,130,210,150);

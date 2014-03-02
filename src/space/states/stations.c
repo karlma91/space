@@ -17,6 +17,10 @@ LList user_system;
 
 static scroll_p scroller;
 
+static Color col_unfocus = {40,40,65,0}; //{0,0,0,255};
+static we_bool lost_focus = WE_FALSE;
+static float focus_a = 0;
+
 // TODO: cooler system
 //tween test
 static tween *test;
@@ -125,6 +129,9 @@ static void on_enter(STATE_ID state_prev)
     float endr = 3.14;
     testr = tween_create(&(str), &(endr), 1, 3, ElasticEaseInOut);
     tween_repeat(testr, 2, 1);
+
+    //TODO use tween for colors here!
+    lost_focus = WE_FALSE;
 }
 
 static void pre_update(void)
@@ -160,13 +167,11 @@ static void draw(void)
 	draw_color4f(1,1,1,1);
 	//draw_box(1, a, b, r, 1);
 
-
 	draw_push_matrix();
 	draw_translate(1900,-1750);
 	draw_rotate(-current_view->rotation);
 	bmfont_center(FONT_SANS, cpvzero,1,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
 	draw_pop_matrix();
-
 
 	llist_begin_loop(user_system);
 	cpVect p;
@@ -192,6 +197,15 @@ static void draw_gui(view *v)
 	draw_circle(0, cpv(-v->view_width/2+20, v->view_height/2-20), 15);
 #endif
 	draw_color4f(1,1,1,1);
+
+	float step = 4*dt;
+	focus_a = lost_focus ?
+			(focus_a + step < 1 ? focus_a + step : 1):
+			(focus_a - step > 0 ? focus_a - step : 0);
+	Color col = col_unfocus;
+	col.r *= focus_a, col.g *= focus_a, col.b *=focus_a, col.a *=focus_a;
+	draw_color(col);
+	draw_box(0, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 }
 
 static void on_pause(void)
@@ -203,6 +217,8 @@ static void on_leave(STATE_ID state_next)
     test = tween_release(test);
     tests = tween_release(tests);
     testr = tween_release(testr);
+
+    lost_focus = WE_TRUE;
 }
 
 static void destroy(void)
@@ -221,14 +237,14 @@ void stations_init(void)
 
 	user_system = solarsystem_load_solar("levels/userlevels.json");
 
-	Color col_back = {30,100,30,100};
+	Color col_back = {30,100,30,255};
 
 	main_view = state_view_get(state_stations, 0);
 	main_view->GUI = draw_gui;
 
-	btn_home = button_create(SPRITE_WHITE, 0, "Shop", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 200, 250, 250);
+	btn_home = button_create(SPRITE_BTN1, 1, "$$$", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 200, 250, 250);
 	button_set_click_callback(btn_home, open_upgrades, 0);
-	button_set_enlargement(btn_home, 1.5);
+	button_set_enlargement(btn_home, 0.9);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
 	button_set_backcolor(btn_home, col_back);
 	state_register_touchable_view(main_view, btn_home);

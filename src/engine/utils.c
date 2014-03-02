@@ -19,3 +19,29 @@ int EndsWith(const char *str, const char *suffix)
         return 0;
     return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
 }
+
+
+Color color_new3b(byte r, byte g, byte b)
+{
+	Color col = {r,g,b,255};
+	return col;
+}
+
+Color color_new4b(byte r, byte g, byte b, byte a)
+{
+	Color col = {r,g,b,a};
+	return col;
+}
+
+Color color_new3f(float r, float g, float b)
+{
+	Color col = {(byte)(r*0xFF), (byte)(g*0xFF), (byte)(b*0xFF), 255};
+	return col;
+}
+
+Color color_new4f(float r, float g, float b, float a)
+{
+	Color col = {(byte)(r*0xFF), (byte)(g*0xFF), (byte)(b*0xFF), (byte)(a*0xFF)};
+	return col;
+}
+

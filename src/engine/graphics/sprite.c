@@ -87,7 +87,7 @@ int sprite_packload(const char* spritepack)
 	readln(); //filter: Mag,Min
 	readln(); //repeat: x/y/xy
 
-	float scale = 1;
+	float scale_x = 1, scale_y = 1;
 #if TARGET_OS_IPHONE //TODO check ext if current gpu supports pvrt1_4bpp
 	char *suffix = memchr(texname, '.', line_size);
 	if (strcmp(suffix, ".png") == 0) {
@@ -96,6 +96,7 @@ int sprite_packload(const char* spritepack)
 
 	#warning "tmp fix for rescaled images"
 	//scale = 0.5;
+    scale_y = 2.0;
 #warning old ios devices not supported atm!
 #endif
 
@@ -115,7 +116,7 @@ int sprite_packload(const char* spritepack)
 
 		//TODO normalize uv-pos and size
 
-		sprite_subimg subimg = {x*scale,y*scale,(x+w)*scale,(y+h)*scale};
+		sprite_subimg subimg = {x*scale_x,y*scale_y,(x+w)*scale_x,(y+h)*scale_y};
 		sprite_add_subimg(tex_id, sprname, subimg, i);
 	}
 

@@ -157,6 +157,7 @@ void bmfont_right(bm_font *font, cpVect pos, float scale, const char *format, ..
 
 void bmfont_render(bm_font *font, int align, float x, float y, float scale, unsigned const char *text)
 {
+	//TODO draw text center-vertically aligned
     int line_width = get_line_width(font, text);
 
     draw_push_matrix();

@@ -70,6 +70,10 @@ void statesystem_set_state(STATE_ID state);
 void statesystem_call_update(STATE_ID state_id);
 void statesystem_push_event(SDL_Event *event);
 
+cpVect statesystem_last_touch_game(void);
+cpVect statesystem_last_touch_port(void);
+cpVect statesystem_last_touch_view(void);
+
 int state_remove_touchable(STATE_ID state_id, touchable *touchable);
 void state_register_touchable(STATE_ID state_id, touchable *touchable);
 void state_register_touchable_view(view *cam, touchable *touchable);

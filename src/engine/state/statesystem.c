@@ -519,12 +519,13 @@ void statesystem_destroy(void)
 	llist_destroy(ll_states);
 }
 
+static cpVect game_p, port_p, view_p;
+
 //TODO CLEAN UP THIS MESSY FUNCTION!
 void statesystem_push_event(SDL_Event *event)
 {
 	static Uint32 latest_motion_event = 0;
 	int consumed = 0;
-	cpVect game_p, port_p, view_p;
 	LList game_touchies = stack_head->touch_objects;
 	float tx = event->tfinger.x, ty = event->tfinger.y;
 
@@ -693,6 +694,21 @@ void statesystem_push_event(SDL_Event *event)
 	}
 	llist_end_loop(game_touchies);
 }
+
+
+cpVect statesystem_last_touch_game(void)
+{
+	return game_p;
+}
+cpVect statesystem_last_touch_port(void)
+{
+	return port_p;
+}
+cpVect statesystem_last_touch_view(void)
+{
+	return view_p;
+}
+
 
 void statesystem_call_update(STATE_ID state_id)
 {

@@ -93,6 +93,7 @@ void solarsystem_add_station(solarsystem * sol, SPRITE_ID spr_id, Color color, i
 	s->pos = cpvadd(WE_P2C(radius,angle), sol->origo);
 	s->col = color;
 	Color col_back = {255,200,180,255};//{255,180,140,255};
+	//TODO have individual sprites for stations
 	s->btn = button_create(SPRITE_STATION001, 0, s->name, s->pos.x, s->pos.y, size, size);
 	button_set_click_callback(s->btn, button_callback, s);
 	button_set_txt_antirot(s->btn, 1);

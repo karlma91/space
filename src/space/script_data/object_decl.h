@@ -135,6 +135,8 @@ OBJ_START(crate)
 	int is_static;
 OBJ_END
 
-
+OBJ_START(spiky)
+	hpbar hp_bar;
+OBJ_END
 
 #endif /* OBJECT_DECL_H_ */

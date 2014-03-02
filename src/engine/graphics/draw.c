@@ -279,23 +279,23 @@ void draw_line_tex(int layer, int tex_id, float *tex_map, cpVect a, cpVect b, fl
     draw_pop_matrix();
 }
 
-void draw_quad_patch_center_spr(int layer, sprite *spr, cpVect pos, cpVect size, float w, float angle)
+void draw_quad_patch_center_spr(int layer, sprite *spr, cpVect pos, cpVect size, float corner, float angle)
 {
 	float tex_map[8];
 	sprite_get_current_image(spr,tex_map);
 	int tex_id = sprite_get_texture(spr->id);
-	draw_quad_patch_center_tex(layer, tex_id, tex_map, pos, size, w, angle);
+	draw_quad_patch_center_tex(layer, tex_id, tex_map, pos, size, corner, angle);
 }
 
-void draw_quad_patch_center(int layer, SPRITE_ID id, cpVect pos, cpVect size, float w, float angle)
+void draw_quad_patch_center(int layer, SPRITE_ID id, cpVect pos, cpVect size, float corner, float angle)
 {
 	float tex_map[8];
 	sprite_get_subimg_by_index(id, 0, tex_map);
 	int tex_id = sprite_get_texture(id);
-	draw_quad_patch_center_tex(layer, tex_id, tex_map, pos, size, w, angle);
+	draw_quad_patch_center_tex(layer, tex_id, tex_map, pos, size, corner, angle);
 }
 
-void draw_quad_patch_center_tex(int layer, int tex_id, float *tex_map, cpVect pos, cpVect size, float w, float angle)
+void draw_quad_patch_center_tex(int layer, int tex_id, float *tex_map, cpVect pos, cpVect size, float corner, float angle)
 {
 
 	texture_bind_virt(tex_id);
@@ -341,15 +341,15 @@ void draw_quad_patch_center_tex(int layer, int tex_id, float *tex_map, cpVect po
 			tx_2,  ty_2};
 
 
-	float x0 = -size.x/2 - w;
-	float x1 = -size.x/2;
-	float x2 =  size.x/2;
-	float x3 =  size.x/2 + w;
+	float x0 = -size.x/2;// - corner;
+	float x1 = -size.x/2 + corner;
+	float x2 =  size.x/2 - corner;
+	float x3 =  size.x/2;// + corner;
 
-	float y0 = -size.y/2 - w;
-	float y1 = -size.y/2;
-	float y2 =  size.y/2;
-	float y3 =  size.y/2 + w;
+	float y0 = -size.y/2;// - corner;
+	float y1 = -size.y/2 + corner;
+	float y2 =  size.y/2 - corner;
+	float y3 =  size.y/2;// + corner;
 
 	GLfloat line_top[16] = {
 			x0, y0, x0, y1,
