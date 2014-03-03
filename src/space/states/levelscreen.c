@@ -24,9 +24,9 @@ static button edit_level;
 
 static view *main_view;
 
-static Color col_radar = {250,230,90,255};
-
-//static Color col_selected= {0,255,0,255};
+static Color col_radar = {68,116,165,0};
+static Color col_back = {23*0.8, 93*0.8, 159*0.8, 255*0.8};
+static Color col_btns = {255,57,0,255};
 
 static button btn_disable;
 static button btn_background;
@@ -94,9 +94,11 @@ static void post_update(void)
 
 static void draw(void)
 {
-	//TODO be able to toggle between radar view and stations view of space station
-	draw_color4f(1,1,1,1);
-	draw_quad_patch_center(4,SPRITE_DIALOG1, box.p, box.s, 150, 0);
+	//TODO be able to toggle between radar view and stations view of space station?
+	draw_color(col_back);
+	draw_quad_patch_center(4,SPRITE_CIRCLE, box.p, box.s, 50, 0);
+
+	draw_color(COL_WHITE);
 	bmfont_center(FONT_SANS_PLAIN, cpv(0,250), 1.3, from_station->name);
 
 	if (level_loaded) {
@@ -156,9 +158,11 @@ void levelscreen_init(void)
 
 	main_view = state_view_get(state_levelscreen,0);
 
-	edit_level = button_create(SPRITE_BTN1, 1, "", -260, LVLSCREEN_BASE, 135, 135);
+	edit_level = button_create(SPRITE_BTN2, 1, "", -260, LVLSCREEN_BASE, 135, 135);
 	button_set_click_callback(edit_level, button_playedit_callback, state_editor);
 	button_set_font(edit_level, FONT_SANS_PLAIN, 1);
+	button_set_backcolor(edit_level, col_btns);
+	button_set_border(edit_level, 25);
 	//button_set_enlargement(edit_level, 2);
 
 	//TODO remove remove_button!
@@ -166,11 +170,14 @@ void levelscreen_init(void)
 	button_set_click_callback(remove_level, button_remove_callback, NULL);
 	button_set_enlargement(remove_level, 2); //TODO add confirmation box here!
 
-	start_level =  button_create(SPRITE_BTN1, 1, "Play!", 0, LVLSCREEN_BASE, 370, 135);
+	start_level =  button_create(SPRITE_BTN2, 1, "Play!", 0, LVLSCREEN_BASE, 370, 135);
 	button_set_click_callback(start_level, button_playedit_callback, state_space);
+	button_set_backcolor(start_level, col_btns);
 	//button_set_enlargement(start_level, 2);
 	button_set_font(start_level, FONT_SANS_PLAIN, 1);
 	button_set_hotkeys(start_level, SDL_SCANCODE_SPACE, 0);
+	button_set_border(start_level, 25);
+
 	state_register_touchable(this, start_level);
 	state_register_touchable(this, edit_level);
 	state_register_touchable_view(main_view, btn_settings);

@@ -17,7 +17,7 @@ LList user_system;
 
 static scroll_p scroller;
 
-static Color col_unfocus = {40,40,65,0}; //{0,0,0,255};
+static Color col_unfocus = {0,0,0,0}; //{0,0,0,255};
 static we_bool lost_focus = WE_FALSE;
 static float focus_a = 0;
 

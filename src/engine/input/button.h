@@ -26,6 +26,7 @@ void button_set_txt_antirot(button btn_id, int antirot);
 void button_set_click_callback(button btn_id, btn_click_callback click_callback, void *click_data);
 void button_set_drag_callback(button btn_id, btn_drag_callback drag_callback, void *drag_data);
 void button_set_hotkeys(button btn_id, SDL_Scancode key, SDL_Scancode key_alt);
+void button_set_border(button btn_id, float width);
 
 void button_set_backcolor(button btn_id, Color col);
 void button_set_frontcolor(button btn_id, Color col);

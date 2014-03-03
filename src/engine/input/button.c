@@ -44,6 +44,8 @@ struct button {
 	float font_size;
 	bm_font *font;
 
+	float border;
+
 	Color backcol;
 	Color frontcol;
 
@@ -92,6 +94,8 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 	touch_place((touchable *) btn, pos_x, pos_y);
 	button_clear((button) btn);
 
+	btn->border = height/2;
+
 	return (button) btn;
 }
 
@@ -122,6 +126,12 @@ void button_set_hotkeys(button btn_id, SDL_Scancode key, SDL_Scancode key_alt)
 	btn->key2 = key_alt;
 }
 
+
+void button_set_border(button btn_id, float width)
+{
+	struct button *btn = (struct button *) btn_id;
+	btn->border = width;
+}
 
 void button_set_backcolor(button btn_id, Color col)
 {
@@ -244,7 +254,7 @@ static void render(button btn_id)
 	} else if (btn->spr.id) {
 		draw_color(btn->backcol);
 		if (btn->stretch) {
-			draw_quad_patch_center_spr(1, &(btn->spr), btn_pos, cpv(width, height), height/2, 0);
+			draw_quad_patch_center_spr(1, &(btn->spr), btn_pos, cpv(width, height), btn->border, 0);
 			//draw_line_spr(1, &(btn->spr), a, b, height, 0);
 		} else {
 			sprite_render_scaled(1, &(btn->spr), btn_pos, 0, scale);
