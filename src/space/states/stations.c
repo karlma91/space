@@ -237,12 +237,13 @@ void stations_init(void)
 
 	user_system = solarsystem_load_solar("levels/userlevels.json");
 
-	Color col_back = {30,100,30,255};
+	Color col_back = {30,100,200,255};
 
 	main_view = state_view_get(state_stations, 0);
 	main_view->GUI = draw_gui;
 
-	btn_home = button_create(SPRITE_BTN1, 1, "$$$", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 200, 250, 250);
+	btn_home = button_create(SPRITE_BTN2, 1, "Upgrade", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 100, 350, 125);
+    button_set_border(btn_home, 25);
 	button_set_click_callback(btn_home, open_upgrades, 0);
 	button_set_enlargement(btn_home, 0.9);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);

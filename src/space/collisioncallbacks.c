@@ -66,7 +66,7 @@ static void collision_bullet_VS_object_with_score(cpArbiter *arb, cpSpace *space
 		if (damage) {
 			fprintf(stderr, "DEBUG: HURTING destroyable tile!\n");
 			meta_tile *meta = b->data;
-			if (meta->hp > 0) {
+			if (meta->hp > 0 && damage) {
 				meta->hp -= *damage;
 				if (meta->hp <= 0 && meta->destroyable) {
 					fprintf(stderr, "DEBUG: removing destroyable tile!\n");

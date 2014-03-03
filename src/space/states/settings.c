@@ -208,7 +208,8 @@ void settings_init(void)
 
 	int i;
 	for (i = 0; i < OPTION_COUNT; i++) {
-		btn_options[i] = button_create(SPRITE_BTN_PUSH, 1, str_options[i], 0, 0, 800, 115);
+		btn_options[i] = button_create(SPRITE_BTN2, 1, str_options[i], 0, 0, 800, 115);
+        button_set_border(btn_options[i], 25);
 		button_set_click_callback(btn_options[i], (void (*)(void *))option_click, NULL + i);
 		button_set_hotkeys(btn_options[i], digit2scancode[(i+1) % 10], 0);
 		state_register_touchable_view(view_box, btn_options[i]);

@@ -96,7 +96,7 @@ int sprite_packload(const char* spritepack)
 
 	#warning "tmp fix for rescaled images"
 	//scale = 0.5;
-    scale_y = 2.0;
+    //scale_y = 2.0;
 #warning old ios devices not supported atm!
 #endif
 
