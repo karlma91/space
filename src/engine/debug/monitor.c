@@ -51,16 +51,16 @@ void monitor_render(view *cam)
             cpVect p = cpv(-cam->view_width/2 ,250-j*30);
             switch(prints[j].type){
             case T_F:
-                bmfont_left(FONT_NORMAL,p,1,"%s:%.4f",prints[j].name, prints[j].fv);
+                bmfont_left(FONT_NORMAL,p,30,"%s:%.4f",prints[j].name, prints[j].fv);
                 break;
             case T_I:
-                bmfont_left(FONT_NORMAL,p,1,"%s:%d",prints[j].name, prints[j].iv);
+                bmfont_left(FONT_NORMAL,p,30,"%s:%d",prints[j].name, prints[j].iv);
                 break;
             case T_S:
-                bmfont_left(FONT_NORMAL,p,1,"%s:%s",prints[j].name, prints[j].sv);
+                bmfont_left(FONT_NORMAL,p,30,"%s:%s",prints[j].name, prints[j].sv);
                 break;
             case T_C:
-                bmfont_left(FONT_NORMAL,p,1,"%s:(%.1f,%.1f)",prints[j].name, prints[j].cv.x, prints[j].cv.y);
+                bmfont_left(FONT_NORMAL,p,30,"%s:(%.1f,%.1f)",prints[j].name, prints[j].cv.x, prints[j].cv.y);
                 break;
             }
             j++;

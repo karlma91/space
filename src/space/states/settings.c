@@ -191,7 +191,7 @@ static void gui(view *cam)
 	draw_box(2, cpvzero,cpv(SCROLL_WIDTH,GAME_HEIGHT),0,1);
 
 	draw_color(COL_WHITE);
-	bmfont_center(FONT_SANS, cpv(0, GAME_HEIGHT/2 - 100), 1.5, "Settings");
+	bmfont_center(FONT_SANS, cpv(0, GAME_HEIGHT/2 - 100), 100, "Settings");
 }
 
 void settings_init(void)

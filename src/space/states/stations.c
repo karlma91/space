@@ -177,7 +177,12 @@ static void draw(void)
 	draw_push_matrix();
 	draw_translate(1900,-1750);
 	draw_rotate(-current_view->rotation);
-	bmfont_center(FONT_SANS, cpvzero,1,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
+	//bmfont_center(FONT_SANS_PLAIN,  cpv(0,400),100,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
+	bmfont_center(FONT_SANS, cpvzero,100,"Font sans");//\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
+	bmfont_center(FONT_BIG, cpv(0,100),100,"Font big");//\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
+	bmfont_center(FONT_COURIER,  cpv(0,200),100,"Font courier");//\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
+	bmfont_center(FONT_NORMAL,  cpv(0,300),100,"Font normal");//\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
+	bmfont_center(FONT_SANS_PLAIN,  cpv(0,400),100,"Font sans plain");
 	draw_pop_matrix();
 
 	llist_begin_loop(user_system);

@@ -597,12 +597,12 @@ static void draw_gui(view *v)
 	case MODE_RESIZE:
 	case MODE_OBJECTS:
 		draw_quad_patch_center(0, SPRITE_PLAYERGUN001, cpv(x,y), cpv(200,200), 20, 0);
-		bmfont_center(FONT_COURIER, cpv(0,-v->view_height/2),1,"MODE: %d",(int)current_mode);
+		bmfont_center(FONT_COURIER, cpv(0,-v->view_height/2),60,"MODE: %d",(int)current_mode);
 		draw_color4b(50,50,50,25);
 		draw_box(RLAY_GUI_BACK,cpv(-GAME_WIDTH/2+panel_offset,-GAME_HEIGHT/2),cpv(PANEL_WIDTH, GAME_HEIGHT),0,0);
 		break;
 	case MODE_TILEMAP:
-		bmfont_center(FONT_COURIER, cpv(0,-v->view_height/2),1,"col: %d, row: %d", grid_i_cur.xcol, grid_i_cur.yrow);
+		bmfont_center(FONT_COURIER, cpv(0,-v->view_height/2),60,"col: %d, row: %d", grid_i_cur.xcol, grid_i_cur.yrow);
 		break;
 	}
 }

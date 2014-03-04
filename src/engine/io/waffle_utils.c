@@ -108,8 +108,8 @@ void waffle_init(void)
 	game_data = zzip_dir_open(APK_PATH, &zzip_err); // NB! is actually .apk, not game_data
 	strcpy(&INTERNAL_PATH[0], SDL_AndroidGetInternalStoragePath());
 #else
-	game_data = zzip_dir_open_ext_io(GAME_RESOURCES, &zzip_err, ext, &io_handler);
-	//game_data = zzip_dir_open("game_data.zip", &zzip_err);
+	//game_data = zzip_dir_open_ext_io(GAME_RESOURCES, &zzip_err, ext, &io_handler);
+	game_data = zzip_dir_open("game_data.zip", &zzip_err);
 	if (!game_data) {
 		SDL_Log("ERROR: game data could not be loaded!\n"
 				"Run ./zip_res.sh to compress current game data");

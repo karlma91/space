@@ -45,7 +45,7 @@ static void draw(void)
 		draw_color4f(0.3,0.4,0.5,0.5); //draw_color4f(0,0,0,0.8);
 		draw_box(4, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
 		draw_color(COL_WHITE);
-		bmfont_center(FONT_SANS, cpv(0, -100),0.8,level_time_buf);
+		bmfont_center(FONT_SANS, cpv(0, -100),50,level_time_buf);
 		//bmfont_center(FONT_SANS, cpv(0, 350),1.5,"Level %d.%d cleared!", currentlvl->station,currentlvl->deck);
 	} else {
 		draw_color4f(0.3,0.1,0.1,0.7); //draw_color4f(0,0,0,0.8);

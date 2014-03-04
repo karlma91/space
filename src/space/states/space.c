@@ -432,25 +432,25 @@ static void draw_gui(view *cam)
 		obj_player *player = current_view == view_p1 ? player1 : player2;
 		if (player) score = player->coins;
 		sprite_render_by_id(RLAY_GUI_FRONT, SPRITE_COIN, cpv(vleft+40,vtop-35),cpv(60,60),0);
-		bmfont_left(FONT_SANS, cpv(vleft+70,vtop-60), 1, "%d", score);
+		bmfont_left(FONT_SANS, cpv(vleft+70,vtop-60), 60, "%d", score);
 		//bmfont_center(FONT_SANS, cpv(vcenter, vbot+24),0.7,"Level %d.%d", currentlvl->station,currentlvl->deck);
 
 		//DEBUG INSTANCE COUNT
 		draw_color4f(0.5,0.1,0.1,1);
-		bmfont_left(FONT_SANS, cpv(vleft+70,vbot+100), 0.5, "%d",
+		bmfont_left(FONT_SANS, cpv(vleft+70,vbot+100), 30, "%d",
 				instance_count(obj_id_factory)+
 				instance_count(obj_id_turret)+
 				instance_count(obj_id_tank));
 
 #if !ARCADE_MODE
 		draw_color4f(1.0,0.4,0.4,1);
-		bmfont_right(FONT_SANS, cpv(vright-15, vtop-40), 0.5, fps_buf);
+		bmfont_right(FONT_SANS, cpv(vright-15, vtop-40), 30, fps_buf);
 #endif
 		if (!multiplayer) {
 			char str_time[20];
 			font_time2str(str_time, game_time);
 			draw_color(COL_WHITE);
-			bmfont_left(FONT_SANS, cpv(vcenter-150, vtop-60),1,"%s",str_time);
+			bmfont_left(FONT_SANS, cpv(vcenter-150, vtop-60),60,"%s",str_time);
 		}
 	}
 
@@ -470,16 +470,16 @@ static void draw_gui(view *cam)
 		font_drawText(0,-cam->view_width/2+100, 0, "CO-OP PLAYER 1");
 		setTextAngle(0);
 
-		bmfont_center(FONT_SANS, cpv(vcenter, vbot+60), 1, "- Move - Single player - Fire -");
+		bmfont_center(FONT_SANS, cpv(vcenter, vbot+60), 60, "- Move - Single player - Fire -");
 #else
-		bmfont_center(FONT_SANS, cpv(vcenter, vcenter), 2, "GET READY!");
+		bmfont_center(FONT_SANS, cpv(vcenter, vcenter), 120, "GET READY!");
 #endif
 		/* no break */
 	case LEVEL_RUNNING:
 		break;
 	case LEVEL_CLEARED:
 #if ARCADE_MODE
-		bmfont_center(FONT_SANS, cpv(vcenter, vcenter), 2, "LEVEL CLEARED!");
+		bmfont_center(FONT_SANS, cpv(vcenter, vcenter), 120, "LEVEL CLEARED!");
 #endif
 		break;
 	case LEVEL_TRANSITION:
@@ -488,7 +488,7 @@ static void draw_gui(view *cam)
 
 #if ARCADE_MODE
 		draw_color(COL_RED);
-		bmfont_center(FONT_SANS, cpv(vcenter, vcenter), 2, "GAME OVER!");
+		bmfont_center(FONT_SANS, cpv(vcenter, vcenter), 120, "GAME OVER!");
 		draw_color4f(0.1,0.9,0.1,1);
 		sprite_update(&spr_startbtn);
 		sprite_render(RLAY_GUI_MID, &spr_startbtn, cpv(0,-0.5f*GAME_HEIGHT/2), 0);
@@ -501,7 +501,7 @@ static void draw_gui(view *cam)
 
 	if (waiting_continue) {
 		draw_color4f(1,1,1,1);
-		bmfont_center(FONT_SANS, cpvzero, 1, "Tap for results!");
+		bmfont_center(FONT_SANS, cpvzero, 60, "Tap for results!");
 	}
 
 }

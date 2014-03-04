@@ -50,8 +50,8 @@ static void draw(void)
 	draw_box(RLAY_BACK_BACK, cpv(0, 0),cpv(GAME_WIDTH, GAME_HEIGHT),0,1);
 	draw_color(COL_WHITE);
 	draw_quad_patch_center(RLAY_BACK_BACK,SPRITE_COIN,cpvzero,cpv(800,500),100,0);
-	bmfont_center(FONT_COURIER, cpv(0,150), 1.4, title);
-	bmfont_center(FONT_COURIER, cpv(0,90), 1.0, msg);
+	bmfont_center(FONT_COURIER, cpv(0,150), 200, title);
+	bmfont_center(FONT_COURIER, cpv(0,90), 60, msg);
 }
 
 static void on_pause(void)

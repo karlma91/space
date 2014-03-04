@@ -109,7 +109,7 @@ static void draw(void)
 	//draw_quad_patch_center(RLAY_BACK_BACK,SPRITE_CIRCLE, box.p, box.s, 50, 0);
 
 	draw_color(COL_WHITE);
-	bmfont_center(FONT_SANS, cpv(0,MAPSIZE/2 + 60), 1.3, from_station->name);
+	bmfont_center(FONT_SANS, cpv(0,MAPSIZE/2 + 60), 80, from_station->name);
 
 	if (level_loaded) {
 		sprite_render_by_id(0, SPRITE_BTN_EDIT, cpv(-GAME_WIDTH/2 + 130, GAME_HEIGHT/2 - 130), cpv(135, 135), 0);
@@ -136,7 +136,7 @@ static void draw(void)
 		draw_pop_matrix();
 
 	} else {
-		bmfont_center(FONT_SANS_PLAIN,cpvzero, 1, "Loading!");
+		bmfont_center(FONT_SANS_PLAIN,cpvzero, 60, "Loading!");
 	}
 }
 

@@ -46,7 +46,7 @@ static void draw(void)
     draw_scale(zoom,zoom);
 	for (i=0; i<LINE_COUNT; i++) {
 		pos.y -= 30; //TODO add scroll offset
-		bmfont_left(FONT_COURIER, pos, 0.5, "%s", debug_log[i]);
+		bmfont_left(FONT_COURIER, pos, 30, "%s", debug_log[i]);
 	}
 }
 

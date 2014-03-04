@@ -85,7 +85,7 @@ button button_create(SPRITE_ID spr_id, int stretch, const char *text, float pos_
 
 	btn->animated = 0;
 	btn->down_size = 1;
-	btn->font_size = 1;
+	btn->font_size = 58;
 	btn->font = FONT_SANS;
 	btn->current_size = btn->down_size;
 
@@ -268,7 +268,9 @@ static void render(button btn_id)
 		draw_push_matrix();
 		draw_translate(x,y);
 		draw_rotate(btn->txt_antirot ? -current_view->rotation : 0);
-		bmfont_center(btn->font, cpvzero, btn->font_size * scale, "%s", btn->label);
+		scale -= 1;
+		scale = scale >=0? scale : 0;
+		bmfont_super_center(btn->font, cpvzero, btn->font_size + btn->font_size*scale, "%s", btn->label);
 		draw_pop_matrix();
 	}
 }

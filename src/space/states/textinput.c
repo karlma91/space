@@ -75,8 +75,8 @@ static void draw(void)
 	int over_min = buffer_length >= min_length;
 	draw_color3f(1, 1*over_min, 1*over_min);
 
-	bmfont_left(FONT_COURIER, cpv(-300,300), 1.5, title);
-	bmfont_left(FONT_COURIER, cpv(-300,200), 1, "%s", input_buffer);
+	bmfont_left(FONT_COURIER, cpv(-300,300), 100, title);
+	bmfont_left(FONT_COURIER, cpv(-300,200), 60, "%s", input_buffer);
 
 }
 
