@@ -376,7 +376,7 @@ static void draw(void)
 	/* draw tilemap */
 	//tilemap_render(RLAY_BACK_BACK, currentlvl->tiles);
 	space_draw_deck(lvl_tmpl);
-	tilemap2_render(&currentlvl->tm);
+	tilemap_render(&currentlvl->tm);
 	//draw_light_map();
 }
 

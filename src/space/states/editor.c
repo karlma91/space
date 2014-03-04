@@ -841,7 +841,7 @@ static void draw(void)
 	r1 -= margin; r2 += margin;
 
 	if (margin > 0.5) draw_donut(RLAY_GAME_FRONT, cpvzero, r1 < 0 ? 0 : r1, r2);
-	tilemap2_render(&lvl_tmpl->tm);
+	tilemap_render(&lvl_tmpl->tm);
 }
 
 static int sdl_event(SDL_Event *event)

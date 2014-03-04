@@ -30,7 +30,7 @@ int tile_render_layers[TILEMAP_LAYERS] = {
 		RLAY_BACK_MID
 };
 
-void tilemap2_render(tilemap *tm)
+void tilemap_render(tilemap *tm)
 {
 	draw_color(COL_WHITE);
 	//texture_bind_virt(SPRITE_WHITE);

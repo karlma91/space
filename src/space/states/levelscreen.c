@@ -10,6 +10,7 @@
 #include "../game.h"
 #include "we_defstate.h"
 #include "editor.h"
+#include "../tilemap.h"
 
 static spacelvl *current_lvl_tmpl = NULL;
 static station *from_station = NULL;
@@ -24,7 +25,7 @@ static button edit_level;
 
 static view *main_view;
 
-static Color col_radar = {68,116,165,0};
+static Color col_radar = {50,100,150,50};
 static Color col_back = {23*0.8, 93*0.8, 159*0.8, 255*0.8};
 static Color col_btns = {255,57,0,255};
 
@@ -96,15 +97,23 @@ static void draw(void)
 {
 	//TODO be able to toggle between radar view and stations view of space station?
 	draw_color(col_back);
-	draw_quad_patch_center(4,SPRITE_CIRCLE, box.p, box.s, 50, 0);
+	draw_quad_patch_center(RLAY_BACK_BACK,SPRITE_CIRCLE, box.p, box.s, 50, 0);
 
 	draw_color(COL_WHITE);
 	bmfont_center(FONT_SANS_PLAIN, cpv(0,250), 1.3, from_station->name);
 
 	if (level_loaded) {
+		float mapsize = 185;
 		sprite_render_by_id(0, SPRITE_BTN_EDIT, cpv(-260, LVLSCREEN_BASE), cpv(135, 135), 0);
 		draw_color(col_radar);
-		draw_donut(0, cpv(0,23), current_lvl_tmpl->inner_radius / current_lvl_tmpl->outer_radius * 185, 185);
+		draw_donut(RLAY_BACK_MID, cpv(0,23), current_lvl_tmpl->inner_radius / current_lvl_tmpl->outer_radius * mapsize, mapsize);
+
+		draw_push_matrix();
+		float scale = mapsize / current_lvl_tmpl->outer_radius;
+		draw_translate(0,23);
+		draw_scale(scale, scale);
+		tilemap_render(&current_lvl_tmpl->tm);
+		draw_pop_matrix();
 
 	} else {
 		bmfont_center(FONT_SANS_PLAIN,cpvzero, 1, "Loading!");

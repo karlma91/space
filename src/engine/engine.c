@@ -486,14 +486,20 @@ static void initGP(void)
 		void main() {
 			float light = 1.0;
 			vec4 tex = texture2D(texUnit, texCoord);
-			//vec3 hsv = rgb2hsv(tex.xyz);
-			//float hf = 0.5;
-			//float sf = 0.1;
-			//float h = uTime * hf - floor(uTime * hf);
-			//float s = uTime * sf - floor(uTime * sf);
-			//hsv.x += h;
-			//hsv.y += s;
-			//tex.xyz = hsv2rgb(hsv);
+
+			//tex += texture2D(texUnit, texCoord + vec2(1.0, 1.0));
+			//tex -= texture2D(texUnit, texCoord + vec2(-1.0, -1.0));
+
+			/*
+			vec3 hsv = rgb2hsv(tex.xyz);
+			float hf = 0.5;
+			float sf = 0.1;
+			float h = uTime * hf - floor(uTime * hf);
+			float s = uTime * sf - floor(uTime * sf);
+			hsv.x += h;
+			hsv.y += s;
+			tex.xyz = hsv2rgb(hsv);
+			*/
 
 			gl_FragColor = tex * (col/255.0) * vec4(light,light,light,1.0);
 			//gl_FragColor = texture2D(texUnit, texCoord) * (col/255.0) * vec4(light,light,light,1) - 0.3*abs(vec4(cos(verCoord.x/68-uTime*3.5)/2,sin(verCoord.y/50-uTime*1.5),cos(verCoord.y/130+uTime/2)*sin(verCoord.x/120+uTime*2),0));
