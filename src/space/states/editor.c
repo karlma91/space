@@ -846,6 +846,13 @@ static void draw(void)
 
 static int sdl_event(SDL_Event *event)
 {
+	float z = scroll_get_zoom(scr_world);
+	switch (event->type) {
+	case SDL_MOUSEWHEEL:
+		z *=  event->wheel.y > 0 ? 1.1 : 0.9;
+		scroll_set_zoom(scr_world, z);
+		return 1;
+	}
 	return 0;
 }
 
@@ -860,9 +867,12 @@ static void on_enter(STATE_ID state_prev)
 		lvl_tmpl = get_current_lvl_template();
 		currentlvl = lvl_tmpl;
 		strncpy(level_name, lvl_tmpl->name, MAX_NAME_LENGTH);
-		objectsystem_clear();
+		//objectsystem_clear();
 		spacelvl_load2state(lvl_tmpl);
 		editor_setmode(MODE_OBJECTS);
+		scroll_set_offset(scr_world,cpvzero);
+		float zoom = MAPSIZE / (lvl_tmpl->outer_radius);
+		scroll_set_zoom(scr_world, zoom);
 	}
 	currentlvl = lvl_tmpl;
 }

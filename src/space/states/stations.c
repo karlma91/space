@@ -159,6 +159,13 @@ static void post_update(void)
 
 static int sdl_event(SDL_Event *event)
 {
+	float z = scroll_get_zoom(scroller);
+	switch (event->type) {
+	case SDL_MOUSEWHEEL:
+		z *=  event->wheel.y > 0 ? 1.1 : 0.9;
+		scroll_set_zoom(scroller, z);
+		return 1;
+	}
 	return 0;
 }
 
@@ -261,7 +268,7 @@ void stations_init(void)
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 1, 0); // max 4 000 gu / sec
 	scroll_set_bounds(scroller, cpBBNew(-60000, -60000, 60000, 60000));
 	scroll_set_zoomlimit(scroller, 0.01, 1);
-	scroll_set_zoom(scroller,0.5);
+	scroll_set_zoom(scroller,0.2);
 	state_register_touchable_view(main_view, scroller);
 
 	state_add_layers(state_stations, 22);

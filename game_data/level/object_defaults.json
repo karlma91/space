@@ -169,11 +169,11 @@
     {
       "type": "crate",
       "name": "def",
-      "sprite": "factoryblue",
+      "sprite": "saw",
       "invinc": 0,
       "size": 100,
       "max_hp": 10,
-      "coins": 10,
+      "coins": 2,
       "expl_pname": "medium"
     },
     {

@@ -26,8 +26,11 @@ static button edit_level;
 static view *main_view;
 
 static Color col_radar = {50,100,150,50};
-static Color col_back = {23*0.8, 93*0.8, 159*0.8, 255*0.8};
+//static Color col_back = {23*0.8, 93*0.8, 159*0.8, 255*0.8};
+static Color col_back = {45,45,45,255*0.90};
 static Color col_btns = {255,57,0,255};
+static Color col_player = {20,255,20,255};
+static Color col_enemy  = {255,20,20,255};
 
 static button btn_disable;
 static button btn_background;
@@ -45,6 +48,12 @@ static int load_lvl(void *unused)
 	current_lvl_tmpl = (spacelvl*)spacelvl_parse(WAFFLE_DOCUMENTS, from_station->path);
 	level_loaded = WE_TRUE;
 	start_level->visible = WE_TRUE;
+
+	float size = (current_lvl_tmpl->inner_radius / current_lvl_tmpl->outer_radius * MAPSIZE);
+
+	touch_area(start_level,size*2,size*2);
+	touch_place(start_level, 0,0);
+	button_set_border(start_level,size);
 	edit_level->visible = WE_TRUE;
 	return 1;
 }
@@ -96,23 +105,34 @@ static void post_update(void)
 static void draw(void)
 {
 	//TODO be able to toggle between radar view and stations view of space station?
-	draw_color(col_back);
-	draw_quad_patch_center(RLAY_BACK_BACK,SPRITE_CIRCLE, box.p, box.s, 50, 0);
+	//draw_color(col_back);
+	//draw_quad_patch_center(RLAY_BACK_BACK,SPRITE_CIRCLE, box.p, box.s, 50, 0);
 
 	draw_color(COL_WHITE);
-	bmfont_center(FONT_SANS_PLAIN, cpv(0,250), 1.3, from_station->name);
+	bmfont_center(FONT_SANS, cpv(0,MAPSIZE/2 + 60), 1.3, from_station->name);
 
 	if (level_loaded) {
-		float mapsize = 185;
-		sprite_render_by_id(0, SPRITE_BTN_EDIT, cpv(-260, LVLSCREEN_BASE), cpv(135, 135), 0);
-		draw_color(col_radar);
-		draw_donut(RLAY_BACK_MID, cpv(0,23), current_lvl_tmpl->inner_radius / current_lvl_tmpl->outer_radius * mapsize, mapsize);
+		sprite_render_by_id(0, SPRITE_BTN_EDIT, cpv(-GAME_WIDTH/2 + 130, GAME_HEIGHT/2 - 130), cpv(135, 135), 0);
+		draw_color(col_back);
+		draw_donut(RLAY_BACK_MID, cpv(0,0), current_lvl_tmpl->inner_radius / current_lvl_tmpl->outer_radius * MAPSIZE, MAPSIZE);
 
 		draw_push_matrix();
-		float scale = mapsize / current_lvl_tmpl->outer_radius;
-		draw_translate(0,23);
+		float scale = MAPSIZE / current_lvl_tmpl->outer_radius;
 		draw_scale(scale, scale);
+		space_draw_deck(current_lvl_tmpl);
 		tilemap_render(&current_lvl_tmpl->tm);
+		llist_begin_loop(current_lvl_tmpl->ll_recipes);
+		while(llist_hasnext(current_lvl_tmpl->ll_recipes)) {
+			object_recipe * data = llist_next(current_lvl_tmpl->ll_recipes);
+			if(data->obj_type == obj_id_player) {
+				draw_color(col_player);
+			}else{
+				draw_color(col_enemy);
+			}
+			draw_box(0,data->pos,cpv(80,80),cpvtoangle(data->pos),1);
+		}
+		llist_end_loop(current_lvl_tmpl->ll_recipes);
+
 		draw_pop_matrix();
 
 	} else {
@@ -167,7 +187,7 @@ void levelscreen_init(void)
 
 	main_view = state_view_get(state_levelscreen,0);
 
-	edit_level = button_create(SPRITE_BTN2, 1, "", -260, LVLSCREEN_BASE, 135, 135);
+	edit_level = button_create(SPRITE_BTN2, 1, "", -GAME_WIDTH/2 + 130, GAME_HEIGHT/2 - 130, 135, 135);
 	button_set_click_callback(edit_level, button_playedit_callback, state_editor);
 	button_set_font(edit_level, FONT_SANS_PLAIN, 1);
 	button_set_backcolor(edit_level, col_btns);

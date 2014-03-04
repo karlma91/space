@@ -40,21 +40,26 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	draw_color(COL_WHITE);
-	float border = 40;
-	draw_quad_patch_center_spr(RLAY_GAME_MID, &(crate->data.spr),crate->data.body->p,cpv(crate->param.size-border*2, crate->param.size-border*2), border, crate->data.body->a);
+	float redfade = (0.2 - crate->data.time_destroyed) / 0.2;
+	redfade = redfade < 0 ? 0 : redfade;
+	draw_color4f(1,redfade,redfade,1);
+	float border = 20;
+	draw_quad_patch_center_spr(RLAY_GAME_MID, &(crate->data.spr),crate->data.body->p,cpv(crate->param.size, crate->param.size), border, crate->data.body->a);
 	hpbar_draw(RLAY_GUI_BACK, &crate->hp_bar, cpvtoangle(crate->data.body->p));
 }
 
 static void on_destroy(OBJ_TYPE *OBJ_NAME)
 {
-	explosion_create(crate->data.body->p, EM_EXPLOSIONBIG, EM_FRAGMENTS, SND_BUILDING_EXPLODE, 2500, 250, 0.3, 4);
-	se_spawn_coins((instance *)crate);
-	instance_remove((instance *)crate);
+
 }
 
 static void on_update_dead(OBJ_TYPE *OBJ_NAME)
 {
+	if(crate->data.time_destroyed > 0.2f){
+		explosion_create(crate->data.body->p, EM_EXPLOSIONBIG, EM_FRAGMENTS, SND_BUILDING_EXPLODE, 2500, 250, 0.3, 4);
+		se_spawn_coins((instance *)crate);
+		instance_remove((instance *)crate);
+	}
 }
 
 static void on_remove(OBJ_TYPE *OBJ_NAME)

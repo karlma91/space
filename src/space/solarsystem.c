@@ -37,10 +37,11 @@ solarsystem *solarsystem_create(int solsys_index, char *name, char *folder)
 	strcpy(solsys->folder, folder);
 
 	int i = solsys_index + 2;
-	cpFloat radius = powf(i, 0.8) * 4800;
+	float world_size = 1600;
+	cpFloat radius = powf(i, 0.8) * world_size;
 	cpFloat angle = WE_2PI * powf(i, 0.8) / 3.768226535;//  + we_randf / 50);
 	i = 2;
-	cpFloat off_radius = powf(i, 0.8) * 4800;
+	cpFloat off_radius = powf(i, 0.8) * world_size;
 	cpFloat off_angle = WE_2PI * powf(i, 0.8) / 3.768226535;//  + we_randf / 50);
 
 	cpVect jitter = cpvmult(cpv(we_randf - 0.5, we_randf - 0.5), 100);

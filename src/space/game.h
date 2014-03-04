@@ -46,6 +46,9 @@ extern int CMP_BODIES;
 extern int CMP_MINIMAP;
 extern int CMP_CREATOR;
 
+/* mapsize in levelscreen and editor enter zoom */
+#define MAPSIZE (185*3)
+
 /* component structs? */
 typedef struct {
 	float size;

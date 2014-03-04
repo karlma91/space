@@ -19,6 +19,8 @@ typedef struct {
 	array *sub_images; /* <sprite_subimg> */
 	float aspect_ratio;
 } sprite_data;
+sprite_subimg def_sub_image = {0,0,0,0};
+sprite_data def_sprite_data;
 
 #define FILE_BUFFER_SIZE (1024*256)
 static char buffer[FILE_BUFFER_SIZE];
@@ -26,6 +28,7 @@ static char buffer[FILE_BUFFER_SIZE];
 static hashmap *hm_sprites;
 
 /* sprites used by engine */
+SPRITE_ID SPRITE_DEF_ERROR;
 SPRITE_ID SPRITE_ERROR;
 SPRITE_ID SPRITE_GLOWDOT;
 SPRITE_ID SPRITE_DOT;
@@ -56,6 +59,13 @@ static inline void *readln(void)
 void sprite_init(void)
 {
 	hm_sprites = hm_create();
+
+	strcpy(def_sprite_data.name, "ERRORSPRITE");
+	def_sprite_data.tex_id = 0;
+	def_sprite_data.sub_images = array_new(sizeof(sprite_subimg));
+	array_set_safe(def_sprite_data.sub_images, 0, &def_sub_image);
+	def_sprite_data.aspect_ratio = 1;
+	SPRITE_DEF_ERROR = &def_sprite_data;
 
 	/*
 	SPRITE_ERROR = sprite_link("error");
@@ -149,7 +159,10 @@ SPRITE_ID sprite_link(const char *name)
 	char name_lower[SPRITE_MAX_LEN];
 	strtolower(name_lower, name);
 	sprite_data *spr_id = hm_get(hm_sprites, name_lower);
-	if (!spr_id) SDL_Log("SPRITE: %s does not exist",name_lower);
+	if (!spr_id){
+		SDL_Log("SPRITE: %s does not exist",name_lower);
+		return SPRITE_DEF_ERROR;
+	}
 	return spr_id;
 }
 

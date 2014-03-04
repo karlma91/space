@@ -364,7 +364,7 @@ void space_draw_deck(spacelvl *lvl)
 	Color col_back = {50,150,50,255};
 	draw_color(col_back);
 	draw_circle(RLAY_BACK_BACK, cpvzero, lvl->inner_radius+5); //TMP margin to cover holes between tilemap and floor and ceiling
-	draw_donut(RLAY_BACK_BACK, cpvzero, lvl->outer_radius-5, lvl->outer_radius + 300);//0);
+	//draw_donut(RLAY_BACK_BACK, cpvzero, lvl->outer_radius-5, lvl->outer_radius + 300);//0);
 }
 
 static void draw(void)
