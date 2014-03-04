@@ -29,7 +29,7 @@ static tween *testr;
 static cpVect a, b;
 static float r;
 
-static view *main_view;
+view *station_view;
 
 /*
 enum {
@@ -140,10 +140,10 @@ static void pre_update(void)
     tests = tween_cpv_is_done_remove(tests, &b);
     testr = tween_float_is_done_remove(testr, &r);
 
-    main_view->zoom = scroll_get_zoom(scroller);
+    station_view->zoom = scroll_get_zoom(scroller);
     float rot = scroll_get_rotation(scroller);
 	cpVect offset = cpvneg(scroll_get_offset(scroller));
-	view_update(main_view, offset, rot);
+	view_update(station_view, offset, rot);
 
 	llist_begin_loop(user_system);
 	while (llist_hasnext(user_system)) {
@@ -251,8 +251,8 @@ void stations_init(void)
 
 	Color col_back = {30,100,200,255};
 
-	main_view = state_view_get(state_stations, 0);
-	main_view->GUI = draw_gui;
+	station_view = state_view_get(state_stations, 0);
+	station_view->GUI = draw_gui;
 
 	btn_home = button_create(SPRITE_BTN2, 1, "Upgrade", GAME_WIDTH/2 - 200, -GAME_HEIGHT/2 + 100, 350, 125);
     button_set_border(btn_home, 25);
@@ -260,7 +260,7 @@ void stations_init(void)
 	button_set_enlargement(btn_home, 0.9);
 	button_set_hotkeys(btn_home, KEY_RETURN_1, KEY_RETURN_2);
 	button_set_backcolor(btn_home, col_back);
-	state_register_touchable_view(main_view, btn_home);
+	state_register_touchable_view(station_view, btn_home);
 
 	llist_begin_loop(user_system);
 	while (llist_hasnext(user_system)) {
@@ -268,13 +268,13 @@ void stations_init(void)
 	}
 	llist_end_loop(user_system);
 
-	state_register_touchable_view(main_view, btn_settings);
+	state_register_touchable_view(station_view, btn_settings);
 
 	scroller = scroll_create(0,0,GAME_WIDTH,GAME_HEIGHT, 0.98, 3000, 1, 1, 0); // max 4 000 gu / sec
 	scroll_set_bounds(scroller, cpBBNew(-60000, -60000, 60000, 60000));
 	scroll_set_zoomlimit(scroller, 0.01, 1);
 	scroll_set_zoom(scroller,0.2);
-	state_register_touchable_view(main_view, scroller);
+	state_register_touchable_view(station_view, scroller);
 
 	state_add_layers(state_stations, 22);
 

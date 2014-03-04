@@ -90,7 +90,7 @@ void solarsystem_add_station(solarsystem * sol, SPRITE_ID spr_id, Color color, i
 	}
 	s->radius = radius + (we_randf-0.5f) * 100;
 	s->angle = angle;
-	s->rotation_speed = (0.4/radius)*rotation_speed;
+	s->rotation_speed = (100.0/radius)*rotation_speed;
 	s->pos = cpvadd(WE_P2C(radius,angle), sol->origo);
 	s->col = color;
 	Color col_back = {255,200,180,255};//{255,180,140,255};
@@ -133,7 +133,7 @@ void solarsystem_update(solarsystem *sol)
 	llist_begin_loop(sol->stations);
 	while (llist_hasnext(sol->stations)) {
 		station *s = ((station *)llist_next(sol->stations));
-		s->angle += s->rotation_speed;
+		s->angle += s->rotation_speed*dt; //TODO fix dt for angle
 		s->pos = cpvadd(WE_P2C(s->radius,s->angle), sol->origo);
 		touch_place(s->btn,s->pos.x, s->pos.y);
 	}
