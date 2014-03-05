@@ -75,10 +75,10 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	player->data.components[CMP_MINIMAP] = &player->radar_image;
 	player->radar_image = cmp_new_minimap(10, COL_GREEN);
 
-	player->flame = particles_get_emitter(RLAY_BACK_MID, EM_FLAME);
+	player->flame = particles_get_emitter(RLAY_GAME_MID, EM_FLAME);
     if (player->flame) {
         player->flame->self_draw = 1;
-        player->flame->disable = 1;
+        player->flame->disable = 0;//1;
     }
 	player->disable=0;
 
@@ -176,39 +176,35 @@ static void controls(obj_player *player)
     monitor_string("NAME","player");
     monitor_float("HP", player->hp_bar.value);
 
-	if (player->joy_left->amplitude) {
-		cpVect player_dir = cpvrotate(cpv(player->joy_left->axis_x, player->joy_left->axis_y), cpvforangle(-pl_view->rotation));
-		static float FORCE = 50;//, VELOCITY = 435;
-		//cpVect j = cpvmult(player_dir, player->force);
-		cpVect j = cpvmult(player_dir, FORCE);
-		//cpBodySetVelLimit(player->data.body, VELOCITY);
-		//cpBodySetVelLimit(player->gunwheel, VELOCITY);
+    if (player->joy_left->amplitude) {
+    	cpVect player_dir = cpvrotate(cpv(player->joy_left->axis_x, player->joy_left->axis_y), cpvforangle(-pl_view->rotation));
+    	static float FORCE = 50;//, VELOCITY = 435;
+    	//cpVect j = cpvmult(player_dir, player->force);
+    	cpVect j = cpvmult(player_dir, FORCE);
+    	//cpBodySetVelLimit(player->data.body, VELOCITY);
+    	//cpBodySetVelLimit(player->gunwheel, VELOCITY);
+    	if (player_assisted_steering) {
+    		//TODO get appliedForce instead?
+    		cpVect gravity = cpSpaceGetGravity(current_space);
+    		gravity = cpvmult(cpvnormalize_safe(player->data.body->p), cpvlength(gravity));
+    		cpVect F = cpvmult(gravity,(cpBodyGetMass(player->data.body)+cpBodyGetMass(player->gunwheel))*dt);
+    		j.x -= F.x;
+    		j.y -= F.y;
 
-
-		if (player_assisted_steering) {
-			//TODO get appliedForce instead?
-			cpVect gravity = cpSpaceGetGravity(current_space);
-			gravity = cpvmult(cpvnormalize_safe(player->data.body->p), cpvlength(gravity));
-			cpVect F = cpvmult(gravity,(cpBodyGetMass(player->data.body)+cpBodyGetMass(player->gunwheel))*dt);
-			j.x -= F.x;
-			j.y -= F.y;
-
-			float length = cpvlength(j);
-			float max_length = player->force * player->joy_left->amplitude;
-			if (length > max_length) {
-				cpvmult(j, max_length / length);
-			}
-		}
-
-		player->direction_target = cpvtoangle(j);
-
-		cpBodyApplyImpulse(player->data.body, j, cpvzero);//cpvmult(player_dir, -1*dt)); // applies impulse from rocket
-		if (player->flame) player->flame->disable = 0;
-	} else {
-		if (player->flame) player->flame->disable = 1;
-		float vel_angle = cpvtoangle(cpBodyGetVel(player->data.body));
-		player->direction = turn_toangle(vel_angle, player->direction,WE_2PI * dt / 10000);
-	}
+    		float length = cpvlength(j);
+    		float max_length = player->force * player->joy_left->amplitude;
+    		if (length > max_length) {
+    			cpvmult(j, max_length / length);
+    		}
+    	}
+    	player->direction_target = cpvtoangle(j);
+    	cpBodyApplyImpulse(player->data.body, j, cpvzero);//cpvmult(player_dir, -1*dt)); // applies impulse from rocket
+    	if (player->flame) player->flame->disable = 0;
+    } else {
+    	if (player->flame) player->flame->disable = 0;//1;
+    	float vel_angle = cpvtoangle(cpBodyGetVel(player->data.body));
+    	player->direction = turn_toangle(vel_angle, player->direction,WE_2PI * dt / 10000);
+    }
 
 	float aim_angle_target = 0;
 	if (player->joy_right->amplitude) {

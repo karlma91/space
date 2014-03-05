@@ -88,7 +88,7 @@ static void change_state(enum game_state state);
 static void draw_gui(view *cam);
 
 #define GRAVITY 600.0f
-#define DAMPING 0.8f
+#define DAMPING 0.99f
 
 #define ARCADE_LVL_COUNT 7
 #define ARCADE_SCORE_LVL (60 * 5 * 10) // in decisec
@@ -320,21 +320,41 @@ void nan_check_instance(instance *ins, void *msg)
 	}
 }
 
+static void view_update_zoom(view *cam, cpVect pos)
+{
+	cam->p = cpvadd(cam->p, pos);
+}
 static void view_mode_update(view *v, int mode, instance *ins)
 {
 	float rot = 0;
+	float zoom = 1;
 	cpVect pos = ins->body->p;
 	switch(mode){
 	case 0:
 	case 1:
 		rot = -se_tangent(pos);
+		zoom = 1.0f*v->view_height/1500;
 		break;
 	case 2:
+		rot = -se_tangent(pos);
+		zoom = 1.0f*v->view_height/2000;
 		break;
 	case 3:
-		rot = -ins->body->a;
+		rot = -se_tangent(pos);
+		zoom = 1.0f*v->view_height/4000;
 		break;
+	case 4:
+		rot = -se_tangent(pos);
+		zoom = 1.0f*v->view_height/(lvl_tmpl->outer_radius*2);
+		pos = cpvzero;
+		break;
+	case 5:
+		zoom = 1.0f*v->view_height/(lvl_tmpl->outer_radius*2);
+		pos = cpvzero;
+		break;
+
 	}
+	v->zoom = zoom;
 	view_update_zoom(v, pos);
 	view_update(v, pos, rot);
 }
@@ -572,8 +592,6 @@ void space_init_game(void)
 
 	player1 = NULL;
 	player2 = NULL;
-
-	particles_clear(current_particles);
 
 	player1 = (obj_player *)instance_first(obj_id_player);
 	setup_singleplay();

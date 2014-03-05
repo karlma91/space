@@ -114,7 +114,6 @@ object_system *objectsystem_new(void)
 
 	system->space = cpSpaceNew();
 	current_space = system->space;
-
 	return system;
 }
 

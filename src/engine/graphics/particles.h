@@ -116,6 +116,7 @@ struct emitter {
 };
 
 struct system {
+	void *state;
 	LList emitters;
 	cpVect offset;
 	float offset_rot;

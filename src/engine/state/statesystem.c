@@ -146,6 +146,7 @@ void state_enable_particles(STATE_ID state_id, int enabled)
 	State *state = (State *) state_id;
 	if (state->particles == NULL && enabled) {
 		state->particles = particlesystem_new();
+		state->particles->state = state;
 		current_particles = state->particles;
 	}
 	state->particles_enabled = enabled;

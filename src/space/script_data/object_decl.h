@@ -133,6 +133,7 @@ OBJ_START(crate)
 	hpbar hp_bar;
 	int destroyable;
 	int is_static;
+	float expl_delay;
 OBJ_END
 
 OBJ_START(spiky)

@@ -12,6 +12,7 @@ extern particle_system *current_particles;
 
 #define PARTICLE_READ_BUFFER_SIZE 4096
 
+static EMITTER_ID read_emitter_from_file_reload(const char *filename, we_bool reload);
 /**
  * parse functions
  */
@@ -158,7 +159,18 @@ emitter *particles_get_emitter(int layer, EMITTER_ID type)
 {
 	particle_system *partl_sys = current_particles;
 	extern int objsys_terminating;
-	if (!partl_sys || objsys_terminating || !type) return NULL;
+	if( objsys_terminating){
+		SDL_Log("Particles terminating");
+		return NULL;
+	}
+	if (!partl_sys){
+		SDL_Log("ERROR:No particle system");
+		return NULL;
+	}
+	if(!type){
+		SDL_Log("ERROR: get emitter NULL type");
+		return NULL;
+	}
 	if (type->ID != type) {
 		SDL_Log("ERROR: Invalid emitter template!");
 		return NULL;
@@ -250,8 +262,19 @@ void particles_destroy()
  */
 void particles_clear(particle_system *s)
 {
+	if(!s) return;
 	llist_set_remove_callback(s->emitters, (ll_rm_callback) clear_emitter_particles);
 	llist_clear(s->emitters);
+}
+
+void particles_reload_particles(void)
+{
+	hashiterator *it = hm_get_iterator(hm_emitter_names);
+	while(hm_iterator_hasnext(it)) {
+		char *filename = hm_iterator_get_key(it);
+		read_emitter_from_file_reload(filename,1);
+	}
+	hm_iterator_destroy(it);
 }
 
 
@@ -494,12 +517,15 @@ static void default_particle_draw(emitter *em, particle *p)
 /**
  * reads from a xml file made with pedegree slick2d particle editor
  */
-EMITTER_ID read_emitter_from_file(const char *filename)
+static EMITTER_ID read_emitter_from_file_reload(const char *filename, we_bool reload)
 {
 	EMITTER_ID id = particles_bind_emitter(filename);
-	if (id) return id->ID; //TODO be able to re-load emitter templates
+	if (id) {
+		if (!reload) return id->ID;
+	} else {
+		id = calloc(1, sizeof(emitter));
+	}
 
-	id = calloc(1, sizeof(emitter));
 	emitter *em = (emitter *) id;
 	em->ID = id;
 	em->alpha_count = 0;
@@ -510,7 +536,7 @@ EMITTER_ID read_emitter_from_file(const char *filename)
 	em->particle_count = 0;
 	em->waiting_to_die = 0;
 	em->draw_particle = default_particle_draw;
-
+	strncpy(em->name,filename, 32);
 	mxml_node_t * tree = NULL;
 	mxml_node_t * node  = NULL;
 
@@ -619,6 +645,12 @@ EMITTER_ID read_emitter_from_file(const char *filename)
 	hm_add(hm_emitter_names, filename, em);
 	return em->ID;
 }
+
+EMITTER_ID read_emitter_from_file(const char *filename)
+{
+	return read_emitter_from_file_reload(filename, 0);
+}
+
 
 EMITTER_ID particles_bind_emitter(const char *name)
 {

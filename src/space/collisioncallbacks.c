@@ -27,7 +27,7 @@ static void add_sparks_at_contactpoint(cpArbiter *arb, float min_force)
 	}
 }
 
-static void se_add_explotion_at_contact_point(cpArbiter *arb)
+static void se_add_explosion_at_contact_point(cpArbiter *arb)
 {
 	if(cpArbiterGetCount(arb) >0){
 		cpVect v = cpArbiterGetPoint(arb, 0);
@@ -121,7 +121,7 @@ static void collision_player_object(cpArbiter *arb, cpSpace *space, void *unused
 			cpVect force = cpArbiterTotalImpulse(arb);
 			float f = cpvlength(force);
 			if (f > 15) {
-				se_damage_deal((instance *)player, f*0.01);
+				//se_damage_deal((instance *)player, f*0.01);
 			}
 		} else {
 			SDL_Log("Expected object type ID %p, but got %p!\n", obj_id_player, player->TYPE);

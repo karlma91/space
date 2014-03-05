@@ -626,6 +626,9 @@ static void check_events(void)
 			case SDL_SCANCODE_R:
 				glClear(GL_COLOR_BUFFER_BIT);
 				break;
+			case SDL_SCANCODE_F6:
+				particles_reload_particles();
+				break;
 			default:
 				break;
 			}

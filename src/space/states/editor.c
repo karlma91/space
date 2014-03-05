@@ -170,6 +170,11 @@ static void save_level_to_file(void *unused)
 	solarsystem_load_levels_from_folder(user_system);
 	solarsystem_write_solar_file(user_system, "levels/userlevels.json");
 }
+static void test_level(void *unused)
+{
+	save_level_to_file(NULL);
+	statesystem_set_state(state_space);
+}
 
 static void enable_objlist(int enable)
 {
@@ -683,7 +688,7 @@ void editor_init()
 
 	button_set_click_callback(btn_space, statesystem_set_state, state_stations);
 	button_set_click_callback(btn_clear, tap_clear_editor, 0);
-	button_set_click_callback(btn_test, statesystem_set_state, state_space);
+	button_set_click_callback(btn_test, test_level, state_space);
 	button_set_click_callback(btn_save, save_level_to_file, 0);
 
 	button_set_hotkeys(btn_state_toggle, SDL_SCANCODE_1, 0);
@@ -730,8 +735,6 @@ void editor_init()
 	state_register_touchable_view(view_editor, scr_world);
 
 	lvl_tmpl = spacelvl_parse(WAFFLE_ZIP, "empty");
-	//tap_clear_editor(WE_TRUE);
-	clear_msg_callback(1);
 }
 
 /* * * * * * * * * *

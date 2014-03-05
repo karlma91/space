@@ -300,6 +300,7 @@ we_bool spacelvl_unload2state(spacelvl *lvl)
 	}
 
 	objectsystem_clear();
+	particles_clear(current_particles);
 
 	/* remove old tilemap tiles */
 	int x, y;

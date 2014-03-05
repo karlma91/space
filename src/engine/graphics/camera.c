@@ -95,13 +95,6 @@ void view_transform2port(view *cam)
 	draw_rotate(cam->priv_port_angle); // supported angles 0, 90, 180, 270
 }
 
-//TODO move out from camera/view
-void view_update_zoom(view *cam, cpVect pos)
-{
-	cam->zoom = 1.0f*cam->view_height/1500;
-	cam->p = cpvadd(cam->p, pos);
-}
-
 void view_free(view *c)
 {
 	llist_destroy(c->touch_objects);

@@ -29,6 +29,8 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	cpShapeSetCollisionType(shape, &this);
 	cpShapeSetGroup(shape, crate);
 
+	crate->expl_delay = 0.18 + 0.04 * we_randf;
+
 	hpbar_init(&(crate->hp_bar), crate->param.max_hp, 100, 25, 0, 50, &(crate->data.body->p));
 	hpbar_set_invincible(&(crate->hp_bar), crate->param.invinc);
 }
@@ -40,7 +42,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 static void on_render(OBJ_TYPE *OBJ_NAME)
 {
-	float redfade = (0.2 - crate->data.time_destroyed) / 0.2;
+	float redfade = (crate->expl_delay - crate->data.time_destroyed) / crate->expl_delay;
 	redfade = redfade < 0 ? 0 : redfade;
 	draw_color4f(1,redfade,redfade,1);
 	float border = 20;
@@ -55,7 +57,7 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
 
 static void on_update_dead(OBJ_TYPE *OBJ_NAME)
 {
-	if(crate->data.time_destroyed > 0.2f){
+	if(crate->data.time_destroyed > crate->expl_delay){
 		explosion_create(crate->data.body->p, EM_EXPLOSIONBIG, EM_FRAGMENTS, SND_BUILDING_EXPLODE, 2500, 250, 0.3, 4);
 		se_spawn_coins((instance *)crate);
 		instance_remove((instance *)crate);
