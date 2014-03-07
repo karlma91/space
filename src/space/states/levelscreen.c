@@ -11,6 +11,7 @@
 #include "we_defstate.h"
 #include "editor.h"
 #include "../tilemap.h"
+#include "../../engine/tween/tween.h"
 
 static spacelvl *current_lvl_tmpl = NULL;
 static station *from_station = NULL;
@@ -31,6 +32,9 @@ static Color col_enemy  = {255,20,20,255};
 
 static button btn_background;
 static we_bool level_loaded = WE_TRUE;
+
+cpVect test;
+tween *tt;
 
 extern view *station_view;
 
@@ -87,6 +91,7 @@ static void on_enter(STATE_ID state_prev)
 
 static void pre_update(void)
 {
+	tween_tween_update(tt,dt);
 	float z_step = dt/0.2;
 	cpVect pos = main_view->p;
 	if (fading == FADE_OUT) {
@@ -123,6 +128,7 @@ static void draw(void)
 {
 	draw_color(COL_WHITE);
 	bmfont_center(FONT_SANS, cpv(0,MAPSIZE/2 + 60), 80, from_station->name);
+	bmfont_center(FONT_SANS, test, 80, "HELLO");
 
 	if (level_loaded) {
 		sprite_render_by_id(0, SPRITE_BTN_EDIT, cpv(-GAME_WIDTH/2 + 130, GAME_HEIGHT/2 - 130), cpv(135, 135), 0);
@@ -207,11 +213,22 @@ static void fadeout(void *unused)
 	fading = FADE_OUT;
 }
 
+static void tween_callback_test(void *data, void *userdata)
+{
+	tween_tween_reset(tt);
+	tween_tween_set_start(tt);
+	tween_target(tt,0,960 - we_randf*1980,600 - we_randf*1200);
+}
+
 void levelscreen_init(void)
 {
 	statesystem_register(state_levelscreen,0);
-
 	main_view = state_view_get(state_levelscreen,0);
+	test = cpv(-300,-100);
+	tt = tween_new_tween(cpvect_accessor, &test, 1);
+	tween_target(tt,1,250 - we_randf*500,250 - we_randf*500);
+	tween_easing(tt,ElasticEaseInOut);
+	tween_set_callback(tt,(tween_callback)tween_callback_test,NULL);
 
 	edit_level = button_create(SPRITE_BTN2, 1, "", -GAME_WIDTH/2 + 130, GAME_HEIGHT/2 - 130, 135, 135);
 	button_set_click_callback(edit_level, button_playedit_callback, state_editor);

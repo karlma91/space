@@ -1,69 +1,93 @@
 /*
- * tween.h
+ * tween2.h
  *
- *  Created on: Sep 13, 2013
- *      Author: karlmka
+ *  Created on: 6. mars 2014
+ *      Author: Karl
  */
 
-#ifndef TWEEN_H_
-#define TWEEN_H_
+#ifndef TWEEN2_H_
+#define TWEEN2_H_
 
-#include "we_data.h"
-#include "../engine.h"
-#include "chipmunk.h"
 #include "easing.h"
+#include "../data/llist.h"
 
-#define TWEEN_DIMS 4
-#define TWEEN_INFINITE -1
+#define TWEEN_MAX_DIMENSION 6
+#define TWEEN_TIMELINE 0
+#define TWEEN_TWEEN 1
+#define TWEEN_SET 0
+#define TWEEN_GET 1
 #define TRUE 1
 #define FALSE 0
 
-typedef struct tween tween;
+typedef int (*tween_accessor)(int action, void *data, double *values); // return dimension
+typedef float (*easing_func)(float);
+typedef void (*tween_callback)(void *data, void *userdata);
+
+extern tween_accessor cpvect_accessor;
+extern tween_accessor float_accessor;
+extern tween_accessor color_accessor;
+extern tween_accessor sprite_accessor;
 
 typedef struct {
-	unsigned int running    : 1;
-	unsigned int done       : 1;
-	unsigned int yoyo       : 1;
-} tween_data;
+	double start[TWEEN_MAX_DIMENSION];
+	double end[TWEEN_MAX_DIMENSION];
+	void * accessor_data;
+	easing_func easing;
+	tween_accessor accessor;
+} inner_tween;
 
-struct tween {
-    tween_data d;
-    signed int repeat;
-    char usertype;
-	int dims;			// elements in start and end
-	signed char dir;
-	float start[TWEEN_DIMS];
-	float end[TWEEN_DIMS];
-	float (*easing)(float);
-	float duration;
+typedef struct {
+	LList tweens;
+} inner_timeline;
+
+typedef struct tween_instance timeline;
+typedef struct tween_instance tween;
+typedef struct tween_instance {
+	int type;          // timeline or tween
+	int yoyo;          // running to end and back or start from start
+	int running;       // running?
+	int repeats;       // num of repeats
+	int repeats_left;       // num of repeats
+	int dims;	       // elements in start and end
+	int dir;           // bacwards or forwards
+	float time;        // time runned
+	float duration;    // duration of a tween
+	float startdelay;  // delay before start
+	float repeatdelay;  // delay before repeat
+	void *userdata;    // userdata for callback
+	tween_callback callback; // callback
+	union {
+		inner_timeline tl;
+		inner_tween tw;
+	};
+} tween_instance;
+
+typedef struct tween_system_ {
 	float time;
-	void (*callback)(void *data);
-};
+	LList timelines;
+} tween_system;
 
-/**
- * Array tween
- */
 void tween_init();
-tween * tween_create(float *start, float *end, int num, float duration, float (*easing)(float));
-void tween_step(tween *t, float dt);
-void tween_repeat(tween *t, int times, int yoyo);
-tween * tween_release(tween *t);
-void tween_pos(tween *t, float *pos);
-float tween_pos_i(tween *t, int i);
-void tween_start(tween *t);
-float tween_tweenfunc(float start, float end, float time, float duration, float (*easing)(float));
+void tween_delay(tween_instance *t, float delay);
+void tween_set_callback(tween_instance *t, tween_callback callback, void *userdata);
+void tween_repeat(tween_instance *t, int yoyo, int times, float delay);
+
+tween * tween_new_tween(tween_accessor accessor, void * data, float duration);
+void tween_tween_reset(tween *t);
+void tween_tween_set_start(tween *t);
+void tween_dimtochange(tween *t, int dim);
+void tween_easing(tween *t, easing_func e);
+void tween_target(tween*t, int relative, double x, ...);
+void tween_tween_update(tween *t, float delta);
+
+timeline * tween_new_timeline();
+void tween_timeline_reset(timeline *t);
+void tween_push(timeline *t, tween *tween);
+void tween_timeline_update(timeline *t, float delta);
+
+tween_system * tween_new_system();
+void tween_add(tween_system *s, tween_instance *t);
+void tween_update(tween_system *s, float delta);
 void tween_destroy();
 
-/**
- * float tween
- */
-tween * tween_float_is_done_remove(tween *t, float *a );
-
-/*
- * cpVect tween
- */
-tween * tween_cpv_create(cpVect start, cpVect end, float duration, float (*easing)(float));
-tween * tween_cpv_is_done_remove(tween *t, cpVect *a);
-cpVect tween_cpv_pos(tween *t);
-
-#endif /* TWEEN_H_ */
+#endif /* TWEEN2_H_ */

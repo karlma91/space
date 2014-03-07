@@ -16,6 +16,13 @@ typedef void * SPRITE_ID; /* Peker til konstant sprite_data (ikke sprite!)*/
 
 #define SPRITE_MAX_LEN 50
 
+/* public instance sprite */
+typedef struct {
+	cpVect p;
+	float size;
+	float angle;
+} sprite_ori;
+
 typedef struct sprite_subimg {
 	float x1,y1,x2,y2;
 } sprite_subimg;
@@ -79,5 +86,6 @@ void sprite_render_index_by_id(int layer, SPRITE_ID id, int index, cpVect pos, c
 void sprite_render(int layer, sprite *spr, cpVect pos, float angle);
 void sprite_render_body(int layer, sprite *spr, cpBody *body);
 void sprite_render_scaled(int layer, sprite *spr, cpVect pos, float angle, float size);
+void sprite_render_ori(int layer, sprite *spr, sprite_ori *ori);
 
 #endif /* SPRITE_H_ */

@@ -375,8 +375,8 @@ void game_init(void)
 
 	game_components();
 	object_types_init();
+//tween_init();
 	tween_init();
-
     game_touchables();
 
 	/* init all states (warning: make sure that no init method depends on uninitialized state_id!) */

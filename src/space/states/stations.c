@@ -9,6 +9,7 @@
 #include "we_defstate.h"
 #include "levelscreen.h"
 #include "../solarsystem.h"
+#include "../../engine/tween/tween.h"
 
 STATE_ID state_stations;
 
@@ -23,10 +24,12 @@ static float focus_a = 0;
 
 // TODO: cooler system
 //tween test
-static tween *test;
-static tween *tests;
-static tween *testr;
-static cpVect a, b;
+static tween *cpv_test, *float_test;
+static sprite s;
+static sprite_ori ori;
+static Color c;
+static tween *sprite_tw, *color_tw;
+static cpVect a;
 static float r;
 
 view *station_view;
@@ -121,24 +124,17 @@ void sound_testing(void)
 
 static void on_enter(STATE_ID state_prev)
 {
-    //TODO: TMP TWEEN TEST
-    test = tween_cpv_create(cpv(0,300), cpv(500,500), 2, LinearInterpolation);
-    tests = tween_cpv_create(cpv(50,50), cpv(100,100), 2, ElasticEaseInOut);
-    tween_repeat(tests, 1, 1);
-    float str = 0;
-    float endr = 3.14;
-    testr = tween_create(&(str), &(endr), 1, 3, ElasticEaseInOut);
-    tween_repeat(testr, 2, 1);
-
     //TODO use tween for colors here!
     lost_focus = WE_FALSE;
 }
 
 static void pre_update(void)
 {
-    test = tween_cpv_is_done_remove(test, &a);
-    tests = tween_cpv_is_done_remove(tests, &b);
-    testr = tween_float_is_done_remove(testr, &r);
+	// TWEEN tests
+	tween_tween_update(cpv_test,dt);
+	tween_tween_update(float_test,dt);
+	tween_tween_update(sprite_tw,dt);
+	tween_tween_update(color_tw,dt);
 
     station_view->zoom = scroll_get_zoom(scroller);
     float rot = scroll_get_rotation(scroller);
@@ -177,13 +173,25 @@ static void draw(void)
 	draw_push_matrix();
 	draw_translate(1900,-1750);
 	draw_rotate(-current_view->rotation);
-	//bmfont_center(FONT_SANS_PLAIN,  cpv(0,400),100,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
-	bmfont_center(FONT_SANS, cpvzero,100,"Font sans");//\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
-	bmfont_center(FONT_BIG, cpv(0,100),100,"Font big");//\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
-	bmfont_center(FONT_COURIER,  cpv(0,200),100,"Font courier");//\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
-	bmfont_center(FONT_NORMAL,  cpv(0,300),100,"Font normal");//\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
+
+	draw_color(c);
+	sprite_render_ori(0,&s,&ori);
+	draw_color4f(1,1,1,1);
+
+	draw_push_matrix();
+	draw_translatev(a);
+	draw_rotate(r);
+	bmfont_center(FONT_SANS_PLAIN, cpvzero,100,"SPACEW");
+	draw_pop_matrix();
+
+	bmfont_center(FONT_SANS_PLAIN, cpv(100,10000),100,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
+	bmfont_center(FONT_SANS, cpvzero,100,"Font sans");
+	bmfont_center(FONT_BIG, cpv(0,100),100,"Font big");
+	bmfont_center(FONT_COURIER,  cpv(0,200),100,"Font courier");
+	bmfont_center(FONT_NORMAL,  cpv(0,300),100,"Font normal");
 	bmfont_center(FONT_SANS_PLAIN,  cpv(0,400),100,"Font sans plain");
 	draw_pop_matrix();
+
 
 	llist_begin_loop(user_system);
 	cpVect p;
@@ -226,10 +234,6 @@ static void on_pause(void)
 
 static void on_leave(STATE_ID state_next)
 {
-    test = tween_release(test);
-    tests = tween_release(tests);
-    testr = tween_release(testr);
-
     lost_focus = WE_TRUE;
 }
 
@@ -242,10 +246,51 @@ static void open_upgrades(void *unused)
 	statesystem_push_state(state_store);
 }
 
+static void tween_callback_test(void *data, void *userdata)
+{
+	tween_tween_reset(sprite_tw);
+	tween_tween_set_start(sprite_tw);
+	tween_target(sprite_tw,1,500 - we_randf*1000,500 - we_randf*1000, WE_PI-we_randf*2*WE_PI, 0.05 - we_randf * 0.08);
+}
+
+static void tween_color_test(void *data, void *userdata)
+{
+	tween_tween_reset(color_tw);
+	tween_tween_set_start(color_tw);
+	tween_target(color_tw,0,we_randf*255,we_randf*255, we_randf*255);
+}
+
+
 void stations_init(void)
 {
 	srand(0x9b3a09fa);
 	statesystem_register(state_stations, 0);
+
+	a = cpv(0,5000);
+	cpv_test = tween_new_tween(cpvect_accessor, &a, 1.8);
+	tween_target(cpv_test,1, 2500 - we_randf*5000, 2500 - we_randf*5000);
+	tween_easing(cpv_test,ElasticEaseInOut);
+	tween_repeat(cpv_test,1,100,1);
+
+	r = 0;
+	float_test = tween_new_tween(float_accessor, &r, 4.5);
+	tween_easing(float_test,ElasticEaseInOut);
+	tween_repeat(float_test,1,100,1);
+
+	sprite_create(&s,SPRITE_GEAR,400,400,0.4);
+	ori.p = cpv(-5000,400);
+	ori.angle = 0;
+	ori.size = 1;
+	sprite_tw = tween_new_tween(sprite_accessor, &ori, 0.15);
+	tween_target(sprite_tw, 0,   -4000.0, 1000.0, 2.0*WE_PI, 2.0);
+	tween_easing(sprite_tw,LinearInterpolation);
+	tween_set_callback(sprite_tw, tween_callback_test, NULL);
+
+	c = color_new3b(255,255,0);
+	color_tw = tween_new_tween(color_accessor, &c, 1.5);
+	tween_target(color_tw,0, 10.0,255.0,250.0);
+	tween_easing(color_tw, LinearInterpolation);
+	tween_set_callback(color_tw, tween_color_test, NULL);
 
 	user_system = solarsystem_load_solar("levels/userlevels.json");
 

@@ -8,7 +8,7 @@
 #ifndef WE_TWEEN_H_
 #define WE_TWEEN_H_
 
-#include "../tween/tween.h"
+//#include "../tween/tween.h"
 #include "../tween/easing.h"
 
 #endif /* WE_TWEEN_H_ */
