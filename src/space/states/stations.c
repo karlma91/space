@@ -341,8 +341,8 @@ void stations_init(void)
 			col2.a = 0;
 			drawbl_dualspr * dd = state_add_dualsprite(state_stations, layer, spr, pos, cpv(size,size), col1, col2);
 			tween * t = tween_system_new_tween(current_tween_system, cpvect_accessor, &(dd->pos), 3 + we_randf*10);
-			tween_target(t,TWEEN_RELATIVE, (double)(we_randsf * 20000) , (double)(we_randsf * 20000));
-			tween_easing(t,ElasticEaseInOut);
+			tween_target(t, TWEEN_RELATIVE, (double)(we_randsf * 20000) , (double)(we_randsf * 20000));
+			tween_easing(t, ElasticEaseInOut);
 			tween_set_callback(t,tween_star_test, NULL);
 		}
 	}
