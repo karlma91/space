@@ -11,12 +11,12 @@
 #include "pool.h"
 pool * tween_pool;
 
-void tween_init()
+void tween_init(void)
 {
 	tween_pool = pool_create(sizeof(tween_instance));
 }
 
-tween_system * tween_new_system()
+tween_system * tween_new_system(void)
 {
 	tween_system *s = calloc(1,sizeof(tween_system));
 	s->tweens = llist_create();
@@ -48,7 +48,7 @@ void tween_update(tween_system *s, float delta)
 		}else if(t->type == TWEEN_TIMELINE){
 			tween_timeline_update(t, delta);
 		}
-		if(t->done && t->autoremove) {
+		if(t->done && t->autofree) {
 			llist_remove(s->tweens, t);
 			pool_release(tween_pool, t);
 		}
@@ -96,13 +96,17 @@ void tween_repeat(tween_instance *t, int yoyo, int times, float delay)
 	t->repeats_left = times;
 	t->repeatdelay = delay;
 }
+void tween_set_dir(tween_instance *t, int dir){
+	if(dir == TWEEN_BACKWARD || dir == TWEEN_FORWARD)
+		t->dir = dir;
+}
 
 tween * tween_new_tween(tween_accessor accessor, void * data, float duration)
 {
 	tween *t = pool_instance(tween_pool);
 	memset(t,0,sizeof(tween));
 	t->type = TWEEN_TWEEN;
-	t->autoremove = 1;
+	t->autofree = 1;
 	t->running = 1;
 	t->dir = 1;
 	t->duration = duration;
@@ -136,7 +140,7 @@ void tween_target(tween*t, int relative, double x, ...)
 {
 	  va_list ap;
 	  va_start(ap, x);
-	  t->tw.end[0] = x;
+	  t->tw.end[0] =  ((relative == TWEEN_RELATIVE) ? t->tw.start[0] : 0) + x;
 	  int i;
 	  for(i = 1; i < t->dims; i++) {
 		  double val = va_arg(ap,double);
@@ -164,13 +168,26 @@ void tween_interpolateall(tween *t)
 	}
 	t->tw.accessor(TWEEN_SET,t->tw.accessor_data, values);
 }
-
+void tween_set_end_pos(tween *t)
+{
+	int i;
+	double values[TWEEN_MAX_DIMENSION];
+	for(i=0; i < t->dims; i++) {
+		if(t->dir > 0) {
+			values[i] = t->tw.end[i];
+		} else {
+			values[i] = t->tw.start[i];
+		}
+	}
+	t->tw.accessor(TWEEN_SET,t->tw.accessor_data, values);
+}
 void tween_tween_update(tween *t, float dt)
 {
 	if (t != NULL) {
 		if (t->running) {
 			t->time += dt * (t->dir);
 			if (t->time > t->duration || t->time < 0) {
+				tween_set_end_pos(t);
 				if (t->repeats_left != 0) {
 					if (t->repeats_left > 0) {
 						t->repeats_left -= 1;
@@ -205,7 +222,7 @@ void tween_timeline_update(timeline *t, float delta)
 
 }
 
-void tween_destroy()
+void tween_destroy(void)
 {
 	pool_destroy(tween_pool);
 }

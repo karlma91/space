@@ -128,7 +128,7 @@ void particles_draw(particle_system *s)
 	llist_begin_loop(s->emitters);
 	while(llist_hasnext(s->emitters)) {
 		emitter *e = llist_next(s->emitters);
-		if(e->self_draw == 0) {
+		if(e->self_draw == 0 || e->waiting_to_die) {
 			draw_all_particles(e);
 		}
 	}

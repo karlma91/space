@@ -32,10 +32,7 @@ static Color col_enemy  = {255,20,20,255};
 
 static button btn_background;
 static we_bool level_loaded = WE_TRUE;
-
-cpVect test;
-tween *tt;
-
+static tween * out;
 extern view *station_view;
 
 enum {
@@ -84,51 +81,40 @@ static void on_enter(STATE_ID state_prev)
 		SDL_CreateThread(load_lvl, "Level_loader", NULL);
 		from = cpvneg(view_world2view(station_view,from_station->pos));
 		main_view->zoom = 0;
-		view_update(main_view, from, 0);
+		main_view->p = from;
 		fading = FADE_IN;
+
+		tween_system_clear(current_tween_system);
+		tween * t = tween_system_new_tween(current_tween_system, cpvect_accessor, &main_view->p,0.5);
+		tween_target(t,TWEEN_FALSE, 0.0, 0.0);
+		tween_easing(t,QuinticEaseOut);
+		t = tween_system_new_tween(current_tween_system, float_accessor, &main_view->zoom,0.5);
+		tween_target(t,TWEEN_FALSE, 1.0);
+		tween_easing(t,QuinticEaseOut);
+
 	}
 }
 
 static void pre_update(void)
 {
-	tween_tween_update(tt,dt);
-	float z_step = dt/0.2;
-	cpVect pos = main_view->p;
-	if (fading == FADE_OUT) {
-		from = cpvneg(view_world2view(station_view,from_station->pos));
-		if (main_view->zoom - z_step > 0) {
-			main_view->zoom -= z_step;
-		} else {
-			statesystem_pop_state(NULL);
-		}
-	} else if (fading == FADE_IN) {
-		if (main_view->zoom + z_step < 1) {
-			main_view->zoom += z_step;
-		} else {
-			main_view->zoom = 1;
-		}
-	} else {
-		main_view->zoom = 1;
-	}
-
-	pos = cpvlerp(from, to, main_view->zoom);
-	if (main_view->zoom) {
-		pos = cpvmult(pos, 1 / main_view->zoom);
-	}
-	touch_place(btn_background, pos.x, pos.y);
-	view_update(main_view, pos, 0);
-	//TODO use tween to animate both cam pos and size
+	touch_place(btn_background, main_view->p.x, main_view->p.y);
 }
 
 static void post_update(void)
 {
+	if (main_view->zoom > 0 && main_view->zoom < 0.99) {
+		main_view->p = cpvmult(main_view->p, 1 / main_view->zoom);
+	}
+	if( fading == FADE_OUT) {
+		cpVect p = cpvneg(view_world2view(station_view,from_station->pos));
+		tween_target(out,TWEEN_FALSE,p.x,p.y);
+	}
 }
 
 static void draw(void)
 {
 	draw_color(COL_WHITE);
 	bmfont_center(FONT_SANS, cpv(0,MAPSIZE/2 + 60), 80, from_station->name);
-	bmfont_center(FONT_SANS, test, 80, "HELLO");
 
 	if (level_loaded) {
 		sprite_render_by_id(0, SPRITE_BTN_EDIT, cpv(-GAME_WIDTH/2 + 130, GAME_HEIGHT/2 - 130), cpv(135, 135), 0);
@@ -208,27 +194,30 @@ static void button_remove_callback(void *data)
 	statesystem_pop_state(NULL);
 }
 
-static void fadeout(void *unused)
+void tween_fadeout(tween_instance * t, void *userdata)
 {
-	fading = FADE_OUT;
+	statesystem_pop_state(NULL);
 }
 
-static void tween_callback_test(void *data, void *userdata)
+static void fadeout(void *unused)
 {
-	tween_tween_reset(tt);
-	tween_tween_set_start(tt);
-	tween_target(tt,0,960 - we_randf*1980,600 - we_randf*1200);
+	if(fading == FADE_IN){
+		fading = FADE_OUT;
+		out = tween_system_new_tween(current_tween_system, cpvect_accessor, &main_view->p,0.3);
+		tween_target(out,TWEEN_FALSE, 0.0, 0.0);
+		tween_easing(out,LinearInterpolation);
+		tween * t = tween_system_new_tween(current_tween_system, float_accessor, &main_view->zoom, 0.3);
+		tween_target(t,TWEEN_FALSE, 0.0);
+		tween_set_callback(t, tween_fadeout, NULL);
+		tween_easing(t,LinearInterpolation);
+	}
 }
 
 void levelscreen_init(void)
 {
-	statesystem_register(state_levelscreen,0);
+	statesystem_register(state_levelscreen, 0);
+	state_enable_tween_system(this, 1);
 	main_view = state_view_get(state_levelscreen,0);
-	test = cpv(-300,-100);
-	tt = tween_new_tween(cpvect_accessor, &test, 1);
-	tween_target(tt, TWEEN_RELATIVE, 250 - we_randf*500, 250 - we_randf*500);
-	tween_easing(tt, ElasticEaseInOut);
-	tween_set_callback(tt, (tween_callback)tween_callback_test,NULL);
 
 	edit_level = button_create(SPRITE_BTN2, 1, "", -GAME_WIDTH/2 + 130, GAME_HEIGHT/2 - 130, 135, 135);
 	button_set_click_callback(edit_level, button_playedit_callback, state_editor);

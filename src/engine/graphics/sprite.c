@@ -349,9 +349,3 @@ void sprite_render_scaled(int layer, sprite *spr, cpVect pos, float angle, float
 	sprite_get_current_image(spr, sub_map);
 	draw_texture(layer, tex_id, pos, sub_map, cpvmult(cpv(spr->width, spr->height), size), angle);
 }
-void sprite_render_ori(int layer, sprite *spr, sprite_ori *ori)
-{
-	if(!ori || !spr) return;
-	sprite_render_scaled(layer, spr, ori->p, ori->angle, ori->size);
-}
-

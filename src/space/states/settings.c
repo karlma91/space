@@ -69,6 +69,7 @@ static cpVect btn_pos[OPTION_COUNT];
 
 static void on_enter(STATE_ID state_prev)
 {
+	if (state_prev == state_log) return;
 	tween_system_clear(current_tween_system);
 	fade_col = color_new4b(5,5,25,0);
 	tween * t = tween_system_new_tween(current_tween_system, color_accessor, &fade_col, 2);
@@ -77,9 +78,9 @@ static void on_enter(STATE_ID state_prev)
 	int i = 0;
 	for(i = 0; i<OPTION_COUNT; i++){
 		btn_pos[i] = cpv(1500 *(i%2 == 0 ? 1 : -1), GAME_HEIGHT/2*0.8+50 - i * 150);
-		t = tween_system_new_tween(current_tween_system, cpvect_accessor, &btn_pos[i], 1);
+		t = tween_system_new_tween(current_tween_system, cpvect_accessor, &btn_pos[i], 0.5);
 		tween_target(t, TWEEN_FALSE, 0.0, (double)(GAME_HEIGHT/2*0.8+50  - i * 150));
-		tween_delay(t, 0.1 + i*0.05);
+		tween_delay(t, 0.05 + i*0.02);
 		tween_easing(t,QuarticEaseOut);
 	}
 }

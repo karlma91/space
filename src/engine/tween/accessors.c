@@ -51,19 +51,17 @@ static int col_accessor(int action, void *data, double v[TWEEN_MAX_DIMENSION])
 
 static int spr_accessor(int action, void *data, double v[TWEEN_MAX_DIMENSION])
 {
-	sprite_ori *s = (sprite_ori*) data;
+	sprite_ext *s = (sprite_ext*) data;
 	if(action == TWEEN_SET) {
-		s->p.x = v[0];
-		s->p.y = v[1];
+		s->pos.x = v[0];
+		s->pos.y = v[1];
 		s->angle =v[2];
-		s->size = v[3];
 	} else if (action == TWEEN_GET) {
-		v[0] = s->p.x;
-		v[1] = s->p.y;
+		v[0] = s->pos.x;
+		v[1] = s->pos.y;
 		v[2] = s->angle;
-		v[3] = s->size;
 	}
-	return 4;
+	return 3;
 }
 
 tween_accessor cpvect_accessor = cpv_accessor;

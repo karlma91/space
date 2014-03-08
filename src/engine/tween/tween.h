@@ -11,6 +11,9 @@
 #include "easing.h"
 #include "../data/llist.h"
 
+#define TWEEN_FORWARD 1
+#define TWEEN_BACKWARD (-1)
+
 #define TWEEN_MAX_DIMENSION 6
 #define TWEEN_NONRELATIVE 3
 #define TWEEN_RELATIVE 2
@@ -54,7 +57,7 @@ typedef struct {
 
 struct tween_instance {
 	int type;          // timeline or tween
-	int autoremove;    // gets automaticaly removed and freed from system
+	int autofree;    // gets automaticaly removed and freed from system
 	int yoyo;          // running to end and back or start from start
 	int running;       // running? used for pause
 	int done;          // if 1 done and ready for removal
@@ -79,8 +82,8 @@ typedef struct tween_system_ {
 	LList tweens;
 } tween_system;
 
-void tween_init();
-tween_system * tween_new_system();
+void tween_init(void);
+tween_system * tween_new_system(void);
 tween * tween_system_new_tween(tween_system *s, tween_accessor accessor, void * data, float duration);
 void tween_add(tween_system *s, tween_instance *t);
 void tween_update(tween_system *s, float delta);
@@ -91,6 +94,7 @@ void tween_delay(tween_instance *t, float delay);
 void tween_set_callback(tween_instance *t, tween_callback callback, void *userdata);
 void tween_call_callback(tween_instance *t);
 void tween_repeat(tween_instance *t, int yoyo, int times, float delay);
+void tween_set_dir(tween_instance *t, int dir);
 
 tween * tween_new_tween(tween_accessor accessor, void * data, float duration);
 void tween_tween_reset(tween *t);
@@ -100,11 +104,11 @@ void tween_easing(tween *t, easing_func e);
 void tween_target(tween*t, int relative, double x, ...);
 void tween_tween_update(tween *t, float delta);
 
-timeline * tween_new_timeline();
+timeline * tween_new_timeline(void);
 void tween_timeline_reset(timeline *t);
 void tween_push(timeline *t, tween *tween);
 void tween_timeline_update(timeline *t, float delta);
 
-void tween_destroy();
+void tween_destroy(void);
 
 #endif /* TWEEN2_H_ */

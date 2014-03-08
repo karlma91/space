@@ -29,6 +29,7 @@
 #define we_deg2rad(x) ((x) / WE_180_PI)
 
 #define we_randf ((float)rand() / RAND_MAX)
+#define we_randsf ((float)rand() / RAND_MAX - 0.5f)
 
 #define minf(a,b) (a <= b ? a : b)
 #define maxf(a,b) (a >= b ? a : b)
