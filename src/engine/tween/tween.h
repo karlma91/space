@@ -12,16 +12,28 @@
 #include "../data/llist.h"
 
 #define TWEEN_MAX_DIMENSION 6
+#define TWEEN_NONRELATIVE 3
+#define TWEEN_RELATIVE 2
+#define TWEEN_YOYO 1
 #define TWEEN_TIMELINE 0
 #define TWEEN_TWEEN 1
 #define TWEEN_SET 0
 #define TWEEN_GET 1
-#define TRUE 1
+#define TWEEN_FALSE 0
 #define FALSE 0
+#define TRUE 1
+#define TWEEN_INFINITY (-1)
+
+
+
+
+typedef struct tween_instance timeline;
+typedef struct tween_instance tween;
+typedef struct tween_instance tween_instance;
 
 typedef int (*tween_accessor)(int action, void *data, double *values); // return dimension
 typedef float (*easing_func)(float);
-typedef void (*tween_callback)(void *data, void *userdata);
+typedef void (*tween_callback)(tween_instance * t, void *userdata);
 
 extern tween_accessor cpvect_accessor;
 extern tween_accessor float_accessor;
@@ -40,36 +52,44 @@ typedef struct {
 	LList tweens;
 } inner_timeline;
 
-typedef struct tween_instance timeline;
-typedef struct tween_instance tween;
-typedef struct tween_instance {
+struct tween_instance {
 	int type;          // timeline or tween
+	int autoremove;    // gets automaticaly removed and freed from system
 	int yoyo;          // running to end and back or start from start
-	int running;       // running?
+	int running;       // running? used for pause
+	int done;          // if 1 done and ready for removal
 	int repeats;       // num of repeats
-	int repeats_left;       // num of repeats
+	int repeats_left;  // num of repeats left
 	int dims;	       // elements in start and end
 	int dir;           // bacwards or forwards
 	float time;        // time runned
 	float duration;    // duration of a tween
 	float startdelay;  // delay before start
-	float repeatdelay;  // delay before repeat
+	float repeatdelay; // delay before repeat
 	void *userdata;    // userdata for callback
 	tween_callback callback; // callback
 	union {
 		inner_timeline tl;
 		inner_tween tw;
 	};
-} tween_instance;
+};
 
 typedef struct tween_system_ {
 	float time;
-	LList timelines;
+	LList tweens;
 } tween_system;
 
 void tween_init();
+tween_system * tween_new_system();
+tween * tween_system_new_tween(tween_system *s, tween_accessor accessor, void * data, float duration);
+void tween_add(tween_system *s, tween_instance *t);
+void tween_update(tween_system *s, float delta);
+void tween_system_clear(tween_system *s);
+void tween_system_destoy(tween_system *s);
+
 void tween_delay(tween_instance *t, float delay);
 void tween_set_callback(tween_instance *t, tween_callback callback, void *userdata);
+void tween_call_callback(tween_instance *t);
 void tween_repeat(tween_instance *t, int yoyo, int times, float delay);
 
 tween * tween_new_tween(tween_accessor accessor, void * data, float duration);
@@ -85,9 +105,6 @@ void tween_timeline_reset(timeline *t);
 void tween_push(timeline *t, tween *tween);
 void tween_timeline_update(timeline *t, float delta);
 
-tween_system * tween_new_system();
-void tween_add(tween_system *s, tween_instance *t);
-void tween_update(tween_system *s, float delta);
 void tween_destroy();
 
 #endif /* TWEEN2_H_ */

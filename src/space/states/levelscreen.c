@@ -226,9 +226,9 @@ void levelscreen_init(void)
 	main_view = state_view_get(state_levelscreen,0);
 	test = cpv(-300,-100);
 	tt = tween_new_tween(cpvect_accessor, &test, 1);
-	tween_target(tt,1,250 - we_randf*500,250 - we_randf*500);
-	tween_easing(tt,ElasticEaseInOut);
-	tween_set_callback(tt,(tween_callback)tween_callback_test,NULL);
+	tween_target(tt, TWEEN_RELATIVE, 250 - we_randf*500, 250 - we_randf*500);
+	tween_easing(tt, ElasticEaseInOut);
+	tween_set_callback(tt, (tween_callback)tween_callback_test,NULL);
 
 	edit_level = button_create(SPRITE_BTN2, 1, "", -GAME_WIDTH/2 + 130, GAME_HEIGHT/2 - 130, 135, 135);
 	button_set_click_callback(edit_level, button_playedit_callback, state_editor);

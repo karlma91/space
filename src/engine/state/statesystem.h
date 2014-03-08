@@ -10,6 +10,7 @@
 
 #include "SDL_events.h"
 #include "we_graphics.h"
+#include "we_tween.h"
 #include "chipmunk.h"
 #include "../components/object.h"
 #include "../graphics/particles.h"
@@ -18,6 +19,7 @@
 extern cpSpace *current_space;
 extern object_system *current_objects;
 extern particle_system *current_particles;
+extern tween_system *current_tween_system;
 extern view * current_view;
 
 typedef void * STATE_ID;
@@ -55,6 +57,7 @@ void state_enable_objects(STATE_ID state_id, int enabled);
 void state_enable_physics(STATE_ID state_id, int enabled);
 void state_enable_objupdate(STATE_ID state_id, int enabled);
 void state_enable_particles(STATE_ID state_id, int enabled);
+void state_enable_tween_system(STATE_ID state_id, int enabled);
 
 view *state_view_add(STATE_ID state_id);
 view *state_view_get(STATE_ID state_id, int index);

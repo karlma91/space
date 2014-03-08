@@ -24,11 +24,10 @@ static float focus_a = 0;
 
 // TODO: cooler system
 //tween test
-static tween *cpv_test, *float_test;
+static tween_system *ts;
 static sprite s;
 static sprite_ori ori;
 static Color c;
-static tween *sprite_tw, *color_tw;
 static cpVect a;
 static float r;
 
@@ -130,12 +129,7 @@ static void on_enter(STATE_ID state_prev)
 
 static void pre_update(void)
 {
-	// TWEEN tests
-	tween_tween_update(cpv_test,dt);
-	tween_tween_update(float_test,dt);
-	tween_tween_update(sprite_tw,dt);
-	tween_tween_update(color_tw,dt);
-
+	tween_update(ts, dt);
     station_view->zoom = scroll_get_zoom(scroller);
     float rot = scroll_get_rotation(scroller);
 	cpVect offset = cpvneg(scroll_get_offset(scroller));
@@ -246,50 +240,50 @@ static void open_upgrades(void *unused)
 	statesystem_push_state(state_store);
 }
 
-static void tween_callback_test(void *data, void *userdata)
+static void tween_callback_test(tween_instance * t, void *userdata)
 {
-	tween_tween_reset(sprite_tw);
-	tween_tween_set_start(sprite_tw);
-	tween_target(sprite_tw,1,500 - we_randf*1000,500 - we_randf*1000, WE_PI-we_randf*2*WE_PI, 0.05 - we_randf * 0.08);
+	tween_tween_reset(t);
+	tween_tween_set_start(t);
+	tween_target(t,TWEEN_RELATIVE,500 - we_randf*1000,500 - we_randf*1000, WE_PI-we_randf*2*WE_PI, 0.05 - we_randf * 0.08);
 }
 
-static void tween_color_test(void *data, void *userdata)
+static void tween_color_test(tween_instance * t, void *userdata)
 {
-	tween_tween_reset(color_tw);
-	tween_tween_set_start(color_tw);
-	tween_target(color_tw,0,we_randf*255,we_randf*255, we_randf*255);
+	tween_tween_reset(t);
+	tween_tween_set_start(t);
+	tween_target(t,TWEEN_NONRELATIVE,we_randf*255,we_randf*255, we_randf*255,  we_randf*255);
 }
 
 
 void stations_init(void)
 {
-	srand(0x9b3a09fa);
 	statesystem_register(state_stations, 0);
 
-	a = cpv(0,5000);
-	cpv_test = tween_new_tween(cpvect_accessor, &a, 1.8);
-	tween_target(cpv_test,1, 2500 - we_randf*5000, 2500 - we_randf*5000);
-	tween_easing(cpv_test,ElasticEaseInOut);
-	tween_repeat(cpv_test,1,100,1);
+	tween *cpv_test, *float_test;
+	tween *sprite_tw, *color_tw;
+
+	ts = tween_new_system();
+
+	a = cpv(0, 5000);
+	cpv_test = tween_system_new_tween(ts, cpvect_accessor, &a, 1.8);
+	tween_target(cpv_test, TWEEN_RELATIVE, 2500 - we_randf*5000, 2500 - we_randf*5000);
+	tween_easing(cpv_test, ElasticEaseInOut);
+	tween_repeat(cpv_test, TWEEN_YOYO, 100, 1);
 
 	r = 0;
-	float_test = tween_new_tween(float_accessor, &r, 4.5);
+	float_test = tween_system_new_tween(ts, float_accessor, &r, 4.5);
+	tween_target(float_test, TWEEN_NONRELATIVE, 2*WE_PI);
 	tween_easing(float_test,ElasticEaseInOut);
-	tween_repeat(float_test,1,100,1);
+	tween_repeat(float_test, TWEEN_YOYO, 100, 1);
 
-	sprite_create(&s,SPRITE_GEAR,400,400,0.4);
-	ori.p = cpv(-5000,400);
-	ori.angle = 0;
+	sprite_create(&s, SPRITE_GEAR, 400, 400, 0.4);
 	ori.size = 1;
-	sprite_tw = tween_new_tween(sprite_accessor, &ori, 0.15);
-	tween_target(sprite_tw, 0,   -4000.0, 1000.0, 2.0*WE_PI, 2.0);
-	tween_easing(sprite_tw,LinearInterpolation);
+	sprite_tw = tween_system_new_tween(ts, sprite_accessor, &ori, 0.25);
 	tween_set_callback(sprite_tw, tween_callback_test, NULL);
 
 	c = color_new3b(255,255,0);
-	color_tw = tween_new_tween(color_accessor, &c, 1.5);
-	tween_target(color_tw,0, 10.0,255.0,250.0);
-	tween_easing(color_tw, LinearInterpolation);
+	color_tw = tween_system_new_tween(ts, color_accessor, &c, 1.5);
+	tween_target(color_tw,TWEEN_FALSE, 10.0,255.0,250.0, 250.0);
 	tween_set_callback(color_tw, tween_color_test, NULL);
 
 	user_system = solarsystem_load_solar("levels/userlevels.json");

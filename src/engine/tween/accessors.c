@@ -39,12 +39,14 @@ static int col_accessor(int action, void *data, double v[TWEEN_MAX_DIMENSION])
 		c->r = (unsigned char)v[0];
 		c->g = (unsigned char)v[1];
 		c->b = (unsigned char)v[2];
+		c->a = (unsigned char)v[3];
 	} else if (action == TWEEN_GET) {
 		v[0] = (double)c->r;
 		v[1] = (double)c->g;
 		v[2] = (double)c->b;
+		v[3] = (double)c->a;
 	}
-	return 3;
+	return 4;
 }
 
 static int spr_accessor(int action, void *data, double v[TWEEN_MAX_DIMENSION])

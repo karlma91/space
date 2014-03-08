@@ -141,7 +141,11 @@ void button_set_backcolor(button btn_id, Color col)
 	btn->backcol.g = col.g;
 	btn->backcol.b = col.b;
 }
-
+Color button_get_backcolor(button btn_id)
+{
+	struct button *btn = (struct button *) btn_id;
+	return btn->backcol;
+}
 void button_set_frontcolor(button btn_id, Color col)
 {
 	struct button *btn = (struct button *) btn_id;

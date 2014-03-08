@@ -29,6 +29,7 @@ void button_set_hotkeys(button btn_id, SDL_Scancode key, SDL_Scancode key_alt);
 void button_set_border(button btn_id, float width);
 
 void button_set_backcolor(button btn_id, Color col);
+Color button_get_backcolor(button btn_id);
 void button_set_frontcolor(button btn_id, Color col);
 
 void button_set_animated(button btn_id, int animated, float fps);

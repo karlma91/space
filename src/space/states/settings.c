@@ -8,6 +8,7 @@
 //#include "settings.h"
 
 #include "../game.h"
+#include "we_tween.h"
 #include "we_defstate.h"
 
 STATE_ID state_settings;
@@ -59,6 +60,8 @@ int bit_settings;
 
 static Color col_btn_checked = {51, 255, 51, 255};
 static Color col_btn_unchecked = {255, 255, 255, 255};
+static Color fade_col;
+static cpVect btn_pos[OPTION_COUNT];
 
 /* * * * * * * * * *
  * state functions *
@@ -66,6 +69,19 @@ static Color col_btn_unchecked = {255, 255, 255, 255};
 
 static void on_enter(STATE_ID state_prev)
 {
+	tween_system_clear(current_tween_system);
+	fade_col = color_new4b(5,5,25,0);
+	tween * t = tween_system_new_tween(current_tween_system, color_accessor, &fade_col, 2);
+	tween_target(t,TWEEN_FALSE, 5.0, 5.0, 25.0, 255.0);
+	tween_easing(t, QuinticEaseOut);
+	int i = 0;
+	for(i = 0; i<OPTION_COUNT; i++){
+		btn_pos[i] = cpv(1500 *(i%2 == 0 ? 1 : -1), GAME_HEIGHT/2*0.8+50 - i * 150);
+		t = tween_system_new_tween(current_tween_system, cpvect_accessor, &btn_pos[i], 1);
+		tween_target(t, TWEEN_FALSE, 0.0, (double)(GAME_HEIGHT/2*0.8+50  - i * 150));
+		tween_delay(t, 0.1 + i*0.05);
+		tween_easing(t,QuarticEaseOut);
+	}
 }
 
 static void pre_update(void)
@@ -73,7 +89,7 @@ static void pre_update(void)
 	cpVect offset = scroll_get_offset(scroller);
 	int i;
 	for (i = 0; i < OPTION_COUNT; i++) {
-		touch_place(btn_options[i], 0, GAME_HEIGHT/2*0.8+50 + offset.y - i * 150);
+		touch_place(btn_options[i], btn_pos[i].x, btn_pos[i].y + offset.y);
 	}
 }
 
@@ -185,27 +201,28 @@ static void option_click(settings_option option)
 
 static void gui(view *cam)
 {
-	draw_color4f(0,0,0,0.5f);
-	draw_box(1, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
-	draw_color4f(0.2,0.4,0.8,0.8);
-	draw_box(2, cpvzero,cpv(SCROLL_WIDTH,GAME_HEIGHT),0,1);
+	draw_color(fade_col);
+	draw_box(2, cpvzero,cpv(GAME_WIDTH,GAME_HEIGHT),0,1);
+	float a = fade_col.a/255.0;
+	draw_color4f(0.2*a,0.4*a,0.8*a,a);
+	draw_box(1, cpvzero,cpv(SCROLL_WIDTH,GAME_HEIGHT),0,1);
 
-	draw_color(COL_WHITE);
+	draw_color4f(a,a,a,a);
 	bmfont_center(FONT_SANS, cpv(0, GAME_HEIGHT/2 - 100), 100, "Settings");
 }
 
 void settings_init(void)
 {
 	statesystem_register(state_settings,0);
+	state_enable_tween_system(this, 1);
 
 	view *view_main = state_view_get(state_settings, 0);
 	view_main->GUI = gui;
 
 	view_box = state_view_add(state_settings);
-	boxsize = cpv(WINDOW_WIDTH * SCROLL_WIDTH / GAME_WIDTH , 0.8 * WINDOW_HEIGHT);
+	boxsize = cpv(WINDOW_WIDTH * SCROLL_WIDTH / GAME_WIDTH , 0.75 * WINDOW_HEIGHT);
 	//TODO fix transformation error when using non-centered viewport?
 	view_set_port(view_box, cpvsub(cpv(WINDOW_WIDTH/2,WINDOW_HEIGHT/2),cpvmult(boxsize, 0.5)), boxsize, 0);  //-0.1*WINDOW_HEIGHT
-
 	int i;
 	for (i = 0; i < OPTION_COUNT; i++) {
 		btn_options[i] = button_create(SPRITE_BTN2, 1, str_options[i], 0, 0, 800, 115);

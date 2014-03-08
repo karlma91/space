@@ -18,6 +18,7 @@ LList ll_states;
 cpSpace *current_space;
 object_system *current_objects;
 particle_system *current_particles;
+tween_system *current_tween_system;
 view * current_view;
 
 static cpFloat phys_step = 1/60.0f;
@@ -45,9 +46,11 @@ struct systemstate {
     int disable_physics;
     int objects_enabled;
     int particles_enabled;
+    int tween_system_enabled;
 
     object_system *objects;
     particle_system *particles;
+    tween_system * tweens;
     layer_system *layersystem;
 
     void (*inner_update[MAX_INNER_STATES])();
@@ -77,6 +80,7 @@ static void update_global_current_var(State *state)
 	}
 
 	current_particles = state->particles;
+	current_tween_system = state->tweens;
     current_objects = state->objects;
 	if (current_objects)
 		current_space = current_objects->space;
@@ -152,6 +156,15 @@ void state_enable_particles(STATE_ID state_id, int enabled)
 	state->particles_enabled = enabled;
 }
 
+void state_enable_tween_system(STATE_ID state_id, int enabled)
+{
+	State *state = (State *) state_id;
+	if (state->tweens == NULL && enabled) {
+		state->tweens = tween_new_system();
+		current_tween_system = state->tweens;
+	}
+	state->tween_system_enabled = enabled;
+}
 
 view *state_view_add(STATE_ID state_id)
 {
@@ -337,6 +350,10 @@ void statesystem_update(void)
 	/* update particle system */
 	if (state->particles_enabled && current_particles) {
 		particles_update(current_particles);
+	}
+	/* update particle system */
+	if (state->tween_system_enabled && current_tween_system) {
+		tween_update(state->tweens, dt);
 	}
 
 	/* state post update */
