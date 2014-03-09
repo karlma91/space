@@ -15,12 +15,15 @@ int player_cheat_invulnerable = 0;
 static void controls(obj_player *);
 static void action_shoot(obj_player *);
 
+static cpFloat radius = 30;
+static cpFloat mass = 2;
+
 //#define IMPULSE_FORCE 160 //prev value: 60
 
 static void init(OBJ_TYPE *OBJ_NAME)
 {
 	instance_revive((instance *)player);
-	player->gun_level = weapons[weapon_index].level + 1;
+	player->gun_level = weapons[weapon_index].level;
 	player->lives = 3;
 	player->coins = 0;
 	player->rotation_speed = 2.5;
@@ -28,10 +31,10 @@ static void init(OBJ_TYPE *OBJ_NAME)
 	player->gun_timer = 0;
 
 	cpBodySetPos(player->data.body, player->data.p_start);
-	cpBodySetPos(player->gunwheel, player->data.p_start);
+	//cpBodySetPos(player->gunwheel, player->data.p_start);
 	cpBodySetAngle(player->data.body,3*(M_PI/2));
 	player->data.body->v = cpvzero;
-	player->gunwheel->v = cpvzero;
+	//player->gunwheel->v = cpvzero;
 
 	player->force = engines[engine_index].force;
 	//cpBodySetVelLimit(player->data.body, engines[engine_index].max_speed);
@@ -46,11 +49,11 @@ static void init(OBJ_TYPE *OBJ_NAME)
 	//TODO get bullet type info from shop
 	player->bullet_param = param_get("bullet", "player");
 
-	cpSpaceReindexShapesForBody(current_space, player->gunwheel);
+	//cpSpaceReindexShapesForBody(current_space, player->gunwheel);
 	cpSpaceReindexShapesForBody(current_space, player->data.body);
 
 	se_velfunc(player->data.body, 0);
-	se_velfunc(player->gunwheel, 0);
+	//se_velfunc(player->gunwheel, 0);
 }
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
@@ -104,16 +107,6 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 
 	hpbar_init(&(player->hp_bar), 100, 120, 25, 0, 50, &(player->data.body->p));
 
-	//FIXME cleanup
-	player->gunwheel = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
-	cpBodySetPos(player->gunwheel, player->data.p_start);
-	cpBodySetUserData(player->gunwheel, (void*)player);
-	se_velfunc(player->gunwheel, 1);
-
-	shape = we_add_circle_shape(current_space, player->gunwheel,radius-2,0.9,0.8);
-	we_shape_collision(shape, &this, LAYER_PLAYER, player);
-	cpSpaceAddConstraint(current_space, cpPivotJointNew(player->data.body, player->gunwheel, player->data.p_start));
-
 	init(player);
 }
 
@@ -127,7 +120,11 @@ static void on_render(OBJ_TYPE *OBJ_NAME)
 
 	draw_color4f(1,1,1,1);
 	sprite_render_body(RLAY_GAME_MID,&(player->data.spr), player->data.body);
-	sprite_render_body(RLAY_GAME_MID, &(player->gun), player->gunwheel);
+	if(player->gunwheel){
+		sprite_render_body(RLAY_GAME_MID, &(player->gun), player->gunwheel);
+	}else{
+		sprite_render(RLAY_GAME_MID, &(player->gun), player->data.body->p, player->aim_angle);
+	}
 	particles_draw_emitter(player->smoke);
 	hpbar_draw(RLAY_GAME_FRONT, &player->hp_bar, cpvtoangle(player->data.body->p));
 }
@@ -152,7 +149,7 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 		//cpBodySetAngVel(player->data.body,0);
 		cpBodySetAngle(player->data.body, player->direction);
 	}
-	player->data.body->v = cpvmult(player->data.body->v, 0.85);
+	player->data.body->v = cpvmult(player->data.body->v, powf(0.05, dt));
 	//cpBodySetVel(player->gunwheel, player->data.body->v);
 
 	if (player->disable == 0){
@@ -162,29 +159,17 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 
 static void controls(obj_player *player)
 {
-	float dir_step;
-	int instant = 0; //tmp instant direction
-
 	view *pl_view = player->player_id == 1 ? view_p1 : view_p2;
 
-
-	float v1 = cpvlength(player->data.body->v);
-	float vv = 800/(v1);
-	vv = vv<=1? vv : 1;
-    player->data.body->v = cpvmult(player->data.body->v, vv);
-    monitor_float("Pspeed",v1);
-    monitor_float("Damping",vv);
     monitor_cpvect("pos",player->data.body->p);
-    monitor_string("NAME","player");
     monitor_float("HP", player->hp_bar.value);
 
     if (player->joy_left->amplitude) {
     	cpVect joy_dir = cpvnormalize(cpvrotate(cpv(player->joy_left->axis_x, player->joy_left->axis_y), cpvforangle(-pl_view->rotation)));
     	cpVect j = cpvmult(joy_dir, player->force);
     	player->direction_target = cpvtoangle(j);
-    	cpBodyApplyImpulse(player->data.body, j, cpvzero);//cpvmult(player_dir, -1*dt)); // applies impulse from rocket
+    	cpBodyApplyImpulse(player->data.body, j, cpvzero);
     	if (player->flame) player->flame->disable = 0;
-
     } else {
     	if (player->flame) player->flame->disable = 1;
     	float vel_angle = cpvtoangle(cpBodyGetVel(player->data.body));
@@ -194,13 +179,7 @@ static void controls(obj_player *player)
 	float aim_angle_target = 0;
 	if (player->joy_right->amplitude) {
 		aim_angle_target = player->joy_right->direction -pl_view->rotation;
-		if (!instant) {
-			dir_step = (player->aim_speed * 2*M_PI) * dt; // 0.5 rps
-			cpBodySetAngle(player->gunwheel, turn_toangle(cpBodyGetAngle(player->gunwheel), aim_angle_target, dir_step));
-		} else {
-			cpBodySetAngle(player->gunwheel, aim_angle_target);
-		}
-		cpBodySetAngVel(player->gunwheel,cpBodyGetAngVel(player->gunwheel)/2);
+		player->aim_angle = aim_angle_target;
 		action_shoot(player);
 	}
 
@@ -222,8 +201,8 @@ static void action_shoot(obj_player *player)
 		sound_play(SND_LASER_1);
 		for(i=0; i < player->gun_level;i++){
 			//obj_bullet *b = object_create_bullet(player->data.body->p, cpvforangle(player->aim_angle + (M_PI/70)*((i+1) - (player->gun_level-i))), player->data.body->v, ID_BULLET_PLAYER);
-			cpVect shoot_vel = cpvforangle(cpBodyGetAngle(player->gunwheel) + (M_PI/70)*((i+1) - (player->gun_level-i))); //TODO remove and split into another weapon
-			cpVect shoot_pos = cpvadd(player->gunwheel->p, cpvmult(shoot_vel,40));
+			cpVect shoot_vel = cpvforangle((player->aim_angle) + (M_PI/70)*((i+1) - (player->gun_level-i))); //TODO remove and split into another weapon
+			cpVect shoot_pos = cpvadd(player->data.body->p, cpvmult(shoot_vel,40));
 			shoot_vel = cpvmult(shoot_vel, 1400);
 			//shoot_vel = cpvadd(shoot_vel, player->data.body->v);
 			instance_create(player->bullet_type, player->bullet_param, shoot_pos, shoot_vel);
@@ -255,7 +234,14 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
     if (player->flame) {
     	player->flame->disable = 1;
     }
-	we_body_remove_constraints(current_space, player->data.body);
+	//FIXME cleanup
+	player->gunwheel = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
+	cpBodySetPos(player->gunwheel, player->data.body->p);
+	cpBodySetUserData(player->gunwheel, (void*)player);
+	se_velfunc(player->gunwheel, 1);
+
+	cpShape *shape = we_add_circle_shape(current_space, player->gunwheel,radius-2,0.9,0.8);
+	we_shape_collision(shape, &this, LAYER_ENEMY, player);
 
 	player->smoke = particles_get_emitter(RLAY_GAME_BACK, EM_SMOKE);
 	particles_self_draw(player->smoke, 1);

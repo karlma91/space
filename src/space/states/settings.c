@@ -188,7 +188,7 @@ static void option_click(settings_option option)
 		button_set_backcolor(btn_options[option], bit_get_status(option) ? col_btn_checked : col_btn_unchecked);
 		break;
 	case OPT_CAMERA:
-		player_camera_mode = player_camera_mode > 1 ? 0 : player_camera_mode + 1;
+		player_camera_mode = player_camera_mode > 5 ? 1 : player_camera_mode + 1;
 		SDL_ShowSimpleMessageBox(0, "Camera mode changed!", "You changed the camera mode!", NULL);
 		break;
 	case OPT_LOG:

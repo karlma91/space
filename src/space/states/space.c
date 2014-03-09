@@ -329,30 +329,31 @@ static void view_mode_update(view *v, int mode, instance *ins)
 	float rot = 0;
 	float zoom = 1;
 	cpVect pos = ins->body->p;
-	switch(mode){
-	case 0:
-	case 1:
+	if (mode == 1) {
 		rot = -se_tangent(pos);
-		zoom = 1.0f*v->view_height/1500;
-		break;
-	case 2:
+		zoom = 1.0f * v->view_height / 2000;
+	} else if (mode == 2) {
+		zoom = 1.0f * v->view_height / 2000;
+	} else if (mode == 3) {
+		zoom = 1.0f * v->view_height / 2000;
+		float boxsize = 20;
+		float delta_box = 200;
+		cpFloat dist = cpvdist(v->p, pos);
+		if (dist > boxsize) {
+			cpFloat ddi = dist - boxsize;
+			pos = cpvadd(v->p,
+					cpvmult(cpvsub(pos, v->p),
+							((ddi * (ddi / delta_box)) / dist)));
+		} else {
+			pos = v->p;
+		}
+	} else if (mode == 4) {
 		rot = -se_tangent(pos);
-		zoom = 1.0f*v->view_height/2000;
-		break;
-	case 3:
-		rot = -se_tangent(pos);
-		zoom = 1.0f*v->view_height/4000;
-		break;
-	case 4:
-		rot = -se_tangent(pos);
-		zoom = 1.0f*v->view_height/(lvl_tmpl->outer_radius*2);
+		zoom = 1.0f * v->view_height / (lvl_tmpl->outer_radius * 2);
 		pos = cpvzero;
-		break;
-	case 5:
-		zoom = 1.0f*v->view_height/(lvl_tmpl->outer_radius*2);
+	} else if (mode == 5) {
+		zoom = 1.0f * v->view_height / (lvl_tmpl->outer_radius * 2);
 		pos = cpvzero;
-		break;
-
 	}
 	v->zoom = zoom;
 	view_update_zoom(v, pos);
@@ -366,7 +367,7 @@ static void update_camera_position(void)
     	if (tank && keys[SDL_SCANCODE_LCTRL]) {
     		view_mode_update(view_p1, player_camera_mode, tank);
     	} else {
-    		view_mode_update(view_p1, player_camera_mode, (instance *)player1);
+			view_mode_update(view_p1, player_camera_mode, (instance *)player1);
     	}
     }
 

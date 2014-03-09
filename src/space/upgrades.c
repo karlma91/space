@@ -15,9 +15,9 @@ upg_weapon weapons[WEAPON_UPGRADES] = {
 		.level = 1,
 		.lvls = {
 			/* dmg, rate, mass, range, price */
-			{50, 1.5, 1.0, 600, 0}, //58
-			{25, 2.4, 1.5, 620, 3200}, // 64
-			{17, 3.7, 2.0, 650, 4500}  // 78
+			{60, 1.5, 2.0, 600, 0}, //58
+			{25, 2.4, 3.5, 620, 3200}, // 64
+			{17, 3.7, 4.0, 650, 4500}  // 78
 		},
 		.spr_id = &SPRITE_PLAYERGUN002,
 		.obj_name = "BULLET"
@@ -56,10 +56,10 @@ upg_armor armors[ARMOR_UPGRADES] = {
 };
 
 upg_engine engines[ENGINE_UPGRADES] = {
-	{.name = "TURTLE POWER", .force = 250, .max_speed = 435, .price = 0, .particle_type = &EM_FLAME, .spr_id = &SPRITE_PLAYERBODY001},
-	{.name = "CHEAP JET", .force = 300, .max_speed = 475, .price = 9500, .particle_type = &EM_FLAME, .spr_id = &SPRITE_PLAYERBODY001},
-	{.name = "Jetlag", .force = 500, .max_speed = 600, .price = 99950, .particle_type = &EM_FLAME, .spr_id = &SPRITE_STATION001},
-	{.name = "UBERSPEED", .force = 1300, .max_speed = 700, .price = 999500, .particle_type = &EM_FLAME, .spr_id = &SPRITE_STATION001}
+	{.name = "TURTLE POWER", .force = 120, .max_speed = 435, .price = 0, .particle_type = &EM_FLAME, .spr_id = &SPRITE_PLAYERBODY001},
+	{.name = "CHEAP JET", .force = 150, .max_speed = 475, .price = 9500, .particle_type = &EM_FLAME, .spr_id = &SPRITE_PLAYERBODY001},
+	{.name = "Jetlag", .force = 200, .max_speed = 600, .price = 99950, .particle_type = &EM_FLAME, .spr_id = &SPRITE_STATION001},
+	{.name = "UBERSPEED", .force = 400, .max_speed = 700, .price = 999500, .particle_type = &EM_FLAME, .spr_id = &SPRITE_STATION001}
 };
 
 /*
