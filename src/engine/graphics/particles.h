@@ -141,6 +141,7 @@ void particle_set_gravity_func(particle_system *s, cpVect (*gravity_dir_func)(cp
 
 emitter *particles_add_score_popup(int layer, cpVect p, int score);
 emitter *particles_add_sparks(int layer, cpVect p, float angle, float force);
+emitter *particles_add_color_expl(int layer, cpVect p, float force);
 
 void particles_clear(particle_system *);
 char *particles_get_name(EMITTER_ID);

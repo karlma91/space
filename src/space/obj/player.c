@@ -58,10 +58,6 @@ static void init(OBJ_TYPE *OBJ_NAME)
 
 static void on_create(OBJ_TYPE *OBJ_NAME)
 {
-	cpShape *shape;
-	cpFloat radius = 30;
-	cpFloat mass = 2;
-
 	player->player_id = player->param.player_id;
 	if(player->player_id == 1) {
 		player->joy_left = joy_p1_left;
@@ -88,8 +84,6 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
     }
 	player->disable=0;
 
-	//cpVect player_pos = cpv(0,990);
-
 	/* make and add new body */
 	player->data.body = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, radius, radius/2,cpvzero)));
 	cpBodySetPos(player->data.body, player->data.p_start);
@@ -98,7 +92,7 @@ static void on_create(OBJ_TYPE *OBJ_NAME)
 	se_velfunc(player->data.body, 1);
 
 	/* make and connect new shape to body */
-	shape = we_add_circle_shape(current_space, player->data.body,radius,0.8,0.9);
+	cpShape *shape = we_add_circle_shape(current_space, player->data.body,radius,0.8,0.9);
 	we_shape_collision(shape, &this, LAYER_PLAYER, player);
 
 	shape = we_add_circle_shape(current_space, player->data.body, 250, 0,0); //TODO be able to upgrade coin magnet radius (<--250)
@@ -138,19 +132,17 @@ static void on_update(OBJ_TYPE *OBJ_NAME)
 #endif
 	player->gun_timer += dt;
 
+	/* DEBUG KEYS */
 	if (keys[SDL_SCANCODE_B] | (keys[SDL_SCANCODE_B]=0)) {
 		instance_create(obj_id_spiky, NULL, player->data.body->p, cpvzero);
 	}
-
-	//update physics and player
-	player->direction = turn_toangle(player->direction_target, player->direction, WE_2PI * dt / 1000);
-	if (player->joy_left->amplitude) {
-		cpBodySetAngVel(player->data.body,cpBodyGetAngVel(player->data.body)/2);
-		//cpBodySetAngVel(player->data.body,0);
-		cpBodySetAngle(player->data.body, player->direction);
+	if (keys[SDL_SCANCODE_E]){
+		player->data.body->p.x=0;
+		player->data.body->p.y=0;
 	}
+
+	player->direction = turn_toangle(player->direction_target, player->direction, WE_2PI * dt / 1000);
 	player->data.body->v = cpvmult(player->data.body->v, powf(0.05, dt));
-	//cpBodySetVel(player->gunwheel, player->data.body->v);
 
 	if (player->disable == 0){
 		controls(player);
@@ -165,6 +157,8 @@ static void controls(obj_player *player)
     monitor_float("HP", player->hp_bar.value);
 
     if (player->joy_left->amplitude) {
+    	cpBodySetAngVel(player->data.body,cpBodyGetAngVel(player->data.body)/2);
+    	cpBodySetAngle(player->data.body, player->direction);
     	cpVect joy_dir = cpvnormalize(cpvrotate(cpv(player->joy_left->axis_x, player->joy_left->axis_y), cpvforangle(-pl_view->rotation)));
     	cpVect j = cpvmult(joy_dir, player->force);
     	player->direction_target = cpvtoangle(j);
@@ -182,14 +176,6 @@ static void controls(obj_player *player)
 		player->aim_angle = aim_angle_target;
 		action_shoot(player);
 	}
-
-	/* DEBUG KEYS */
-#if !ARCADE_MODE
-		if (keys[SDL_SCANCODE_E]){
-			player->data.body->p.x=0;
-			player->data.body->p.y=0;
-		}
-#endif
 }
 
 
@@ -234,14 +220,14 @@ static void on_destroy(OBJ_TYPE *OBJ_NAME)
     if (player->flame) {
     	player->flame->disable = 1;
     }
-	//FIXME cleanup
+
 	player->gunwheel = cpSpaceAddBody(current_space, cpBodyNew(mass, cpMomentForCircle(mass, 0.0f, radius, cpvzero)));
 	cpBodySetPos(player->gunwheel, player->data.body->p);
 	cpBodySetUserData(player->gunwheel, (void*)player);
 	se_velfunc(player->gunwheel, 1);
 
 	cpShape *shape = we_add_circle_shape(current_space, player->gunwheel,radius-2,0.9,0.8);
-	we_shape_collision(shape, &this, LAYER_ENEMY, player);
+	we_shape_collision(shape, &this, LAYER_PLAYER, 0);
 
 	player->smoke = particles_get_emitter(RLAY_GAME_BACK, EM_SMOKE);
 	particles_self_draw(player->smoke, 1);

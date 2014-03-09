@@ -133,7 +133,10 @@ void draw_velocity_line(cpShape *shape);
 void draw_quad_line(int layer, cpVect a, cpVect b, float w);
 void draw_line_spr_id(int layer, SPRITE_ID id, cpVect a, cpVect b, float w, int append_edge);
 void draw_line_spr(int layer, sprite *spr, cpVect a, cpVect b, float w, int append_edge);
+void draw_simple_line_spr(int layer, sprite *spr, cpVect a, cpVect b, float w);
+void draw_simple_line_spr_id(int layer, SPRITE_ID id, int index, cpVect a, cpVect b, float w);
 void draw_line_tex(int layer, int tex_id, float *tex_map, cpVect a, cpVect b, float w, int append_edge);
+
 
 void draw_box(int layer, cpVect p, cpVect size, GLfloat angle, int centered);
 void draw_bar(int layer, cpVect pos, cpVect size, cpFloat angle, cpFloat p, cpFloat p2);

@@ -226,6 +226,34 @@ void draw_line_spr(int layer, sprite *spr, cpVect a, cpVect b, float w, int appe
     int tex_id = sprite_get_texture(spr->id);
 	draw_line_tex(layer, tex_id, tex_map, a, b, w, append_edge);
 }
+void draw_simple_line_spr(int layer, sprite *spr, cpVect a, cpVect b, float w)
+{
+	float tex_map[8];
+	sprite_get_current_image(spr,tex_map);
+	draw_simple_line_spr_id(layer,spr->id, 0,a,b,w);
+}
+
+void draw_simple_line_spr_id(int layer, SPRITE_ID id, int index, cpVect a, cpVect b, float w)
+{
+	float tex_map[8];
+	sprite_get_subimg_by_index(id, index, tex_map);
+	int tex_id = sprite_get_texture(id);
+	cpVect d = cpvsub(b,a);
+	draw_push_matrix();
+	draw_translate(a.x, a.y);
+	draw_rotate(cpvtoangle(d));
+	GLfloat length = cpvlength(d);
+	draw_scale(1,w);
+	w /= 2;
+	GLfloat line[8] = { -w, -0.5,
+			-w,  0.5,
+			length + w, -0.5,
+			length + w,  0.5};
+
+	texture_bind_virt(tex_id);
+	draw_quad_new(layer, line, tex_map);
+	draw_pop_matrix();
+}
 
 void draw_line_tex(int layer, int tex_id, float *tex_map, cpVect a, cpVect b, float w, int append_edge)
 {

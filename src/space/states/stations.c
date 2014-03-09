@@ -165,15 +165,17 @@ static void draw(void)
 	draw_translate(1900,-1750);
 	draw_rotate(-current_view->rotation);
 
-	draw_color(c);
 	draw_color4f(1,1,1,1);
+	draw_color(c);
+	draw_line_spr(1, &(s), cpv(0,-700),cpv(1000,-700), 150, 0);
+	draw_simple_line_spr(0,&s,cpv(0,-1000),cpv(1000,-1000), 150);
+	draw_simple_line_spr_id(0,SPRITE_GLOW, 0, cpv(0,-1200),cpv(1000,-1200), 150);
 
 	draw_push_matrix();
 	draw_translatev(a);
 	draw_rotate(r);
 	bmfont_center(FONT_SANS_PLAIN, cpvzero,100,"SPACEW");
 	draw_pop_matrix();
-
 	bmfont_center(FONT_SANS_PLAIN, cpv(100,10000),100,"Space (working title)\nETA: 25. Jan 2014\n\nCredits:\nMathias Wilhelmsen\nKarl Magnus Kalvik\n\nAlpha Testers\nJacob & Jonathan Høgset [iPod 4th]\nBård-Kristian Krohg [iPod 3rd]");
 	bmfont_center(FONT_SANS, cpvzero,100,"Font sans");
 	bmfont_center(FONT_BIG, cpv(0,100),100,"Font big");
@@ -241,6 +243,8 @@ static void tween_color_test(tween_instance * t, void *userdata)
 	tween_tween_reset(t);
 	tween_tween_set_start(t);
 	tween_target(t,TWEEN_NONRELATIVE,we_randf*255,we_randf*255, we_randf*255,  we_randf*255);
+	particles_add_color_expl(0,cpv(-2000,0),100);
+	particles_add_sparks(0,cpv(-3000,0),0,10000);
 }
 
 static void tween_star_test(tween_instance * t, void *userdata)
@@ -256,10 +260,11 @@ void stations_init(void)
 {
 	statesystem_register(state_stations, 0);
 	state_enable_tween_system(this,1);
+	state_enable_particles(state_stations,1);
 	tween *cpv_test, *float_test;
 	tween *color_tw;
 
-
+	sprite_create(&s, SPRITE_GLOW, 100,100,1);
 	a = cpv(0, 5000);
 	cpv_test = tween_system_new_tween(current_tween_system, cpvect_accessor, &a, 1.8);
 	tween_target(cpv_test, TWEEN_RELATIVE, 2500 - we_randf*5000, 2500 - we_randf*5000);
