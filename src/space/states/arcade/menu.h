@@ -3,7 +3,7 @@
 
 #include "we_graphics.h"
 
-sprite spr_startbtn;
+// sprite spr_startbtn;
 
 enum MINU_INNER_STATES {
 	MENU_MAIN,

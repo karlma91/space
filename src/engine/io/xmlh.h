@@ -11,7 +11,7 @@
 #include "mxml.h"
 
 /** used to test a string */
-#define TESTNAME(s) strcmp(node->value.element.name, s) == 0
+#define TESTNAME(s) mxmlGetElement(node) == 0 ? 0 : strcmp(mxmlGetElement(node), s) == 0
 
 int parse_float(mxml_node_t *node,char *name, float *v);
 int parse_int(mxml_node_t *node, char *name, int *v);

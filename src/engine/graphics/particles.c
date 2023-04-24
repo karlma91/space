@@ -565,7 +565,7 @@ static EMITTER_ID read_emitter_from_file_reload(const char *filename, we_bool re
 			node != NULL;
 			node=mxmlWalkNext (node, NULL, MXML_DESCEND)
 	){
-		if (node->type  == MXML_ELEMENT) {
+		if (mxmlGetType(node) == MXML_ELEMENT) {
 			if (alpha_last) {
 				int index = em->alpha_count;
 				if (index < PARTICLE_ALPHA_MAX && (parse_point(node, em->alpha + index) == 0)) {

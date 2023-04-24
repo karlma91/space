@@ -243,6 +243,7 @@ static void tween_color_test(tween_instance * t, void *userdata)
 	tween_tween_reset(t);
 	tween_tween_set_start(t);
 	tween_target(t,TWEEN_NONRELATIVE,we_randf*255,we_randf*255, we_randf*255,  we_randf*255);
+	t->duration = we_randf * 2;
 	particles_add_color_expl(0,cpv(-2000,0),100);
 	particles_add_sparks(0,cpv(-3000,0),0,10000);
 }

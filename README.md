@@ -46,3 +46,32 @@ A cross-platform space game being written in C.
 - physics-body-editor (TODO: add link)
 - Blender
 - Photoshop
+
+# on windows 11 WSL ubuntu 22
+## dependencies
+sudo apt install libsdl2-dev
+sudo apt install libsdl2-image-dev
+sudo apt install libsdl2-mixer-dev
+sudo apt install libmxml-dev 
+sudo apt install libinih-dev 
+sudo apt install libglew-dev
+sudo apt install cmake
+sudo apt install libzzip-dev
+sudo apt install libcjson-dev
+
+## chipmunk
+git clone https://github.com/slembcke/Chipmunk2D.git
+cd Chipmunk2D/
+git checkout Chipmunk-6.2.2
+mkdir build
+cd build/
+// disable demos
+ccmake ..
+cmake ..
+make
+
+## build space
+mkdir build
+cd build
+cmake ..
+make

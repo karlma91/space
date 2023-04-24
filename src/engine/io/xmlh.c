@@ -10,18 +10,12 @@
  */
 int parse_float(mxml_node_t *node, char *name, float *v)
 {
-	int ok = 0;
-	int k;
-	for (k = 0; k < node->value.element.num_attrs; k++){
-		if(strcmp(node->value.element.attrs[k].name, name) == 0){
-			*v = strtod(node->value.element.attrs[k].value,NULL);
-			ok++;
-		}
-	}
-	if(ok == 1){
+	char *val = mxmlElementGetAttr(node, name);
+	if (val != NULL) {
+		*v = strtod(val,NULL);
 		return 0;
 	}else{
-		SDL_Log("Error parsing atribute: %s in node %s \n", name, node->value.element.name);
+		SDL_Log("Error parsing atribute: %s in node %s \n", name, mxmlGetElement(node));
 		return -1;
 	}
 }
@@ -31,18 +25,12 @@ int parse_float(mxml_node_t *node, char *name, float *v)
  */
 int parse_int(mxml_node_t *node, char *name, int *v)
 {
-	int ok = 0;
-	int k;
-	for (k = 0; k < node->value.element.num_attrs; k++){
-		if(strcmp(node->value.element.attrs[k].name, name) == 0){
-			*v =(int)strtol(node->value.element.attrs[k].value,(char **)NULL,10);
-			ok++;
-		}
-	}
-	if(ok == 1){
+	char *val = mxmlElementGetAttr(node, name);
+	if (val != NULL) {
+		*v =(int)strtol(val,(char **)NULL,10);
 		return 0;
-	}else{
-		SDL_Log("Error parsing atribute: %s in node %s \n", name, node->value.element.name);
+	} else {
+		SDL_Log("Error parsing atribute: %s in node %s \n", name, mxmlGetElement(node));
 		return -1;
 	}
 }
@@ -53,22 +41,16 @@ int parse_int(mxml_node_t *node, char *name, int *v)
  */
 int parse_bool(mxml_node_t *node, char *name, int *v)
 {
-    int ok = 0;
-    int k;
-    for (k = 0; k < node->value.element.num_attrs; k++){
-    	if(strcmp(node->value.element.attrs[k].name, name) == 0){
-    		if(strcmp(node->value.element.attrs[k].value,"true")){
-    			*v = 0;
-    		}else{
-    			*v = 1;
-    		}
-    		ok++;
-    	}
-    }
-    if(ok == 1){
+	char *val = mxmlElementGetAttr(node, name);
+	if (val != NULL) {
+		if(strcmp(val, "true")){
+			*v = 0;
+		}else{
+			*v = 1;
+		}
     	return 0;
     }else{
-    	SDL_Log("Error parsing boolean in node %s \n", node->value.element.name);
+    	SDL_Log("Error parsing boolean in node %s \n", mxmlGetElement(node));
     	return -1;
     }
 }
@@ -79,11 +61,9 @@ int parse_bool(mxml_node_t *node, char *name, int *v)
  */
 int parse_string(mxml_node_t *node, char *name, char **c)
 {
-    int k;
-    for (k = 0; k < node->value.element.num_attrs; k++){
-    	if(strcmp(node->value.element.attrs[k].name, name) == 0){
-    		*c = (node->value.element.attrs[k].value);
-    	}
+    char *val = mxmlElementGetAttr(node, name);
+	if (val != NULL) {
+		*c = (val);
     }
     return 0;
 }
