@@ -59,15 +59,19 @@ cd Chipmunk2D/
 git checkout Chipmunk-6.2.2
 mkdir build
 cd build/
-// disable demos
 ccmake ..
+// disable demos
 cmake ..
 make
+sudo make install
 ```
+
 ## build space
 ```
 mkdir build
 cd build
 cmake ..
 make
+cd ..
+./build/space
 ```

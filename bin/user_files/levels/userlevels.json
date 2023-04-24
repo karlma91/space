@@ -1,0 +1,28 @@
+{
+	"systems":	[{
+			"name":	"karlmka",
+			"folder":	"karlmka",
+			"levels":	[{
+					"author":	"author",
+					"name":	"TESTING",
+					"filename":	"TESTING.json",
+					"sprite":	"nosprite",
+					"size":	470.42144775390625,
+					"color":	"000000FF"
+				}, {
+					"author":	"author",
+					"name":	"rockET",
+					"filename":	"rockET.json",
+					"sprite":	"nosprite",
+					"size":	539.47613525390625,
+					"color":	"000000FF"
+				}, {
+					"author":	"author",
+					"name":	"BIGGERmap",
+					"filename":	"BIGGERmap.json",
+					"sprite":	"nosprite",
+					"size":	506.95703125,
+					"color":	"000000FF"
+				}]
+		}]
+}
